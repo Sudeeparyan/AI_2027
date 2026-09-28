@@ -1,0 +1,129 @@
+Section 7: Module Descriptors
+Throughout this section, where applicable, providers should identify the delivery modality or modalities selected for the programme(s) and describe any programme specific features or supporting infrastructure that support delivery via those modalities.
+
+
+Note: The assessment techniques outlined in the table above represent the base mode of full-time on campus delivery.  This programme will also be available through part-time online delivery.  Variations to the assessment techniques for this delivery mode are available in the Programme Schedule. 
+
+
+
+
+
+
+
+
+
+7.1	Module Overview (copy and paste for other modules)
+Module Number |  | Module Title | Generative AI
+Stage of Principal Programme | 1 | Semester
+(if applicable) | 2 | Duration. (Weeks F/T) | 12 | ECTS | 10
+Mandatory / Elective (M/E) | M | Hours of Learner Effort / Week | 4 | 
+Analysis of required hours of learning effort
+Teaching and Learning Modalities | ✔if relevant to this module | Approx. proportion of total (hours)
+Direct Contact Hours
+On-site face-to-face  | ✔ |  48
+Synchronous online | 
+Synchronous blended | 
+Indirect/Non-contact Hours
+Asynchronous  | 
+Independent Learning  | 
+Work Based | 
+Other (Identify) | ✔ | 202
+Total | 250
+Pre-Requisite Module, if any.  Module Number and Title | No
+Co-Requisite Module, if any.  Module Number and Title | No
+Maximum number of learners per instance of the module | 70
+Specification of the qualifications (academic, pedagogical and professional/occupational) and experience required of staff working in this module.
+Role e.g., 
+Tutor, Mentor, Lecturer, Research Supervisor, etc. | 
+Qualifications & experience required | 
+Staff (X) : Learner (Y) Ratio  
+Express as X:Y
+Lecturer  | MSc and/or PhD degree in computer science, mathematics or cognate discipline. May have industry experience also.  | 1:70 
+
+Tutor  | MSc and/or PhD degree in computer science, mathematics or cognate discipline. May have industry experience also.  | 1:70 
+Assessment Techniques – percentage contribution
+Continuous Assessment  |  | Proctored Exam – in person | 40% | Practical Skills Based
+Project | 60% | Proctored Exam - online |  | Work Based
+Capstone modules (Yes/No)? | N | If Yes, provide details | 
+7.2	Minimum Intended Module Learning Outcomes (MIMLOs)
+MIMLO
+On successful completion of this module a learner will be able to: | Related MIPLO  MSCAI
+Critically explain the core concepts and mathematical principles underlying generative AI, and demonstrate in-depth knowledge of major generative AI model families, including VAEs, GANs, diffusion models and transformer-based LLMs. | 1, 4
+Analyse and apply multimodal generative AI techniques, including alignment and cross-modal reasoning across text, image, audio and video modalities. | 1, 2
+Design, implement and fine-tune generative AI models using contemporary frameworks and parameter-efficient methods. | 2
+Critically evaluate generative AI outputs using quantitative metrics, human-centered assessments and ethical considerations, including fairness, bias and hallucination risks. | 3, 5
+Deploy generative AI models in real-world scenarios, utilising contemporary frameworks and implement retrieval-augmented or agentic systems. | 1, 2
+7.3	Indicative Module Content, Organisation and Structure
+Lecture Topic | Week | Detail | Tutorials (Examples)
+Introduction to Generative & Responsible AI | 1 | The landscape of Generative AI. Core concepts. Probabilistic Foundations. likelihood, latent variables and the generative vs. discriminative paradigm | Set up working environment. Examples on
+Probabilistic Foundations.
+Show a generative model in action. Students to try different inputs or prompts and compare outputs.
+
+Variational Autoencoders (VAEs) | 2 | Motivation, Concept of Latent space and Exploration, Encoder-decoder architecture. Reconstruction and Regularization Loss, Training, Variants (e.g Conditional), Evaluation of VAEs, Applications of VAEs | Implementing VAE in PyTorch/TensorFlow.
+Visualize latent space interpolation.
+Generate new images from the learned latent distribution.
+Generative Adversarial Networks (GANs) | 3 | Motivation for adversarial learning, GAN Architecture (Generator, Discriminator), GAN Objective Function, Training Challenges, Variants (e.g DCGAN, cGAN, StyleGAN). Evaluation of GANs. Applications of GANs | Implementing a GAN in PyTorch/TensorFlow.
+Visualizing generator outputs across epochs.
+Exploring latent space interpolations.
+Diffusion Models | 4 | Motivation, Limitations of GANs and VAEs that diffusion models address. Theoretical Foundations. Core Architecture. Denoising Process. Variants. Evaluation, Applications.
+Comparison with other generative models.
+ | Training a simple diffusion model.
+Generate images using a pre-trained diffusion model (e.g., Stable Diffusion).
+Experiment with different noise steps and guidance scales
+Transformers & Attention | 5 | Motivation, Limitations of recurrent architectures (long-term dependencies, parallelisation, Attention Mechanism (Self-Attention, Multi-Head Attention, Cross-attention). Transformer Architecture and Components, Training, Evaluation, Variants, Applications
+ | Lab balances coding, visualisation, and critical thinking. Students not only build simple transformer models (blocks and attention mechanisms) but also interrogate how transformers use them in practice.
+Large Language Models (LLMs) and families | 6 | Evolution of NLP. How Transformers are used in LLMs and generative models. Architecture Overview. LLM families (e.g. GPT, BERT, LLaMA, T5). Applications
+ | Use pretrained models.
+Comparing outputs across families (e.g., GPT vs BERT vs T5)
+Query a GPT or LLaMA model using Hugging Face API
+Prompt Engineering and evaluation | 7 | The paradigm shift (pre-training vs fine-tuning vs prompt-based usage). Basic Prompting Techniques (zero-shot, one-shot, few shot, role based), Chain-of-Thought (CoT) prompting. Prompting for Different Tasks. Evaluation Methods. Limitations and Challenges. Supporting tools.
+ | Explore different case studies in prompt engineering and different prompt styles on pre-trained LLMs.
+
+Fine-Tuning and Domain Adaptation | 8 | Fine-tuning approaches: supervised fine-tuning, reinforcement learning with human feedback (RLHF).
+Parameter-efficient tuning: LoRA, adapters, prompt tuning. Instruction Tuning.  Domain-Specific Fine-Tuning. Evaluation & Benchmarks | Fine-tune a pre-trained LLM for a domain-specific task. Apply parameter-efficient fine-tuning (LoRA / QLoRA). Compare base vs fine-tuned model performance.
+Foundations of Multimodal Generative AI | 9 | Definition of modalities (text, image, audio, video). Key Concepts & Terminology (modality, cross modal, muti modal, alignment, fusion). Representation learning across modalities. Key multimodal architectures and models. Contrastive Learning (CLIP), Vision-Language Transformers.
+ | Understand modalities and embeddings.
+Explore text–image embeddings, alignment, and retrieval using pre-trained models like CLIP.
+
+
+Multimodal Generative AI Applications | 10 | Multimodal LLMs. Training & Fine-Tuning Multimodal Models.
+Evaluation of Multimodal Generative AI. Applications | Multimodal generative tasks for example: Text to Image, Image to Text, Text to Audio, Text to Video, Image to Image, Cross-modal reasoning
+Explore advanced models, real-world use cases and emerging trends.
+Deployment and Frameworks. | 11 | Frameworks (Hugging Face, OpenAI / Azure OpenAI, vLLM, Ollama, LangChain). API Platforms. Deploy and monitor generative AI models using standard frameworks and deployment tools. Comparison
+ | Explore different tools and frameworks. Work with local and cloud based LLM models.
+
+Retrieval-Augmented Generation (RAG) & Agentic AI | 12 | Motivation. LLM limitations (e.g Static Knowledge, Hallucinations). RAG architectures and workflow. Understand agentic AI concepts and components. Frameworks & Tools
+ | Build RAG pipelines (e.g document Q&A). Implement a simple LLM agent. Compare with and without RAG.
+7.4	Work based learning and practice-placement (if applicable)
+
+N/A
+7.5	Specific module resources required (if applicable)
+Learners will use a high-level programming language such as Python for the implementation and experimentation of generative AI models. Development and execution environments may include Anaconda, Visual Studio Code (VS Code), Jupyter Notebook, Google Colab and Cloud based Platforms to support interactive coding, experimentation, and prototyping.
+
+Students will install and work with a range of machine learning and deep learning libraries, including but not limited to PyTorch, TensorFlow, and Hugging Face Transformers and Diffusers, for building, fine-tuning, and evaluating generative models. Additional software tools may be used such as Git and Docker for the deployment of generative AI applications.
+
+7.6	Application of programme teaching, learning and assessment strategies to this module
+Teaching & Learning:
+The teaching and learning strategy for the Generative AI module comprises a combination of lectures, tutorials, lab exercises, case studies, group discussions and independent learning activities. Each week, students will participate in a 2-hour lecture and a 2-hour tutorial/lab session.
+The practical tutorial and lab sessions are designed to enable students to apply theoretical concepts to real-world generative AI problems, thereby reinforcing learning through hands-on experience. 
+All module materials, including lecture content, lab instructions, supplementary resources, and assessment information, are made available to students through the Moodle learning management system.
+The module supports both face-to-face and blended delivery modes. NCI’s blended learning model combines in-person classes with asynchronous, directed learning activities, such as pre-recorded videos, guided exercises, and online quizzes, which students are expected to complete in advance of live sessions. This approach promotes active learning and ensures effective use of classroom time.
+Assessment:
+Assessment in this module is by a Group Project (60%) and a terminal exam (40%). 
+Group Project: Students will work in groups of two to three to design, implement, and evaluate a generative AI application addressing a real-world problem in a specific domain. The project will require students to apply theoretical concepts and practical skills learned throughout the module, such as generative model architectures, prompt engineering, fine-tuning, multimodal learning, comparative analysis of different models, evaluation and responsible AI practices.
+Exam: The examination will be of two hours duration and may include a mix of: theoretical, applied and interpretation questions.
+Re-assessment:
+Re-assessment of this module will consist of a new submission of an individual project that demonstrates achievement of the minimum intended learning outcomes. All learning outcomes will be reassessed in the repeat attempt, and students will be afforded opportunities to resubmit at specified times throughout the academic year.
+7.7	Summative Assessment Strategy for this module
+MIMLOs | Technique(s) | Weighting
+1, 2, 3, 4, 5 | Group Project | 60%
+1, 2, 3 | Proctored Examination | 40%
+7.8	Sample Assessment Materials
+Sample assessment materials can be found in Appendix 4.
+7.9	Indicative reading lists and other information resources
+Recommended Book Reading
+David Foster, 2nd edition, (2023), Generative Deep Learning: Teaching Machines to Paint, Write, Compose, and Play, O’Reilly
+Denis Rothman. (2022), Transformers for Natural Language Processing, Packt Publishing, p.564, [ISBN: 978-1803247335].
+Supplementary Book Reading
+Lewis Tunstall, Leandro von Werra, Thomas Wolf, (2022), Natural Language Processing with Transformers, Reilly Media, p.406, [ISBN: 978-1098136796].
+Sinan Ozdemir. (2023), Quick Start Guide to Large Language Models, Addison-Wesley Professional, p.0, [ISBN: 978-0138199197].

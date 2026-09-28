@@ -1,0 +1,56 @@
+{
+  "outcomes": "LO1, LO2",
+  "plain_explanation": "A VAE learns to describe an example using a latent distribution and reconstruct it. A GAN learns through a generator and a discriminator. In both cases inspect outputs as well as numerical loss. GAN losses depend on both networks, so a falling value alone does not prove improvement.",
+  "worked_example": "Supplied VAE reconstruction errors fall from 0.30 to 0.18 to 0.12, while validation error falls to 0.20 then rises to 0.26. This can indicate overfitting. A GAN repeatedly producing the same icon may have poor diversity even when its images look sharp.",
+  "exam": [
+    {
+      "question": "Label input, encoder, latent sample and decoder in a VAE.",
+      "model_answer": "Input enters encoder. Encoder predicts a latent distribution. Sample z from that distribution. Decoder reconstructs the input from z.",
+      "marks": 4
+    },
+    {
+      "question": "Training error falls but validation error rises. What should you inspect?",
+      "model_answer": "Inspect held-out examples and overfitting; compare checkpoints and avoid claiming progress from training error alone.",
+      "marks": 4
+    },
+    {
+      "question": "A GAN produces only one excellent icon. Is it a successful generator?",
+      "model_answer": "Not necessarily. Quality may be high but diversity is poor, consistent with mode collapse.",
+      "marks": 4
+    }
+  ],
+  "resources": [
+    {
+      "id": "G2",
+      "publisher": "Google Developers",
+      "title": "Overview of GAN Structure",
+      "url": "https://developers.google.com/machine-learning/gan/gan_structure",
+      "type": "Official concept guide",
+      "use": "Generator, discriminator and training feedback.",
+      "checked_date": "2026-09-28",
+      "verification": "Official page/search metadata reviewed"
+    },
+    {
+      "id": "G3",
+      "publisher": "Google / TensorFlow",
+      "title": "Convolutional Variational Autoencoder",
+      "url": "https://www.tensorflow.org/tutorials/generative/cvae",
+      "type": "Optional implementation tutorial",
+      "use": "VAE architecture; core students interpret prepared examples rather than train it.",
+      "checked_date": "2026-09-28",
+      "verification": "Official page/search metadata reviewed"
+    },
+    {
+      "id": "N2",
+      "publisher": "NVIDIA",
+      "title": "NeMo Framework overview",
+      "url": "https://docs.nvidia.com/nemo-framework/user-guide/latest/overview.html",
+      "type": "Official documentation",
+      "use": "Instructor background on model customization; no NVIDIA setup required in core labs.",
+      "checked_date": "2026-09-28",
+      "verification": "Official page/search metadata reviewed"
+    }
+  ],
+  "study_task": "Draw the main diagram from memory, explain each arrow, then check it against the slides. Answer the three questions without notes before reading the model answers.",
+  "reference_note": "Selected source concepts inform the lesson. Examples, figures, questions and solutions are original classroom material; no exam questions are claimed to be official."
+}

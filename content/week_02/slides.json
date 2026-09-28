@@ -1,0 +1,618 @@
+{
+  "s01": {
+    "title": "Week 02 · VAE and GAN model ideas",
+    "explanation": "The icon studio\n\nA designer wants varied icons that resemble a style without copying one example. How could two training ideas approach this?",
+    "speaker_notes": "TEACHER SCRIPT — OPEN. Show the visual for ten seconds, then ask for an initial decision. Do not reveal the answer yet. Ask a student to name the source or measurement that would change their mind. This week’s case is: A designer wants new simple icons similar to examples, without copying an exact icon. The visible slide states: The icon studio\n\nA designer wants varied icons that resemble a style without copying one example. How could two training ideas approach this? Reveal that the case will be revisited after four short concept cycles. The target is: Explain how reconstruction differs from adversarial generation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "story",
+      "items": [
+        "The icon studio",
+        "What is known?",
+        "What must we check?"
+      ]
+    },
+    "teaching_stage": "open"
+  },
+  "s02": {
+    "title": "First vote: what would you do?",
+    "explanation": "A designer wants varied icons that resemble a style without copying one example. How could two training ideas approach this?\n\nChoose an initial answer and name one piece of evidence you need.",
+    "speaker_notes": "TEACHER SCRIPT — QUESTION. Take a show of hands for each choice before showing the mechanism. Ask pairs to defend a choice with evidence. Save the strongest wrong reason for the reveal later in this cycle. This week’s case is: A designer wants new simple icons similar to examples, without copying an exact icon. The visible slide states: A designer wants varied icons that resemble a style without copying one example. How could two training ideas approach this?\n\nChoose an initial answer and name one piece of evidence you need. Accept reasonable uncertainty; record the initial votes to revisit at the end. The target is: Explain how reconstruction differs from adversarial generation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "Accept the first plausible result",
+        "Check the source or measurement"
+      ]
+    },
+    "teaching_stage": "question"
+  },
+  "s03": {
+    "title": "The journey through today’s case",
+    "explanation": "We will predict, connect an analogy, trace a mechanism, work an example, then explain a decision.",
+    "speaker_notes": "TEACHER SCRIPT — OPEN. Show the visual for ten seconds, then ask for an initial decision. Do not reveal the answer yet. Ask a student to name the source or measurement that would change their mind. This week’s case is: A designer wants new simple icons similar to examples, without copying an exact icon. The visible slide states: We will predict, connect an analogy, trace a mechanism, work an example, then explain a decision. Point to the four named ideas, then show where the notebook experiment fits. The target is: Explain how reconstruction differs from adversarial generation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "VAE",
+        "Latent space",
+        "GAN",
+        "Training curves"
+      ]
+    },
+    "teaching_stage": "open"
+  },
+  "s04": {
+    "title": "1. Predict · VAE",
+    "explanation": "Which arrow could lose a fine detail?\n\nMake a choice before we explain the diagram.",
+    "speaker_notes": "TEACHER SCRIPT — QUESTION. Take a show of hands for each choice before showing the mechanism. Ask pairs to defend a choice with evidence. Save the strongest wrong reason for the reveal later in this cycle. This week’s case is: A designer wants new simple icons similar to examples, without copying an exact icon. The visible slide states: Which arrow could lose a fine detail?\n\nMake a choice before we explain the diagram. The intended answer is Compression into z can discard information; compare original and reconstruction. The tempting claim is A VAE stores and copies exact training icons. Do not show which card is correct until the reveal. The target is: Explain how reconstruction differs from adversarial generation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "Compression into z can discard information; compare original and reconstruction.",
+        "A VAE stores and copies exact training icons."
+      ]
+    },
+    "teaching_stage": "question"
+  },
+  "s05": {
+    "title": "VAE · a familiar picture",
+    "explanation": "A travel suitcase packs the essential features and unpacks them at the destination.\n\nWhat matches our case, and where does the analogy stop?",
+    "speaker_notes": "TEACHER SCRIPT — ANALOGY. Begin with the familiar scene. Invite learners to describe each part in everyday language. Then ask where the comparison might fail before introducing the technical vocabulary. This week’s case is: A designer wants new simple icons similar to examples, without copying an exact icon. The visible slide states: A travel suitcase packs the essential features and unpacks them at the destination.\n\nWhat matches our case, and where does the analogy stop? The boundary is: A VAE learns a distribution and reconstruction objective; a suitcase is not a probabilistic model. The target is: Explain how reconstruction differs from adversarial generation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "analogy",
+      "items": [
+        "Packing",
+        "Compact code",
+        "Unpacking"
+      ],
+      "caption": "A travel suitcase packs the essential features and unpacks them at the destination."
+    },
+    "teaching_stage": "analogy"
+  },
+  "s06": {
+    "title": "VAE · map the parts",
+    "explanation": "Match each everyday part to the technical part.\n\nAnalogy limit: A VAE learns a distribution and reconstruction objective; a suitcase is not a probabilistic model.",
+    "speaker_notes": "TEACHER SCRIPT — MAPPING. Point from each familiar element to the corresponding technical element. Have students cover the right column and reconstruct the three matches. Read the limitation aloud. This week’s case is: A designer wants new simple icons similar to examples, without copying an exact icon. The visible slide states: Match each everyday part to the technical part.\n\nAnalogy limit: A VAE learns a distribution and reconstruction objective; a suitcase is not a probabilistic model. The three precise mappings are [['Packing', 'encoder'], ['Compact code', 'sampled latent z'], ['Unpacking', 'decoder']]. The target is: Explain how reconstruction differs from adversarial generation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "map",
+      "pairs": [
+        [
+          "Packing",
+          "encoder"
+        ],
+        [
+          "Compact code",
+          "sampled latent z"
+        ],
+        [
+          "Unpacking",
+          "decoder"
+        ]
+      ]
+    },
+    "teaching_stage": "mapping"
+  },
+  "s07": {
+    "title": "VAE · how it works",
+    "explanation": "An encoder predicts the centre (μ) and spread (σ) of a small latent distribution. We sample a code z from it. A decoder uses z to reconstruct the image.\n\nTrace the arrows from left to right.",
+    "speaker_notes": "TEACHER SCRIPT — MECHANISM. Trace every arrow slowly from the input to the output. Ask what information crosses the boundary at each arrow. Pause if students confuse a simplified notebook with a trained model. This week’s case is: A designer wants new simple icons similar to examples, without copying an exact icon. The visible slide states: An encoder predicts the centre (μ) and spread (σ) of a small latent distribution. We sample a code z from it. A decoder uses z to reconstruct the image.\n\nTrace the arrows from left to right. The weekly example is: A 2-value icon [0.2, 0.8] enters an encoder; a sampled z is decoded into a reconstructed icon. State what the analogy does not explain: A VAE learns a distribution and reconstruction objective; a suitcase is not a probabilistic model. The target is: Explain how reconstruction differs from adversarial generation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Example image",
+        "Encoder: μ and σ",
+        "Sample z",
+        "Decoder",
+        "Output image"
+      ]
+    },
+    "teaching_stage": "mechanism"
+  },
+  "s08": {
+    "title": "VAE · work one case",
+    "explanation": "A 2-value icon [0.2, 0.8] enters an encoder; a sampled z is decoded into a reconstructed icon.\n\nPoint to the evidence before giving your conclusion.",
+    "speaker_notes": "TEACHER SCRIPT — WORKED. Work the specific numbers or source wording aloud. Give students thirty seconds to write a conclusion, then ask which source line or calculation supports it. This week’s case is: A designer wants new simple icons similar to examples, without copying an exact icon. The visible slide states: A 2-value icon [0.2, 0.8] enters an encoder; a sampled z is decoded into a reconstructed icon.\n\nPoint to the evidence before giving your conclusion. The expected reasoning concludes: Compression into z can discard information; compare original and reconstruction. Distinguish measured results from illustrative numbers. The target is: Explain how reconstruction differs from adversarial generation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "work",
+      "items": [
+        "A 2-value icon [0.2, 0.8] enters an encoder; a sampled z is decoded into a reconstructed icon.",
+        "Which arrow could lose a fine detail?",
+        "Compression into z can discard information; compare original and reconstruction."
+      ]
+    },
+    "teaching_stage": "worked"
+  },
+  "s09": {
+    "title": "VAE · answer and explain",
+    "explanation": "Compression into z can discard information; compare original and reconstruction.\n\nTempting mistake: A VAE stores and copies exact training icons.",
+    "speaker_notes": "TEACHER SCRIPT — REVEAL. Return to the earlier choice. Explain the correct answer and why the tempting claim fails. Ask one learner to say the answer in a single sentence without reading it. This week’s case is: A designer wants new simple icons similar to examples, without copying an exact icon. The visible slide states: Compression into z can discard information; compare original and reconstruction.\n\nTempting mistake: A VAE stores and copies exact training icons. The earlier question was Which arrow could lose a fine detail? Ask how this differs from the wrong claim. The target is: Explain how reconstruction differs from adversarial generation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "reveal",
+      "items": [
+        "A VAE stores and copies exact training icons.",
+        "Compression into z can discard information; compare original and reconstruction."
+      ],
+      "caption": "A VAE learns a distribution and reconstruction objective; a suitcase is not a probabilistic model."
+    },
+    "teaching_stage": "reveal"
+  },
+  "s10": {
+    "title": "2. Predict · Latent space",
+    "explanation": "Does a smoother output prove realism?\n\nMake a choice before we explain the diagram.",
+    "speaker_notes": "TEACHER SCRIPT — QUESTION. Take a show of hands for each choice before showing the mechanism. Ask pairs to defend a choice with evidence. Save the strongest wrong reason for the reveal later in this cycle. This week’s case is: A designer wants new simple icons similar to examples, without copying an exact icon. The visible slide states: Does a smoother output prove realism?\n\nMake a choice before we explain the diagram. The intended answer is No. Inspect examples and use a suitable quality test. The tempting claim is A latent coordinate is a pixel location. Do not show which card is correct until the reveal. The target is: Explain how reconstruction differs from adversarial generation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "No. Inspect examples and use a suitable quality test.",
+        "A latent coordinate is a pixel location."
+      ]
+    },
+    "teaching_stage": "question"
+  },
+  "s11": {
+    "title": "Latent space · a familiar picture",
+    "explanation": "A map places similar destinations near one another.\n\nWhat matches our case, and where does the analogy stop?",
+    "speaker_notes": "TEACHER SCRIPT — ANALOGY. Begin with the familiar scene. Invite learners to describe each part in everyday language. Then ask where the comparison might fail before introducing the technical vocabulary. This week’s case is: A designer wants new simple icons similar to examples, without copying an exact icon. The visible slide states: A map places similar destinations near one another.\n\nWhat matches our case, and where does the analogy stop? The boundary is: Closeness in a toy plot does not guarantee human-perceived similarity. The target is: Explain how reconstruction differs from adversarial generation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "analogy",
+      "items": [
+        "Map point",
+        "Nearby points",
+        "Visit"
+      ],
+      "caption": "A map places similar destinations near one another."
+    },
+    "teaching_stage": "analogy"
+  },
+  "s12": {
+    "title": "Latent space · map the parts",
+    "explanation": "Match each everyday part to the technical part.\n\nAnalogy limit: Closeness in a toy plot does not guarantee human-perceived similarity.",
+    "speaker_notes": "TEACHER SCRIPT — MAPPING. Point from each familiar element to the corresponding technical element. Have students cover the right column and reconstruct the three matches. Read the limitation aloud. This week’s case is: A designer wants new simple icons similar to examples, without copying an exact icon. The visible slide states: Match each everyday part to the technical part.\n\nAnalogy limit: Closeness in a toy plot does not guarantee human-perceived similarity. The three precise mappings are [['Map point', 'latent coordinate'], ['Nearby points', 'related codes'], ['Visit', 'decoded output']]. The target is: Explain how reconstruction differs from adversarial generation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "map",
+      "pairs": [
+        [
+          "Map point",
+          "latent coordinate"
+        ],
+        [
+          "Nearby points",
+          "related codes"
+        ],
+        [
+          "Visit",
+          "decoded output"
+        ]
+      ]
+    },
+    "teaching_stage": "mapping"
+  },
+  "s13": {
+    "title": "Latent space · how it works",
+    "explanation": "Nearby latent values often produce related outputs, though this is learned rather than guaranteed.\n\nTrace the arrows from left to right.",
+    "speaker_notes": "TEACHER SCRIPT — MECHANISM. Trace every arrow slowly from the input to the output. Ask what information crosses the boundary at each arrow. Pause if students confuse a simplified notebook with a trained model. This week’s case is: A designer wants new simple icons similar to examples, without copying an exact icon. The visible slide states: Nearby latent values often produce related outputs, though this is learned rather than guaranteed.\n\nTrace the arrows from left to right. The weekly example is: Change toy z from 0.3 to 0.7; compare the output pattern while keeping the decoder fixed. State what the analogy does not explain: Closeness in a toy plot does not guarantee human-perceived similarity. The target is: Explain how reconstruction differs from adversarial generation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Nearby z values",
+        "Toy decoder outputs",
+        "Compare patterns"
+      ]
+    },
+    "teaching_stage": "mechanism"
+  },
+  "s14": {
+    "title": "Latent space · work one case",
+    "explanation": "Change toy z from 0.3 to 0.7; compare the output pattern while keeping the decoder fixed.\n\nPoint to the evidence before giving your conclusion.",
+    "speaker_notes": "TEACHER SCRIPT — WORKED. Work the specific numbers or source wording aloud. Give students thirty seconds to write a conclusion, then ask which source line or calculation supports it. This week’s case is: A designer wants new simple icons similar to examples, without copying an exact icon. The visible slide states: Change toy z from 0.3 to 0.7; compare the output pattern while keeping the decoder fixed.\n\nPoint to the evidence before giving your conclusion. The expected reasoning concludes: No. Inspect examples and use a suitable quality test. Distinguish measured results from illustrative numbers. The target is: Explain how reconstruction differs from adversarial generation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "work",
+      "items": [
+        "Change toy z from 0.3 to 0.7; compare the output pattern while keeping the decoder fixed.",
+        "Does a smoother output prove realism?",
+        "No. Inspect examples and use a suitable quality test."
+      ]
+    },
+    "teaching_stage": "worked"
+  },
+  "s15": {
+    "title": "Latent space · answer and explain",
+    "explanation": "No. Inspect examples and use a suitable quality test.\n\nTempting mistake: A latent coordinate is a pixel location.",
+    "speaker_notes": "TEACHER SCRIPT — REVEAL. Return to the earlier choice. Explain the correct answer and why the tempting claim fails. Ask one learner to say the answer in a single sentence without reading it. This week’s case is: A designer wants new simple icons similar to examples, without copying an exact icon. The visible slide states: No. Inspect examples and use a suitable quality test.\n\nTempting mistake: A latent coordinate is a pixel location. The earlier question was Does a smoother output prove realism? Ask how this differs from the wrong claim. The target is: Explain how reconstruction differs from adversarial generation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "reveal",
+      "items": [
+        "A latent coordinate is a pixel location.",
+        "No. Inspect examples and use a suitable quality test."
+      ],
+      "caption": "Closeness in a toy plot does not guarantee human-perceived similarity."
+    },
+    "teaching_stage": "reveal"
+  },
+  "s16": {
+    "title": "3. Predict · GAN",
+    "explanation": "Which part produces the new image?\n\nMake a choice before we explain the diagram.",
+    "speaker_notes": "TEACHER SCRIPT — QUESTION. Take a show of hands for each choice before showing the mechanism. Ask pairs to defend a choice with evidence. Save the strongest wrong reason for the reveal later in this cycle. This week’s case is: A designer wants new simple icons similar to examples, without copying an exact icon. The visible slide states: Which part produces the new image?\n\nMake a choice before we explain the diagram. The intended answer is The generator produces it; the discriminator provides a training signal. The tempting claim is The discriminator paints the final image. Do not show which card is correct until the reveal. The target is: Explain how reconstruction differs from adversarial generation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "The generator produces it; the discriminator provides a training signal.",
+        "The discriminator paints the final image."
+      ]
+    },
+    "teaching_stage": "question"
+  },
+  "s17": {
+    "title": "GAN · a familiar picture",
+    "explanation": "A forger and examiner improve through repeated feedback.\n\nWhat matches our case, and where does the analogy stop?",
+    "speaker_notes": "TEACHER SCRIPT — ANALOGY. Begin with the familiar scene. Invite learners to describe each part in everyday language. Then ask where the comparison might fail before introducing the technical vocabulary. This week’s case is: A designer wants new simple icons similar to examples, without copying an exact icon. The visible slide states: A forger and examiner improve through repeated feedback.\n\nWhat matches our case, and where does the analogy stop? The boundary is: The analogy can imply a human examiner; the discriminator is a learned network and may be fooled. The target is: Explain how reconstruction differs from adversarial generation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "analogy",
+      "items": [
+        "Forger",
+        "Examiner",
+        "Critique"
+      ],
+      "caption": "A forger and examiner improve through repeated feedback."
+    },
+    "teaching_stage": "analogy"
+  },
+  "s18": {
+    "title": "GAN · map the parts",
+    "explanation": "Match each everyday part to the technical part.\n\nAnalogy limit: The analogy can imply a human examiner; the discriminator is a learned network and may be fooled.",
+    "speaker_notes": "TEACHER SCRIPT — MAPPING. Point from each familiar element to the corresponding technical element. Have students cover the right column and reconstruct the three matches. Read the limitation aloud. This week’s case is: A designer wants new simple icons similar to examples, without copying an exact icon. The visible slide states: Match each everyday part to the technical part.\n\nAnalogy limit: The analogy can imply a human examiner; the discriminator is a learned network and may be fooled. The three precise mappings are [['Forger', 'generator'], ['Examiner', 'discriminator'], ['Critique', 'training signal']]. The target is: Explain how reconstruction differs from adversarial generation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "map",
+      "pairs": [
+        [
+          "Forger",
+          "generator"
+        ],
+        [
+          "Examiner",
+          "discriminator"
+        ],
+        [
+          "Critique",
+          "training signal"
+        ]
+      ]
+    },
+    "teaching_stage": "mapping"
+  },
+  "s19": {
+    "title": "GAN · how it works",
+    "explanation": "A generator proposes samples. A discriminator learns to distinguish generated and real samples; both change during training.\n\nTrace the arrows from left to right.",
+    "speaker_notes": "TEACHER SCRIPT — MECHANISM. Trace every arrow slowly from the input to the output. Ask what information crosses the boundary at each arrow. Pause if students confuse a simplified notebook with a trained model. This week’s case is: A designer wants new simple icons similar to examples, without copying an exact icon. The visible slide states: A generator proposes samples. A discriminator learns to distinguish generated and real samples; both change during training.\n\nTrace the arrows from left to right. The weekly example is: A generator proposes an icon; the discriminator scores real versus generated examples; both update. State what the analogy does not explain: The analogy can imply a human examiner; the discriminator is a learned network and may be fooled. The target is: Explain how reconstruction differs from adversarial generation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Random input",
+        "Generator",
+        "Proposed image",
+        "Real/fake judge",
+        "Training feedback"
+      ]
+    },
+    "teaching_stage": "mechanism"
+  },
+  "s20": {
+    "title": "GAN · work one case",
+    "explanation": "A generator proposes an icon; the discriminator scores real versus generated examples; both update.\n\nPoint to the evidence before giving your conclusion.",
+    "speaker_notes": "TEACHER SCRIPT — WORKED. Work the specific numbers or source wording aloud. Give students thirty seconds to write a conclusion, then ask which source line or calculation supports it. This week’s case is: A designer wants new simple icons similar to examples, without copying an exact icon. The visible slide states: A generator proposes an icon; the discriminator scores real versus generated examples; both update.\n\nPoint to the evidence before giving your conclusion. The expected reasoning concludes: The generator produces it; the discriminator provides a training signal. Distinguish measured results from illustrative numbers. The target is: Explain how reconstruction differs from adversarial generation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "work",
+      "items": [
+        "A generator proposes an icon; the discriminator scores real versus generated examples; both update.",
+        "Which part produces the new image?",
+        "The generator produces it; the discriminator provides a training signal."
+      ]
+    },
+    "teaching_stage": "worked"
+  },
+  "s21": {
+    "title": "GAN · answer and explain",
+    "explanation": "The generator produces it; the discriminator provides a training signal.\n\nTempting mistake: The discriminator paints the final image.",
+    "speaker_notes": "TEACHER SCRIPT — REVEAL. Return to the earlier choice. Explain the correct answer and why the tempting claim fails. Ask one learner to say the answer in a single sentence without reading it. This week’s case is: A designer wants new simple icons similar to examples, without copying an exact icon. The visible slide states: The generator produces it; the discriminator provides a training signal.\n\nTempting mistake: The discriminator paints the final image. The earlier question was Which part produces the new image? Ask how this differs from the wrong claim. The target is: Explain how reconstruction differs from adversarial generation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "reveal",
+      "items": [
+        "The discriminator paints the final image.",
+        "The generator produces it; the discriminator provides a training signal."
+      ],
+      "caption": "The analogy can imply a human examiner; the discriminator is a learned network and may be fooled."
+    },
+    "teaching_stage": "reveal"
+  },
+  "s22": {
+    "title": "4. Predict · Training curves",
+    "explanation": "Why is the final training number insufficient?\n\nMake a choice before we explain the diagram.",
+    "speaker_notes": "TEACHER SCRIPT — QUESTION. Take a show of hands for each choice before showing the mechanism. Ask pairs to defend a choice with evidence. Save the strongest wrong reason for the reveal later in this cycle. This week’s case is: A designer wants new simple icons similar to examples, without copying an exact icon. The visible slide states: Why is the final training number insufficient?\n\nMake a choice before we explain the diagram. The intended answer is Validation worsened; quality and variety require separate inspection. The tempting claim is Lower training loss always proves better new icons. Do not show which card is correct until the reveal. The target is: Explain how reconstruction differs from adversarial generation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "Validation worsened; quality and variety require separate inspection.",
+        "Lower training loss always proves better new icons."
+      ]
+    },
+    "teaching_stage": "question"
+  },
+  "s23": {
+    "title": "Training curves · a familiar picture",
+    "explanation": "A student gets better on practice sheets while worse on unfamiliar exam sheets.\n\nWhat matches our case, and where does the analogy stop?",
+    "speaker_notes": "TEACHER SCRIPT — ANALOGY. Begin with the familiar scene. Invite learners to describe each part in everyday language. Then ask where the comparison might fail before introducing the technical vocabulary. This week’s case is: A designer wants new simple icons similar to examples, without copying an exact icon. The visible slide states: A student gets better on practice sheets while worse on unfamiliar exam sheets.\n\nWhat matches our case, and where does the analogy stop? The boundary is: GAN losses are not simple universal quality scores; compare held-out samples too. The target is: Explain how reconstruction differs from adversarial generation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "analogy",
+      "items": [
+        "Practice curve",
+        "Unseen sheet",
+        "Visual inspection"
+      ],
+      "caption": "A student gets better on practice sheets while worse on unfamiliar exam sheets."
+    },
+    "teaching_stage": "analogy"
+  },
+  "s24": {
+    "title": "Training curves · map the parts",
+    "explanation": "Match each everyday part to the technical part.\n\nAnalogy limit: GAN losses are not simple universal quality scores; compare held-out samples too.",
+    "speaker_notes": "TEACHER SCRIPT — MAPPING. Point from each familiar element to the corresponding technical element. Have students cover the right column and reconstruct the three matches. Read the limitation aloud. This week’s case is: A designer wants new simple icons similar to examples, without copying an exact icon. The visible slide states: Match each everyday part to the technical part.\n\nAnalogy limit: GAN losses are not simple universal quality scores; compare held-out samples too. The three precise mappings are [['Practice curve', 'training loss'], ['Unseen sheet', 'validation set'], ['Visual inspection', 'quality check']]. The target is: Explain how reconstruction differs from adversarial generation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "map",
+      "pairs": [
+        [
+          "Practice curve",
+          "training loss"
+        ],
+        [
+          "Unseen sheet",
+          "validation set"
+        ],
+        [
+          "Visual inspection",
+          "quality check"
+        ]
+      ]
+    },
+    "teaching_stage": "mapping"
+  },
+  "s25": {
+    "title": "Training curves · how it works",
+    "explanation": "A lower loss alone does not certify useful images; inspect quality, diversity and a held-out sample.\n\nTrace the arrows from left to right.",
+    "speaker_notes": "TEACHER SCRIPT — MECHANISM. Trace every arrow slowly from the input to the output. Ask what information crosses the boundary at each arrow. Pause if students confuse a simplified notebook with a trained model. This week’s case is: A designer wants new simple icons similar to examples, without copying an exact icon. The visible slide states: A lower loss alone does not certify useful images; inspect quality, diversity and a held-out sample.\n\nTrace the arrows from left to right. The weekly example is: Training error 0.30→0.18→0.12; validation 0.32→0.20→0.26. Inspect epoch 3. State what the analogy does not explain: GAN losses are not simple universal quality scores; compare held-out samples too. The target is: Explain how reconstruction differs from adversarial generation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Loss curve",
+        "Held-out images",
+        "Quality and diversity"
+      ]
+    },
+    "teaching_stage": "mechanism"
+  },
+  "s26": {
+    "title": "Training curves · work one case",
+    "explanation": "Training error 0.30→0.18→0.12; validation 0.32→0.20→0.26. Inspect epoch 3.\n\nPoint to the evidence before giving your conclusion.",
+    "speaker_notes": "TEACHER SCRIPT — WORKED. Work the specific numbers or source wording aloud. Give students thirty seconds to write a conclusion, then ask which source line or calculation supports it. This week’s case is: A designer wants new simple icons similar to examples, without copying an exact icon. The visible slide states: Training error 0.30→0.18→0.12; validation 0.32→0.20→0.26. Inspect epoch 3.\n\nPoint to the evidence before giving your conclusion. The expected reasoning concludes: Validation worsened; quality and variety require separate inspection. Distinguish measured results from illustrative numbers. The target is: Explain how reconstruction differs from adversarial generation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "work",
+      "items": [
+        "Training error 0.30→0.18→0.12; validation 0.32→0.20→0.26. Inspect epoch 3.",
+        "Why is the final training number insufficient?",
+        "Validation worsened; quality and variety require separate inspection."
+      ]
+    },
+    "teaching_stage": "worked"
+  },
+  "s27": {
+    "title": "Training curves · answer and explain",
+    "explanation": "Validation worsened; quality and variety require separate inspection.\n\nTempting mistake: Lower training loss always proves better new icons.",
+    "speaker_notes": "TEACHER SCRIPT — REVEAL. Return to the earlier choice. Explain the correct answer and why the tempting claim fails. Ask one learner to say the answer in a single sentence without reading it. This week’s case is: A designer wants new simple icons similar to examples, without copying an exact icon. The visible slide states: Validation worsened; quality and variety require separate inspection.\n\nTempting mistake: Lower training loss always proves better new icons. The earlier question was Why is the final training number insufficient? Ask how this differs from the wrong claim. The target is: Explain how reconstruction differs from adversarial generation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "reveal",
+      "items": [
+        "Lower training loss always proves better new icons.",
+        "Validation worsened; quality and variety require separate inspection."
+      ],
+      "caption": "GAN losses are not simple universal quality scores; compare held-out samples too."
+    },
+    "teaching_stage": "reveal"
+  },
+  "s28": {
+    "title": "Evidence trail: input → result",
+    "explanation": "Latent coordinate z changes from 0.3 to 0.7.\n\nToy decoder output changes; inspect rather than assume improvement.",
+    "speaker_notes": "TEACHER SCRIPT — WORKED. Work the specific numbers or source wording aloud. Give students thirty seconds to write a conclusion, then ask which source line or calculation supports it. This week’s case is: A designer wants new simple icons similar to examples, without copying an exact icon. The visible slide states: Latent coordinate z changes from 0.3 to 0.7.\n\nToy decoder output changes; inspect rather than assume improvement. Have one student point to an exact source word or number for each conclusion. The target is: Explain how reconstruction differs from adversarial generation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "work",
+      "items": [
+        "Input icon represented by [0.2, 0.8].",
+        "Latent coordinate z changes from 0.3 to 0.7.",
+        "Toy decoder output changes; inspect rather than assume improvement."
+      ]
+    },
+    "teaching_stage": "worked"
+  },
+  "s29": {
+    "title": "Notebook: run the prepared example",
+    "explanation": "Annotate model paths and explore a toy latent coordinate.\n\nRead the original output before editing.",
+    "speaker_notes": "TEACHER SCRIPT — PRACTICE. Open the matching notebook and demonstrate the first run. Have learners predict one change, run only that change, and record input, setting, output and an error explanation. This week’s case is: A designer wants new simple icons similar to examples, without copying an exact icon. The visible slide states: Annotate model paths and explore a toy latent coordinate.\n\nRead the original output before editing. Use Week_02_Lab.ipynb. This lab is a prepared classroom demonstration with its limitations documented. The target is: Explain how reconstruction differs from adversarial generation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "Trace an example through encoder, sample and decoder",
+        "Trace random input through generator and discriminator",
+        "Inspect supplied loss and quality figures",
+        "Change one latent coordinate in a toy visualization"
+      ]
+    },
+    "teaching_stage": "practice"
+  },
+  "s30": {
+    "title": "Find the input and check in Python",
+    "explanation": "Locate the supplied input, the transformation, the checking line and the printed result.",
+    "speaker_notes": "TEACHER SCRIPT — PRACTICE. Open the matching notebook and demonstrate the first run. Have learners predict one change, run only that change, and record input, setting, output and an error explanation. This week’s case is: A designer wants new simple icons similar to examples, without copying an exact icon. The visible slide states: Locate the supplied input, the transformation, the checking line and the printed result. The weekly lab change is: Change z and compare output difference; explain that the toy cannot establish realism. The target is: Explain how reconstruction differs from adversarial generation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Input data",
+        "Python operation",
+        "Check",
+        "Recorded result"
+      ]
+    },
+    "teaching_stage": "practice"
+  },
+  "s31": {
+    "title": "Predict one controlled change",
+    "explanation": "Change z and compare output difference; explain that the toy cannot establish realism.\n\nWhat should change in the result? What stays fixed?",
+    "speaker_notes": "TEACHER SCRIPT — PRACTICE. Open the matching notebook and demonstrate the first run. Have learners predict one change, run only that change, and record input, setting, output and an error explanation. This week’s case is: A designer wants new simple icons similar to examples, without copying an exact icon. The visible slide states: Change z and compare output difference; explain that the toy cannot establish realism.\n\nWhat should change in the result? What stays fixed? Ask learners to write their prediction before rerunning the cell. The target is: Explain how reconstruction differs from adversarial generation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "compare",
+      "left": "Before: original case",
+      "right": "After: one change",
+      "caption": "Keep all other inputs fixed."
+    },
+    "teaching_stage": "practice"
+  },
+  "s32": {
+    "title": "Run, compare and record",
+    "explanation": "Record the input, the one changed setting, the observed result and a reason for any difference.",
+    "speaker_notes": "TEACHER SCRIPT — PRACTICE. Open the matching notebook and demonstrate the first run. Have learners predict one change, run only that change, and record input, setting, output and an error explanation. This week’s case is: A designer wants new simple icons similar to examples, without copying an exact icon. The visible slide states: Record the input, the one changed setting, the observed result and a reason for any difference. The required evidence is: Two labelled model diagrams and a reconstruction comparison. The target is: Explain how reconstruction differs from adversarial generation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "table",
+      "rows": [
+        [
+          "Input",
+          "Setting",
+          "Result"
+        ],
+        [
+          "Original",
+          "baseline",
+          "record"
+        ],
+        [
+          "Changed",
+          "one edit",
+          "compare"
+        ]
+      ]
+    },
+    "teaching_stage": "practice"
+  },
+  "s33": {
+    "title": "Measure without hiding the denominator",
+    "explanation": "Mean absolute reconstruction error on supplied example pairs\n\nWrite the numerator, denominator and one failure case.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: A designer wants new simple icons similar to examples, without copying an exact icon. The visible slide states: Mean absolute reconstruction error on supplied example pairs\n\nWrite the numerator, denominator and one failure case. Where a measure is qualitative, show the concrete source comparison. Example: Toy decoder output changes; inspect rather than assume improvement. The target is: Explain how reconstruction differs from adversarial generation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Define success",
+        "Count successes",
+        "Count cases",
+        "Inspect errors"
+      ]
+    },
+    "teaching_stage": "check"
+  },
+  "s34": {
+    "title": "Error detective: find the layer",
+    "explanation": "Plausible wrong claim: The toy decoder is a trained VAE or a trained GAN.\n\nCorrect it using the case evidence.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: A designer wants new simple icons similar to examples, without copying an exact icon. The visible slide states: Plausible wrong claim: The toy decoder is a trained VAE or a trained GAN.\n\nCorrect it using the case evidence. The correction is It is only a deterministic illustration of latent variation. Real models learn parameters from examples. The target is: Explain how reconstruction differs from adversarial generation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "reveal",
+      "items": [
+        "The toy decoder is a trained VAE or a trained GAN.",
+        "It is only a deterministic illustration of latent variation. Real models learn parameters from examples."
+      ],
+      "caption": "Name a test that would catch this failure."
+    },
+    "teaching_stage": "check"
+  },
+  "s35": {
+    "title": "Transfer to a new situation",
+    "explanation": "The generated icon looks sharp but repeats one shape. Which additional check would reveal lack of diversity?\n\nExplain which source or test would settle it.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: A designer wants new simple icons similar to examples, without copying an exact icon. The visible slide states: The generated icon looks sharp but repeats one shape. Which additional check would reveal lack of diversity?\n\nExplain which source or test would settle it. This is a fresh scenario, so ask for a reason before accepting either short answer. The target is: Explain how reconstruction differs from adversarial generation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "Use the visible evidence",
+        "Flag missing or unsafe evidence"
+      ]
+    },
+    "teaching_stage": "check"
+  },
+  "s36": {
+    "title": "Explain it to a partner",
+    "explanation": "Without reading the slide, name the input, one processing step and the check. Your partner should ask “How do you know?”",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: A designer wants new simple icons similar to examples, without copying an exact icon. The visible slide states: Without reading the slide, name the input, one processing step and the check. Your partner should ask “How do you know?” Listen for a causal explanation and one limitation, then revisit a difficult arrow on the board. The target is: Explain how reconstruction differs from adversarial generation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Example image",
+        "VAE encoder",
+        "Output image"
+      ]
+    },
+    "teaching_stage": "check"
+  },
+  "s37": {
+    "title": "Exam rehearsal · explain and apply",
+    "explanation": "Label input, encoder, latent sample and decoder in a VAE.\n\nWrite a short answer, then compare with the guide.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: A designer wants new simple icons similar to examples, without copying an exact icon. The visible slide states: Label input, encoder, latent sample and decoder in a VAE.\n\nWrite a short answer, then compare with the guide. Model answer after discussion: Input enters encoder. Encoder predicts a latent distribution. Sample z from that distribution. Decoder reconstructs the input from z. Practice marks: 4. The target is: Explain how reconstruction differs from adversarial generation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "State the core idea",
+        "Use a case detail or calculation",
+        "Add a limitation",
+        "Compare with the Word guide"
+      ]
+    },
+    "teaching_stage": "check"
+  },
+  "s38": {
+    "title": "Exam rehearsal · explain and apply",
+    "explanation": "Training error falls but validation error rises. What should you inspect?\n\nWrite a short answer, then compare with the guide.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: A designer wants new simple icons similar to examples, without copying an exact icon. The visible slide states: Training error falls but validation error rises. What should you inspect?\n\nWrite a short answer, then compare with the guide. Model answer after discussion: Inspect held-out examples and overfitting; compare checkpoints and avoid claiming progress from training error alone. Practice marks: 4. The target is: Explain how reconstruction differs from adversarial generation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "State the core idea",
+        "Use a case detail or calculation",
+        "Add a limitation",
+        "Compare with the Word guide"
+      ]
+    },
+    "teaching_stage": "check"
+  },
+  "s39": {
+    "title": "What to hand in",
+    "explanation": "Two labelled model diagrams and a reconstruction comparison.\n\nInclude the one changed input and an error explanation.",
+    "speaker_notes": "TEACHER SCRIPT — PRACTICE. Open the matching notebook and demonstrate the first run. Have learners predict one change, run only that change, and record input, setting, output and an error explanation. This week’s case is: A designer wants new simple icons similar to examples, without copying an exact icon. The visible slide states: Two labelled model diagrams and a reconstruction comparison.\n\nInclude the one changed input and an error explanation. This weekly evidence receives formative feedback according to the module sequence; refer to the assessment brief for graded work. The target is: Explain how reconstruction differs from adversarial generation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "Original run",
+        "One changed input",
+        "Comparison",
+        "Explanation + source"
+      ]
+    },
+    "teaching_stage": "practice"
+  },
+  "s40": {
+    "title": "Three ideas to recall next week",
+    "explanation": "VAE: compress and reconstruct. GAN: propose and critique.\n\nRead the linked official sources in the Word guide and redraw one diagram from memory.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: A designer wants new simple icons similar to examples, without copying an exact icon. The visible slide states: VAE: compress and reconstruct. GAN: propose and critique.\n\nRead the linked official sources in the Word guide and redraw one diagram from memory. Return to the opening vote and ask whether the evidence changed anyone’s mind. The next week builds on this outcome: Explain how reconstruction differs from adversarial generation. The target is: Explain how reconstruction differs from adversarial generation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "VAE",
+        "Latent space",
+        "GAN",
+        "Training curves"
+      ]
+    },
+    "teaching_stage": "check"
+  }
+}

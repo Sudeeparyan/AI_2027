@@ -1,0 +1,46 @@
+{
+  "n": 2,
+  "title": "VAE and GAN model ideas",
+  "goal": "Explain how reconstruction differs from adversarial generation.",
+  "case": "A designer wants new simple icons similar to examples, without copying an exact icon.",
+  "terms": [
+    [
+      "VAE",
+      "An encoder predicts the centre (μ) and spread (σ) of a small latent distribution. We sample a code z from it. A decoder uses z to reconstruct the image."
+    ],
+    [
+      "Latent space",
+      "Nearby latent values often produce related outputs, though this is learned rather than guaranteed."
+    ],
+    [
+      "GAN",
+      "A generator proposes samples. A discriminator learns to distinguish generated and real samples; both change during training."
+    ],
+    [
+      "Training curves",
+      "A lower loss alone does not certify useful images; inspect quality, diversity and a held-out sample."
+    ]
+  ],
+  "steps": [
+    "Trace an example through encoder, sample and decoder",
+    "Trace random input through generator and discriminator",
+    "Inspect supplied loss and quality figures",
+    "Change one latent coordinate in a toy visualization"
+  ],
+  "example": [
+    "Input icon represented by [0.2, 0.8].",
+    "Latent coordinate z changes from 0.3 to 0.7.",
+    "Toy decoder output changes; inspect rather than assume improvement."
+  ],
+  "misconception": "The toy decoder is a trained VAE or a trained GAN.",
+  "correction": "It is only a deterministic illustration of latent variation. Real models learn parameters from examples.",
+  "change": "Change z and compare output difference; explain that the toy cannot establish realism.",
+  "metric": "Mean absolute reconstruction error on supplied example pairs",
+  "lab": "Annotate model paths and explore a toy latent coordinate.",
+  "output": "Two labelled model diagrams and a reconstruction comparison.",
+  "reading": [
+    "Google, GAN overview",
+    "NVIDIA, NeMo framework overview"
+  ],
+  "code": "latent"
+}

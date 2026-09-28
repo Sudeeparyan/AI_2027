@@ -1,0 +1,46 @@
+{
+  "n": 7,
+  "title": "Building and checking RAG",
+  "goal": "Connect retrieved evidence to an answer and abstain when support is absent.",
+  "case": "The college-policy assistant answers questions with policy IDs.",
+  "terms": [
+    [
+      "RAG",
+      "Retrieve relevant text for the current request, then draft an answer bounded by that text."
+    ],
+    [
+      "Citation support",
+      "Check every material claim against the cited passage."
+    ],
+    [
+      "No-answer case",
+      "If approved sources lack an answer, return a clear unsupported status."
+    ],
+    [
+      "Test split",
+      "Use 20 practice questions for improvements and keep ten separate questions for final checking."
+    ]
+  ],
+  "steps": [
+    "Search for a relevant policy",
+    "Produce an extractive classroom answer with a source ID",
+    "Record supported and unsupported questions",
+    "Compare top-1 and top-2 on practice cases"
+  ],
+  "example": [
+    "P3: Students may request one deadline extension within seven days.",
+    "Q: How many extensions are allowed?",
+    "A: One deadline extension [P3]."
+  ],
+  "misconception": "A citation label proves that the cited passage supports the answer.",
+  "correction": "Read the passage and check that it entails the claim; a plausible-looking source tag can be wrong.",
+  "change": "Replace a relevant passage with an irrelevant one and observe abstention.",
+  "metric": "Supported claims / checked claims and no-answer accuracy",
+  "lab": "Run a small extractive retrieval and answer pipeline.",
+  "output": "Twenty-case practice table; ten final questions remain sealed for assessment.",
+  "reading": [
+    "Microsoft, Retrieval augmented generation",
+    "OpenAI, Evaluation best practices"
+  ],
+  "code": "rag"
+}

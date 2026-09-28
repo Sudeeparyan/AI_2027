@@ -1,0 +1,134 @@
+[
+  {
+    "week": 1,
+    "outcomes": "LO1, LO4",
+    "hours": {
+      "concepts": 2,
+      "guided_practice": 2
+    },
+    "content": "content/week_01",
+    "exam_questions": 3,
+    "required_evidence": "Ten-case answer table with one error analysis."
+  },
+  {
+    "week": 2,
+    "outcomes": "LO1, LO2",
+    "hours": {
+      "concepts": 2,
+      "guided_practice": 2
+    },
+    "content": "content/week_02",
+    "exam_questions": 3,
+    "required_evidence": "Two labelled model diagrams and a reconstruction comparison."
+  },
+  {
+    "week": 3,
+    "outcomes": "LO1, LO2",
+    "hours": {
+      "concepts": 2,
+      "guided_practice": 2
+    },
+    "content": "content/week_03",
+    "exam_questions": 3,
+    "required_evidence": "Step comparison and three task-specific image observations."
+  },
+  {
+    "week": 4,
+    "outcomes": "LO1, LO2",
+    "hours": {
+      "concepts": 2,
+      "guided_practice": 2
+    },
+    "content": "content/week_04",
+    "exam_questions": 3,
+    "required_evidence": "Annotated attention table and one model-role choice."
+  },
+  {
+    "week": 5,
+    "outcomes": "LO4, LO5",
+    "hours": {
+      "concepts": 2,
+      "guided_practice": 2
+    },
+    "content": "content/week_05",
+    "exam_questions": 3,
+    "required_evidence": "Prompt revision and before/after field-check table."
+  },
+  {
+    "week": 6,
+    "outcomes": "LO4, LO5",
+    "hours": {
+      "concepts": 2,
+      "guided_practice": 2
+    },
+    "content": "content/week_06",
+    "exam_questions": 3,
+    "required_evidence": "Corpus manifest and retrieval misses with evidence IDs."
+  },
+  {
+    "week": 7,
+    "outcomes": "LO4, LO5",
+    "hours": {
+      "concepts": 2,
+      "guided_practice": 2
+    },
+    "content": "content/week_07",
+    "exam_questions": 3,
+    "required_evidence": "Twenty-case practice table; ten final questions remain sealed for assessment."
+  },
+  {
+    "week": 8,
+    "outcomes": "LO4, LO5",
+    "hours": {
+      "concepts": 2,
+      "guided_practice": 2
+    },
+    "content": "content/week_08",
+    "exam_questions": 3,
+    "required_evidence": "Tool result, blocked-request trace and approval explanation."
+  },
+  {
+    "week": 9,
+    "outcomes": "LO3, LO4",
+    "hours": {
+      "concepts": 2,
+      "guided_practice": 2
+    },
+    "content": "content/week_09",
+    "exam_questions": 3,
+    "required_evidence": "Comparison table with recommendation and uncertainty."
+  },
+  {
+    "week": 10,
+    "outcomes": "LO2, LO4",
+    "hours": {
+      "concepts": 2,
+      "guided_practice": 2
+    },
+    "content": "content/week_10",
+    "exam_questions": 3,
+    "required_evidence": "Source-linked field table and calculation."
+  },
+  {
+    "week": 11,
+    "outcomes": "LO4, LO5",
+    "hours": {
+      "concepts": 2,
+      "guided_practice": 2
+    },
+    "content": "content/week_11",
+    "exam_questions": 3,
+    "required_evidence": "Filtered trace and classroom release checklist."
+  },
+  {
+    "week": 12,
+    "outcomes": "LO1–LO5",
+    "hours": {
+      "concepts": 2,
+      "guided_practice": 2
+    },
+    "content": "content/week_12",
+    "exam_questions": 3,
+    "required_evidence": "Demo, test table, known limits and individual explanation."
+  }
+]

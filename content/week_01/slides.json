@@ -1,0 +1,614 @@
+{
+  "s01": {
+    "title": "Week 01 · What generative AI does",
+    "explanation": "The late-bus refund\n\nA confident assistant says a late bus ticket is reimbursed. Policy P1 says student travel is not reimbursed. Would you trust the answer?",
+    "speaker_notes": "TEACHER SCRIPT — OPEN. Show the visual for ten seconds, then ask for an initial decision. Do not reveal the answer yet. Ask a student to name the source or measurement that would change their mind. This week’s case is: A student asks whether a fictional college reimburses a late bus ticket. The visible slide states: The late-bus refund\n\nA confident assistant says a late bus ticket is reimbursed. Policy P1 says student travel is not reimbursed. Would you trust the answer? Reveal that the case will be revisited after four short concept cycles. The target is: Separate a model from the application that checks and delivers its output. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "story",
+      "items": [
+        "The late-bus refund",
+        "What is known?",
+        "What must we check?"
+      ]
+    },
+    "teaching_stage": "open"
+  },
+  "s02": {
+    "title": "First vote: what would you do?",
+    "explanation": "A confident assistant says a late bus ticket is reimbursed. Policy P1 says student travel is not reimbursed. Would you trust the answer?\n\nChoose an initial answer and name one piece of evidence you need.",
+    "speaker_notes": "TEACHER SCRIPT — QUESTION. Take a show of hands for each choice before showing the mechanism. Ask pairs to defend a choice with evidence. Save the strongest wrong reason for the reveal later in this cycle. This week’s case is: A student asks whether a fictional college reimburses a late bus ticket. The visible slide states: A confident assistant says a late bus ticket is reimbursed. Policy P1 says student travel is not reimbursed. Would you trust the answer?\n\nChoose an initial answer and name one piece of evidence you need. Accept reasonable uncertainty; record the initial votes to revisit at the end. The target is: Separate a model from the application that checks and delivers its output. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "Accept the first plausible result",
+        "Check the source or measurement"
+      ]
+    },
+    "teaching_stage": "question"
+  },
+  "s03": {
+    "title": "The journey through today’s case",
+    "explanation": "We will predict, connect an analogy, trace a mechanism, work an example, then explain a decision.",
+    "speaker_notes": "TEACHER SCRIPT — OPEN. Show the visual for ten seconds, then ask for an initial decision. Do not reveal the answer yet. Ask a student to name the source or measurement that would change their mind. This week’s case is: A student asks whether a fictional college reimburses a late bus ticket. The visible slide states: We will predict, connect an analogy, trace a mechanism, work an example, then explain a decision. Point to the four named ideas, then show where the notebook experiment fits. The target is: Separate a model from the application that checks and delivers its output. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "Generation and prediction",
+        "Model and system",
+        "Prompt and context",
+        "Baseline and variability"
+      ]
+    },
+    "teaching_stage": "open"
+  },
+  "s04": {
+    "title": "1. Predict · Generation and prediction",
+    "explanation": "Can a newly worded answer still be false?\n\nMake a choice before we explain the diagram.",
+    "speaker_notes": "TEACHER SCRIPT — QUESTION. Take a show of hands for each choice before showing the mechanism. Ask pairs to defend a choice with evidence. Save the strongest wrong reason for the reveal later in this cycle. This week’s case is: A student asks whether a fictional college reimburses a late bus ticket. The visible slide states: Can a newly worded answer still be false?\n\nMake a choice before we explain the diagram. The intended answer is Yes. Novel wording does not establish factual support. The tempting claim is Every generated sentence is creative evidence. Do not show which card is correct until the reveal. The target is: Separate a model from the application that checks and delivers its output. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "Yes. Novel wording does not establish factual support.",
+        "Every generated sentence is creative evidence."
+      ]
+    },
+    "teaching_stage": "question"
+  },
+  "s05": {
+    "title": "Generation and prediction · a familiar picture",
+    "explanation": "A weather forecast predicts a category; a novelist writes a fresh sentence.\n\nWhat matches our case, and where does the analogy stop?",
+    "speaker_notes": "TEACHER SCRIPT — ANALOGY. Begin with the familiar scene. Invite learners to describe each part in everyday language. Then ask where the comparison might fail before introducing the technical vocabulary. This week’s case is: A student asks whether a fictional college reimburses a late bus ticket. The visible slide states: A weather forecast predicts a category; a novelist writes a fresh sentence.\n\nWhat matches our case, and where does the analogy stop? The boundary is: A generative model also predicts the next token internally; the distinction concerns the output task. The target is: Separate a model from the application that checks and delivers its output. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "analogy",
+      "items": [
+        "Forecast label",
+        "New sentence",
+        "Weather record"
+      ],
+      "caption": "A weather forecast predicts a category; a novelist writes a fresh sentence."
+    },
+    "teaching_stage": "analogy"
+  },
+  "s06": {
+    "title": "Generation and prediction · map the parts",
+    "explanation": "Match each everyday part to the technical part.\n\nAnalogy limit: A generative model also predicts the next token internally; the distinction concerns the output task.",
+    "speaker_notes": "TEACHER SCRIPT — MAPPING. Point from each familiar element to the corresponding technical element. Have students cover the right column and reconstruct the three matches. Read the limitation aloud. This week’s case is: A student asks whether a fictional college reimburses a late bus ticket. The visible slide states: Match each everyday part to the technical part.\n\nAnalogy limit: A generative model also predicts the next token internally; the distinction concerns the output task. The three precise mappings are [['Forecast label', 'predicted class'], ['New sentence', 'generated sequence'], ['Weather record', 'training examples']]. The target is: Separate a model from the application that checks and delivers its output. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "map",
+      "pairs": [
+        [
+          "Forecast label",
+          "predicted class"
+        ],
+        [
+          "New sentence",
+          "generated sequence"
+        ],
+        [
+          "Weather record",
+          "training examples"
+        ]
+      ]
+    },
+    "teaching_stage": "mapping"
+  },
+  "s07": {
+    "title": "Generation and prediction · how it works",
+    "explanation": "A predictor assigns a label or value. A generator creates a new sequence or image. Both can make errors.\n\nTrace the arrows from left to right.",
+    "speaker_notes": "TEACHER SCRIPT — MECHANISM. Trace every arrow slowly from the input to the output. Ask what information crosses the boundary at each arrow. Pause if students confuse a simplified notebook with a trained model. This week’s case is: A student asks whether a fictional college reimburses a late bus ticket. The visible slide states: A predictor assigns a label or value. A generator creates a new sequence or image. Both can make errors.\n\nTrace the arrows from left to right. The weekly example is: Given “Is travel reimbursed?”, a classifier could output NO; a generator could write “No, under P1.” State what the analogy does not explain: A generative model also predicts the next token internally; the distinction concerns the output task. The target is: Separate a model from the application that checks and delivers its output. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Training examples",
+        "Model learns patterns",
+        "New text"
+      ]
+    },
+    "teaching_stage": "mechanism"
+  },
+  "s08": {
+    "title": "Generation and prediction · work one case",
+    "explanation": "Given “Is travel reimbursed?”, a classifier could output NO; a generator could write “No, under P1.”\n\nPoint to the evidence before giving your conclusion.",
+    "speaker_notes": "TEACHER SCRIPT — WORKED. Work the specific numbers or source wording aloud. Give students thirty seconds to write a conclusion, then ask which source line or calculation supports it. This week’s case is: A student asks whether a fictional college reimburses a late bus ticket. The visible slide states: Given “Is travel reimbursed?”, a classifier could output NO; a generator could write “No, under P1.”\n\nPoint to the evidence before giving your conclusion. The expected reasoning concludes: Yes. Novel wording does not establish factual support. Distinguish measured results from illustrative numbers. The target is: Separate a model from the application that checks and delivers its output. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "work",
+      "items": [
+        "Given “Is travel reimbursed?”, a classifier could output NO; a generator could write “No, under P1.”",
+        "Can a newly worded answer still be false?",
+        "Yes. Novel wording does not establish factual support."
+      ]
+    },
+    "teaching_stage": "worked"
+  },
+  "s09": {
+    "title": "Generation and prediction · answer and explain",
+    "explanation": "Yes. Novel wording does not establish factual support.\n\nTempting mistake: Every generated sentence is creative evidence.",
+    "speaker_notes": "TEACHER SCRIPT — REVEAL. Return to the earlier choice. Explain the correct answer and why the tempting claim fails. Ask one learner to say the answer in a single sentence without reading it. This week’s case is: A student asks whether a fictional college reimburses a late bus ticket. The visible slide states: Yes. Novel wording does not establish factual support.\n\nTempting mistake: Every generated sentence is creative evidence. The earlier question was Can a newly worded answer still be false? Ask how this differs from the wrong claim. The target is: Separate a model from the application that checks and delivers its output. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "reveal",
+      "items": [
+        "Every generated sentence is creative evidence.",
+        "Yes. Novel wording does not establish factual support."
+      ],
+      "caption": "A generative model also predicts the next token internally; the distinction concerns the output task."
+    },
+    "teaching_stage": "reveal"
+  },
+  "s10": {
+    "title": "2. Predict · Model and system",
+    "explanation": "Which component can stop an unsupported answer reaching the student?\n\nMake a choice before we explain the diagram.",
+    "speaker_notes": "TEACHER SCRIPT — QUESTION. Take a show of hands for each choice before showing the mechanism. Ask pairs to defend a choice with evidence. Save the strongest wrong reason for the reveal later in this cycle. This week’s case is: A student asks whether a fictional college reimburses a late bus ticket. The visible slide states: Which component can stop an unsupported answer reaching the student?\n\nMake a choice before we explain the diagram. The intended answer is The application check using P1 can flag or block it. The tempting claim is The model itself guarantees the college rule. Do not show which card is correct until the reveal. The target is: Separate a model from the application that checks and delivers its output. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "The application check using P1 can flag or block it.",
+        "The model itself guarantees the college rule."
+      ]
+    },
+    "teaching_stage": "question"
+  },
+  "s11": {
+    "title": "Model and system · a familiar picture",
+    "explanation": "A cook proposes a dish; the restaurant checks ingredients and allergies before serving.\n\nWhat matches our case, and where does the analogy stop?",
+    "speaker_notes": "TEACHER SCRIPT — ANALOGY. Begin with the familiar scene. Invite learners to describe each part in everyday language. Then ask where the comparison might fail before introducing the technical vocabulary. This week’s case is: A student asks whether a fictional college reimburses a late bus ticket. The visible slide states: A cook proposes a dish; the restaurant checks ingredients and allergies before serving.\n\nWhat matches our case, and where does the analogy stop? The boundary is: A restaurant check is a deliberate rule; a model does not automatically enforce permissions. The target is: Separate a model from the application that checks and delivers its output. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "analogy",
+      "items": [
+        "Cook",
+        "Ingredient sheet",
+        "Server check"
+      ],
+      "caption": "A cook proposes a dish; the restaurant checks ingredients and allergies before serving."
+    },
+    "teaching_stage": "analogy"
+  },
+  "s12": {
+    "title": "Model and system · map the parts",
+    "explanation": "Match each everyday part to the technical part.\n\nAnalogy limit: A restaurant check is a deliberate rule; a model does not automatically enforce permissions.",
+    "speaker_notes": "TEACHER SCRIPT — MAPPING. Point from each familiar element to the corresponding technical element. Have students cover the right column and reconstruct the three matches. Read the limitation aloud. This week’s case is: A student asks whether a fictional college reimburses a late bus ticket. The visible slide states: Match each everyday part to the technical part.\n\nAnalogy limit: A restaurant check is a deliberate rule; a model does not automatically enforce permissions. The three precise mappings are [['Cook', 'model'], ['Ingredient sheet', 'policy P1'], ['Server check', 'application validation']]. The target is: Separate a model from the application that checks and delivers its output. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "map",
+      "pairs": [
+        [
+          "Cook",
+          "model"
+        ],
+        [
+          "Ingredient sheet",
+          "policy P1"
+        ],
+        [
+          "Server check",
+          "application validation"
+        ]
+      ]
+    },
+    "teaching_stage": "mapping"
+  },
+  "s13": {
+    "title": "Model and system · how it works",
+    "explanation": "The model proposes words. Retrieval, permissions, validation and people decide what the application may present.\n\nTrace the arrows from left to right.",
+    "speaker_notes": "TEACHER SCRIPT — MECHANISM. Trace every arrow slowly from the input to the output. Ask what information crosses the boundary at each arrow. Pause if students confuse a simplified notebook with a trained model. This week’s case is: A student asks whether a fictional college reimburses a late bus ticket. The visible slide states: The model proposes words. Retrieval, permissions, validation and people decide what the application may present.\n\nTrace the arrows from left to right. The weekly example is: The model proposes “Yes”; the application compares the claim with P1 and flags it. State what the analogy does not explain: A restaurant check is a deliberate rule; a model does not automatically enforce permissions. The target is: Separate a model from the application that checks and delivers its output. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Question",
+        "Model answer",
+        "Check against P1"
+      ]
+    },
+    "teaching_stage": "mechanism"
+  },
+  "s14": {
+    "title": "Model and system · work one case",
+    "explanation": "The model proposes “Yes”; the application compares the claim with P1 and flags it.\n\nPoint to the evidence before giving your conclusion.",
+    "speaker_notes": "TEACHER SCRIPT — WORKED. Work the specific numbers or source wording aloud. Give students thirty seconds to write a conclusion, then ask which source line or calculation supports it. This week’s case is: A student asks whether a fictional college reimburses a late bus ticket. The visible slide states: The model proposes “Yes”; the application compares the claim with P1 and flags it.\n\nPoint to the evidence before giving your conclusion. The expected reasoning concludes: The application check using P1 can flag or block it. Distinguish measured results from illustrative numbers. The target is: Separate a model from the application that checks and delivers its output. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "work",
+      "items": [
+        "The model proposes “Yes”; the application compares the claim with P1 and flags it.",
+        "Which component can stop an unsupported answer reaching the student?",
+        "The application check using P1 can flag or block it."
+      ]
+    },
+    "teaching_stage": "worked"
+  },
+  "s15": {
+    "title": "Model and system · answer and explain",
+    "explanation": "The application check using P1 can flag or block it.\n\nTempting mistake: The model itself guarantees the college rule.",
+    "speaker_notes": "TEACHER SCRIPT — REVEAL. Return to the earlier choice. Explain the correct answer and why the tempting claim fails. Ask one learner to say the answer in a single sentence without reading it. This week’s case is: A student asks whether a fictional college reimburses a late bus ticket. The visible slide states: The application check using P1 can flag or block it.\n\nTempting mistake: The model itself guarantees the college rule. The earlier question was Which component can stop an unsupported answer reaching the student? Ask how this differs from the wrong claim. The target is: Separate a model from the application that checks and delivers its output. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "reveal",
+      "items": [
+        "The model itself guarantees the college rule.",
+        "The application check using P1 can flag or block it."
+      ],
+      "caption": "A restaurant check is a deliberate rule; a model does not automatically enforce permissions."
+    },
+    "teaching_stage": "reveal"
+  },
+  "s16": {
+    "title": "3. Predict · Prompt and context",
+    "explanation": "What should the prompt say when P1 lacks the answer?\n\nMake a choice before we explain the diagram.",
+    "speaker_notes": "TEACHER SCRIPT — QUESTION. Take a show of hands for each choice before showing the mechanism. Ask pairs to defend a choice with evidence. Save the strongest wrong reason for the reveal later in this cycle. This week’s case is: A student asks whether a fictional college reimburses a late bus ticket. The visible slide states: What should the prompt say when P1 lacks the answer?\n\nMake a choice before we explain the diagram. The intended answer is State that the assistant should say evidence is missing. The tempting claim is Longer prompts always create true answers. Do not show which card is correct until the reveal. The target is: Separate a model from the application that checks and delivers its output. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "State that the assistant should say evidence is missing.",
+        "Longer prompts always create true answers."
+      ]
+    },
+    "teaching_stage": "question"
+  },
+  "s17": {
+    "title": "Prompt and context · a familiar picture",
+    "explanation": "A librarian needs both the question and the correct shelf card.\n\nWhat matches our case, and where does the analogy stop?",
+    "speaker_notes": "TEACHER SCRIPT — ANALOGY. Begin with the familiar scene. Invite learners to describe each part in everyday language. Then ask where the comparison might fail before introducing the technical vocabulary. This week’s case is: A student asks whether a fictional college reimburses a late bus ticket. The visible slide states: A librarian needs both the question and the correct shelf card.\n\nWhat matches our case, and where does the analogy stop? The boundary is: The shelf card helps only if it is relevant, current and actually used. The target is: Separate a model from the application that checks and delivers its output. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "analogy",
+      "items": [
+        "Request",
+        "Shelf card",
+        "Draft reply"
+      ],
+      "caption": "A librarian needs both the question and the correct shelf card."
+    },
+    "teaching_stage": "analogy"
+  },
+  "s18": {
+    "title": "Prompt and context · map the parts",
+    "explanation": "Match each everyday part to the technical part.\n\nAnalogy limit: The shelf card helps only if it is relevant, current and actually used.",
+    "speaker_notes": "TEACHER SCRIPT — MAPPING. Point from each familiar element to the corresponding technical element. Have students cover the right column and reconstruct the three matches. Read the limitation aloud. This week’s case is: A student asks whether a fictional college reimburses a late bus ticket. The visible slide states: Match each everyday part to the technical part.\n\nAnalogy limit: The shelf card helps only if it is relevant, current and actually used. The three precise mappings are [['Request', 'task prompt'], ['Shelf card', 'supplied context P1'], ['Draft reply', 'model output']]. The target is: Separate a model from the application that checks and delivers its output. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "map",
+      "pairs": [
+        [
+          "Request",
+          "task prompt"
+        ],
+        [
+          "Shelf card",
+          "supplied context P1"
+        ],
+        [
+          "Draft reply",
+          "model output"
+        ]
+      ]
+    },
+    "teaching_stage": "mapping"
+  },
+  "s19": {
+    "title": "Prompt and context · how it works",
+    "explanation": "A prompt states the task; context contains the supplied evidence. The model cannot reliably invent a missing policy.\n\nTrace the arrows from left to right.",
+    "speaker_notes": "TEACHER SCRIPT — MECHANISM. Trace every arrow slowly from the input to the output. Ask what information crosses the boundary at each arrow. Pause if students confuse a simplified notebook with a trained model. This week’s case is: A student asks whether a fictional college reimburses a late bus ticket. The visible slide states: A prompt states the task; context contains the supplied evidence. The model cannot reliably invent a missing policy.\n\nTrace the arrows from left to right. The weekly example is: “Answer using P1 and cite it” includes a task and source; “help me” does not. State what the analogy does not explain: The shelf card helps only if it is relevant, current and actually used. The target is: Separate a model from the application that checks and delivers its output. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Task prompt",
+        "P1 policy context",
+        "Draft answer"
+      ]
+    },
+    "teaching_stage": "mechanism"
+  },
+  "s20": {
+    "title": "Prompt and context · work one case",
+    "explanation": "“Answer using P1 and cite it” includes a task and source; “help me” does not.\n\nPoint to the evidence before giving your conclusion.",
+    "speaker_notes": "TEACHER SCRIPT — WORKED. Work the specific numbers or source wording aloud. Give students thirty seconds to write a conclusion, then ask which source line or calculation supports it. This week’s case is: A student asks whether a fictional college reimburses a late bus ticket. The visible slide states: “Answer using P1 and cite it” includes a task and source; “help me” does not.\n\nPoint to the evidence before giving your conclusion. The expected reasoning concludes: State that the assistant should say evidence is missing. Distinguish measured results from illustrative numbers. The target is: Separate a model from the application that checks and delivers its output. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "work",
+      "items": [
+        "“Answer using P1 and cite it” includes a task and source; “help me” does not.",
+        "What should the prompt say when P1 lacks the answer?",
+        "State that the assistant should say evidence is missing."
+      ]
+    },
+    "teaching_stage": "worked"
+  },
+  "s21": {
+    "title": "Prompt and context · answer and explain",
+    "explanation": "State that the assistant should say evidence is missing.\n\nTempting mistake: Longer prompts always create true answers.",
+    "speaker_notes": "TEACHER SCRIPT — REVEAL. Return to the earlier choice. Explain the correct answer and why the tempting claim fails. Ask one learner to say the answer in a single sentence without reading it. This week’s case is: A student asks whether a fictional college reimburses a late bus ticket. The visible slide states: State that the assistant should say evidence is missing.\n\nTempting mistake: Longer prompts always create true answers. The earlier question was What should the prompt say when P1 lacks the answer? Ask how this differs from the wrong claim. The target is: Separate a model from the application that checks and delivers its output. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "reveal",
+      "items": [
+        "Longer prompts always create true answers.",
+        "State that the assistant should say evidence is missing."
+      ],
+      "caption": "The shelf card helps only if it is relevant, current and actually used."
+    },
+    "teaching_stage": "reveal"
+  },
+  "s22": {
+    "title": "4. Predict · Baseline and variability",
+    "explanation": "Why record the denominator and repeats?\n\nMake a choice before we explain the diagram.",
+    "speaker_notes": "TEACHER SCRIPT — QUESTION. Take a show of hands for each choice before showing the mechanism. Ask pairs to defend a choice with evidence. Save the strongest wrong reason for the reveal later in this cycle. This week’s case is: A student asks whether a fictional college reimburses a late bus ticket. The visible slide states: Why record the denominator and repeats?\n\nMake a choice before we explain the diagram. The intended answer is The denominator shows sample size; repeats show whether outputs change. The tempting claim is A 70% score means the next answer is certainly correct. Do not show which card is correct until the reveal. The target is: Separate a model from the application that checks and delivers its output. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "The denominator shows sample size; repeats show whether outputs change.",
+        "A 70% score means the next answer is certainly correct."
+      ]
+    },
+    "teaching_stage": "question"
+  },
+  "s23": {
+    "title": "Baseline and variability · a familiar picture",
+    "explanation": "A teacher marks ten scripts against one answer key, then repeats two questions.\n\nWhat matches our case, and where does the analogy stop?",
+    "speaker_notes": "TEACHER SCRIPT — ANALOGY. Begin with the familiar scene. Invite learners to describe each part in everyday language. Then ask where the comparison might fail before introducing the technical vocabulary. This week’s case is: A student asks whether a fictional college reimburses a late bus ticket. The visible slide states: A teacher marks ten scripts against one answer key, then repeats two questions.\n\nWhat matches our case, and where does the analogy stop? The boundary is: One short sample cannot estimate performance in all future situations. The target is: Separate a model from the application that checks and delivers its output. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "analogy",
+      "items": [
+        "Answer key",
+        "Script",
+        "Repeat"
+      ],
+      "caption": "A teacher marks ten scripts against one answer key, then repeats two questions."
+    },
+    "teaching_stage": "analogy"
+  },
+  "s24": {
+    "title": "Baseline and variability · map the parts",
+    "explanation": "Match each everyday part to the technical part.\n\nAnalogy limit: One short sample cannot estimate performance in all future situations.",
+    "speaker_notes": "TEACHER SCRIPT — MAPPING. Point from each familiar element to the corresponding technical element. Have students cover the right column and reconstruct the three matches. Read the limitation aloud. This week’s case is: A student asks whether a fictional college reimburses a late bus ticket. The visible slide states: Match each everyday part to the technical part.\n\nAnalogy limit: One short sample cannot estimate performance in all future situations. The three precise mappings are [['Answer key', 'manual baseline'], ['Script', 'model reply'], ['Repeat', 'variability check']]. The target is: Separate a model from the application that checks and delivers its output. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "map",
+      "pairs": [
+        [
+          "Answer key",
+          "manual baseline"
+        ],
+        [
+          "Script",
+          "model reply"
+        ],
+        [
+          "Repeat",
+          "variability check"
+        ]
+      ]
+    },
+    "teaching_stage": "mapping"
+  },
+  "s25": {
+    "title": "Baseline and variability · how it works",
+    "explanation": "A manual answer sheet gives us a reference. Repeated responses can vary, so record both correctness and changes.\n\nTrace the arrows from left to right.",
+    "speaker_notes": "TEACHER SCRIPT — MECHANISM. Trace every arrow slowly from the input to the output. Ask what information crosses the boundary at each arrow. Pause if students confuse a simplified notebook with a trained model. This week’s case is: A student asks whether a fictional college reimburses a late bus ticket. The visible slide states: A manual answer sheet gives us a reference. Repeated responses can vary, so record both correctness and changes.\n\nTrace the arrows from left to right. The weekly example is: Seven of ten replies are supported: 7/10 = 70%; log the three failures and two repeats. State what the analogy does not explain: One short sample cannot estimate performance in all future situations. The target is: Separate a model from the application that checks and delivers its output. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "10 reference answers",
+        "10 observed answers",
+        "Count supported"
+      ]
+    },
+    "teaching_stage": "mechanism"
+  },
+  "s26": {
+    "title": "Baseline and variability · work one case",
+    "explanation": "Seven of ten replies are supported: 7/10 = 70%; log the three failures and two repeats.\n\nPoint to the evidence before giving your conclusion.",
+    "speaker_notes": "TEACHER SCRIPT — WORKED. Work the specific numbers or source wording aloud. Give students thirty seconds to write a conclusion, then ask which source line or calculation supports it. This week’s case is: A student asks whether a fictional college reimburses a late bus ticket. The visible slide states: Seven of ten replies are supported: 7/10 = 70%; log the three failures and two repeats.\n\nPoint to the evidence before giving your conclusion. The expected reasoning concludes: The denominator shows sample size; repeats show whether outputs change. Distinguish measured results from illustrative numbers. The target is: Separate a model from the application that checks and delivers its output. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "work",
+      "items": [
+        "Seven of ten replies are supported: 7/10 = 70%; log the three failures and two repeats.",
+        "Why record the denominator and repeats?",
+        "The denominator shows sample size; repeats show whether outputs change."
+      ]
+    },
+    "teaching_stage": "worked"
+  },
+  "s27": {
+    "title": "Baseline and variability · answer and explain",
+    "explanation": "The denominator shows sample size; repeats show whether outputs change.\n\nTempting mistake: A 70% score means the next answer is certainly correct.",
+    "speaker_notes": "TEACHER SCRIPT — REVEAL. Return to the earlier choice. Explain the correct answer and why the tempting claim fails. Ask one learner to say the answer in a single sentence without reading it. This week’s case is: A student asks whether a fictional college reimburses a late bus ticket. The visible slide states: The denominator shows sample size; repeats show whether outputs change.\n\nTempting mistake: A 70% score means the next answer is certainly correct. The earlier question was Why record the denominator and repeats? Ask how this differs from the wrong claim. The target is: Separate a model from the application that checks and delivers its output. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "reveal",
+      "items": [
+        "A 70% score means the next answer is certainly correct.",
+        "The denominator shows sample size; repeats show whether outputs change."
+      ],
+      "caption": "One short sample cannot estimate performance in all future situations."
+    },
+    "teaching_stage": "reveal"
+  },
+  "s28": {
+    "title": "Evidence trail: input → result",
+    "explanation": "Q: Is a late bus ticket reimbursed?\n\nA: No; travel is not reimbursed [P1].",
+    "speaker_notes": "TEACHER SCRIPT — WORKED. Work the specific numbers or source wording aloud. Give students thirty seconds to write a conclusion, then ask which source line or calculation supports it. This week’s case is: A student asks whether a fictional college reimburses a late bus ticket. The visible slide states: Q: Is a late bus ticket reimbursed?\n\nA: No; travel is not reimbursed [P1]. Have one student point to an exact source word or number for each conclusion. The target is: Separate a model from the application that checks and delivers its output. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "work",
+      "items": [
+        "Policy P1 says student travel is not reimbursed.",
+        "Q: Is a late bus ticket reimbursed?",
+        "A: No; travel is not reimbursed [P1]."
+      ]
+    },
+    "teaching_stage": "worked"
+  },
+  "s29": {
+    "title": "Notebook: run the prepared example",
+    "explanation": "Run the ten-case baseline and change a single answer.\n\nRead the original output before editing.",
+    "speaker_notes": "TEACHER SCRIPT — PRACTICE. Open the matching notebook and demonstrate the first run. Have learners predict one change, run only that change, and record input, setting, output and an error explanation. This week’s case is: A student asks whether a fictional college reimburses a late bus ticket. The visible slide states: Run the ten-case baseline and change a single answer.\n\nRead the original output before editing. Use Week_01_Lab.ipynb. This lab is a prepared classroom demonstration with its limitations documented. The target is: Separate a model from the application that checks and delivers its output. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "Read ten short questions and their reference answers",
+        "Run the supplied rule-based classroom stand-in",
+        "Mark each answer correct, incorrect or unsupported",
+        "Repeat two questions and compare what changed"
+      ]
+    },
+    "teaching_stage": "practice"
+  },
+  "s30": {
+    "title": "Find the input and check in Python",
+    "explanation": "Locate the supplied input, the transformation, the checking line and the printed result.",
+    "speaker_notes": "TEACHER SCRIPT — PRACTICE. Open the matching notebook and demonstrate the first run. Have learners predict one change, run only that change, and record input, setting, output and an error explanation. This week’s case is: A student asks whether a fictional college reimburses a late bus ticket. The visible slide states: Locate the supplied input, the transformation, the checking line and the printed result. The weekly lab change is: Change one answer to an unsupported claim and measure the score again. The target is: Separate a model from the application that checks and delivers its output. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Input data",
+        "Python operation",
+        "Check",
+        "Recorded result"
+      ]
+    },
+    "teaching_stage": "practice"
+  },
+  "s31": {
+    "title": "Predict one controlled change",
+    "explanation": "Change one answer to an unsupported claim and measure the score again.\n\nWhat should change in the result? What stays fixed?",
+    "speaker_notes": "TEACHER SCRIPT — PRACTICE. Open the matching notebook and demonstrate the first run. Have learners predict one change, run only that change, and record input, setting, output and an error explanation. This week’s case is: A student asks whether a fictional college reimburses a late bus ticket. The visible slide states: Change one answer to an unsupported claim and measure the score again.\n\nWhat should change in the result? What stays fixed? Ask learners to write their prediction before rerunning the cell. The target is: Separate a model from the application that checks and delivers its output. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "compare",
+      "left": "Before: original case",
+      "right": "After: one change",
+      "caption": "Keep all other inputs fixed."
+    },
+    "teaching_stage": "practice"
+  },
+  "s32": {
+    "title": "Run, compare and record",
+    "explanation": "Record the input, the one changed setting, the observed result and a reason for any difference.",
+    "speaker_notes": "TEACHER SCRIPT — PRACTICE. Open the matching notebook and demonstrate the first run. Have learners predict one change, run only that change, and record input, setting, output and an error explanation. This week’s case is: A student asks whether a fictional college reimburses a late bus ticket. The visible slide states: Record the input, the one changed setting, the observed result and a reason for any difference. The required evidence is: Ten-case answer table with one error analysis. The target is: Separate a model from the application that checks and delivers its output. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "table",
+      "rows": [
+        [
+          "Input",
+          "Setting",
+          "Result"
+        ],
+        [
+          "Original",
+          "baseline",
+          "record"
+        ],
+        [
+          "Changed",
+          "one edit",
+          "compare"
+        ]
+      ]
+    },
+    "teaching_stage": "practice"
+  },
+  "s33": {
+    "title": "Measure without hiding the denominator",
+    "explanation": "Correct supported answers / 10 questions\n\nWrite the numerator, denominator and one failure case.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: A student asks whether a fictional college reimburses a late bus ticket. The visible slide states: Correct supported answers / 10 questions\n\nWrite the numerator, denominator and one failure case. Where a measure is qualitative, show the concrete source comparison. Example: A: No; travel is not reimbursed [P1]. The target is: Separate a model from the application that checks and delivers its output. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Define success",
+        "Count successes",
+        "Count cases",
+        "Inspect errors"
+      ]
+    },
+    "teaching_stage": "check"
+  },
+  "s34": {
+    "title": "Error detective: find the layer",
+    "explanation": "Plausible wrong claim: A fluent answer is evidence that it is correct.\n\nCorrect it using the case evidence.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: A student asks whether a fictional college reimburses a late bus ticket. The visible slide states: Plausible wrong claim: A fluent answer is evidence that it is correct.\n\nCorrect it using the case evidence. The correction is Fluency is a property of wording. Check the actual claim against the policy text. The target is: Separate a model from the application that checks and delivers its output. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "reveal",
+      "items": [
+        "A fluent answer is evidence that it is correct.",
+        "Fluency is a property of wording. Check the actual claim against the policy text."
+      ],
+      "caption": "Name a test that would catch this failure."
+    },
+    "teaching_stage": "check"
+  },
+  "s35": {
+    "title": "Transfer to a new situation",
+    "explanation": "The assistant repeats the answer twice, but one version invents an exception. Which answer belongs in the ten-case baseline?\n\nExplain which source or test would settle it.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: A student asks whether a fictional college reimburses a late bus ticket. The visible slide states: The assistant repeats the answer twice, but one version invents an exception. Which answer belongs in the ten-case baseline?\n\nExplain which source or test would settle it. This is a fresh scenario, so ask for a reason before accepting either short answer. The target is: Separate a model from the application that checks and delivers its output. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "Use the visible evidence",
+        "Flag missing or unsafe evidence"
+      ]
+    },
+    "teaching_stage": "check"
+  },
+  "s36": {
+    "title": "Explain it to a partner",
+    "explanation": "Without reading the slide, name the input, one processing step and the check. Your partner should ask “How do you know?”",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: A student asks whether a fictional college reimburses a late bus ticket. The visible slide states: Without reading the slide, name the input, one processing step and the check. Your partner should ask “How do you know?” Listen for a causal explanation and one limitation, then revisit a difficult arrow on the board. The target is: Separate a model from the application that checks and delivers its output. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Student question",
+        "Retrieve policy P1",
+        "Check citation"
+      ]
+    },
+    "teaching_stage": "check"
+  },
+  "s37": {
+    "title": "Exam rehearsal · explain and apply",
+    "explanation": "Explain generation versus prediction with one example of each.\n\nWrite a short answer, then compare with the guide.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: A student asks whether a fictional college reimburses a late bus ticket. The visible slide states: Explain generation versus prediction with one example of each.\n\nWrite a short answer, then compare with the guide. Model answer after discussion: Predict whether an email is spam: a label. Generate a reply: new text. Both use learned patterns and both can be wrong. Practice marks: 4. The target is: Separate a model from the application that checks and delivers its output. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "State the core idea",
+        "Use a case detail or calculation",
+        "Add a limitation",
+        "Compare with the Word guide"
+      ]
+    },
+    "teaching_stage": "check"
+  },
+  "s38": {
+    "title": "Exam rehearsal · explain and apply",
+    "explanation": "Seven of ten answers are correct and supported. Calculate accuracy and name a missing check.\n\nWrite a short answer, then compare with the guide.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: A student asks whether a fictional college reimburses a late bus ticket. The visible slide states: Seven of ten answers are correct and supported. Calculate accuracy and name a missing check.\n\nWrite a short answer, then compare with the guide. Model answer after discussion: 7/10 = 70%. Also check permissions, unsupported claims or repeated-run variation. Practice marks: 4. The target is: Separate a model from the application that checks and delivers its output. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "State the core idea",
+        "Use a case detail or calculation",
+        "Add a limitation",
+        "Compare with the Word guide"
+      ]
+    },
+    "teaching_stage": "check"
+  },
+  "s39": {
+    "title": "What to hand in",
+    "explanation": "Ten-case answer table with one error analysis.\n\nInclude the one changed input and an error explanation.",
+    "speaker_notes": "TEACHER SCRIPT — PRACTICE. Open the matching notebook and demonstrate the first run. Have learners predict one change, run only that change, and record input, setting, output and an error explanation. This week’s case is: A student asks whether a fictional college reimburses a late bus ticket. The visible slide states: Ten-case answer table with one error analysis.\n\nInclude the one changed input and an error explanation. This weekly evidence receives formative feedback according to the module sequence; refer to the assessment brief for graded work. The target is: Separate a model from the application that checks and delivers its output. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "Original run",
+        "One changed input",
+        "Comparison",
+        "Explanation + source"
+      ]
+    },
+    "teaching_stage": "practice"
+  },
+  "s40": {
+    "title": "Three ideas to recall next week",
+    "explanation": "A polished reply is a draft; trace its claim back to P1.\n\nRead the linked official sources in the Word guide and redraw one diagram from memory.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: A student asks whether a fictional college reimburses a late bus ticket. The visible slide states: A polished reply is a draft; trace its claim back to P1.\n\nRead the linked official sources in the Word guide and redraw one diagram from memory. Return to the opening vote and ask whether the evidence changed anyone’s mind. The next week builds on this outcome: Separate a model from the application that checks and delivers its output. The target is: Separate a model from the application that checks and delivers its output. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "Generation and prediction",
+        "Model and system",
+        "Prompt and context",
+        "Baseline and variability"
+      ]
+    },
+    "teaching_stage": "check"
+  }
+}

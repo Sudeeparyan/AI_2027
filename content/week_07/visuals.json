@@ -1,0 +1,37 @@
+{
+  "term": [
+    [
+      "Question",
+      "Retrieve passages",
+      "Answer with source"
+    ],
+    [
+      "Answer claim",
+      "Cited passage",
+      "Check entailment"
+    ],
+    [
+      "No relevant source",
+      "Abstain",
+      "Explain missing evidence"
+    ],
+    [
+      "20 practice cases",
+      "Choose setting",
+      "10 final cases"
+    ]
+  ],
+  "path": [
+    "Question",
+    "Role filter",
+    "Retrieve P3",
+    "Extract answer",
+    "Verify support"
+  ],
+  "compare": [
+    "Answer with source",
+    "Unsupported question"
+  ],
+  "good": "One extension [P3]",
+  "bad": "Invent an extension rule"
+}

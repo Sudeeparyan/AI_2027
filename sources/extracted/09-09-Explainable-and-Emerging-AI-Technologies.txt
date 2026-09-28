@@ -1,0 +1,96 @@
+Section 7: Module Descriptors
+Explainable and Emerging AI Technologies
+Note: The hours outlined in the table above represent the base mode of full-time on campus delivery.  This programme will also be available through part-time online delivery.  The required hours of learning effort for this delivery mode are available in the Programme Schedule
+
+Note: The assessment techniques outlined in the table above represent the base mode of full-time on campus delivery.  This programme will also be available through part-time online delivery. The assessment techniques for this delivery mode are available in the Programme Schedule.
+
+
+
+
+
+Note: The assessment strategy outlined in the table above represent the base mode of full-time on campus delivery.  This programme will also be available through part-time online delivery.  The assessment strategy for this delivery mode is available in the Programme Schedule
+
+
+7.1	Module Overview (copy and paste for other modules)
+Module Number |  | Module Title | Explainable and Emerging AI Technologies
+Stage of Principal Programme | 1 | Semester
+(if applicable) | 3 | Duration. (Weeks F/T) | 12 | ECTS | 5
+Mandatory / Elective (M/E) | M | Hours of Learner Effort / Week | 3 | 
+Analysis of required hours of learning effort
+Teaching and Learning Modalities | ✔if relevant to this module | Approx. proportion of total (hours)
+Direct Contact Hours
+On-site face-to-face  | ✔ |  36
+Synchronous online | 
+Synchronous blended | 
+Indirect/Non-contact Hours
+Asynchronous  | 
+Independent Learning  |  | 89
+Work Based | 
+Other (Identify) | 
+Total | 125
+Pre-Requisite Module, if any.  Module Number and Title | N/A
+Co-Requisite Module, if any.  Module Number and Title | N/A
+Maximum number of learners per instance of the module | 70
+Specification of the qualifications (academic, pedagogical and professional/occupational) and experience required of staff working in this module.
+Role e.g., 
+Tutor, Mentor, Lecturer, Research Supervisor, etc. | 
+Qualifications & experience required | 
+Staff (X) : Learner (Y) Ratio  
+Express as X:Y
+Lecturer | Master’s and/or PhD degree in a numerate / scientific discipline, with experience in process automation and artificial intelligence. May have industry experience also. | 1:70
+Tutor | Master’s degree in a computing or cognate discipline. May have industry experience also.  | 1:25
+Assessment Techniques – percentage contribution
+Continuous Assessment  | 50% | Proctored Exam – in person |  | Practical Skills Based
+Project | 50% | Proctored Exam - online |  | Work Based
+Capstone modules (Yes/No)? | No | If Yes, provide details | 
+7.2	Minimum Intended Module Learning Outcomes (MIMLOs)
+MIMLO
+On successful completion of this module a learner will be able to: | Related MIPLO #
+Analyse and interpret emerging AI technologies and their system-level impacts on safety, society, and sustainability. | 1, 3, 4, 5, 6
+Apply advanced XAI, robustness, and monitoring techniques to evaluate the behaviour, limitations, and risks of complex AI systems. | 1, 2, 3, 5, 6
+Design responsible AI solutions that integrate compliance requirements, human-centred controls, safety engineering, and sustainability strategies. | 1, 2, 3, 5, 6
+Produce and communicate professional assurance artefacts demonstrating operational readiness and trustworthy AI integration at system scale. | 2, 3, 4, 5, 6
+
+
+7.3	Indicative Module Content, Organisation and Structure
+
+
+7.4	Work based learning and practice-placement (if applicable)
+N/A
+
+7.5	Specific module resources required (if applicable)
+Learners will require access to a high-level programming language such as Python, and software frameworks that support distributed data processing, scalable analytics, machine learning, and cloud-based computation.
+Access to NCI’s Student Portal (e.g., Moodle, Helpdesk, Library resources, student email, and timetables) 
+Access to high speed Wi-Fi network. 
+BYOD laptop Requirements: 16GB of RAM (32GB recommended); a 64-bit x86 processor (Intel i7 or superior); 100+ GB of hard disk; and a recent installed release of Linux, Mac OS or Windows operating system 
+Laptop charging points 
+Library resources (see further details below)
+
+7.6	Application of programme teaching, learning and assessment strategies to this module
+Teaching & Learning:
+The learning strategy combines lectures, demonstrations, and practical explainable and emerging AI technologies to reinforce conceptual understanding through application. The module adopts a learner-centred approach, encouraging students to take ownership of their practical work while receiving structured guidance from instructors. Sessions are interactive and project-driven, providing opportunities for learning by doing, collaborative problem-solving, and applied experimentation in XAI.
+Assessment:
+Assessment in this module is by continuous assessment (50%) and project (50%).
+The continuous assessment will typically consist of hands-on labs and mini-projects where students critically apply concepts of explainable AI, system-level XAI, safety, human-centred oversight, sustainability, and compliance. Students will produce micro deliverables such as model cards, counterfactual explanation tables, SHAP/LIME visualisations, audit logs, drift monitoring reports, and energy usage charts, demonstrating both technical accuracy and responsible AI practices.
+The project component will require students to design, implement, and evaluate a system-level Trustworthy AI assurance plan for a real or simulated AI application. Deliverables include a technical report, supporting artefacts (e.g., lineage logs, drift metrics, energy measurements, safety audits), and a presentation or demonstration of the operational pipeline. This structure ensures that students can understand core principles, critically evaluate AI systems, and apply them responsibly in realistic deployment scenarios.
+Re-assessment:
+Reassessment of this module will consist of an individual project re-submission that assesses all module learning outcomes. Students will be given an opportunity to complete the reassessment project at specified times during the academic year, demonstrating their understanding and practical application of scalable analytics and cloud computing concepts.
+7.7	Summative Assessment Strategy for this module
+MIMLOs | Technique(s) | Weighting
+1, 2 | Group Project | 50%
+1, 2, 3, 4 | Individual Project | 50%
+7.8	Sample Assessment Materials
+Sample assessment materials can be found in Appendix 
+7.9	Indicative reading lists and other information resources
+Recommended:
+Tim Frick. (2016), Designing for Sustainability, O'Reilly Media, p.250, [ISBN: 978-1491935774].
+Peter Dauvergne. (2020), AI in the Wild, MIT Press, p.272, [ISBN: 978-0262539333].
+Mehta, Mayuri & Palade, Vasile & Chatterjee, Indranath. (2022). Explainable AI: Foundations, Methodologies and Applications. 10.1007/978-3-031-12807-3. 
+Supplementary:
+Strubell, E., Ganesh, A., & McCallum, A.. (2019), Energy and policy considerations for deep learning in NLP. arXiv:1906.02243,
+https://arxiv.org/abs/1906.02243
+Holstein, K., Vaughan, J. W., Daumé, H., Dudik, M., & Wallach, H.. (2019), Improving fairness in machine learning systems: What do industry practitioners need? arXiv:1812.05239 [cs].,
+https://arxiv.org/abs/1812.05239
+Westerlund, M.. (2019), The emergence of deepfake technology: A review. Technology Innovation Management Review, 9(11), 40-53. DOI: 10.22215/timreview/1282.
+Pantserev, K.A.. (2020), The malicious use of AI-based deepfake technology as the new threat to psychological security and political stability. In: Jahankhani H., Kendzierskyj S., Chelvachandran N., Ibarra J. (eds) Cyber Defence in the Age of AI, Smart Soc.
+Brundage, M., Avin, S., Clark, J., Toner, H., Eckersley, P., Garfinkel, B., Dafoe, A., Scharre, P., Zeitzoff,. (2018), The malicious use of artificial intelligence: Forecasting, prevention, and mitigation. arXiv:1802.07228 [cs]., https://arxiv.org/abs/1802.07228 

@@ -1,0 +1,46 @@
+{
+  "n": 10,
+  "title": "Working with an image or document",
+  "goal": "Distinguish reading from independently checking a document value.",
+  "case": "A synthetic invoice image has fields supplied by a prepared transcription.",
+  "terms": [
+    [
+      "Multimodal input",
+      "A system may process text, images or other signals. Here the transcription stands in for an image reader."
+    ],
+    [
+      "Extraction",
+      "Read fields present in the document and retain a pointer to the source."
+    ],
+    [
+      "Verification",
+      "Recalculate totals and compare against the listed values."
+    ],
+    [
+      "Uncertainty",
+      "Mark unreadable or absent fields for review rather than inventing a value."
+    ]
+  ],
+  "steps": [
+    "Inspect a synthetic source transcription",
+    "Extract amount, quantity, tax and stated total",
+    "Calculate the expected total independently",
+    "Flag mismatches and retain the source ID"
+  ],
+  "example": [
+    "Invoice shows 2 items at €20 plus €5 tax.",
+    "Calculated total is €45.",
+    "Listed total of €54 triggers review, even if transcription is syntactically valid."
+  ],
+  "misconception": "The notebook performs OCR on a real image.",
+  "correction": "This core lab uses prepared transcription to teach verification. Image/OCR integration is an optional extension.",
+  "change": "Correct the listed total and rerun the checker.",
+  "metric": "Number of correctly checked fields / fields reviewed",
+  "lab": "Check two synthetic invoices, including a mismatched total.",
+  "output": "Source-linked field table and calculation.",
+  "reading": [
+    "Google, Develop a generative AI application",
+    "OpenAI, Evaluation best practices"
+  ],
+  "code": "multimodal"
+}

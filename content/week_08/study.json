@@ -1,0 +1,46 @@
+{
+  "outcomes": "LO4, LO5",
+  "plain_explanation": "A tool has a name, expected arguments and a bounded operation. A workflow follows fixed code paths. An agent may choose its next step, but permissions and argument validation still belong to the application. Read-only calculations and record changes require different controls.",
+  "worked_example": "An eligible expense of 55 with a cap of 40 gives min(55,40)=40. Negative or nonfinite amounts are invalid. A separate mock request to change a payroll record must remain blocked until a trusted manager approval is recorded.",
+  "exam": [
+    {
+      "question": "What distinguishes a workflow from an agent?",
+      "model_answer": "A workflow follows predefined steps; an agent can select subsequent actions within allowed boundaries.",
+      "marks": 4
+    },
+    {
+      "question": "Calculate a reimbursement with eligible expense 55 and cap 40.",
+      "model_answer": "min(55,40)=40. Eligibility must already be established; the calculator does not decide it.",
+      "marks": 4
+    },
+    {
+      "question": "A model says approved. Is this enough to write a record?",
+      "model_answer": "No. A trusted approval check must authorize the specific action and arguments.",
+      "marks": 4
+    }
+  ],
+  "resources": [
+    {
+      "id": "O2",
+      "publisher": "OpenAI",
+      "title": "Safety in building agents",
+      "url": "https://developers.openai.com/api/docs/guides/agent-builder-safety",
+      "type": "Official guide",
+      "use": "Tool approvals, untrusted input and controls.",
+      "checked_date": "2026-09-28",
+      "verification": "Official page/search metadata reviewed"
+    },
+    {
+      "id": "N1",
+      "publisher": "NVIDIA",
+      "title": "Generative AI and LLM Learning Paths",
+      "url": "https://www.nvidia.com/en-us/learn/learning-path/generative-ai-llm/",
+      "type": "Training catalogue",
+      "use": "Optional deeper RAG, diffusion and deployment training; some courses require payment.",
+      "checked_date": "2026-09-28",
+      "verification": "Official page/search metadata reviewed"
+    }
+  ],
+  "study_task": "Draw the main diagram from memory, explain each arrow, then check it against the slides. Answer the three questions without notes before reading the model answers.",
+  "reference_note": "Selected source concepts inform the lesson. Examples, figures, questions and solutions are original classroom material; no exam questions are claimed to be official."
+}

@@ -1,0 +1,36 @@
+{
+  "term": [
+    [
+      "Policy PDF",
+      "Short passages",
+      "Source ID + version"
+    ],
+    [
+      "Question terms",
+      "Token overlap",
+      "Rank passages"
+    ],
+    [
+      "Question meaning",
+      "Numeric embedding",
+      "Vector similarity"
+    ],
+    [
+      "Student role",
+      "Filter allowed sources",
+      "Search results"
+    ]
+  ],
+  "path": [
+    "Five policies",
+    "Passage index",
+    "Role filter",
+    "Ranked evidence"
+  ],
+  "compare": [
+    "Keyword overlap",
+    "Meaning-aware retrieval"
+  ],
+  "good": "P2 found for a renewal question",
+  "bad": "Reveal staff-only P5"
+}

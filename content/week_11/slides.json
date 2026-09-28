@@ -1,0 +1,614 @@
+{
+  "s01": {
+    "title": "Week 11 · Testing and classroom delivery",
+    "explanation": "The failed classroom release\n\nVersion 2 answers faster but exposes one staff-only policy to a student. Would you release it?",
+    "speaker_notes": "TEACHER SCRIPT — OPEN. Show the visual for ten seconds, then ask for an initial decision. Do not reveal the answer yet. Ask a student to name the source or measurement that would change their mind. This week’s case is: A new policy-assistant version sometimes exposes a staff-only passage. The visible slide states: The failed classroom release\n\nVersion 2 answers faster but exposes one staff-only policy to a student. Would you release it? Reveal that the case will be revisited after four short concept cycles. The target is: Record a safe release decision with test and rollback evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "story",
+      "items": [
+        "The failed classroom release",
+        "What is known?",
+        "What must we check?"
+      ]
+    },
+    "teaching_stage": "open"
+  },
+  "s02": {
+    "title": "First vote: what would you do?",
+    "explanation": "Version 2 answers faster but exposes one staff-only policy to a student. Would you release it?\n\nChoose an initial answer and name one piece of evidence you need.",
+    "speaker_notes": "TEACHER SCRIPT — QUESTION. Take a show of hands for each choice before showing the mechanism. Ask pairs to defend a choice with evidence. Save the strongest wrong reason for the reveal later in this cycle. This week’s case is: A new policy-assistant version sometimes exposes a staff-only passage. The visible slide states: Version 2 answers faster but exposes one staff-only policy to a student. Would you release it?\n\nChoose an initial answer and name one piece of evidence you need. Accept reasonable uncertainty; record the initial votes to revisit at the end. The target is: Record a safe release decision with test and rollback evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "Accept the first plausible result",
+        "Check the source or measurement"
+      ]
+    },
+    "teaching_stage": "question"
+  },
+  "s03": {
+    "title": "The journey through today’s case",
+    "explanation": "We will predict, connect an analogy, trace a mechanism, work an example, then explain a decision.",
+    "speaker_notes": "TEACHER SCRIPT — OPEN. Show the visual for ten seconds, then ask for an initial decision. Do not reveal the answer yet. Ask a student to name the source or measurement that would change their mind. This week’s case is: A new policy-assistant version sometimes exposes a staff-only passage. The visible slide states: We will predict, connect an analogy, trace a mechanism, work an example, then explain a decision. Point to the four named ideas, then show where the notebook experiment fits. The target is: Record a safe release decision with test and rollback evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "Release gate",
+        "Filtered trace",
+        "Rollback",
+        "Cost per success"
+      ]
+    },
+    "teaching_stage": "open"
+  },
+  "s04": {
+    "title": "1. Predict · Release gate",
+    "explanation": "Can a faster answer override a failed access gate?\n\nMake a choice before we explain the diagram.",
+    "speaker_notes": "TEACHER SCRIPT — QUESTION. Take a show of hands for each choice before showing the mechanism. Ask pairs to defend a choice with evidence. Save the strongest wrong reason for the reveal later in this cycle. This week’s case is: A new policy-assistant version sometimes exposes a staff-only passage. The visible slide states: Can a faster answer override a failed access gate?\n\nMake a choice before we explain the diagram. The intended answer is No. The required access test must pass. The tempting claim is Most tests passing is enough to release. Do not show which card is correct until the reveal. The target is: Record a safe release decision with test and rollback evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "No. The required access test must pass.",
+        "Most tests passing is enough to release."
+      ]
+    },
+    "teaching_stage": "question"
+  },
+  "s05": {
+    "title": "Release gate · a familiar picture",
+    "explanation": "An aircraft checklist must pass every required item before departure.\n\nWhat matches our case, and where does the analogy stop?",
+    "speaker_notes": "TEACHER SCRIPT — ANALOGY. Begin with the familiar scene. Invite learners to describe each part in everyday language. Then ask where the comparison might fail before introducing the technical vocabulary. This week’s case is: A new policy-assistant version sometimes exposes a staff-only passage. The visible slide states: An aircraft checklist must pass every required item before departure.\n\nWhat matches our case, and where does the analogy stop? The boundary is: A checklist reduces known risk; it cannot prove zero future failures. The target is: Record a safe release decision with test and rollback evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "analogy",
+      "items": [
+        "Candidate version",
+        "Required tests",
+        "Release"
+      ],
+      "caption": "An aircraft checklist must pass every required item before departure."
+    },
+    "teaching_stage": "analogy"
+  },
+  "s06": {
+    "title": "Release gate · map the parts",
+    "explanation": "Match each everyday part to the technical part.\n\nAnalogy limit: A checklist reduces known risk; it cannot prove zero future failures.",
+    "speaker_notes": "TEACHER SCRIPT — MAPPING. Point from each familiar element to the corresponding technical element. Have students cover the right column and reconstruct the three matches. Read the limitation aloud. This week’s case is: A new policy-assistant version sometimes exposes a staff-only passage. The visible slide states: Match each everyday part to the technical part.\n\nAnalogy limit: A checklist reduces known risk; it cannot prove zero future failures. The three precise mappings are [['Candidate version', 'aircraft'], ['Required tests', 'checklist'], ['Release', 'departure decision']]. The target is: Record a safe release decision with test and rollback evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "map",
+      "pairs": [
+        [
+          "Candidate version",
+          "aircraft"
+        ],
+        [
+          "Required tests",
+          "checklist"
+        ],
+        [
+          "Release",
+          "departure decision"
+        ]
+      ]
+    },
+    "teaching_stage": "mapping"
+  },
+  "s07": {
+    "title": "Release gate · how it works",
+    "explanation": "Require evidence that inputs, permissions, output and failure handling meet a defined threshold.\n\nTrace the arrows from left to right.",
+    "speaker_notes": "TEACHER SCRIPT — MECHANISM. Trace every arrow slowly from the input to the output. Ask what information crosses the boundary at each arrow. Pause if students confuse a simplified notebook with a trained model. This week’s case is: A new policy-assistant version sometimes exposes a staff-only passage. The visible slide states: Require evidence that inputs, permissions, output and failure handling meet a defined threshold.\n\nTrace the arrows from left to right. The weekly example is: Candidate v2 fails staff access, so the release decision is “block” even if other scores improve. State what the analogy does not explain: A checklist reduces known risk; it cannot prove zero future failures. The target is: Record a safe release decision with test and rollback evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Candidate config",
+        "Required tests",
+        "Release decision"
+      ]
+    },
+    "teaching_stage": "mechanism"
+  },
+  "s08": {
+    "title": "Release gate · work one case",
+    "explanation": "Candidate v2 fails staff access, so the release decision is “block” even if other scores improve.\n\nPoint to the evidence before giving your conclusion.",
+    "speaker_notes": "TEACHER SCRIPT — WORKED. Work the specific numbers or source wording aloud. Give students thirty seconds to write a conclusion, then ask which source line or calculation supports it. This week’s case is: A new policy-assistant version sometimes exposes a staff-only passage. The visible slide states: Candidate v2 fails staff access, so the release decision is “block” even if other scores improve.\n\nPoint to the evidence before giving your conclusion. The expected reasoning concludes: No. The required access test must pass. Distinguish measured results from illustrative numbers. The target is: Record a safe release decision with test and rollback evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "work",
+      "items": [
+        "Candidate v2 fails staff access, so the release decision is “block” even if other scores improve.",
+        "Can a faster answer override a failed access gate?",
+        "No. The required access test must pass."
+      ]
+    },
+    "teaching_stage": "worked"
+  },
+  "s09": {
+    "title": "Release gate · answer and explain",
+    "explanation": "No. The required access test must pass.\n\nTempting mistake: Most tests passing is enough to release.",
+    "speaker_notes": "TEACHER SCRIPT — REVEAL. Return to the earlier choice. Explain the correct answer and why the tempting claim fails. Ask one learner to say the answer in a single sentence without reading it. This week’s case is: A new policy-assistant version sometimes exposes a staff-only passage. The visible slide states: No. The required access test must pass.\n\nTempting mistake: Most tests passing is enough to release. The earlier question was Can a faster answer override a failed access gate? Ask how this differs from the wrong claim. The target is: Record a safe release decision with test and rollback evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "reveal",
+      "items": [
+        "Most tests passing is enough to release.",
+        "No. The required access test must pass."
+      ],
+      "caption": "A checklist reduces known risk; it cannot prove zero future failures."
+    },
+    "teaching_stage": "reveal"
+  },
+  "s10": {
+    "title": "2. Predict · Filtered trace",
+    "explanation": "Which fields help investigate without exposing private text?\n\nMake a choice before we explain the diagram.",
+    "speaker_notes": "TEACHER SCRIPT — QUESTION. Take a show of hands for each choice before showing the mechanism. Ask pairs to defend a choice with evidence. Save the strongest wrong reason for the reveal later in this cycle. This week’s case is: A new policy-assistant version sometimes exposes a staff-only passage. The visible slide states: Which fields help investigate without exposing private text?\n\nMake a choice before we explain the diagram. The intended answer is Safe identifiers, role, source ID and decision. The tempting claim is A useful trace must store the full private prompt. Do not show which card is correct until the reveal. The target is: Record a safe release decision with test and rollback evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "Safe identifiers, role, source ID and decision.",
+        "A useful trace must store the full private prompt."
+      ]
+    },
+    "teaching_stage": "question"
+  },
+  "s11": {
+    "title": "Filtered trace · a familiar picture",
+    "explanation": "A shipping receipt records what happened without copying the private parcel.\n\nWhat matches our case, and where does the analogy stop?",
+    "speaker_notes": "TEACHER SCRIPT — ANALOGY. Begin with the familiar scene. Invite learners to describe each part in everyday language. Then ask where the comparison might fail before introducing the technical vocabulary. This week’s case is: A new policy-assistant version sometimes exposes a staff-only passage. The visible slide states: A shipping receipt records what happened without copying the private parcel.\n\nWhat matches our case, and where does the analogy stop? The boundary is: Aggressive filtering can hide useful debug details; keep safe IDs and event type. The target is: Record a safe release decision with test and rollback evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "analogy",
+      "items": [
+        "Event",
+        "Private text",
+        "Receipt"
+      ],
+      "caption": "A shipping receipt records what happened without copying the private parcel."
+    },
+    "teaching_stage": "analogy"
+  },
+  "s12": {
+    "title": "Filtered trace · map the parts",
+    "explanation": "Match each everyday part to the technical part.\n\nAnalogy limit: Aggressive filtering can hide useful debug details; keep safe IDs and event type.",
+    "speaker_notes": "TEACHER SCRIPT — MAPPING. Point from each familiar element to the corresponding technical element. Have students cover the right column and reconstruct the three matches. Read the limitation aloud. This week’s case is: A new policy-assistant version sometimes exposes a staff-only passage. The visible slide states: Match each everyday part to the technical part.\n\nAnalogy limit: Aggressive filtering can hide useful debug details; keep safe IDs and event type. The three precise mappings are [['Event', 'trace record'], ['Private text', 'removed content'], ['Receipt', 'filtered log']]. The target is: Record a safe release decision with test and rollback evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "map",
+      "pairs": [
+        [
+          "Event",
+          "trace record"
+        ],
+        [
+          "Private text",
+          "removed content"
+        ],
+        [
+          "Receipt",
+          "filtered log"
+        ]
+      ]
+    },
+    "teaching_stage": "mapping"
+  },
+  "s13": {
+    "title": "Filtered trace · how it works",
+    "explanation": "Log enough to debug while omitting unnecessary personal data and credentials.\n\nTrace the arrows from left to right.",
+    "speaker_notes": "TEACHER SCRIPT — MECHANISM. Trace every arrow slowly from the input to the output. Ask what information crosses the boundary at each arrow. Pause if students confuse a simplified notebook with a trained model. This week’s case is: A new policy-assistant version sometimes exposes a staff-only passage. The visible slide states: Log enough to debug while omitting unnecessary personal data and credentials.\n\nTrace the arrows from left to right. The weekly example is: Log request ID, role, policy ID and outcome; omit student question text and secret key. State what the analogy does not explain: Aggressive filtering can hide useful debug details; keep safe IDs and event type. The target is: Record a safe release decision with test and rollback evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Event",
+        "Remove private text",
+        "Safe trace"
+      ]
+    },
+    "teaching_stage": "mechanism"
+  },
+  "s14": {
+    "title": "Filtered trace · work one case",
+    "explanation": "Log request ID, role, policy ID and outcome; omit student question text and secret key.\n\nPoint to the evidence before giving your conclusion.",
+    "speaker_notes": "TEACHER SCRIPT — WORKED. Work the specific numbers or source wording aloud. Give students thirty seconds to write a conclusion, then ask which source line or calculation supports it. This week’s case is: A new policy-assistant version sometimes exposes a staff-only passage. The visible slide states: Log request ID, role, policy ID and outcome; omit student question text and secret key.\n\nPoint to the evidence before giving your conclusion. The expected reasoning concludes: Safe identifiers, role, source ID and decision. Distinguish measured results from illustrative numbers. The target is: Record a safe release decision with test and rollback evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "work",
+      "items": [
+        "Log request ID, role, policy ID and outcome; omit student question text and secret key.",
+        "Which fields help investigate without exposing private text?",
+        "Safe identifiers, role, source ID and decision."
+      ]
+    },
+    "teaching_stage": "worked"
+  },
+  "s15": {
+    "title": "Filtered trace · answer and explain",
+    "explanation": "Safe identifiers, role, source ID and decision.\n\nTempting mistake: A useful trace must store the full private prompt.",
+    "speaker_notes": "TEACHER SCRIPT — REVEAL. Return to the earlier choice. Explain the correct answer and why the tempting claim fails. Ask one learner to say the answer in a single sentence without reading it. This week’s case is: A new policy-assistant version sometimes exposes a staff-only passage. The visible slide states: Safe identifiers, role, source ID and decision.\n\nTempting mistake: A useful trace must store the full private prompt. The earlier question was Which fields help investigate without exposing private text? Ask how this differs from the wrong claim. The target is: Record a safe release decision with test and rollback evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "reveal",
+      "items": [
+        "A useful trace must store the full private prompt.",
+        "Safe identifiers, role, source ID and decision."
+      ],
+      "caption": "Aggressive filtering can hide useful debug details; keep safe IDs and event type."
+    },
+    "teaching_stage": "reveal"
+  },
+  "s16": {
+    "title": "3. Predict · Rollback",
+    "explanation": "What must be checked after restoring v1?\n\nMake a choice before we explain the diagram.",
+    "speaker_notes": "TEACHER SCRIPT — QUESTION. Take a show of hands for each choice before showing the mechanism. Ask pairs to defend a choice with evidence. Save the strongest wrong reason for the reveal later in this cycle. This week’s case is: A new policy-assistant version sometimes exposes a staff-only passage. The visible slide states: What must be checked after restoring v1?\n\nMake a choice before we explain the diagram. The intended answer is Re-run the critical access and answer checks. The tempting claim is Rollback means changing only the visible version label. Do not show which card is correct until the reveal. The target is: Record a safe release decision with test and rollback evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "Re-run the critical access and answer checks.",
+        "Rollback means changing only the visible version label."
+      ]
+    },
+    "teaching_stage": "question"
+  },
+  "s17": {
+    "title": "Rollback · a familiar picture",
+    "explanation": "A theater switches back to the last working lighting cue.\n\nWhat matches our case, and where does the analogy stop?",
+    "speaker_notes": "TEACHER SCRIPT — ANALOGY. Begin with the familiar scene. Invite learners to describe each part in everyday language. Then ask where the comparison might fail before introducing the technical vocabulary. This week’s case is: A new policy-assistant version sometimes exposes a staff-only passage. The visible slide states: A theater switches back to the last working lighting cue.\n\nWhat matches our case, and where does the analogy stop? The boundary is: Rollback needs tested artifacts and compatible data; rehearsal matters. The target is: Record a safe release decision with test and rollback evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "analogy",
+      "items": [
+        "New cue",
+        "Old cue",
+        "Switch"
+      ],
+      "caption": "A theater switches back to the last working lighting cue."
+    },
+    "teaching_stage": "analogy"
+  },
+  "s18": {
+    "title": "Rollback · map the parts",
+    "explanation": "Match each everyday part to the technical part.\n\nAnalogy limit: Rollback needs tested artifacts and compatible data; rehearsal matters.",
+    "speaker_notes": "TEACHER SCRIPT — MAPPING. Point from each familiar element to the corresponding technical element. Have students cover the right column and reconstruct the three matches. Read the limitation aloud. This week’s case is: A new policy-assistant version sometimes exposes a staff-only passage. The visible slide states: Match each everyday part to the technical part.\n\nAnalogy limit: Rollback needs tested artifacts and compatible data; rehearsal matters. The three precise mappings are [['New cue', 'candidate version'], ['Old cue', 'tested configuration'], ['Switch', 'rollback']]. The target is: Record a safe release decision with test and rollback evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "map",
+      "pairs": [
+        [
+          "New cue",
+          "candidate version"
+        ],
+        [
+          "Old cue",
+          "tested configuration"
+        ],
+        [
+          "Switch",
+          "rollback"
+        ]
+      ]
+    },
+    "teaching_stage": "mapping"
+  },
+  "s19": {
+    "title": "Rollback · how it works",
+    "explanation": "Restore a previously tested configuration if a new version fails.\n\nTrace the arrows from left to right.",
+    "speaker_notes": "TEACHER SCRIPT — MECHANISM. Trace every arrow slowly from the input to the output. Ask what information crosses the boundary at each arrow. Pause if students confuse a simplified notebook with a trained model. This week’s case is: A new policy-assistant version sometimes exposes a staff-only passage. The visible slide states: Restore a previously tested configuration if a new version fails.\n\nTrace the arrows from left to right. The weekly example is: After v2 leaks P5, restore v1 with its policy index and confirm the student test passes. State what the analogy does not explain: Rollback needs tested artifacts and compatible data; rehearsal matters. The target is: Record a safe release decision with test and rollback evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Failed candidate",
+        "Prior tested version",
+        "Restore service"
+      ]
+    },
+    "teaching_stage": "mechanism"
+  },
+  "s20": {
+    "title": "Rollback · work one case",
+    "explanation": "After v2 leaks P5, restore v1 with its policy index and confirm the student test passes.\n\nPoint to the evidence before giving your conclusion.",
+    "speaker_notes": "TEACHER SCRIPT — WORKED. Work the specific numbers or source wording aloud. Give students thirty seconds to write a conclusion, then ask which source line or calculation supports it. This week’s case is: A new policy-assistant version sometimes exposes a staff-only passage. The visible slide states: After v2 leaks P5, restore v1 with its policy index and confirm the student test passes.\n\nPoint to the evidence before giving your conclusion. The expected reasoning concludes: Re-run the critical access and answer checks. Distinguish measured results from illustrative numbers. The target is: Record a safe release decision with test and rollback evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "work",
+      "items": [
+        "After v2 leaks P5, restore v1 with its policy index and confirm the student test passes.",
+        "What must be checked after restoring v1?",
+        "Re-run the critical access and answer checks."
+      ]
+    },
+    "teaching_stage": "worked"
+  },
+  "s21": {
+    "title": "Rollback · answer and explain",
+    "explanation": "Re-run the critical access and answer checks.\n\nTempting mistake: Rollback means changing only the visible version label.",
+    "speaker_notes": "TEACHER SCRIPT — REVEAL. Return to the earlier choice. Explain the correct answer and why the tempting claim fails. Ask one learner to say the answer in a single sentence without reading it. This week’s case is: A new policy-assistant version sometimes exposes a staff-only passage. The visible slide states: Re-run the critical access and answer checks.\n\nTempting mistake: Rollback means changing only the visible version label. The earlier question was What must be checked after restoring v1? Ask how this differs from the wrong claim. The target is: Record a safe release decision with test and rollback evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "reveal",
+      "items": [
+        "Rollback means changing only the visible version label.",
+        "Re-run the critical access and answer checks."
+      ],
+      "caption": "Rollback needs tested artifacts and compatible data; rehearsal matters."
+    },
+    "teaching_stage": "reveal"
+  },
+  "s22": {
+    "title": "4. Predict · Cost per success",
+    "explanation": "Why divide by eight rather than ten?\n\nMake a choice before we explain the diagram.",
+    "speaker_notes": "TEACHER SCRIPT — QUESTION. Take a show of hands for each choice before showing the mechanism. Ask pairs to defend a choice with evidence. Save the strongest wrong reason for the reveal later in this cycle. This week’s case is: A new policy-assistant version sometimes exposes a staff-only passage. The visible slide states: Why divide by eight rather than ten?\n\nMake a choice before we explain the diagram. The intended answer is Only eight runs delivered the defined successful outcome. The tempting claim is Cheapest run is automatically best delivery. Do not show which card is correct until the reveal. The target is: Record a safe release decision with test and rollback evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "Only eight runs delivered the defined successful outcome.",
+        "Cheapest run is automatically best delivery."
+      ]
+    },
+    "teaching_stage": "question"
+  },
+  "s23": {
+    "title": "Cost per success · a familiar picture",
+    "explanation": "A restaurant compares the full meal bill with meals actually served.\n\nWhat matches our case, and where does the analogy stop?",
+    "speaker_notes": "TEACHER SCRIPT — ANALOGY. Begin with the familiar scene. Invite learners to describe each part in everyday language. Then ask where the comparison might fail before introducing the technical vocabulary. This week’s case is: A new policy-assistant version sometimes exposes a staff-only passage. The visible slide states: A restaurant compares the full meal bill with meals actually served.\n\nWhat matches our case, and where does the analogy stop? The boundary is: A very small sample can make the estimate noisy; state the denominator. The target is: Record a safe release decision with test and rollback evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "analogy",
+      "items": [
+        "Full bill",
+        "Served meals",
+        "Unit cost"
+      ],
+      "caption": "A restaurant compares the full meal bill with meals actually served."
+    },
+    "teaching_stage": "analogy"
+  },
+  "s24": {
+    "title": "Cost per success · map the parts",
+    "explanation": "Match each everyday part to the technical part.\n\nAnalogy limit: A very small sample can make the estimate noisy; state the denominator.",
+    "speaker_notes": "TEACHER SCRIPT — MAPPING. Point from each familiar element to the corresponding technical element. Have students cover the right column and reconstruct the three matches. Read the limitation aloud. This week’s case is: A new policy-assistant version sometimes exposes a staff-only passage. The visible slide states: Match each everyday part to the technical part.\n\nAnalogy limit: A very small sample can make the estimate noisy; state the denominator. The three precise mappings are [['Full bill', 'total run cost'], ['Served meals', 'successful answers'], ['Unit cost', 'cost per success']]. The target is: Record a safe release decision with test and rollback evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "map",
+      "pairs": [
+        [
+          "Full bill",
+          "total run cost"
+        ],
+        [
+          "Served meals",
+          "successful answers"
+        ],
+        [
+          "Unit cost",
+          "cost per success"
+        ]
+      ]
+    },
+    "teaching_stage": "mapping"
+  },
+  "s25": {
+    "title": "Cost per success · how it works",
+    "explanation": "All run costs including failed attempts divided by successful tasks; undefined at zero success.\n\nTrace the arrows from left to right.",
+    "speaker_notes": "TEACHER SCRIPT — MECHANISM. Trace every arrow slowly from the input to the output. Ask what information crosses the boundary at each arrow. Pause if students confuse a simplified notebook with a trained model. This week’s case is: A new policy-assistant version sometimes exposes a staff-only passage. The visible slide states: All run costs including failed attempts divided by successful tasks; undefined at zero success.\n\nTrace the arrows from left to right. The weekly example is: If ten runs cost €0.20 and eight meet criteria, cost per success = €0.025. State what the analogy does not explain: A very small sample can make the estimate noisy; state the denominator. The target is: Record a safe release decision with test and rollback evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "All run costs",
+        "Successful tasks",
+        "Cost per success"
+      ]
+    },
+    "teaching_stage": "mechanism"
+  },
+  "s26": {
+    "title": "Cost per success · work one case",
+    "explanation": "If ten runs cost €0.20 and eight meet criteria, cost per success = €0.025.\n\nPoint to the evidence before giving your conclusion.",
+    "speaker_notes": "TEACHER SCRIPT — WORKED. Work the specific numbers or source wording aloud. Give students thirty seconds to write a conclusion, then ask which source line or calculation supports it. This week’s case is: A new policy-assistant version sometimes exposes a staff-only passage. The visible slide states: If ten runs cost €0.20 and eight meet criteria, cost per success = €0.025.\n\nPoint to the evidence before giving your conclusion. The expected reasoning concludes: Only eight runs delivered the defined successful outcome. Distinguish measured results from illustrative numbers. The target is: Record a safe release decision with test and rollback evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "work",
+      "items": [
+        "If ten runs cost €0.20 and eight meet criteria, cost per success = €0.025.",
+        "Why divide by eight rather than ten?",
+        "Only eight runs delivered the defined successful outcome."
+      ]
+    },
+    "teaching_stage": "worked"
+  },
+  "s27": {
+    "title": "Cost per success · answer and explain",
+    "explanation": "Only eight runs delivered the defined successful outcome.\n\nTempting mistake: Cheapest run is automatically best delivery.",
+    "speaker_notes": "TEACHER SCRIPT — REVEAL. Return to the earlier choice. Explain the correct answer and why the tempting claim fails. Ask one learner to say the answer in a single sentence without reading it. This week’s case is: A new policy-assistant version sometimes exposes a staff-only passage. The visible slide states: Only eight runs delivered the defined successful outcome.\n\nTempting mistake: Cheapest run is automatically best delivery. The earlier question was Why divide by eight rather than ten? Ask how this differs from the wrong claim. The target is: Record a safe release decision with test and rollback evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "reveal",
+      "items": [
+        "Cheapest run is automatically best delivery.",
+        "Only eight runs delivered the defined successful outcome."
+      ],
+      "caption": "A very small sample can make the estimate noisy; state the denominator."
+    },
+    "teaching_stage": "reveal"
+  },
+  "s28": {
+    "title": "Evidence trail: input → result",
+    "explanation": "Version 2 returns a staff paragraph.\n\nRelease is blocked and version 1 remains active.",
+    "speaker_notes": "TEACHER SCRIPT — WORKED. Work the specific numbers or source wording aloud. Give students thirty seconds to write a conclusion, then ask which source line or calculation supports it. This week’s case is: A new policy-assistant version sometimes exposes a staff-only passage. The visible slide states: Version 2 returns a staff paragraph.\n\nRelease is blocked and version 1 remains active. Have one student point to an exact source word or number for each conclusion. The target is: Record a safe release decision with test and rollback evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "work",
+      "items": [
+        "Version 1 blocks staff policy for student role.",
+        "Version 2 returns a staff paragraph.",
+        "Release is blocked and version 1 remains active."
+      ]
+    },
+    "teaching_stage": "worked"
+  },
+  "s29": {
+    "title": "Notebook: run the prepared example",
+    "explanation": "Run a local release-gate simulation and rollback.\n\nRead the original output before editing.",
+    "speaker_notes": "TEACHER SCRIPT — PRACTICE. Open the matching notebook and demonstrate the first run. Have learners predict one change, run only that change, and record input, setting, output and an error explanation. This week’s case is: A new policy-assistant version sometimes exposes a staff-only passage. The visible slide states: Run a local release-gate simulation and rollback.\n\nRead the original output before editing. Use Week_11_Lab.ipynb. This lab is a prepared classroom demonstration with its limitations documented. The target is: Record a safe release decision with test and rollback evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "Run approved and unauthorized access cases",
+        "Simulate a missing source and bad input",
+        "Filter a trace before sharing",
+        "Reject a bad candidate version and restore the prior config"
+      ]
+    },
+    "teaching_stage": "practice"
+  },
+  "s30": {
+    "title": "Find the input and check in Python",
+    "explanation": "Locate the supplied input, the transformation, the checking line and the printed result.",
+    "speaker_notes": "TEACHER SCRIPT — PRACTICE. Open the matching notebook and demonstrate the first run. Have learners predict one change, run only that change, and record input, setting, output and an error explanation. This week’s case is: A new policy-assistant version sometimes exposes a staff-only passage. The visible slide states: Locate the supplied input, the transformation, the checking line and the printed result. The weekly lab change is: Flip the candidate role check and verify rollback happens. The target is: Record a safe release decision with test and rollback evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Input data",
+        "Python operation",
+        "Check",
+        "Recorded result"
+      ]
+    },
+    "teaching_stage": "practice"
+  },
+  "s31": {
+    "title": "Predict one controlled change",
+    "explanation": "Flip the candidate role check and verify rollback happens.\n\nWhat should change in the result? What stays fixed?",
+    "speaker_notes": "TEACHER SCRIPT — PRACTICE. Open the matching notebook and demonstrate the first run. Have learners predict one change, run only that change, and record input, setting, output and an error explanation. This week’s case is: A new policy-assistant version sometimes exposes a staff-only passage. The visible slide states: Flip the candidate role check and verify rollback happens.\n\nWhat should change in the result? What stays fixed? Ask learners to write their prediction before rerunning the cell. The target is: Record a safe release decision with test and rollback evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "compare",
+      "left": "Before: original case",
+      "right": "After: one change",
+      "caption": "Keep all other inputs fixed."
+    },
+    "teaching_stage": "practice"
+  },
+  "s32": {
+    "title": "Run, compare and record",
+    "explanation": "Record the input, the one changed setting, the observed result and a reason for any difference.",
+    "speaker_notes": "TEACHER SCRIPT — PRACTICE. Open the matching notebook and demonstrate the first run. Have learners predict one change, run only that change, and record input, setting, output and an error explanation. This week’s case is: A new policy-assistant version sometimes exposes a staff-only passage. The visible slide states: Record the input, the one changed setting, the observed result and a reason for any difference. The required evidence is: Filtered trace and classroom release checklist. The target is: Record a safe release decision with test and rollback evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "table",
+      "rows": [
+        [
+          "Input",
+          "Setting",
+          "Result"
+        ],
+        [
+          "Original",
+          "baseline",
+          "record"
+        ],
+        [
+          "Changed",
+          "one edit",
+          "compare"
+        ]
+      ]
+    },
+    "teaching_stage": "practice"
+  },
+  "s33": {
+    "title": "Measure without hiding the denominator",
+    "explanation": "Passed release gates / required gates; cost per successful task\n\nWrite the numerator, denominator and one failure case.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: A new policy-assistant version sometimes exposes a staff-only passage. The visible slide states: Passed release gates / required gates; cost per successful task\n\nWrite the numerator, denominator and one failure case. Where a measure is qualitative, show the concrete source comparison. Example: Release is blocked and version 1 remains active. The target is: Record a safe release decision with test and rollback evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Define success",
+        "Count successes",
+        "Count cases",
+        "Inspect errors"
+      ]
+    },
+    "teaching_stage": "check"
+  },
+  "s34": {
+    "title": "Error detective: find the layer",
+    "explanation": "Plausible wrong claim: A high answer accuracy can compensate for an access-control failure.\n\nCorrect it using the case evidence.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: A new policy-assistant version sometimes exposes a staff-only passage. The visible slide states: Plausible wrong claim: A high answer accuracy can compensate for an access-control failure.\n\nCorrect it using the case evidence. The correction is Access is a release gate. Report accuracy and security outcomes separately. The target is: Record a safe release decision with test and rollback evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "reveal",
+      "items": [
+        "A high answer accuracy can compensate for an access-control failure.",
+        "Access is a release gate. Report accuracy and security outcomes separately."
+      ],
+      "caption": "Name a test that would catch this failure."
+    },
+    "teaching_stage": "check"
+  },
+  "s35": {
+    "title": "Transfer to a new situation",
+    "explanation": "The new version passes answer checks but fails the missing-source test. What does the release gate decide?\n\nExplain which source or test would settle it.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: A new policy-assistant version sometimes exposes a staff-only passage. The visible slide states: The new version passes answer checks but fails the missing-source test. What does the release gate decide?\n\nExplain which source or test would settle it. This is a fresh scenario, so ask for a reason before accepting either short answer. The target is: Record a safe release decision with test and rollback evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "Use the visible evidence",
+        "Flag missing or unsafe evidence"
+      ]
+    },
+    "teaching_stage": "check"
+  },
+  "s36": {
+    "title": "Explain it to a partner",
+    "explanation": "Without reading the slide, name the input, one processing step and the check. Your partner should ask “How do you know?”",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: A new policy-assistant version sometimes exposes a staff-only passage. The visible slide states: Without reading the slide, name the input, one processing step and the check. Your partner should ask “How do you know?” Listen for a causal explanation and one limitation, then revisit a difficult arrow on the board. The target is: Record a safe release decision with test and rollback evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Version 2 candidate",
+        "Access test fails",
+        "Keep version 1"
+      ]
+    },
+    "teaching_stage": "check"
+  },
+  "s37": {
+    "title": "Exam rehearsal · explain and apply",
+    "explanation": "What happens to cost per success when successes equal zero?\n\nWrite a short answer, then compare with the guide.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: A new policy-assistant version sometimes exposes a staff-only passage. The visible slide states: What happens to cost per success when successes equal zero?\n\nWrite a short answer, then compare with the guide. Model answer after discussion: There is no finite value. Report undefined and investigate the failed workload. Practice marks: 4. The target is: Record a safe release decision with test and rollback evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "State the core idea",
+        "Use a case detail or calculation",
+        "Add a limitation",
+        "Compare with the Word guide"
+      ]
+    },
+    "teaching_stage": "check"
+  },
+  "s38": {
+    "title": "Exam rehearsal · explain and apply",
+    "explanation": "Why test a missing source before release?\n\nWrite a short answer, then compare with the guide.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: A new policy-assistant version sometimes exposes a staff-only passage. The visible slide states: Why test a missing source before release?\n\nWrite a short answer, then compare with the guide. Model answer after discussion: To verify the application abstains or recovers rather than inventing an answer. Practice marks: 4. The target is: Record a safe release decision with test and rollback evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "State the core idea",
+        "Use a case detail or calculation",
+        "Add a limitation",
+        "Compare with the Word guide"
+      ]
+    },
+    "teaching_stage": "check"
+  },
+  "s39": {
+    "title": "What to hand in",
+    "explanation": "Filtered trace and classroom release checklist.\n\nInclude the one changed input and an error explanation.",
+    "speaker_notes": "TEACHER SCRIPT — PRACTICE. Open the matching notebook and demonstrate the first run. Have learners predict one change, run only that change, and record input, setting, output and an error explanation. This week’s case is: A new policy-assistant version sometimes exposes a staff-only passage. The visible slide states: Filtered trace and classroom release checklist.\n\nInclude the one changed input and an error explanation. This weekly evidence receives formative feedback according to the module sequence; refer to the assessment brief for graded work. The target is: Record a safe release decision with test and rollback evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "Original run",
+        "One changed input",
+        "Comparison",
+        "Explanation + source"
+      ]
+    },
+    "teaching_stage": "practice"
+  },
+  "s40": {
+    "title": "Three ideas to recall next week",
+    "explanation": "A required access test blocks release; keep safe traces and a tested rollback.\n\nRead the linked official sources in the Word guide and redraw one diagram from memory.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: A new policy-assistant version sometimes exposes a staff-only passage. The visible slide states: A required access test blocks release; keep safe traces and a tested rollback.\n\nRead the linked official sources in the Word guide and redraw one diagram from memory. Return to the opening vote and ask whether the evidence changed anyone’s mind. The next week builds on this outcome: Record a safe release decision with test and rollback evidence. The target is: Record a safe release decision with test and rollback evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "Release gate",
+        "Filtered trace",
+        "Rollback",
+        "Cost per success"
+      ]
+    },
+    "teaching_stage": "check"
+  }
+}

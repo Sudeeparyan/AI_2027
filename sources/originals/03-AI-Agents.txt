@@ -1,0 +1,471 @@
+Introduction & The AI Ladder
+	• The AI Knowledge Gap:
+		○ Most people who say they understand AI only understand one tiny piece: typing something into ChatGPT and getting a response back.
+		○ The gap between making a basic API call to a language model and building an actual AI Agent that can execute real-world tasks is massive.
+	• Core Objectives:
+		1. Understand how a Large Language Model (LLM) works under the hood (including non-deterministic behavior).
+		2. Understand the invisible backend plumbing connecting users to LLMs (shifting from Prompt Engineering to Context Engineering, enabling RAG and Agents).
+		3. Understand the fundamental distinction separating a model from an agent.
+Level 1: The Brain (Large Language Models)
+1. LLM as a Prediction Machine
+	• Core Concept: An LLM is simply a prediction machine (or a highly sophisticated auto-complete).
+	• Mechanism: Given input text, its sole job is to predict the next most likely piece of text based on patterns learned from training on massive datasets (internet text, books, Wikipedia, code).
+	• Tokens:
+		○ LLMs do not process whole words; they process tokens.
+		○ A token can be a word, part of a word, or a punctuation mark.
+		○ The model reads inputs as tokens and generates outputs token-by-token based on preceding context. Streaming responses (like ChatGPT typing in real-time) represent the model literally predicting and emitting one token after another.
+2. Non-Determinism & Temperature
+	• Why LLMs are Non-Deterministic:
+		○ When predicting the next token, the model generates a probability distribution across a list of possible next tokens (e.g., blue: 80%, clear: 10%, grey: 5%).
+		○ Instead of always picking the top option, the model samples from this list using a weighted dice roll.
+		○ Analogies: Like a chef who knows a recipe by heart but improvises slightly every time—the dish is recognizably the same, but never identical.
+	• Temperature Parameter:
+		○ Lower Temperature: The model strictly follows the highest probability predictions, making outputs predictable and deterministic.
+		○ Higher Temperature: The model samples lower probability tokens, introducing creativity, variation, and unexpected outputs.
+	• Conclusion: Non-determinism is a feature (not a bug) that enables creativity.
+Level 2: The Transformer Architecture
+1. The Attention Mechanism
+	• Historical Context: Introduced by Google in the 2017 paper "Attention Is All You Need".
+	• Previous Models vs. Transformers:
+		○ Older Models: Read text sequentially through a tiny keyhole (one word at a time, left-to-right). By the time they reached the end of a paragraph, they forgot the beginning.
+		○ Transformers: Use Attention, allowing the model to look at all words simultaneously and calculate how much each word relates to every other word.
+	• Analogy: Being at a loud dinner party with 10 conversations happening at once—attention is your brain's ability to tune out noise and focus specifically on the key people whose words matter to what you are trying to understand.
+	• Example: In the sentence "The trophy didn't fit in the suitcase because it was too big", attention allows the model to determine that "it" refers to the trophy, not the suitcase.
+2. Encoder vs. Decoder
+                  +-----------------------------------+
+                  |      Original Transformer        |
+                  |             (2017)                |
+                  +-----------------+-----------------+
+                                    |
+            +-----------------------+-----------------------+
+            |                                               |
+  +---------v---------+                           +---------v---------+
+  |      Encoder      |                           |      Decoder      |
+  |    ("The Reader") |                           |    ("The Writer") |
+  +---------+---------+                           +---------+---------+
+            |                                               |
+            | Takes input & creates rich                    | Takes internal state &
+            | internal representations.                     | generates output one
+            | Pure text understanding.                      | token at a time.
+            |                                               |
+            v                                               v
+  +-------------------+                           +-------------------+
+  |   Encoder-Only    |                           |   Decoder-Only    |
+  |  (e.g., BERT)     |                           |  (e.g., GPT-4)    |
+  +-------------------+                           +-------------------+
+  | Task: Read/Classify|                           | Task: Next-Token  |
+  | Fill-in-the-blank |                           | Prediction/Write  |
+  +-------------------+                           +-------------------+
+	• Encoder (The Reader):
+		○ Takes raw input and converts it into a rich internal representation of meaning.
+		○ Purely designed for text understanding (listening/absorbing).
+	• Decoder (The Writer):
+		○ Takes the internal representation and generates output one token at a time.
+		○ Purely designed for text generation (speaking/responding).
+	• Evolution from Dual to Decoder-Only:
+		○ Original 2017 Transformer: Used both Encoder and Decoder for translation tasks (Encoder reads French $\rightarrow$ Decoder writes English).
+		○ BERT Era (2018): Encoder-only model focused on text classification, search, and sentiment analysis by playing "fill-in-the-blank". Excellent reader, but could not generate long-form text.
+		○ Modern Era (GPT, Claude, Gemini, Llama): Decoder-only architectures dominate. It was discovered that for open-ended generation, a separate encoder is unnecessary; a decoder paying attention to all prior tokens can perform both understanding and generation simultaneously via next-token prediction at massive scale.
+Level 3: Modalities & System Plumbing
+1. Multimodality
+	• Definition: Determined entirely by what inputs a model accepts and what outputs it produces.
+	• Modalities:
+		○ VLM (Vision-Language Model): Accepts text + images/videos as input, produces text as output (e.g., analyzing pictures of a fridge or debugging an error screenshot).
+		○ Image Generation Models: Produces images as output (e.g., Midjourney, DALL-E).
+		○ Video Generation Models: Produces video as output (e.g., Veo, Sora).
+		○ Multimodal Models: A single underlying brain capable of handling multiple input and output types simultaneously (reading, seeing, listening, speaking).
+2. Prompt Engineering vs. Context Engineering
+	• Prompt Engineering: Crafting and phrasing user prompts to get better responses from a raw model endpoint.
+	• The Shift to Context Engineering:
+		○ Modern AI applications place a complex layer of invisible backend plumbing between the raw user input and the LLM endpoint.
+		○ Raw user inputs are transformed, wrapped, and enriched before reaching the model.
+	• Restaurant Analogy:
+		○ The LLM is the Chef.
+		○ The backend plumbing is the Kitchen / Process (Waiter taking the order, standing kitchen rules, fetching pantry ingredients, plating). The chef is critical, but the chef is not the whole restaurant.
++-----------------------------------------------------------------------------------+
+|                               CONTEXT WINDOW                                      |
+|                                                                                   |
+|  +--------------------+  +--------------------+  +-----------------------------+  |
+|  |   System Prompt    |  |    User Prompt     |  |    Conversation History     |  |
+|  | (Job Description)  |  |   (Current Task)   |  |   (Short-term memory)       |  |
+|  +--------------------+  +--------------------+  +-----------------------------+  |
+|                                                                                   |
+|  +--------------------+  +--------------------+  +-----------------------------+  |
+|  | Retrieved Knowledge|  |  Tool Definitions  |  |    Long-Term Memory         |  |
+|  |    (via RAG)       |  | (Actions Allowed)  |  | (User facts/Context)        |  |
+|  +--------------------+  +--------------------+  +-----------------------------+  |
+|                                                                                   |
+|                                       │                                           |
+|                                       ▼                                           |
+|                             +-------------------+                                 |
+|                             |  LLM Core Brain   |                                 |
+|                             +-------------------+                                 |
++-----------------------------------------------------------------------------------+
+
+	• Core System Components:
+		○ System Prompt: Persistent job description instructions setting model behavior and safety bounds across the conversation.
+		○ User Prompt: The current specific task submitted by the user.
+		○ Conversation History: Prior turns enabling multi-turn memory.
+		○ Retrieved Knowledge: External document chunks injected dynamically.
+		○ Tool Definitions: Descriptions of external capabilities the model can call.
+		○ Long-Term Memory: Persistent facts about the user and domain.
+	• Context Engineering Definition: The discipline of selecting, ordering, and structuring exactly what enters the model's Context Window (short-term working memory) to ensure high signal with zero distraction.
+Level 4: RAG (Retrieval-Augmented Generation)
+	• Analogy: Converts a "closed-book exam" (relying on static, frozen training memory) into an "open-book exam" (fetching exact reference material before answering).
+	• The Three Stages:
+		1. Retrieval: Queries an external store (typically a Vector Database) using Embeddings (converting text/audio/PDFs into numerical vectors) to retrieve relevant content by semantic meaning rather than simple keyword matching.
+		2. Augmentation: Post-processes retrieved chunks before passing them to the model (re-ranking, trimming irrelevant text, cleaning, and formatting neatly into the context).
+		3. Generation: The LLM processes the user prompt alongside the cleaned context chunks to generate a response grounded in dynamic, up-to-date data.
+Level 5: Reasoning Models & Agentic AI
+1. Reasoning Models
+	• Standard Models: Fast instinctual outputs; blurt out the most probable next token immediately.
+	• Reasoning Models (e.g., OpenAI o-series, DeepSeek-R1):
+		○ Trained to generate an internal Chain of Thought (CoT) before emitting the final response.
+		○ Analogy: A student working through a math problem on scratch paper before writing down the final answer.
+		○ Critical for high-complexity domain tasks like advanced mathematics, formal logic, and software debugging.
+2. Model vs. Agent
+	• Model: The Brain in a jar. Performs thinking, reasoning, and text processing, but cannot execute real-world changes.
+	• Agent: The Brain given a Body. Equipping the model with hands, legs, and tools to act autonomously in external environments.
+                        +-----------------------+
+                        |       LLM Brain       |
+                        | (Reasoning / Planning)|
+                        +-----------+-----------+
+                                    |
+                                    ▼
+                        +-----------------------+
+                        |      ReAct Loop       |
+                        |  Think -> Act -> Obs  |
+                        +-----------+-----------+
+                                    |
+         +--------------------------+--------------------------+
+         |                          |                          |
+         ▼                          ▼                          ▼
++-----------------+        +-----------------+        +-----------------+
+|   Web Search    |        | Code Execution  |        | API / DB Calls  |
++-----------------+        +-----------------+        +-----------------+
+
+3. The ReAct Pattern (Reason + Act)
+	• Core Loop: Think $\rightarrow$ Act $\rightarrow$ Observe $\rightarrow$ Think
+	• Detective Analogy: Form a hypothesis $\rightarrow$ check a clue $\rightarrow$ observe what the clue reveals $\rightarrow$ update hypothesis $\rightarrow$ check next clue. The loop runs continuously until the task is complete.
+4. Key Agentic Design Patterns
+	1. Reflection: The agent self-evaluates and critiques its own generated output, revising its work internally before returning a final answer.
+	2. Tool Use: The model identifies when external execution (web searches, code interpreters, API calls) is required and structures execution calls.
+	3. Planning: Breaking down complex goals into sequential sub-tasks prior to execution.
+	4. Multi-Agent Collaboration: Distributing complex workflows across specialized agent roles (e.g., Researcher Agent $\rightarrow$ Writer Agent $\rightarrow$ Reviewer Agent).
+Level 6: AI Evaluations (Evals)
+	• The Non-Deterministic Problem: Because agentic systems use probabilistic weighted sampling, the exact same agent can take different paths or produce different outputs on identical inputs.
+	• Definition of Evals: Frameworks and test suites designed to continuously evaluate agent precision, task completion, and response quality.
+	• Software Testing vs. AI Evals:
+		○ Traditional Software Testing: Deterministic ($2 + 2 = 4$; test passes or fails).
+		○ AI Evals: Qualitative judgment over fuzzy criteria (e.g., Was the answer grounded? Was the tone correct? Were tools invoked safely and efficiently?).
+
+Agentic AI System Design
+Introduction & Overview
+**** A lot of people stop at understanding what AI agents are. But when you are actually building AI agents, one of the most important concepts you need to understand is the system design behind it.
+**** An Agentic AI system is not just an LLM wrapped inside a chat interface. It is a production software system where a model can:
+
+Why agentic AI system design matters we can able to get the response but the hardest part is designing a system it is reliable , cost aware , fast enough for the user experience, context aware observable and safe enough to connect with real tools.
+
+	• Reason over a goal
+	• Use tools and retrieve context
+	• Maintain state
+	• Make decisions across multiple steps and trigger real actions via APIs.
+
+Definition of Production Software Systems (Agentic AI)
+It is a production software system where a model can reason over a goal:
+	• It can use tools
+	• It can retrieve context
+	• It will maintain state
+	• It will make decisions across multiple steps
+	• Trigger real actions through APIs
+
+
+1. Definition of Production Software Systems (Agentic AI)
+It is a production software system where a model can reason over a goal:
+	• It can use tools
+	• It can retrieve context
+	• It will maintain state
+	• It will make decisions across multiple steps
+	• Trigger real actions through APIs
+Capabilities of an Agentic AI System
+An agentic AI system actually goes further:
+	• It can decompose a goal
+	• Decide which step to take next
+	• Call external tools
+	• Inspect the tool result
+	• Update its state
+	• Continue the workflow
+
+
+
+**** In this video, I break down Agentic AI system design from a builder's perspective. We will quickly recap what Agentic AI systems are, how single-agent and multi-agent systems differ, and then dive into the core building blocks:
+	• Model routing
+	• Tools
+	• Memory & State Management
+	• Orchestration
+	• Evaluations (Evals)
+	• Observability, Security, and Production Controls
+Single-Agent vs. Multi-Agent Systems
+	• Basic LLM Application: Takes an input, sends it to a model, and returns an output.
+	• Agentic AI System: Goes further. It can decompose a goal, decide which step to take next, call external tools, inspect the tool results, update its state, and continue the workflow until it reaches a stopping condition.
+1. Single-Agent System
+**** One primary agent owns the workflow. It may call multiple tools, retrieve documents, update memory, and perform multiple reasoning steps, but the control loop is centralized.
+	• Example: A customer support agent that classifies a request, retrieves account context, calls a billing API, asks for user confirmation, and generates a final response.
+2. Multi-Agent System
+**** The workflow is split across multiple specialized agents based on separation of responsibilities:
+	• One agent handles planning
+	• Another retrieves knowledge
+	• Another writes code
+	• Another reviews the output
+	• Another handles execution
+**** Multi-agent systems are useful when tasks require clear specialization, parallel work, review loops, or long-running workflows. However, they add complexity: more coordination overhead, failure modes, state tracking, logs, latency, and cost.
+The Core Building Blocks
+Core Building Blocks (CHAPTER - 2)
+CHAPTER - 2: The core building blocks
+	1. Model layer
+	2. Tools
+	3. Memory and state
+	4. Orchestration
+	5. Evaluation
+	6. Approval and policy control
+
+
+1. Model Layer & Model Routing
+**** In production, you shouldn’t use a single powerful model to handle every step—that becomes expensive and slow very quickly.
+	• Model Routing Strategy:
+		○ Cheaper/Faster Models: Use for low-complexity steps (intent classification, routing, extraction, schema filling, simple summarization).
+		○ Stronger Reasoning Models: Use only when deeper reasoning changes the outcome (e.g., handling complex, ambiguous user constraints).
+	• Structured Outputs: Any step feeding another system must return predictable structure (using JSON Schema, Pydantic models, function/tool calling), not free-form prose.
+
+The Model Layer Questions
+The model layer should answer 3 specific questions:
+	• What model is going to be used for this step?
+	• What output contract does it return?
+	• What happens if the model fails or returns invalid output?
+
+2. Tools
+**** Tools act as the interface between the model and the external world (e.g., database lookups, CRM APIs, calendar APIs, code interpreters).
+	• Tool Design Principles:
+		○ Every tool needs a clear name, description, input schema, output schema, permission boundaries, timeouts, retry behavior, and error format.
+		○ Inputs and outputs should be strict and machine-readable (e.g., requiring explicit user_id, field_to_update, and request_id instead of loose natural language).
+		○ Read vs. Write Separation: Separate Read-only tools from Write tools. High-risk write operations should always require validation and human approval.
+		○ Model Context Protocol (MCP): An emerging standard for exposing tools and context to agents. MCP goal is to exposing the tools, resources, context to agents in an standard manner
+Safer Tool Contract Architecture
+A safer tool contract would be:
+	• User ID $\rightarrow$
+	• Field To Update $\rightarrow$
+	• New Value $\rightarrow$
+	• Reason $\rightarrow$
+	• Source Request ID $\rightarrow$
+	• Confirmation Required
+
+
+• 
+		
+3. Memory & State Management
+**** Do not confuse Memory with State:
+	• State: The current execution context of the workflow (e.g., current step, collected information, tool call results, workflow status weather it is passed or failed).
+	• Memory: Broader information across time (e.g., conversation history, user preferences, past actions, retrieved knowledge, Documents context, Summaries, Long form information that can be used later).
+	• Storage Selection based on Access Patterns:
+		○ Workflow / Conversation State: Low-latency stores like Redis, DynamoDB, Postgres, MongoDB.
+		○ Knowledge Retrieval: RAG vector databases (Pinecone, pgvector, Weaviate, ElasticSearch).
+		○ Long-term Archives: Cheap object storage like AWS S3.
+		○ But as per the compnay we are using only the Azure but do not dump everything into one vectore dB it’s a bad practice
+	• Context Window Optimization: Distinguish short-term context (passed into the current prompt) from long-term memory (retrieved selectively). Avoid stuffing everything into the context window to prevent "context bloat."
+End-to-End Agent Execution Workflow
+Sequential Flow:
+	1. Receive a user message
+	2. Classify the intent
+	3. Retrieve the required context
+	4. Decide
+	5. Select the tools
+	6. Validate the tool inputs
+	7. Execute the tools
+	8. Inspect the results
+	9. Ask for confirmation
+	10. Generate the response
+	11. Log the trace
+	12. Send evaluation data
+
+
+
+4. Orchestration Layer
+**** Orchestration defines how the system moves from user request to execution. It can be implemented using plain code, graph-based frameworks (LangGraph, LlamaIndex Workflows, LangChain), workflow engines (Temporal), or state machines.
+	• Deterministic vs. Autonomous: If a sequence of steps is known, design it as a deterministic pipeline or state machine. Only use autonomous reasoning when the workflow genuinely needs dynamic decision-making.
+	• Graph-based Orchestration: Handles branching, retries, loops, approval gates, and fallback paths (e.g., if tool retrieval fails, retry with a different prompt/model or branch into an alternative path or if users askes for canclellation u can ask for the confimation path).
+	• There is a hugh difference between autonomy with lack of structure.
+	• Production agents should have a very clear control flow.
+5. Evaluation (Evals) Currently we are using langfuse of everything
+**** In AI systems, valid JSON or code execution doesn't guarantee accuracy. The model could generate syntactically correct output that is semantically wrong.
+• Eval system should produce metrics not examples
+
+Semantic Failure Modes
+The model can return a valid JSON that is semantically wrong:
+	• It can call the correct tool with the wrong arguments
+	• It can retrieve irrelevant context
+	• It can answer using a stale information
+	• It can fail to ask for confirmation
+	• It can even refuse a valid request or comply with an unsafe request
+
+• 
+
+	• Trace-Level Evaluations: Evaluate every step of the trajectory (intent classification, retrieval quality, tool arguments, policy compliance, final response quality).
+	• Test Sets & Regression Testing: Maintain realistic scenario test sets (happy paths, ambiguous queries, edge cases, malicious inputs). Run them whenever models, prompts, retrieval logic, tools changes.
+	• Evaluation Metrics to Track: Intent accuracy, tool call success rate, invalid schema rate, retrieval hit rate, refusal accuracy, escalation rate, task completion rate, user flag rate, cost per successful task.
+Evaluation & Quality Pipeline
+Pipeline Flow:
+	• Intent Classification $\rightarrow$
+	• Retrieval Quality $\rightarrow$
+	• Tool Selection $\rightarrow$
+	• Tool Arguments $\rightarrow$
+	• Policy Compliance $\rightarrow$
+	• Confirmation Behavior $\rightarrow$
+	• Final Answer Quality $\rightarrow$
+	• Task Success
+
+
+
+• 
+
+Agentic Workflow Steps (Image 1)
+Sequential Flow:
+	• Intent Classification
+$\downarrow$
+	• Query Rewriting
+$\downarrow$
+	• Retrieval
+$\downarrow$
+	• Planning
+$\downarrow$
+	• Tool Selection
+$\downarrow$
+	• Tool Argument Generation
+$\downarrow$
+	• Tool Result Interpretation
+$\downarrow$
+	• Final Response Generation
+$\downarrow$
+	• Evaluation
+
+
+
+
+	Realistic Test Set Scenarios
+	You should always maintain a test set of realistic scenarios:
+		• Happy paths
+		• Ambiguous request
+		• Out of scope request
+		• Tool failures
+		• Malicious inputs
+		• Partial information
+		• Policy edge case
+		• Escalation cases
+	
+• 
+
+6. Approval & Policy Control (Human-in-the-Loop)
+**** High-impact actions (sending emails, deleting data, issuing refunds, cancling the appoiments, changing or updating your billing,updating the CRM record,placing an order or making an finicaial transction ) must have gates.
+	• Safe Pattern: Model suggests → Code validates → User approves → Tool executes.
+	• Deterministic Validation: Application code (not the agent) should remain the source of truth for business logic, permissions, and ownership verification.
+	• For example if user tells to cancle the appoinment the model can callisify the intent as a cancalestion and proess a target appoinemnt but the system should verify that the logged in user owns the appoinment that is canacleble and it should be under the policy and user should definaltey conforms before the canclation API is called.
+	• Which is very improatnt for the muti agent systems if one agent genreates a plan an another excecting agent should not bliendly trust the planning agents tool execution still need validation and aruthrization Agent should not be the srouce of truth applcaition should be 
+Production System Design Principles
+1. Reliability
+**** Ensured through decomposition, contracts, retries, validation fallbacks, and monitoring:
+	• Break large prompts into smaller, easier-to-debug steps.
+	• A single giant prompt should not to everything all a time like classifies intent retrieves context, decides policies, calls tools, writes the final response
+	• If the next step is decided on the models output then it should be structured output the need to validate the schema if it is invalid we need to retry if its still breaks then its better to use fallback
+	• Treat every model call like an unreliable upstream dependency with built-in handling for timeouts, rate limits, and malformed outputs, Degraded quality.
+	• On a high level if a model extracts the date code should valiadate the date if a model selectes the user ID code should verify the permissions. Simillary if model selects the tool call then it should be validate the outputs .
+	•  Need to keep in the mind like Realibuilty which means designing the system that model imperfections do not immediately become the product failure 
+2. Cost & Latency Optimization
+
+
+• Every intreaction with agents can able to trigger all this steps it is the place where we will be using model routing use small model for the simple classification or extraction or other stuff use larger models when there is ambiguity reasoning and syntesis required
+
+	• Token Limits: Restrict output tokens strictly based on downstream needs.
+	• Caching: Cache retrieval results, repeated policy lookups, tool metadata and table context and static context. We 
+	• Batching and Asynchronous Processing: Run non-blocking steps (evals, summaries) asynchronously.
+	• Streaming & Progress States: Stream UI responses and show intermediate progress during long-running tool operations.
+Most importantly enforce scope earlyas out of scope request can able to burn the request and tokens you can use the cheap filters rules and intent gate before the expensive reasoning step even happens production agent should have cost obersbuilty like token in tokens out cost per step and cost per conversation and cost for sucessful task 
+3. Context & RAG Design
+	• Focus on retrieval quality through document chunking, metadata filters, hybrid search, and re-ranking.
+	• Data Isolation: Keep trusted instructions separate from untrusted context (retrieved documents or user inputs should never override system prompts).
+	• Tool outputs should be consider as a data not instructions
+	• User provided content should be isolated from developer and system instrucutre.
+	• For long converstation use summarizartion and check ppoints instead of passing full history store the summary sepeartley from the raw converstation loggs and keep track of the acutally summary entires
+	• Summarization: Use periodic summaries and checkpoints for long-running conversations instead of passing full history.
+	• We need to desgin a context aware system where it should retrive it form weather it is trusted or not and weather it is safe to be sent to the model
+
+
+2. Context Components 
+CONTEXT
+	• User Message
+	• Conversation State
+	• Application Database
+	• Retrieved Documents
+	• Tool Results
+	• User Profile
+	• Long Term Memory
+
+
+4. Observability, Security, and Privacy
+	• Observability: Log complete execution traces including model name, versions, prompt versions, step names, workflow id, converation id, Tool name arguments,  tool inputs/outputs, latency, token usage time to first token ,token in &token out, what are the cost,How many retries,were there any fallbacks and error traces, was there any user feedback, what the eval scores were
+	• Security: Treat all external inputs (including user messages, retrieved documents, and tool responses) as untrusted to prevent direct/indirect prompt injection and SQL injection. Grant tools least-privilege permissions. Do not execture the raw model output do not run any SQL or shell comands directly from the model generated text. We need to give tools least privaieldge permsisisons and add approval gates for risky actions.
+	• Privacy & PII: Minimize data sent to the LLM, mask Personally Identifiable Information (PII), and enforce appropriate log retention policies. For example if the model need only the appoinment ID and avalaiblity do not send the patent report if they require the summary ticket do not send the full customer history . Need to make sure to Keep the sensitif fields out of the prompt unless they are required for the task
+
+Model Provider, Vector Databse, Observabilty Platform, Logging System.
+
+
+Main goal is where did the error happened at any point of time like it is because of intent claisifaction was it because of retrival,planning tool sections tool exectuion poliecy valiation or the final response
+
+
+
+
+System Identification & Execution Metadata
+Performance, Cost & Quality Metrics
+* What's the model name
+* Latency
+* What's the model version
+* Time to first token
+* The prompt version
+* Token in & token out
+* Step name
+* What are the cost
+* Workflow ID
+* How many retries
+* Conversation ID
+* Were there any fallbacks
+* Tool name
+* Were there any errors
+* Tool arguments
+* Was there any user feedback
+* What the eval scores were
+
+
+It is the backend design data design and product design with LLM in the loop
+
+Production Grade Requirements 
+A production grade agentic AI system needs:
+	• Clear model routing
+	• Strict tool contracts
+	• Explicit memory and state management
+	• It needs orchestration
+	• It needs trace level evals
+	• It needs approval gates
+	• Cost and latency controls
+
+
+Clear Along with context design obserbilty secuirty and privacy 
+
+Key Takeaways & Interview Summary
+**** A production-grade Agentic AI system requires:
+	1. Clear Model Routing (balancing cost vs. reasoning capability).
+	2. Strict Tool Contracts (type-safe inputs and structured outputs).
+	3. Explicit Memory & State Management separated by access patterns.
+	4. Deterministic or Graph-based Orchestration.
+	5. Trace-Level Evals across the entire execution trajectory.
+	6. Approval Gates for high-risk write operations.
+	7. Strong Observability, Security, and Privacy controls.
+
+

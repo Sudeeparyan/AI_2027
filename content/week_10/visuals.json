@@ -1,0 +1,37 @@
+{
+  "term": [
+    [
+      "Image or scan",
+      "Vision/OCR reader",
+      "Transcribed text"
+    ],
+    [
+      "Visible field",
+      "Extract exact value",
+      "Source pointer"
+    ],
+    [
+      "Quantity × price",
+      "Add tax",
+      "Compare listed total"
+    ],
+    [
+      "Blurred or absent field",
+      "Mark uncertain",
+      "Send for review"
+    ]
+  ],
+  "path": [
+    "Invoice image",
+    "Prepared text",
+    "Field extraction",
+    "Check maths",
+    "Flag mismatch"
+  ],
+  "compare": [
+    "Read listed €54",
+    "Calculate expected €45"
+  ],
+  "good": "€54 differs from €45",
+  "bad": "Trust the listed total"
+}

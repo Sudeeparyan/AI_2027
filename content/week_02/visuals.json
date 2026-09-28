@@ -1,0 +1,41 @@
+{
+  "term": [
+    [
+      "Example image",
+      "Encoder: μ and σ",
+      "Sample z",
+      "Decoder",
+      "Output image"
+    ],
+    [
+      "Nearby z values",
+      "Toy decoder outputs",
+      "Compare patterns"
+    ],
+    [
+      "Random input",
+      "Generator",
+      "Proposed image",
+      "Real/fake judge",
+      "Training feedback"
+    ],
+    [
+      "Loss curve",
+      "Held-out images",
+      "Quality and diversity"
+    ]
+  ],
+  "path": [
+    "Example image",
+    "VAE encoder",
+    "Latent sample",
+    "VAE decoder",
+    "Output image"
+  ],
+  "compare": [
+    "VAE: reconstruct",
+    "GAN: compete"
+  ],
+  "good": "Inspect both quality and variety",
+  "bad": "Low loss proves realism"
+}

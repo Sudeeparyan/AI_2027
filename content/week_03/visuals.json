@@ -1,0 +1,37 @@
+{
+  "term": [
+    [
+      "Clean example",
+      "Add gradual noise",
+      "Noisy training input"
+    ],
+    [
+      "Noisy input",
+      "Learned noise estimate",
+      "Less noisy step"
+    ],
+    [
+      "Text condition",
+      "Denoising steps",
+      "Generated image"
+    ],
+    [
+      "Output image",
+      "Consent check",
+      "Detail check",
+      "Decision"
+    ]
+  ],
+  "path": [
+    "Clean training image",
+    "Noising steps",
+    "Learned reverse steps",
+    "New sample"
+  ],
+  "compare": [
+    "Teaching toy: knows clean",
+    "Real model: learned estimate"
+  ],
+  "good": "Review the image against the brief",
+  "bad": "Toy denoiser is a trained model"
+}

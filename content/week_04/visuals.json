@@ -1,0 +1,37 @@
+{
+  "term": [
+    [
+      "Sentence",
+      "Token pieces",
+      "Token IDs"
+    ],
+    [
+      "Query token",
+      "Attention scores",
+      "Weighted context"
+    ],
+    [
+      "Past tokens",
+      "Causal mask",
+      "Visible positions"
+    ],
+    [
+      "Encoder: read",
+      "Decoder: write",
+      "Encoder-decoder: both"
+    ]
+  ],
+  "path": [
+    "Token IDs",
+    "Query and keys",
+    "Mask future",
+    "Softmax weights",
+    "Next token"
+  ],
+  "compare": [
+    "Encoder reads input",
+    "Decoder writes output"
+  ],
+  "good": "Mask: 0 weight on future token",
+  "bad": "Attention alone proves truth"
+}

@@ -1,0 +1,36 @@
+{
+  "term": [
+    [
+      "Amount €55",
+      "Validate argument",
+      "Cap calculator €40"
+    ],
+    [
+      "Known steps",
+      "Fixed code path",
+      "Tool result"
+    ],
+    [
+      "Model-selected step",
+      "Tool boundary",
+      "Validated result"
+    ],
+    [
+      "Write request",
+      "Manager approval",
+      "Audit record"
+    ]
+  ],
+  "path": [
+    "User request",
+    "Validate amount",
+    "Read-only tool",
+    "Display €40"
+  ],
+  "compare": [
+    "Read-only calculation",
+    "Consequential write"
+  ],
+  "good": "€55 input → capped €40",
+  "bad": "Change policy without approval"
+}

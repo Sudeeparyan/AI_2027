@@ -1,0 +1,62 @@
+{
+  "week_01": {
+    "fingerprint": "0c92a7de4967f1a6b291f61246eb62ec35e127b569785e300deb5d4e017cb88a",
+    "run": "20260928T202137535507Z",
+    "output": "outputs/current/week_01"
+  },
+  "week_02": {
+    "fingerprint": "61a37059b23f2137e188ce27e4fe82142ce9a4948f24c2530cde6b3fbf85d809",
+    "run": "20260928T202137535507Z",
+    "output": "outputs/current/week_02"
+  },
+  "week_03": {
+    "fingerprint": "83005baf8719a4f423ad23a9c91a4d3fbde4527ebc779cb208245012b8401fa0",
+    "run": "20260928T202137535507Z",
+    "output": "outputs/current/week_03"
+  },
+  "week_04": {
+    "fingerprint": "655cc58711f6fabe590f77c03b322393e2987d5abd8e7d350962e2040dce2a2b",
+    "run": "20260928T202137535507Z",
+    "output": "outputs/current/week_04"
+  },
+  "week_05": {
+    "fingerprint": "861ebbc9aafb8ae70eecbc051a4310f6ed383bb9b9fb1d93a86aed5d88ed2d87",
+    "run": "20260928T202137535507Z",
+    "output": "outputs/current/week_05"
+  },
+  "week_06": {
+    "fingerprint": "d1a3207419dc111b9c1a45308c4f4b964420ff2071cb0c0eaa1f7e658c369745",
+    "run": "20260928T202137535507Z",
+    "output": "outputs/current/week_06"
+  },
+  "week_07": {
+    "fingerprint": "ee9a72bf90e206fd34c799fba0bbecdd597b2bf627ed3bb587618e755e171644",
+    "run": "20260928T202137535507Z",
+    "output": "outputs/current/week_07"
+  },
+  "week_08": {
+    "fingerprint": "4b88b5f9c9dde8b4de17749631e8f6307a1695eee345fd3acca1e4ed24937101",
+    "run": "20260928T202137535507Z",
+    "output": "outputs/current/week_08"
+  },
+  "week_09": {
+    "fingerprint": "4f0542f0718414ca86c3e1f2a217aaafa5e80c7bd02e003a447f6f10af0a22bd",
+    "run": "20260928T202137535507Z",
+    "output": "outputs/current/week_09"
+  },
+  "week_10": {
+    "fingerprint": "5a4373a611ad73a8bac3362628663952b5b17edd10c0241436269ae792737332",
+    "run": "20260928T202137535507Z",
+    "output": "outputs/current/week_10"
+  },
+  "week_11": {
+    "fingerprint": "6872ffea19be1da5c9426ba07e3b51dcca57667458dd2478ed5d41c582bc2e65",
+    "run": "20260928T202137535507Z",
+    "output": "outputs/current/week_11"
+  },
+  "week_12": {
+    "fingerprint": "5e4f50f119cca2f144e1b199924d743a84c9cb0eacc01e7c69b48fe5a8b73340",
+    "run": "20260928T202137535507Z",
+    "output": "outputs/current/week_12"
+  }
+}

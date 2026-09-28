@@ -1,0 +1,46 @@
+{
+  "outcomes": "LO1, LO2",
+  "plain_explanation": "In a common diffusion training setup, a clean example is combined with noise. A model learns to predict noise or another denoising target. Generation starts from noise and applies learned reverse steps, often conditioned on text. Our toy knows the original image and therefore only illustrates the sequence.",
+  "worked_example": "Compare two prepared poster outputs: A follows the brief but has unreadable lettering; B has clear lettering but depicts an unapproved real person. Both need revision for different reasons. Score adherence, legibility and consent separately.",
+  "exam": [
+    {
+      "question": "Distinguish noising during training from denoising during generation.",
+      "model_answer": "Training creates corrupted examples and learns a reverse prediction. Generation applies learned reverse steps to a noise sample.",
+      "marks": 4
+    },
+    {
+      "question": "Does conditioning guarantee the requested text will be correct?",
+      "model_answer": "No. The condition guides generation; the resulting image still needs inspection.",
+      "marks": 4
+    },
+    {
+      "question": "Why is a toy that sees the clean image not a real diffusion generator?",
+      "model_answer": "It has access to the desired answer at inference. A trained generator must estimate reverse steps without that target.",
+      "marks": 4
+    }
+  ],
+  "resources": [
+    {
+      "id": "G4",
+      "publisher": "Google Cloud Tech",
+      "title": "Introduction to image generation",
+      "url": "https://www.youtube.com/watch?v=kzxz8CO_oG4",
+      "type": "YouTube lesson",
+      "use": "Denoising intuition. Video title and channel indexed in search; full transcript not retrieved.",
+      "checked_date": "2026-09-28",
+      "verification": "Official page or indexed metadata; video transcripts not reviewed"
+    },
+    {
+      "id": "N1",
+      "publisher": "NVIDIA",
+      "title": "Generative AI and LLM Learning Paths",
+      "url": "https://www.nvidia.com/en-us/learn/learning-path/generative-ai-llm/",
+      "type": "Training catalogue",
+      "use": "Optional deeper RAG, diffusion and deployment training; some courses require payment.",
+      "checked_date": "2026-09-28",
+      "verification": "Official page/search metadata reviewed"
+    }
+  ],
+  "study_task": "Draw the main diagram from memory, explain each arrow, then check it against the slides. Answer the three questions without notes before reading the model answers.",
+  "reference_note": "Selected source concepts inform the lesson. Examples, figures, questions and solutions are original classroom material; no exam questions are claimed to be official."
+}

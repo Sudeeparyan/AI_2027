@@ -1,0 +1,37 @@
+{
+  "term": [
+    [
+      "Student question",
+      "Retrieve allowed policy",
+      "Check cited answer"
+    ],
+    [
+      "Your code change",
+      "Your experiment",
+      "Your explanation"
+    ],
+    [
+      "New failure case",
+      "Identify layer",
+      "Design a test"
+    ],
+    [
+      "Setup guide",
+      "Known limits",
+      "Repeatable handover"
+    ]
+  ],
+  "path": [
+    "Question",
+    "Role check",
+    "Search",
+    "Extract policy",
+    "Evidence check"
+  ],
+  "compare": [
+    "Answerable P4",
+    "Unknown cafeteria rule"
+  ],
+  "good": "Appeal within ten days [P4]",
+  "bad": "Claim without a source"
+}

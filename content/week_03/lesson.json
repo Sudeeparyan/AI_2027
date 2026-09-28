@@ -1,0 +1,46 @@
+{
+  "n": 3,
+  "title": "Diffusion and generated media",
+  "goal": "Explain the denoising idea and judge an image with a consistent checklist.",
+  "case": "A college needs a synthetic poster image while respecting consent and image rights.",
+  "terms": [
+    [
+      "Forward noising",
+      "In a common training setup, progressively add noise to a clean image."
+    ],
+    [
+      "Denoising model",
+      "A learned model estimates how to remove noise at each step; the course simulation uses the known clean target."
+    ],
+    [
+      "Conditioning",
+      "Text or other inputs can guide generation. The condition does not guarantee accurate details."
+    ],
+    [
+      "Image review",
+      "Check whether text, people, permissions and task-specific details meet the brief."
+    ]
+  ],
+  "steps": [
+    "Inspect a 4 by 4 synthetic clean image",
+    "Add reproducible noise at two strengths",
+    "Use a transparent toy denoising demonstration",
+    "Compare two prepared descriptions using one rubric"
+  ],
+  "example": [
+    "Clean grid has an L-shaped bright pattern.",
+    "Noise obscures the L at high strength.",
+    "A toy restoration with access to the clean target restores it; a real model does not have that target."
+  ],
+  "misconception": "Removing random noise with the original image in hand reproduces diffusion generation.",
+  "correction": "This exercise visualizes steps only. Actual generation uses learned denoising without a clean target at inference.",
+  "change": "Increase noise strength from 0.15 to 0.45 and compare measured error.",
+  "metric": "Mean absolute pixel error; plus a human quality checklist",
+  "lab": "Run a denoising illustration and a consent checklist.",
+  "output": "Step comparison and three task-specific image observations.",
+  "reading": [
+    "Google, Develop a generative AI application",
+    "NVIDIA, NeMo framework overview"
+  ],
+  "code": "diffusion"
+}

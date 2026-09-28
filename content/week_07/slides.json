@@ -1,0 +1,614 @@
+{
+  "s01": {
+    "title": "Week 07 · Building and checking RAG",
+    "explanation": "The cited deadline answer\n\nThe assistant cites P3 for “two extensions,” but P3 permits one. A citation is present. Is the answer supported?",
+    "speaker_notes": "TEACHER SCRIPT — OPEN. Show the visual for ten seconds, then ask for an initial decision. Do not reveal the answer yet. Ask a student to name the source or measurement that would change their mind. This week’s case is: The college-policy assistant answers questions with policy IDs. The visible slide states: The cited deadline answer\n\nThe assistant cites P3 for “two extensions,” but P3 permits one. A citation is present. Is the answer supported? Reveal that the case will be revisited after four short concept cycles. The target is: Connect retrieved evidence to an answer and abstain when support is absent. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "story",
+      "items": [
+        "The cited deadline answer",
+        "What is known?",
+        "What must we check?"
+      ]
+    },
+    "teaching_stage": "open"
+  },
+  "s02": {
+    "title": "First vote: what would you do?",
+    "explanation": "The assistant cites P3 for “two extensions,” but P3 permits one. A citation is present. Is the answer supported?\n\nChoose an initial answer and name one piece of evidence you need.",
+    "speaker_notes": "TEACHER SCRIPT — QUESTION. Take a show of hands for each choice before showing the mechanism. Ask pairs to defend a choice with evidence. Save the strongest wrong reason for the reveal later in this cycle. This week’s case is: The college-policy assistant answers questions with policy IDs. The visible slide states: The assistant cites P3 for “two extensions,” but P3 permits one. A citation is present. Is the answer supported?\n\nChoose an initial answer and name one piece of evidence you need. Accept reasonable uncertainty; record the initial votes to revisit at the end. The target is: Connect retrieved evidence to an answer and abstain when support is absent. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "Accept the first plausible result",
+        "Check the source or measurement"
+      ]
+    },
+    "teaching_stage": "question"
+  },
+  "s03": {
+    "title": "The journey through today’s case",
+    "explanation": "We will predict, connect an analogy, trace a mechanism, work an example, then explain a decision.",
+    "speaker_notes": "TEACHER SCRIPT — OPEN. Show the visual for ten seconds, then ask for an initial decision. Do not reveal the answer yet. Ask a student to name the source or measurement that would change their mind. This week’s case is: The college-policy assistant answers questions with policy IDs. The visible slide states: We will predict, connect an analogy, trace a mechanism, work an example, then explain a decision. Point to the four named ideas, then show where the notebook experiment fits. The target is: Connect retrieved evidence to an answer and abstain when support is absent. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "RAG",
+        "Citation support",
+        "No-answer case",
+        "Test split"
+      ]
+    },
+    "teaching_stage": "open"
+  },
+  "s04": {
+    "title": "1. Predict · RAG",
+    "explanation": "Which step happens before drafting?\n\nMake a choice before we explain the diagram.",
+    "speaker_notes": "TEACHER SCRIPT — QUESTION. Take a show of hands for each choice before showing the mechanism. Ask pairs to defend a choice with evidence. Save the strongest wrong reason for the reveal later in this cycle. This week’s case is: The college-policy assistant answers questions with policy IDs. The visible slide states: Which step happens before drafting?\n\nMake a choice before we explain the diagram. The intended answer is Find the relevant allowed passage. The tempting claim is A citation added afterward repairs a false answer. Do not show which card is correct until the reveal. The target is: Connect retrieved evidence to an answer and abstain when support is absent. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "Find the relevant allowed passage.",
+        "A citation added afterward repairs a false answer."
+      ]
+    },
+    "teaching_stage": "question"
+  },
+  "s05": {
+    "title": "RAG · a familiar picture",
+    "explanation": "An open-book examiner finds the page before writing the answer.\n\nWhat matches our case, and where does the analogy stop?",
+    "speaker_notes": "TEACHER SCRIPT — ANALOGY. Begin with the familiar scene. Invite learners to describe each part in everyday language. Then ask where the comparison might fail before introducing the technical vocabulary. This week’s case is: The college-policy assistant answers questions with policy IDs. The visible slide states: An open-book examiner finds the page before writing the answer.\n\nWhat matches our case, and where does the analogy stop? The boundary is: Retrieval can pick an irrelevant page; answer quality depends on what was found. The target is: Connect retrieved evidence to an answer and abstain when support is absent. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "analogy",
+      "items": [
+        "Question",
+        "Open page",
+        "Answer"
+      ],
+      "caption": "An open-book examiner finds the page before writing the answer."
+    },
+    "teaching_stage": "analogy"
+  },
+  "s06": {
+    "title": "RAG · map the parts",
+    "explanation": "Match each everyday part to the technical part.\n\nAnalogy limit: Retrieval can pick an irrelevant page; answer quality depends on what was found.",
+    "speaker_notes": "TEACHER SCRIPT — MAPPING. Point from each familiar element to the corresponding technical element. Have students cover the right column and reconstruct the three matches. Read the limitation aloud. This week’s case is: The college-policy assistant answers questions with policy IDs. The visible slide states: Match each everyday part to the technical part.\n\nAnalogy limit: Retrieval can pick an irrelevant page; answer quality depends on what was found. The three precise mappings are [['Question', 'query'], ['Open page', 'retrieved passage'], ['Answer', 'cited reply']]. The target is: Connect retrieved evidence to an answer and abstain when support is absent. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "map",
+      "pairs": [
+        [
+          "Question",
+          "query"
+        ],
+        [
+          "Open page",
+          "retrieved passage"
+        ],
+        [
+          "Answer",
+          "cited reply"
+        ]
+      ]
+    },
+    "teaching_stage": "mapping"
+  },
+  "s07": {
+    "title": "RAG · how it works",
+    "explanation": "Retrieve relevant text for the current request, then draft an answer bounded by that text.\n\nTrace the arrows from left to right.",
+    "speaker_notes": "TEACHER SCRIPT — MECHANISM. Trace every arrow slowly from the input to the output. Ask what information crosses the boundary at each arrow. Pause if students confuse a simplified notebook with a trained model. This week’s case is: The college-policy assistant answers questions with policy IDs. The visible slide states: Retrieve relevant text for the current request, then draft an answer bounded by that text.\n\nTrace the arrows from left to right. The weekly example is: P3 states one extension in seven days; answer “one [P3]” after retrieving P3. State what the analogy does not explain: Retrieval can pick an irrelevant page; answer quality depends on what was found. The target is: Connect retrieved evidence to an answer and abstain when support is absent. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Question",
+        "Retrieve passages",
+        "Answer with source"
+      ]
+    },
+    "teaching_stage": "mechanism"
+  },
+  "s08": {
+    "title": "RAG · work one case",
+    "explanation": "P3 states one extension in seven days; answer “one [P3]” after retrieving P3.\n\nPoint to the evidence before giving your conclusion.",
+    "speaker_notes": "TEACHER SCRIPT — WORKED. Work the specific numbers or source wording aloud. Give students thirty seconds to write a conclusion, then ask which source line or calculation supports it. This week’s case is: The college-policy assistant answers questions with policy IDs. The visible slide states: P3 states one extension in seven days; answer “one [P3]” after retrieving P3.\n\nPoint to the evidence before giving your conclusion. The expected reasoning concludes: Find the relevant allowed passage. Distinguish measured results from illustrative numbers. The target is: Connect retrieved evidence to an answer and abstain when support is absent. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "work",
+      "items": [
+        "P3 states one extension in seven days; answer “one [P3]” after retrieving P3.",
+        "Which step happens before drafting?",
+        "Find the relevant allowed passage."
+      ]
+    },
+    "teaching_stage": "worked"
+  },
+  "s09": {
+    "title": "RAG · answer and explain",
+    "explanation": "Find the relevant allowed passage.\n\nTempting mistake: A citation added afterward repairs a false answer.",
+    "speaker_notes": "TEACHER SCRIPT — REVEAL. Return to the earlier choice. Explain the correct answer and why the tempting claim fails. Ask one learner to say the answer in a single sentence without reading it. This week’s case is: The college-policy assistant answers questions with policy IDs. The visible slide states: Find the relevant allowed passage.\n\nTempting mistake: A citation added afterward repairs a false answer. The earlier question was Which step happens before drafting? Ask how this differs from the wrong claim. The target is: Connect retrieved evidence to an answer and abstain when support is absent. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "reveal",
+      "items": [
+        "A citation added afterward repairs a false answer.",
+        "Find the relevant allowed passage."
+      ],
+      "caption": "Retrieval can pick an irrelevant page; answer quality depends on what was found."
+    },
+    "teaching_stage": "reveal"
+  },
+  "s10": {
+    "title": "2. Predict · Citation support",
+    "explanation": "What must be checked beyond the presence of a citation?\n\nMake a choice before we explain the diagram.",
+    "speaker_notes": "TEACHER SCRIPT — QUESTION. Take a show of hands for each choice before showing the mechanism. Ask pairs to defend a choice with evidence. Save the strongest wrong reason for the reveal later in this cycle. This week’s case is: The college-policy assistant answers questions with policy IDs. The visible slide states: What must be checked beyond the presence of a citation?\n\nMake a choice before we explain the diagram. The intended answer is The passage must support the exact claim. The tempting claim is Any source ID proves the sentence. Do not show which card is correct until the reveal. The target is: Connect retrieved evidence to an answer and abstain when support is absent. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "The passage must support the exact claim.",
+        "Any source ID proves the sentence."
+      ]
+    },
+    "teaching_stage": "question"
+  },
+  "s11": {
+    "title": "Citation support · a familiar picture",
+    "explanation": "A footnote is useful only when its source actually says the claim.\n\nWhat matches our case, and where does the analogy stop?",
+    "speaker_notes": "TEACHER SCRIPT — ANALOGY. Begin with the familiar scene. Invite learners to describe each part in everyday language. Then ask where the comparison might fail before introducing the technical vocabulary. This week’s case is: The college-policy assistant answers questions with policy IDs. The visible slide states: A footnote is useful only when its source actually says the claim.\n\nWhat matches our case, and where does the analogy stop? The boundary is: Checking entailment can involve nuance; use a human for disputed cases. The target is: Connect retrieved evidence to an answer and abstain when support is absent. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "analogy",
+      "items": [
+        "Sentence",
+        "Footnote",
+        "Highlight"
+      ],
+      "caption": "A footnote is useful only when its source actually says the claim."
+    },
+    "teaching_stage": "analogy"
+  },
+  "s12": {
+    "title": "Citation support · map the parts",
+    "explanation": "Match each everyday part to the technical part.\n\nAnalogy limit: Checking entailment can involve nuance; use a human for disputed cases.",
+    "speaker_notes": "TEACHER SCRIPT — MAPPING. Point from each familiar element to the corresponding technical element. Have students cover the right column and reconstruct the three matches. Read the limitation aloud. This week’s case is: The college-policy assistant answers questions with policy IDs. The visible slide states: Match each everyday part to the technical part.\n\nAnalogy limit: Checking entailment can involve nuance; use a human for disputed cases. The three precise mappings are [['Sentence', 'claim'], ['Footnote', 'source ID'], ['Highlight', 'supporting span']]. The target is: Connect retrieved evidence to an answer and abstain when support is absent. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "map",
+      "pairs": [
+        [
+          "Sentence",
+          "claim"
+        ],
+        [
+          "Footnote",
+          "source ID"
+        ],
+        [
+          "Highlight",
+          "supporting span"
+        ]
+      ]
+    },
+    "teaching_stage": "mapping"
+  },
+  "s13": {
+    "title": "Citation support · how it works",
+    "explanation": "Check every material claim against the cited passage.\n\nTrace the arrows from left to right.",
+    "speaker_notes": "TEACHER SCRIPT — MECHANISM. Trace every arrow slowly from the input to the output. Ask what information crosses the boundary at each arrow. Pause if students confuse a simplified notebook with a trained model. This week’s case is: The college-policy assistant answers questions with policy IDs. The visible slide states: Check every material claim against the cited passage.\n\nTrace the arrows from left to right. The weekly example is: “Two extensions [P3]” is unsupported because P3 says one, even though the ID exists. State what the analogy does not explain: Checking entailment can involve nuance; use a human for disputed cases. The target is: Connect retrieved evidence to an answer and abstain when support is absent. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Answer claim",
+        "Cited passage",
+        "Check entailment"
+      ]
+    },
+    "teaching_stage": "mechanism"
+  },
+  "s14": {
+    "title": "Citation support · work one case",
+    "explanation": "“Two extensions [P3]” is unsupported because P3 says one, even though the ID exists.\n\nPoint to the evidence before giving your conclusion.",
+    "speaker_notes": "TEACHER SCRIPT — WORKED. Work the specific numbers or source wording aloud. Give students thirty seconds to write a conclusion, then ask which source line or calculation supports it. This week’s case is: The college-policy assistant answers questions with policy IDs. The visible slide states: “Two extensions [P3]” is unsupported because P3 says one, even though the ID exists.\n\nPoint to the evidence before giving your conclusion. The expected reasoning concludes: The passage must support the exact claim. Distinguish measured results from illustrative numbers. The target is: Connect retrieved evidence to an answer and abstain when support is absent. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "work",
+      "items": [
+        "“Two extensions [P3]” is unsupported because P3 says one, even though the ID exists.",
+        "What must be checked beyond the presence of a citation?",
+        "The passage must support the exact claim."
+      ]
+    },
+    "teaching_stage": "worked"
+  },
+  "s15": {
+    "title": "Citation support · answer and explain",
+    "explanation": "The passage must support the exact claim.\n\nTempting mistake: Any source ID proves the sentence.",
+    "speaker_notes": "TEACHER SCRIPT — REVEAL. Return to the earlier choice. Explain the correct answer and why the tempting claim fails. Ask one learner to say the answer in a single sentence without reading it. This week’s case is: The college-policy assistant answers questions with policy IDs. The visible slide states: The passage must support the exact claim.\n\nTempting mistake: Any source ID proves the sentence. The earlier question was What must be checked beyond the presence of a citation? Ask how this differs from the wrong claim. The target is: Connect retrieved evidence to an answer and abstain when support is absent. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "reveal",
+      "items": [
+        "Any source ID proves the sentence.",
+        "The passage must support the exact claim."
+      ],
+      "caption": "Checking entailment can involve nuance; use a human for disputed cases."
+    },
+    "teaching_stage": "reveal"
+  },
+  "s16": {
+    "title": "3. Predict · No-answer case",
+    "explanation": "What should the system say?\n\nMake a choice before we explain the diagram.",
+    "speaker_notes": "TEACHER SCRIPT — QUESTION. Take a show of hands for each choice before showing the mechanism. Ask pairs to defend a choice with evidence. Save the strongest wrong reason for the reveal later in this cycle. This week’s case is: The college-policy assistant answers questions with policy IDs. The visible slide states: What should the system say?\n\nMake a choice before we explain the diagram. The intended answer is It lacks a relevant approved source in this corpus. The tempting claim is The model should guess from common knowledge. Do not show which card is correct until the reveal. The target is: Connect retrieved evidence to an answer and abstain when support is absent. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "It lacks a relevant approved source in this corpus.",
+        "The model should guess from common knowledge."
+      ]
+    },
+    "teaching_stage": "question"
+  },
+  "s17": {
+    "title": "No-answer case · a familiar picture",
+    "explanation": "A careful researcher leaves a blank when the archive lacks evidence.\n\nWhat matches our case, and where does the analogy stop?",
+    "speaker_notes": "TEACHER SCRIPT — ANALOGY. Begin with the familiar scene. Invite learners to describe each part in everyday language. Then ask where the comparison might fail before introducing the technical vocabulary. This week’s case is: The college-policy assistant answers questions with policy IDs. The visible slide states: A careful researcher leaves a blank when the archive lacks evidence.\n\nWhat matches our case, and where does the analogy stop? The boundary is: A retrieval miss may hide a real answer elsewhere; report the search limit. The target is: Connect retrieved evidence to an answer and abstain when support is absent. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "analogy",
+      "items": [
+        "Missing page",
+        "Blank",
+        "Search log"
+      ],
+      "caption": "A careful researcher leaves a blank when the archive lacks evidence."
+    },
+    "teaching_stage": "analogy"
+  },
+  "s18": {
+    "title": "No-answer case · map the parts",
+    "explanation": "Match each everyday part to the technical part.\n\nAnalogy limit: A retrieval miss may hide a real answer elsewhere; report the search limit.",
+    "speaker_notes": "TEACHER SCRIPT — MAPPING. Point from each familiar element to the corresponding technical element. Have students cover the right column and reconstruct the three matches. Read the limitation aloud. This week’s case is: The college-policy assistant answers questions with policy IDs. The visible slide states: Match each everyday part to the technical part.\n\nAnalogy limit: A retrieval miss may hide a real answer elsewhere; report the search limit. The three precise mappings are [['Missing page', 'no relevant passage'], ['Blank', 'abstain'], ['Search log', 'reason']]. The target is: Connect retrieved evidence to an answer and abstain when support is absent. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "map",
+      "pairs": [
+        [
+          "Missing page",
+          "no relevant passage"
+        ],
+        [
+          "Blank",
+          "abstain"
+        ],
+        [
+          "Search log",
+          "reason"
+        ]
+      ]
+    },
+    "teaching_stage": "mapping"
+  },
+  "s19": {
+    "title": "No-answer case · how it works",
+    "explanation": "If approved sources lack an answer, return a clear unsupported status.\n\nTrace the arrows from left to right.",
+    "speaker_notes": "TEACHER SCRIPT — MECHANISM. Trace every arrow slowly from the input to the output. Ask what information crosses the boundary at each arrow. Pause if students confuse a simplified notebook with a trained model. This week’s case is: The college-policy assistant answers questions with policy IDs. The visible slide states: If approved sources lack an answer, return a clear unsupported status.\n\nTrace the arrows from left to right. The weekly example is: Ask about parking permits; none of five policies covers it, so say evidence is unavailable. State what the analogy does not explain: A retrieval miss may hide a real answer elsewhere; report the search limit. The target is: Connect retrieved evidence to an answer and abstain when support is absent. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "No relevant source",
+        "Abstain",
+        "Explain missing evidence"
+      ]
+    },
+    "teaching_stage": "mechanism"
+  },
+  "s20": {
+    "title": "No-answer case · work one case",
+    "explanation": "Ask about parking permits; none of five policies covers it, so say evidence is unavailable.\n\nPoint to the evidence before giving your conclusion.",
+    "speaker_notes": "TEACHER SCRIPT — WORKED. Work the specific numbers or source wording aloud. Give students thirty seconds to write a conclusion, then ask which source line or calculation supports it. This week’s case is: The college-policy assistant answers questions with policy IDs. The visible slide states: Ask about parking permits; none of five policies covers it, so say evidence is unavailable.\n\nPoint to the evidence before giving your conclusion. The expected reasoning concludes: It lacks a relevant approved source in this corpus. Distinguish measured results from illustrative numbers. The target is: Connect retrieved evidence to an answer and abstain when support is absent. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "work",
+      "items": [
+        "Ask about parking permits; none of five policies covers it, so say evidence is unavailable.",
+        "What should the system say?",
+        "It lacks a relevant approved source in this corpus."
+      ]
+    },
+    "teaching_stage": "worked"
+  },
+  "s21": {
+    "title": "No-answer case · answer and explain",
+    "explanation": "It lacks a relevant approved source in this corpus.\n\nTempting mistake: The model should guess from common knowledge.",
+    "speaker_notes": "TEACHER SCRIPT — REVEAL. Return to the earlier choice. Explain the correct answer and why the tempting claim fails. Ask one learner to say the answer in a single sentence without reading it. This week’s case is: The college-policy assistant answers questions with policy IDs. The visible slide states: It lacks a relevant approved source in this corpus.\n\nTempting mistake: The model should guess from common knowledge. The earlier question was What should the system say? Ask how this differs from the wrong claim. The target is: Connect retrieved evidence to an answer and abstain when support is absent. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "reveal",
+      "items": [
+        "The model should guess from common knowledge.",
+        "It lacks a relevant approved source in this corpus."
+      ],
+      "caption": "A retrieval miss may hide a real answer elsewhere; report the search limit."
+    },
+    "teaching_stage": "reveal"
+  },
+  "s22": {
+    "title": "4. Predict · Test split",
+    "explanation": "Why not tune again after seeing the ten final answers?\n\nMake a choice before we explain the diagram.",
+    "speaker_notes": "TEACHER SCRIPT — QUESTION. Take a show of hands for each choice before showing the mechanism. Ask pairs to defend a choice with evidence. Save the strongest wrong reason for the reveal later in this cycle. This week’s case is: The college-policy assistant answers questions with policy IDs. The visible slide states: Why not tune again after seeing the ten final answers?\n\nMake a choice before we explain the diagram. The intended answer is That would contaminate the independent check. The tempting claim is Reusing final questions improves an unbiased estimate. Do not show which card is correct until the reveal. The target is: Connect retrieved evidence to an answer and abstain when support is absent. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "That would contaminate the independent check.",
+        "Reusing final questions improves an unbiased estimate."
+      ]
+    },
+    "teaching_stage": "question"
+  },
+  "s23": {
+    "title": "Test split · a familiar picture",
+    "explanation": "A practice quiz guides choices; an unopened exam checks the choice.\n\nWhat matches our case, and where does the analogy stop?",
+    "speaker_notes": "TEACHER SCRIPT — ANALOGY. Begin with the familiar scene. Invite learners to describe each part in everyday language. Then ask where the comparison might fail before introducing the technical vocabulary. This week’s case is: The college-policy assistant answers questions with policy IDs. The visible slide states: A practice quiz guides choices; an unopened exam checks the choice.\n\nWhat matches our case, and where does the analogy stop? The boundary is: Ten final cases are still a small sample; report each failure and denominator. The target is: Connect retrieved evidence to an answer and abstain when support is absent. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "analogy",
+      "items": [
+        "20 questions",
+        "Search setting",
+        "10 new questions"
+      ],
+      "caption": "A practice quiz guides choices; an unopened exam checks the choice."
+    },
+    "teaching_stage": "analogy"
+  },
+  "s24": {
+    "title": "Test split · map the parts",
+    "explanation": "Match each everyday part to the technical part.\n\nAnalogy limit: Ten final cases are still a small sample; report each failure and denominator.",
+    "speaker_notes": "TEACHER SCRIPT — MAPPING. Point from each familiar element to the corresponding technical element. Have students cover the right column and reconstruct the three matches. Read the limitation aloud. This week’s case is: The college-policy assistant answers questions with policy IDs. The visible slide states: Match each everyday part to the technical part.\n\nAnalogy limit: Ten final cases are still a small sample; report each failure and denominator. The three precise mappings are [['20 questions', 'development set'], ['Search setting', 'chosen configuration'], ['10 new questions', 'final check']]. The target is: Connect retrieved evidence to an answer and abstain when support is absent. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "map",
+      "pairs": [
+        [
+          "20 questions",
+          "development set"
+        ],
+        [
+          "Search setting",
+          "chosen configuration"
+        ],
+        [
+          "10 new questions",
+          "final check"
+        ]
+      ]
+    },
+    "teaching_stage": "mapping"
+  },
+  "s25": {
+    "title": "Test split · how it works",
+    "explanation": "Use 20 practice questions for improvements and keep ten separate questions for final checking.\n\nTrace the arrows from left to right.",
+    "speaker_notes": "TEACHER SCRIPT — MECHANISM. Trace every arrow slowly from the input to the output. Ask what information crosses the boundary at each arrow. Pause if students confuse a simplified notebook with a trained model. This week’s case is: The college-policy assistant answers questions with policy IDs. The visible slide states: Use 20 practice questions for improvements and keep ten separate questions for final checking.\n\nTrace the arrows from left to right. The weekly example is: Compare top-k 1 and 2 on 20 practice questions, freeze the choice, then open ten final cases. State what the analogy does not explain: Ten final cases are still a small sample; report each failure and denominator. The target is: Connect retrieved evidence to an answer and abstain when support is absent. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "20 practice cases",
+        "Choose setting",
+        "10 final cases"
+      ]
+    },
+    "teaching_stage": "mechanism"
+  },
+  "s26": {
+    "title": "Test split · work one case",
+    "explanation": "Compare top-k 1 and 2 on 20 practice questions, freeze the choice, then open ten final cases.\n\nPoint to the evidence before giving your conclusion.",
+    "speaker_notes": "TEACHER SCRIPT — WORKED. Work the specific numbers or source wording aloud. Give students thirty seconds to write a conclusion, then ask which source line or calculation supports it. This week’s case is: The college-policy assistant answers questions with policy IDs. The visible slide states: Compare top-k 1 and 2 on 20 practice questions, freeze the choice, then open ten final cases.\n\nPoint to the evidence before giving your conclusion. The expected reasoning concludes: That would contaminate the independent check. Distinguish measured results from illustrative numbers. The target is: Connect retrieved evidence to an answer and abstain when support is absent. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "work",
+      "items": [
+        "Compare top-k 1 and 2 on 20 practice questions, freeze the choice, then open ten final cases.",
+        "Why not tune again after seeing the ten final answers?",
+        "That would contaminate the independent check."
+      ]
+    },
+    "teaching_stage": "worked"
+  },
+  "s27": {
+    "title": "Test split · answer and explain",
+    "explanation": "That would contaminate the independent check.\n\nTempting mistake: Reusing final questions improves an unbiased estimate.",
+    "speaker_notes": "TEACHER SCRIPT — REVEAL. Return to the earlier choice. Explain the correct answer and why the tempting claim fails. Ask one learner to say the answer in a single sentence without reading it. This week’s case is: The college-policy assistant answers questions with policy IDs. The visible slide states: That would contaminate the independent check.\n\nTempting mistake: Reusing final questions improves an unbiased estimate. The earlier question was Why not tune again after seeing the ten final answers? Ask how this differs from the wrong claim. The target is: Connect retrieved evidence to an answer and abstain when support is absent. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "reveal",
+      "items": [
+        "Reusing final questions improves an unbiased estimate.",
+        "That would contaminate the independent check."
+      ],
+      "caption": "Ten final cases are still a small sample; report each failure and denominator."
+    },
+    "teaching_stage": "reveal"
+  },
+  "s28": {
+    "title": "Evidence trail: input → result",
+    "explanation": "Q: How many extensions are allowed?\n\nA: One deadline extension [P3].",
+    "speaker_notes": "TEACHER SCRIPT — WORKED. Work the specific numbers or source wording aloud. Give students thirty seconds to write a conclusion, then ask which source line or calculation supports it. This week’s case is: The college-policy assistant answers questions with policy IDs. The visible slide states: Q: How many extensions are allowed?\n\nA: One deadline extension [P3]. Have one student point to an exact source word or number for each conclusion. The target is: Connect retrieved evidence to an answer and abstain when support is absent. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "work",
+      "items": [
+        "P3: Students may request one deadline extension within seven days.",
+        "Q: How many extensions are allowed?",
+        "A: One deadline extension [P3]."
+      ]
+    },
+    "teaching_stage": "worked"
+  },
+  "s29": {
+    "title": "Notebook: run the prepared example",
+    "explanation": "Run a small extractive retrieval and answer pipeline.\n\nRead the original output before editing.",
+    "speaker_notes": "TEACHER SCRIPT — PRACTICE. Open the matching notebook and demonstrate the first run. Have learners predict one change, run only that change, and record input, setting, output and an error explanation. This week’s case is: The college-policy assistant answers questions with policy IDs. The visible slide states: Run a small extractive retrieval and answer pipeline.\n\nRead the original output before editing. Use Week_07_Lab.ipynb. This lab is a prepared classroom demonstration with its limitations documented. The target is: Connect retrieved evidence to an answer and abstain when support is absent. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "Search for a relevant policy",
+        "Produce an extractive classroom answer with a source ID",
+        "Record supported and unsupported questions",
+        "Compare top-1 and top-2 on practice cases"
+      ]
+    },
+    "teaching_stage": "practice"
+  },
+  "s30": {
+    "title": "Find the input and check in Python",
+    "explanation": "Locate the supplied input, the transformation, the checking line and the printed result.",
+    "speaker_notes": "TEACHER SCRIPT — PRACTICE. Open the matching notebook and demonstrate the first run. Have learners predict one change, run only that change, and record input, setting, output and an error explanation. This week’s case is: The college-policy assistant answers questions with policy IDs. The visible slide states: Locate the supplied input, the transformation, the checking line and the printed result. The weekly lab change is: Replace a relevant passage with an irrelevant one and observe abstention. The target is: Connect retrieved evidence to an answer and abstain when support is absent. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Input data",
+        "Python operation",
+        "Check",
+        "Recorded result"
+      ]
+    },
+    "teaching_stage": "practice"
+  },
+  "s31": {
+    "title": "Predict one controlled change",
+    "explanation": "Replace a relevant passage with an irrelevant one and observe abstention.\n\nWhat should change in the result? What stays fixed?",
+    "speaker_notes": "TEACHER SCRIPT — PRACTICE. Open the matching notebook and demonstrate the first run. Have learners predict one change, run only that change, and record input, setting, output and an error explanation. This week’s case is: The college-policy assistant answers questions with policy IDs. The visible slide states: Replace a relevant passage with an irrelevant one and observe abstention.\n\nWhat should change in the result? What stays fixed? Ask learners to write their prediction before rerunning the cell. The target is: Connect retrieved evidence to an answer and abstain when support is absent. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "compare",
+      "left": "Before: original case",
+      "right": "After: one change",
+      "caption": "Keep all other inputs fixed."
+    },
+    "teaching_stage": "practice"
+  },
+  "s32": {
+    "title": "Run, compare and record",
+    "explanation": "Record the input, the one changed setting, the observed result and a reason for any difference.",
+    "speaker_notes": "TEACHER SCRIPT — PRACTICE. Open the matching notebook and demonstrate the first run. Have learners predict one change, run only that change, and record input, setting, output and an error explanation. This week’s case is: The college-policy assistant answers questions with policy IDs. The visible slide states: Record the input, the one changed setting, the observed result and a reason for any difference. The required evidence is: Twenty-case practice table; ten final questions remain sealed for assessment. The target is: Connect retrieved evidence to an answer and abstain when support is absent. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "table",
+      "rows": [
+        [
+          "Input",
+          "Setting",
+          "Result"
+        ],
+        [
+          "Original",
+          "baseline",
+          "record"
+        ],
+        [
+          "Changed",
+          "one edit",
+          "compare"
+        ]
+      ]
+    },
+    "teaching_stage": "practice"
+  },
+  "s33": {
+    "title": "Measure without hiding the denominator",
+    "explanation": "Supported claims / checked claims and no-answer accuracy\n\nWrite the numerator, denominator and one failure case.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: The college-policy assistant answers questions with policy IDs. The visible slide states: Supported claims / checked claims and no-answer accuracy\n\nWrite the numerator, denominator and one failure case. Where a measure is qualitative, show the concrete source comparison. Example: A: One deadline extension [P3]. The target is: Connect retrieved evidence to an answer and abstain when support is absent. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Define success",
+        "Count successes",
+        "Count cases",
+        "Inspect errors"
+      ]
+    },
+    "teaching_stage": "check"
+  },
+  "s34": {
+    "title": "Error detective: find the layer",
+    "explanation": "Plausible wrong claim: A citation label proves that the cited passage supports the answer.\n\nCorrect it using the case evidence.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: The college-policy assistant answers questions with policy IDs. The visible slide states: Plausible wrong claim: A citation label proves that the cited passage supports the answer.\n\nCorrect it using the case evidence. The correction is Read the passage and check that it entails the claim; a plausible-looking source tag can be wrong. The target is: Connect retrieved evidence to an answer and abstain when support is absent. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "reveal",
+      "items": [
+        "A citation label proves that the cited passage supports the answer.",
+        "Read the passage and check that it entails the claim; a plausible-looking source tag can be wrong."
+      ],
+      "caption": "Name a test that would catch this failure."
+    },
+    "teaching_stage": "check"
+  },
+  "s35": {
+    "title": "Transfer to a new situation",
+    "explanation": "A fresh question asks about a rule absent from all five policies. What should the assistant do?\n\nExplain which source or test would settle it.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: The college-policy assistant answers questions with policy IDs. The visible slide states: A fresh question asks about a rule absent from all five policies. What should the assistant do?\n\nExplain which source or test would settle it. This is a fresh scenario, so ask for a reason before accepting either short answer. The target is: Connect retrieved evidence to an answer and abstain when support is absent. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "Use the visible evidence",
+        "Flag missing or unsafe evidence"
+      ]
+    },
+    "teaching_stage": "check"
+  },
+  "s36": {
+    "title": "Explain it to a partner",
+    "explanation": "Without reading the slide, name the input, one processing step and the check. Your partner should ask “How do you know?”",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: The college-policy assistant answers questions with policy IDs. The visible slide states: Without reading the slide, name the input, one processing step and the check. Your partner should ask “How do you know?” Listen for a causal explanation and one limitation, then revisit a difficult arrow on the board. The target is: Connect retrieved evidence to an answer and abstain when support is absent. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Question",
+        "Role filter",
+        "Verify support"
+      ]
+    },
+    "teaching_stage": "check"
+  },
+  "s37": {
+    "title": "Exam rehearsal · explain and apply",
+    "explanation": "Why reserve final questions?\n\nWrite a short answer, then compare with the guide.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: The college-policy assistant answers questions with policy IDs. The visible slide states: Why reserve final questions?\n\nWrite a short answer, then compare with the guide. Model answer after discussion: They estimate performance on cases that did not guide tuning. Repeated tuning on them leaks evaluation information. Practice marks: 4. The target is: Connect retrieved evidence to an answer and abstain when support is absent. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "State the core idea",
+        "Use a case detail or calculation",
+        "Add a limitation",
+        "Compare with the Word guide"
+      ]
+    },
+    "teaching_stage": "check"
+  },
+  "s38": {
+    "title": "Exam rehearsal · explain and apply",
+    "explanation": "Two of four material claims are supported. What is citation support?\n\nWrite a short answer, then compare with the guide.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: The college-policy assistant answers questions with policy IDs. The visible slide states: Two of four material claims are supported. What is citation support?\n\nWrite a short answer, then compare with the guide. Model answer after discussion: 2/4 = 50%. Check each claim against its cited evidence. Practice marks: 4. The target is: Connect retrieved evidence to an answer and abstain when support is absent. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "State the core idea",
+        "Use a case detail or calculation",
+        "Add a limitation",
+        "Compare with the Word guide"
+      ]
+    },
+    "teaching_stage": "check"
+  },
+  "s39": {
+    "title": "What to hand in",
+    "explanation": "Twenty-case practice table; ten final questions remain sealed for assessment.\n\nInclude the one changed input and an error explanation.",
+    "speaker_notes": "TEACHER SCRIPT — PRACTICE. Open the matching notebook and demonstrate the first run. Have learners predict one change, run only that change, and record input, setting, output and an error explanation. This week’s case is: The college-policy assistant answers questions with policy IDs. The visible slide states: Twenty-case practice table; ten final questions remain sealed for assessment.\n\nInclude the one changed input and an error explanation. This weekly evidence receives formative feedback according to the module sequence; refer to the assessment brief for graded work. The target is: Connect retrieved evidence to an answer and abstain when support is absent. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "Original run",
+        "One changed input",
+        "Comparison",
+        "Explanation + source"
+      ]
+    },
+    "teaching_stage": "practice"
+  },
+  "s40": {
+    "title": "Three ideas to recall next week",
+    "explanation": "Retrieve, answer, check each claim, and abstain without evidence.\n\nRead the linked official sources in the Word guide and redraw one diagram from memory.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: The college-policy assistant answers questions with policy IDs. The visible slide states: Retrieve, answer, check each claim, and abstain without evidence.\n\nRead the linked official sources in the Word guide and redraw one diagram from memory. Return to the opening vote and ask whether the evidence changed anyone’s mind. The next week builds on this outcome: Connect retrieved evidence to an answer and abstain when support is absent. The target is: Connect retrieved evidence to an answer and abstain when support is absent. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "RAG",
+        "Citation support",
+        "No-answer case",
+        "Test split"
+      ]
+    },
+    "teaching_stage": "check"
+  }
+}

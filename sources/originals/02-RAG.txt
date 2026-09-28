@@ -1,0 +1,109 @@
+Introduction to RAG
+	• RAG Analogy (The Open-Book Exam):
+		○ Imagine taking an open-book exam. You don't have every single fact memorized, but you have access to a pile of textbooks and notes sitting right next to you.
+		○ When a question comes up, you flip through the right sections, read what's relevant, and write your answer based on what you found.
+		○ You are not making things up; you are grounding your answer in actual source material.
+		○ That is exactly what RAG does for a Large Language Model (LLM).
+	• Standard LLM Limitations:
+		○ Standard LLMs (like GPT, Claude, or Gemini) are like students who rely solely on what they memorized during training.
+		○ They are smart, can reason, write, and explain things, but their knowledge has a cutoff date.
+		○ They have no idea what is in your private documents, company databases, or internal knowledge bases.
+	• What is RAG?
+		○ RAG stands for Retrieval Augmented Generation.
+		○ Instead of relying purely on memorized data, RAG allows the model to look up information first, pull in relevant details, and generate an answer grounded in the retrieved context.
+		○ It consists of two systems working together:
+			1. Retrieval System: Finds the right information.
+			2. Generation System: The LLM that uses that information to answer intelligently.
+	• Enterprise Importance:
+		○ RAG is the foundation of almost every serious enterprise AI application today, including customer support bots, internal knowledge assistants, and legal document analysis.
+Top Two RAG Misconceptions
+Myth 1: "RAG is Dead"
+	• Why people say it: Research papers showed that LLMs can sometimes hallucinate even with retrieved context.
+	• Reality: RAG is not a single technology; it is an architectural pattern.
+	• Evolution: It is not dying; it is maturing through advanced patterns like Corrective RAG, Self-RAG, and Agentic RAG.
+Myth 2: "Bigger Context Windows Replace RAG"
+	• Why it seems logical: If you can stuff a million tokens into a prompt, it feels like you don't need a retrieval system.
+	• Why context stuffing fails in practice:
+		1. Cost: Processing million-token contexts on every query is astronomically expensive at scale.
+		2. Latency: Long-context calls are significantly slower.
+		3. Performance Degradation: LLMs actually perform worse when overloaded with irrelevant context. Research shows models lose precision when the signal is buried in too much noise.
+	• Conclusion: A well-built RAG system consistently outperforms brute-force context stuffing on accuracy, cost, and speed.
+RAG Architecture & Under-the-Hood Components
+1. Ingestion & Chunking
+Before anything can be retrieved, documents must be broken down and stored.
+	• Fixed-Size Chunking (Naive Approach):
+		○ Cuts documents into fixed pieces (e.g., 500 tokens).
+		○ Drawback: Loses context at the boundaries. If a sentence gets cut in half between two chunks, neither chunk makes proper sense.
+	• Semantic Chunking:
+		○ Uses an embedding model to detect where the topic shifts in the text, breaking the document at natural semantic boundaries (supported natively in LangChain and LlamaIndex).
+	• Document-Aware Chunking:
+		○ Respects the structural layout of documents (e.g., sections in PDFs, headers in Markdown).
+	• Hierarchical Chunking (Small-to-Big Retrieval):
+		○ Stores both a small, precise chunk and a larger parent chunk containing broader context.
+		○ When the small chunk is matched, the larger parent chunk is passed to the LLM. It is one of the best techniques in production RAG.
+2. Embedding Models
+	• Converts each chunk into an embedding (a numerical vector representing the text's meaning).
+	• When a user asks a question, the system embeds the query and finds the chunks with embeddings closest to it (Semantic Search).
+	• Top Embedding Models:
+		○ OpenAI: text-embedding-3-large
+		○ Voyage: Voyage 3
+		○ Open Source (Hugging Face): BGE-large, E5-Mistral
+	• Best Practice: Always benchmark embedding models on your specific domain, as a model good at legal text might perform poorly on code documentation.
+3. Vector Databases
+	• Stores and indexes the generated vector embeddings.
+	• Popular Databases: Pinecone, Weaviate, Qdrant, Milvus, and ChromaDB.
+	• Key Evaluation Metrics:
+		○ Query latency at expected scale.
+		○ Support for metadata filtering (filtering by date, source, category before vector search).
+		○ Support for hybrid search.
+10 Essential RAG Patterns
+1. Simple RAG
+	• Mechanism: User asks a question $\rightarrow$ system retrieves relevant chunks $\rightarrow$ chunks are stuffed into prompt $\rightarrow$ LLM generates answer.
+	• Use Case: Good for prototyping ("Hello World" of RAG), but insufficient for production.
+2. RAG with Memory
+	• Mechanism: Adds a dedicated conversational memory layer on top of standard Simple RAG to maintain multi-turn chat context.
+3. Branched RAG
+	• Mechanism: Uses an LLM to decompose a complex query into multiple sub-questions, executes parallel retrievals for each sub-question, and synthesizes all results into a single coherent answer.
+	• Use Case: Complex multi-part queries where a single retrieval call isn't sufficient.
+4. HyDE (Hypothetical Document Embeddings)
+	• Problem Solved: Query embeddings and document embeddings often look semantically different even when discussing the same topic (e.g., a short question vs. a long explanatory paragraph).
+	• Mechanism:
+		1. The LLM generates a hypothetical answer to the query before performing retrieval.
+		2. The system embeds this hypothetical answer.
+		3. The generated embedding is used as the search vector against the database.
+	• Result: Significantly improves retrieval quality because the hypothetical answer closely resembles real document chunks.
+5. Adaptive RAG
+	• Mechanism: Uses a routing layer (a lightweight classifier or fast LLM call) to analyze incoming queries and route them dynamically.
+	• Routing Logic:
+		○ Simple questions (e.g., "What is 2+2?") $\rightarrow$ No retrieval needed.
+		○ Standard queries $\rightarrow$ Simple retrieval.
+		○ Complex queries $\rightarrow$ Multi-step retrieval.
+	• Result: Optimizes system efficiency, lowers latency, and reduces cost.
+6. Corrective RAG (CRAG)
+	• Problem Solved: Handles cases where retrieved documents are low-quality or completely irrelevant.
+	• Mechanism:
+		1. Adds an evaluation step immediately after retrieval.
+		2. If retrieved chunks fall below a confidence threshold, the system re-formulates the query and tries again, or falls back to an external web search.
+	• Result: Acts as a quality gate for the pipeline before generation occurs.
+7. Self-RAG
+	• Mechanism: The LLM is trained or prompted to output explicit reflection tokens while generating the answer in real time.
+	• Reflection Tokens:
+		○ Is retrieval needed here?
+		○ Is this passage relevant?
+		○ Is this claim supported by the retrieved context?
+	• Result: The model critiques its own reasoning continuously, leading to more grounded, accurate, and transparent responses.
+8. Agentic RAG
+	• Mechanism: Replaces static retrieve-then-generate flows with an LLM functioning as an autonomous orchestrator.
+	• Logic Loop: The agent determines whether to search for more data, call an external API, execute code, query a different database, or answer based on accumulated context. It loops iteratively until the answer meets quality standards.
+	• Frameworks: Commonly built using LangChain or LlamaIndex Workflows.
+9. Multimodal RAG
+	• Problem Solved: Enterprise data contains non-text elements like charts, diagrams, tables, and visual PDFs.
+	• Mechanism:
+		○ Approach A: Uses a Vision-Language Model (VLM) at ingestion time to generate descriptive text summaries for images and tables, allowing them to be indexed as normal text.
+		○ Approach B: Direct storage and retrieval of image embeddings alongside text embeddings natively (supported by LlamaIndex).
+10. GraphRAG
+	• Problem Solved: Standard RAG treats documents as a flat collection of chunks with no structural relationships between them.
+	• Mechanism: Builds an explicit Knowledge Graph over the document store, mapping out entities and their interrelationships.
+	• Use Case: Connecting complex, interconnected information across multiple documents (e.g., "How does this specific regulation affect the contracts we signed with these three vendors?").
+	• Result: Dramatically outperforms pure vector search on relationship-heavy domain queries.
+

@@ -1,0 +1,614 @@
+{
+  "s01": {
+    "title": "Week 05 · Clear prompts and output checks",
+    "explanation": "The missing invoice total\n\nAn invoice has quantity 3 and price €12, but no printed total. Should the assistant fill €36 into the extracted total field?",
+    "speaker_notes": "TEACHER SCRIPT — OPEN. Show the visual for ten seconds, then ask for an initial decision. Do not reveal the answer yet. Ask a student to name the source or measurement that would change their mind. This week’s case is: An office extracts amounts and invoice identifiers from synthetic invoices. The visible slide states: The missing invoice total\n\nAn invoice has quantity 3 and price €12, but no printed total. Should the assistant fill €36 into the extracted total field? Reveal that the case will be revisited after four short concept cycles. The target is: Specify a task and validate an answer before using it. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "story",
+      "items": [
+        "The missing invoice total",
+        "What is known?",
+        "What must we check?"
+      ]
+    },
+    "teaching_stage": "open"
+  },
+  "s02": {
+    "title": "First vote: what would you do?",
+    "explanation": "An invoice has quantity 3 and price €12, but no printed total. Should the assistant fill €36 into the extracted total field?\n\nChoose an initial answer and name one piece of evidence you need.",
+    "speaker_notes": "TEACHER SCRIPT — QUESTION. Take a show of hands for each choice before showing the mechanism. Ask pairs to defend a choice with evidence. Save the strongest wrong reason for the reveal later in this cycle. This week’s case is: An office extracts amounts and invoice identifiers from synthetic invoices. The visible slide states: An invoice has quantity 3 and price €12, but no printed total. Should the assistant fill €36 into the extracted total field?\n\nChoose an initial answer and name one piece of evidence you need. Accept reasonable uncertainty; record the initial votes to revisit at the end. The target is: Specify a task and validate an answer before using it. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "Accept the first plausible result",
+        "Check the source or measurement"
+      ]
+    },
+    "teaching_stage": "question"
+  },
+  "s03": {
+    "title": "The journey through today’s case",
+    "explanation": "We will predict, connect an analogy, trace a mechanism, work an example, then explain a decision.",
+    "speaker_notes": "TEACHER SCRIPT — OPEN. Show the visual for ten seconds, then ask for an initial decision. Do not reveal the answer yet. Ask a student to name the source or measurement that would change their mind. This week’s case is: An office extracts amounts and invoice identifiers from synthetic invoices. The visible slide states: We will predict, connect an analogy, trace a mechanism, work an example, then explain a decision. Point to the four named ideas, then show where the notebook experiment fits. The target is: Specify a task and validate an answer before using it. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "Task instruction",
+        "Evidence",
+        "Schema",
+        "Abstention"
+      ]
+    },
+    "teaching_stage": "open"
+  },
+  "s04": {
+    "title": "1. Predict · Task instruction",
+    "explanation": "What should the output contain for this invoice’s listed total?\n\nMake a choice before we explain the diagram.",
+    "speaker_notes": "TEACHER SCRIPT — QUESTION. Take a show of hands for each choice before showing the mechanism. Ask pairs to defend a choice with evidence. Save the strongest wrong reason for the reveal later in this cycle. This week’s case is: An office extracts amounts and invoice identifiers from synthetic invoices. The visible slide states: What should the output contain for this invoice’s listed total?\n\nMake a choice before we explain the diagram. The intended answer is null, because no printed total appears. The tempting claim is The assistant should infer every blank value. Do not show which card is correct until the reveal. The target is: Specify a task and validate an answer before using it. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "null, because no printed total appears.",
+        "The assistant should infer every blank value."
+      ]
+    },
+    "teaching_stage": "question"
+  },
+  "s05": {
+    "title": "Task instruction · a familiar picture",
+    "explanation": "A precise work order names each item and what to do if it is absent.\n\nWhat matches our case, and where does the analogy stop?",
+    "speaker_notes": "TEACHER SCRIPT — ANALOGY. Begin with the familiar scene. Invite learners to describe each part in everyday language. Then ask where the comparison might fail before introducing the technical vocabulary. This week’s case is: An office extracts amounts and invoice identifiers from synthetic invoices. The visible slide states: A precise work order names each item and what to do if it is absent.\n\nWhat matches our case, and where does the analogy stop? The boundary is: A prompt guides behaviour but does not enforce correctness by itself. The target is: Specify a task and validate an answer before using it. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "analogy",
+      "items": [
+        "Work order",
+        "Required items",
+        "Missing-item rule"
+      ],
+      "caption": "A precise work order names each item and what to do if it is absent."
+    },
+    "teaching_stage": "analogy"
+  },
+  "s06": {
+    "title": "Task instruction · map the parts",
+    "explanation": "Match each everyday part to the technical part.\n\nAnalogy limit: A prompt guides behaviour but does not enforce correctness by itself.",
+    "speaker_notes": "TEACHER SCRIPT — MAPPING. Point from each familiar element to the corresponding technical element. Have students cover the right column and reconstruct the three matches. Read the limitation aloud. This week’s case is: An office extracts amounts and invoice identifiers from synthetic invoices. The visible slide states: Match each everyday part to the technical part.\n\nAnalogy limit: A prompt guides behaviour but does not enforce correctness by itself. The three precise mappings are [['Work order', 'prompt'], ['Required items', 'fields'], ['Missing-item rule', 'null instruction']]. The target is: Specify a task and validate an answer before using it. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "map",
+      "pairs": [
+        [
+          "Work order",
+          "prompt"
+        ],
+        [
+          "Required items",
+          "fields"
+        ],
+        [
+          "Missing-item rule",
+          "null instruction"
+        ]
+      ]
+    },
+    "teaching_stage": "mapping"
+  },
+  "s07": {
+    "title": "Task instruction · how it works",
+    "explanation": "State exactly which fields to extract and how to handle missing entries.\n\nTrace the arrows from left to right.",
+    "speaker_notes": "TEACHER SCRIPT — MECHANISM. Trace every arrow slowly from the input to the output. Ask what information crosses the boundary at each arrow. Pause if students confuse a simplified notebook with a trained model. This week’s case is: An office extracts amounts and invoice identifiers from synthetic invoices. The visible slide states: State exactly which fields to extract and how to handle missing entries.\n\nTrace the arrows from left to right. The weekly example is: Request invoice_id and listed_total; say “use null if the total is not printed.” State what the analogy does not explain: A prompt guides behaviour but does not enforce correctness by itself. The target is: Specify a task and validate an answer before using it. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Invoice text",
+        "Field instructions",
+        "Structured reply"
+      ]
+    },
+    "teaching_stage": "mechanism"
+  },
+  "s08": {
+    "title": "Task instruction · work one case",
+    "explanation": "Request invoice_id and listed_total; say “use null if the total is not printed.”\n\nPoint to the evidence before giving your conclusion.",
+    "speaker_notes": "TEACHER SCRIPT — WORKED. Work the specific numbers or source wording aloud. Give students thirty seconds to write a conclusion, then ask which source line or calculation supports it. This week’s case is: An office extracts amounts and invoice identifiers from synthetic invoices. The visible slide states: Request invoice_id and listed_total; say “use null if the total is not printed.”\n\nPoint to the evidence before giving your conclusion. The expected reasoning concludes: null, because no printed total appears. Distinguish measured results from illustrative numbers. The target is: Specify a task and validate an answer before using it. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "work",
+      "items": [
+        "Request invoice_id and listed_total; say “use null if the total is not printed.”",
+        "What should the output contain for this invoice’s listed total?",
+        "null, because no printed total appears."
+      ]
+    },
+    "teaching_stage": "worked"
+  },
+  "s09": {
+    "title": "Task instruction · answer and explain",
+    "explanation": "null, because no printed total appears.\n\nTempting mistake: The assistant should infer every blank value.",
+    "speaker_notes": "TEACHER SCRIPT — REVEAL. Return to the earlier choice. Explain the correct answer and why the tempting claim fails. Ask one learner to say the answer in a single sentence without reading it. This week’s case is: An office extracts amounts and invoice identifiers from synthetic invoices. The visible slide states: null, because no printed total appears.\n\nTempting mistake: The assistant should infer every blank value. The earlier question was What should the output contain for this invoice’s listed total? Ask how this differs from the wrong claim. The target is: Specify a task and validate an answer before using it. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "reveal",
+      "items": [
+        "The assistant should infer every blank value.",
+        "null, because no printed total appears."
+      ],
+      "caption": "A prompt guides behaviour but does not enforce correctness by itself."
+    },
+    "teaching_stage": "reveal"
+  },
+  "s10": {
+    "title": "2. Predict · Evidence",
+    "explanation": "Can €36 be labelled “extracted listed total”?\n\nMake a choice before we explain the diagram.",
+    "speaker_notes": "TEACHER SCRIPT — QUESTION. Take a show of hands for each choice before showing the mechanism. Ask pairs to defend a choice with evidence. Save the strongest wrong reason for the reveal later in this cycle. This week’s case is: An office extracts amounts and invoice identifiers from synthetic invoices. The visible slide states: Can €36 be labelled “extracted listed total”?\n\nMake a choice before we explain the diagram. The intended answer is No. It can be a separate calculated check only. The tempting claim is A plausible calculation counts as document evidence. Do not show which card is correct until the reveal. The target is: Specify a task and validate an answer before using it. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "No. It can be a separate calculated check only.",
+        "A plausible calculation counts as document evidence."
+      ]
+    },
+    "teaching_stage": "question"
+  },
+  "s11": {
+    "title": "Evidence · a familiar picture",
+    "explanation": "A clerk points to the exact line on a receipt before copying it.\n\nWhat matches our case, and where does the analogy stop?",
+    "speaker_notes": "TEACHER SCRIPT — ANALOGY. Begin with the familiar scene. Invite learners to describe each part in everyday language. Then ask where the comparison might fail before introducing the technical vocabulary. This week’s case is: An office extracts amounts and invoice identifiers from synthetic invoices. The visible slide states: A clerk points to the exact line on a receipt before copying it.\n\nWhat matches our case, and where does the analogy stop? The boundary is: A source pointer may still point to the wrong line; verify the match. The target is: Specify a task and validate an answer before using it. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "analogy",
+      "items": [
+        "Receipt line",
+        "Copied value",
+        "Pointer"
+      ],
+      "caption": "A clerk points to the exact line on a receipt before copying it."
+    },
+    "teaching_stage": "analogy"
+  },
+  "s12": {
+    "title": "Evidence · map the parts",
+    "explanation": "Match each everyday part to the technical part.\n\nAnalogy limit: A source pointer may still point to the wrong line; verify the match.",
+    "speaker_notes": "TEACHER SCRIPT — MAPPING. Point from each familiar element to the corresponding technical element. Have students cover the right column and reconstruct the three matches. Read the limitation aloud. This week’s case is: An office extracts amounts and invoice identifiers from synthetic invoices. The visible slide states: Match each everyday part to the technical part.\n\nAnalogy limit: A source pointer may still point to the wrong line; verify the match. The three precise mappings are [['Receipt line', 'source evidence'], ['Copied value', 'extracted field'], ['Pointer', 'source span']]. The target is: Specify a task and validate an answer before using it. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "map",
+      "pairs": [
+        [
+          "Receipt line",
+          "source evidence"
+        ],
+        [
+          "Copied value",
+          "extracted field"
+        ],
+        [
+          "Pointer",
+          "source span"
+        ]
+      ]
+    },
+    "teaching_stage": "mapping"
+  },
+  "s13": {
+    "title": "Evidence · how it works",
+    "explanation": "Use only the supplied invoice text; do not infer a value that is absent.\n\nTrace the arrows from left to right.",
+    "speaker_notes": "TEACHER SCRIPT — MECHANISM. Trace every arrow slowly from the input to the output. Ask what information crosses the boundary at each arrow. Pause if students confuse a simplified notebook with a trained model. This week’s case is: An office extracts amounts and invoice identifiers from synthetic invoices. The visible slide states: Use only the supplied invoice text; do not infer a value that is absent.\n\nTrace the arrows from left to right. The weekly example is: Quantity 3 and unit price €12 are visible. €36 is a calculation, not a printed total. State what the analogy does not explain: A source pointer may still point to the wrong line; verify the match. The target is: Specify a task and validate an answer before using it. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Invoice INV-04",
+        "Read printed total",
+        "Keep source text"
+      ]
+    },
+    "teaching_stage": "mechanism"
+  },
+  "s14": {
+    "title": "Evidence · work one case",
+    "explanation": "Quantity 3 and unit price €12 are visible. €36 is a calculation, not a printed total.\n\nPoint to the evidence before giving your conclusion.",
+    "speaker_notes": "TEACHER SCRIPT — WORKED. Work the specific numbers or source wording aloud. Give students thirty seconds to write a conclusion, then ask which source line or calculation supports it. This week’s case is: An office extracts amounts and invoice identifiers from synthetic invoices. The visible slide states: Quantity 3 and unit price €12 are visible. €36 is a calculation, not a printed total.\n\nPoint to the evidence before giving your conclusion. The expected reasoning concludes: No. It can be a separate calculated check only. Distinguish measured results from illustrative numbers. The target is: Specify a task and validate an answer before using it. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "work",
+      "items": [
+        "Quantity 3 and unit price €12 are visible. €36 is a calculation, not a printed total.",
+        "Can €36 be labelled “extracted listed total”?",
+        "No. It can be a separate calculated check only."
+      ]
+    },
+    "teaching_stage": "worked"
+  },
+  "s15": {
+    "title": "Evidence · answer and explain",
+    "explanation": "No. It can be a separate calculated check only.\n\nTempting mistake: A plausible calculation counts as document evidence.",
+    "speaker_notes": "TEACHER SCRIPT — REVEAL. Return to the earlier choice. Explain the correct answer and why the tempting claim fails. Ask one learner to say the answer in a single sentence without reading it. This week’s case is: An office extracts amounts and invoice identifiers from synthetic invoices. The visible slide states: No. It can be a separate calculated check only.\n\nTempting mistake: A plausible calculation counts as document evidence. The earlier question was Can €36 be labelled “extracted listed total”? Ask how this differs from the wrong claim. The target is: Specify a task and validate an answer before using it. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "reveal",
+      "items": [
+        "A plausible calculation counts as document evidence.",
+        "No. It can be a separate calculated check only."
+      ],
+      "caption": "A source pointer may still point to the wrong line; verify the match."
+    },
+    "teaching_stage": "reveal"
+  },
+  "s16": {
+    "title": "3. Predict · Schema",
+    "explanation": "Which test detects a wrong but well-typed amount?\n\nMake a choice before we explain the diagram.",
+    "speaker_notes": "TEACHER SCRIPT — QUESTION. Take a show of hands for each choice before showing the mechanism. Ask pairs to defend a choice with evidence. Save the strongest wrong reason for the reveal later in this cycle. This week’s case is: An office extracts amounts and invoice identifiers from synthetic invoices. The visible slide states: Which test detects a wrong but well-typed amount?\n\nMake a choice before we explain the diagram. The intended answer is Compare the returned amount with the original invoice text. The tempting claim is Valid JSON means the facts are valid. Do not show which card is correct until the reveal. The target is: Specify a task and validate an answer before using it. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "Compare the returned amount with the original invoice text.",
+        "Valid JSON means the facts are valid."
+      ]
+    },
+    "teaching_stage": "question"
+  },
+  "s17": {
+    "title": "Schema · a familiar picture",
+    "explanation": "A shipping form checks boxes and value types before accepting a parcel.\n\nWhat matches our case, and where does the analogy stop?",
+    "speaker_notes": "TEACHER SCRIPT — ANALOGY. Begin with the familiar scene. Invite learners to describe each part in everyday language. Then ask where the comparison might fail before introducing the technical vocabulary. This week’s case is: An office extracts amounts and invoice identifiers from synthetic invoices. The visible slide states: A shipping form checks boxes and value types before accepting a parcel.\n\nWhat matches our case, and where does the analogy stop? The boundary is: A correct shape does not prove the value came from the document. The target is: Specify a task and validate an answer before using it. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "analogy",
+      "items": [
+        "Boxes",
+        "Type rule",
+        "Reject stamp"
+      ],
+      "caption": "A shipping form checks boxes and value types before accepting a parcel."
+    },
+    "teaching_stage": "analogy"
+  },
+  "s18": {
+    "title": "Schema · map the parts",
+    "explanation": "Match each everyday part to the technical part.\n\nAnalogy limit: A correct shape does not prove the value came from the document.",
+    "speaker_notes": "TEACHER SCRIPT — MAPPING. Point from each familiar element to the corresponding technical element. Have students cover the right column and reconstruct the three matches. Read the limitation aloud. This week’s case is: An office extracts amounts and invoice identifiers from synthetic invoices. The visible slide states: Match each everyday part to the technical part.\n\nAnalogy limit: A correct shape does not prove the value came from the document. The three precise mappings are [['Boxes', 'field names'], ['Type rule', 'schema'], ['Reject stamp', 'validator flag']]. The target is: Specify a task and validate an answer before using it. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "map",
+      "pairs": [
+        [
+          "Boxes",
+          "field names"
+        ],
+        [
+          "Type rule",
+          "schema"
+        ],
+        [
+          "Reject stamp",
+          "validator flag"
+        ]
+      ]
+    },
+    "teaching_stage": "mapping"
+  },
+  "s19": {
+    "title": "Schema · how it works",
+    "explanation": "Validate names and types of returned fields with Python.\n\nTrace the arrows from left to right.",
+    "speaker_notes": "TEACHER SCRIPT — MECHANISM. Trace every arrow slowly from the input to the output. Ask what information crosses the boundary at each arrow. Pause if students confuse a simplified notebook with a trained model. This week’s case is: An office extracts amounts and invoice identifiers from synthetic invoices. The visible slide states: Validate names and types of returned fields with Python.\n\nTrace the arrows from left to right. The weekly example is: An ID of INV-04 and a listed total of €36 can pass type checks but fail a source check. State what the analogy does not explain: A correct shape does not prove the value came from the document. The target is: Specify a task and validate an answer before using it. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Fields and types",
+        "Python validator",
+        "Accept or flag"
+      ]
+    },
+    "teaching_stage": "mechanism"
+  },
+  "s20": {
+    "title": "Schema · work one case",
+    "explanation": "An ID of INV-04 and a listed total of €36 can pass type checks but fail a source check.\n\nPoint to the evidence before giving your conclusion.",
+    "speaker_notes": "TEACHER SCRIPT — WORKED. Work the specific numbers or source wording aloud. Give students thirty seconds to write a conclusion, then ask which source line or calculation supports it. This week’s case is: An office extracts amounts and invoice identifiers from synthetic invoices. The visible slide states: An ID of INV-04 and a listed total of €36 can pass type checks but fail a source check.\n\nPoint to the evidence before giving your conclusion. The expected reasoning concludes: Compare the returned amount with the original invoice text. Distinguish measured results from illustrative numbers. The target is: Specify a task and validate an answer before using it. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "work",
+      "items": [
+        "An ID of INV-04 and a listed total of €36 can pass type checks but fail a source check.",
+        "Which test detects a wrong but well-typed amount?",
+        "Compare the returned amount with the original invoice text."
+      ]
+    },
+    "teaching_stage": "worked"
+  },
+  "s21": {
+    "title": "Schema · answer and explain",
+    "explanation": "Compare the returned amount with the original invoice text.\n\nTempting mistake: Valid JSON means the facts are valid.",
+    "speaker_notes": "TEACHER SCRIPT — REVEAL. Return to the earlier choice. Explain the correct answer and why the tempting claim fails. Ask one learner to say the answer in a single sentence without reading it. This week’s case is: An office extracts amounts and invoice identifiers from synthetic invoices. The visible slide states: Compare the returned amount with the original invoice text.\n\nTempting mistake: Valid JSON means the facts are valid. The earlier question was Which test detects a wrong but well-typed amount? Ask how this differs from the wrong claim. The target is: Specify a task and validate an answer before using it. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "reveal",
+      "items": [
+        "Valid JSON means the facts are valid.",
+        "Compare the returned amount with the original invoice text."
+      ],
+      "caption": "A correct shape does not prove the value came from the document."
+    },
+    "teaching_stage": "reveal"
+  },
+  "s22": {
+    "title": "4. Predict · Abstention",
+    "explanation": "Why preserve a missing value?\n\nMake a choice before we explain the diagram.",
+    "speaker_notes": "TEACHER SCRIPT — QUESTION. Take a show of hands for each choice before showing the mechanism. Ask pairs to defend a choice with evidence. Save the strongest wrong reason for the reveal later in this cycle. This week’s case is: An office extracts amounts and invoice identifiers from synthetic invoices. The visible slide states: Why preserve a missing value?\n\nMake a choice before we explain the diagram. The intended answer is It separates unknown source content from an independent calculation. The tempting claim is Every missing field is a model failure to be hidden. Do not show which card is correct until the reveal. The target is: Specify a task and validate an answer before using it. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "It separates unknown source content from an independent calculation.",
+        "Every missing field is a model failure to be hidden."
+      ]
+    },
+    "teaching_stage": "question"
+  },
+  "s23": {
+    "title": "Abstention · a familiar picture",
+    "explanation": "A careful witness says “I did not see that number.”\n\nWhat matches our case, and where does the analogy stop?",
+    "speaker_notes": "TEACHER SCRIPT — ANALOGY. Begin with the familiar scene. Invite learners to describe each part in everyday language. Then ask where the comparison might fail before introducing the technical vocabulary. This week’s case is: An office extracts amounts and invoice identifiers from synthetic invoices. The visible slide states: A careful witness says “I did not see that number.”\n\nWhat matches our case, and where does the analogy stop? The boundary is: Abstention can be too cautious; measure missing and falsely missing fields. The target is: Specify a task and validate an answer before using it. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "analogy",
+      "items": [
+        "Unseen figure",
+        "Honest reply",
+        "Follow-up"
+      ],
+      "caption": "A careful witness says “I did not see that number.”"
+    },
+    "teaching_stage": "analogy"
+  },
+  "s24": {
+    "title": "Abstention · map the parts",
+    "explanation": "Match each everyday part to the technical part.\n\nAnalogy limit: Abstention can be too cautious; measure missing and falsely missing fields.",
+    "speaker_notes": "TEACHER SCRIPT — MAPPING. Point from each familiar element to the corresponding technical element. Have students cover the right column and reconstruct the three matches. Read the limitation aloud. This week’s case is: An office extracts amounts and invoice identifiers from synthetic invoices. The visible slide states: Match each everyday part to the technical part.\n\nAnalogy limit: Abstention can be too cautious; measure missing and falsely missing fields. The three precise mappings are [['Unseen figure', 'missing field'], ['Honest reply', 'null'], ['Follow-up', 'human review']]. The target is: Specify a task and validate an answer before using it. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "map",
+      "pairs": [
+        [
+          "Unseen figure",
+          "missing field"
+        ],
+        [
+          "Honest reply",
+          "null"
+        ],
+        [
+          "Follow-up",
+          "human review"
+        ]
+      ]
+    },
+    "teaching_stage": "mapping"
+  },
+  "s25": {
+    "title": "Abstention · how it works",
+    "explanation": "A missing value should stay null or cause a review flag, rather than be guessed.\n\nTrace the arrows from left to right.",
+    "speaker_notes": "TEACHER SCRIPT — MECHANISM. Trace every arrow slowly from the input to the output. Ask what information crosses the boundary at each arrow. Pause if students confuse a simplified notebook with a trained model. This week’s case is: An office extracts amounts and invoice identifiers from synthetic invoices. The visible slide states: A missing value should stay null or cause a review flag, rather than be guessed.\n\nTrace the arrows from left to right. The weekly example is: When the total is absent, the validator flags null for review without inventing a figure. State what the analogy does not explain: Abstention can be too cautious; measure missing and falsely missing fields. The target is: Specify a task and validate an answer before using it. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Missing total",
+        "Return null",
+        "Human review"
+      ]
+    },
+    "teaching_stage": "mechanism"
+  },
+  "s26": {
+    "title": "Abstention · work one case",
+    "explanation": "When the total is absent, the validator flags null for review without inventing a figure.\n\nPoint to the evidence before giving your conclusion.",
+    "speaker_notes": "TEACHER SCRIPT — WORKED. Work the specific numbers or source wording aloud. Give students thirty seconds to write a conclusion, then ask which source line or calculation supports it. This week’s case is: An office extracts amounts and invoice identifiers from synthetic invoices. The visible slide states: When the total is absent, the validator flags null for review without inventing a figure.\n\nPoint to the evidence before giving your conclusion. The expected reasoning concludes: It separates unknown source content from an independent calculation. Distinguish measured results from illustrative numbers. The target is: Specify a task and validate an answer before using it. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "work",
+      "items": [
+        "When the total is absent, the validator flags null for review without inventing a figure.",
+        "Why preserve a missing value?",
+        "It separates unknown source content from an independent calculation."
+      ]
+    },
+    "teaching_stage": "worked"
+  },
+  "s27": {
+    "title": "Abstention · answer and explain",
+    "explanation": "It separates unknown source content from an independent calculation.\n\nTempting mistake: Every missing field is a model failure to be hidden.",
+    "speaker_notes": "TEACHER SCRIPT — REVEAL. Return to the earlier choice. Explain the correct answer and why the tempting claim fails. Ask one learner to say the answer in a single sentence without reading it. This week’s case is: An office extracts amounts and invoice identifiers from synthetic invoices. The visible slide states: It separates unknown source content from an independent calculation.\n\nTempting mistake: Every missing field is a model failure to be hidden. The earlier question was Why preserve a missing value? Ask how this differs from the wrong claim. The target is: Specify a task and validate an answer before using it. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "reveal",
+      "items": [
+        "Every missing field is a model failure to be hidden.",
+        "It separates unknown source content from an independent calculation."
+      ],
+      "caption": "Abstention can be too cautious; measure missing and falsely missing fields."
+    },
+    "teaching_stage": "reveal"
+  },
+  "s28": {
+    "title": "Evidence trail: input → result",
+    "explanation": "Extract ID and listed total if present.\n\nIf total is absent, return None; 3 × 12 is a calculated check, not an extracted listed value.",
+    "speaker_notes": "TEACHER SCRIPT — WORKED. Work the specific numbers or source wording aloud. Give students thirty seconds to write a conclusion, then ask which source line or calculation supports it. This week’s case is: An office extracts amounts and invoice identifiers from synthetic invoices. The visible slide states: Extract ID and listed total if present.\n\nIf total is absent, return None; 3 × 12 is a calculated check, not an extracted listed value. Have one student point to an exact source word or number for each conclusion. The target is: Specify a task and validate an answer before using it. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "work",
+      "items": [
+        "Invoice INV-04 shows quantity 3 and price 12.",
+        "Extract ID and listed total if present.",
+        "If total is absent, return None; 3 × 12 is a calculated check, not an extracted listed value."
+      ]
+    },
+    "teaching_stage": "worked"
+  },
+  "s29": {
+    "title": "Notebook: run the prepared example",
+    "explanation": "Run extraction validation on ten synthetic records.\n\nRead the original output before editing.",
+    "speaker_notes": "TEACHER SCRIPT — PRACTICE. Open the matching notebook and demonstrate the first run. Have learners predict one change, run only that change, and record input, setting, output and an error explanation. This week’s case is: An office extracts amounts and invoice identifiers from synthetic invoices. The visible slide states: Run extraction validation on ten synthetic records.\n\nRead the original output before editing. Use Week_05_Lab.ipynb. This lab is a prepared classroom demonstration with its limitations documented. The target is: Specify a task and validate an answer before using it. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "Compare a vague request with a field-specific request",
+        "Inspect ten synthetic invoice records",
+        "Validate an extraction dictionary against the schema",
+        "Explain a failure caused by an invented total"
+      ]
+    },
+    "teaching_stage": "practice"
+  },
+  "s30": {
+    "title": "Find the input and check in Python",
+    "explanation": "Locate the supplied input, the transformation, the checking line and the printed result.",
+    "speaker_notes": "TEACHER SCRIPT — PRACTICE. Open the matching notebook and demonstrate the first run. Have learners predict one change, run only that change, and record input, setting, output and an error explanation. This week’s case is: An office extracts amounts and invoice identifiers from synthetic invoices. The visible slide states: Locate the supplied input, the transformation, the checking line and the printed result. The weekly lab change is: Delete one total and confirm the missing-field review flag fires. The target is: Specify a task and validate an answer before using it. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Input data",
+        "Python operation",
+        "Check",
+        "Recorded result"
+      ]
+    },
+    "teaching_stage": "practice"
+  },
+  "s31": {
+    "title": "Predict one controlled change",
+    "explanation": "Delete one total and confirm the missing-field review flag fires.\n\nWhat should change in the result? What stays fixed?",
+    "speaker_notes": "TEACHER SCRIPT — PRACTICE. Open the matching notebook and demonstrate the first run. Have learners predict one change, run only that change, and record input, setting, output and an error explanation. This week’s case is: An office extracts amounts and invoice identifiers from synthetic invoices. The visible slide states: Delete one total and confirm the missing-field review flag fires.\n\nWhat should change in the result? What stays fixed? Ask learners to write their prediction before rerunning the cell. The target is: Specify a task and validate an answer before using it. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "compare",
+      "left": "Before: original case",
+      "right": "After: one change",
+      "caption": "Keep all other inputs fixed."
+    },
+    "teaching_stage": "practice"
+  },
+  "s32": {
+    "title": "Run, compare and record",
+    "explanation": "Record the input, the one changed setting, the observed result and a reason for any difference.",
+    "speaker_notes": "TEACHER SCRIPT — PRACTICE. Open the matching notebook and demonstrate the first run. Have learners predict one change, run only that change, and record input, setting, output and an error explanation. This week’s case is: An office extracts amounts and invoice identifiers from synthetic invoices. The visible slide states: Record the input, the one changed setting, the observed result and a reason for any difference. The required evidence is: Prompt revision and before/after field-check table. The target is: Specify a task and validate an answer before using it. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "table",
+      "rows": [
+        [
+          "Input",
+          "Setting",
+          "Result"
+        ],
+        [
+          "Original",
+          "baseline",
+          "record"
+        ],
+        [
+          "Changed",
+          "one edit",
+          "compare"
+        ]
+      ]
+    },
+    "teaching_stage": "practice"
+  },
+  "s33": {
+    "title": "Measure without hiding the denominator",
+    "explanation": "Fields correct / fields checked; report missing fields separately\n\nWrite the numerator, denominator and one failure case.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: An office extracts amounts and invoice identifiers from synthetic invoices. The visible slide states: Fields correct / fields checked; report missing fields separately\n\nWrite the numerator, denominator and one failure case. Where a measure is qualitative, show the concrete source comparison. Example: If total is absent, return None; 3 × 12 is a calculated check, not an extracted listed value. The target is: Specify a task and validate an answer before using it. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Define success",
+        "Count successes",
+        "Count cases",
+        "Inspect errors"
+      ]
+    },
+    "teaching_stage": "check"
+  },
+  "s34": {
+    "title": "Error detective: find the layer",
+    "explanation": "Plausible wrong claim: Valid JSON means the invoice facts are true.\n\nCorrect it using the case evidence.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: An office extracts amounts and invoice identifiers from synthetic invoices. The visible slide states: Plausible wrong claim: Valid JSON means the invoice facts are true.\n\nCorrect it using the case evidence. The correction is Syntax and data types are only the first check; compare values with the original document. The target is: Specify a task and validate an answer before using it. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "reveal",
+      "items": [
+        "Valid JSON means the invoice facts are true.",
+        "Syntax and data types are only the first check; compare values with the original document."
+      ],
+      "caption": "Name a test that would catch this failure."
+    },
+    "teaching_stage": "check"
+  },
+  "s35": {
+    "title": "Transfer to a new situation",
+    "explanation": "A syntactically valid JSON reply lists total €36. Which two checks disagree?\n\nExplain which source or test would settle it.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: An office extracts amounts and invoice identifiers from synthetic invoices. The visible slide states: A syntactically valid JSON reply lists total €36. Which two checks disagree?\n\nExplain which source or test would settle it. This is a fresh scenario, so ask for a reason before accepting either short answer. The target is: Specify a task and validate an answer before using it. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "Use the visible evidence",
+        "Flag missing or unsafe evidence"
+      ]
+    },
+    "teaching_stage": "check"
+  },
+  "s36": {
+    "title": "Explain it to a partner",
+    "explanation": "Without reading the slide, name the input, one processing step and the check. Your partner should ask “How do you know?”",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: An office extracts amounts and invoice identifiers from synthetic invoices. The visible slide states: Without reading the slide, name the input, one processing step and the check. Your partner should ask “How do you know?” Listen for a causal explanation and one limitation, then revisit a difficult arrow on the board. The target is: Specify a task and validate an answer before using it. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Invoice source",
+        "Prompt fields",
+        "Check original"
+      ]
+    },
+    "teaching_stage": "check"
+  },
+  "s37": {
+    "title": "Exam rehearsal · explain and apply",
+    "explanation": "Write a missing-value instruction for invoice extraction.\n\nWrite a short answer, then compare with the guide.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: An office extracts amounts and invoice identifiers from synthetic invoices. The visible slide states: Write a missing-value instruction for invoice extraction.\n\nWrite a short answer, then compare with the guide. Model answer after discussion: Use only the provided invoice. Return null for an absent field and do not infer or invent the printed total. Practice marks: 4. The target is: Specify a task and validate an answer before using it. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "State the core idea",
+        "Use a case detail or calculation",
+        "Add a limitation",
+        "Compare with the Word guide"
+      ]
+    },
+    "teaching_stage": "check"
+  },
+  "s38": {
+    "title": "Exam rehearsal · explain and apply",
+    "explanation": "A JSON response contains a valid number for an absent total. Does it pass?\n\nWrite a short answer, then compare with the guide.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: An office extracts amounts and invoice identifiers from synthetic invoices. The visible slide states: A JSON response contains a valid number for an absent total. Does it pass?\n\nWrite a short answer, then compare with the guide. Model answer after discussion: It may pass schema validation but fails evidence validation. Practice marks: 4. The target is: Specify a task and validate an answer before using it. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "State the core idea",
+        "Use a case detail or calculation",
+        "Add a limitation",
+        "Compare with the Word guide"
+      ]
+    },
+    "teaching_stage": "check"
+  },
+  "s39": {
+    "title": "What to hand in",
+    "explanation": "Prompt revision and before/after field-check table.\n\nInclude the one changed input and an error explanation.",
+    "speaker_notes": "TEACHER SCRIPT — PRACTICE. Open the matching notebook and demonstrate the first run. Have learners predict one change, run only that change, and record input, setting, output and an error explanation. This week’s case is: An office extracts amounts and invoice identifiers from synthetic invoices. The visible slide states: Prompt revision and before/after field-check table.\n\nInclude the one changed input and an error explanation. This weekly evidence receives formative feedback according to the module sequence; refer to the assessment brief for graded work. The target is: Specify a task and validate an answer before using it. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "Original run",
+        "One changed input",
+        "Comparison",
+        "Explanation + source"
+      ]
+    },
+    "teaching_stage": "practice"
+  },
+  "s40": {
+    "title": "Three ideas to recall next week",
+    "explanation": "Specify the task, keep missing fields missing, then check structure and source.\n\nRead the linked official sources in the Word guide and redraw one diagram from memory.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: An office extracts amounts and invoice identifiers from synthetic invoices. The visible slide states: Specify the task, keep missing fields missing, then check structure and source.\n\nRead the linked official sources in the Word guide and redraw one diagram from memory. Return to the opening vote and ask whether the evidence changed anyone’s mind. The next week builds on this outcome: Specify a task and validate an answer before using it. The target is: Specify a task and validate an answer before using it. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "Task instruction",
+        "Evidence",
+        "Schema",
+        "Abstention"
+      ]
+    },
+    "teaching_stage": "check"
+  }
+}

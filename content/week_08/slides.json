@@ -1,0 +1,614 @@
+{
+  "s01": {
+    "title": "Week 08 · Tools and controlled actions",
+    "explanation": "The reimbursement cap tool\n\nA €55 claim has a €40 cap. The assistant may calculate the payable amount. A separate request asks it to change the cap. Which path needs approval?",
+    "speaker_notes": "TEACHER SCRIPT — OPEN. Show the visual for ten seconds, then ask for an initial decision. Do not reveal the answer yet. Ask a student to name the source or measurement that would change their mind. This week’s case is: The assistant calculates a permitted reimbursement cap; a request to update a record needs approval. The visible slide states: The reimbursement cap tool\n\nA €55 claim has a €40 cap. The assistant may calculate the payable amount. A separate request asks it to change the cap. Which path needs approval? Reveal that the case will be revisited after four short concept cycles. The target is: Implement a bounded read-only tool and reason about approval for actions. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "story",
+      "items": [
+        "The reimbursement cap tool",
+        "What is known?",
+        "What must we check?"
+      ]
+    },
+    "teaching_stage": "open"
+  },
+  "s02": {
+    "title": "First vote: what would you do?",
+    "explanation": "A €55 claim has a €40 cap. The assistant may calculate the payable amount. A separate request asks it to change the cap. Which path needs approval?\n\nChoose an initial answer and name one piece of evidence you need.",
+    "speaker_notes": "TEACHER SCRIPT — QUESTION. Take a show of hands for each choice before showing the mechanism. Ask pairs to defend a choice with evidence. Save the strongest wrong reason for the reveal later in this cycle. This week’s case is: The assistant calculates a permitted reimbursement cap; a request to update a record needs approval. The visible slide states: A €55 claim has a €40 cap. The assistant may calculate the payable amount. A separate request asks it to change the cap. Which path needs approval?\n\nChoose an initial answer and name one piece of evidence you need. Accept reasonable uncertainty; record the initial votes to revisit at the end. The target is: Implement a bounded read-only tool and reason about approval for actions. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "Accept the first plausible result",
+        "Check the source or measurement"
+      ]
+    },
+    "teaching_stage": "question"
+  },
+  "s03": {
+    "title": "The journey through today’s case",
+    "explanation": "We will predict, connect an analogy, trace a mechanism, work an example, then explain a decision.",
+    "speaker_notes": "TEACHER SCRIPT — OPEN. Show the visual for ten seconds, then ask for an initial decision. Do not reveal the answer yet. Ask a student to name the source or measurement that would change their mind. This week’s case is: The assistant calculates a permitted reimbursement cap; a request to update a record needs approval. The visible slide states: We will predict, connect an analogy, trace a mechanism, work an example, then explain a decision. Point to the four named ideas, then show where the notebook experiment fits. The target is: Implement a bounded read-only tool and reason about approval for actions. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "Tool",
+        "Workflow",
+        "Agent",
+        "Approval boundary"
+      ]
+    },
+    "teaching_stage": "open"
+  },
+  "s04": {
+    "title": "1. Predict · Tool",
+    "explanation": "What should run before the arithmetic?\n\nMake a choice before we explain the diagram.",
+    "speaker_notes": "TEACHER SCRIPT — QUESTION. Take a show of hands for each choice before showing the mechanism. Ask pairs to defend a choice with evidence. Save the strongest wrong reason for the reveal later in this cycle. This week’s case is: The assistant calculates a permitted reimbursement cap; a request to update a record needs approval. The visible slide states: What should run before the arithmetic?\n\nMake a choice before we explain the diagram. The intended answer is Type and range validation. The tempting claim is A tool call is safe because its function is simple. Do not show which card is correct until the reveal. The target is: Implement a bounded read-only tool and reason about approval for actions. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "Type and range validation.",
+        "A tool call is safe because its function is simple."
+      ]
+    },
+    "teaching_stage": "question"
+  },
+  "s05": {
+    "title": "Tool · a familiar picture",
+    "explanation": "A calculator performs one defined operation when given a valid number.\n\nWhat matches our case, and where does the analogy stop?",
+    "speaker_notes": "TEACHER SCRIPT — ANALOGY. Begin with the familiar scene. Invite learners to describe each part in everyday language. Then ask where the comparison might fail before introducing the technical vocabulary. This week’s case is: The assistant calculates a permitted reimbursement cap; a request to update a record needs approval. The visible slide states: A calculator performs one defined operation when given a valid number.\n\nWhat matches our case, and where does the analogy stop? The boundary is: The model may choose the wrong tool or arguments; inspect the call. The target is: Implement a bounded read-only tool and reason about approval for actions. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "analogy",
+      "items": [
+        "Number",
+        "Guard",
+        "Display"
+      ],
+      "caption": "A calculator performs one defined operation when given a valid number."
+    },
+    "teaching_stage": "analogy"
+  },
+  "s06": {
+    "title": "Tool · map the parts",
+    "explanation": "Match each everyday part to the technical part.\n\nAnalogy limit: The model may choose the wrong tool or arguments; inspect the call.",
+    "speaker_notes": "TEACHER SCRIPT — MAPPING. Point from each familiar element to the corresponding technical element. Have students cover the right column and reconstruct the three matches. Read the limitation aloud. This week’s case is: The assistant calculates a permitted reimbursement cap; a request to update a record needs approval. The visible slide states: Match each everyday part to the technical part.\n\nAnalogy limit: The model may choose the wrong tool or arguments; inspect the call. The three precise mappings are [['Number', 'tool argument'], ['Guard', 'input validator'], ['Display', 'tool result']]. The target is: Implement a bounded read-only tool and reason about approval for actions. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "map",
+      "pairs": [
+        [
+          "Number",
+          "tool argument"
+        ],
+        [
+          "Guard",
+          "input validator"
+        ],
+        [
+          "Display",
+          "tool result"
+        ]
+      ]
+    },
+    "teaching_stage": "mapping"
+  },
+  "s07": {
+    "title": "Tool · how it works",
+    "explanation": "A named operation with validated arguments, permissions and a defined result.\n\nTrace the arrows from left to right.",
+    "speaker_notes": "TEACHER SCRIPT — MECHANISM. Trace every arrow slowly from the input to the output. Ask what information crosses the boundary at each arrow. Pause if students confuse a simplified notebook with a trained model. This week’s case is: The assistant calculates a permitted reimbursement cap; a request to update a record needs approval. The visible slide states: A named operation with validated arguments, permissions and a defined result.\n\nTrace the arrows from left to right. The weekly example is: cap(55,40) returns €40; cap(−5,40) is rejected as invalid input. State what the analogy does not explain: The model may choose the wrong tool or arguments; inspect the call. The target is: Implement a bounded read-only tool and reason about approval for actions. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Amount €55",
+        "Validate argument",
+        "Cap calculator €40"
+      ]
+    },
+    "teaching_stage": "mechanism"
+  },
+  "s08": {
+    "title": "Tool · work one case",
+    "explanation": "cap(55,40) returns €40; cap(−5,40) is rejected as invalid input.\n\nPoint to the evidence before giving your conclusion.",
+    "speaker_notes": "TEACHER SCRIPT — WORKED. Work the specific numbers or source wording aloud. Give students thirty seconds to write a conclusion, then ask which source line or calculation supports it. This week’s case is: The assistant calculates a permitted reimbursement cap; a request to update a record needs approval. The visible slide states: cap(55,40) returns €40; cap(−5,40) is rejected as invalid input.\n\nPoint to the evidence before giving your conclusion. The expected reasoning concludes: Type and range validation. Distinguish measured results from illustrative numbers. The target is: Implement a bounded read-only tool and reason about approval for actions. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "work",
+      "items": [
+        "cap(55,40) returns €40; cap(−5,40) is rejected as invalid input.",
+        "What should run before the arithmetic?",
+        "Type and range validation."
+      ]
+    },
+    "teaching_stage": "worked"
+  },
+  "s09": {
+    "title": "Tool · answer and explain",
+    "explanation": "Type and range validation.\n\nTempting mistake: A tool call is safe because its function is simple.",
+    "speaker_notes": "TEACHER SCRIPT — REVEAL. Return to the earlier choice. Explain the correct answer and why the tempting claim fails. Ask one learner to say the answer in a single sentence without reading it. This week’s case is: The assistant calculates a permitted reimbursement cap; a request to update a record needs approval. The visible slide states: Type and range validation.\n\nTempting mistake: A tool call is safe because its function is simple. The earlier question was What should run before the arithmetic? Ask how this differs from the wrong claim. The target is: Implement a bounded read-only tool and reason about approval for actions. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "reveal",
+      "items": [
+        "A tool call is safe because its function is simple.",
+        "Type and range validation."
+      ],
+      "caption": "The model may choose the wrong tool or arguments; inspect the call."
+    },
+    "teaching_stage": "reveal"
+  },
+  "s10": {
+    "title": "2. Predict · Workflow",
+    "explanation": "Who chooses the next station in this version?\n\nMake a choice before we explain the diagram.",
+    "speaker_notes": "TEACHER SCRIPT — QUESTION. Take a show of hands for each choice before showing the mechanism. Ask pairs to defend a choice with evidence. Save the strongest wrong reason for the reveal later in this cycle. This week’s case is: The assistant calculates a permitted reimbursement cap; a request to update a record needs approval. The visible slide states: Who chooses the next station in this version?\n\nMake a choice before we explain the diagram. The intended answer is The predefined workflow code. The tempting claim is A workflow must involve a free-form agent. Do not show which card is correct until the reveal. The target is: Implement a bounded read-only tool and reason about approval for actions. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "The predefined workflow code.",
+        "A workflow must involve a free-form agent."
+      ]
+    },
+    "teaching_stage": "question"
+  },
+  "s11": {
+    "title": "Workflow · a familiar picture",
+    "explanation": "An assembly line follows the same stations in a fixed order.\n\nWhat matches our case, and where does the analogy stop?",
+    "speaker_notes": "TEACHER SCRIPT — ANALOGY. Begin with the familiar scene. Invite learners to describe each part in everyday language. Then ask where the comparison might fail before introducing the technical vocabulary. This week’s case is: The assistant calculates a permitted reimbursement cap; a request to update a record needs approval. The visible slide states: An assembly line follows the same stations in a fixed order.\n\nWhat matches our case, and where does the analogy stop? The boundary is: Real workflows can branch on validated conditions, while remaining predefined. The target is: Implement a bounded read-only tool and reason about approval for actions. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "analogy",
+      "items": [
+        "Station",
+        "Conveyor",
+        "Finished item"
+      ],
+      "caption": "An assembly line follows the same stations in a fixed order."
+    },
+    "teaching_stage": "analogy"
+  },
+  "s12": {
+    "title": "Workflow · map the parts",
+    "explanation": "Match each everyday part to the technical part.\n\nAnalogy limit: Real workflows can branch on validated conditions, while remaining predefined.",
+    "speaker_notes": "TEACHER SCRIPT — MAPPING. Point from each familiar element to the corresponding technical element. Have students cover the right column and reconstruct the three matches. Read the limitation aloud. This week’s case is: The assistant calculates a permitted reimbursement cap; a request to update a record needs approval. The visible slide states: Match each everyday part to the technical part.\n\nAnalogy limit: Real workflows can branch on validated conditions, while remaining predefined. The three precise mappings are [['Station', 'code step'], ['Conveyor', 'workflow'], ['Finished item', 'checked result']]. The target is: Implement a bounded read-only tool and reason about approval for actions. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "map",
+      "pairs": [
+        [
+          "Station",
+          "code step"
+        ],
+        [
+          "Conveyor",
+          "workflow"
+        ],
+        [
+          "Finished item",
+          "checked result"
+        ]
+      ]
+    },
+    "teaching_stage": "mapping"
+  },
+  "s13": {
+    "title": "Workflow · how it works",
+    "explanation": "Code chooses the next step by a fixed rule.\n\nTrace the arrows from left to right.",
+    "speaker_notes": "TEACHER SCRIPT — MECHANISM. Trace every arrow slowly from the input to the output. Ask what information crosses the boundary at each arrow. Pause if students confuse a simplified notebook with a trained model. This week’s case is: The assistant calculates a permitted reimbursement cap; a request to update a record needs approval. The visible slide states: Code chooses the next step by a fixed rule.\n\nTrace the arrows from left to right. The weekly example is: Validate amount → calculate cap → format reply; a negative amount stops at validation. State what the analogy does not explain: Real workflows can branch on validated conditions, while remaining predefined. The target is: Implement a bounded read-only tool and reason about approval for actions. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Known steps",
+        "Fixed code path",
+        "Tool result"
+      ]
+    },
+    "teaching_stage": "mechanism"
+  },
+  "s14": {
+    "title": "Workflow · work one case",
+    "explanation": "Validate amount → calculate cap → format reply; a negative amount stops at validation.\n\nPoint to the evidence before giving your conclusion.",
+    "speaker_notes": "TEACHER SCRIPT — WORKED. Work the specific numbers or source wording aloud. Give students thirty seconds to write a conclusion, then ask which source line or calculation supports it. This week’s case is: The assistant calculates a permitted reimbursement cap; a request to update a record needs approval. The visible slide states: Validate amount → calculate cap → format reply; a negative amount stops at validation.\n\nPoint to the evidence before giving your conclusion. The expected reasoning concludes: The predefined workflow code. Distinguish measured results from illustrative numbers. The target is: Implement a bounded read-only tool and reason about approval for actions. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "work",
+      "items": [
+        "Validate amount → calculate cap → format reply; a negative amount stops at validation.",
+        "Who chooses the next station in this version?",
+        "The predefined workflow code."
+      ]
+    },
+    "teaching_stage": "worked"
+  },
+  "s15": {
+    "title": "Workflow · answer and explain",
+    "explanation": "The predefined workflow code.\n\nTempting mistake: A workflow must involve a free-form agent.",
+    "speaker_notes": "TEACHER SCRIPT — REVEAL. Return to the earlier choice. Explain the correct answer and why the tempting claim fails. Ask one learner to say the answer in a single sentence without reading it. This week’s case is: The assistant calculates a permitted reimbursement cap; a request to update a record needs approval. The visible slide states: The predefined workflow code.\n\nTempting mistake: A workflow must involve a free-form agent. The earlier question was Who chooses the next station in this version? Ask how this differs from the wrong claim. The target is: Implement a bounded read-only tool and reason about approval for actions. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "reveal",
+      "items": [
+        "A workflow must involve a free-form agent.",
+        "The predefined workflow code."
+      ],
+      "caption": "Real workflows can branch on validated conditions, while remaining predefined."
+    },
+    "teaching_stage": "reveal"
+  },
+  "s16": {
+    "title": "3. Predict · Agent",
+    "explanation": "Can the model authorize a write by choosing a tool?\n\nMake a choice before we explain the diagram.",
+    "speaker_notes": "TEACHER SCRIPT — QUESTION. Take a show of hands for each choice before showing the mechanism. Ask pairs to defend a choice with evidence. Save the strongest wrong reason for the reveal later in this cycle. This week’s case is: The assistant calculates a permitted reimbursement cap; a request to update a record needs approval. The visible slide states: Can the model authorize a write by choosing a tool?\n\nMake a choice before we explain the diagram. The intended answer is No. Authorization is enforced outside the model. The tempting claim is An agent can grant itself a new permission. Do not show which card is correct until the reveal. The target is: Implement a bounded read-only tool and reason about approval for actions. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "No. Authorization is enforced outside the model.",
+        "An agent can grant itself a new permission."
+      ]
+    },
+    "teaching_stage": "question"
+  },
+  "s17": {
+    "title": "Agent · a familiar picture",
+    "explanation": "A dispatcher selects among allowed services to handle a request.\n\nWhat matches our case, and where does the analogy stop?",
+    "speaker_notes": "TEACHER SCRIPT — ANALOGY. Begin with the familiar scene. Invite learners to describe each part in everyday language. Then ask where the comparison might fail before introducing the technical vocabulary. This week’s case is: The assistant calculates a permitted reimbursement cap; a request to update a record needs approval. The visible slide states: A dispatcher selects among allowed services to handle a request.\n\nWhat matches our case, and where does the analogy stop? The boundary is: Agent choice is bounded by available tools and permissions; autonomy is limited. The target is: Implement a bounded read-only tool and reason about approval for actions. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "analogy",
+      "items": [
+        "Dispatcher",
+        "Service desk",
+        "Ticket"
+      ],
+      "caption": "A dispatcher selects among allowed services to handle a request."
+    },
+    "teaching_stage": "analogy"
+  },
+  "s18": {
+    "title": "Agent · map the parts",
+    "explanation": "Match each everyday part to the technical part.\n\nAnalogy limit: Agent choice is bounded by available tools and permissions; autonomy is limited.",
+    "speaker_notes": "TEACHER SCRIPT — MAPPING. Point from each familiar element to the corresponding technical element. Have students cover the right column and reconstruct the three matches. Read the limitation aloud. This week’s case is: The assistant calculates a permitted reimbursement cap; a request to update a record needs approval. The visible slide states: Match each everyday part to the technical part.\n\nAnalogy limit: Agent choice is bounded by available tools and permissions; autonomy is limited. The three precise mappings are [['Dispatcher', 'model decision'], ['Service desk', 'tool interface'], ['Ticket', 'logged result']]. The target is: Implement a bounded read-only tool and reason about approval for actions. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "map",
+      "pairs": [
+        [
+          "Dispatcher",
+          "model decision"
+        ],
+        [
+          "Service desk",
+          "tool interface"
+        ],
+        [
+          "Ticket",
+          "logged result"
+        ]
+      ]
+    },
+    "teaching_stage": "mapping"
+  },
+  "s19": {
+    "title": "Agent · how it works",
+    "explanation": "A model may choose a next action, within the permissions and limits supplied by the application.\n\nTrace the arrows from left to right.",
+    "speaker_notes": "TEACHER SCRIPT — MECHANISM. Trace every arrow slowly from the input to the output. Ask what information crosses the boundary at each arrow. Pause if students confuse a simplified notebook with a trained model. This week’s case is: The assistant calculates a permitted reimbursement cap; a request to update a record needs approval. The visible slide states: A model may choose a next action, within the permissions and limits supplied by the application.\n\nTrace the arrows from left to right. The weekly example is: The model proposes calculator; the interface validates €55 before executing it. State what the analogy does not explain: Agent choice is bounded by available tools and permissions; autonomy is limited. The target is: Implement a bounded read-only tool and reason about approval for actions. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Model-selected step",
+        "Tool boundary",
+        "Validated result"
+      ]
+    },
+    "teaching_stage": "mechanism"
+  },
+  "s20": {
+    "title": "Agent · work one case",
+    "explanation": "The model proposes calculator; the interface validates €55 before executing it.\n\nPoint to the evidence before giving your conclusion.",
+    "speaker_notes": "TEACHER SCRIPT — WORKED. Work the specific numbers or source wording aloud. Give students thirty seconds to write a conclusion, then ask which source line or calculation supports it. This week’s case is: The assistant calculates a permitted reimbursement cap; a request to update a record needs approval. The visible slide states: The model proposes calculator; the interface validates €55 before executing it.\n\nPoint to the evidence before giving your conclusion. The expected reasoning concludes: No. Authorization is enforced outside the model. Distinguish measured results from illustrative numbers. The target is: Implement a bounded read-only tool and reason about approval for actions. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "work",
+      "items": [
+        "The model proposes calculator; the interface validates €55 before executing it.",
+        "Can the model authorize a write by choosing a tool?",
+        "No. Authorization is enforced outside the model."
+      ]
+    },
+    "teaching_stage": "worked"
+  },
+  "s21": {
+    "title": "Agent · answer and explain",
+    "explanation": "No. Authorization is enforced outside the model.\n\nTempting mistake: An agent can grant itself a new permission.",
+    "speaker_notes": "TEACHER SCRIPT — REVEAL. Return to the earlier choice. Explain the correct answer and why the tempting claim fails. Ask one learner to say the answer in a single sentence without reading it. This week’s case is: The assistant calculates a permitted reimbursement cap; a request to update a record needs approval. The visible slide states: No. Authorization is enforced outside the model.\n\nTempting mistake: An agent can grant itself a new permission. The earlier question was Can the model authorize a write by choosing a tool? Ask how this differs from the wrong claim. The target is: Implement a bounded read-only tool and reason about approval for actions. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "reveal",
+      "items": [
+        "An agent can grant itself a new permission.",
+        "No. Authorization is enforced outside the model."
+      ],
+      "caption": "Agent choice is bounded by available tools and permissions; autonomy is limited."
+    },
+    "teaching_stage": "reveal"
+  },
+  "s22": {
+    "title": "4. Predict · Approval boundary",
+    "explanation": "What evidence shows a write was authorized?\n\nMake a choice before we explain the diagram.",
+    "speaker_notes": "TEACHER SCRIPT — QUESTION. Take a show of hands for each choice before showing the mechanism. Ask pairs to defend a choice with evidence. Save the strongest wrong reason for the reveal later in this cycle. This week’s case is: The assistant calculates a permitted reimbursement cap; a request to update a record needs approval. The visible slide states: What evidence shows a write was authorized?\n\nMake a choice before we explain the diagram. The intended answer is An approval tied to the request and recorded action. The tempting claim is A polite request is enough approval. Do not show which card is correct until the reveal. The target is: Implement a bounded read-only tool and reason about approval for actions. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "An approval tied to the request and recorded action.",
+        "A polite request is enough approval."
+      ]
+    },
+    "teaching_stage": "question"
+  },
+  "s23": {
+    "title": "Approval boundary · a familiar picture",
+    "explanation": "A bank transfer waits for an authorized person to approve it.\n\nWhat matches our case, and where does the analogy stop?",
+    "speaker_notes": "TEACHER SCRIPT — ANALOGY. Begin with the familiar scene. Invite learners to describe each part in everyday language. Then ask where the comparison might fail before introducing the technical vocabulary. This week’s case is: The assistant calculates a permitted reimbursement cap; a request to update a record needs approval. The visible slide states: A bank transfer waits for an authorized person to approve it.\n\nWhat matches our case, and where does the analogy stop? The boundary is: Some read-only actions also need controls when they reveal restricted information. The target is: Implement a bounded read-only tool and reason about approval for actions. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "analogy",
+      "items": [
+        "Transfer request",
+        "Approver",
+        "Receipt"
+      ],
+      "caption": "A bank transfer waits for an authorized person to approve it."
+    },
+    "teaching_stage": "analogy"
+  },
+  "s24": {
+    "title": "Approval boundary · map the parts",
+    "explanation": "Match each everyday part to the technical part.\n\nAnalogy limit: Some read-only actions also need controls when they reveal restricted information.",
+    "speaker_notes": "TEACHER SCRIPT — MAPPING. Point from each familiar element to the corresponding technical element. Have students cover the right column and reconstruct the three matches. Read the limitation aloud. This week’s case is: The assistant calculates a permitted reimbursement cap; a request to update a record needs approval. The visible slide states: Match each everyday part to the technical part.\n\nAnalogy limit: Some read-only actions also need controls when they reveal restricted information. The three precise mappings are [['Transfer request', 'write action'], ['Approver', 'authorized reviewer'], ['Receipt', 'audit record']]. The target is: Implement a bounded read-only tool and reason about approval for actions. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "map",
+      "pairs": [
+        [
+          "Transfer request",
+          "write action"
+        ],
+        [
+          "Approver",
+          "authorized reviewer"
+        ],
+        [
+          "Receipt",
+          "audit record"
+        ]
+      ]
+    },
+    "teaching_stage": "mapping"
+  },
+  "s25": {
+    "title": "Approval boundary · how it works",
+    "explanation": "A consequential write needs explicit review before execution and an audit record.\n\nTrace the arrows from left to right.",
+    "speaker_notes": "TEACHER SCRIPT — MECHANISM. Trace every arrow slowly from the input to the output. Ask what information crosses the boundary at each arrow. Pause if students confuse a simplified notebook with a trained model. This week’s case is: The assistant calculates a permitted reimbursement cap; a request to update a record needs approval. The visible slide states: A consequential write needs explicit review before execution and an audit record.\n\nTrace the arrows from left to right. The weekly example is: Changing the cap requires an approval record; calculation of €40 does not change the record. State what the analogy does not explain: Some read-only actions also need controls when they reveal restricted information. The target is: Implement a bounded read-only tool and reason about approval for actions. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Write request",
+        "Manager approval",
+        "Audit record"
+      ]
+    },
+    "teaching_stage": "mechanism"
+  },
+  "s26": {
+    "title": "Approval boundary · work one case",
+    "explanation": "Changing the cap requires an approval record; calculation of €40 does not change the record.\n\nPoint to the evidence before giving your conclusion.",
+    "speaker_notes": "TEACHER SCRIPT — WORKED. Work the specific numbers or source wording aloud. Give students thirty seconds to write a conclusion, then ask which source line or calculation supports it. This week’s case is: The assistant calculates a permitted reimbursement cap; a request to update a record needs approval. The visible slide states: Changing the cap requires an approval record; calculation of €40 does not change the record.\n\nPoint to the evidence before giving your conclusion. The expected reasoning concludes: An approval tied to the request and recorded action. Distinguish measured results from illustrative numbers. The target is: Implement a bounded read-only tool and reason about approval for actions. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "work",
+      "items": [
+        "Changing the cap requires an approval record; calculation of €40 does not change the record.",
+        "What evidence shows a write was authorized?",
+        "An approval tied to the request and recorded action."
+      ]
+    },
+    "teaching_stage": "worked"
+  },
+  "s27": {
+    "title": "Approval boundary · answer and explain",
+    "explanation": "An approval tied to the request and recorded action.\n\nTempting mistake: A polite request is enough approval.",
+    "speaker_notes": "TEACHER SCRIPT — REVEAL. Return to the earlier choice. Explain the correct answer and why the tempting claim fails. Ask one learner to say the answer in a single sentence without reading it. This week’s case is: The assistant calculates a permitted reimbursement cap; a request to update a record needs approval. The visible slide states: An approval tied to the request and recorded action.\n\nTempting mistake: A polite request is enough approval. The earlier question was What evidence shows a write was authorized? Ask how this differs from the wrong claim. The target is: Implement a bounded read-only tool and reason about approval for actions. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "reveal",
+      "items": [
+        "A polite request is enough approval.",
+        "An approval tied to the request and recorded action."
+      ],
+      "caption": "Some read-only actions also need controls when they reveal restricted information."
+    },
+    "teaching_stage": "reveal"
+  },
+  "s28": {
+    "title": "Evidence trail: input → result",
+    "explanation": "Read-only tool returns €40.\n\nA request to change the policy cap is denied until the authorized reviewer approves.",
+    "speaker_notes": "TEACHER SCRIPT — WORKED. Work the specific numbers or source wording aloud. Give students thirty seconds to write a conclusion, then ask which source line or calculation supports it. This week’s case is: The assistant calculates a permitted reimbursement cap; a request to update a record needs approval. The visible slide states: Read-only tool returns €40.\n\nA request to change the policy cap is denied until the authorized reviewer approves. Have one student point to an exact source word or number for each conclusion. The target is: Implement a bounded read-only tool and reason about approval for actions. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "work",
+      "items": [
+        "Policy cap is €40; eligible expense is €55.",
+        "Read-only tool returns €40.",
+        "A request to change the policy cap is denied until the authorized reviewer approves."
+      ]
+    },
+    "teaching_stage": "worked"
+  },
+  "s29": {
+    "title": "Notebook: run the prepared example",
+    "explanation": "Implement a calculator and approval gate simulation.\n\nRead the original output before editing.",
+    "speaker_notes": "TEACHER SCRIPT — PRACTICE. Open the matching notebook and demonstrate the first run. Have learners predict one change, run only that change, and record input, setting, output and an error explanation. This week’s case is: The assistant calculates a permitted reimbursement cap; a request to update a record needs approval. The visible slide states: Implement a calculator and approval gate simulation.\n\nRead the original output before editing. Use Week_08_Lab.ipynb. This lab is a prepared classroom demonstration with its limitations documented. The target is: Implement a bounded read-only tool and reason about approval for actions. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "Call a read-only capped calculator",
+        "Reject a negative or non-numeric amount",
+        "Simulate an approval request without a real write",
+        "Check that a denied request remains unchanged"
+      ]
+    },
+    "teaching_stage": "practice"
+  },
+  "s30": {
+    "title": "Find the input and check in Python",
+    "explanation": "Locate the supplied input, the transformation, the checking line and the printed result.",
+    "speaker_notes": "TEACHER SCRIPT — PRACTICE. Open the matching notebook and demonstrate the first run. Have learners predict one change, run only that change, and record input, setting, output and an error explanation. This week’s case is: The assistant calculates a permitted reimbursement cap; a request to update a record needs approval. The visible slide states: Locate the supplied input, the transformation, the checking line and the printed result. The weekly lab change is: Try a negative amount and confirm the validator blocks it. The target is: Implement a bounded read-only tool and reason about approval for actions. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Input data",
+        "Python operation",
+        "Check",
+        "Recorded result"
+      ]
+    },
+    "teaching_stage": "practice"
+  },
+  "s31": {
+    "title": "Predict one controlled change",
+    "explanation": "Try a negative amount and confirm the validator blocks it.\n\nWhat should change in the result? What stays fixed?",
+    "speaker_notes": "TEACHER SCRIPT — PRACTICE. Open the matching notebook and demonstrate the first run. Have learners predict one change, run only that change, and record input, setting, output and an error explanation. This week’s case is: The assistant calculates a permitted reimbursement cap; a request to update a record needs approval. The visible slide states: Try a negative amount and confirm the validator blocks it.\n\nWhat should change in the result? What stays fixed? Ask learners to write their prediction before rerunning the cell. The target is: Implement a bounded read-only tool and reason about approval for actions. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "compare",
+      "left": "Before: original case",
+      "right": "After: one change",
+      "caption": "Keep all other inputs fixed."
+    },
+    "teaching_stage": "practice"
+  },
+  "s32": {
+    "title": "Run, compare and record",
+    "explanation": "Record the input, the one changed setting, the observed result and a reason for any difference.",
+    "speaker_notes": "TEACHER SCRIPT — PRACTICE. Open the matching notebook and demonstrate the first run. Have learners predict one change, run only that change, and record input, setting, output and an error explanation. This week’s case is: The assistant calculates a permitted reimbursement cap; a request to update a record needs approval. The visible slide states: Record the input, the one changed setting, the observed result and a reason for any difference. The required evidence is: Tool result, blocked-request trace and approval explanation. The target is: Implement a bounded read-only tool and reason about approval for actions. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "table",
+      "rows": [
+        [
+          "Input",
+          "Setting",
+          "Result"
+        ],
+        [
+          "Original",
+          "baseline",
+          "record"
+        ],
+        [
+          "Changed",
+          "one edit",
+          "compare"
+        ]
+      ]
+    },
+    "teaching_stage": "practice"
+  },
+  "s33": {
+    "title": "Measure without hiding the denominator",
+    "explanation": "Unauthorized successful actions / attempted unauthorized actions (target zero)\n\nWrite the numerator, denominator and one failure case.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: The assistant calculates a permitted reimbursement cap; a request to update a record needs approval. The visible slide states: Unauthorized successful actions / attempted unauthorized actions (target zero)\n\nWrite the numerator, denominator and one failure case. Where a measure is qualitative, show the concrete source comparison. Example: A request to change the policy cap is denied until the authorized reviewer approves. The target is: Implement a bounded read-only tool and reason about approval for actions. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Define success",
+        "Count successes",
+        "Count cases",
+        "Inspect errors"
+      ]
+    },
+    "teaching_stage": "check"
+  },
+  "s34": {
+    "title": "Error detective: find the layer",
+    "explanation": "Plausible wrong claim: A tool call chosen by a model is automatically authorized.\n\nCorrect it using the case evidence.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: The assistant calculates a permitted reimbursement cap; a request to update a record needs approval. The visible slide states: Plausible wrong claim: A tool call chosen by a model is automatically authorized.\n\nCorrect it using the case evidence. The correction is The application checks role, arguments and approval independently of the model text. The target is: Implement a bounded read-only tool and reason about approval for actions. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "reveal",
+      "items": [
+        "A tool call chosen by a model is automatically authorized.",
+        "The application checks role, arguments and approval independently of the model text."
+      ],
+      "caption": "Name a test that would catch this failure."
+    },
+    "teaching_stage": "check"
+  },
+  "s35": {
+    "title": "Transfer to a new situation",
+    "explanation": "A tool receives amount −€5. What should happen before any calculation?\n\nExplain which source or test would settle it.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: The assistant calculates a permitted reimbursement cap; a request to update a record needs approval. The visible slide states: A tool receives amount −€5. What should happen before any calculation?\n\nExplain which source or test would settle it. This is a fresh scenario, so ask for a reason before accepting either short answer. The target is: Implement a bounded read-only tool and reason about approval for actions. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "Use the visible evidence",
+        "Flag missing or unsafe evidence"
+      ]
+    },
+    "teaching_stage": "check"
+  },
+  "s36": {
+    "title": "Explain it to a partner",
+    "explanation": "Without reading the slide, name the input, one processing step and the check. Your partner should ask “How do you know?”",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: The assistant calculates a permitted reimbursement cap; a request to update a record needs approval. The visible slide states: Without reading the slide, name the input, one processing step and the check. Your partner should ask “How do you know?” Listen for a causal explanation and one limitation, then revisit a difficult arrow on the board. The target is: Implement a bounded read-only tool and reason about approval for actions. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "User request",
+        "Validate amount",
+        "Display €40"
+      ]
+    },
+    "teaching_stage": "check"
+  },
+  "s37": {
+    "title": "Exam rehearsal · explain and apply",
+    "explanation": "What distinguishes a workflow from an agent?\n\nWrite a short answer, then compare with the guide.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: The assistant calculates a permitted reimbursement cap; a request to update a record needs approval. The visible slide states: What distinguishes a workflow from an agent?\n\nWrite a short answer, then compare with the guide. Model answer after discussion: A workflow follows predefined steps; an agent can select subsequent actions within allowed boundaries. Practice marks: 4. The target is: Implement a bounded read-only tool and reason about approval for actions. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "State the core idea",
+        "Use a case detail or calculation",
+        "Add a limitation",
+        "Compare with the Word guide"
+      ]
+    },
+    "teaching_stage": "check"
+  },
+  "s38": {
+    "title": "Exam rehearsal · explain and apply",
+    "explanation": "Calculate a reimbursement with eligible expense 55 and cap 40.\n\nWrite a short answer, then compare with the guide.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: The assistant calculates a permitted reimbursement cap; a request to update a record needs approval. The visible slide states: Calculate a reimbursement with eligible expense 55 and cap 40.\n\nWrite a short answer, then compare with the guide. Model answer after discussion: min(55,40)=40. Eligibility must already be established; the calculator does not decide it. Practice marks: 4. The target is: Implement a bounded read-only tool and reason about approval for actions. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "State the core idea",
+        "Use a case detail or calculation",
+        "Add a limitation",
+        "Compare with the Word guide"
+      ]
+    },
+    "teaching_stage": "check"
+  },
+  "s39": {
+    "title": "What to hand in",
+    "explanation": "Tool result, blocked-request trace and approval explanation.\n\nInclude the one changed input and an error explanation.",
+    "speaker_notes": "TEACHER SCRIPT — PRACTICE. Open the matching notebook and demonstrate the first run. Have learners predict one change, run only that change, and record input, setting, output and an error explanation. This week’s case is: The assistant calculates a permitted reimbursement cap; a request to update a record needs approval. The visible slide states: Tool result, blocked-request trace and approval explanation.\n\nInclude the one changed input and an error explanation. This weekly evidence receives formative feedback according to the module sequence; refer to the assessment brief for graded work. The target is: Implement a bounded read-only tool and reason about approval for actions. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "Original run",
+        "One changed input",
+        "Comparison",
+        "Explanation + source"
+      ]
+    },
+    "teaching_stage": "practice"
+  },
+  "s40": {
+    "title": "Three ideas to recall next week",
+    "explanation": "Validate a read-only tool; route write actions through human approval.\n\nRead the linked official sources in the Word guide and redraw one diagram from memory.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: The assistant calculates a permitted reimbursement cap; a request to update a record needs approval. The visible slide states: Validate a read-only tool; route write actions through human approval.\n\nRead the linked official sources in the Word guide and redraw one diagram from memory. Return to the opening vote and ask whether the evidence changed anyone’s mind. The next week builds on this outcome: Implement a bounded read-only tool and reason about approval for actions. The target is: Implement a bounded read-only tool and reason about approval for actions. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "Tool",
+        "Workflow",
+        "Agent",
+        "Approval boundary"
+      ]
+    },
+    "teaching_stage": "check"
+  }
+}

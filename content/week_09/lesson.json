@@ -1,0 +1,46 @@
+{
+  "n": 9,
+  "title": "When fine-tuning helps",
+  "goal": "Choose among a clearer prompt, current evidence and model adaptation.",
+  "case": "A college assistant uses the correct format but misses a revised policy.",
+  "terms": [
+    [
+      "Prompting",
+      "Change instructions or examples for the task without changing weights."
+    ],
+    [
+      "RAG",
+      "Supply up-to-date evidence at inference time; useful for changing facts and traceable answers."
+    ],
+    [
+      "Fine-tuning",
+      "Train on examples to change learned behaviour; separate development from final test cases."
+    ],
+    [
+      "LoRA",
+      "Update a small trainable low-rank component instead of all model weights."
+    ]
+  ],
+  "steps": [
+    "Compare provided base, prompted and adapted predictions",
+    "Score each on development cases",
+    "Inspect a held-out final set once",
+    "Recommend a method for a policy update"
+  ],
+  "example": [
+    "Base 6/10; prompt 8/10; tuned 9/10 on practice cases.",
+    "On fresh cases tuned score is 6/10.",
+    "The practice gain alone does not prove better generalization."
+  ],
+  "misconception": "Fine-tuning is the right way to add a policy changed yesterday.",
+  "correction": "Update the source document and retrieval index; weight adaptation is poor for rapidly changing facts.",
+  "change": "Change one threshold and note why the final set must remain untouched.",
+  "metric": "Accuracy with numerator and denominator on separate cases",
+  "lab": "Analyze a supplied results pack without training a model.",
+  "output": "Comparison table with recommendation and uncertainty.",
+  "reading": [
+    "Hu et al., LoRA",
+    "NVIDIA, NeMo framework overview"
+  ],
+  "code": "tuning"
+}

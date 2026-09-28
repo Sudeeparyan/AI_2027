@@ -1,0 +1,56 @@
+{
+  "outcomes": "LO4, LO5",
+  "plain_explanation": "A classroom release has a versioned configuration, tested behavior and a rollback path. Test failures by actually supplying bad inputs or removing evidence. Keep only necessary non-sensitive trace fields. Calculate cost using all attempts, including failures and retries.",
+  "worked_example": "If total simulated spend is 4 units and eight tasks succeed, cost per success is 0.50 units. If no tasks succeed, report undefined. If a candidate version exposes a staff source to a student, keep the previous version even if average answer accuracy improves.",
+  "exam": [
+    {
+      "question": "What happens to cost per success when successes equal zero?",
+      "model_answer": "There is no finite value. Report undefined and investigate the failed workload.",
+      "marks": 4
+    },
+    {
+      "question": "Why test a missing source before release?",
+      "model_answer": "To verify the application abstains or recovers rather than inventing an answer.",
+      "marks": 4
+    },
+    {
+      "question": "What should a privacy-filtered trace retain?",
+      "model_answer": "A request ID, source IDs, version, outcome and timing as needed; omit credentials and unnecessary personal content.",
+      "marks": 4
+    }
+  ],
+  "resources": [
+    {
+      "id": "M3",
+      "publisher": "Microsoft Learn",
+      "title": "Building a RAG-powered AI chat app with Python and VS Code",
+      "url": "https://learn.microsoft.com/en-us/shows/vs-code-day-2024/building-a-rag-powered-ai-chat-app-with-python-and-vs-code",
+      "type": "Official video demonstration",
+      "use": "Optional system walkthrough. Older SDK interfaces are not the core lab dependency.",
+      "checked_date": "2026-09-28",
+      "verification": "Official page or indexed metadata; video transcripts not reviewed"
+    },
+    {
+      "id": "O1",
+      "publisher": "OpenAI",
+      "title": "Evaluation best practices",
+      "url": "https://developers.openai.com/api/docs/guides/evaluation-best-practices",
+      "type": "Official guide",
+      "use": "Task-specific testing, repeated outputs and separate evaluation cases.",
+      "checked_date": "2026-09-28",
+      "verification": "Official page/search metadata reviewed"
+    },
+    {
+      "id": "O2",
+      "publisher": "OpenAI",
+      "title": "Safety in building agents",
+      "url": "https://developers.openai.com/api/docs/guides/agent-builder-safety",
+      "type": "Official guide",
+      "use": "Tool approvals, untrusted input and controls.",
+      "checked_date": "2026-09-28",
+      "verification": "Official page/search metadata reviewed"
+    }
+  ],
+  "study_task": "Draw the main diagram from memory, explain each arrow, then check it against the slides. Answer the three questions without notes before reading the model answers.",
+  "reference_note": "Selected source concepts inform the lesson. Examples, figures, questions and solutions are original classroom material; no exam questions are claimed to be official."
+}

@@ -1,0 +1,58 @@
+{
+  "retries_per_profile": 1,
+  "routes": {
+    "writer": [
+      "openai_primary"
+    ],
+    "reviewer": [
+      "openai_primary"
+    ]
+  },
+  "profiles": {
+    "openai_primary": {
+      "base_url": "https://api.openai.com/v1",
+      "key_env": "OPENAI_API_KEY",
+      "model_env": "OPENAI_MODEL",
+      "model": "SET_AVAILABLE_MODEL",
+      "parameters": {
+        "max_completion_tokens": 16000
+      }
+    },
+    "google_backup": {
+      "base_url": "https://generativelanguage.googleapis.com/v1beta/openai",
+      "key_env": "GEMINI_API_KEY",
+      "model_env": "GEMINI_MODEL",
+      "model": "SET_AVAILABLE_MODEL",
+      "parameters": {
+        "max_tokens": 16000
+      }
+    },
+    "azure_institution": {
+      "base_url": "https://YOUR-RESOURCE.openai.azure.com/openai/v1",
+      "key_env": "AZURE_OPENAI_API_KEY",
+      "model_env": "AZURE_OPENAI_DEPLOYMENT",
+      "model": "SET_DEPLOYMENT_NAME",
+      "parameters": {
+        "max_completion_tokens": 16000
+      }
+    },
+    "nvidia": {
+      "base_url": "https://integrate.api.nvidia.com/v1",
+      "key_env": "NVIDIA_API_KEY",
+      "model_env": "NVIDIA_MODEL",
+      "model": "SET_AVAILABLE_MODEL",
+      "parameters": {
+        "max_tokens": 16000
+      }
+    },
+    "local": {
+      "base_url": "http://localhost:8000/v1",
+      "key_env": "",
+      "model_env": "LOCAL_MODEL",
+      "model": "SET_LOCAL_MODEL",
+      "parameters": {
+        "max_tokens": 16000
+      }
+    }
+  }
+}

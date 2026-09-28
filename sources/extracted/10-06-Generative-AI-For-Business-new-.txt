@@ -1,0 +1,171 @@
+Section 7: Module Descriptors
+Generative AI for Business
+Note: The hours outlined in the table above represent the base mode of full-time on campus delivery.  This programme will also be available through part-time online delivery.  The required hours of learning effort for this delivery mode are available in the Programme Schedule.
+
+Note: The assessment techniques outlined in the table above represent the base mode of full-time on campus delivery.  This programme will also be available through part-time online delivery.  Variations to the assessment techniques for this delivery mode are available in the Programme Schedule.
+
+
+
+
+
+
+
+
+
+7.1	Module Overview (copy and paste for other modules)
+Module Number |  | Module Title | Generative AI for Business
+Stage of Principal Programme | 1 | Semester
+(if applicable) | 2 | Duration. (Weeks F/T) | 12 | ECTS | 10
+Mandatory / Elective (M/E) | M | Hours of Learner Effort / Week | 4 | 2 Hours Lecture and 2 Hours Lab*
+Analysis of required hours of learning effort
+Teaching and Learning Modalities | ✔if relevant to this module | Approx. proportion of total (hours)
+Direct Contact Hours
+On-site face-to-face  | ✔ |  48
+Synchronous online | 
+Synchronous blended | 
+Indirect/Non-contact Hours
+Asynchronous  | 
+Independent Learning  | ✔ | 202
+Work Based | 
+Other (Identify) | 
+Total | 250
+Pre-Requisite Module, if any.  Module Number and Title | No
+Co-Requisite Module, if any.  Module Number and Title | No
+Maximum number of learners per instance of the module | 70
+Specification of the qualifications (academic, pedagogical and professional/occupational) and experience required of staff working in this module.
+Role e.g., 
+Tutor, Mentor, Lecturer, Research Supervisor, etc. | 
+Qualifications & experience required | 
+Staff (X) : Learner (Y) Ratio  
+Express as X:Y
+Lecturer  | MSc and/or PhD degree in computer science, mathematics or cognate discipline. May have industry experience also.  | 1:70 
+Tutor  | MSc and/or PhD degree in computer science, mathematics or cognate discipline. May have industry experience also.  | 1:25
+Assessment Techniques – percentage contribution
+Continuous Assessment  | 40% | Proctored Exam – in person |  | Practical Skills Based
+Project | 60% | Proctored Exam - online |  | Work Based
+Capstone modules (Yes/No)? | N | If Yes, provide details | 
+7.2	Minimum Intended Module Learning Outcomes (MIMLOs)
+MIMLO
+On successful completion of this module a learner will be able to: | Related MIPLO 
+MSCAI
+Demonstrate a clear understanding of the core concepts, architectures and techniques of generative AI, including language models, image generation models and multimodal systems. | 1
+Critically analyse and evaluate the relevance, limitations, and strategic value of generative AI applications across diverse business contexts | 1
+Design, develop, and adapt generative AI models, workflows, or prototypes to address specific business challenges, using appropriate datasets, tools, and contemporary frameworks. | 2, 3
+Critically evaluate generative AI outputs using quantitative metrics, human-centered assessments and ethical considerations, including fairness, bias and hallucination risks. | 5
+Design and implement contemporary generative AI solutions in real-world business scenarios by leveraging domain specific knowledge, information retrieval systems, modern AI frameworks and agentic architectures. | 2, 3
+7.3	Indicative Module Content, Organisation and Structure
+Week | Lecture Topic | Detail | Tutorials (Examples)
+1 | Introduction to Generative AI for Business | What is Generative AI vs traditional AI. Key concepts and terminology.  Probabilistic Foundations. Latent Space. Explain how generative models create content (text, images, audio and video).
+Business relevance and value creation.
+ | Set up the working environment and demonstrate generative models in action. Explore how Generative AI supports different business operations through real-world examples.
+2 | How Generative Models Work | Transformers and attention. Transformer architecture, including self-attention, multi-head attention, positional encoding, and the key encoder–decoder components that underpin modern generative AI models. | Students will build simple transformer models (blocks and attention mechanisms) and analyse how transformers use them in practice.
+3 | Large Language Models (LLMs) | Evolution of NLP. How Transformers are used in LLMs and generative models. Architecture Overview. Tokenization and embeddings. LLM families (e.g. GPT, BERT, LLaMA, T5). Supporting core Business Applications.
+ | Use pretrained models.
+Comparing outputs across families (e.g., GPT vs BERT vs T5)
+Query a GPT or LLaMA model using Hugging Face API.
+Used for dynamic Content Creation and
+Summarization,
+Multilingual support,
+Analyze customer reviews, feedback, sentiment,
+Personalization and recommendations.
+
+4 | Prompt Engineering for Business Applications | Methods to produce more accurate, relevant, and reliable outputs.
+The paradigm shift (pre-training vs fine-tuning vs prompt-based usage). Basic Prompting Techniques (zero-shot, one-shot, few shot, role based), Chain-of-Thought (CoT) prompting. Prompting for Different Tasks. Evaluation Methods. Limitations and Challenges. Supporting tools.
+ | Explore different case studies in prompt engineering and different prompt styles on pre-trained LLMs
+
+Guide Generative models to more accurate, relevant, and reliable outputs. Questions and Answers via Natural language search.
+
+5 | Domain Adaptation & Fine-Tuning | Integrate domain-specific knowledge. Reduce Hallucinations.
+Fine-tuning approaches: supervised fine-tuning, reinforcement learning with human feedback (RLHF).
+Parameter-efficient tuning: LoRA, adapters, prompt tuning. Instruction Tuning.  Domain-Specific Fine-Tuning. Evaluation & Benchmarks | Fine-tune a pre-trained LLM for a domain-specific task. Apply parameter-efficient fine-tuning (LoRA / QLoRA). Compare base vs fine-tuned model performance.
+Use domain LLMs for Finance (BloombergGPT), Analytics (DataBert), Retail, HR, etc
+
+6 | Generative AI Models Beyond Text | Used to support Customer Experience and Product innovation. 
+Generative Vision models overview (GANs, VAEs, diffusion). Multimodal.
+Text-to-image generation (Diffusion models - Stable Diffusion, DALL-E)
+Image Captioning (Multi modal - BLIP, CLIP, ViT, HaggingFace, etc)
+Text-to-speech generation
+VAEs (anomaly detection, simulation)
+GANs (marketing, design, fraud) | Practice with dynamic content creation, and processing (multimodal understanding). Image generation (DALL-E, diffusion models)
+Work on different Business Scenarios (personalization, anomaly detection).
+Customer Service Voice Bots.
+Support Design & Prototyping, Product mock-ups
+
+7 | Generative AI for Decision Support | AI-assisted analytics. 
+Synthetic data.
+Scenario generation and simulation (Monte Carlo simulation with generative inputs)
+Root‑cause analysis
+ | Practice with Natural‑language querying of data.
+Generate Automated insights (anomalies, patterns, etc). Turning data into narratives. Executive summaries.
+Generate synthetic data for testing.
+Generate customer personas and use cases.
+Simulate user behavior and usage scenarios.
+
+8 | Business Strategy & Operations | AI-assisted strategic analysis mapped to SWOT, PESTLE, Porter.
+Business forecasting. Process Automation, Personalization Sentiment/Opinion/Toxicity Analysis. | Explore how Generative AI can enhance strategic and operational business functions. Students will learn to leverage AI for value chain analysis, process automation, competitive analysis, marketing strategy, and customer insight generation (feedback, sentiment)
+
+9 | Conversational AI & Chatbots | Supporting customer experience with conversational agents and dialogue systems. Context handling and memory. Dialog management.
+Customer service automation.
+ | Practical exercises will utilize AI customer support platforms and tools such as OpenAI API, LangChain, LLaMA, Hugging Face, Azure Bot Service, and related frameworks to implement conversational agents in realistic business scenarios.
+
+10 | Enterprise Integration | Explore how generative AI can be seamlessly integrated into enterprise systems using APIs, plug-ins, and Retrieval-Augmented Generation (RAG).
+Integration with ERP, CRM, BI systems.
+ | Design and implement RAG pipelines to enable LLMs to answer questions using external documents or knowledge bases.
+11 | AI Agents in Business | Understand agentic AI concepts and components. 
+Goal-driven agents and workflows.
+Frameworks & Tools
+ | Hands-on experience in designing and implementing AI agents that can autonomously complete tasks and automate workflows.
+Implement a simple LLM agent. Automated alerts.
+
+12 | Ethics, Risk, Trust & Responsible AI | Bias, fairness, transparency and mitigation. AI misuse and misinformation. Risk Management. Data Privacy. Explainability and accountability
+ | Case Studies & Real‑World Scenarios. Evaluate an AI use case for responsible AI.
+Bias detection tools
+7.4	Work based learning and practice-placement (if applicable)
+N/A
+7.5	Specific module resources required (if applicable)
+
+Access to NCI’s Student Portal (e.g., Moodle, Helpdesk, Library resources, student email, and timetables) 
+Access to high speed Wi-Fi network. 
+BYOD laptop Requirements: 16GB of RAM (32GB recommended); a 64-bit x86 processor (Intel i7 or superior); 100+ GB of hard disk; and a recent installed release of Linux, Mac OS or Windows operating system 
+Laptop charging points 
+Library resources (see further details below)
+
+Learners will use a high-level programming language such as Python for the implementation and experimentation of generative AI models. Development and execution environments may include Anaconda, Visual Studio Code (VS Code), Jupyter Notebook, Google Colab and Cloud based Platforms to support interactive coding, experimentation, and prototyping.
+
+Students will install and work with a range of machine learning and deep learning libraries, including but not limited to PyTorch, TensorFlow, and Hugging Face Transformers and Diffusers, for building, fine-tuning, and evaluating generative models. Additional software tools may be used such as Git and Docker for the deployment of generative AI applications.
+
+
+
+
+7.6	Application of programme teaching, learning and assessment strategies to this module
+Teaching & Learning:
+The teaching and learning strategy for the Generative AI for Business module comprises a combination of lectures, tutorials, lab exercises, case studies, group discussions and independent learning activities. Each week, students will participate in a 2-hour lecture and a 2-hour tutorial/lab session.
+
+The practical tutorial and lab sessions are designed to enable students to apply theoretical concepts to real-world generative AI problems, thereby reinforcing learning through hands-on experience. 
+
+All module materials, including lecture content, lab instructions, supplementary resources, and assessment information, are made available to students through the Moodle learning management system.
+
+The module supports both face-to-face and blended delivery modes. NCI’s blended learning model combines in-person classes with asynchronous, directed learning activities, such as pre-recorded videos, guided exercises, and online quizzes, which students are expected to complete in advance of live sessions. This approach promotes active learning and ensures effective use of classroom time.
+
+Assessment:
+Assessment in this module is by a Group Project (60%) and a continuous assessment (40%). 
+Group Project: Students will work in groups of two to three to design, implement, and evaluate a generative AI application addressing a real-world problem in a business scenario/context. The project requires students to integrate theoretical foundations with hands-on implementation, demonstrating the ability to translate generative AI concepts into practical business solutions.
+Exam: The examination will be of two hours duration and may include a mix of: theoretical, applied and interpretation questions.
+
+Re-assessment:
+Re-assessment of this module will consist of a new submission of an individual project that demonstrates achievement of the minimum intended learning outcomes. All learning outcomes will be reassessed in the repeat attempt, and students will be afforded opportunities to resubmit at specified times throughout the academic year.
+7.7	Summative Assessment Strategy for this module
+MIMLOs | Technique(s) | Weighting
+1, 2, 3, 4, 5 | Group Project | 60%
+1, 2, 3, 4, 5 | Continuous Assessment | 40%
+7.8	Sample Assessment Materials
+Sample assessment materials can be found in Appendix 4.
+7.9	Indicative reading lists and other information resources
+Recommended Book Reading
+David Foster, 2nd edition, (2023), Generative Deep Learning: Teaching Machines to Paint, Write, Compose, and Play, O’Reilly
+Cronin, I. (2024). Understanding Generative AI Business Applications: A Guide to Technical Principles and Real‑World Applications. Apress / Springer Nature
+Denis Rothman. (2022), Transformers for Natural Language Processing, Packt Publishing, p.564, [ISBN: 978-1803247335].
+Supplementary Book Reading
+Marr, B. (2024). Generative AI in Practice: 100+ Amazing Ways Generative Artificial Intelligence Is Changing Business and Society. John Wiley & Sons.
+Lewis Tunstall, Leandro von Werra, Thomas Wolf, (2022), Natural Language Processing with Transformers, Reilly Media, p.406, [ISBN: 978-1098136796].
+Sinan Ozdemir. (2023), Quick Start Guide to Large Language Models, Addison-Wesley Professional, p.0, [ISBN: 978-0138199197].

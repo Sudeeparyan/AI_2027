@@ -1,0 +1,46 @@
+{
+  "outcomes": "LO2, LO4",
+  "plain_explanation": "A multimodal system can accept an image and text. Reading a value from an image and verifying that value are different operations. Retain the original source location, mark unreadable fields and recalculate totals with ordinary code.",
+  "worked_example": "Two items at 20 plus tax 5 imply 45. If the image says 54, a perfect transcription of 54 is still inconsistent with arithmetic. Flag the mismatch and ask for review; the discrepancy alone does not prove fraud.",
+  "exam": [
+    {
+      "question": "What is the difference between extraction and verification?",
+      "model_answer": "Extraction records the visible value. Verification checks it against arithmetic, evidence or rules.",
+      "marks": 4
+    },
+    {
+      "question": "Calculate the total for 2 × 20 plus 5 tax.",
+      "model_answer": "45. A listed value of 54 differs by 9 and should be reviewed.",
+      "marks": 4
+    },
+    {
+      "question": "How should an unreadable digit be handled?",
+      "model_answer": "Mark it uncertain or missing and request a clearer source; do not silently guess.",
+      "marks": 4
+    }
+  ],
+  "resources": [
+    {
+      "id": "G7",
+      "publisher": "Google Developers",
+      "title": "Image understanding",
+      "url": "https://ai.google.dev/gemini-api/docs/image-understanding",
+      "type": "Official documentation",
+      "use": "Multimodal image inputs. The core notebook uses a prepared transcription.",
+      "checked_date": "2026-09-28",
+      "verification": "Official page/search metadata reviewed"
+    },
+    {
+      "id": "O1",
+      "publisher": "OpenAI",
+      "title": "Evaluation best practices",
+      "url": "https://developers.openai.com/api/docs/guides/evaluation-best-practices",
+      "type": "Official guide",
+      "use": "Task-specific testing, repeated outputs and separate evaluation cases.",
+      "checked_date": "2026-09-28",
+      "verification": "Official page/search metadata reviewed"
+    }
+  ],
+  "study_task": "Draw the main diagram from memory, explain each arrow, then check it against the slides. Answer the three questions without notes before reading the model answers.",
+  "reference_note": "Selected source concepts inform the lesson. Examples, figures, questions and solutions are original classroom material; no exam questions are claimed to be official."
+}

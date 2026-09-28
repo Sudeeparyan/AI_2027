@@ -1,0 +1,47 @@
+{
+  "n": 12,
+  "title": "Final demonstration and explanation",
+  "goal": "Demonstrate the policy assistant and explain its limits with evidence.",
+  "case": "A fresh student question and a previously unseen failure are presented.",
+  "terms": [
+    [
+      "Integrated system",
+      "The student question enters retrieval, access checks, answer construction and evaluation."
+    ],
+    [
+      "Attribution",
+      "Each learner shows the part they changed and explains the choice."
+    ],
+    [
+      "Fresh challenge",
+      "A new example of a practised failure tests understanding rather than memorization."
+    ],
+    [
+      "Handover",
+      "Another person can run, test and review the solution from written instructions."
+    ]
+  ],
+  "steps": [
+    "Run an answerable student policy question",
+    "Run a no-answer question",
+    "Demonstrate blocked staff-only access",
+    "Explain one failure and propose a new test"
+  ],
+  "example": [
+    "P4: appeals must be filed within ten days.",
+    "Q: May I appeal on day 12?",
+    "A: No; the ten-day window has passed [P4], subject to the policy version used."
+  ],
+  "misconception": "A polished demonstration without tests establishes that the system is ready.",
+  "correction": "Show the test cases, negative cases, access result and remaining limitations.",
+  "change": "Use a new policy version and explain which index and tests must change.",
+  "metric": "Task success, citation support, no-answer accuracy and access gate",
+  "lab": "Present a self-contained end-to-end policy assistant.",
+  "output": "Demo, test table, known limits and individual explanation.",
+  "reading": [
+    "Microsoft, Retrieval augmented generation",
+    "OpenAI, Evaluation best practices",
+    "Anthropic, Building effective agents"
+  ],
+  "code": "capstone"
+}

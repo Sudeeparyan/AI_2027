@@ -1,0 +1,37 @@
+{
+  "term": [
+    [
+      "Invoice text",
+      "Field instructions",
+      "Structured reply"
+    ],
+    [
+      "Invoice INV-04",
+      "Read printed total",
+      "Keep source text"
+    ],
+    [
+      "Fields and types",
+      "Python validator",
+      "Accept or flag"
+    ],
+    [
+      "Missing total",
+      "Return null",
+      "Human review"
+    ]
+  ],
+  "path": [
+    "Invoice source",
+    "Prompt fields",
+    "Extract values",
+    "Validate types",
+    "Check original"
+  ],
+  "compare": [
+    "Valid structure",
+    "Correct source values"
+  ],
+  "good": "Missing listed total → None",
+  "bad": "Guess the listed total"
+}

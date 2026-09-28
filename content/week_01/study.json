@@ -1,0 +1,56 @@
+{
+  "outcomes": "LO1, LO4",
+  "plain_explanation": "A model predicts likely next pieces of text. The surrounding application chooses evidence, enforces access, and checks the result. A manual answer sheet gives a baseline. A replayed response is useful for an outage but cannot measure fresh model variability.",
+  "worked_example": "Of ten policy questions, seven answers are supported, two are wrong and one should have abstained. Supported task accuracy is 7/10 = 70%. Repeating two recorded prompts gives two different wordings, but both may be correct. Compare meaning and evidence rather than exact spelling.",
+  "exam": [
+    {
+      "question": "Explain generation versus prediction with one example of each.",
+      "model_answer": "Predict whether an email is spam: a label. Generate a reply: new text. Both use learned patterns and both can be wrong.",
+      "marks": 4
+    },
+    {
+      "question": "Seven of ten answers are correct and supported. Calculate accuracy and name a missing check.",
+      "model_answer": "7/10 = 70%. Also check permissions, unsupported claims or repeated-run variation.",
+      "marks": 4
+    },
+    {
+      "question": "Why can a fluent answer be wrong?",
+      "model_answer": "Likely wording is not proof of a claim. Compare the statement with the source or reference answer.",
+      "marks": 4
+    }
+  ],
+  "resources": [
+    {
+      "id": "G1",
+      "publisher": "Google",
+      "title": "Introduction to Generative AI",
+      "url": "https://www.cloudskillsboost.google/course_templates/536",
+      "type": "Introductory course",
+      "use": "Generation versus traditional machine learning.",
+      "checked_date": "2026-09-28",
+      "verification": "Official page/search metadata reviewed"
+    },
+    {
+      "id": "G6",
+      "publisher": "Google Cloud Tech",
+      "title": "Introduction to Generative AI",
+      "url": "https://www.youtube.com/watch?v=G2fqAlgmoPo",
+      "type": "YouTube lesson",
+      "use": "Foundation overview. Metadata verified; full transcript not retrieved.",
+      "checked_date": "2026-09-28",
+      "verification": "Official page or indexed metadata; video transcripts not reviewed"
+    },
+    {
+      "id": "O1",
+      "publisher": "OpenAI",
+      "title": "Evaluation best practices",
+      "url": "https://developers.openai.com/api/docs/guides/evaluation-best-practices",
+      "type": "Official guide",
+      "use": "Task-specific testing, repeated outputs and separate evaluation cases.",
+      "checked_date": "2026-09-28",
+      "verification": "Official page/search metadata reviewed"
+    }
+  ],
+  "study_task": "Draw the main diagram from memory, explain each arrow, then check it against the slides. Answer the three questions without notes before reading the model answers.",
+  "reference_note": "Selected source concepts inform the lesson. Examples, figures, questions and solutions are original classroom material; no exam questions are claimed to be official."
+}

@@ -1,0 +1,90 @@
+[
+  {
+    "id": "01",
+    "file": "sources/originals/01-Deep-reserach.txt",
+    "extracted": "sources/extracted/01-Deep-reserach.txt",
+    "sha256": "dcb3dc1464461462b54ad3e726a53a8b42631d77e43363d9b078b6951ff73b41",
+    "characters": 32280,
+    "status": "user supplied; claims require verification"
+  },
+  {
+    "id": "02",
+    "file": "sources/originals/02-RAG.txt",
+    "extracted": "sources/extracted/02-RAG.txt",
+    "sha256": "ef68b3156b5cfc38e3bc56495740b056ce5fa3253164dcec08ac0fa174051963",
+    "characters": 8387,
+    "status": "user supplied; claims require verification"
+  },
+  {
+    "id": "03",
+    "file": "sources/originals/03-AI-Agents.txt",
+    "extracted": "sources/extracted/03-AI-Agents.txt",
+    "sha256": "8e1aea0be395c0aca5c1f7d6d9aaa644dd3948596fbd59041976d7968996411e",
+    "characters": 30690,
+    "status": "user supplied; claims require verification"
+  },
+  {
+    "id": "04",
+    "file": "sources/originals/04-MCP-Vectore-Database.txt",
+    "extracted": "sources/extracted/04-MCP-Vectore-Database.txt",
+    "sha256": "2d85b84da4d4f2dd13f6944099b4d291c61875a70c6549c5187d8bd8b2e2552b",
+    "characters": 14311,
+    "status": "user supplied; claims require verification"
+  },
+  {
+    "id": "05",
+    "file": "sources/originals/05-Muti-Agent-AI-System.txt",
+    "extracted": "sources/extracted/05-Muti-Agent-AI-System.txt",
+    "sha256": "fecb2c77bbdd14ef3002f42ae315b0c25c7e7bf77aa3a42c4dd49cf9198d23d6",
+    "characters": 7784,
+    "status": "user supplied; claims require verification"
+  },
+  {
+    "id": "06",
+    "file": "sources/originals/06-Eval-Finetune-Loop-Enginnering.txt",
+    "extracted": "sources/extracted/06-Eval-Finetune-Loop-Enginnering.txt",
+    "sha256": "0d02ec0f1f5a702515d9cd3647f148fa988f39fa758bbdddc9ab6d58ac506f76",
+    "characters": 24317,
+    "status": "user supplied; claims require verification"
+  },
+  {
+    "id": "07",
+    "file": "sources/originals/07-Descriptor-Generative-AI-new-.docx",
+    "extracted": "sources/extracted/07-Descriptor-Generative-AI-new-.txt",
+    "sha256": "8e60aa01252db5b0df07faf32b80a6e211571e38eb9f175b3d9f5068e0c3033f",
+    "characters": 11947,
+    "status": "user supplied; claims require verification"
+  },
+  {
+    "id": "08",
+    "file": "sources/originals/08-04-AI-Technologies.docx",
+    "extracted": "sources/extracted/08-04-AI-Technologies.txt",
+    "sha256": "14b61cbab9017f06e2c8de5c25013c7add7fc7f474b550cd04dcd4c3098294cf",
+    "characters": 8146,
+    "status": "user supplied; claims require verification"
+  },
+  {
+    "id": "09",
+    "file": "sources/originals/09-09-Explainable-and-Emerging-AI-Technologies.docx",
+    "extracted": "sources/extracted/09-09-Explainable-and-Emerging-AI-Technologies.txt",
+    "sha256": "4eca6731f9a9166ef117493d90eb09ea9eba6c95ae14e0cb7429cbcacc2928ec",
+    "characters": 7955,
+    "status": "user supplied; claims require verification"
+  },
+  {
+    "id": "10",
+    "file": "sources/originals/10-06-Generative-AI-For-Business-new-.docx",
+    "extracted": "sources/extracted/10-06-Generative-AI-For-Business-new-.txt",
+    "sha256": "072d4a484cacc9f8dda0ba788973dd3d3e28c896d6027da633c1d8d388749d3b",
+    "characters": 13619,
+    "status": "user supplied; claims require verification"
+  },
+  {
+    "id": "11",
+    "file": "sources/originals/11-Generative-AI-for-Developers-and-Business_-A-Research-Based-Curriculum-Blueprint-for-2027.docx",
+    "extracted": "sources/extracted/11-Generative-AI-for-Developers-and-Business_-A-Research-Based-Curriculum-Blueprint-for-2027.txt",
+    "sha256": "4c3fb7c339f2b5d10eef836f8a6cfb38d5000ae1d17cbb44ed9b3082ed622daf",
+    "characters": 67032,
+    "status": "user supplied; claims require verification"
+  }
+]

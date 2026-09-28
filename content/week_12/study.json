@@ -1,0 +1,56 @@
+{
+  "outcomes": "LO1–LO5",
+  "plain_explanation": "A final demonstration must show an answerable case, an unsupported case, a denied-access case and recovery from a failure. Each learner explains their own change. Compare against week 1 only on matched questions with consistent scoring.",
+  "worked_example": "Run the same two travel and appeal questions on baseline and final versions. Count supported correct answers under the same rubric. Explain changed settings and unresolved failures; do not compare a ten-question baseline percentage with a different final dataset as if they were controlled.",
+  "exam": [
+    {
+      "question": "What makes a fair baseline comparison?",
+      "model_answer": "Same task, matched cases, source version and scoring rubric, with changes and variability recorded.",
+      "marks": 4
+    },
+    {
+      "question": "Name the four demonstration cases.",
+      "model_answer": "Answerable, unsupported, access denied, and failure recovery.",
+      "marks": 4
+    },
+    {
+      "question": "What should an individual explanation include?",
+      "model_answer": "The learner’s own change, why they made it, test evidence and a remaining limitation.",
+      "marks": 4
+    }
+  ],
+  "resources": [
+    {
+      "id": "M1",
+      "publisher": "Microsoft Learn",
+      "title": "Introduction to retrieval-augmented generation concepts",
+      "url": "https://learn.microsoft.com/en-us/training/modules/rag-fundamentals/",
+      "type": "Beginner module",
+      "use": "Preparation, retrieval, generation and evaluation.",
+      "checked_date": "2026-09-28",
+      "verification": "Official page/search metadata reviewed"
+    },
+    {
+      "id": "O1",
+      "publisher": "OpenAI",
+      "title": "Evaluation best practices",
+      "url": "https://developers.openai.com/api/docs/guides/evaluation-best-practices",
+      "type": "Official guide",
+      "use": "Task-specific testing, repeated outputs and separate evaluation cases.",
+      "checked_date": "2026-09-28",
+      "verification": "Official page/search metadata reviewed"
+    },
+    {
+      "id": "N1",
+      "publisher": "NVIDIA",
+      "title": "Generative AI and LLM Learning Paths",
+      "url": "https://www.nvidia.com/en-us/learn/learning-path/generative-ai-llm/",
+      "type": "Training catalogue",
+      "use": "Optional deeper RAG, diffusion and deployment training; some courses require payment.",
+      "checked_date": "2026-09-28",
+      "verification": "Official page/search metadata reviewed"
+    }
+  ],
+  "study_task": "Draw the main diagram from memory, explain each arrow, then check it against the slides. Answer the three questions without notes before reading the model answers.",
+  "reference_note": "Selected source concepts inform the lesson. Examples, figures, questions and solutions are original classroom material; no exam questions are claimed to be official."
+}

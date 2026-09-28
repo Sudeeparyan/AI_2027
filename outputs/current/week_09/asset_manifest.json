@@ -1,0 +1,282 @@
+[
+  {
+    "slide_id": "s01",
+    "png": "assets/diagrams/week_09/s01-7c70d8f9437f.png",
+    "svg": "assets/diagrams/week_09/s01-7c70d8f9437f.svg",
+    "sha256": "7c70d8f9437f19cc51f357497207bd8d50cf4a1ffb27811d69d2eed46d7934ec",
+    "source_run": "20260928T202137535507Z"
+  },
+  {
+    "slide_id": "s02",
+    "png": "assets/diagrams/week_09/s02-3c8f8b5908ad.png",
+    "svg": "assets/diagrams/week_09/s02-3c8f8b5908ad.svg",
+    "sha256": "3c8f8b5908adadf303d7464ee0c0d45230a811b75e06de3202fda8104c2615e1",
+    "source_run": "20260928T202137535507Z"
+  },
+  {
+    "slide_id": "s03",
+    "png": "assets/diagrams/week_09/s03-cf3d01187416.png",
+    "svg": "assets/diagrams/week_09/s03-cf3d01187416.svg",
+    "sha256": "cf3d0118741655229aa5bb1dea33b4fedaca4a5e36e5b2eb3f58dd454ae6254d",
+    "source_run": "20260928T202137535507Z"
+  },
+  {
+    "slide_id": "s04",
+    "png": "assets/diagrams/week_09/s04-45d79a7f885b.png",
+    "svg": "assets/diagrams/week_09/s04-45d79a7f885b.svg",
+    "sha256": "45d79a7f885b14cb25e8acdacfe1ac06079ac22a6985d8fd62172d4f399f72f4",
+    "source_run": "20260928T202137535507Z"
+  },
+  {
+    "slide_id": "s05",
+    "png": "assets/diagrams/week_09/s05-32ebf26c4279.png",
+    "svg": "assets/diagrams/week_09/s05-32ebf26c4279.svg",
+    "sha256": "32ebf26c42792165e66f79ab6468321336a6bb3e153e940e6dbfdacd22c1ee58",
+    "source_run": "20260928T202137535507Z"
+  },
+  {
+    "slide_id": "s06",
+    "png": "assets/diagrams/week_09/s06-46749bd4399a.png",
+    "svg": "assets/diagrams/week_09/s06-46749bd4399a.svg",
+    "sha256": "46749bd4399a1297aab68f7c1cd94edebe05aab44325793affd7a688a2d3e112",
+    "source_run": "20260928T202137535507Z"
+  },
+  {
+    "slide_id": "s07",
+    "png": "assets/diagrams/week_09/s07-0198f038045f.png",
+    "svg": "assets/diagrams/week_09/s07-0198f038045f.svg",
+    "sha256": "0198f038045f238a5f75ddd2e30346d4abc8547191b523d0b13583880e120fa0",
+    "source_run": "20260928T202137535507Z"
+  },
+  {
+    "slide_id": "s08",
+    "png": "assets/diagrams/week_09/s08-3f1dc41399da.png",
+    "svg": "assets/diagrams/week_09/s08-3f1dc41399da.svg",
+    "sha256": "3f1dc41399da60ecc39b59fbcedfb6d8d99fcf8d35bb24aa30d7024734ba4184",
+    "source_run": "20260928T202137535507Z"
+  },
+  {
+    "slide_id": "s09",
+    "png": "assets/diagrams/week_09/s09-f2356e97aef3.png",
+    "svg": "assets/diagrams/week_09/s09-f2356e97aef3.svg",
+    "sha256": "f2356e97aef3a2cd2d9d8d0fed81b0164700b152182402d58150833141233114",
+    "source_run": "20260928T202137535507Z"
+  },
+  {
+    "slide_id": "s10",
+    "png": "assets/diagrams/week_09/s10-c4e7636efe14.png",
+    "svg": "assets/diagrams/week_09/s10-c4e7636efe14.svg",
+    "sha256": "c4e7636efe147cb543e4b656ab0739dfa708e7758f6a2466112e916d3cb97693",
+    "source_run": "20260928T202137535507Z"
+  },
+  {
+    "slide_id": "s11",
+    "png": "assets/diagrams/week_09/s11-4e381d0a1135.png",
+    "svg": "assets/diagrams/week_09/s11-4e381d0a1135.svg",
+    "sha256": "4e381d0a11359a7733b008ee08bf75ce5ae981cc7ec491c1c4c587393af6c4d3",
+    "source_run": "20260928T202137535507Z"
+  },
+  {
+    "slide_id": "s12",
+    "png": "assets/diagrams/week_09/s12-f00e1a987d90.png",
+    "svg": "assets/diagrams/week_09/s12-f00e1a987d90.svg",
+    "sha256": "f00e1a987d90797f874ceccaedd003b2609799ee5062f067c60cb8d91a80ab55",
+    "source_run": "20260928T202137535507Z"
+  },
+  {
+    "slide_id": "s13",
+    "png": "assets/diagrams/week_09/s13-d86b0963ce54.png",
+    "svg": "assets/diagrams/week_09/s13-d86b0963ce54.svg",
+    "sha256": "d86b0963ce54899d6516742891a22121c1eac043f9a51dce20cfec13285fef19",
+    "source_run": "20260928T202137535507Z"
+  },
+  {
+    "slide_id": "s14",
+    "png": "assets/diagrams/week_09/s14-8b3993752107.png",
+    "svg": "assets/diagrams/week_09/s14-8b3993752107.svg",
+    "sha256": "8b399375210716ea5c46eece3d911b07322cdab3dfc8c7ae713c6d4788ea1d58",
+    "source_run": "20260928T202137535507Z"
+  },
+  {
+    "slide_id": "s15",
+    "png": "assets/diagrams/week_09/s15-0af7228d40ca.png",
+    "svg": "assets/diagrams/week_09/s15-0af7228d40ca.svg",
+    "sha256": "0af7228d40ca6f5e6e68d918ea921b0df76d4c5d1b5ae778f6d36ab4efe2c775",
+    "source_run": "20260928T202137535507Z"
+  },
+  {
+    "slide_id": "s16",
+    "png": "assets/diagrams/week_09/s16-52c885f0e4f0.png",
+    "svg": "assets/diagrams/week_09/s16-52c885f0e4f0.svg",
+    "sha256": "52c885f0e4f0ce21afda1f932e16a76825a40450f6ff8acb09fe520c5d0145f5",
+    "source_run": "20260928T202137535507Z"
+  },
+  {
+    "slide_id": "s17",
+    "png": "assets/diagrams/week_09/s17-34b5c21fe93f.png",
+    "svg": "assets/diagrams/week_09/s17-34b5c21fe93f.svg",
+    "sha256": "34b5c21fe93fe19cf005b1b79929bc2a5e964ef7cca43ae15d43cd437da4af92",
+    "source_run": "20260928T202137535507Z"
+  },
+  {
+    "slide_id": "s18",
+    "png": "assets/diagrams/week_09/s18-592c6dd7b065.png",
+    "svg": "assets/diagrams/week_09/s18-592c6dd7b065.svg",
+    "sha256": "592c6dd7b0650e8a28c3b3e7475295a30fccf5f16bc520936b854aaef1148262",
+    "source_run": "20260928T202137535507Z"
+  },
+  {
+    "slide_id": "s19",
+    "png": "assets/diagrams/week_09/s19-d0baa2d2aa75.png",
+    "svg": "assets/diagrams/week_09/s19-d0baa2d2aa75.svg",
+    "sha256": "d0baa2d2aa75c892bb244f30c8f8f3da234a0531452ea3e26c53d60cd8b35c7a",
+    "source_run": "20260928T202137535507Z"
+  },
+  {
+    "slide_id": "s20",
+    "png": "assets/diagrams/week_09/s20-b26e0d48399a.png",
+    "svg": "assets/diagrams/week_09/s20-b26e0d48399a.svg",
+    "sha256": "b26e0d48399ae252d94968b260a80399aae3a1fe814991b4d2d150daec7a1d8f",
+    "source_run": "20260928T202137535507Z"
+  },
+  {
+    "slide_id": "s21",
+    "png": "assets/diagrams/week_09/s21-82104d2aaaeb.png",
+    "svg": "assets/diagrams/week_09/s21-82104d2aaaeb.svg",
+    "sha256": "82104d2aaaeb9fcad96400a1f4b5450ad39cffffc00bf50b622398294d389a21",
+    "source_run": "20260928T202137535507Z"
+  },
+  {
+    "slide_id": "s22",
+    "png": "assets/diagrams/week_09/s22-cbe4c39a7ba5.png",
+    "svg": "assets/diagrams/week_09/s22-cbe4c39a7ba5.svg",
+    "sha256": "cbe4c39a7ba58a43d824b134564ba3fb893413c95003a5cc77a82e8d2f1619b2",
+    "source_run": "20260928T202137535507Z"
+  },
+  {
+    "slide_id": "s23",
+    "png": "assets/diagrams/week_09/s23-923193d9eacb.png",
+    "svg": "assets/diagrams/week_09/s23-923193d9eacb.svg",
+    "sha256": "923193d9eacb485cdf942cbfaf5e9d4aa5c69a85f96156e1753d04d9c7a0b91d",
+    "source_run": "20260928T202137535507Z"
+  },
+  {
+    "slide_id": "s24",
+    "png": "assets/diagrams/week_09/s24-d543dda823cc.png",
+    "svg": "assets/diagrams/week_09/s24-d543dda823cc.svg",
+    "sha256": "d543dda823cc38a9a478246298477569b3401080a0c181865de4ad5b9ce18357",
+    "source_run": "20260928T202137535507Z"
+  },
+  {
+    "slide_id": "s25",
+    "png": "assets/diagrams/week_09/s25-6b5207081b01.png",
+    "svg": "assets/diagrams/week_09/s25-6b5207081b01.svg",
+    "sha256": "6b5207081b0149487ca5472b7cb34401bd18bd7eed00f0abce0fe7047a5444f5",
+    "source_run": "20260928T202137535507Z"
+  },
+  {
+    "slide_id": "s26",
+    "png": "assets/diagrams/week_09/s26-77c2d65d7d5b.png",
+    "svg": "assets/diagrams/week_09/s26-77c2d65d7d5b.svg",
+    "sha256": "77c2d65d7d5bbd6f37c7023e4b1cd1ee43735199cd37a9700c0ec4a8de59b4b2",
+    "source_run": "20260928T202137535507Z"
+  },
+  {
+    "slide_id": "s27",
+    "png": "assets/diagrams/week_09/s27-8377c21873ff.png",
+    "svg": "assets/diagrams/week_09/s27-8377c21873ff.svg",
+    "sha256": "8377c21873ff4c18cbc702a82ba1f9b6976f275f610cc2d2e859ad63832d1302",
+    "source_run": "20260928T202137535507Z"
+  },
+  {
+    "slide_id": "s28",
+    "png": "assets/diagrams/week_09/s28-6d6d9c8b5e81.png",
+    "svg": "assets/diagrams/week_09/s28-6d6d9c8b5e81.svg",
+    "sha256": "6d6d9c8b5e81a02efcf286ead698114d2baccac937f751a6b6ea1fb6cc2b5d82",
+    "source_run": "20260928T202137535507Z"
+  },
+  {
+    "slide_id": "s29",
+    "png": "assets/diagrams/week_09/s29-e8e519afb47e.png",
+    "svg": "assets/diagrams/week_09/s29-e8e519afb47e.svg",
+    "sha256": "e8e519afb47e85c932b0a5ac0ac75ddfa78093e0f8c7fc52022da8ef84b35a26",
+    "source_run": "20260928T202137535507Z"
+  },
+  {
+    "slide_id": "s30",
+    "png": "assets/diagrams/week_09/s30-08b0b77ecaa6.png",
+    "svg": "assets/diagrams/week_09/s30-08b0b77ecaa6.svg",
+    "sha256": "08b0b77ecaa6313af1b931c8d6ec290fbfe2ce13ddd7574dcdb7c6f5e75b3114",
+    "source_run": "20260928T202137535507Z"
+  },
+  {
+    "slide_id": "s31",
+    "png": "assets/diagrams/week_09/s31-3bfc0ca2166a.png",
+    "svg": "assets/diagrams/week_09/s31-3bfc0ca2166a.svg",
+    "sha256": "3bfc0ca2166a6cdb93942b1503902a6f9fdedb725ad3a5316d55e9670eda9690",
+    "source_run": "20260928T202137535507Z"
+  },
+  {
+    "slide_id": "s32",
+    "png": "assets/diagrams/week_09/s32-e70d13d240fb.png",
+    "svg": "assets/diagrams/week_09/s32-e70d13d240fb.svg",
+    "sha256": "e70d13d240fba553d0ebf30ba820a10e665a56ee74a2d26768c064270420b1fe",
+    "source_run": "20260928T202137535507Z"
+  },
+  {
+    "slide_id": "s33",
+    "png": "assets/diagrams/week_09/s33-27dee737e1ec.png",
+    "svg": "assets/diagrams/week_09/s33-27dee737e1ec.svg",
+    "sha256": "27dee737e1ecd05f26f86a379cc5606dd5be9f3c4d7a94a520e81dd224de0abb",
+    "source_run": "20260928T202137535507Z"
+  },
+  {
+    "slide_id": "s34",
+    "png": "assets/diagrams/week_09/s34-b2a75781cfd3.png",
+    "svg": "assets/diagrams/week_09/s34-b2a75781cfd3.svg",
+    "sha256": "b2a75781cfd37ec9f4ca8be3a45468ffbcc2af43e40ca08e301b61750971a5cc",
+    "source_run": "20260928T202137535507Z"
+  },
+  {
+    "slide_id": "s35",
+    "png": "assets/diagrams/week_09/s35-03817b02ca1d.png",
+    "svg": "assets/diagrams/week_09/s35-03817b02ca1d.svg",
+    "sha256": "03817b02ca1d21fa092b6ea75545bbe6c32fb770e8cab6e1fd29d32a4e8e315a",
+    "source_run": "20260928T202137535507Z"
+  },
+  {
+    "slide_id": "s36",
+    "png": "assets/diagrams/week_09/s36-26dfecf5e742.png",
+    "svg": "assets/diagrams/week_09/s36-26dfecf5e742.svg",
+    "sha256": "26dfecf5e742ce90f39b7a31c1b3a26dde844708a575211417d6654d11442705",
+    "source_run": "20260928T202137535507Z"
+  },
+  {
+    "slide_id": "s37",
+    "png": "assets/diagrams/week_09/s37-b0bab297a332.png",
+    "svg": "assets/diagrams/week_09/s37-b0bab297a332.svg",
+    "sha256": "b0bab297a3323c03ec2d764b623e2cc9940fbd68efebbd17a308e5ff1ed4d7e2",
+    "source_run": "20260928T202137535507Z"
+  },
+  {
+    "slide_id": "s38",
+    "png": "assets/diagrams/week_09/s38-b0bab297a332.png",
+    "svg": "assets/diagrams/week_09/s38-b0bab297a332.svg",
+    "sha256": "b0bab297a3323c03ec2d764b623e2cc9940fbd68efebbd17a308e5ff1ed4d7e2",
+    "source_run": "20260928T202137535507Z"
+  },
+  {
+    "slide_id": "s39",
+    "png": "assets/diagrams/week_09/s39-c232379b67cd.png",
+    "svg": "assets/diagrams/week_09/s39-c232379b67cd.svg",
+    "sha256": "c232379b67cd0f539d5fffa5e8b0972034444e7aa2d5060e25605f0fb5bc7955",
+    "source_run": "20260928T202137535507Z"
+  },
+  {
+    "slide_id": "s40",
+    "png": "assets/diagrams/week_09/s40-cf3d01187416.png",
+    "svg": "assets/diagrams/week_09/s40-cf3d01187416.svg",
+    "sha256": "cf3d0118741655229aa5bb1dea33b4fedaca4a5e36e5b2eb3f58dd454ae6254d",
+    "source_run": "20260928T202137535507Z"
+  }
+]

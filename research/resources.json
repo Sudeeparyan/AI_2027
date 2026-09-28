@@ -1,0 +1,162 @@
+[
+  {
+    "id": "G1",
+    "publisher": "Google",
+    "title": "Introduction to Generative AI",
+    "url": "https://www.cloudskillsboost.google/course_templates/536",
+    "type": "Introductory course",
+    "use": "Generation versus traditional machine learning.",
+    "checked_date": "2026-09-28",
+    "verification": "Official page/search metadata reviewed"
+  },
+  {
+    "id": "G2",
+    "publisher": "Google Developers",
+    "title": "Overview of GAN Structure",
+    "url": "https://developers.google.com/machine-learning/gan/gan_structure",
+    "type": "Official concept guide",
+    "use": "Generator, discriminator and training feedback.",
+    "checked_date": "2026-09-28",
+    "verification": "Official page/search metadata reviewed"
+  },
+  {
+    "id": "G3",
+    "publisher": "Google / TensorFlow",
+    "title": "Convolutional Variational Autoencoder",
+    "url": "https://www.tensorflow.org/tutorials/generative/cvae",
+    "type": "Optional implementation tutorial",
+    "use": "VAE architecture; core students interpret prepared examples rather than train it.",
+    "checked_date": "2026-09-28",
+    "verification": "Official page/search metadata reviewed"
+  },
+  {
+    "id": "G4",
+    "publisher": "Google Cloud Tech",
+    "title": "Introduction to image generation",
+    "url": "https://www.youtube.com/watch?v=kzxz8CO_oG4",
+    "type": "YouTube lesson",
+    "use": "Denoising intuition. Video title and channel indexed in search; full transcript not retrieved.",
+    "checked_date": "2026-09-28",
+    "verification": "Official page or indexed metadata; video transcripts not reviewed"
+  },
+  {
+    "id": "G5",
+    "publisher": "Google Cloud Tech",
+    "title": "Attention mechanism: Overview",
+    "url": "https://www.youtube.com/watch?v=fjJOgb-E41w",
+    "type": "YouTube lesson",
+    "use": "Attention intuition. Verified channel in indexed metadata; full transcript not retrieved.",
+    "checked_date": "2026-09-28",
+    "verification": "Official page or indexed metadata; video transcripts not reviewed"
+  },
+  {
+    "id": "G6",
+    "publisher": "Google Cloud Tech",
+    "title": "Introduction to Generative AI",
+    "url": "https://www.youtube.com/watch?v=G2fqAlgmoPo",
+    "type": "YouTube lesson",
+    "use": "Foundation overview. Metadata verified; full transcript not retrieved.",
+    "checked_date": "2026-09-28",
+    "verification": "Official page or indexed metadata; video transcripts not reviewed"
+  },
+  {
+    "id": "G7",
+    "publisher": "Google Developers",
+    "title": "Image understanding",
+    "url": "https://ai.google.dev/gemini-api/docs/image-understanding",
+    "type": "Official documentation",
+    "use": "Multimodal image inputs. The core notebook uses a prepared transcription.",
+    "checked_date": "2026-09-28",
+    "verification": "Official page/search metadata reviewed"
+  },
+  {
+    "id": "M1",
+    "publisher": "Microsoft Learn",
+    "title": "Introduction to retrieval-augmented generation concepts",
+    "url": "https://learn.microsoft.com/en-us/training/modules/rag-fundamentals/",
+    "type": "Beginner module",
+    "use": "Preparation, retrieval, generation and evaluation.",
+    "checked_date": "2026-09-28",
+    "verification": "Official page/search metadata reviewed"
+  },
+  {
+    "id": "M2",
+    "publisher": "Microsoft Learn",
+    "title": "RAG and Vector Databases: Generative AI for Beginners",
+    "url": "https://learn.microsoft.com/en-us/shows/generative-ai-for-beginners/retrieval-augmented-generation-rag-and-vector-databases-generative-ai-for-beginners",
+    "type": "Official video lesson",
+    "use": "Optional RAG overview; hosted on Microsoft Learn.",
+    "checked_date": "2026-09-28",
+    "verification": "Official page or indexed metadata; video transcripts not reviewed"
+  },
+  {
+    "id": "M3",
+    "publisher": "Microsoft Learn",
+    "title": "Building a RAG-powered AI chat app with Python and VS Code",
+    "url": "https://learn.microsoft.com/en-us/shows/vs-code-day-2024/building-a-rag-powered-ai-chat-app-with-python-and-vs-code",
+    "type": "Official video demonstration",
+    "use": "Optional system walkthrough. Older SDK interfaces are not the core lab dependency.",
+    "checked_date": "2026-09-28",
+    "verification": "Official page or indexed metadata; video transcripts not reviewed"
+  },
+  {
+    "id": "O1",
+    "publisher": "OpenAI",
+    "title": "Evaluation best practices",
+    "url": "https://developers.openai.com/api/docs/guides/evaluation-best-practices",
+    "type": "Official guide",
+    "use": "Task-specific testing, repeated outputs and separate evaluation cases.",
+    "checked_date": "2026-09-28",
+    "verification": "Official page/search metadata reviewed"
+  },
+  {
+    "id": "O2",
+    "publisher": "OpenAI",
+    "title": "Safety in building agents",
+    "url": "https://developers.openai.com/api/docs/guides/agent-builder-safety",
+    "type": "Official guide",
+    "use": "Tool approvals, untrusted input and controls.",
+    "checked_date": "2026-09-28",
+    "verification": "Official page/search metadata reviewed"
+  },
+  {
+    "id": "O3",
+    "publisher": "OpenAI Academy",
+    "title": "Prompting",
+    "url": "https://academy.openai.com/en/public/clubs/work-users-ynjqu/resources/prompting",
+    "type": "Official learning resource",
+    "use": "Task, context, expected format and iterative improvement.",
+    "checked_date": "2026-09-28",
+    "verification": "Official page/search metadata reviewed"
+  },
+  {
+    "id": "N1",
+    "publisher": "NVIDIA",
+    "title": "Generative AI and LLM Learning Paths",
+    "url": "https://www.nvidia.com/en-us/learn/learning-path/generative-ai-llm/",
+    "type": "Training catalogue",
+    "use": "Optional deeper RAG, diffusion and deployment training; some courses require payment.",
+    "checked_date": "2026-09-28",
+    "verification": "Official page/search metadata reviewed"
+  },
+  {
+    "id": "N2",
+    "publisher": "NVIDIA",
+    "title": "NeMo Framework overview",
+    "url": "https://docs.nvidia.com/nemo-framework/user-guide/latest/overview.html",
+    "type": "Official documentation",
+    "use": "Instructor background on model customization; no NVIDIA setup required in core labs.",
+    "checked_date": "2026-09-28",
+    "verification": "Official page/search metadata reviewed"
+  },
+  {
+    "id": "N3",
+    "publisher": "NVIDIA",
+    "title": "Supported PEFT methods: LoRA",
+    "url": "https://docs.nvidia.com/nemo-framework/user-guide/25.02/sft_peft/supported_methods.html",
+    "type": "Official versioned guide",
+    "use": "Frozen base weights and low-rank updates. Read the concept section; live setup is optional.",
+    "checked_date": "2026-09-28",
+    "verification": "Official indexed source reviewed"
+  }
+]

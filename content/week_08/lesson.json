@@ -1,0 +1,46 @@
+{
+  "n": 8,
+  "title": "Tools and controlled actions",
+  "goal": "Implement a bounded read-only tool and reason about approval for actions.",
+  "case": "The assistant calculates a permitted reimbursement cap; a request to update a record needs approval.",
+  "terms": [
+    [
+      "Tool",
+      "A named operation with validated arguments, permissions and a defined result."
+    ],
+    [
+      "Workflow",
+      "Code chooses the next step by a fixed rule."
+    ],
+    [
+      "Agent",
+      "A model may choose a next action, within the permissions and limits supplied by the application."
+    ],
+    [
+      "Approval boundary",
+      "A consequential write needs explicit review before execution and an audit record."
+    ]
+  ],
+  "steps": [
+    "Call a read-only capped calculator",
+    "Reject a negative or non-numeric amount",
+    "Simulate an approval request without a real write",
+    "Check that a denied request remains unchanged"
+  ],
+  "example": [
+    "Policy cap is €40; eligible expense is €55.",
+    "Read-only tool returns €40.",
+    "A request to change the policy cap is denied until the authorized reviewer approves."
+  ],
+  "misconception": "A tool call chosen by a model is automatically authorized.",
+  "correction": "The application checks role, arguments and approval independently of the model text.",
+  "change": "Try a negative amount and confirm the validator blocks it.",
+  "metric": "Unauthorized successful actions / attempted unauthorized actions (target zero)",
+  "lab": "Implement a calculator and approval gate simulation.",
+  "output": "Tool result, blocked-request trace and approval explanation.",
+  "reading": [
+    "Anthropic, Building effective agents",
+    "OpenAI, Agent safety"
+  ],
+  "code": "tools"
+}

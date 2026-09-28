@@ -1,0 +1,614 @@
+{
+  "s01": {
+    "title": "Week 06 · Finding useful information",
+    "explanation": "The library-renewal search\n\nA learner asks “Can I renew my book?” Policy P2 says “library loans may be extended once.” Which passage should search find?",
+    "speaker_notes": "TEACHER SCRIPT — OPEN. Show the visual for ten seconds, then ask for an initial decision. Do not reveal the answer yet. Ask a student to name the source or measurement that would change their mind. This week’s case is: Five fictional college policies must answer student questions. The visible slide states: The library-renewal search\n\nA learner asks “Can I renew my book?” Policy P2 says “library loans may be extended once.” Which passage should search find? Reveal that the case will be revisited after four short concept cycles. The target is: Compare search strategies while preserving source and access information. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "story",
+      "items": [
+        "The library-renewal search",
+        "What is known?",
+        "What must we check?"
+      ]
+    },
+    "teaching_stage": "open"
+  },
+  "s02": {
+    "title": "First vote: what would you do?",
+    "explanation": "A learner asks “Can I renew my book?” Policy P2 says “library loans may be extended once.” Which passage should search find?\n\nChoose an initial answer and name one piece of evidence you need.",
+    "speaker_notes": "TEACHER SCRIPT — QUESTION. Take a show of hands for each choice before showing the mechanism. Ask pairs to defend a choice with evidence. Save the strongest wrong reason for the reveal later in this cycle. This week’s case is: Five fictional college policies must answer student questions. The visible slide states: A learner asks “Can I renew my book?” Policy P2 says “library loans may be extended once.” Which passage should search find?\n\nChoose an initial answer and name one piece of evidence you need. Accept reasonable uncertainty; record the initial votes to revisit at the end. The target is: Compare search strategies while preserving source and access information. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "Accept the first plausible result",
+        "Check the source or measurement"
+      ]
+    },
+    "teaching_stage": "question"
+  },
+  "s03": {
+    "title": "The journey through today’s case",
+    "explanation": "We will predict, connect an analogy, trace a mechanism, work an example, then explain a decision.",
+    "speaker_notes": "TEACHER SCRIPT — OPEN. Show the visual for ten seconds, then ask for an initial decision. Do not reveal the answer yet. Ask a student to name the source or measurement that would change their mind. This week’s case is: Five fictional college policies must answer student questions. The visible slide states: We will predict, connect an analogy, trace a mechanism, work an example, then explain a decision. Point to the four named ideas, then show where the notebook experiment fits. The target is: Compare search strategies while preserving source and access information. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "Chunk",
+        "Keyword search",
+        "Vector search",
+        "Access filter"
+      ]
+    },
+    "teaching_stage": "open"
+  },
+  "s04": {
+    "title": "1. Predict · Chunk",
+    "explanation": "Why preserve the source ID and version?\n\nMake a choice before we explain the diagram.",
+    "speaker_notes": "TEACHER SCRIPT — QUESTION. Take a show of hands for each choice before showing the mechanism. Ask pairs to defend a choice with evidence. Save the strongest wrong reason for the reveal later in this cycle. This week’s case is: Five fictional college policies must answer student questions. The visible slide states: Why preserve the source ID and version?\n\nMake a choice before we explain the diagram. The intended answer is They let a learner verify the answer in the correct policy edition. The tempting claim is A chunk needs only its text. Do not show which card is correct until the reveal. The target is: Compare search strategies while preserving source and access information. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "They let a learner verify the answer in the correct policy edition.",
+        "A chunk needs only its text."
+      ]
+    },
+    "teaching_stage": "question"
+  },
+  "s05": {
+    "title": "Chunk · a familiar picture",
+    "explanation": "A long textbook gets labelled index cards for individual sections.\n\nWhat matches our case, and where does the analogy stop?",
+    "speaker_notes": "TEACHER SCRIPT — ANALOGY. Begin with the familiar scene. Invite learners to describe each part in everyday language. Then ask where the comparison might fail before introducing the technical vocabulary. This week’s case is: Five fictional college policies must answer student questions. The visible slide states: A long textbook gets labelled index cards for individual sections.\n\nWhat matches our case, and where does the analogy stop? The boundary is: Cutting at arbitrary length can separate a condition from its rule. The target is: Compare search strategies while preserving source and access information. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "analogy",
+      "items": [
+        "Book section",
+        "Card label",
+        "Edition"
+      ],
+      "caption": "A long textbook gets labelled index cards for individual sections."
+    },
+    "teaching_stage": "analogy"
+  },
+  "s06": {
+    "title": "Chunk · map the parts",
+    "explanation": "Match each everyday part to the technical part.\n\nAnalogy limit: Cutting at arbitrary length can separate a condition from its rule.",
+    "speaker_notes": "TEACHER SCRIPT — MAPPING. Point from each familiar element to the corresponding technical element. Have students cover the right column and reconstruct the three matches. Read the limitation aloud. This week’s case is: Five fictional college policies must answer student questions. The visible slide states: Match each everyday part to the technical part.\n\nAnalogy limit: Cutting at arbitrary length can separate a condition from its rule. The three precise mappings are [['Book section', 'passage chunk'], ['Card label', 'source ID'], ['Edition', 'version']]. The target is: Compare search strategies while preserving source and access information. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "map",
+      "pairs": [
+        [
+          "Book section",
+          "passage chunk"
+        ],
+        [
+          "Card label",
+          "source ID"
+        ],
+        [
+          "Edition",
+          "version"
+        ]
+      ]
+    },
+    "teaching_stage": "mapping"
+  },
+  "s07": {
+    "title": "Chunk · how it works",
+    "explanation": "A short passage from a larger source; keep its document ID and version.\n\nTrace the arrows from left to right.",
+    "speaker_notes": "TEACHER SCRIPT — MECHANISM. Trace every arrow slowly from the input to the output. Ask what information crosses the boundary at each arrow. Pause if students confuse a simplified notebook with a trained model. This week’s case is: Five fictional college policies must answer student questions. The visible slide states: A short passage from a larger source; keep its document ID and version.\n\nTrace the arrows from left to right. The weekly example is: P2 becomes a short passage with ID P2 and version; keep “once” in the same passage. State what the analogy does not explain: Cutting at arbitrary length can separate a condition from its rule. The target is: Compare search strategies while preserving source and access information. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Policy PDF",
+        "Short passages",
+        "Source ID + version"
+      ]
+    },
+    "teaching_stage": "mechanism"
+  },
+  "s08": {
+    "title": "Chunk · work one case",
+    "explanation": "P2 becomes a short passage with ID P2 and version; keep “once” in the same passage.\n\nPoint to the evidence before giving your conclusion.",
+    "speaker_notes": "TEACHER SCRIPT — WORKED. Work the specific numbers or source wording aloud. Give students thirty seconds to write a conclusion, then ask which source line or calculation supports it. This week’s case is: Five fictional college policies must answer student questions. The visible slide states: P2 becomes a short passage with ID P2 and version; keep “once” in the same passage.\n\nPoint to the evidence before giving your conclusion. The expected reasoning concludes: They let a learner verify the answer in the correct policy edition. Distinguish measured results from illustrative numbers. The target is: Compare search strategies while preserving source and access information. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "work",
+      "items": [
+        "P2 becomes a short passage with ID P2 and version; keep “once” in the same passage.",
+        "Why preserve the source ID and version?",
+        "They let a learner verify the answer in the correct policy edition."
+      ]
+    },
+    "teaching_stage": "worked"
+  },
+  "s09": {
+    "title": "Chunk · answer and explain",
+    "explanation": "They let a learner verify the answer in the correct policy edition.\n\nTempting mistake: A chunk needs only its text.",
+    "speaker_notes": "TEACHER SCRIPT — REVEAL. Return to the earlier choice. Explain the correct answer and why the tempting claim fails. Ask one learner to say the answer in a single sentence without reading it. This week’s case is: Five fictional college policies must answer student questions. The visible slide states: They let a learner verify the answer in the correct policy edition.\n\nTempting mistake: A chunk needs only its text. The earlier question was Why preserve the source ID and version? Ask how this differs from the wrong claim. The target is: Compare search strategies while preserving source and access information. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "reveal",
+      "items": [
+        "A chunk needs only its text.",
+        "They let a learner verify the answer in the correct policy edition."
+      ],
+      "caption": "Cutting at arbitrary length can separate a condition from its rule."
+    },
+    "teaching_stage": "reveal"
+  },
+  "s10": {
+    "title": "2. Predict · Keyword search",
+    "explanation": "What explains this miss?\n\nMake a choice before we explain the diagram.",
+    "speaker_notes": "TEACHER SCRIPT — QUESTION. Take a show of hands for each choice before showing the mechanism. Ask pairs to defend a choice with evidence. Save the strongest wrong reason for the reveal later in this cycle. This week’s case is: Five fictional college policies must answer student questions. The visible slide states: What explains this miss?\n\nMake a choice before we explain the diagram. The intended answer is Different words express a similar intent. The tempting claim is No exact match proves no relevant policy exists. Do not show which card is correct until the reveal. The target is: Compare search strategies while preserving source and access information. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "Different words express a similar intent.",
+        "No exact match proves no relevant policy exists."
+      ]
+    },
+    "teaching_stage": "question"
+  },
+  "s11": {
+    "title": "Keyword search · a familiar picture",
+    "explanation": "An index finds pages that contain the exact words you entered.\n\nWhat matches our case, and where does the analogy stop?",
+    "speaker_notes": "TEACHER SCRIPT — ANALOGY. Begin with the familiar scene. Invite learners to describe each part in everyday language. Then ask where the comparison might fail before introducing the technical vocabulary. This week’s case is: Five fictional college policies must answer student questions. The visible slide states: An index finds pages that contain the exact words you entered.\n\nWhat matches our case, and where does the analogy stop? The boundary is: Synonyms can make a relevant passage score poorly. The target is: Compare search strategies while preserving source and access information. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "analogy",
+      "items": [
+        "Search phrase",
+        "Word matches",
+        "Top cards"
+      ],
+      "caption": "An index finds pages that contain the exact words you entered."
+    },
+    "teaching_stage": "analogy"
+  },
+  "s12": {
+    "title": "Keyword search · map the parts",
+    "explanation": "Match each everyday part to the technical part.\n\nAnalogy limit: Synonyms can make a relevant passage score poorly.",
+    "speaker_notes": "TEACHER SCRIPT — MAPPING. Point from each familiar element to the corresponding technical element. Have students cover the right column and reconstruct the three matches. Read the limitation aloud. This week’s case is: Five fictional college policies must answer student questions. The visible slide states: Match each everyday part to the technical part.\n\nAnalogy limit: Synonyms can make a relevant passage score poorly. The three precise mappings are [['Search phrase', 'query tokens'], ['Word matches', 'overlap score'], ['Top cards', 'ranked passages']]. The target is: Compare search strategies while preserving source and access information. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "map",
+      "pairs": [
+        [
+          "Search phrase",
+          "query tokens"
+        ],
+        [
+          "Word matches",
+          "overlap score"
+        ],
+        [
+          "Top cards",
+          "ranked passages"
+        ]
+      ]
+    },
+    "teaching_stage": "mapping"
+  },
+  "s13": {
+    "title": "Keyword search · how it works",
+    "explanation": "Matches terms in a query and passage; useful when wording overlaps.\n\nTrace the arrows from left to right.",
+    "speaker_notes": "TEACHER SCRIPT — MECHANISM. Trace every arrow slowly from the input to the output. Ask what information crosses the boundary at each arrow. Pause if students confuse a simplified notebook with a trained model. This week’s case is: Five fictional college policies must answer student questions. The visible slide states: Matches terms in a query and passage; useful when wording overlaps.\n\nTrace the arrows from left to right. The weekly example is: “renew” does not exactly match P2’s “extend”; a keyword-only search may miss it. State what the analogy does not explain: Synonyms can make a relevant passage score poorly. The target is: Compare search strategies while preserving source and access information. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Question terms",
+        "Token overlap",
+        "Rank passages"
+      ]
+    },
+    "teaching_stage": "mechanism"
+  },
+  "s14": {
+    "title": "Keyword search · work one case",
+    "explanation": "“renew” does not exactly match P2’s “extend”; a keyword-only search may miss it.\n\nPoint to the evidence before giving your conclusion.",
+    "speaker_notes": "TEACHER SCRIPT — WORKED. Work the specific numbers or source wording aloud. Give students thirty seconds to write a conclusion, then ask which source line or calculation supports it. This week’s case is: Five fictional college policies must answer student questions. The visible slide states: “renew” does not exactly match P2’s “extend”; a keyword-only search may miss it.\n\nPoint to the evidence before giving your conclusion. The expected reasoning concludes: Different words express a similar intent. Distinguish measured results from illustrative numbers. The target is: Compare search strategies while preserving source and access information. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "work",
+      "items": [
+        "“renew” does not exactly match P2’s “extend”; a keyword-only search may miss it.",
+        "What explains this miss?",
+        "Different words express a similar intent."
+      ]
+    },
+    "teaching_stage": "worked"
+  },
+  "s15": {
+    "title": "Keyword search · answer and explain",
+    "explanation": "Different words express a similar intent.\n\nTempting mistake: No exact match proves no relevant policy exists.",
+    "speaker_notes": "TEACHER SCRIPT — REVEAL. Return to the earlier choice. Explain the correct answer and why the tempting claim fails. Ask one learner to say the answer in a single sentence without reading it. This week’s case is: Five fictional college policies must answer student questions. The visible slide states: Different words express a similar intent.\n\nTempting mistake: No exact match proves no relevant policy exists. The earlier question was What explains this miss? Ask how this differs from the wrong claim. The target is: Compare search strategies while preserving source and access information. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "reveal",
+      "items": [
+        "No exact match proves no relevant policy exists.",
+        "Different words express a similar intent."
+      ],
+      "caption": "Synonyms can make a relevant passage score poorly."
+    },
+    "teaching_stage": "reveal"
+  },
+  "s16": {
+    "title": "3. Predict · Vector search",
+    "explanation": "Which passage ranks nearer to q in this toy calculation?\n\nMake a choice before we explain the diagram.",
+    "speaker_notes": "TEACHER SCRIPT — QUESTION. Take a show of hands for each choice before showing the mechanism. Ask pairs to defend a choice with evidence. Save the strongest wrong reason for the reveal later in this cycle. This week’s case is: Five fictional college policies must answer student questions. The visible slide states: Which passage ranks nearer to q in this toy calculation?\n\nMake a choice before we explain the diagram. The intended answer is P2, with the larger cosine similarity. The tempting claim is An embedding is an authoritative answer. Do not show which card is correct until the reveal. The target is: Compare search strategies while preserving source and access information. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "P2, with the larger cosine similarity.",
+        "An embedding is an authoritative answer."
+      ]
+    },
+    "teaching_stage": "question"
+  },
+  "s17": {
+    "title": "Vector search · a familiar picture",
+    "explanation": "A map places related meanings near one another.\n\nWhat matches our case, and where does the analogy stop?",
+    "speaker_notes": "TEACHER SCRIPT — ANALOGY. Begin with the familiar scene. Invite learners to describe each part in everyday language. Then ask where the comparison might fail before introducing the technical vocabulary. This week’s case is: Five fictional college policies must answer student questions. The visible slide states: A map places related meanings near one another.\n\nWhat matches our case, and where does the analogy stop? The boundary is: Similar vectors can retrieve the wrong passage; check text and permissions. The target is: Compare search strategies while preserving source and access information. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "analogy",
+      "items": [
+        "Question",
+        "Policy",
+        "Distance"
+      ],
+      "caption": "A map places related meanings near one another."
+    },
+    "teaching_stage": "analogy"
+  },
+  "s18": {
+    "title": "Vector search · map the parts",
+    "explanation": "Match each everyday part to the technical part.\n\nAnalogy limit: Similar vectors can retrieve the wrong passage; check text and permissions.",
+    "speaker_notes": "TEACHER SCRIPT — MAPPING. Point from each familiar element to the corresponding technical element. Have students cover the right column and reconstruct the three matches. Read the limitation aloud. This week’s case is: Five fictional college policies must answer student questions. The visible slide states: Match each everyday part to the technical part.\n\nAnalogy limit: Similar vectors can retrieve the wrong passage; check text and permissions. The three precise mappings are [['Question', 'numeric embedding'], ['Policy', 'numeric embedding'], ['Distance', 'similarity']]. The target is: Compare search strategies while preserving source and access information. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "map",
+      "pairs": [
+        [
+          "Question",
+          "numeric embedding"
+        ],
+        [
+          "Policy",
+          "numeric embedding"
+        ],
+        [
+          "Distance",
+          "similarity"
+        ]
+      ]
+    },
+    "teaching_stage": "mapping"
+  },
+  "s19": {
+    "title": "Vector search · how it works",
+    "explanation": "Compares numerical representations of text; a production embedding model can capture semantic similarity.\n\nTrace the arrows from left to right.",
+    "speaker_notes": "TEACHER SCRIPT — MECHANISM. Trace every arrow slowly from the input to the output. Ask what information crosses the boundary at each arrow. Pause if students confuse a simplified notebook with a trained model. This week’s case is: Five fictional college policies must answer student questions. The visible slide states: Compares numerical representations of text; a production embedding model can capture semantic similarity.\n\nTrace the arrows from left to right. The weekly example is: Toy vectors q=[1,0], P2=[1,1], P3=[0,1]: cosine scores about .707 and 0. State what the analogy does not explain: Similar vectors can retrieve the wrong passage; check text and permissions. The target is: Compare search strategies while preserving source and access information. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Question meaning",
+        "Numeric embedding",
+        "Vector similarity"
+      ]
+    },
+    "teaching_stage": "mechanism"
+  },
+  "s20": {
+    "title": "Vector search · work one case",
+    "explanation": "Toy vectors q=[1,0], P2=[1,1], P3=[0,1]: cosine scores about .707 and 0.\n\nPoint to the evidence before giving your conclusion.",
+    "speaker_notes": "TEACHER SCRIPT — WORKED. Work the specific numbers or source wording aloud. Give students thirty seconds to write a conclusion, then ask which source line or calculation supports it. This week’s case is: Five fictional college policies must answer student questions. The visible slide states: Toy vectors q=[1,0], P2=[1,1], P3=[0,1]: cosine scores about .707 and 0.\n\nPoint to the evidence before giving your conclusion. The expected reasoning concludes: P2, with the larger cosine similarity. Distinguish measured results from illustrative numbers. The target is: Compare search strategies while preserving source and access information. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "work",
+      "items": [
+        "Toy vectors q=[1,0], P2=[1,1], P3=[0,1]: cosine scores about .707 and 0.",
+        "Which passage ranks nearer to q in this toy calculation?",
+        "P2, with the larger cosine similarity."
+      ]
+    },
+    "teaching_stage": "worked"
+  },
+  "s21": {
+    "title": "Vector search · answer and explain",
+    "explanation": "P2, with the larger cosine similarity.\n\nTempting mistake: An embedding is an authoritative answer.",
+    "speaker_notes": "TEACHER SCRIPT — REVEAL. Return to the earlier choice. Explain the correct answer and why the tempting claim fails. Ask one learner to say the answer in a single sentence without reading it. This week’s case is: Five fictional college policies must answer student questions. The visible slide states: P2, with the larger cosine similarity.\n\nTempting mistake: An embedding is an authoritative answer. The earlier question was Which passage ranks nearer to q in this toy calculation? Ask how this differs from the wrong claim. The target is: Compare search strategies while preserving source and access information. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "reveal",
+      "items": [
+        "An embedding is an authoritative answer.",
+        "P2, with the larger cosine similarity."
+      ],
+      "caption": "Similar vectors can retrieve the wrong passage; check text and permissions."
+    },
+    "teaching_stage": "reveal"
+  },
+  "s22": {
+    "title": "4. Predict · Access filter",
+    "explanation": "When must the access filter apply?\n\nMake a choice before we explain the diagram.",
+    "speaker_notes": "TEACHER SCRIPT — QUESTION. Take a show of hands for each choice before showing the mechanism. Ask pairs to defend a choice with evidence. Save the strongest wrong reason for the reveal later in this cycle. This week’s case is: Five fictional college policies must answer student questions. The visible slide states: When must the access filter apply?\n\nMake a choice before we explain the diagram. The intended answer is Before retrieval results are passed into an answer. The tempting claim is A relevant staff policy may be shown if cited. Do not show which card is correct until the reveal. The target is: Compare search strategies while preserving source and access information. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "Before retrieval results are passed into an answer.",
+        "A relevant staff policy may be shown if cited."
+      ]
+    },
+    "teaching_stage": "question"
+  },
+  "s23": {
+    "title": "Access filter · a familiar picture",
+    "explanation": "A library card allows entry to some shelves but not staff cabinets.\n\nWhat matches our case, and where does the analogy stop?",
+    "speaker_notes": "TEACHER SCRIPT — ANALOGY. Begin with the familiar scene. Invite learners to describe each part in everyday language. Then ask where the comparison might fail before introducing the technical vocabulary. This week’s case is: Five fictional college policies must answer student questions. The visible slide states: A library card allows entry to some shelves but not staff cabinets.\n\nWhat matches our case, and where does the analogy stop? The boundary is: Filtering after generation may leak details already inserted into context. The target is: Compare search strategies while preserving source and access information. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "analogy",
+      "items": [
+        "Student role",
+        "Open shelf",
+        "Cabinet"
+      ],
+      "caption": "A library card allows entry to some shelves but not staff cabinets."
+    },
+    "teaching_stage": "analogy"
+  },
+  "s24": {
+    "title": "Access filter · map the parts",
+    "explanation": "Match each everyday part to the technical part.\n\nAnalogy limit: Filtering after generation may leak details already inserted into context.",
+    "speaker_notes": "TEACHER SCRIPT — MAPPING. Point from each familiar element to the corresponding technical element. Have students cover the right column and reconstruct the three matches. Read the limitation aloud. This week’s case is: Five fictional college policies must answer student questions. The visible slide states: Match each everyday part to the technical part.\n\nAnalogy limit: Filtering after generation may leak details already inserted into context. The three precise mappings are [['Student role', 'access identity'], ['Open shelf', 'allowed policy'], ['Cabinet', 'restricted source']]. The target is: Compare search strategies while preserving source and access information. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "map",
+      "pairs": [
+        [
+          "Student role",
+          "access identity"
+        ],
+        [
+          "Open shelf",
+          "allowed policy"
+        ],
+        [
+          "Cabinet",
+          "restricted source"
+        ]
+      ]
+    },
+    "teaching_stage": "mapping"
+  },
+  "s25": {
+    "title": "Access filter · how it works",
+    "explanation": "Only retrieve passages that the current role is allowed to read.\n\nTrace the arrows from left to right.",
+    "speaker_notes": "TEACHER SCRIPT — MECHANISM. Trace every arrow slowly from the input to the output. Ask what information crosses the boundary at each arrow. Pause if students confuse a simplified notebook with a trained model. This week’s case is: Five fictional college policies must answer student questions. The visible slide states: Only retrieve passages that the current role is allowed to read.\n\nTrace the arrows from left to right. The weekly example is: Filter staff-only P5 before ranking; never supply it to the student answer stage. State what the analogy does not explain: Filtering after generation may leak details already inserted into context. The target is: Compare search strategies while preserving source and access information. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Student role",
+        "Filter allowed sources",
+        "Search results"
+      ]
+    },
+    "teaching_stage": "mechanism"
+  },
+  "s26": {
+    "title": "Access filter · work one case",
+    "explanation": "Filter staff-only P5 before ranking; never supply it to the student answer stage.\n\nPoint to the evidence before giving your conclusion.",
+    "speaker_notes": "TEACHER SCRIPT — WORKED. Work the specific numbers or source wording aloud. Give students thirty seconds to write a conclusion, then ask which source line or calculation supports it. This week’s case is: Five fictional college policies must answer student questions. The visible slide states: Filter staff-only P5 before ranking; never supply it to the student answer stage.\n\nPoint to the evidence before giving your conclusion. The expected reasoning concludes: Before retrieval results are passed into an answer. Distinguish measured results from illustrative numbers. The target is: Compare search strategies while preserving source and access information. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "work",
+      "items": [
+        "Filter staff-only P5 before ranking; never supply it to the student answer stage.",
+        "When must the access filter apply?",
+        "Before retrieval results are passed into an answer."
+      ]
+    },
+    "teaching_stage": "worked"
+  },
+  "s27": {
+    "title": "Access filter · answer and explain",
+    "explanation": "Before retrieval results are passed into an answer.\n\nTempting mistake: A relevant staff policy may be shown if cited.",
+    "speaker_notes": "TEACHER SCRIPT — REVEAL. Return to the earlier choice. Explain the correct answer and why the tempting claim fails. Ask one learner to say the answer in a single sentence without reading it. This week’s case is: Five fictional college policies must answer student questions. The visible slide states: Before retrieval results are passed into an answer.\n\nTempting mistake: A relevant staff policy may be shown if cited. The earlier question was When must the access filter apply? Ask how this differs from the wrong claim. The target is: Compare search strategies while preserving source and access information. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "reveal",
+      "items": [
+        "A relevant staff policy may be shown if cited.",
+        "Before retrieval results are passed into an answer."
+      ],
+      "caption": "Filtering after generation may leak details already inserted into context."
+    },
+    "teaching_stage": "reveal"
+  },
+  "s28": {
+    "title": "Evidence trail: input → result",
+    "explanation": "Question uses the phrase renew a book.\n\nExact overlap may miss P2; a simple synonym mapping improves this case but can create other misses.",
+    "speaker_notes": "TEACHER SCRIPT — WORKED. Work the specific numbers or source wording aloud. Give students thirty seconds to write a conclusion, then ask which source line or calculation supports it. This week’s case is: Five fictional college policies must answer student questions. The visible slide states: Question uses the phrase renew a book.\n\nExact overlap may miss P2; a simple synonym mapping improves this case but can create other misses. Have one student point to an exact source word or number for each conclusion. The target is: Compare search strategies while preserving source and access information. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "work",
+      "items": [
+        "P2 says library loans may be extended once.",
+        "Question uses the phrase renew a book.",
+        "Exact overlap may miss P2; a simple synonym mapping improves this case but can create other misses."
+      ]
+    },
+    "teaching_stage": "worked"
+  },
+  "s29": {
+    "title": "Notebook: run the prepared example",
+    "explanation": "Compare token overlap and the synonym proxy on a fixed corpus.\n\nRead the original output before editing.",
+    "speaker_notes": "TEACHER SCRIPT — PRACTICE. Open the matching notebook and demonstrate the first run. Have learners predict one change, run only that change, and record input, setting, output and an error explanation. This week’s case is: Five fictional college policies must answer student questions. The visible slide states: Compare token overlap and the synonym proxy on a fixed corpus.\n\nRead the original output before editing. Use Week_06_Lab.ipynb. This lab is a prepared classroom demonstration with its limitations documented. The target is: Compare search strategies while preserving source and access information. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "Create a five-policy corpus with access labels",
+        "Search ten questions with token overlap",
+        "Use the supplied synonym expansion as a meaning-aware proxy",
+        "Measure whether the known policy is in the top two"
+      ]
+    },
+    "teaching_stage": "practice"
+  },
+  "s30": {
+    "title": "Find the input and check in Python",
+    "explanation": "Locate the supplied input, the transformation, the checking line and the printed result.",
+    "speaker_notes": "TEACHER SCRIPT — PRACTICE. Open the matching notebook and demonstrate the first run. Have learners predict one change, run only that change, and record input, setting, output and an error explanation. This week’s case is: Five fictional college policies must answer student questions. The visible slide states: Locate the supplied input, the transformation, the checking line and the printed result. The weekly lab change is: Remove a synonym or lower top-k from 2 to 1 and compare recall. The target is: Compare search strategies while preserving source and access information. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Input data",
+        "Python operation",
+        "Check",
+        "Recorded result"
+      ]
+    },
+    "teaching_stage": "practice"
+  },
+  "s31": {
+    "title": "Predict one controlled change",
+    "explanation": "Remove a synonym or lower top-k from 2 to 1 and compare recall.\n\nWhat should change in the result? What stays fixed?",
+    "speaker_notes": "TEACHER SCRIPT — PRACTICE. Open the matching notebook and demonstrate the first run. Have learners predict one change, run only that change, and record input, setting, output and an error explanation. This week’s case is: Five fictional college policies must answer student questions. The visible slide states: Remove a synonym or lower top-k from 2 to 1 and compare recall.\n\nWhat should change in the result? What stays fixed? Ask learners to write their prediction before rerunning the cell. The target is: Compare search strategies while preserving source and access information. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "compare",
+      "left": "Before: original case",
+      "right": "After: one change",
+      "caption": "Keep all other inputs fixed."
+    },
+    "teaching_stage": "practice"
+  },
+  "s32": {
+    "title": "Run, compare and record",
+    "explanation": "Record the input, the one changed setting, the observed result and a reason for any difference.",
+    "speaker_notes": "TEACHER SCRIPT — PRACTICE. Open the matching notebook and demonstrate the first run. Have learners predict one change, run only that change, and record input, setting, output and an error explanation. This week’s case is: Five fictional college policies must answer student questions. The visible slide states: Record the input, the one changed setting, the observed result and a reason for any difference. The required evidence is: Corpus manifest and retrieval misses with evidence IDs. The target is: Compare search strategies while preserving source and access information. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "table",
+      "rows": [
+        [
+          "Input",
+          "Setting",
+          "Result"
+        ],
+        [
+          "Original",
+          "baseline",
+          "record"
+        ],
+        [
+          "Changed",
+          "one edit",
+          "compare"
+        ]
+      ]
+    },
+    "teaching_stage": "practice"
+  },
+  "s33": {
+    "title": "Measure without hiding the denominator",
+    "explanation": "Recall@2 on ten labelled questions\n\nWrite the numerator, denominator and one failure case.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: Five fictional college policies must answer student questions. The visible slide states: Recall@2 on ten labelled questions\n\nWrite the numerator, denominator and one failure case. Where a measure is qualitative, show the concrete source comparison. Example: Exact overlap may miss P2; a simple synonym mapping improves this case but can create other misses. The target is: Compare search strategies while preserving source and access information. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Define success",
+        "Count successes",
+        "Count cases",
+        "Inspect errors"
+      ]
+    },
+    "teaching_stage": "check"
+  },
+  "s34": {
+    "title": "Error detective: find the layer",
+    "explanation": "Plausible wrong claim: The synonym mapping is a production embedding model.\n\nCorrect it using the case evidence.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: Five fictional college policies must answer student questions. The visible slide states: Plausible wrong claim: The synonym mapping is a production embedding model.\n\nCorrect it using the case evidence. The correction is It is an inspectable proxy for class discussion. A vector index would require a tested embedding model. The target is: Compare search strategies while preserving source and access information. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "reveal",
+      "items": [
+        "The synonym mapping is a production embedding model.",
+        "It is an inspectable proxy for class discussion. A vector index would require a tested embedding model."
+      ],
+      "caption": "Name a test that would catch this failure."
+    },
+    "teaching_stage": "check"
+  },
+  "s35": {
+    "title": "Transfer to a new situation",
+    "explanation": "A staff-only policy has a perfect keyword match. Should the student see it?\n\nExplain which source or test would settle it.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: Five fictional college policies must answer student questions. The visible slide states: A staff-only policy has a perfect keyword match. Should the student see it?\n\nExplain which source or test would settle it. This is a fresh scenario, so ask for a reason before accepting either short answer. The target is: Compare search strategies while preserving source and access information. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "Use the visible evidence",
+        "Flag missing or unsafe evidence"
+      ]
+    },
+    "teaching_stage": "check"
+  },
+  "s36": {
+    "title": "Explain it to a partner",
+    "explanation": "Without reading the slide, name the input, one processing step and the check. Your partner should ask “How do you know?”",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: Five fictional college policies must answer student questions. The visible slide states: Without reading the slide, name the input, one processing step and the check. Your partner should ask “How do you know?” Listen for a causal explanation and one limitation, then revisit a difficult arrow on the board. The target is: Compare search strategies while preserving source and access information. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Five policies",
+        "Passage index",
+        "Ranked evidence"
+      ]
+    },
+    "teaching_stage": "check"
+  },
+  "s37": {
+    "title": "Exam rehearsal · explain and apply",
+    "explanation": "Why keep source IDs and versions with chunks?\n\nWrite a short answer, then compare with the guide.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: Five fictional college policies must answer student questions. The visible slide states: Why keep source IDs and versions with chunks?\n\nWrite a short answer, then compare with the guide. Model answer after discussion: To trace an answer to the right document and identify stale evidence. Practice marks: 4. The target is: Compare search strategies while preserving source and access information. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "State the core idea",
+        "Use a case detail or calculation",
+        "Add a limitation",
+        "Compare with the Word guide"
+      ]
+    },
+    "teaching_stage": "check"
+  },
+  "s38": {
+    "title": "Exam rehearsal · explain and apply",
+    "explanation": "One relevant passage exists and appears in the top two. What is recall@2?\n\nWrite a short answer, then compare with the guide.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: Five fictional college policies must answer student questions. The visible slide states: One relevant passage exists and appears in the top two. What is recall@2?\n\nWrite a short answer, then compare with the guide. Model answer after discussion: 1/1 = 1 for that query. Average across queries with relevant evidence; handle no-answer cases separately. Practice marks: 4. The target is: Compare search strategies while preserving source and access information. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "State the core idea",
+        "Use a case detail or calculation",
+        "Add a limitation",
+        "Compare with the Word guide"
+      ]
+    },
+    "teaching_stage": "check"
+  },
+  "s39": {
+    "title": "What to hand in",
+    "explanation": "Corpus manifest and retrieval misses with evidence IDs.\n\nInclude the one changed input and an error explanation.",
+    "speaker_notes": "TEACHER SCRIPT — PRACTICE. Open the matching notebook and demonstrate the first run. Have learners predict one change, run only that change, and record input, setting, output and an error explanation. This week’s case is: Five fictional college policies must answer student questions. The visible slide states: Corpus manifest and retrieval misses with evidence IDs.\n\nInclude the one changed input and an error explanation. This weekly evidence receives formative feedback according to the module sequence; refer to the assessment brief for graded work. The target is: Compare search strategies while preserving source and access information. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "Original run",
+        "One changed input",
+        "Comparison",
+        "Explanation + source"
+      ]
+    },
+    "teaching_stage": "practice"
+  },
+  "s40": {
+    "title": "Three ideas to recall next week",
+    "explanation": "Split with source IDs, compare retrieval methods, and filter permissions first.\n\nRead the linked official sources in the Word guide and redraw one diagram from memory.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: Five fictional college policies must answer student questions. The visible slide states: Split with source IDs, compare retrieval methods, and filter permissions first.\n\nRead the linked official sources in the Word guide and redraw one diagram from memory. Return to the opening vote and ask whether the evidence changed anyone’s mind. The next week builds on this outcome: Compare search strategies while preserving source and access information. The target is: Compare search strategies while preserving source and access information. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "Chunk",
+        "Keyword search",
+        "Vector search",
+        "Access filter"
+      ]
+    },
+    "teaching_stage": "check"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "run": "20260928T202137535507Z",
+  "passes": [
+    {
+      "pass": 1,
+      "issues": [],
+      "repairs": []
+    }
+  ],
+  "remaining_issues": 0,
+  "assets": 40,
+  "status": "automatic checks passed"
+}

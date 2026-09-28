@@ -1,0 +1,46 @@
+{
+  "n": 5,
+  "title": "Clear prompts and output checks",
+  "goal": "Specify a task and validate an answer before using it.",
+  "case": "An office extracts amounts and invoice identifiers from synthetic invoices.",
+  "terms": [
+    [
+      "Task instruction",
+      "State exactly which fields to extract and how to handle missing entries."
+    ],
+    [
+      "Evidence",
+      "Use only the supplied invoice text; do not infer a value that is absent."
+    ],
+    [
+      "Schema",
+      "Validate names and types of returned fields with Python."
+    ],
+    [
+      "Abstention",
+      "A missing value should stay null or cause a review flag, rather than be guessed."
+    ]
+  ],
+  "steps": [
+    "Compare a vague request with a field-specific request",
+    "Inspect ten synthetic invoice records",
+    "Validate an extraction dictionary against the schema",
+    "Explain a failure caused by an invented total"
+  ],
+  "example": [
+    "Invoice INV-04 shows quantity 3 and price 12.",
+    "Extract ID and listed total if present.",
+    "If total is absent, return None; 3 × 12 is a calculated check, not an extracted listed value."
+  ],
+  "misconception": "Valid JSON means the invoice facts are true.",
+  "correction": "Syntax and data types are only the first check; compare values with the original document.",
+  "change": "Delete one total and confirm the missing-field review flag fires.",
+  "metric": "Fields correct / fields checked; report missing fields separately",
+  "lab": "Run extraction validation on ten synthetic records.",
+  "output": "Prompt revision and before/after field-check table.",
+  "reading": [
+    "OpenAI, Evaluation best practices",
+    "Google, Develop a generative AI application"
+  ],
+  "code": "invoice"
+}

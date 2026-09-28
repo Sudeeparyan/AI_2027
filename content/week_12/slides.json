@@ -1,0 +1,614 @@
+{
+  "s01": {
+    "title": "Week 12 · Final demonstration and explanation",
+    "explanation": "The fresh policy question\n\nA student appeals on day 12. P4 says appeals must be filed within ten days. The team must answer, cite, test and explain a fresh failure.",
+    "speaker_notes": "TEACHER SCRIPT — OPEN. Show the visual for ten seconds, then ask for an initial decision. Do not reveal the answer yet. Ask a student to name the source or measurement that would change their mind. This week’s case is: A fresh student question and a previously unseen failure are presented. The visible slide states: The fresh policy question\n\nA student appeals on day 12. P4 says appeals must be filed within ten days. The team must answer, cite, test and explain a fresh failure. Reveal that the case will be revisited after four short concept cycles. The target is: Demonstrate the policy assistant and explain its limits with evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "story",
+      "items": [
+        "The fresh policy question",
+        "What is known?",
+        "What must we check?"
+      ]
+    },
+    "teaching_stage": "open"
+  },
+  "s02": {
+    "title": "First vote: what would you do?",
+    "explanation": "A student appeals on day 12. P4 says appeals must be filed within ten days. The team must answer, cite, test and explain a fresh failure.\n\nChoose an initial answer and name one piece of evidence you need.",
+    "speaker_notes": "TEACHER SCRIPT — QUESTION. Take a show of hands for each choice before showing the mechanism. Ask pairs to defend a choice with evidence. Save the strongest wrong reason for the reveal later in this cycle. This week’s case is: A fresh student question and a previously unseen failure are presented. The visible slide states: A student appeals on day 12. P4 says appeals must be filed within ten days. The team must answer, cite, test and explain a fresh failure.\n\nChoose an initial answer and name one piece of evidence you need. Accept reasonable uncertainty; record the initial votes to revisit at the end. The target is: Demonstrate the policy assistant and explain its limits with evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "Accept the first plausible result",
+        "Check the source or measurement"
+      ]
+    },
+    "teaching_stage": "question"
+  },
+  "s03": {
+    "title": "The journey through today’s case",
+    "explanation": "We will predict, connect an analogy, trace a mechanism, work an example, then explain a decision.",
+    "speaker_notes": "TEACHER SCRIPT — OPEN. Show the visual for ten seconds, then ask for an initial decision. Do not reveal the answer yet. Ask a student to name the source or measurement that would change their mind. This week’s case is: A fresh student question and a previously unseen failure are presented. The visible slide states: We will predict, connect an analogy, trace a mechanism, work an example, then explain a decision. Point to the four named ideas, then show where the notebook experiment fits. The target is: Demonstrate the policy assistant and explain its limits with evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "Integrated system",
+        "Attribution",
+        "Fresh challenge",
+        "Handover"
+      ]
+    },
+    "teaching_stage": "open"
+  },
+  "s04": {
+    "title": "1. Predict · Integrated system",
+    "explanation": "Which three checks precede a confident reply?\n\nMake a choice before we explain the diagram.",
+    "speaker_notes": "TEACHER SCRIPT — QUESTION. Take a show of hands for each choice before showing the mechanism. Ask pairs to defend a choice with evidence. Save the strongest wrong reason for the reveal later in this cycle. This week’s case is: A fresh student question and a previously unseen failure are presented. The visible slide states: Which three checks precede a confident reply?\n\nMake a choice before we explain the diagram. The intended answer is Allowed source, relevant passage and supported claim. The tempting claim is An answer is valid because it includes [P4]. Do not show which card is correct until the reveal. The target is: Demonstrate the policy assistant and explain its limits with evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "Allowed source, relevant passage and supported claim.",
+        "An answer is valid because it includes [P4]."
+      ]
+    },
+    "teaching_stage": "question"
+  },
+  "s05": {
+    "title": "Integrated system · a familiar picture",
+    "explanation": "A museum guide checks which rooms a visitor may enter before quoting a label.\n\nWhat matches our case, and where does the analogy stop?",
+    "speaker_notes": "TEACHER SCRIPT — ANALOGY. Begin with the familiar scene. Invite learners to describe each part in everyday language. Then ask where the comparison might fail before introducing the technical vocabulary. This week’s case is: A fresh student question and a previously unseen failure are presented. The visible slide states: A museum guide checks which rooms a visitor may enter before quoting a label.\n\nWhat matches our case, and where does the analogy stop? The boundary is: A citation needs to support the exact statement and the version in force. The target is: Demonstrate the policy assistant and explain its limits with evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "analogy",
+      "items": [
+        "Visitor role",
+        "Exhibit label",
+        "Guided answer"
+      ],
+      "caption": "A museum guide checks which rooms a visitor may enter before quoting a label."
+    },
+    "teaching_stage": "analogy"
+  },
+  "s06": {
+    "title": "Integrated system · map the parts",
+    "explanation": "Match each everyday part to the technical part.\n\nAnalogy limit: A citation needs to support the exact statement and the version in force.",
+    "speaker_notes": "TEACHER SCRIPT — MAPPING. Point from each familiar element to the corresponding technical element. Have students cover the right column and reconstruct the three matches. Read the limitation aloud. This week’s case is: A fresh student question and a previously unseen failure are presented. The visible slide states: Match each everyday part to the technical part.\n\nAnalogy limit: A citation needs to support the exact statement and the version in force. The three precise mappings are [['Visitor role', 'access check'], ['Exhibit label', 'retrieved P4'], ['Guided answer', 'cited response']]. The target is: Demonstrate the policy assistant and explain its limits with evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "map",
+      "pairs": [
+        [
+          "Visitor role",
+          "access check"
+        ],
+        [
+          "Exhibit label",
+          "retrieved P4"
+        ],
+        [
+          "Guided answer",
+          "cited response"
+        ]
+      ]
+    },
+    "teaching_stage": "mapping"
+  },
+  "s07": {
+    "title": "Integrated system · how it works",
+    "explanation": "The student question enters retrieval, access checks, answer construction and evaluation.\n\nTrace the arrows from left to right.",
+    "speaker_notes": "TEACHER SCRIPT — MECHANISM. Trace every arrow slowly from the input to the output. Ask what information crosses the boundary at each arrow. Pause if students confuse a simplified notebook with a trained model. This week’s case is: A fresh student question and a previously unseen failure are presented. The visible slide states: The student question enters retrieval, access checks, answer construction and evaluation.\n\nTrace the arrows from left to right. The weekly example is: For day 12 under the supplied ten-day P4, answer no and cite P4 with the used version. State what the analogy does not explain: A citation needs to support the exact statement and the version in force. The target is: Demonstrate the policy assistant and explain its limits with evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Student question",
+        "Retrieve allowed policy",
+        "Check cited answer"
+      ]
+    },
+    "teaching_stage": "mechanism"
+  },
+  "s08": {
+    "title": "Integrated system · work one case",
+    "explanation": "For day 12 under the supplied ten-day P4, answer no and cite P4 with the used version.\n\nPoint to the evidence before giving your conclusion.",
+    "speaker_notes": "TEACHER SCRIPT — WORKED. Work the specific numbers or source wording aloud. Give students thirty seconds to write a conclusion, then ask which source line or calculation supports it. This week’s case is: A fresh student question and a previously unseen failure are presented. The visible slide states: For day 12 under the supplied ten-day P4, answer no and cite P4 with the used version.\n\nPoint to the evidence before giving your conclusion. The expected reasoning concludes: Allowed source, relevant passage and supported claim. Distinguish measured results from illustrative numbers. The target is: Demonstrate the policy assistant and explain its limits with evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "work",
+      "items": [
+        "For day 12 under the supplied ten-day P4, answer no and cite P4 with the used version.",
+        "Which three checks precede a confident reply?",
+        "Allowed source, relevant passage and supported claim."
+      ]
+    },
+    "teaching_stage": "worked"
+  },
+  "s09": {
+    "title": "Integrated system · answer and explain",
+    "explanation": "Allowed source, relevant passage and supported claim.\n\nTempting mistake: An answer is valid because it includes [P4].",
+    "speaker_notes": "TEACHER SCRIPT — REVEAL. Return to the earlier choice. Explain the correct answer and why the tempting claim fails. Ask one learner to say the answer in a single sentence without reading it. This week’s case is: A fresh student question and a previously unseen failure are presented. The visible slide states: Allowed source, relevant passage and supported claim.\n\nTempting mistake: An answer is valid because it includes [P4]. The earlier question was Which three checks precede a confident reply? Ask how this differs from the wrong claim. The target is: Demonstrate the policy assistant and explain its limits with evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "reveal",
+      "items": [
+        "An answer is valid because it includes [P4].",
+        "Allowed source, relevant passage and supported claim."
+      ],
+      "caption": "A citation needs to support the exact statement and the version in force."
+    },
+    "teaching_stage": "reveal"
+  },
+  "s10": {
+    "title": "2. Predict · Attribution",
+    "explanation": "What proves the work is yours and reproducible?\n\nMake a choice before we explain the diagram.",
+    "speaker_notes": "TEACHER SCRIPT — QUESTION. Take a show of hands for each choice before showing the mechanism. Ask pairs to defend a choice with evidence. Save the strongest wrong reason for the reveal later in this cycle. This week’s case is: A fresh student question and a previously unseen failure are presented. The visible slide states: What proves the work is yours and reproducible?\n\nMake a choice before we explain the diagram. The intended answer is The changed code, settings, inputs and explanation. The tempting claim is A polished demonstration alone proves understanding. Do not show which card is correct until the reveal. The target is: Demonstrate the policy assistant and explain its limits with evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "The changed code, settings, inputs and explanation.",
+        "A polished demonstration alone proves understanding."
+      ]
+    },
+    "teaching_stage": "question"
+  },
+  "s11": {
+    "title": "Attribution · a familiar picture",
+    "explanation": "A science notebook shows a changed setting, observation and explanation.\n\nWhat matches our case, and where does the analogy stop?",
+    "speaker_notes": "TEACHER SCRIPT — ANALOGY. Begin with the familiar scene. Invite learners to describe each part in everyday language. Then ask where the comparison might fail before introducing the technical vocabulary. This week’s case is: A fresh student question and a previously unseen failure are presented. The visible slide states: A science notebook shows a changed setting, observation and explanation.\n\nWhat matches our case, and where does the analogy stop? The boundary is: A before/after result in one toy case cannot establish general reliability. The target is: Demonstrate the policy assistant and explain its limits with evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "analogy",
+      "items": [
+        "Setting change",
+        "Measurement",
+        "Reason"
+      ],
+      "caption": "A science notebook shows a changed setting, observation and explanation."
+    },
+    "teaching_stage": "analogy"
+  },
+  "s12": {
+    "title": "Attribution · map the parts",
+    "explanation": "Match each everyday part to the technical part.\n\nAnalogy limit: A before/after result in one toy case cannot establish general reliability.",
+    "speaker_notes": "TEACHER SCRIPT — MAPPING. Point from each familiar element to the corresponding technical element. Have students cover the right column and reconstruct the three matches. Read the limitation aloud. This week’s case is: A fresh student question and a previously unseen failure are presented. The visible slide states: Match each everyday part to the technical part.\n\nAnalogy limit: A before/after result in one toy case cannot establish general reliability. The three precise mappings are [['Setting change', 'your code change'], ['Measurement', 'experiment table'], ['Reason', 'individual explanation']]. The target is: Demonstrate the policy assistant and explain its limits with evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "map",
+      "pairs": [
+        [
+          "Setting change",
+          "your code change"
+        ],
+        [
+          "Measurement",
+          "experiment table"
+        ],
+        [
+          "Reason",
+          "individual explanation"
+        ]
+      ]
+    },
+    "teaching_stage": "mapping"
+  },
+  "s13": {
+    "title": "Attribution · how it works",
+    "explanation": "Each learner shows the part they changed and explains the choice.\n\nTrace the arrows from left to right.",
+    "speaker_notes": "TEACHER SCRIPT — MECHANISM. Trace every arrow slowly from the input to the output. Ask what information crosses the boundary at each arrow. Pause if students confuse a simplified notebook with a trained model. This week’s case is: A fresh student question and a previously unseen failure are presented. The visible slide states: Each learner shows the part they changed and explains the choice.\n\nTrace the arrows from left to right. The weekly example is: Show baseline, chosen setting, case counts and one error that still remains. State what the analogy does not explain: A before/after result in one toy case cannot establish general reliability. The target is: Demonstrate the policy assistant and explain its limits with evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Your code change",
+        "Your experiment",
+        "Your explanation"
+      ]
+    },
+    "teaching_stage": "mechanism"
+  },
+  "s14": {
+    "title": "Attribution · work one case",
+    "explanation": "Show baseline, chosen setting, case counts and one error that still remains.\n\nPoint to the evidence before giving your conclusion.",
+    "speaker_notes": "TEACHER SCRIPT — WORKED. Work the specific numbers or source wording aloud. Give students thirty seconds to write a conclusion, then ask which source line or calculation supports it. This week’s case is: A fresh student question and a previously unseen failure are presented. The visible slide states: Show baseline, chosen setting, case counts and one error that still remains.\n\nPoint to the evidence before giving your conclusion. The expected reasoning concludes: The changed code, settings, inputs and explanation. Distinguish measured results from illustrative numbers. The target is: Demonstrate the policy assistant and explain its limits with evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "work",
+      "items": [
+        "Show baseline, chosen setting, case counts and one error that still remains.",
+        "What proves the work is yours and reproducible?",
+        "The changed code, settings, inputs and explanation."
+      ]
+    },
+    "teaching_stage": "worked"
+  },
+  "s15": {
+    "title": "Attribution · answer and explain",
+    "explanation": "The changed code, settings, inputs and explanation.\n\nTempting mistake: A polished demonstration alone proves understanding.",
+    "speaker_notes": "TEACHER SCRIPT — REVEAL. Return to the earlier choice. Explain the correct answer and why the tempting claim fails. Ask one learner to say the answer in a single sentence without reading it. This week’s case is: A fresh student question and a previously unseen failure are presented. The visible slide states: The changed code, settings, inputs and explanation.\n\nTempting mistake: A polished demonstration alone proves understanding. The earlier question was What proves the work is yours and reproducible? Ask how this differs from the wrong claim. The target is: Demonstrate the policy assistant and explain its limits with evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "reveal",
+      "items": [
+        "A polished demonstration alone proves understanding.",
+        "The changed code, settings, inputs and explanation."
+      ],
+      "caption": "A before/after result in one toy case cannot establish general reliability."
+    },
+    "teaching_stage": "reveal"
+  },
+  "s16": {
+    "title": "3. Predict · Fresh challenge",
+    "explanation": "Which layer deserves the first test here?\n\nMake a choice before we explain the diagram.",
+    "speaker_notes": "TEACHER SCRIPT — QUESTION. Take a show of hands for each choice before showing the mechanism. Ask pairs to defend a choice with evidence. Save the strongest wrong reason for the reveal later in this cycle. This week’s case is: A fresh student question and a previously unseen failure are presented. The visible slide states: Which layer deserves the first test here?\n\nMake a choice before we explain the diagram. The intended answer is Answer support using the retrieved P4 passage. The tempting claim is Every wrong answer is a retrieval failure. Do not show which card is correct until the reveal. The target is: Demonstrate the policy assistant and explain its limits with evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "Answer support using the retrieved P4 passage.",
+        "Every wrong answer is a retrieval failure."
+      ]
+    },
+    "teaching_stage": "question"
+  },
+  "s17": {
+    "title": "Fresh challenge · a familiar picture",
+    "explanation": "A mechanic diagnoses a new symptom by testing the failing part.\n\nWhat matches our case, and where does the analogy stop?",
+    "speaker_notes": "TEACHER SCRIPT — ANALOGY. Begin with the familiar scene. Invite learners to describe each part in everyday language. Then ask where the comparison might fail before introducing the technical vocabulary. This week’s case is: A fresh student question and a previously unseen failure are presented. The visible slide states: A mechanic diagnoses a new symptom by testing the failing part.\n\nWhat matches our case, and where does the analogy stop? The boundary is: Some failures cross layers; record uncertainty and test competing causes. The target is: Demonstrate the policy assistant and explain its limits with evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "analogy",
+      "items": [
+        "Symptom",
+        "Component",
+        "Check"
+      ],
+      "caption": "A mechanic diagnoses a new symptom by testing the failing part."
+    },
+    "teaching_stage": "analogy"
+  },
+  "s18": {
+    "title": "Fresh challenge · map the parts",
+    "explanation": "Match each everyday part to the technical part.\n\nAnalogy limit: Some failures cross layers; record uncertainty and test competing causes.",
+    "speaker_notes": "TEACHER SCRIPT — MAPPING. Point from each familiar element to the corresponding technical element. Have students cover the right column and reconstruct the three matches. Read the limitation aloud. This week’s case is: A fresh student question and a previously unseen failure are presented. The visible slide states: Match each everyday part to the technical part.\n\nAnalogy limit: Some failures cross layers; record uncertainty and test competing causes. The three precise mappings are [['Symptom', 'new failure'], ['Component', 'likely layer'], ['Check', 'targeted test']]. The target is: Demonstrate the policy assistant and explain its limits with evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "map",
+      "pairs": [
+        [
+          "Symptom",
+          "new failure"
+        ],
+        [
+          "Component",
+          "likely layer"
+        ],
+        [
+          "Check",
+          "targeted test"
+        ]
+      ]
+    },
+    "teaching_stage": "mapping"
+  },
+  "s19": {
+    "title": "Fresh challenge · how it works",
+    "explanation": "A new example of a practised failure tests understanding rather than memorization.\n\nTrace the arrows from left to right.",
+    "speaker_notes": "TEACHER SCRIPT — MECHANISM. Trace every arrow slowly from the input to the output. Ask what information crosses the boundary at each arrow. Pause if students confuse a simplified notebook with a trained model. This week’s case is: A fresh student question and a previously unseen failure are presented. The visible slide states: A new example of a practised failure tests understanding rather than memorization.\n\nTrace the arrows from left to right. The weekly example is: If P4 is retrieved but the answer says 12 days is allowed, test claim support before changing search. State what the analogy does not explain: Some failures cross layers; record uncertainty and test competing causes. The target is: Demonstrate the policy assistant and explain its limits with evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "New failure case",
+        "Identify layer",
+        "Design a test"
+      ]
+    },
+    "teaching_stage": "mechanism"
+  },
+  "s20": {
+    "title": "Fresh challenge · work one case",
+    "explanation": "If P4 is retrieved but the answer says 12 days is allowed, test claim support before changing search.\n\nPoint to the evidence before giving your conclusion.",
+    "speaker_notes": "TEACHER SCRIPT — WORKED. Work the specific numbers or source wording aloud. Give students thirty seconds to write a conclusion, then ask which source line or calculation supports it. This week’s case is: A fresh student question and a previously unseen failure are presented. The visible slide states: If P4 is retrieved but the answer says 12 days is allowed, test claim support before changing search.\n\nPoint to the evidence before giving your conclusion. The expected reasoning concludes: Answer support using the retrieved P4 passage. Distinguish measured results from illustrative numbers. The target is: Demonstrate the policy assistant and explain its limits with evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "work",
+      "items": [
+        "If P4 is retrieved but the answer says 12 days is allowed, test claim support before changing search.",
+        "Which layer deserves the first test here?",
+        "Answer support using the retrieved P4 passage."
+      ]
+    },
+    "teaching_stage": "worked"
+  },
+  "s21": {
+    "title": "Fresh challenge · answer and explain",
+    "explanation": "Answer support using the retrieved P4 passage.\n\nTempting mistake: Every wrong answer is a retrieval failure.",
+    "speaker_notes": "TEACHER SCRIPT — REVEAL. Return to the earlier choice. Explain the correct answer and why the tempting claim fails. Ask one learner to say the answer in a single sentence without reading it. This week’s case is: A fresh student question and a previously unseen failure are presented. The visible slide states: Answer support using the retrieved P4 passage.\n\nTempting mistake: Every wrong answer is a retrieval failure. The earlier question was Which layer deserves the first test here? Ask how this differs from the wrong claim. The target is: Demonstrate the policy assistant and explain its limits with evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "reveal",
+      "items": [
+        "Every wrong answer is a retrieval failure.",
+        "Answer support using the retrieved P4 passage."
+      ],
+      "caption": "Some failures cross layers; record uncertainty and test competing causes."
+    },
+    "teaching_stage": "reveal"
+  },
+  "s22": {
+    "title": "4. Predict · Handover",
+    "explanation": "What can the next maintainer reproduce?\n\nMake a choice before we explain the diagram.",
+    "speaker_notes": "TEACHER SCRIPT — QUESTION. Take a show of hands for each choice before showing the mechanism. Ask pairs to defend a choice with evidence. Save the strongest wrong reason for the reveal later in this cycle. This week’s case is: A fresh student question and a previously unseen failure are presented. The visible slide states: What can the next maintainer reproduce?\n\nMake a choice before we explain the diagram. The intended answer is The setup, evaluation and known-failure checks from the handover. The tempting claim is The notebook is self-explanatory without instructions. Do not show which card is correct until the reveal. The target is: Demonstrate the policy assistant and explain its limits with evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "The setup, evaluation and known-failure checks from the handover.",
+        "The notebook is self-explanatory without instructions."
+      ]
+    },
+    "teaching_stage": "question"
+  },
+  "s23": {
+    "title": "Handover · a familiar picture",
+    "explanation": "A relief teacher can run a lesson from a clear folder and known limits.\n\nWhat matches our case, and where does the analogy stop?",
+    "speaker_notes": "TEACHER SCRIPT — ANALOGY. Begin with the familiar scene. Invite learners to describe each part in everyday language. Then ask where the comparison might fail before introducing the technical vocabulary. This week’s case is: A fresh student question and a previously unseen failure are presented. The visible slide states: A relief teacher can run a lesson from a clear folder and known limits.\n\nWhat matches our case, and where does the analogy stop? The boundary is: Documentation can go stale; date versions and rerun the checks. The target is: Demonstrate the policy assistant and explain its limits with evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "analogy",
+      "items": [
+        "Folder",
+        "Known gaps",
+        "Trial run"
+      ],
+      "caption": "A relief teacher can run a lesson from a clear folder and known limits."
+    },
+    "teaching_stage": "analogy"
+  },
+  "s24": {
+    "title": "Handover · map the parts",
+    "explanation": "Match each everyday part to the technical part.\n\nAnalogy limit: Documentation can go stale; date versions and rerun the checks.",
+    "speaker_notes": "TEACHER SCRIPT — MAPPING. Point from each familiar element to the corresponding technical element. Have students cover the right column and reconstruct the three matches. Read the limitation aloud. This week’s case is: A fresh student question and a previously unseen failure are presented. The visible slide states: Match each everyday part to the technical part.\n\nAnalogy limit: Documentation can go stale; date versions and rerun the checks. The three precise mappings are [['Folder', 'setup guide'], ['Known gaps', 'limitations'], ['Trial run', 'repeatable handover']]. The target is: Demonstrate the policy assistant and explain its limits with evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "map",
+      "pairs": [
+        [
+          "Folder",
+          "setup guide"
+        ],
+        [
+          "Known gaps",
+          "limitations"
+        ],
+        [
+          "Trial run",
+          "repeatable handover"
+        ]
+      ]
+    },
+    "teaching_stage": "mapping"
+  },
+  "s25": {
+    "title": "Handover · how it works",
+    "explanation": "Another person can run, test and review the solution from written instructions.\n\nTrace the arrows from left to right.",
+    "speaker_notes": "TEACHER SCRIPT — MECHANISM. Trace every arrow slowly from the input to the output. Ask what information crosses the boundary at each arrow. Pause if students confuse a simplified notebook with a trained model. This week’s case is: A fresh student question and a previously unseen failure are presented. The visible slide states: Another person can run, test and review the solution from written instructions.\n\nTrace the arrows from left to right. The weekly example is: Give installation steps, source versions, test commands, role rules and rollback instructions. State what the analogy does not explain: Documentation can go stale; date versions and rerun the checks. The target is: Demonstrate the policy assistant and explain its limits with evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Setup guide",
+        "Known limits",
+        "Repeatable handover"
+      ]
+    },
+    "teaching_stage": "mechanism"
+  },
+  "s26": {
+    "title": "Handover · work one case",
+    "explanation": "Give installation steps, source versions, test commands, role rules and rollback instructions.\n\nPoint to the evidence before giving your conclusion.",
+    "speaker_notes": "TEACHER SCRIPT — WORKED. Work the specific numbers or source wording aloud. Give students thirty seconds to write a conclusion, then ask which source line or calculation supports it. This week’s case is: A fresh student question and a previously unseen failure are presented. The visible slide states: Give installation steps, source versions, test commands, role rules and rollback instructions.\n\nPoint to the evidence before giving your conclusion. The expected reasoning concludes: The setup, evaluation and known-failure checks from the handover. Distinguish measured results from illustrative numbers. The target is: Demonstrate the policy assistant and explain its limits with evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "work",
+      "items": [
+        "Give installation steps, source versions, test commands, role rules and rollback instructions.",
+        "What can the next maintainer reproduce?",
+        "The setup, evaluation and known-failure checks from the handover."
+      ]
+    },
+    "teaching_stage": "worked"
+  },
+  "s27": {
+    "title": "Handover · answer and explain",
+    "explanation": "The setup, evaluation and known-failure checks from the handover.\n\nTempting mistake: The notebook is self-explanatory without instructions.",
+    "speaker_notes": "TEACHER SCRIPT — REVEAL. Return to the earlier choice. Explain the correct answer and why the tempting claim fails. Ask one learner to say the answer in a single sentence without reading it. This week’s case is: A fresh student question and a previously unseen failure are presented. The visible slide states: The setup, evaluation and known-failure checks from the handover.\n\nTempting mistake: The notebook is self-explanatory without instructions. The earlier question was What can the next maintainer reproduce? Ask how this differs from the wrong claim. The target is: Demonstrate the policy assistant and explain its limits with evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "reveal",
+      "items": [
+        "The notebook is self-explanatory without instructions.",
+        "The setup, evaluation and known-failure checks from the handover."
+      ],
+      "caption": "Documentation can go stale; date versions and rerun the checks."
+    },
+    "teaching_stage": "reveal"
+  },
+  "s28": {
+    "title": "Evidence trail: input → result",
+    "explanation": "Q: May I appeal on day 12?\n\nA: No; the ten-day window has passed [P4], subject to the policy version used.",
+    "speaker_notes": "TEACHER SCRIPT — WORKED. Work the specific numbers or source wording aloud. Give students thirty seconds to write a conclusion, then ask which source line or calculation supports it. This week’s case is: A fresh student question and a previously unseen failure are presented. The visible slide states: Q: May I appeal on day 12?\n\nA: No; the ten-day window has passed [P4], subject to the policy version used. Have one student point to an exact source word or number for each conclusion. The target is: Demonstrate the policy assistant and explain its limits with evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "work",
+      "items": [
+        "P4: appeals must be filed within ten days.",
+        "Q: May I appeal on day 12?",
+        "A: No; the ten-day window has passed [P4], subject to the policy version used."
+      ]
+    },
+    "teaching_stage": "worked"
+  },
+  "s29": {
+    "title": "Notebook: run the prepared example",
+    "explanation": "Present a self-contained end-to-end policy assistant.\n\nRead the original output before editing.",
+    "speaker_notes": "TEACHER SCRIPT — PRACTICE. Open the matching notebook and demonstrate the first run. Have learners predict one change, run only that change, and record input, setting, output and an error explanation. This week’s case is: A fresh student question and a previously unseen failure are presented. The visible slide states: Present a self-contained end-to-end policy assistant.\n\nRead the original output before editing. Use Week_12_Lab.ipynb. This lab is a prepared classroom demonstration with its limitations documented. The target is: Demonstrate the policy assistant and explain its limits with evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "Run an answerable student policy question",
+        "Run a no-answer question",
+        "Demonstrate blocked staff-only access",
+        "Explain one failure and propose a new test"
+      ]
+    },
+    "teaching_stage": "practice"
+  },
+  "s30": {
+    "title": "Find the input and check in Python",
+    "explanation": "Locate the supplied input, the transformation, the checking line and the printed result.",
+    "speaker_notes": "TEACHER SCRIPT — PRACTICE. Open the matching notebook and demonstrate the first run. Have learners predict one change, run only that change, and record input, setting, output and an error explanation. This week’s case is: A fresh student question and a previously unseen failure are presented. The visible slide states: Locate the supplied input, the transformation, the checking line and the printed result. The weekly lab change is: Use a new policy version and explain which index and tests must change. The target is: Demonstrate the policy assistant and explain its limits with evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Input data",
+        "Python operation",
+        "Check",
+        "Recorded result"
+      ]
+    },
+    "teaching_stage": "practice"
+  },
+  "s31": {
+    "title": "Predict one controlled change",
+    "explanation": "Use a new policy version and explain which index and tests must change.\n\nWhat should change in the result? What stays fixed?",
+    "speaker_notes": "TEACHER SCRIPT — PRACTICE. Open the matching notebook and demonstrate the first run. Have learners predict one change, run only that change, and record input, setting, output and an error explanation. This week’s case is: A fresh student question and a previously unseen failure are presented. The visible slide states: Use a new policy version and explain which index and tests must change.\n\nWhat should change in the result? What stays fixed? Ask learners to write their prediction before rerunning the cell. The target is: Demonstrate the policy assistant and explain its limits with evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "compare",
+      "left": "Before: original case",
+      "right": "After: one change",
+      "caption": "Keep all other inputs fixed."
+    },
+    "teaching_stage": "practice"
+  },
+  "s32": {
+    "title": "Run, compare and record",
+    "explanation": "Record the input, the one changed setting, the observed result and a reason for any difference.",
+    "speaker_notes": "TEACHER SCRIPT — PRACTICE. Open the matching notebook and demonstrate the first run. Have learners predict one change, run only that change, and record input, setting, output and an error explanation. This week’s case is: A fresh student question and a previously unseen failure are presented. The visible slide states: Record the input, the one changed setting, the observed result and a reason for any difference. The required evidence is: Demo, test table, known limits and individual explanation. The target is: Demonstrate the policy assistant and explain its limits with evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "table",
+      "rows": [
+        [
+          "Input",
+          "Setting",
+          "Result"
+        ],
+        [
+          "Original",
+          "baseline",
+          "record"
+        ],
+        [
+          "Changed",
+          "one edit",
+          "compare"
+        ]
+      ]
+    },
+    "teaching_stage": "practice"
+  },
+  "s33": {
+    "title": "Measure without hiding the denominator",
+    "explanation": "Task success, citation support, no-answer accuracy and access gate\n\nWrite the numerator, denominator and one failure case.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: A fresh student question and a previously unseen failure are presented. The visible slide states: Task success, citation support, no-answer accuracy and access gate\n\nWrite the numerator, denominator and one failure case. Where a measure is qualitative, show the concrete source comparison. Example: A: No; the ten-day window has passed [P4], subject to the policy version used. The target is: Demonstrate the policy assistant and explain its limits with evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Define success",
+        "Count successes",
+        "Count cases",
+        "Inspect errors"
+      ]
+    },
+    "teaching_stage": "check"
+  },
+  "s34": {
+    "title": "Error detective: find the layer",
+    "explanation": "Plausible wrong claim: A polished demonstration without tests establishes that the system is ready.\n\nCorrect it using the case evidence.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: A fresh student question and a previously unseen failure are presented. The visible slide states: Plausible wrong claim: A polished demonstration without tests establishes that the system is ready.\n\nCorrect it using the case evidence. The correction is Show the test cases, negative cases, access result and remaining limitations. The target is: Demonstrate the policy assistant and explain its limits with evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "reveal",
+      "items": [
+        "A polished demonstration without tests establishes that the system is ready.",
+        "Show the test cases, negative cases, access result and remaining limitations."
+      ],
+      "caption": "Name a test that would catch this failure."
+    },
+    "teaching_stage": "check"
+  },
+  "s35": {
+    "title": "Transfer to a new situation",
+    "explanation": "A new policy edition changes the appeal window. What records, index and tests need updating?\n\nExplain which source or test would settle it.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: A fresh student question and a previously unseen failure are presented. The visible slide states: A new policy edition changes the appeal window. What records, index and tests need updating?\n\nExplain which source or test would settle it. This is a fresh scenario, so ask for a reason before accepting either short answer. The target is: Demonstrate the policy assistant and explain its limits with evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "Use the visible evidence",
+        "Flag missing or unsafe evidence"
+      ]
+    },
+    "teaching_stage": "check"
+  },
+  "s36": {
+    "title": "Explain it to a partner",
+    "explanation": "Without reading the slide, name the input, one processing step and the check. Your partner should ask “How do you know?”",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: A fresh student question and a previously unseen failure are presented. The visible slide states: Without reading the slide, name the input, one processing step and the check. Your partner should ask “How do you know?” Listen for a causal explanation and one limitation, then revisit a difficult arrow on the board. The target is: Demonstrate the policy assistant and explain its limits with evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Question",
+        "Role check",
+        "Evidence check"
+      ]
+    },
+    "teaching_stage": "check"
+  },
+  "s37": {
+    "title": "Exam rehearsal · explain and apply",
+    "explanation": "What makes a fair baseline comparison?\n\nWrite a short answer, then compare with the guide.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: A fresh student question and a previously unseen failure are presented. The visible slide states: What makes a fair baseline comparison?\n\nWrite a short answer, then compare with the guide. Model answer after discussion: Same task, matched cases, source version and scoring rubric, with changes and variability recorded. Practice marks: 4. The target is: Demonstrate the policy assistant and explain its limits with evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "State the core idea",
+        "Use a case detail or calculation",
+        "Add a limitation",
+        "Compare with the Word guide"
+      ]
+    },
+    "teaching_stage": "check"
+  },
+  "s38": {
+    "title": "Exam rehearsal · explain and apply",
+    "explanation": "Name the four demonstration cases.\n\nWrite a short answer, then compare with the guide.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: A fresh student question and a previously unseen failure are presented. The visible slide states: Name the four demonstration cases.\n\nWrite a short answer, then compare with the guide. Model answer after discussion: Answerable, unsupported, access denied, and failure recovery. Practice marks: 4. The target is: Demonstrate the policy assistant and explain its limits with evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "State the core idea",
+        "Use a case detail or calculation",
+        "Add a limitation",
+        "Compare with the Word guide"
+      ]
+    },
+    "teaching_stage": "check"
+  },
+  "s39": {
+    "title": "What to hand in",
+    "explanation": "Demo, test table, known limits and individual explanation.\n\nInclude the one changed input and an error explanation.",
+    "speaker_notes": "TEACHER SCRIPT — PRACTICE. Open the matching notebook and demonstrate the first run. Have learners predict one change, run only that change, and record input, setting, output and an error explanation. This week’s case is: A fresh student question and a previously unseen failure are presented. The visible slide states: Demo, test table, known limits and individual explanation.\n\nInclude the one changed input and an error explanation. This weekly evidence receives formative feedback according to the module sequence; refer to the assessment brief for graded work. The target is: Demonstrate the policy assistant and explain its limits with evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "Original run",
+        "One changed input",
+        "Comparison",
+        "Explanation + source"
+      ]
+    },
+    "teaching_stage": "practice"
+  },
+  "s40": {
+    "title": "Three ideas to recall next week",
+    "explanation": "Show the question-to-evidence path, your measured change and a repeatable handover.\n\nRead the linked official sources in the Word guide and redraw one diagram from memory.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: A fresh student question and a previously unseen failure are presented. The visible slide states: Show the question-to-evidence path, your measured change and a repeatable handover.\n\nRead the linked official sources in the Word guide and redraw one diagram from memory. Return to the opening vote and ask whether the evidence changed anyone’s mind. The next week builds on this outcome: Demonstrate the policy assistant and explain its limits with evidence. The target is: Demonstrate the policy assistant and explain its limits with evidence. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "Integrated system",
+        "Attribution",
+        "Fresh challenge",
+        "Handover"
+      ]
+    },
+    "teaching_stage": "check"
+  }
+}

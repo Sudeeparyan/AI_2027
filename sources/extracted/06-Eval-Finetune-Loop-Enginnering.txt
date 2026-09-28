@@ -1,0 +1,320 @@
+Structured Study Notes: Why 95% of AI Agents Fail in Production (And How to Fix It)
+The Hard Problem of Building AI Agents
+	• The hardest part isn't building the agent (building it is the fun part).
+	• The hard part is knowing whether what you built is actually any good.
+	• Running an AI agent once, giving it tools, and seeing it do something magical is not the same as it actually working in production.
+	• That gap—the little voice asking "but does it actually work?"—has a name: Evaluation or Evals for short.
+	• Evals are one of the most critical concepts to master to deploy AI agents into production.
+
+What is an AI Eval?
+	• An AI Eval is a structured way of measuring how good your AI outputs really are.
+	• Instead of eyeballing a couple of answers and saying "that looks fine," you set up a repeatable process that gives you an actual score.
+	• That score answers one core question: Is my AI agent getting better, or did I do something to break it?
+	• Every time you change a prompt, swap a model, or tweak your retrieval, an eval tells you whether you helped the agent or silently broke something.
+Benchmarks vs. AI Evals
+	• Benchmarks (e.g., SWE-bench for coding, TAU-bench for customer service, Terminal Bench for command-line tasks, Agentic Analysis Index):
+		○ Test the underlying model using a generic test applied across every model.
+		○ Great for deciding which model to start with.
+		○ A model sitting at the top of a leaderboard can still completely fall apart on your specific use case because the benchmark never saw your data, your prompt, or your users.
+	• AI Evals:
+		○ Test your specific agentic system on your task, with your data.
+		○ How you determine if the agent actually works for your specific application.
+Why Evals Matter Specifically for AI Agents
+	• An agent isn't just a single answer; it's a whole chain of decisions (picking a tool, calling it, reading results, deciding the next action).
+	• There are many places where things can quietly go wrong (quietly go sideways).
+	• When an AI agent breaks in production, you need to know where and why. Reading transcripts one at a time at 2:00 AM won't scale.
+	• Research shows roughly a one-third gap between how models score in the lab and how they perform in real deployed work. Evals close that gap before users feel it.
+Traditional Machine Learning Evals vs. Modern AI Evals
+	• Traditional Machine Learning Evals:
+		○ Clean, discrete outputs: categories (spam vs. not spam), numbers (predicted house prices), or simple yes/no.
+		○ Grading was clean and objective using a test set with ground-truth answers.
+		○ Metrics used: Accuracy, Precision, Recall, F1 Score.
+		○ Analogy: Grading a multiple-choice test (there is a clear answer key; just count correct answers).
+	• LLM & AI Agent Evals:
+		○ Outputs are open-ended text or a sequence of actions; there isn't just one single correct answer.
+		○ Example: For an article summary, there could be 100 good summaries and 100 bad ones, and two great summaries can look completely different.
+		○ Analogy: Grading an essay (there is no single right answer; you need a rubric and judgment).
+		○ AI evals are inherently messier and more qualitative.
+Core Metrics and Matching Them to Tasks
+Top 4 Core Metrics:
+	1. Relevance: Did the output actually answer what was asked?
+	2. Faithfulness / Groundedness: Is the response true and backed by real data, or is the model making things up? (Hallucination check).
+	3. Correctness: Did it match the expected answer when there is one?
+	4. Coherence: Does it read well?
+Matching Metrics to Specific Tasks:
+	• Summarization: Care about Faithfulness (true to source without inventing stuff), Coverage (capturing main points), and Conciseness (keeping it tight).
+	• Classification: Uses traditional ML metrics like Accuracy, Precision, Recall, and F1 Score (since outputs are clean labels).
+	• Translation: Care about meaning preservation and natural reading flow in the target language. Uses metrics like BLEU and COMET.
+	• Retrieval-Augmented Generation (RAG): Uses Faithfulness and Answer Relevance to pinpoint whether failure was caused by bad retrieval or bad generation.
+The Three Buckets of AI Evaluation Metrics
+	1. Classic Overlap Metrics:
+		○ Examples: BLEU (translation), ROUGE (summarization), METEOR.
+		○ Mechanics: Measures exact word overlap between output and reference answer.
+		○ Pros/Cons: Fast, cheap, simple, but completely blind to meaning (two sentences saying the exact same thing in different words get different scores).
+	2. Semantic Metrics:
+		○ Examples: BERTScore, BLEURT, COMET.
+		○ Mechanics: Compares meanings using embeddings.
+		○ Pros/Cons: Handles paraphrasing significantly better than word overlap metrics.
+	3. Model-Based Metrics:
+		○ Examples: LLM-as-a-Judge, G-Eval.
+		○ Mechanics: Uses a strong LLM to grade outputs against a rubric.
+		○ Pros/Cons: Flexible enough to grade open-ended, creative outputs with no reference answers.
+The Golden Rule: Start with a Golden Dataset
+	• Do NOT start by picking metrics off a list.
+	• Start by building a Golden Dataset:
+		○ A collection of example inputs paired with what a great output looks like and what a bad output looks like.
+		○ Includes common cases, annoying edge cases, and every past failure seen in production.
+		○ Scale: Start small with 5 to 20 examples and grow it over time.
+	• Working Backwards:
+		1. Build the Golden Dataset first.
+		2. Look at the examples and ask: "What makes this output good, and what makes it bad?"
+		3. Quantify those criteria—those become your Metrics.
+The Four Ways to Execute Grading (Graders)
+	1. Human Evals:
+		○ Domain experts sit down and grade outputs against a rubric.
+		○ Gold standard for quality, but slow, expensive, and non-scalable.
+		○ Best used for small, careful sampling as the ground truth.
+	2. User Evals:
+		○ Direct implicit/explicit feedback from real users in live production (thumbs up/down, accept/reject, edits made, task completion, repeat queries).
+		○ Ultimate real-world ground truth, but can be noisy and only available after deployment (cannot serve as a pre-deployment safety net).
+	3. Code-Based / Programmatic Evals:
+		○ Simple checks written in code (checking exact value matches, valid JSON formatting, correct tool call arguments, execution latency, cost).
+		○ Cheap, instant, and scalable to run automatically on every change, but only works for clearly checkable answers (pairs perfectly with classification).
+	4. LLM-as-a-Judge:
+		○ Using a strong, large model to grade outputs against your rubric.
+		○ Scales essay-style grading across thousands of open-ended outputs (e.g., evaluating helpfulness or groundedness).
+		○ Critical Rule: Judge models have biases (preferring longer answers or favoring the first response shown). Always validate LLM judge grades against human-graded samples before trusting them at scale.
+The Continuous Evaluation Loop (CI/CD for AI)
+Evals are not a one-time report card before launch; they are a continuous loop analogous to automated software testing.
+                  ┌──────────────────────────────┐
+                  │ 1. Define "Good" Specially    │
+                  └──────────────┬───────────────┘
+                                 ▼
+                  ┌──────────────────────────────┐
+                  │ 2. Build Golden Dataset      │
+                  └──────────────┬───────────────┘
+                                 ▼
+                  ┌──────────────────────────────┐
+                  │ 3. Pick Metrics (Work Back)  │
+                  └──────────────┬───────────────┘
+                                 ▼
+                  ┌──────────────────────────────┐
+                  │ 4. Establish Baseline Score  │
+                  └──────────────┬───────────────┘
+                                 ▼
+                  ┌──────────────────────────────┐
+                  │ 5. Group & Analyze Failures  │
+                  └──────────────┬───────────────┘
+                                 ▼
+┌─────────────────────────────────────────────────────────────────┐
+│ 6. Fix Issues (Tweak Prompts, Retrieval, Tool Definitions)     │
+└────────────────────────────────┬────────────────────────────────┘
+                                 ▼
+                  ┌──────────────────────────────┐
+                  │ 7. Re-run Against Golden Set │
+                  └──────────────┬───────────────┘
+                                 ▼
+                  ┌──────────────────────────────┐
+                  │ 8. Monitor Production & Loop │
+                  └──────────────────────────────┘
+
+	• Baseline: Running the current system across the full dataset to get a starting score. Without a baseline, "it feels better" is just vibe eval.
+	• Failure Grouping: Categorizing failures (e.g., retrieval misses, formatting errors, weird edge cases) pinpoints exactly what to fix.
+	• Regression Prevention: Re-running evals after adjustments ensures improvements were made without breaking previously working features.
+	• Production Monitoring: Model providers may silently update underlying models overnight, changing behavior without code changes. Production failures must feed back into the Golden Dataset.
+Ecosystem Tools for Evals and Monitoring
+	• Eval Execution Tools:
+		○ Promptfoo: Test prompts and run evals directly from the command line.
+		○ Ragas: Library providing out-of-the-box RAG evaluation metrics.
+	• Tracing & Production Monitoring Tools:
+		○ LangFuse
+
+You will never ever know if your AI Agent actually works by watching it succeed one time. 
+
+
+LLM Fine-Tuning Explained: The Complete Guide
+Pre-Training vs. Post-Training
+	• Pre-Training:
+		○ Carried out internally by foundational labs (e.g., OpenAI training GPT-5.5, Anthropic training Claude Opus 4.7, Meta training Llama models, Google training Gemini models).
+		○ Runs massive training jobs on huge GPU clusters using trillions of tokens of data.
+		○ Produces the base model (the out-of-the-box pre-trained model available on platforms like Hugging Face or via APIs).
+	• Post-Training:
+		○ Encompasses everything that happens after pre-training.
+		○ Fine-Tuning is the most common form of post-training.
+	• Evolution from Traditional ML to LLMs:
+		○ Traditional Machine Learning: Teams built and trained models from scratch on their own data, then fine-tuned those same models on specific data for specialized tasks (owning the entire pipeline).
+		○ LLM Era (Model as a Service): Foundational labs create the pre-trained model and serve it via API. Developers adapt this pre-trained model to perform better on specific use cases rather than training from zero.
+	• Parameter Scale Challenge:
+		○ Traditional ML: Parameters ranged from hundreds of thousands to a few million.
+		○ LLMs: Parameters range from a few billion (small open-source models) to 10–70 billion (production standards), hundreds of billions (frontier models), and over 1 trillion parameters (models like GLM).
+		○ Core Challenge: Updating even a fraction of a 1-trillion-parameter model cannot be casually done on a single GPU.
+Open-Weight vs. Closed-Source Models
+	• Open-Weight Models:
+		○ Hosted by inference providers (e.g., Hugging Face Inference, Nebius Token Factory) distributing weights across GPUs.
+		○ Examples: Llama, Mistral, Qwen, DeepSeek, Kimi, GLM.
+		○ Fine-Tuning Capability: Because model weights are exposed and accessible, you can directly modify parameters, fine-tune, and deploy on your own infrastructure.
+	• Closed-Source Models:
+		○ Examples: Anthropic (Claude), OpenAI (GPT series), Google (Gemini).
+		○ Fine-Tuning Capability: You cannot fine-tune them on private infrastructure because you do not have direct access to their weights.
+		○ Fine-tuning must be done through native fine-tuning APIs/services (e.g., OpenAI Fine-Tuning API, Google Vertex AI, Anthropic Fine-Tuning Service).
+		○ Trade-off: You submit data, they execute training on their infrastructure, and you call the fine-tuned model via API without visibility into under-the-hood operations.
+Parameter-Efficient Fine-Tuning (PEFT) vs. Full Fine-Tuning
+	• PEFT (Parameter-Efficient Fine-Tuning):
+		○ Core Concept: Instead of updating every parameter in a massive model (e.g., 70B parameters), PEFT modifies only a tiny fraction of parameters required for a task.
+		○ LoRA (Low-Rank Adaptation):
+			§ Freezes the original base model weights.
+			§ Injects small, trainable matrices into specific layers of the model.
+			§ Only trains those small matrices. At inference time, they are combined with frozen weights to produce adapted behavior.
+			§ Impact: Reduces trainable parameters from ~70 Billion down to ~100 Million, drastically cutting compute, memory, and cost.
+		○ QLoRA (Quantized Low-Rank Adaptation):
+			§ Takes LoRA a step further by quantizing the frozen base model down to 4-bit precision.
+			§ Runs LoRA adapters on top of the 4-bit quantized base.
+			§ Enables fine-tuning a 70 Billion parameter model on a single H100 GPU.
+			§ Serves as the default starting point for teams fine-tuning open-source models using libraries like Hugging Face's peft.
+	• Full Fine-Tuning:
+		○ Updates every single parameter in the model.
+		○ Offers maximum flexibility and quality, but is extremely expensive, slow, and requires heavy GPU infrastructure.
+		○ Used only as a fallback when PEFT fails to hit the required quality bar.
+Reinforcement Fine-Tuning & Alignment Methods
+	1. Reinforcement Fine-Tuning with Verifiable Rewards:
+		○ Technique powering reasoning models (e.g., OpenAI 'o' series, DeepSeek-R1).
+		○ Applied to tasks where answers are automatically verifiable (e.g., math problems or code that can execute tests).
+		○ The model generates multiple attempts: correct attempts receive rewards, wrong attempts get penalized.
+		○ Learns to reason over time without needing human labelers.
+	2. RLHF (Reinforcement Learning from Human Feedback):
+		○ The classic alignment technique behind systems like ChatGPT.
+		○ Trains a separate Reward Model based on human preference data.
+		○ Uses algorithms like PPO (Proximal Policy Optimization) to steer the primary language model using the Reward Model.
+		○ Highly effective, but expensive and complex due to human labeling requirements and training loop complexity.
+	3. Preference Optimization (DPO - Direct Preference Optimization):
+		○ A simpler alternative to RLHF that skips the separate reward model completely.
+		○ Directly optimizes the language model on preference pairs in a single training step.
+		○ Lower compute requirements, easier implementation; default choice for open-source preference tuning.
+Decision Framework: Choosing the Right Strategy
+	1. Phase 1 (Pre-Fine-Tuning Baseline):
+		○ Optimize Prompts first.
+		○ Optimize Context / RAG second.
+		○ Establishes a performance benchmark to measure actual uplift gained from fine-tuning.
+	2. Phase 2 (Fine-Tuning Methodology Selection):
+		○ Domain Adaptation / Task Precision / Tone: Start with QLoRA.
+		○ High-Quality Fallback: Move to Full Fine-Tuning only if QLoRA/LoRA performance is insufficient.
+		○ Human Preference / Alignment (Safety, Style, Tone): Use DPO or RLHF.
+		○ Reasoning / Verifiable Tasks (Code, Math): Use Reinforcement Fine-Tuning with Verifiable Rewards.
+Critical Challenges in Fine-Tuning
+	• Data Quality: Fine-tuning a good base model with a poor-quality dataset degrades performance rather than improving it.
+	• Evaluation Framework: A clear evaluation dataset (Eval Set) and precise metrics must be established before fine-tuning to verify if training brought measurable improvement.
+
+Prompt Engineering is Dead. The Future is Loop Engineering.
+The Evolution of AI Paradigms
+	• Era 1: Prompt Engineering
+		○ The highest leverage skill was crafting the exact wording of the prompt.
+		○ Phrasing changed output quality because models were rigid and input words carried all the weight.
+	• Era 2: Context Engineering
+		○ As models improved, the bottleneck shifted from phrasing to what the model sees at inference time.
+		○ Focused on curating everything landing in the context window: retrieved documents, conversation history, memory, and tool results.
+	• Era 3: Loop Engineering (The Current Paradigm - 2026)
+		○ Models write their own prompts and pull their own context via tool calls, meaning inputs are no longer a scarce skill.
+		○ The scarce skill is designing the loop the agent runs inside.
+		○ Loop Engineering Defined: Designing the cycle of Act $\rightarrow$ Observe $\rightarrow$ Verify $\rightarrow$ Retry instead of handwriting every step manually.
+		○ Origin: Came directly out of teams building coding agents (e.g., Corgi) and AI-native companies replacing floors of human agents.
+Running Example: AI Customer Support Agent
+	• Used throughout the breakdown to illustrate loop design: An AI support agent for an online store handling order questions, refunds, and shipping status.
+Anatomy of the Agent Loop
+	• The Core Loop Primitive (ReAct Pattern):
+		1. The model gets called.
+		2. The model decides on an action (almost always a tool call).
+		3. The harness executes that action.
+		4. Results return as an observation.
+		5. The observation is appended to the context.
+		6. The model gets called again (Reason, Act, Observe, Repeat).
+	• Customer Support Loop Execution Flow:
+		○ Iteration 1: Classifies intent as request refund.
+		○ Iteration 2: Decides order details are needed $\rightarrow$ calls order lookup tool. Observation (order record) returns to context.
+		○ Iteration 3: Checks refund against policy.
+		○ Iteration 4: Drafts reply and either sends or escalates.
+Stopping Conditions & Economics of Loops
+	• The Stopping Condition Problem:
+		○ Without explicit termination, agents experience runaway loops: repeatedly calling tools, re-reasoning, spinning on uncompletable tasks, and burning tokens.
+	• Explicit Termination Mechanisms (Use multiple in production):
+		○ Model emits a clear done signal or final answer.
+		○ Hard cap on maximum iterations.
+		○ Cost or token budget that kills the loop.
+		○ A verifier passes and ends the loop.
+	• Loop Economics & Performance Optimization:
+		○ Every iteration is a full model call $\rightarrow$ latency and cost scale directly with loop length.
+		○ Taking 10 steps for a 2-step task equals 10x the inference bill and 10x the failure surface area.
+		○ Goal: Design the tightest loop that completes the task reliably.
+Anti-Pattern: Point Solution Thinking
+	• The Mistake: Treating agents as single-point solutions by obsessing over single node generation in isolation (e.g., hyper-tuning a reply writer or intent classifier).
+	• The Reality: A support agent is a loop where every step feeds the next. If an intent classifier is flawless but the order lookup tool times out without handling, the system fails.
+	• Optimizing a single node in an interdependent graph yields almost no system-level benefit.
+Harness Engineering
+	• Definition: All the deterministic software wrapped around the model.
+		○ Model = ~5% of the magic.
+		○ Harness = Determines whether the agent survives real production traffic.
+	• Core Responsibilities of the Harness:
+		○ Retry logic when a tool call fails.
+		○ Timeouts when databases are slow.
+		○ Fallbacks when the model returns malformed output.
+		○ Guardrails stopping unauthorized actions (e.g., promising unauthorized refunds).
+		○ Structured logging and tracing to reconstruct production failures.
+	• System-Level Evaluation (Evals):
+		○ Moving beyond single output quality ("Was this reply good?") to evaluating whole system behavior under stress.
+		○ Evaluate handling of lookup failures, graceful degradation, hallucination prevention under error, angry customers, and out-of-policy refunds.
+		○ Use tools like LangSmith or LangFuse to score end-to-end trace runs, not isolated completions.
+Context Management & Context Rot
+	• Context Rot Defined: As loops iterate, tool results, intermediate reasoning, and observations accumulate. Before hitting hard token limits, model quality degraded due to filling the window with stale, low-signal tokens.
+	• Context Management Strategies:
+		1. Compaction: Periodically summarize earlier steps into short-running summaries.
+		2. External Memory: Write facts out to external storage; retrieve only relevant steps into line.
+		3. Tool Result Management: Filter, extract, and summarize massive tool payloads (e.g., large database query responses) before inserting them into context.
+	• Multi-Agent Orchestration as Context Strategy:
+		○ Multi-agent architectures serve as a context management strategy, not just a capability flex.
+		○ Spin off sub-agents with clean, scoped context for bounded tasks, returning only the final result to the main loop to keep the primary context lean.
+		○ Context must be budgeted like cost and iterations.
+Verification Strategies in the Loop
+	• Asymmetry of Verification:
+		○ Cheap / Automated Verifiers: Fast, deterministic checks. Put these inside the loop so the agent catches mistakes and retries automatically.
+			§ Coding Example: Code compiles and passes unit tests.
+			§ Support Example: Check drafted reply against deterministic policy rules (e.g., "Any refund over $100 must escalate").
+		○ Expensive / Subjective Verifiers: Requires nuanced human judgment.
+			§ Support Example: Judging whether a refund decision was generally "reasonable."
+			§ Put humans in the loop where automated verification is unavailable.
+The Mint Framework (Minimal Intelligence Necessary Tools)
+	• Core Philosophy: Build the minimal viable system end-to-end before adding any complexity.
+	• Incremental Construction Sequence:
+		1. Basic Prompt + Basic Workflow: Message comes in $\rightarrow$ agent answers (end-to-end working).
+		2. Tool Use: Add tool access (e.g., actual order lookup).
+		3. Continuous Evaluation: Measure real resolution vs. silent failure.
+		4. State & Memory: Retain customer context across conversations and tickets.
+		5. More Workflows: Add dedicated sub-flows (refund flow, escalation flow).
+		6. Human-in-the-Loop & Multi-Agent Orchestration: Add ONLY at the end when demonstrated real needs arise (for hard cases or context isolation).
+	• System Observability: Incremental additions keep systems observable, allowing clear localization of failures during debugging.
+	• Failure Questions for Every Layer:
+		○ How does this break?
+		○ What does the system do when it breaks? (50% of failure modes are traditional software issues like timeouts, null values, and API downtimes).
+Andrew Ng’s Three Nested Loops of Software Construction
+Software development with agents operates across three nested loops running at different time frequencies:
+	1. Agent Decoding Loop (Seconds to Minutes):
+		○ Operator: Run by the Agent.
+		○ Mechanism: Given a specification, the agent writes code, tests its work, and iterates until specs are met.
+	2. Developer Feedback Loop (Tens of Minutes to Hours):
+		○ Operator: Run by the Developer.
+		○ Mechanism: Developer reviews agent outputs, steers direction, updates specs, and feeds policy updates/corrections back.
+	3. External Feedback Loop (Hours to Weeks):
+		○ Operator: Run by the World (Real users, alpha testers, A/B tests, production data).
+		○ Mechanism: Production feedback updates product vision and specifications, which trickle back into the inner loops.
+	• Insight: Verification relies more on human judgment the further out the loop goes. Humans shift to where context and judgment advantages lie.
+Mapping the 4 Agentic Design Patterns to the Loop
+Andrew Ng’s four original agentic design patterns function as literal building blocks within the engineered loop:
+	• Reflection: The agent checks its draft against policy (the in-loop verifier).
+	• Tool Use: Querying external tools (order lookup).
+	• Planning: Sequencing steps (Classify $\rightarrow$ Lookup $\rightarrow$ Decide $\rightarrow$ Respond).
+	• Multi-Agent Collaboration: Sub-agents executing bounded sub-tasks and returning clean results.
+Actionable System Design Checklist
+	• Avoid point-solution thinking; design the whole loop.
+	• Explicitly design stopping conditions and budget iterations, cost, and context.
+	• Prioritize harness engineering and system-level tracing/evaluations equally with model evaluations.
+	• Embed cheap verifiers inside the loop; position humans where verification is expensive.
+	• Follow the Mint framework: start minimal end-to-end and scale complexity incrementally.
+

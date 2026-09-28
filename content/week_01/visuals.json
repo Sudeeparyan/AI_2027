@@ -1,0 +1,36 @@
+{
+  "term": [
+    [
+      "Training examples",
+      "Model learns patterns",
+      "New text"
+    ],
+    [
+      "Question",
+      "Model answer",
+      "Check against P1"
+    ],
+    [
+      "Task prompt",
+      "P1 policy context",
+      "Draft answer"
+    ],
+    [
+      "10 reference answers",
+      "10 observed answers",
+      "Count supported"
+    ]
+  ],
+  "path": [
+    "Student question",
+    "Retrieve policy P1",
+    "Draft answer",
+    "Check citation"
+  ],
+  "compare": [
+    "Plausible prose",
+    "Policy evidence"
+  ],
+  "good": "No travel reimbursement [P1]",
+  "bad": "Yes, buses are covered"
+}

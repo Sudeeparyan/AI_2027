@@ -1,0 +1,614 @@
+{
+  "s01": {
+    "title": "Week 09 · When fine-tuning helps",
+    "explanation": "The revised policy problem\n\nPractice results say a tuned model wins 9/10, but a revised policy arrived yesterday and final cases show 6/10. What should change first?",
+    "speaker_notes": "TEACHER SCRIPT — OPEN. Show the visual for ten seconds, then ask for an initial decision. Do not reveal the answer yet. Ask a student to name the source or measurement that would change their mind. This week’s case is: A college assistant uses the correct format but misses a revised policy. The visible slide states: The revised policy problem\n\nPractice results say a tuned model wins 9/10, but a revised policy arrived yesterday and final cases show 6/10. What should change first? Reveal that the case will be revisited after four short concept cycles. The target is: Choose among a clearer prompt, current evidence and model adaptation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "story",
+      "items": [
+        "The revised policy problem",
+        "What is known?",
+        "What must we check?"
+      ]
+    },
+    "teaching_stage": "open"
+  },
+  "s02": {
+    "title": "First vote: what would you do?",
+    "explanation": "Practice results say a tuned model wins 9/10, but a revised policy arrived yesterday and final cases show 6/10. What should change first?\n\nChoose an initial answer and name one piece of evidence you need.",
+    "speaker_notes": "TEACHER SCRIPT — QUESTION. Take a show of hands for each choice before showing the mechanism. Ask pairs to defend a choice with evidence. Save the strongest wrong reason for the reveal later in this cycle. This week’s case is: A college assistant uses the correct format but misses a revised policy. The visible slide states: Practice results say a tuned model wins 9/10, but a revised policy arrived yesterday and final cases show 6/10. What should change first?\n\nChoose an initial answer and name one piece of evidence you need. Accept reasonable uncertainty; record the initial votes to revisit at the end. The target is: Choose among a clearer prompt, current evidence and model adaptation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "Accept the first plausible result",
+        "Check the source or measurement"
+      ]
+    },
+    "teaching_stage": "question"
+  },
+  "s03": {
+    "title": "The journey through today’s case",
+    "explanation": "We will predict, connect an analogy, trace a mechanism, work an example, then explain a decision.",
+    "speaker_notes": "TEACHER SCRIPT — OPEN. Show the visual for ten seconds, then ask for an initial decision. Do not reveal the answer yet. Ask a student to name the source or measurement that would change their mind. This week’s case is: A college assistant uses the correct format but misses a revised policy. The visible slide states: We will predict, connect an analogy, trace a mechanism, work an example, then explain a decision. Point to the four named ideas, then show where the notebook experiment fits. The target is: Choose among a clearer prompt, current evidence and model adaptation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "Prompting",
+        "RAG",
+        "Fine-tuning",
+        "LoRA"
+      ]
+    },
+    "teaching_stage": "open"
+  },
+  "s04": {
+    "title": "1. Predict · Prompting",
+    "explanation": "When is this an inexpensive first trial?\n\nMake a choice before we explain the diagram.",
+    "speaker_notes": "TEACHER SCRIPT — QUESTION. Take a show of hands for each choice before showing the mechanism. Ask pairs to defend a choice with evidence. Save the strongest wrong reason for the reveal later in this cycle. This week’s case is: A college assistant uses the correct format but misses a revised policy. The visible slide states: When is this an inexpensive first trial?\n\nMake a choice before we explain the diagram. The intended answer is When the failure concerns task instructions or format. The tempting claim is A prompt can permanently teach yesterday’s revised policy. Do not show which card is correct until the reveal. The target is: Choose among a clearer prompt, current evidence and model adaptation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "When the failure concerns task instructions or format.",
+        "A prompt can permanently teach yesterday’s revised policy."
+      ]
+    },
+    "teaching_stage": "question"
+  },
+  "s05": {
+    "title": "Prompting · a familiar picture",
+    "explanation": "A clearer recipe can change a cook’s output without retraining the cook.\n\nWhat matches our case, and where does the analogy stop?",
+    "speaker_notes": "TEACHER SCRIPT — ANALOGY. Begin with the familiar scene. Invite learners to describe each part in everyday language. Then ask where the comparison might fail before introducing the technical vocabulary. This week’s case is: A college assistant uses the correct format but misses a revised policy. The visible slide states: A clearer recipe can change a cook’s output without retraining the cook.\n\nWhat matches our case, and where does the analogy stop? The boundary is: Instructions can fail; a prompt does not update facts or guarantee conformance. The target is: Choose among a clearer prompt, current evidence and model adaptation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "analogy",
+      "items": [
+        "Recipe",
+        "Example plate",
+        "Taste check"
+      ],
+      "caption": "A clearer recipe can change a cook’s output without retraining the cook."
+    },
+    "teaching_stage": "analogy"
+  },
+  "s06": {
+    "title": "Prompting · map the parts",
+    "explanation": "Match each everyday part to the technical part.\n\nAnalogy limit: Instructions can fail; a prompt does not update facts or guarantee conformance.",
+    "speaker_notes": "TEACHER SCRIPT — MAPPING. Point from each familiar element to the corresponding technical element. Have students cover the right column and reconstruct the three matches. Read the limitation aloud. This week’s case is: A college assistant uses the correct format but misses a revised policy. The visible slide states: Match each everyday part to the technical part.\n\nAnalogy limit: Instructions can fail; a prompt does not update facts or guarantee conformance. The three precise mappings are [['Recipe', 'prompt'], ['Example plate', 'few-shot example'], ['Taste check', 'task evaluation']]. The target is: Choose among a clearer prompt, current evidence and model adaptation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "map",
+      "pairs": [
+        [
+          "Recipe",
+          "prompt"
+        ],
+        [
+          "Example plate",
+          "few-shot example"
+        ],
+        [
+          "Taste check",
+          "task evaluation"
+        ]
+      ]
+    },
+    "teaching_stage": "mapping"
+  },
+  "s07": {
+    "title": "Prompting · how it works",
+    "explanation": "Change instructions or examples for the task without changing weights.\n\nTrace the arrows from left to right.",
+    "speaker_notes": "TEACHER SCRIPT — MECHANISM. Trace every arrow slowly from the input to the output. Ask what information crosses the boundary at each arrow. Pause if students confuse a simplified notebook with a trained model. This week’s case is: A college assistant uses the correct format but misses a revised policy. The visible slide states: Change instructions or examples for the task without changing weights.\n\nTrace the arrows from left to right. The weekly example is: On ten practice cases, a clarified prompt improves 6/10 to 8/10; record the cases. State what the analogy does not explain: Instructions can fail; a prompt does not update facts or guarantee conformance. The target is: Choose among a clearer prompt, current evidence and model adaptation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Same model",
+        "Better instructions",
+        "Check examples"
+      ]
+    },
+    "teaching_stage": "mechanism"
+  },
+  "s08": {
+    "title": "Prompting · work one case",
+    "explanation": "On ten practice cases, a clarified prompt improves 6/10 to 8/10; record the cases.\n\nPoint to the evidence before giving your conclusion.",
+    "speaker_notes": "TEACHER SCRIPT — WORKED. Work the specific numbers or source wording aloud. Give students thirty seconds to write a conclusion, then ask which source line or calculation supports it. This week’s case is: A college assistant uses the correct format but misses a revised policy. The visible slide states: On ten practice cases, a clarified prompt improves 6/10 to 8/10; record the cases.\n\nPoint to the evidence before giving your conclusion. The expected reasoning concludes: When the failure concerns task instructions or format. Distinguish measured results from illustrative numbers. The target is: Choose among a clearer prompt, current evidence and model adaptation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "work",
+      "items": [
+        "On ten practice cases, a clarified prompt improves 6/10 to 8/10; record the cases.",
+        "When is this an inexpensive first trial?",
+        "When the failure concerns task instructions or format."
+      ]
+    },
+    "teaching_stage": "worked"
+  },
+  "s09": {
+    "title": "Prompting · answer and explain",
+    "explanation": "When the failure concerns task instructions or format.\n\nTempting mistake: A prompt can permanently teach yesterday’s revised policy.",
+    "speaker_notes": "TEACHER SCRIPT — REVEAL. Return to the earlier choice. Explain the correct answer and why the tempting claim fails. Ask one learner to say the answer in a single sentence without reading it. This week’s case is: A college assistant uses the correct format but misses a revised policy. The visible slide states: When the failure concerns task instructions or format.\n\nTempting mistake: A prompt can permanently teach yesterday’s revised policy. The earlier question was When is this an inexpensive first trial? Ask how this differs from the wrong claim. The target is: Choose among a clearer prompt, current evidence and model adaptation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "reveal",
+      "items": [
+        "A prompt can permanently teach yesterday’s revised policy.",
+        "When the failure concerns task instructions or format."
+      ],
+      "caption": "Instructions can fail; a prompt does not update facts or guarantee conformance."
+    },
+    "teaching_stage": "reveal"
+  },
+  "s10": {
+    "title": "2. Predict · RAG",
+    "explanation": "Where should a changed policy be updated first?\n\nMake a choice before we explain the diagram.",
+    "speaker_notes": "TEACHER SCRIPT — QUESTION. Take a show of hands for each choice before showing the mechanism. Ask pairs to defend a choice with evidence. Save the strongest wrong reason for the reveal later in this cycle. This week’s case is: A college assistant uses the correct format but misses a revised policy. The visible slide states: Where should a changed policy be updated first?\n\nMake a choice before we explain the diagram. The intended answer is In the authoritative document and retrieval index. The tempting claim is Retrieval changes model weights. Do not show which card is correct until the reveal. The target is: Choose among a clearer prompt, current evidence and model adaptation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "In the authoritative document and retrieval index.",
+        "Retrieval changes model weights."
+      ]
+    },
+    "teaching_stage": "question"
+  },
+  "s11": {
+    "title": "RAG · a familiar picture",
+    "explanation": "A clerk opens the current rulebook instead of relying on memory.\n\nWhat matches our case, and where does the analogy stop?",
+    "speaker_notes": "TEACHER SCRIPT — ANALOGY. Begin with the familiar scene. Invite learners to describe each part in everyday language. Then ask where the comparison might fail before introducing the technical vocabulary. This week’s case is: A college assistant uses the correct format but misses a revised policy. The visible slide states: A clerk opens the current rulebook instead of relying on memory.\n\nWhat matches our case, and where does the analogy stop? The boundary is: Retrieved text still needs access, relevance and claim checks. The target is: Choose among a clearer prompt, current evidence and model adaptation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "analogy",
+      "items": [
+        "Rulebook",
+        "Page search",
+        "Quoted line"
+      ],
+      "caption": "A clerk opens the current rulebook instead of relying on memory."
+    },
+    "teaching_stage": "analogy"
+  },
+  "s12": {
+    "title": "RAG · map the parts",
+    "explanation": "Match each everyday part to the technical part.\n\nAnalogy limit: Retrieved text still needs access, relevance and claim checks.",
+    "speaker_notes": "TEACHER SCRIPT — MAPPING. Point from each familiar element to the corresponding technical element. Have students cover the right column and reconstruct the three matches. Read the limitation aloud. This week’s case is: A college assistant uses the correct format but misses a revised policy. The visible slide states: Match each everyday part to the technical part.\n\nAnalogy limit: Retrieved text still needs access, relevance and claim checks. The three precise mappings are [['Rulebook', 'updated policy'], ['Page search', 'retrieval'], ['Quoted line', 'grounded answer']]. The target is: Choose among a clearer prompt, current evidence and model adaptation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "map",
+      "pairs": [
+        [
+          "Rulebook",
+          "updated policy"
+        ],
+        [
+          "Page search",
+          "retrieval"
+        ],
+        [
+          "Quoted line",
+          "grounded answer"
+        ]
+      ]
+    },
+    "teaching_stage": "mapping"
+  },
+  "s13": {
+    "title": "RAG · how it works",
+    "explanation": "Supply up-to-date evidence at inference time; useful for changing facts and traceable answers.\n\nTrace the arrows from left to right.",
+    "speaker_notes": "TEACHER SCRIPT — MECHANISM. Trace every arrow slowly from the input to the output. Ask what information crosses the boundary at each arrow. Pause if students confuse a simplified notebook with a trained model. This week’s case is: A college assistant uses the correct format but misses a revised policy. The visible slide states: Supply up-to-date evidence at inference time; useful for changing facts and traceable answers.\n\nTrace the arrows from left to right. The weekly example is: Replace P3 with its approved revised version, reindex and retrieve it for the question. State what the analogy does not explain: Retrieved text still needs access, relevance and claim checks. The target is: Choose among a clearer prompt, current evidence and model adaptation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Latest policy",
+        "Retrieve now",
+        "Ground answer"
+      ]
+    },
+    "teaching_stage": "mechanism"
+  },
+  "s14": {
+    "title": "RAG · work one case",
+    "explanation": "Replace P3 with its approved revised version, reindex and retrieve it for the question.\n\nPoint to the evidence before giving your conclusion.",
+    "speaker_notes": "TEACHER SCRIPT — WORKED. Work the specific numbers or source wording aloud. Give students thirty seconds to write a conclusion, then ask which source line or calculation supports it. This week’s case is: A college assistant uses the correct format but misses a revised policy. The visible slide states: Replace P3 with its approved revised version, reindex and retrieve it for the question.\n\nPoint to the evidence before giving your conclusion. The expected reasoning concludes: In the authoritative document and retrieval index. Distinguish measured results from illustrative numbers. The target is: Choose among a clearer prompt, current evidence and model adaptation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "work",
+      "items": [
+        "Replace P3 with its approved revised version, reindex and retrieve it for the question.",
+        "Where should a changed policy be updated first?",
+        "In the authoritative document and retrieval index."
+      ]
+    },
+    "teaching_stage": "worked"
+  },
+  "s15": {
+    "title": "RAG · answer and explain",
+    "explanation": "In the authoritative document and retrieval index.\n\nTempting mistake: Retrieval changes model weights.",
+    "speaker_notes": "TEACHER SCRIPT — REVEAL. Return to the earlier choice. Explain the correct answer and why the tempting claim fails. Ask one learner to say the answer in a single sentence without reading it. This week’s case is: A college assistant uses the correct format but misses a revised policy. The visible slide states: In the authoritative document and retrieval index.\n\nTempting mistake: Retrieval changes model weights. The earlier question was Where should a changed policy be updated first? Ask how this differs from the wrong claim. The target is: Choose among a clearer prompt, current evidence and model adaptation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "reveal",
+      "items": [
+        "Retrieval changes model weights.",
+        "In the authoritative document and retrieval index."
+      ],
+      "caption": "Retrieved text still needs access, relevance and claim checks."
+    },
+    "teaching_stage": "reveal"
+  },
+  "s16": {
+    "title": "3. Predict · Fine-tuning",
+    "explanation": "Does the practice result prove tuning should ship?\n\nMake a choice before we explain the diagram.",
+    "speaker_notes": "TEACHER SCRIPT — QUESTION. Take a show of hands for each choice before showing the mechanism. Ask pairs to defend a choice with evidence. Save the strongest wrong reason for the reveal later in this cycle. This week’s case is: A college assistant uses the correct format but misses a revised policy. The visible slide states: Does the practice result prove tuning should ship?\n\nMake a choice before we explain the diagram. The intended answer is No; the fresh test and failure analysis matter. The tempting claim is Fine-tuning is guaranteed to beat a good prompt. Do not show which card is correct until the reveal. The target is: Choose among a clearer prompt, current evidence and model adaptation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "No; the fresh test and failure analysis matter.",
+        "Fine-tuning is guaranteed to beat a good prompt."
+      ]
+    },
+    "teaching_stage": "question"
+  },
+  "s17": {
+    "title": "Fine-tuning · a familiar picture",
+    "explanation": "A musician practises many examples to change a habit.\n\nWhat matches our case, and where does the analogy stop?",
+    "speaker_notes": "TEACHER SCRIPT — ANALOGY. Begin with the familiar scene. Invite learners to describe each part in everyday language. Then ask where the comparison might fail before introducing the technical vocabulary. This week’s case is: A college assistant uses the correct format but misses a revised policy. The visible slide states: A musician practises many examples to change a habit.\n\nWhat matches our case, and where does the analogy stop? The boundary is: Small practice gains can reflect overfitting; tuning is not a live fact store. The target is: Choose among a clearer prompt, current evidence and model adaptation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "analogy",
+      "items": [
+        "Practice pieces",
+        "Habit change",
+        "New concert"
+      ],
+      "caption": "A musician practises many examples to change a habit."
+    },
+    "teaching_stage": "analogy"
+  },
+  "s18": {
+    "title": "Fine-tuning · map the parts",
+    "explanation": "Match each everyday part to the technical part.\n\nAnalogy limit: Small practice gains can reflect overfitting; tuning is not a live fact store.",
+    "speaker_notes": "TEACHER SCRIPT — MAPPING. Point from each familiar element to the corresponding technical element. Have students cover the right column and reconstruct the three matches. Read the limitation aloud. This week’s case is: A college assistant uses the correct format but misses a revised policy. The visible slide states: Match each everyday part to the technical part.\n\nAnalogy limit: Small practice gains can reflect overfitting; tuning is not a live fact store. The three precise mappings are [['Practice pieces', 'labelled data'], ['Habit change', 'weight update'], ['New concert', 'final test']]. The target is: Choose among a clearer prompt, current evidence and model adaptation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "map",
+      "pairs": [
+        [
+          "Practice pieces",
+          "labelled data"
+        ],
+        [
+          "Habit change",
+          "weight update"
+        ],
+        [
+          "New concert",
+          "final test"
+        ]
+      ]
+    },
+    "teaching_stage": "mapping"
+  },
+  "s19": {
+    "title": "Fine-tuning · how it works",
+    "explanation": "Train on examples to change learned behaviour; separate development from final test cases.\n\nTrace the arrows from left to right.",
+    "speaker_notes": "TEACHER SCRIPT — MECHANISM. Trace every arrow slowly from the input to the output. Ask what information crosses the boundary at each arrow. Pause if students confuse a simplified notebook with a trained model. This week’s case is: A college assistant uses the correct format but misses a revised policy. The visible slide states: Train on examples to change learned behaviour; separate development from final test cases.\n\nTrace the arrows from left to right. The weekly example is: Base 6/10, prompted 8/10, tuned 9/10 in practice; final tuned 6/10. Investigate. State what the analogy does not explain: Small practice gains can reflect overfitting; tuning is not a live fact store. The target is: Choose among a clearer prompt, current evidence and model adaptation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Labeled examples",
+        "Update weights",
+        "Test separately"
+      ]
+    },
+    "teaching_stage": "mechanism"
+  },
+  "s20": {
+    "title": "Fine-tuning · work one case",
+    "explanation": "Base 6/10, prompted 8/10, tuned 9/10 in practice; final tuned 6/10. Investigate.\n\nPoint to the evidence before giving your conclusion.",
+    "speaker_notes": "TEACHER SCRIPT — WORKED. Work the specific numbers or source wording aloud. Give students thirty seconds to write a conclusion, then ask which source line or calculation supports it. This week’s case is: A college assistant uses the correct format but misses a revised policy. The visible slide states: Base 6/10, prompted 8/10, tuned 9/10 in practice; final tuned 6/10. Investigate.\n\nPoint to the evidence before giving your conclusion. The expected reasoning concludes: No; the fresh test and failure analysis matter. Distinguish measured results from illustrative numbers. The target is: Choose among a clearer prompt, current evidence and model adaptation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "work",
+      "items": [
+        "Base 6/10, prompted 8/10, tuned 9/10 in practice; final tuned 6/10. Investigate.",
+        "Does the practice result prove tuning should ship?",
+        "No; the fresh test and failure analysis matter."
+      ]
+    },
+    "teaching_stage": "worked"
+  },
+  "s21": {
+    "title": "Fine-tuning · answer and explain",
+    "explanation": "No; the fresh test and failure analysis matter.\n\nTempting mistake: Fine-tuning is guaranteed to beat a good prompt.",
+    "speaker_notes": "TEACHER SCRIPT — REVEAL. Return to the earlier choice. Explain the correct answer and why the tempting claim fails. Ask one learner to say the answer in a single sentence without reading it. This week’s case is: A college assistant uses the correct format but misses a revised policy. The visible slide states: No; the fresh test and failure analysis matter.\n\nTempting mistake: Fine-tuning is guaranteed to beat a good prompt. The earlier question was Does the practice result prove tuning should ship? Ask how this differs from the wrong claim. The target is: Choose among a clearer prompt, current evidence and model adaptation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "reveal",
+      "items": [
+        "Fine-tuning is guaranteed to beat a good prompt.",
+        "No; the fresh test and failure analysis matter."
+      ],
+      "caption": "Small practice gains can reflect overfitting; tuning is not a live fact store."
+    },
+    "teaching_stage": "reveal"
+  },
+  "s22": {
+    "title": "4. Predict · LoRA",
+    "explanation": "What does LoRA reduce?\n\nMake a choice before we explain the diagram.",
+    "speaker_notes": "TEACHER SCRIPT — QUESTION. Take a show of hands for each choice before showing the mechanism. Ask pairs to defend a choice with evidence. Save the strongest wrong reason for the reveal later in this cycle. This week’s case is: A college assistant uses the correct format but misses a revised policy. The visible slide states: What does LoRA reduce?\n\nMake a choice before we explain the diagram. The intended answer is The trainable parameter count compared with full fine-tuning. The tempting claim is LoRA retrieves current policy documents automatically. Do not show which card is correct until the reveal. The target is: Choose among a clearer prompt, current evidence and model adaptation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "The trainable parameter count compared with full fine-tuning.",
+        "LoRA retrieves current policy documents automatically."
+      ]
+    },
+    "teaching_stage": "question"
+  },
+  "s23": {
+    "title": "LoRA · a familiar picture",
+    "explanation": "A small adapter changes a machine’s behaviour without replacing its engine.\n\nWhat matches our case, and where does the analogy stop?",
+    "speaker_notes": "TEACHER SCRIPT — ANALOGY. Begin with the familiar scene. Invite learners to describe each part in everyday language. Then ask where the comparison might fail before introducing the technical vocabulary. This week’s case is: A college assistant uses the correct format but misses a revised policy. The visible slide states: A small adapter changes a machine’s behaviour without replacing its engine.\n\nWhat matches our case, and where does the analogy stop? The boundary is: Low trainable parameter count does not remove data, compute or evaluation needs. The target is: Choose among a clearer prompt, current evidence and model adaptation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "analogy",
+      "items": [
+        "Engine",
+        "Adapter",
+        "New behaviour"
+      ],
+      "caption": "A small adapter changes a machine’s behaviour without replacing its engine."
+    },
+    "teaching_stage": "analogy"
+  },
+  "s24": {
+    "title": "LoRA · map the parts",
+    "explanation": "Match each everyday part to the technical part.\n\nAnalogy limit: Low trainable parameter count does not remove data, compute or evaluation needs.",
+    "speaker_notes": "TEACHER SCRIPT — MAPPING. Point from each familiar element to the corresponding technical element. Have students cover the right column and reconstruct the three matches. Read the limitation aloud. This week’s case is: A college assistant uses the correct format but misses a revised policy. The visible slide states: Match each everyday part to the technical part.\n\nAnalogy limit: Low trainable parameter count does not remove data, compute or evaluation needs. The three precise mappings are [['Engine', 'frozen base weights'], ['Adapter', 'low-rank matrices'], ['New behaviour', 'tuned output']]. The target is: Choose among a clearer prompt, current evidence and model adaptation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "map",
+      "pairs": [
+        [
+          "Engine",
+          "frozen base weights"
+        ],
+        [
+          "Adapter",
+          "low-rank matrices"
+        ],
+        [
+          "New behaviour",
+          "tuned output"
+        ]
+      ]
+    },
+    "teaching_stage": "mapping"
+  },
+  "s25": {
+    "title": "LoRA · how it works",
+    "explanation": "Update a small trainable low-rank component instead of all model weights.\n\nTrace the arrows from left to right.",
+    "speaker_notes": "TEACHER SCRIPT — MECHANISM. Trace every arrow slowly from the input to the output. Ask what information crosses the boundary at each arrow. Pause if students confuse a simplified notebook with a trained model. This week’s case is: A college assistant uses the correct format but misses a revised policy. The visible slide states: Update a small trainable low-rank component instead of all model weights.\n\nTrace the arrows from left to right. The weekly example is: LoRA trains small matrices while freezing most base weights; no live tuning is required in this lab. State what the analogy does not explain: Low trainable parameter count does not remove data, compute or evaluation needs. The target is: Choose among a clearer prompt, current evidence and model adaptation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Frozen base model",
+        "Small LoRA matrices",
+        "Adapted output"
+      ]
+    },
+    "teaching_stage": "mechanism"
+  },
+  "s26": {
+    "title": "LoRA · work one case",
+    "explanation": "LoRA trains small matrices while freezing most base weights; no live tuning is required in this lab.\n\nPoint to the evidence before giving your conclusion.",
+    "speaker_notes": "TEACHER SCRIPT — WORKED. Work the specific numbers or source wording aloud. Give students thirty seconds to write a conclusion, then ask which source line or calculation supports it. This week’s case is: A college assistant uses the correct format but misses a revised policy. The visible slide states: LoRA trains small matrices while freezing most base weights; no live tuning is required in this lab.\n\nPoint to the evidence before giving your conclusion. The expected reasoning concludes: The trainable parameter count compared with full fine-tuning. Distinguish measured results from illustrative numbers. The target is: Choose among a clearer prompt, current evidence and model adaptation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "work",
+      "items": [
+        "LoRA trains small matrices while freezing most base weights; no live tuning is required in this lab.",
+        "What does LoRA reduce?",
+        "The trainable parameter count compared with full fine-tuning."
+      ]
+    },
+    "teaching_stage": "worked"
+  },
+  "s27": {
+    "title": "LoRA · answer and explain",
+    "explanation": "The trainable parameter count compared with full fine-tuning.\n\nTempting mistake: LoRA retrieves current policy documents automatically.",
+    "speaker_notes": "TEACHER SCRIPT — REVEAL. Return to the earlier choice. Explain the correct answer and why the tempting claim fails. Ask one learner to say the answer in a single sentence without reading it. This week’s case is: A college assistant uses the correct format but misses a revised policy. The visible slide states: The trainable parameter count compared with full fine-tuning.\n\nTempting mistake: LoRA retrieves current policy documents automatically. The earlier question was What does LoRA reduce? Ask how this differs from the wrong claim. The target is: Choose among a clearer prompt, current evidence and model adaptation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "reveal",
+      "items": [
+        "LoRA retrieves current policy documents automatically.",
+        "The trainable parameter count compared with full fine-tuning."
+      ],
+      "caption": "Low trainable parameter count does not remove data, compute or evaluation needs."
+    },
+    "teaching_stage": "reveal"
+  },
+  "s28": {
+    "title": "Evidence trail: input → result",
+    "explanation": "On fresh cases tuned score is 6/10.\n\nThe practice gain alone does not prove better generalization.",
+    "speaker_notes": "TEACHER SCRIPT — WORKED. Work the specific numbers or source wording aloud. Give students thirty seconds to write a conclusion, then ask which source line or calculation supports it. This week’s case is: A college assistant uses the correct format but misses a revised policy. The visible slide states: On fresh cases tuned score is 6/10.\n\nThe practice gain alone does not prove better generalization. Have one student point to an exact source word or number for each conclusion. The target is: Choose among a clearer prompt, current evidence and model adaptation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "work",
+      "items": [
+        "Base 6/10; prompt 8/10; tuned 9/10 on practice cases.",
+        "On fresh cases tuned score is 6/10.",
+        "The practice gain alone does not prove better generalization."
+      ]
+    },
+    "teaching_stage": "worked"
+  },
+  "s29": {
+    "title": "Notebook: run the prepared example",
+    "explanation": "Analyze a supplied results pack without training a model.\n\nRead the original output before editing.",
+    "speaker_notes": "TEACHER SCRIPT — PRACTICE. Open the matching notebook and demonstrate the first run. Have learners predict one change, run only that change, and record input, setting, output and an error explanation. This week’s case is: A college assistant uses the correct format but misses a revised policy. The visible slide states: Analyze a supplied results pack without training a model.\n\nRead the original output before editing. Use Week_09_Lab.ipynb. This lab is a prepared classroom demonstration with its limitations documented. The target is: Choose among a clearer prompt, current evidence and model adaptation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "Compare provided base, prompted and adapted predictions",
+        "Score each on development cases",
+        "Inspect a held-out final set once",
+        "Recommend a method for a policy update"
+      ]
+    },
+    "teaching_stage": "practice"
+  },
+  "s30": {
+    "title": "Find the input and check in Python",
+    "explanation": "Locate the supplied input, the transformation, the checking line and the printed result.",
+    "speaker_notes": "TEACHER SCRIPT — PRACTICE. Open the matching notebook and demonstrate the first run. Have learners predict one change, run only that change, and record input, setting, output and an error explanation. This week’s case is: A college assistant uses the correct format but misses a revised policy. The visible slide states: Locate the supplied input, the transformation, the checking line and the printed result. The weekly lab change is: Change one threshold and note why the final set must remain untouched. The target is: Choose among a clearer prompt, current evidence and model adaptation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Input data",
+        "Python operation",
+        "Check",
+        "Recorded result"
+      ]
+    },
+    "teaching_stage": "practice"
+  },
+  "s31": {
+    "title": "Predict one controlled change",
+    "explanation": "Change one threshold and note why the final set must remain untouched.\n\nWhat should change in the result? What stays fixed?",
+    "speaker_notes": "TEACHER SCRIPT — PRACTICE. Open the matching notebook and demonstrate the first run. Have learners predict one change, run only that change, and record input, setting, output and an error explanation. This week’s case is: A college assistant uses the correct format but misses a revised policy. The visible slide states: Change one threshold and note why the final set must remain untouched.\n\nWhat should change in the result? What stays fixed? Ask learners to write their prediction before rerunning the cell. The target is: Choose among a clearer prompt, current evidence and model adaptation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "compare",
+      "left": "Before: original case",
+      "right": "After: one change",
+      "caption": "Keep all other inputs fixed."
+    },
+    "teaching_stage": "practice"
+  },
+  "s32": {
+    "title": "Run, compare and record",
+    "explanation": "Record the input, the one changed setting, the observed result and a reason for any difference.",
+    "speaker_notes": "TEACHER SCRIPT — PRACTICE. Open the matching notebook and demonstrate the first run. Have learners predict one change, run only that change, and record input, setting, output and an error explanation. This week’s case is: A college assistant uses the correct format but misses a revised policy. The visible slide states: Record the input, the one changed setting, the observed result and a reason for any difference. The required evidence is: Comparison table with recommendation and uncertainty. The target is: Choose among a clearer prompt, current evidence and model adaptation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "table",
+      "rows": [
+        [
+          "Input",
+          "Setting",
+          "Result"
+        ],
+        [
+          "Original",
+          "baseline",
+          "record"
+        ],
+        [
+          "Changed",
+          "one edit",
+          "compare"
+        ]
+      ]
+    },
+    "teaching_stage": "practice"
+  },
+  "s33": {
+    "title": "Measure without hiding the denominator",
+    "explanation": "Accuracy with numerator and denominator on separate cases\n\nWrite the numerator, denominator and one failure case.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: A college assistant uses the correct format but misses a revised policy. The visible slide states: Accuracy with numerator and denominator on separate cases\n\nWrite the numerator, denominator and one failure case. Where a measure is qualitative, show the concrete source comparison. Example: The practice gain alone does not prove better generalization. The target is: Choose among a clearer prompt, current evidence and model adaptation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Define success",
+        "Count successes",
+        "Count cases",
+        "Inspect errors"
+      ]
+    },
+    "teaching_stage": "check"
+  },
+  "s34": {
+    "title": "Error detective: find the layer",
+    "explanation": "Plausible wrong claim: Fine-tuning is the right way to add a policy changed yesterday.\n\nCorrect it using the case evidence.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: A college assistant uses the correct format but misses a revised policy. The visible slide states: Plausible wrong claim: Fine-tuning is the right way to add a policy changed yesterday.\n\nCorrect it using the case evidence. The correction is Update the source document and retrieval index; weight adaptation is poor for rapidly changing facts. The target is: Choose among a clearer prompt, current evidence and model adaptation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "reveal",
+      "items": [
+        "Fine-tuning is the right way to add a policy changed yesterday.",
+        "Update the source document and retrieval index; weight adaptation is poor for rapidly changing facts."
+      ],
+      "caption": "Name a test that would catch this failure."
+    },
+    "teaching_stage": "check"
+  },
+  "s35": {
+    "title": "Transfer to a new situation",
+    "explanation": "The system returns the right fact but the wrong JSON field names. Which adaptation is the simplest first trial?\n\nExplain which source or test would settle it.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: A college assistant uses the correct format but misses a revised policy. The visible slide states: The system returns the right fact but the wrong JSON field names. Which adaptation is the simplest first trial?\n\nExplain which source or test would settle it. This is a fresh scenario, so ask for a reason before accepting either short answer. The target is: Choose among a clearer prompt, current evidence and model adaptation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "Use the visible evidence",
+        "Flag missing or unsafe evidence"
+      ]
+    },
+    "teaching_stage": "check"
+  },
+  "s36": {
+    "title": "Explain it to a partner",
+    "explanation": "Without reading the slide, name the input, one processing step and the check. Your partner should ask “How do you know?”",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: A college assistant uses the correct format but misses a revised policy. The visible slide states: Without reading the slide, name the input, one processing step and the check. Your partner should ask “How do you know?” Listen for a causal explanation and one limitation, then revisit a difficult arrow on the board. The target is: Choose among a clearer prompt, current evidence and model adaptation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Base: 6/10",
+        "Prompt: 8/10",
+        "Fresh test: 6/10"
+      ]
+    },
+    "teaching_stage": "check"
+  },
+  "s37": {
+    "title": "Exam rehearsal · explain and apply",
+    "explanation": "Which method suits a policy that changed yesterday?\n\nWrite a short answer, then compare with the guide.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: A college assistant uses the correct format but misses a revised policy. The visible slide states: Which method suits a policy that changed yesterday?\n\nWrite a short answer, then compare with the guide. Model answer after discussion: Update the authoritative document and retrieval data. Fine-tuning is not a dependable store for rapidly changing facts. Practice marks: 4. The target is: Choose among a clearer prompt, current evidence and model adaptation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "State the core idea",
+        "Use a case detail or calculation",
+        "Add a limitation",
+        "Compare with the Word guide"
+      ]
+    },
+    "teaching_stage": "check"
+  },
+  "s38": {
+    "title": "Exam rehearsal · explain and apply",
+    "explanation": "What does LoRA reduce compared with full fine-tuning?\n\nWrite a short answer, then compare with the guide.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: A college assistant uses the correct format but misses a revised policy. The visible slide states: What does LoRA reduce compared with full fine-tuning?\n\nWrite a short answer, then compare with the guide. Model answer after discussion: The number of trainable parameters by using low-rank updates. It does not remove the need for data quality or evaluation. Practice marks: 4. The target is: Choose among a clearer prompt, current evidence and model adaptation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "State the core idea",
+        "Use a case detail or calculation",
+        "Add a limitation",
+        "Compare with the Word guide"
+      ]
+    },
+    "teaching_stage": "check"
+  },
+  "s39": {
+    "title": "What to hand in",
+    "explanation": "Comparison table with recommendation and uncertainty.\n\nInclude the one changed input and an error explanation.",
+    "speaker_notes": "TEACHER SCRIPT — PRACTICE. Open the matching notebook and demonstrate the first run. Have learners predict one change, run only that change, and record input, setting, output and an error explanation. This week’s case is: A college assistant uses the correct format but misses a revised policy. The visible slide states: Comparison table with recommendation and uncertainty.\n\nInclude the one changed input and an error explanation. This weekly evidence receives formative feedback according to the module sequence; refer to the assessment brief for graded work. The target is: Choose among a clearer prompt, current evidence and model adaptation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "Original run",
+        "One changed input",
+        "Comparison",
+        "Explanation + source"
+      ]
+    },
+    "teaching_stage": "practice"
+  },
+  "s40": {
+    "title": "Three ideas to recall next week",
+    "explanation": "Diagnose the failure, choose prompt or RAG or tuning, and test fresh cases.\n\nRead the linked official sources in the Word guide and redraw one diagram from memory.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: A college assistant uses the correct format but misses a revised policy. The visible slide states: Diagnose the failure, choose prompt or RAG or tuning, and test fresh cases.\n\nRead the linked official sources in the Word guide and redraw one diagram from memory. Return to the opening vote and ask whether the evidence changed anyone’s mind. The next week builds on this outcome: Choose among a clearer prompt, current evidence and model adaptation. The target is: Choose among a clearer prompt, current evidence and model adaptation. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "Prompting",
+        "RAG",
+        "Fine-tuning",
+        "LoRA"
+      ]
+    },
+    "teaching_stage": "check"
+  }
+}

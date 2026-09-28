@@ -1,0 +1,46 @@
+{
+  "outcomes": "LO4, LO5",
+  "plain_explanation": "Split sources into passages while preserving document IDs, versions and roles. Keyword search depends on wording. Embeddings place inputs in a numerical representation where similarity can help retrieval. Filter permissions before selecting evidence. The class synonym search is a transparent proxy, not a learned embedding model.",
+  "worked_example": "The query renew my book and policy library loans may be extended use different words. Keyword overlap may miss the source. A meaning-aware representation can help, but its ranking must still be evaluated. If P5 is staff-only, a student query must not retrieve it.",
+  "exam": [
+    {
+      "question": "Why keep source IDs and versions with chunks?",
+      "model_answer": "To trace an answer to the right document and identify stale evidence.",
+      "marks": 4
+    },
+    {
+      "question": "One relevant passage exists and appears in the top two. What is recall@2?",
+      "model_answer": "1/1 = 1 for that query. Average across queries with relevant evidence; handle no-answer cases separately.",
+      "marks": 4
+    },
+    {
+      "question": "Can a high similarity score override a role restriction?",
+      "model_answer": "No. Similarity is about relevance; permission determines allowed access.",
+      "marks": 4
+    }
+  ],
+  "resources": [
+    {
+      "id": "M1",
+      "publisher": "Microsoft Learn",
+      "title": "Introduction to retrieval-augmented generation concepts",
+      "url": "https://learn.microsoft.com/en-us/training/modules/rag-fundamentals/",
+      "type": "Beginner module",
+      "use": "Preparation, retrieval, generation and evaluation.",
+      "checked_date": "2026-09-28",
+      "verification": "Official page/search metadata reviewed"
+    },
+    {
+      "id": "M2",
+      "publisher": "Microsoft Learn",
+      "title": "RAG and Vector Databases: Generative AI for Beginners",
+      "url": "https://learn.microsoft.com/en-us/shows/generative-ai-for-beginners/retrieval-augmented-generation-rag-and-vector-databases-generative-ai-for-beginners",
+      "type": "Official video lesson",
+      "use": "Optional RAG overview; hosted on Microsoft Learn.",
+      "checked_date": "2026-09-28",
+      "verification": "Official page or indexed metadata; video transcripts not reviewed"
+    }
+  ],
+  "study_task": "Draw the main diagram from memory, explain each arrow, then check it against the slides. Answer the three questions without notes before reading the model answers.",
+  "reference_note": "Selected source concepts inform the lesson. Examples, figures, questions and solutions are original classroom material; no exam questions are claimed to be official."
+}

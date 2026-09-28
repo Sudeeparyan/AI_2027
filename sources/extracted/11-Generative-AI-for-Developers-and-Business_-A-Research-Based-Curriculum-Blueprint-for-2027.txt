@@ -1,0 +1,488 @@
+Generative AI for Developers and Business: A Research-Based Curriculum Blueprint for 2027
+Executive summary and design assumptions
+This report recommends a vendor-aware but vendor-neutral, two-track 2027 curriculum: AI for Developers and AI for Business. The curriculum should teach enduring concepts—model behavior, grounding, tool use, agents, evaluation, governance, economics, deployment, and human oversight—while using Microsoft, Google, NVIDIA, Anthropic, and OpenAI as rotating implementation platforms. This is important because the vendor layer is changing too quickly for a model-name-driven syllabus: Microsoft substantially evolved Azure AI Foundry into Microsoft Foundry and its agent/API architecture during 2026; OpenAI maintains active API changelogs and deprecation schedules; Google explicitly publishes Gemini model deprecations; and NVIDIA's current NeMo documentation maintains release notes and component-version histories. [1]
+The state of the market by September 2026 also argues for teaching agents and AI systems rather than isolated prompting. Microsoft Foundry now combines models, agents, tools, tracing, evaluation, identity and deployment; Google's Agent Development Kit is an open-source framework for agent applications and its Gemini Enterprise Agent Platform emphasizes enterprise agent governance; OpenAI's Agents SDK provides handoffs, tools, guardrails, sessions and tracing; Anthropic's Agent SDK exposes the agent loop, subagents, permissions, sessions and MCP; and NVIDIA positions NIM, NeMo, NeMo Guardrails and Blueprints as production components for agentic AI. [2]
+For Developers, the program should therefore progress from API fundamentals to structured generation, multimodality, retrieval, tool use, MCP, agents, evaluation, open-model adaptation, GPU inference, software-engineering agents, LLMOps and secure deployment. For Business, it should progress from AI literacy and prompting to workflow redesign, grounding, enterprise agents, use-case economics, procurement, governance, privacy, the EU AI Act, change management, measurement and an executive transformation capstone.
+The curriculum should not imply that using AI automatically improves productivity. A 2025 randomized study of experienced open-source developers found participants were 19% slower on the particular mature-repository tasks studied when early-2025 AI tools were allowed, even though participants perceived a speedup; METR subsequently reported that its late-2025 follow-up had substantial selection and measurement problems and therefore could not reliably estimate a current effect. The instructional lesson is that students should measure task quality, time, rework, defects and cost rather than assuming an AI productivity benefit. [3]
+For teaching practice, I recommend an evidence-centered, active-learning model: short conceptual instruction followed by hands-on construction, comparison, evaluation, critique and reflection. UNESCO's 2023 guidance for generative AI in education and its 2024 AI competency frameworks for teachers and students explicitly position AI literacy, human agency, responsible use and curriculum development as educational priorities. [4] The curriculum should therefore evaluate not just whether learners can make an AI system work, but whether they can determine when not to use AI, verify its output, quantify its value, document its limitations and operate it responsibly.
+Planning assumptions
+Unless the institution has different requirements, the detailed plan below assumes:
+A crucial exception is Google's current pricing page: it has already announced that Gemini 3.8 Flash standard pricing changes on January 1, 2027 from $0.75 to $1.50 per million input tokens and from $3.75 to $7.50 per million output/thinking tokens; Batch and Flex are published at half those 2027 standard token rates. Thus, 2027 budget documents should use the January 2027 prices rather than Google's temporary 2026 promotional rates. [5]
+The overall course architecture should look like this:
+The most important design principle is therefore:
+Freeze learning objectives, not model names.
+A student should graduate able to migrate a solution from one provider to another because they understand messages/responses, tokens, structured schemas, embeddings, retrieval, tools, state, agent loops, evaluation, observability, IAM, privacy, cost and deployment—not because they memorized one provider's 2026 SDK.
+Vendor landscape for 2027
+The five vendors increasingly overlap, but they have different strengths. OpenAI and Anthropic offer especially direct model-and-agent developer stacks; Google combines Gemini APIs, ADK and a broad data/cloud environment; Microsoft offers a strong enterprise orchestration and governance layer across models; NVIDIA is particularly important when students need to understand open models, GPU inference, optimization, model adaptation and private/hybrid deployment. These distinctions are reflected in their current official product architectures. [6]
+Core platform comparison
+Microsoft Foundry deserves special attention for curriculum planning because the August 2026 documentation explicitly records a product evolution from Azure AI Studio/Azure AI Foundry toward Microsoft Foundry, a move toward stable /openai/v1 routes, and changes in project/client packages. This is exactly why the curriculum should encapsulate vendor code behind small adapters. [30]
+Pricing and operational comparison
+These are reference anchors, not promises about 2027 prices. Prices should be revalidated at the beginning of every teaching term.
+Google's free-versus-paid distinction deserves an explicit classroom rule: the current Gemini pricing page states that free-tier content can be used to improve Google's products, whereas paid-tier content is not. Therefore, student exercises involving private institutional or company data should not silently fall back to consumer/free environments. [5] OpenAI similarly states that business offerings and API data are not used for model training by default. [10]
+NVIDIA should not be compared to the hosted API vendors purely on a “price per million tokens” table. NVIDIA's value proposition includes running and optimizing models on controlled GPU infrastructure; its current AI Enterprise offering explicitly emphasizes production support, orchestration, NIM microservices, NeMo, security controls and on-premises/hybrid deployment. [39]
+Curriculum policy for fast-moving roadmaps
+I would establish an institutional AI Curriculum Compatibility Contract:
+Learning objectives and assessment rubrics remain fixed for the year.
+Model IDs reside in environment/configuration files, never in assessment logic.
+Each lab has a primary provider and at least one documented alternative.
+An assessment may not become invalid merely because a vendor replaces a model.
+Vendor updates are reviewed monthly; major syllabus changes occur only between terms.
+Breaking API or safety changes can trigger an emergency lab patch.
+Every January and July, instructors audit official changelogs, deprecations, pricing, policies and model cards.
+This is more reliable than trying to forecast exact December 2027 model names today, particularly when official vendor documentation already shows material changes during 2026. [40]
+Recommended curriculum: AI for Developers
+Entry prerequisites: Python fundamentals; functions/classes; HTTP/REST and JSON; Git/GitHub; basic SQL; command line; Docker concepts; basic probability; familiarity with cloud computing. Deep-learning mathematics should not be a hard prerequisite. Week 1 includes a diagnostic and bridging lab.
+Contact structure: 30 weeks × 5 hours = 150 contact hours, plus approximately 120–180 independent hours. Every three-week module consists of approximately 5 hours concept/case instruction, 7 hours supervised lab/studio and 3 hours review/evaluation.
+Developer weekly curriculum
+Developer contact-hour total: 150 hours.
+The key benchmark lesson should not be “maximize SWE-bench score.” SWE-bench was created to test model ability to resolve real GitHub issues requiring repository-level understanding, multi-file changes and execution interaction; it is a useful example of why realistic evaluation differs from toy code-generation benchmarks. [56]
+A strong capstone might be an enterprise research and compliance assistant: it retrieves approved documents, cites evidence, invokes controlled tools, detects PII, refuses unauthorized actions, records complete traces, supports provider fallback and reports expected cost per completed business task—not merely cost per token.
+Recommended curriculum: AI for Business
+The Business curriculum should not be “prompt engineering for managers.” By 2027 that would be too narrow. It should teach executives, analysts, product managers and transformation leaders to answer six harder questions:
+Where can AI create value? What process must change? What data and systems does it need? How will quality be measured? What can go wrong? Who is accountable?
+The current World Economic Forum Future of Jobs report identifies AI/big data among the fastest-growing skills, while contemporary industry work increasingly focuses on moving from experimentation to measurable ROI and responsible enterprise deployment. [57] The course should consequently combine literacy with operational, financial and governance competence.
+Entry prerequisites: no programming requirement. Learners should be comfortable with spreadsheets, presentations, common business processes and basic quantitative reasoning.
+Business weekly curriculum
+Business contact-hour total: 150 hours.
+For the Business track, one of the most useful exercises is deliberately to reject AI use cases. Students should receive ten proposed projects and be rewarded for identifying those in which a conventional rules engine, database query, workflow system, spreadsheet, search engine or human decision process is more reliable and economical. This prevents “AI solutionism” and makes business-case discipline part of AI literacy.
+The Business curriculum should also require a value denominator. Instead of reporting “50,000 prompts/month,” students should report metrics such as:
+
+
+
+and, where decision quality matters,
+
+This also addresses the gap between perceived and measured AI productivity highlighted by empirical developer research. [3]
+Shared assessment, governance, deployment, and pedagogy
+Assessment design is particularly important in an AI curriculum because learners can use AI to produce superficially strong work without acquiring the underlying competency. UNESCO's AI education work emphasizes human agency and responsible engagement, and the OECD's 2026 education work places generative AI and its implications for learning and assessment squarely on the education agenda. [70]
+The solution should not be a blanket AI ban. Instead, use a transparent AI-assisted assessment model.
+Every significant submission should contain:
+Artifact → evidence → AI-use disclosure → evaluation results → learner reflection → short oral defense.
+Students may use AI where permitted, but must be able to explain and defend every consequential design or business decision.
+Competency milestones
+Developer grading rubric
+Business grading rubric
+A recommended overall course assessment distribution is 15% knowledge checks, 25% labs/studios, 15% midterm practical, 15% evaluation/risk dossier and 30% capstone. This allocation is a curriculum recommendation rather than a vendor requirement.
+Deployment and LLMOps core
+The shared production architecture should be taught as a reusable pattern:
+Microsoft's Foundry Agent Service explicitly presents a lifecycle covering creation, testing, tracing, evaluation, optimization, publishing and monitoring, while OpenAI's Agents SDK includes tracing and guardrail mechanisms and NVIDIA NeMo Guardrails exposes evaluation, vulnerability scanning, logging/tracing and OpenTelemetry-oriented observability. [71] These provide three useful implementations of the same underlying production principles.
+Every developer capstone should have:
+requirements → threat model → data map → prompt/tool code → evaluation dataset → automated tests → container → staging → release gates → monitoring → incident/rollback procedure.
+Ethics, legal, privacy and governance syllabus
+This must be a full module rather than one lecture.
+EU AI Act. As of September 9, 2026, the European Commission states that the AI Act entered into force on August 1, 2024, AI literacy obligations and the original prohibited-practice provisions began applying February 2, 2025, GPAI obligations became applicable August 2, 2025, and the Act broadly became applicable August 2, 2026. Following the 2026 AI Omnibus changes, rules for systems in specified high-risk areas—including education and employment—are scheduled to apply from December 2, 2027, while certain high-risk AI embedded in regulated products has an extended date of August 2028. [68]
+That timeline is directly relevant to a 2027 curriculum: students entering organizations in late 2027 may be participating in deployments precisely when strengthened high-risk requirements begin applying. The Commission describes requirements including risk management, dataset quality, logging/traceability, technical documentation, information for deployers, human oversight, robustness, cybersecurity and accuracy. [68]
+The Commission also identifies AI uses in education that may determine access or a person's educational/professional course, and employment applications such as recruitment/CV sorting, among high-risk categories. [68] This makes education and HR excellent case studies—but poor choices for uncontrolled classroom automation.
+Transparency and generative AI. The EU AI Act's transparency obligations include informing people in specified circumstances that they are interacting with AI and obligations relating to identifiable/labelled AI-generated material; the Commission states the transparency rules took effect in August 2026. [68]
+GDPR. EU data protection is a fundamental right; the GDPR has applied since May 25, 2018 and governs processing of personal data within its scope. The European Commission also highlights the roles of national supervisory authorities and the European Data Protection Board. [69] The curriculum should therefore cover lawful basis, purpose limitation, data minimization, retention, data-subject rights, processor/controller relationships, international transfers, access control and when a privacy/DPIA review is required.
+NIST. NIST's AI Risk Management Framework: Generative Artificial Intelligence Profile, NIST AI 600-1, published in July 2024, should be used as a cross-sector risk-management companion alongside local legal requirements rather than as a replacement for them. [72]
+Operational security. The technical module should include prompt injection, indirect prompt injection, retrieval poisoning, tool abuse, excessive permissions, secrets leakage, PII leakage, insecure output handling, harmful content, denial-of-wallet/cost attacks and untrusted code execution. NVIDIA NeMo Guardrails' current documentation includes jailbreak protection, PII-related controls, tool/agentic security, hallucination/fact-checking integrations and vulnerability scanning, making it useful for laboratory work. [53]
+The practical security rule for agents should be:
+
+and consequential actions should use:
+
+Students should never receive credit merely for making an agent “more autonomous.”
+Pedagogical model
+A recommended weekly learning cycle is:
+Attempt → Learn → Build → Measure → Critique → Transfer.
+For AI-assisted assignments, use an “AI sandwich”:
+Student first articulates the problem and initial approach without generation.
+AI is then allowed as a collaborator.
+The student must subsequently critique, test and improve the AI-assisted artifact independently.
+This structure preserves cognitive work while allowing realistic tool use.
+The strongest evidence base should be complemented by a primary reading of Freeman et al., “Active learning increases student performance in science, engineering, and mathematics,” PNAS (2014), rather than relying on lecture-only delivery. A major synthesis of 225 STEM studies found improved learning outcomes under active learning, supporting the decision to allocate a substantial portion of contact time to labs, discussion and critique. [73]
+UNESCO's current education guidance and competency frameworks provide a second pillar: teaching should develop not just technical capability but human-centered judgment, responsible use and teacher/student agency. [4]
+Instructor resources, labs, compute, and budget
+Instructor slide architecture
+Instead of creating 30 independent slide decks, build ten reusable module decks per track, with each deck containing five sections:
+Concept model → architecture/process → current vendor implementation → failure/risk case → laboratory briefing.
+For a Developer module such as agents, a 35–45 slide deck might be organized as:
+Why workflows before agents → tool calling → state/memory → agent loop → MCP → human approval → permissions → OpenAI implementation → Anthropic implementation → Google ADK → Microsoft Foundry → traces/evals → attack cases → lab architecture → assessment rubric.
+For a Business module such as ROI:
+use-case taxonomy → baseline process → task decomposition → measurable value → adoption assumptions → token/API economics → SaaS seat economics → integration costs → rework → risk cost → sensitivity analysis → procurement comparison → case exercise.
+Each vendor-specific slide should contain a “last verified” date. For 2027, the beginning of each term should include a scripted check of OpenAI deprecations/changelog, Google Gemini deprecations/pricing, Microsoft Foundry documentation, Anthropic model/pricing pages and NVIDIA release notes. [74]
+Sample assignment bank
+A high-quality instructor bank would include at least these reusable assignments:
+Recommended datasets
+Use datasets that let students practice realistic work without accidentally teaching unsafe data handling.
+A good RAG/governance corpus consists of public EU AI Act material, European Commission privacy guidance, NIST AI RMF material and selected public organizational policies. The EU Commission and NIST sources used in this report are particularly suitable because learners can simultaneously practice retrieval, citation and governance analysis. [75]
+For business analytics, favor government/open data such as data.gov.ie, Eurostat, the World Bank and public company regulatory filings, subject to each source's terms. For customer-service and HR exercises, create synthetic records rather than exporting real employee/customer material into classroom AI services.
+For coding-agent evaluation, instructor-maintained Python repositories with seeded bugs are preferable to uncontrolled live repositories for graded work. SWE-bench is valuable as a reading/benchmark reference because it demonstrates realistic repository-level issue solving, but a smaller controlled benchmark makes assessment reproducible. [56]
+For safety, create an institution-owned adversarial dataset with categories such as:
+prompt injection | jailbreak | data exfiltration | unsupported factual request | PII | malicious tool request | conflicting source | stale source | excessive-cost request | malformed structured output.
+Reuse this dataset throughout the year so students experience evaluation as regression testing, not as a one-time final-week exercise.
+Required compute
+Most of this curriculum does not require expensive GPUs.
+NVIDIA explicitly supports free hosted experimentation and local prototyping before production licensing, which makes it suitable for a limited teaching module without purchasing production AI Enterprise licenses for every student. [38]
+The Developer track's compute time should be allocated approximately as follows:
+Recommended budget
+Because 2027 prices will not all equal today's prices, the right budgeting mechanism is a spend ceiling, not an assumption that every learner should consume the allowance.
+For the assumed 30 Developer + 30 Business students:
+This $19,800 figure is an instructional planning model, not a vendor quote. In particular, Microsoft, Google and NVIDIA enterprise contracts may be priced differently, and institutional agreements/cloud credits can materially change the result. [77]
+The budget recommendation is deliberately not to buy every learner a full-year seat from all five vendors. That would increase cost while encouraging tool memorization. A better architecture is:
+one primary enterprise workspace + several controlled API accounts + instructor/demo access to alternate enterprise platforms + shared NVIDIA/GPU lab capacity.
+A balanced allocation would look like:
+At current OpenAI pricing, API exercises performed mostly on an inexpensive model can cost surprisingly little compared with enterprise seat licensing: GPT-5.6 Luna's September 2026 standard short-context price is only $0.20/M input and $1.20/M output, although stronger models can cost dramatically more. [31] Anthropic Sonnet 5 is currently $2/M input and $10/M output, and Google has already announced a $1.50/$7.50 standard input/output price for Gemini 3.8 Flash beginning January 2027. [78] The teaching implication is to let students see both small-model/high-volume economics and frontier-model economics.
+Instructor CI/CD template
+Every Developer team should receive an instructor template repository containing:
+project/
+├── app/
+│   ├── providers/
+│   ├── agents/
+│   ├── retrieval/
+│   ├── guardrails/
+│   └── api/
+├── evals/
+│   ├── golden.jsonl
+│   ├── adversarial.jsonl
+│   └── metrics.py
+├── tests/
+├── policies/
+│   ├── data-classification.md
+│   └── threat-model.md
+├── infra/
+│   ├── Dockerfile
+│   └── deployment/
+├── .github/workflows/
+├── pyproject.toml
+├── .env.example
+├── MODEL_CARD.md
+├── SYSTEM_CARD.md
+└── README.md
+The CI pipeline should implement:
+lint/type-check
+      ↓
+unit tests
+      ↓
+structured-output/schema tests
+      ↓
+golden AI evaluations
+      ↓
+adversarial/prompt-injection evaluations
+      ↓
+PII/security tests
+      ↓
+latency + cost budget
+      ↓
+container/security scan
+      ↓
+staging deployment
+      ↓
+smoke tests
+      ↓
+manual production approval
+This reinforces a core message: an LLM application is a software system with a probabilistic component, not a prompt wrapped in a web page.
+Adoption roadmap and prioritized reading list
+Institutional adoption roadmap
+Given the present date of September 9, 2026, preparation should start now rather than in January 2027.
+The legal curriculum must be explicitly rechecked before the autumn 2027 term because the European Commission currently schedules major high-risk AI obligations for specified areas, including education and employment, from December 2, 2027 following the AI Omnibus amendments. [68]
+Staff preparation
+For each 30-person cohort I recommend:
+Those figures are planning recommendations, not regulatory staffing requirements.
+Instructor training should occur in three layers.
+Foundation training: instructors personally complete the basic OpenAI, Claude, Gemini and Foundry API exercises and an NVIDIA hosted/open-model exercise.
+Production training: instructors deploy one RAG or agent application with CI/CD, traces, evaluations, IAM, budget controls and an incident drill.
+Teaching training: instructors practice grading AI-assisted work through oral defense and evaluation evidence rather than trying to infer whether prose/code “looks AI generated.”
+Infrastructure checklist
+Before learners receive access, the institution should have:
+Identity: SSO where available, role-based permissions and named learner accounts.
+Secrets: a secrets manager or course proxy; no API keys committed to Git or pasted into notebooks.
+Budgets: per-project quotas, alerts and hard/soft limits.
+Data: approved data classification—public, internal, confidential, prohibited-for-training.
+Repositories: institution-controlled Git organization with starter repos and evaluation datasets.
+Observability: request tracing/logging while respecting privacy and retention requirements.
+Sandboxes: isolated environments for agent tool execution.
+GPU: shared scheduled GPU rather than persistent per-student instances.
+Procurement/privacy: DPAs/vendor security documentation reviewed before processing institutional data.
+Incident plan: revoke keys, stop agent tools, disable a model/provider, roll back model/prompt configuration, preserve relevant logs and notify responsible staff.
+Microsoft Foundry's current emphasis on Entra identity/RBAC/network controls, OpenAI's published enterprise security/data controls and NVIDIA's enterprise production-security positioning provide useful examples for institutional architecture discussions. [79]
+Prioritized official learning resources
+Priority A should always be current official documentation.
+Primary and academic reading sequence
+The academic reading list should be intentionally smaller than the documentation list: students need to understand the ideas, but should spend most of their time building and evaluating systems.
+Foundational architecture
+Vaswani et al., “Attention Is All You Need” (2017) is the canonical Transformer reading. [41]
+Lewis et al., “Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks” (2020):
+https://arxiv.org/abs/2005.11401
+Hu et al., “LoRA: Low-Rank Adaptation of Large Language Models” (2021):
+https://arxiv.org/abs/2106.09685
+Ouyang et al., “Training language models to follow instructions with human feedback” (2022):
+https://arxiv.org/abs/2203.02155
+Agent/tool reasoning
+Yao et al., “ReAct: Synergizing Reasoning and Acting in Language Models”:
+https://arxiv.org/abs/2210.03629
+Schick et al., “Toolformer: Language Models Can Teach Themselves to Use Tools”:
+https://arxiv.org/abs/2302.04761
+Rafailov et al., “Direct Preference Optimization”:
+https://arxiv.org/abs/2305.18290
+Evaluation and software engineering
+Jimenez et al., “SWE-bench: Can Language Models Resolve Real-World GitHub Issues?” provides an important bridge between benchmark design and realistic repository-level software engineering. [56]
+Liu et al., “Lost in the Middle: How Language Models Use Long Contexts”:
+https://arxiv.org/abs/2307.03172
+Zheng et al., “Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena”:
+https://arxiv.org/abs/2306.05685
+Es et al., “RAGAS: Automated Evaluation of Retrieval Augmented Generation”:
+https://arxiv.org/abs/2309.15217
+Becker, Rush, Barnes and Rein/METR's 2025 randomized developer-productivity study should be paired with METR's 2026 follow-up methodological note to teach students why empirical AI impact claims require careful experimental interpretation. [3]
+Safety and governance
+Rebedea et al., “NeMo Guardrails: A Toolkit for Controllable and Safe LLM Applications with Programmable Rails”, provides useful background for runtime guardrail architectures. [85]
+NIST, AI RMF Generative AI Profile, NIST AI 600-1, should be required reading for both tracks. [72]
+The European Commission's AI Act implementation pages should be the legal-policy source of truth for EU teaching because the implementation schedule has already changed through the 2026 AI Omnibus process. [68]
+The European Commission's EU data protection/GDPR framework should accompany it. [69]
+Education and AI literacy
+UNESCO's Guidance for Generative AI in Education and Research and AI Competency Frameworks for Teachers and Students should guide instructor practice and responsible-AI learning objectives. [4]
+Annapureddy, Fornaroli and Gatica-Perez, “Generative AI Literacy: Twelve Defining Competencies”, provides a useful academic competency framework spanning foundational knowledge, practical interaction and ethical/legal competence. [86]
+Sharples, “Towards social generative AI for education: theory, practices and ethics,” is useful for discussing AI as part of a broader human/social learning system rather than a simple prompt-response machine. [87]
+Industry reports for the Business track
+The Stanford AI Index 2026 should be the preferred broad annual reference because it provides a cross-cutting research-oriented view of AI progress and responsible-AI developments rather than a single vendor's sales perspective. Its 2026 responsible-AI coverage explicitly addresses safety, fairness, transparency, governance and continuing measurement gaps. [88]
+The World Economic Forum Future of Jobs Report 2025 is valuable for workforce discussion because it places AI/big data among the fastest-growing skill areas while also situating AI beside other technology and human skills. [89]
+McKinsey's State of AI in 2026 material is appropriate as a business transformation and ROI reading, but should be treated as an industry survey/consulting perspective rather than neutral technical evidence. [90]
+OpenAI's enterprise-adoption reports can likewise provide useful vendor-specific case material on enterprise usage patterns, but instructors should label them explicitly as vendor-produced evidence. [91]
+Textbooks
+For the Developer track, the most useful book-length resources are:
+Chip Huyen, AI Engineering: Building Applications with Foundation Models — particularly useful for application architecture, evaluation and production concerns.
+Jay Alammar and Maarten Grootendorst, Hands-On Large Language Models — strong visual/conceptual and practical treatment of LLM techniques.
+Sebastian Raschka, Build a Large Language Model (From Scratch) — best assigned selectively when learners need deeper architectural understanding rather than as the main application-development text.
+For Business, books should supplement—not replace—current case reports and official policy material because business AI changes faster than textbook publishing cycles. Ethan Mollick's Co-Intelligence is accessible for human-AI work practices; Marco Iansiti and Karim Lakhani's Competing in the Age of AI remains useful for operating-model discussion, although its examples predate the current agentic generative-AI wave.
+Final curriculum recommendation
+The 2027 curriculum should ultimately graduate two complementary professionals.
+The Developer graduate should be able to say:
+“I can build an AI system, test it, attack it, measure it, optimize it, secure it, deploy it, monitor it, estimate its cost, migrate it between vendors and explain when a non-AI system is preferable.”
+The Business graduate should be able to say:
+“I can identify a valuable AI opportunity, redesign the workflow, select the right platform, quantify the economics, establish evidence and controls, comply with governance requirements, lead adoption and stop a deployment when its evidence or risk profile is inadequate.”
+The joint institutional objective should be neither “everyone knows ChatGPT” nor “everyone can build an agent.” It should be evidence-based AI competence: learners can connect models to trustworthy data and tools, preserve accountable human agency, evaluate real outcomes, and operate systems responsibly under cost, security, privacy, legal and organizational constraints. That direction is consistent with the current shift across OpenAI, Anthropic, Microsoft, Google and NVIDIA toward complete agent/application platforms and with UNESCO/NIST/EU frameworks emphasizing competency, risk management and human oversight. [92]
+
+[1] [2] [16] [19] [30] [61] [82] What is Microsoft Foundry? - Microsoft Foundry | Microsoft Learn
+https://learn.microsoft.com/en-us/azure/ai-foundry/azure-openai-in-azure-ai-foundry?utm_source=chatgpt.com
+[3] Measuring the Impact of Early-2025 AI on Experienced ... - METR
+https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/?utm_source=chatgpt.com
+[4] [70] UNESCO's actions
+https://www.unesco.org/en/node/256473?utm_source=chatgpt.com
+[5] [83] Gemini Developer API pricing  |  Gemini API  |  Google AI for Developers
+https://ai.google.dev/gemini-api/docs/pricing
+[6] [45] [80] OpenAI API Platform Documentation
+https://developers.openai.com/api/docs?utm_source=chatgpt.com
+[7] [42] OpenAI Python API library | OpenAI API Reference
+https://developers.openai.com/api/reference/python/?utm_source=chatgpt.com
+[8] [52] [92] OpenAI Agents SDK - GitHub Pages
+https://openai.github.io/openai-agents-python/?utm_source=chatgpt.com
+[9] [33] [63] [65] [76] Business Pricing | OpenAI
+https://openai.com/business/pricing/?utm_source=chatgpt.com
+[10] Business data privacy, security, and compliance - OpenAI
+https://openai.com/business-data/?utm_source=chatgpt.com
+[11] [81] API overview - Claude Platform Docs
+https://docs.anthropic.com/?utm_source=chatgpt.com
+[12] [49] Agent SDK overview - Claude Code Docs
+https://docs.anthropic.com/en/docs/claude-code/sdk?utm_source=chatgpt.com
+[13] [58] [64] Claude Enterprise Plan | Claude by Anthropic
+https://www.anthropic.com/enterprise?utm_source=chatgpt.com
+[14] What is the Enterprise plan? | Claude Help Center
+https://support.anthropic.com/en/articles/9797531-what-is-the-claude-enterprise-plan?utm_source=chatgpt.com
+[15] OpenAI SDK compatibility - Claude Platform Docs
+https://docs.anthropic.com/en/api/openai-sdk?utm_source=chatgpt.com
+[17] [51] [66] [71] [79] What is Microsoft Foundry Agent Service? - Microsoft Foundry | Microsoft Learn
+https://learn.microsoft.com/en-us/azure/ai-foundry/agents/overview?utm_source=chatgpt.com
+[18] Standard harness licensing - Microsoft Copilot Studio
+https://learn.microsoft.com/?utm_source=chatgpt.com
+[20] [77] Azure OpenAI Service - Pricing
+https://azure.microsoft.com/en-us/pricing/details/azure-openai/?utm_source=chatgpt.com
+[21] [44] Gemini API libraries  |  Google AI for Developers
+https://ai.google.dev/gemini-api/docs/libraries
+[22] [50] Agent Development Kit | Gemini Enterprise Agent Platform
+https://docs.cloud.google.com/gemini-enterprise-agent-platform/build/adk?utm_source=chatgpt.com
+[23] [59] [60] Gemini Enterprise app: Best of Google AI for Business
+https://cloud.google.com/gemini-enterprise?utm_source=chatgpt.com
+[24] [48] Agent Platform Pricing
+https://cloud.google.com/gemini-enterprise-agent-platform/generative-ai/pricing?utm_source=chatgpt.com
+[25] [29] [84] Overview — NVIDIA NeMo Framework User Guide
+https://docs.nvidia.com/nemo-framework/user-guide/latest/overview.html
+[26] [27] [28] [38] [39] NVIDIA AI Enterprise | Cloud-native Software Platform | NVIDIA
+https://www.nvidia.com/en-us/data-center/products/ai-enterprise/
+[31] Pricing | OpenAI API
+https://developers.openai.com/api/docs/pricing
+[32] [40] [74] Changelog | OpenAI API
+https://developers.openai.com/api/docs/changelog
+[34] [35] [78] Pricing - Claude Platform Docs
+https://docs.anthropic.com/en/docs/about-claude/pricing
+[36] Service tiers - Claude Platform Docs
+https://docs.anthropic.com/en/api/service-tiers?utm_source=chatgpt.com
+[37] Plans & Pricing | Claude by Anthropic
+https://www.anthropic.com/team?utm_source=chatgpt.com
+[41] Attention Is All You Need
+https://arxiv.org/abs/1706.03762?utm_source=chatgpt.com
+[43] CLI, SDKs, and libraries - Claude Platform Docs
+https://docs.anthropic.com/en/api/client-sdks?utm_source=chatgpt.com
+[46] Agents - OpenAI Developers
+https://developers.openai.com/learn/agents?utm_source=chatgpt.com
+[47] Cloud Computing Services | Microsoft Azure
+https://azure.microsoft.com/
+[53] Overview | NVIDIA NeMo Guardrails Library Developer Guide
+https://docs.nvidia.com/nemo/guardrails/latest/index.html
+[54] Gemini deprecations | Gemini API - Google AI for Developers
+https://ai.google.dev/?utm_source=chatgpt.com
+[55] AI Platforms to Accelerate your Business - OpenAI
+https://openai.com/business/?utm_source=chatgpt.com
+[56] SWE-bench: Can Language Models Resolve Real-World GitHub Issues?
+https://arxiv.org/abs/2310.06770?utm_source=chatgpt.com
+[57] [89] The Future of Jobs Report 2025 | World Economic Forum
+https://www.weforum.org/?utm_source=chatgpt.com
+[62] Gemini Enterprise Agent Platform
+https://docs.cloud.google.com/gemini-enterprise-agent-platform?utm_source=chatgpt.com
+[67] Publications | NIST - National Institute of Standards and Technology
+https://www.nist.gov/publications/search_by_author/1826201?utm_source=chatgpt.com
+[68] [75] AI Act | Shaping Europe’s digital future
+https://digital-strategy.ec.europa.eu/en/policies/regulatory-framework-ai
+[69] Legal framework of EU data protection - European Commission
+https://commission.europa.eu/law/law-topic/data-protection/data-protection-eu_en
+[72] Department of Commerce Announces New Actions to Implement ...
+https://www.nist.gov/news-events/news/2024/04/department-commerce-announces-new-actions-implement-president-bidens?utm_source=chatgpt.com
+[73] Active Learning Leads to Higher Grades and Fewer Failing Students in Science, Math, and Engineering
+https://www.wired.com/2014/05/empzeal-active-learning?utm_source=chatgpt.com
+[85] NeMo Guardrails: A Toolkit for Controllable and Safe LLM Applications with Programmable Rails
+https://arxiv.org/abs/2310.10501?utm_source=chatgpt.com
+[86] Generative AI Literacy: Twelve Defining Competencies
+https://arxiv.org/abs/2412.12107?utm_source=chatgpt.com
+[87] Towards social generative AI for education: theory, practices and ethics
+https://arxiv.org/abs/2306.10063?utm_source=chatgpt.com
+[88] Responsible AI | The 2026 AI Index Report - Stanford HAI
+https://hai.stanford.edu/?utm_source=chatgpt.com
+[90] State of AI trust in 2026: Shifting to the agentic era
+https://www.mckinsey.com/?utm_source=chatgpt.com
+[91] The state of enterprise AI | OpenAI
+https://openai.com/business/guides-and-resources/the-state-of-enterprise-ai-2025-report/?utm_source=chatgpt.com
+Planning variable | Recommended baseline
+Learners | 30 Developers + 30 Business learners
+Audience | Higher education, postgraduate, professional or executive education; adults rather than minors
+Teaching year | 30 teaching weeks
+Contact time | 5 hours/week per track
+Total contact hours | 150 hours per track
+Independent work | Approximately 4–6 hours/week
+Classroom pattern | 2 h concepts/cases + 2 h lab/studio + 1 h critique/evaluation
+Student equipment | Laptop, 16 GB RAM preferred; no student-owned GPU required
+Programming language | Python as primary language for Developer track
+Cloud architecture | Institution-managed accounts, IAM, budget limits and secrets
+GPUs | Shared/cloud GPU pool rather than one GPU workstation per learner
+API strategy | Institution-managed credentials and per-user/project quotas
+Business SaaS strategy | One primary enterprise productivity platform; rotate other vendors through APIs, instructor demonstrations and temporary labs
+Data policy | Synthetic, open or institution-approved datasets; no sensitive personal/customer data in unrestricted consumer accounts
+Pricing convention | USD, September 9, 2026 snapshot unless a vendor has already announced a 2027 price
+Contingency | At least 25–30% because APIs, model families and prices can change before/during 2027
+
+
+Vendor | Developer stack to teach | Agent stack | Business/enterprise layer | Enterprise/security emphasis | Licensing/deployment consideration | 2027 curriculum role
+OpenAI | Responses API; Python/JS/.NET and other official SDKs; multimodal APIs; structured outputs; eval/fine-tuning capabilities. [7] | Agents SDK with agents, handoffs, tools, guardrails, sessions, tracing, realtime/voice and MCP-related capabilities. [8] | ChatGPT Business/Enterprise, Work and Codex ecosystem. [9] | Business/API data is not used for training by default; enterprise features include SSO/SCIM/RBAC, retention controls, data residency options and encryption/security controls. [10] | Proprietary hosted service; teach APIs through configuration and abstraction rather than hard-coded model identifiers. | Excellent first API for API fundamentals, structured output, tools, agent SDKs, coding agents and eval-driven development.
+Anthropic | Claude Messages API; official SDKs for Python, TypeScript and several additional languages. [11] | Claude Agent SDK, subagents, MCP, permissions, sessions, hooks and managed-agent options. [12] | Claude Team/Enterprise and Claude Code. [13] | Enterprise admin/security controls, SCIM, audit-related features and configurable retention are offered at enterprise level. [14] | Native Claude API exposes capabilities that Anthropic says its OpenAI compatibility layer does not fully cover; the compatibility layer is positioned primarily for testing/evaluation rather than as the default production path. [15] | Excellent comparison implementation for agent design, long-context work, tool use, code agents, caching and cross-provider portability.
+Microsoft | Microsoft Foundry, Foundry Models, Azure AI Search, azure-ai-projects/OpenAI-compatible model access, VS Code/Azure Developer CLI integration. [16] | Foundry Agent Service and Microsoft Agent Framework; hosted agents can work with several external frameworks including OpenAI Agents SDK and Anthropic Agent SDK. [17] | Microsoft 365 Copilot and Copilot Studio plus Azure/Foundry. [18] | Entra identity, RBAC, managed identity, network controls/VNet, content filtering, tracing, evaluations and lifecycle governance. [19] | Foundry can expose models from multiple suppliers, so underlying model terms/pricing differ; Azure billing is deployment/model/region dependent. [20] | Best platform for teaching enterprise architecture, identity, multi-model governance, managed agents, Azure deployment and Microsoft-centric business transformation.
+Google | Gemini Developer API, Google Gen AI SDK, Vertex/Agent Platform, AI Studio. [21] | Open-source Agent Development Kit and Gemini Enterprise Agent Platform. [22] | Gemini Enterprise app, Google Workspace with Gemini and enterprise connectors. [23] | Paid Gemini API content is stated not to be used to improve Google's products; enterprise tier adds advanced security/compliance, support and provisioned throughput options. Free tier has a different data-use position. [5] | Gemini proprietary APIs plus open-model Gemma ecosystem; quotas, grounding costs and deployment modes vary. [24] | Strong for multimodality, grounding, ADK agents, Google Cloud data integration and comparing proprietary APIs with Gemma/open-model approaches.
+NVIDIA | NIM microservices, NeMo Framework, NeMo Evaluator/Curator/Export, TensorRT-oriented deployment ecosystem. NeMo's primary interface is Python/PyTorch. [25] | NeMo agent/model lifecycle components, guardrails, RAG building blocks and NVIDIA Blueprints. [26] | NVIDIA AI Enterprise. [27] | Supported production branches, secure software supply chain, vulnerability mitigation, hardened containers, enterprise support and hybrid/on-prem deployment are major differentiators. [28] | NeMo GitHub code is Apache 2.0, while NeMo containers are governed by the NVIDIA AI Product Agreement and included models may have their own licenses; instructors must therefore teach layered licensing. [29] | Essential for GPU/open-model literacy, adaptation, private inference, optimization, guardrails and the difference between API consumption and running AI infrastructure.
+Platform | Current or announced pricing anchor | Useful cost controls | Operational/limit issue to teach
+OpenAI API | Current September 2026 standard rates include GPT-5.6 Luna at approximately $0.20/M input and $1.20/M output for short-context usage; higher-capability tiers cost substantially more. [31] | Cached input, Batch/Flex-style processing where applicable, cheaper model routing, token budgets. [31] | Rate limits, context and tools are model/tier specific; models can be deprecated, so monitor the official changelog/deprecation pages. [32]
+OpenAI ChatGPT Business | Current standard annual price is $20/user/month, with a higher month-to-month price; Enterprise is custom. [33] | Central billing/spend controls; API costs remain a separate planning concern. [33] | Do not confuse ChatGPT seats with API budgets.
+Anthropic Claude API | Claude Sonnet 5: $2/M input, $10/M output; Opus 5: $5/M input, $25/M output; Haiku 4.5: $1/M input, $5/M output at the September 2026 snapshot. [34] | Batch provides a 50% input/output discount; prompt caching can materially reduce repeated-context cost. [35] | Service tiers, caching and geographic inference can change effective cost; teach learners to calculate total request cost rather than headline token price. [36]
+Claude Enterprise | Current enterprise offering is listed at $20/seat/month plus API-equivalent usage, annual commitment, with additional enterprise controls. [37] | Seat allocation and per-team usage policy. | Seat fee and model consumption are different cost components.
+Google Gemini API | Gemini 3.8 Flash is already published at $1.50/M standard input and $7.50/M output beginning Jan. 1, 2027; Batch/Flex are published at $0.75/M and $3.75/M respectively for 2027. [5] | Batch/Flex, cheaper Flash-Lite variants, context caching and free development tier. [5] | Search/Maps grounding can generate separate per-query charges; free-tier data handling differs from paid-tier handling. [5]
+Microsoft Foundry/Azure models | Usage pricing is model, region and deployment dependent; Azure publishes model pricing/calculator rather than one universal token price. [20] | Model routing, quota management, prompt caching where supported, Azure budgets and managed deployment policies. | Azure-hosted third-party models can have different commercial/licensing terms.
+NVIDIA | NVIDIA currently allows free browser/hosted-API experimentation and free local prototyping from NGC; production deployment can begin with a 90-day NVIDIA AI Enterprise trial, while commercial production pricing is organization/infrastructure dependent. [38] | Hosted NIMs for teaching, shared GPUs, scheduled GPU shutdown, smaller models, quantization. | GPU memory, throughput, model licenses and AI Enterprise licensing—not tokens alone—drive TCO.
+Weeks and module | Weekly schedule and learning objectives | Hands-on lab/project | Vendor mapping | Compute and indicative student cost | Assessment
+Weeks 1–3: Foundation-model and API engineering | W1: tokens, transformers, inference, temperature, context, limitations. W2: HTTP, SDKs, streaming, retries, authentication. W3: multi-provider comparison. Learners explain model/API architecture, build a reliable client and measure latency/cost. The Transformer architecture remains the foundational conceptual reading. [41] | Create one Python interface that sends the same task to three providers; record tokens, latency, errors and approximate cost. | OpenAI Python SDK/Responses API [42]; Anthropic SDK [43]; Gemini SDK [44]; Foundry model endpoint [30] | Laptop only. No GPU. ~$3–5/student. | Diagnostic + reproducible API notebook and cost report.
+Weeks 4–6: Prompt systems, structured outputs and multimodality | W4: instruction hierarchy, prompting patterns, failure modes. W5: schema-constrained outputs/function arguments. W6: image/audio/document inputs and evaluation. Learners distinguish probabilistic text generation from deterministic software contracts. | Build an “invoice/document intelligence” pipeline that converts mixed documents to validated Pydantic/JSON objects, rejects malformed outputs and calculates confidence/verification status. | OpenAI structured/multimodal APIs [45]; Gemini multimodal APIs/pricing [5]; Claude native API including document-oriented capabilities [15]; Foundry models. | Laptop/API. ~$8–12/student. | Practical structured-extraction examination.
+Weeks 7–9: Embeddings, retrieval and RAG | W7: embedding/search concepts, chunking and metadata. W8: hybrid retrieval, citations and reranking. W9: RAG evaluation and failure analysis. Learners identify whether an error originates in retrieval or generation. | Build a RAG assistant over EU/NIST/open-government documents. Compare chunk sizes and retrieval strategies against a 50-question gold dataset. | OpenAI file/vector tooling and learning resources [46]; Azure AI Search/Foundry [47]; Google grounding/enterprise data features [48]; NVIDIA enterprise RAG Blueprint [38] | Local FAISS/SQLite/pgvector or managed search. No GPU required. ~$10–15/student. | RAG benchmark report: recall, groundedness, citation accuracy, latency and cost.
+Weeks 10–12: Tool use, MCP and agent design | W10: function/tool calling and least privilege. W11: agent loops, state, memory, MCP, human approval. W12: multi-agent patterns and failure recovery. Learners decide when a deterministic workflow is superior to an autonomous agent. | Build a procurement-support agent that can query a product database, calculate totals and draft a recommendation but requires human approval before any simulated purchase/action. | OpenAI Agents SDK [8]; Claude Agent SDK [49]; Google ADK [50]; Microsoft Foundry Agent Service [51] | Laptop/API; optional cloud agent runtime. ~$15–25/student. | Agent design review + live failure-recovery demonstration.
+Weeks 13–15: Evaluation, tracing, red-teaming and guardrails | W13: golden datasets, task metrics, LLM-as-judge caveats. W14: traces, error taxonomies, prompt injection. W15: adversarial testing and regression gates. | Construct 100 test cases for the Week 10 agent; inject prompt attacks, invalid tool arguments, PII and contradictory documents; create pass/fail release gates. | OpenAI tracing/evals capabilities [52]; Foundry tracing/evaluation [19]; NeMo Guardrails evaluation, vulnerability scanning and OpenTelemetry features [53] | Laptop/API. ~$15–20/student. | Mid-year “AI quality engineering” practical.
+Weeks 16–18: Open models, adaptation and GPU engineering | W16: open weights versus hosted APIs, licenses, quantization. W17: LoRA/QLoRA-style adaptation and dataset quality. W18: GPU memory, batching, throughput and inference optimization. | Fine-tune or adapt a small instruction model on a narrow synthetic domain dataset; compare base versus adapted model on held-out tests. | NVIDIA NeMo Framework, optimization/export ecosystem [29]; NVIDIA NIM/AI Enterprise [38]; Google Gemma can serve as an open-model comparison. [54] | Shared 24–80 GB GPU depending model/technique. Plan ~6–10 GPU-hours/team rather than per learner. ~$30–50/student budget ceiling. | Model card + before/after evaluation + license analysis.
+Weeks 19–21: Production performance and AI FinOps | W19: caching, Batch, concurrency. W20: routing, fallbacks and model selection. W21: cost/latency/SLA engineering. | Reduce a deliberately expensive workload's cost by ≥50% while preserving a stated quality threshold, using smaller models, caching, batching or routing. | OpenAI price tiers/caching/batch concepts [31]; Anthropic Batch/caching [35]; Gemini Batch/Flex/caching [5]; Azure budget/routing patterns. | CPU/cloud APIs. ~$15–20/student. | FinOps optimization report.
+Weeks 22–24: AI-assisted software engineering | W22: code generation versus code understanding. W23: repository agents, tests and reviews. W24: secure AI-assisted SDLC. Learners compare perceived versus measured productivity and maintain human ownership of correctness. METR's mixed evidence makes measurement an explicit learning outcome. [3] | Give each student a real bug/feature in an instructor repository. Record baseline estimate, AI interactions, tests, review defects, actual time and rework. | OpenAI Codex/SDK ecosystem [55]; Claude Code/Agent SDK [49]; Microsoft's developer agent ecosystem/VS Code integration [30]; Gemini developer/coding tools [54] | Laptop; optional coding-agent licenses. ~$10–20/student excluding commercial IDE seats. | PR, tests, threat review and productivity experiment.
+Weeks 25–27: Secure deployment and LLMOps | W25: containers, IAM, secrets, networking. W26: CI/CD, eval gates, monitoring, rollback. W27: privacy, AI Act, incident response and production readiness. | Dockerize the agent/RAG system; deploy staging; CI blocks release on functional, safety, cost or privacy regression; perform rollback drill. | Foundry lifecycle/identity/networking [51]; OpenAI enterprise/API security controls [10]; Google paid/enterprise security modes [5]; NeMo Guardrails observability/deployment [53] | Cloud container service; GPU only if self-hosting. ~$20–30/student. | Production-readiness review.
+Weeks 28–30: Capstone | W28: architecture/design review. W29: implementation, eval and adversarial testing. W30: deployment, demo and oral defense. | Teams build a production-shaped AI application with grounding, at least one tool, documented evals, observability, privacy analysis, cost model and human-oversight path. | Teams choose ≥2 vendors or one managed vendor plus one open-model path. | ~$30–50/student reserved. | Capstone: 30% of course grade.
+Weeks and module | Weekly schedule and learning objectives | Studio/project | Vendor mapping | Compute/cost | Assessment
+Weeks 1–3: AI literacy and executive mental models | W1: what generative AI is/is not. W2: tokens, context, reasoning, multimodality, hallucination. W3: human-AI task decomposition. Learners distinguish automation, augmentation and decision support. | Compare five models on one business task; identify factual errors, unsupported confidence and differences in usability. | ChatGPT Business/Enterprise [33]; Claude Enterprise [58]; Gemini Enterprise [59]; Microsoft 365 Copilot/Copilot Studio; instructor demo of NVIDIA AI Enterprise. | Browser only. $0–10/student beyond seats. | AI-literacy diagnostic and verification memo.
+Weeks 4–6: Prompting, verification and knowledge work | W4: task/context/output/evidence prompting. W5: iteration and verification. W6: documents, spreadsheets, presentations and research. | Produce an executive briefing from a controlled source pack; all material claims must be traceable to sources. | ChatGPT, Claude, Gemini/Workspace and Copilot. Current Google/enterprise platforms support integration with business data/connectors, as do OpenAI enterprise workspaces. [60] | Browser. Primary suite seat. | Source-grounded executive briefing.
+Weeks 7–9: Data, grounding and decision support | W7: structured/unstructured data. W8: RAG/enterprise search concepts. W9: analytical uncertainty and decision support. | Create a policy/market research assistant over an approved source collection and test it with misleading questions. | Microsoft Foundry/Azure AI Search [61]; Gemini Enterprise search/connectors [59]; OpenAI workspace connectors [33]; NVIDIA enterprise RAG as architecture demo [38] | Browser/cloud; no GPU. ~$5–10/student API allowance. | Decision-quality memo including uncertainty.
+Weeks 10–12: Workflow redesign and enterprise agents | W10: map work before adding AI. W11: agent boundaries and approvals. W12: low-code/no-code prototype. | Map a procurement, support or onboarding process; automate only approved steps and retain human sign-off for consequential decisions. | Copilot Studio [18]; Gemini Enterprise Agent Platform [62]; OpenAI workspace/agent ecosystem [63]; Claude Enterprise/Agent SDK demo [64] | Browser; ~$10/student plus any SaaS seat. | Before/after process map + control matrix.
+Weeks 13–15: Use-case portfolio, ROI and AI economics | W13: use-case scoring. W14: TCO, token/seat/cloud costs. W15: pilot design and benefits measurement. | Build a business case including baseline labor/process cost, adoption, rework, expected quality, API/license/integration cost and downside scenario. | All vendor pricing pages. Current pricing structures differ enough that students should calculate with live vendor data rather than canned textbook numbers. [65] | Spreadsheet/browser. | CFO-style investment memo.
+Weeks 16–18: Vendor selection, procurement and enterprise architecture | W16: API versus SaaS versus self-hosted. W17: security, interoperability, lock-in and data residency. W18: RFP/vendor scorecard. | Evaluate Microsoft, Google, NVIDIA, Anthropic and OpenAI for a hypothetical regulated organization. | All five. Microsoft emphasizes identity/network controls; OpenAI publishes enterprise security/privacy controls; Google distinguishes paid/enterprise data handling; NVIDIA emphasizes supported private/hybrid deployment. [66] | No GPU. | Procurement scorecard + architecture recommendation.
+Weeks 19–21: Governance, privacy, law and responsible AI | W19: risk taxonomy and AI inventory. W20: GDPR, AI Act, intellectual property and data governance. W21: red-teaming, incident response and human oversight. | Perform an AI Act classification and privacy/risk assessment for an AI-assisted hiring, education or customer-service system. | NIST GenAI Profile [67]; EU AI Act [68]; GDPR framework [69]; vendor security docs. | No special compute. | Board risk committee briefing.
+Weeks 22–24: Change management and adoption | W22: stakeholder analysis. W23: training, job redesign and communities of practice. W24: adoption metrics and incentive design. | Design an organizational rollout where users receive task-level training, safe-use rules, office hours and measurable adoption goals. | Productivity suites primarily; one enterprise agent platform. | Browser. | Change/adoption plan.
+Weeks 25–27: Functional AI studios | W25: marketing/sales and customer service. W26: finance/operations/procurement. W27: HR/knowledge management, including higher-risk boundaries. | Learners choose one functional process, create prototype + eval dataset + KPI dashboard. | Cross-vendor. | ~$10–20/student. | Functional pilot demonstration.
+Weeks 28–30: AI transformation capstone | W28: portfolio and operating model. W29: pilot evidence and governance. W30: board presentation and challenge panel. | 12–18 month AI transformation proposal with prioritized portfolio, architecture, cost, risk register, adoption model and pilot evidence. | Must compare at least three vendor options even if the proposed implementation selects one. | No GPU required. | Board-style oral defense, 30% of grade.
+Milestone | Developer learner can… | Business learner can… | Typical checkpoint
+AI Literate | Explain model/API behavior, tokens, context, hallucination and privacy basics. | Explain capabilities, limitations, data risk and appropriate human oversight. | End Week 6
+AI Practitioner | Build structured, grounded applications with reliable error handling. | Use AI productively with evidence, source grounding and verification. | End Week 9
+AI Systems Builder / Process Designer | Build tools and agents with state, permissions and human approval. | Redesign a workflow and identify where agents/automation should and should not operate. | End Week 12
+AI Evaluator | Create datasets, metrics, regression suites, traces and adversarial tests. | Define baseline, KPIs, acceptance thresholds and risk indicators. | End Week 18
+Responsible Deployment Practitioner | Deploy with IAM, secrets, monitoring, cost controls and security gates. | Evaluate procurement, privacy, AI Act, vendor and governance implications. | End Week 24–27
+Independent AI Leader | Architect, evaluate, deploy and defend a production-shaped system. | Defend an evidence-based enterprise AI strategy and pilot. | Week 30 capstone
+Criterion | Weight | Exemplary | Proficient | Developing | Insufficient
+Functional correctness and architecture | 20% | Reliable design, graceful failures, justified architecture | Mostly reliable; minor gaps | Works only in expected cases | Demo-driven/no reliable system
+Evaluation evidence | 20% | Representative eval set, clear metrics, regression analysis | Useful evals with moderate coverage | Small/weak test set | Claims quality without evidence
+Security, ethics and privacy | 15% | Threat model + tested mitigations + data controls | Major risks identified and mitigated | Risks mentioned but weakly tested | Material risks ignored
+Reliability/operations | 15% | CI/CD, tracing, monitoring, rollback and incident plan | Most operational controls present | Basic deployment only | Notebook/demo only
+Cost/performance engineering | 10% | Measured latency/token/GPU economics and optimization | Cost quantified | Rough estimate only | Cost ignored
+Code quality/reproducibility | 10% | Configured, tested, documented, reproducible | Reproducible with small gaps | Manual steps required | Cannot reliably reproduce
+Explanation/oral defense | 10% | Clearly explains tradeoffs and limitations | Sound understanding | Relies heavily on generated explanation | Cannot defend own work
+Criterion | Weight | Exemplary | Proficient | Developing | Insufficient
+Problem framing and strategic value | 20% | Clear baseline, stakeholder need and measurable outcome | Strong use case | Value mostly qualitative | Technology-first proposal
+Process/workflow redesign | 15% | Human and AI responsibilities explicitly redesigned | Credible process | AI added without deep redesign | “Add chatbot” thinking
+Evidence and pilot measurement | 15% | Baselines, experimental design and acceptance thresholds | Useful metrics | Weak measurement | No evidence
+Governance, legal, privacy and safety | 20% | Comprehensive risk/control/accountability model | Major issues covered | Checklist-level treatment | Major compliance risks missed
+Economics/TCO | 10% | Scenario/sensitivity analysis, full TCO and opportunity cost | Credible business case | Simplistic ROI | No realistic economics
+Adoption/change management | 10% | Roles, training, incentives and feedback loops integrated | Sound rollout | General communications plan | Assumes adoption
+Executive communication/oral defense | 10% | Concise, evidence-based decisions and strong challenge response | Defensible | Uneven reasoning | Cannot support recommendation
+
+
+Assignment | Track | Deliverable | Main learning evidence
+Multi-provider model laboratory | Developer | Python package + benchmark CSV | API abstraction, latency, tokens, provider differences
+Structured-output challenge | Developer | Extraction service + invalid-case tests | Software contracts around probabilistic models
+RAG bake-off | Developer | Retrieval benchmark + report | Retrieval quality versus generation quality
+Agent permission challenge | Developer | Tool agent + approval controls | Least privilege and bounded autonomy
+Red-team tournament | Developer | Attack corpus + mitigations | Adversarial thinking and regression testing
+GPU adaptation laboratory | Developer | Adapter/checkpoint + model card | Open models, adaptation and compute economics
+AI FinOps challenge | Developer | Optimized workload | Cost/performance engineering
+Coding-agent productivity study | Developer | PR + experiment log | Evidence-based AI-assisted SDLC
+AI use-case kill list | Business | Reject/accept portfolio | Appropriate-use judgment
+Grounded executive brief | Business | Board memo with sources | Verification
+Process redesign workshop | Business | BPMN/process map | Workflow transformation
+Vendor RFP | Business | Weighted procurement matrix | Commercial/architecture comparison
+AI ROI simulation | Business | Spreadsheet + sensitivity analysis | TCO and uncertainty
+AI Act/privacy case | Business | Risk classification + controls | Governance competence
+AI adoption plan | Business | 90/180/365-day rollout | Change management
+Joint capstone | Both | System/pilot + business case | Cross-functional AI delivery
+Workload | Student requirement | Shared infrastructure recommendation
+Hosted LLM API development | 16 GB laptop; internet | None beyond managed API project
+RAG/vector search | Laptop sufficient for small corpora | Managed vector/search service for production module
+Agent SDKs | Laptop | Optional managed agent runtime
+Evals/red-teaming | Laptop; parallel API calls | Shared runners to prevent rate spikes
+Small local models | 16–32 GB RAM depending model/quantization | Optional GPU
+Small-model LoRA/QLoRA lab | Cloud/shared GPU preferable | 24 GB GPU is a practical lower-end educational target for carefully selected small models; larger exercises use 48–80 GB
+7B–14B-class model work | Shared/cloud GPU strongly preferred | 48–80 GB GPU class or multiple GPUs depending precision/workflow
+NIM/model serving laboratory | Hosted NVIDIA endpoint or shared GPU | Avoid requiring each learner to provision NIM infrastructure
+Business track | Browser/laptop | No GPU
+
+
+Category | Recommended planning budget | Rationale
+Developer API/cloud/GPU allowance | $7,200 | $240 × 30, including generous contingency; typical labs should finish below ceiling
+Business API/special lab allowance | $2,400 | $80 × 30 excluding primary SaaS seats
+Business primary enterprise AI seats | ~$7,200 baseline example | 30 seats × $20/month × 12 months when using a product at the current OpenAI/Anthropic $20/month enterprise/business-seat anchor; actual selected vendor may differ. [76]
+Shared CI/CD, storage, logging, sandbox and GPU contingency | $3,000 | Shared institutional infrastructure
+Balanced annual teaching technology budget | ~$19,800 | Before staff costs and existing institutional licenses
+
+
+
+
+Role | Suggested involvement | Responsibilities
+Lead instructor | 1 | Concepts, architecture, integration of business/technical content
+Technical instructor/TA | 0.5–1 FTE-equivalent during teaching | Python/cloud/GPU/debug support
+Cloud/platform administrator | ~0.2 FTE | IAM, quotas, keys, billing, logs
+Privacy/security adviser | ~0.1 FTE | data rules, assessments, incident exercises
+Instructional designer | ~0.1–0.2 FTE during development | active learning, rubrics, accessibility
+Business transformation faculty | shared | cases, economics, operating models
+Librarian/research-skills partner | shared | source verification, copyright and research literacy
+Provider | Instructor/student resources | Curriculum use
+OpenAI | OpenAI developer platform, official SDK documentation and developer learning/cookbook material. Current learning resources cover Responses, agents, RAG, tools, evaluations, voice and human-in-the-loop patterns. [80] | Weeks 1–15 and coding-agent modules
+OpenAI Agents SDK | Official Python Agents SDK covering agents, handoffs/tools, guardrails, sessions and tracing. [8] | Agent engineering
+Anthropic | Claude API documentation, official SDK documentation and quickstarts. [81] | API comparison, prompting, tool use
+Anthropic Agent SDK | Official Agent SDK docs covering subagents, MCP, permissions, hooks and sessions. [49] | Agent laboratory
+Microsoft | Microsoft Foundry overview, Foundry Agent Service and Microsoft Agent Framework documentation. [82] | Enterprise AI architecture, agents, Azure deployment
+Google | Gemini API documentation, official Gen AI SDK documentation and pricing. [83] | Multimodal APIs and cost engineering
+Google ADK | Agent Development Kit documentation and Google's hands-on ADK codelab; the July 2026 codelab covers setup, building an agent and test/debug workflows. [50] | Weeks 10–12
+NVIDIA | NeMo Framework docs, NeMo Guardrails docs, NIM/AI Enterprise resources. [84] | GPU/open models, guardrails, RAG
+NVIDIA DLI | NVIDIA currently links free training such as “Generative AI Explained,” “Introduction to NVIDIA NIM Microservices” and introductory RAG material from its AI Enterprise resources. [38] | Instructor prep and optional student prework

@@ -1,0 +1,46 @@
+{
+  "n": 1,
+  "title": "What generative AI does",
+  "goal": "Separate a model from the application that checks and delivers its output.",
+  "case": "A student asks whether a fictional college reimburses a late bus ticket.",
+  "terms": [
+    [
+      "Generation and prediction",
+      "A predictor assigns a label or value. A generator creates a new sequence or image. Both can make errors."
+    ],
+    [
+      "Model and system",
+      "The model proposes words. Retrieval, permissions, validation and people decide what the application may present."
+    ],
+    [
+      "Prompt and context",
+      "A prompt states the task; context contains the supplied evidence. The model cannot reliably invent a missing policy."
+    ],
+    [
+      "Baseline and variability",
+      "A manual answer sheet gives us a reference. Repeated responses can vary, so record both correctness and changes."
+    ]
+  ],
+  "steps": [
+    "Read ten short questions and their reference answers",
+    "Run the supplied rule-based classroom stand-in",
+    "Mark each answer correct, incorrect or unsupported",
+    "Repeat two questions and compare what changed"
+  ],
+  "example": [
+    "Policy P1 says student travel is not reimbursed.",
+    "Q: Is a late bus ticket reimbursed?",
+    "A: No; travel is not reimbursed [P1]."
+  ],
+  "misconception": "A fluent answer is evidence that it is correct.",
+  "correction": "Fluency is a property of wording. Check the actual claim against the policy text.",
+  "change": "Change one answer to an unsupported claim and measure the score again.",
+  "metric": "Correct supported answers / 10 questions",
+  "lab": "Run the ten-case baseline and change a single answer.",
+  "output": "Ten-case answer table with one error analysis.",
+  "reading": [
+    "Google, Develop a generative AI application",
+    "OpenAI, Evaluation best practices"
+  ],
+  "code": "baseline"
+}

@@ -1,0 +1,46 @@
+{
+  "outcomes": "LO1, LO2",
+  "plain_explanation": "Tokens are model-specific pieces of input, not always words. Attention combines representations using weights. A causal mask stops a decoder using future positions. Encoders suit understanding inputs; decoders generate continuations; encoder-decoder models read an input and generate a corresponding output.",
+  "worked_example": "Weights 0.25, 0.65 and 0.10 sum to 1. A token in position two cannot see position three under a causal mask. Scores [1,2,-infinity] produce weights about [0.269,0.731,0]. A large attention weight alone does not establish causal explanation or factual accuracy.",
+  "exam": [
+    {
+      "question": "Why does a decoder use a causal mask?",
+      "model_answer": "To ensure generation at a position depends only on permitted earlier/current positions, not future target tokens.",
+      "marks": 4
+    },
+    {
+      "question": "For weights 0.25, 0.65, 0.10, which input receives most weight?",
+      "model_answer": "The second input, with 0.65. The three weights sum to 1.",
+      "marks": 4
+    },
+    {
+      "question": "Choose a model role for translating one sentence into another language.",
+      "model_answer": "An encoder-decoder design is a suitable example: read the source then generate the target. Other architectures can also translate.",
+      "marks": 4
+    }
+  ],
+  "resources": [
+    {
+      "id": "G1",
+      "publisher": "Google",
+      "title": "Introduction to Generative AI",
+      "url": "https://www.cloudskillsboost.google/course_templates/536",
+      "type": "Introductory course",
+      "use": "Generation versus traditional machine learning.",
+      "checked_date": "2026-09-28",
+      "verification": "Official page/search metadata reviewed"
+    },
+    {
+      "id": "G5",
+      "publisher": "Google Cloud Tech",
+      "title": "Attention mechanism: Overview",
+      "url": "https://www.youtube.com/watch?v=fjJOgb-E41w",
+      "type": "YouTube lesson",
+      "use": "Attention intuition. Verified channel in indexed metadata; full transcript not retrieved.",
+      "checked_date": "2026-09-28",
+      "verification": "Official page or indexed metadata; video transcripts not reviewed"
+    }
+  ],
+  "study_task": "Draw the main diagram from memory, explain each arrow, then check it against the slides. Answer the three questions without notes before reading the model answers.",
+  "reference_note": "Selected source concepts inform the lesson. Examples, figures, questions and solutions are original classroom material; no exam questions are claimed to be official."
+}

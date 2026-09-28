@@ -1,0 +1,114 @@
+{
+  "weeks": [
+    {
+      "week": 1,
+      "slides": 40,
+      "pdf_pages": {
+        "Week_01_Editable.pdf": 40,
+        "Week_01_Reading_and_Teaching_Notes.pdf": 6
+      },
+      "checks": "passed"
+    },
+    {
+      "week": 2,
+      "slides": 40,
+      "pdf_pages": {
+        "Week_02_Editable.pdf": 40,
+        "Week_02_Reading_and_Teaching_Notes.pdf": 6
+      },
+      "checks": "passed"
+    },
+    {
+      "week": 3,
+      "slides": 40,
+      "pdf_pages": {
+        "Week_03_Editable.pdf": 40,
+        "Week_03_Reading_and_Teaching_Notes.pdf": 6
+      },
+      "checks": "passed"
+    },
+    {
+      "week": 4,
+      "slides": 40,
+      "pdf_pages": {
+        "Week_04_Reading_and_Teaching_Notes.pdf": 6,
+        "Week_04_Editable.pdf": 40
+      },
+      "checks": "passed"
+    },
+    {
+      "week": 5,
+      "slides": 40,
+      "pdf_pages": {
+        "Week_05_Editable.pdf": 40,
+        "Week_05_Reading_and_Teaching_Notes.pdf": 6
+      },
+      "checks": "passed"
+    },
+    {
+      "week": 6,
+      "slides": 40,
+      "pdf_pages": {
+        "Week_06_Editable.pdf": 40,
+        "Week_06_Reading_and_Teaching_Notes.pdf": 6
+      },
+      "checks": "passed"
+    },
+    {
+      "week": 7,
+      "slides": 40,
+      "pdf_pages": {
+        "Week_07_Reading_and_Teaching_Notes.pdf": 6,
+        "Week_07_Editable.pdf": 40
+      },
+      "checks": "passed"
+    },
+    {
+      "week": 8,
+      "slides": 40,
+      "pdf_pages": {
+        "Week_08_Editable.pdf": 40,
+        "Week_08_Reading_and_Teaching_Notes.pdf": 6
+      },
+      "checks": "passed"
+    },
+    {
+      "week": 9,
+      "slides": 40,
+      "pdf_pages": {
+        "Week_09_Editable.pdf": 40,
+        "Week_09_Reading_and_Teaching_Notes.pdf": 6
+      },
+      "checks": "passed"
+    },
+    {
+      "week": 10,
+      "slides": 40,
+      "pdf_pages": {
+        "Week_10_Editable.pdf": 40,
+        "Week_10_Reading_and_Teaching_Notes.pdf": 6
+      },
+      "checks": "passed"
+    },
+    {
+      "week": 11,
+      "slides": 40,
+      "pdf_pages": {
+        "Week_11_Reading_and_Teaching_Notes.pdf": 6,
+        "Week_11_Editable.pdf": 40
+      },
+      "checks": "passed"
+    },
+    {
+      "week": 12,
+      "slides": 40,
+      "pdf_pages": {
+        "Week_12_Reading_and_Teaching_Notes.pdf": 6,
+        "Week_12_Editable.pdf": 40
+      },
+      "checks": "passed"
+    }
+  ],
+  "errors": [],
+  "scope": "Structural checks, source/asset consistency and PDF bounds. Does not certify educational accuracy."
+}

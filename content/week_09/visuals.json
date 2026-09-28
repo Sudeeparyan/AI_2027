@@ -1,0 +1,36 @@
+{
+  "term": [
+    [
+      "Same model",
+      "Better instructions",
+      "Check examples"
+    ],
+    [
+      "Latest policy",
+      "Retrieve now",
+      "Ground answer"
+    ],
+    [
+      "Labeled examples",
+      "Update weights",
+      "Test separately"
+    ],
+    [
+      "Frozen base model",
+      "Small LoRA matrices",
+      "Adapted output"
+    ]
+  ],
+  "path": [
+    "Base: 6/10",
+    "Prompt: 8/10",
+    "Tuned: 9/10",
+    "Fresh test: 6/10"
+  ],
+  "compare": [
+    "Current facts: RAG",
+    "Stable behavior: tuning"
+  ],
+  "good": "Update policy source first",
+  "bad": "Train on yesterday’s policy"
+}

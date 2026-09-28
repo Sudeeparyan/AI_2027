@@ -1,0 +1,47 @@
+{
+  "n": 11,
+  "title": "Testing and classroom delivery",
+  "goal": "Record a safe release decision with test and rollback evidence.",
+  "case": "A new policy-assistant version sometimes exposes a staff-only passage.",
+  "terms": [
+    [
+      "Release gate",
+      "Require evidence that inputs, permissions, output and failure handling meet a defined threshold."
+    ],
+    [
+      "Filtered trace",
+      "Log enough to debug while omitting unnecessary personal data and credentials."
+    ],
+    [
+      "Rollback",
+      "Restore a previously tested configuration if a new version fails."
+    ],
+    [
+      "Cost per success",
+      "All run costs including failed attempts divided by successful tasks; undefined at zero success."
+    ]
+  ],
+  "steps": [
+    "Run approved and unauthorized access cases",
+    "Simulate a missing source and bad input",
+    "Filter a trace before sharing",
+    "Reject a bad candidate version and restore the prior config"
+  ],
+  "example": [
+    "Version 1 blocks staff policy for student role.",
+    "Version 2 returns a staff paragraph.",
+    "Release is blocked and version 1 remains active."
+  ],
+  "misconception": "A high answer accuracy can compensate for an access-control failure.",
+  "correction": "Access is a release gate. Report accuracy and security outcomes separately.",
+  "change": "Flip the candidate role check and verify rollback happens.",
+  "metric": "Passed release gates / required gates; cost per successful task",
+  "lab": "Run a local release-gate simulation and rollback.",
+  "output": "Filtered trace and classroom release checklist.",
+  "reading": [
+    "OpenAI, Agent safety",
+    "OpenAI, Evaluation best practices",
+    "NIST, Generative AI Profile"
+  ],
+  "code": "release"
+}

@@ -1,0 +1,36 @@
+{
+  "term": [
+    [
+      "Candidate config",
+      "Required tests",
+      "Release decision"
+    ],
+    [
+      "Event",
+      "Remove private text",
+      "Safe trace"
+    ],
+    [
+      "Failed candidate",
+      "Prior tested version",
+      "Restore service"
+    ],
+    [
+      "All run costs",
+      "Successful tasks",
+      "Cost per success"
+    ]
+  ],
+  "path": [
+    "Version 2 candidate",
+    "Access test fails",
+    "Block release",
+    "Keep version 1"
+  ],
+  "compare": [
+    "Answer accuracy",
+    "Access-control gate"
+  ],
+  "good": "Staff data stays blocked",
+  "bad": "Release unsafe version"
+}

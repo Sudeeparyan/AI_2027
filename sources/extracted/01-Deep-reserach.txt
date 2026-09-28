@@ -1,0 +1,243 @@
+Comprehensive 2027 Curriculum Blueprint: Generative AI for Business and Developer DomainsThe rapid evolution of artificial intelligence has fundamentally altered the pedagogical requirements for higher education and professional training. As the horizon of 2027 approaches, the paradigm has decisively shifted from foundational machine learning awareness to the complex engineering of autonomous, agentic systems and the rigorous governance of enterprise artificial intelligence implementations. Developing a curriculum for this era necessitates an exhaustive architectural flow that synthesizes the proprietary frameworks, research breakthroughs, and educational pathways from industry pioneers including Microsoft, Google, Nvidia, DeepLearning.AI, Anthropic, and OpenAI. The following research report delineates an end-to-end curriculum plan, strictly bifurcated into two specialized domains: Artificial Intelligence for Business and Artificial Intelligence for Developers.The curriculum design recognizes a critical divergence in professional requirements. Business leaders must master strategic deployment, systemic governance, regulatory compliance, and organizational transformation to leverage generative AI for enterprise differentiation. Conversely, software developers and system architects require deep technical fluency in inference scaling, retrieval-augmented generation (RAG), multimodal agent orchestration, hardware optimization, and advanced cybersecurity. The integration of cross-vendor technologies is paramount, as no single ecosystem provides a complete solution. Therefore, this pedagogical blueprint mandates fluency across the entire AI stack, transitioning students from deterministic programming paradigms to probabilistic, agentic architectures, while preparing business students for the complex regulatory landscape of the late 2020s.Domain 1: Artificial Intelligence for BusinessThe business curriculum is designed for non-technical professionals, organizational executives, and corporate strategists. The primary objective is to cultivate deep AI literacy, strategic implementation capabilities, and a comprehensive understanding of regulatory compliance, particularly in light of emerging global legislation. This track deliberately avoids complex coding paradigms, focusing instead on the tangible business value of generative AI, project lifecycle management, enterprise governance, and the integration of these technologies into existing workflows.Foundational AI Literacy and Corporate StrategyThe entry point for the business curriculum relies heavily on the pedagogical structures established by DeepLearning.AI, specifically the globally recognized "AI for Everyone" framework curated by Andrew Ng. Before engaging with complex enterprise ecosystems, students must first establish a standardized and highly accurate vocabulary. The curriculum begins by distinguishing between artificial narrow intelligence (ANI), which encompasses systems like smart speakers, self-driving algorithms, and highly specific generative models, and the theoretical concept of artificial general intelligence (AGI). While generative AI is projected to add trillions of dollars in value, students must understand that a significant portion of AI's economic impact still derives from traditional machine learning and data science applications.The curriculum subsequently progresses to the practical realities of AI project deployment. Business students must learn to identify viable AI projects by understanding precisely what generative AI can realistically accomplish and, equally important, where its limitations lie. This involves teaching the workflow of machine learning and data science projects from a strictly managerial perspective, emphasizing the reality that every business function must learn to leverage data effectively. A critical component of this foundation is the "AI Transformation Playbook," which guides organizations through the execution of initial pilot projects, the building of internal AI teams, and the alignment of AI initiatives with broader corporate strategy. Students explore industry-specific case studies to understand the economic drivers behind AI adoption, learning how to calculate return on investment (ROI) for these initiatives.Navigating Enterprise Deployment EcosystemsFollowing the mastery of foundational concepts, business students must understand the dominant enterprise platforms that facilitate AI deployment, primarily focusing on the ecosystems provided by Microsoft Azure and Google Cloud. The objective is not to teach these students how to code within these environments, but rather to understand how to select and deploy these services strategically.The Microsoft Azure AI Fundamentals (AI-900 and AI-901) curriculum provides the necessary conceptual knowledge of cloud-based AI workloads. Students learn the business applications of computer vision, natural language processing, and conversational AI without requiring programmatic expertise. The curriculum emphasizes the selection of appropriate cloud services, cost monitoring across AI workloads, and lifecycle management from development through production. Understanding these capabilities allows business leaders to map specific corporate bottlenecks to corresponding Azure cognitive services.Similarly, the Google Cloud "Introduction to Generative AI" learning path introduces business leaders to the Google ecosystem, including Vertex AI and the Gemini API. This segment focuses on how large language models differ from traditional machine learning and how no-code platforms, such as Google Workspace Studio, can transition manual organizational workflows into strategic productivity via agentic AI. The Google curriculum also provides specialized courses, such as Vertex AI Search for Commerce, which allows business leaders in the retail sector to understand how generative AI can transform customer discovery and inventory management. The overarching goal is for students to understand how these ecosystems serve as the foundation for enterprise-wide digital transformation.AI Governance, Risk Management, and Regulatory ComplianceThe most critical aspect of the 2027 business curriculum is the rigorous study of AI governance, enterprise ethics, and regulatory compliance. As global legislation solidifies, particularly the European Union AI Act, which will see its stringent obligations for high-risk AI systems and general-purpose AI models actively enforced by late 2027, business leaders must integrate compliance directly into their strategic planning. The era of deploying AI without rigorous oversight has concluded, and education must reflect this new reality.Students must comprehensively analyze the systemic risk obligations imposed on foundation models and the compliance frameworks required to deploy AI in highly regulated sectors such as finance and healthcare. The curriculum utilizes Google Cloud's AI Governance modules, which emphasize a holistic approach to governance, analyzing cautionary tales of catastrophic financial and reputational costs resulting from inadequate safeguards and ethical shortcuts. Students explore the implementation of responsible AI principles, algorithmic bias mitigation, transparency requirements, and privacy preservation in machine learning. The curriculum also mandates a deep understanding of how to audit AI systems and how to manage the organizational change required to ensure successful, secure, and compliant AI adoption.Business Curriculum ArchitectureThe integration of these strategic, operational, and regulatory concepts culminates in a structured curriculum flow designed to produce highly competent AI executives. The following table outlines the modular progression of the Artificial Intelligence for Business track.Curriculum ModuleCore Subject FocusPrimary Vendor AlignmentKey Pedagogical ObjectivesModule 1: FoundationsArtificial Intelligence LiteracyDeepLearning.AIMaster core terminology; differentiate ANI, AGI, ML, and GenAI; analyze realistic AI capabilities.Module 2: StrategyProject Identification & ScalingDeepLearning.AIExecute the AI Transformation Playbook; assess corporate data readiness; evaluate cross-industry case studies.Module 3: InfrastructureEnterprise Cloud CapabilitiesMicrosoft AzureMap business requirements to Azure cognitive services; evaluate cloud workload costs (AI-900 principles).Module 4: ProductivityGenerative AI in the WorkplaceGoogle CloudExplore Vertex AI and Gemini applications; understand no-code agentic deployment in enterprise workflows.Module 5: GovernanceResponsible AI ImplementationGoogle / MicrosoftEstablish enterprise AI governance frameworks; implement responsible AI guardrails; manage organizational change.Module 6: ComplianceGlobal Regulatory LandscapesIndependent AnalysisNavigate the EU AI Act; assess systemic risks in general-purpose models; ensure compliance for 2027 enforcement.Domain 2: Artificial Intelligence for DevelopersThe developer curriculum is an exhaustive, deeply technical program designed for software engineers, AI architects, and advanced data scientists. This track focuses heavily on the programmatic orchestration of generative models, inference optimization, advanced knowledge retrieval mechanisms, complex multi-agent frameworks, and rigorous system security. It mandates pre-existing proficiency in Python, REST APIs, cloud infrastructure, and fundamental mathematical optimization techniques.Foundations of Accelerated Compute and Model ArchitectureThe developer journey must begin with a profound understanding of the hardware and infrastructural realities of generative AI, heavily utilizing the Nvidia Deep Learning Institute (DLI) curriculum. Before building high-level applications, developers must understand the physical constraints and optimizations of large language models at the silicon level. The curriculum covers fundamental accelerated computing using CUDA Python and modern CUDA C++, highlighting how complex tensor operations are executed and parallelized at the hardware level.Students explore the mechanics of deep learning, transformer-based natural language processing, and advanced data generation techniques using diffusion models. Nvidia's materials guide developers through model parallelism, enabling them to build, deploy, and scale large neural networks efficiently. The training emphasizes the transition from basic pre-trained models to highly customized architectures using Parameter Efficient Fine Tuning (PEFT) and deployment monitoring with ONNX. Furthermore, the curriculum introduces developers to Nvidia's NeMo and NIM (Nvidia Inference Microservices) frameworks, alongside certifications such as the NCA-GENL (Nvidia-Certified Generative AI LLMs - Associate), ensuring they can handle enterprise-scale model serving. Understanding this infrastructural layer is an absolute prerequisite before developers attempt to build resilient agentic applications.Model Customization, Fine-Tuning, and MLOpsWhile frontier models offer broad, generalized capabilities, developers must learn the exact mechanisms for customizing them for highly specific, domain-restricted tasks. The curriculum integrates OpenAI’s documentation on supervised fine-tuning (SFT) alongside Microsoft's comprehensive MLOps training. Developers learn to train models using highly curated datasets to alter output tone, enforce strict JSON formatting, or inject niche industry knowledge that prompting alone cannot reliably achieve.Crucially, the curriculum explores the boundaries and best practices of fine-tuning versus other contextualization methods. For example, OpenAI's guidelines demonstrate a critical failure mode: if a model is fine-tuned to compliment user traits based on a specific training set, but a subsequent testing prompt lacks those traits, the model may hallucinate attributes to fulfill its learned pattern. Students learn to curate high-quality datasets, evaluate loss functions, apply rigorous alignment techniques, and measure evaluation metrics such as perplexity. Through the Microsoft Azure AI Apps and Agents Developer Associate (AI-103) track, developers gain hands-on experience integrating these customized large language models into applications while managing lifecycle tracking, cost optimization, and responsible AI practices.The Evolution of Retrieval: From Vector Search to GraphRAGA cornerstone of the 2027 developer curriculum is the complete mastery of Retrieval-Augmented Generation (RAG). However, the pedagogical approach must explicitly contrast traditional Vector RAG with the highly advanced GraphRAG architectures pioneered by Microsoft Research.Traditional vector-based RAG relies on chunking documents, embedding them into vector databases, and using mathematical similarity searches to retrieve conceptually related text. While highly effective for basic, highly specific factual retrieval, students learn its fatal limitations: baseline RAG struggles immensely to "connect the dots" across disparate documents and performs terribly on global queries requiring holistic dataset summarization or semantic concept analysis over large collections.To overcome these severe limitations, the curriculum heavily features Microsoft's GraphRAG architecture. GraphRAG leverages large language models to extract specific entities (nodes) and their relationships (edges) from unstructured text, building a comprehensive, queryable knowledge graph. Developers learn the complex, multi-stage pipeline: extracting the graph, detecting community structures using specialized algorithms, and hierarchically summarizing these communities.When a query is received, the GraphRAG system maps the query to the nodes and edges, allowing the system to traverse the graph and retrieve information based on actual semantic relationships rather than mere statistical word similarity. Students learn to implement both "Local Search" for specific entity extraction and "Global Search" for dataset-wide reasoning, resulting in highly accurate, grounded answers that include verifiable provenance back to the source text. The curriculum also covers the significant computational expense of GraphRAG indexing, teaching developers how to balance API costs, scalability, and operational performance when deploying these systems.Test-Time Compute and Inference Scaling OptimizationA paradigm-shifting concept that must be central to the 2027 curriculum is the transition from model parameter scaling during pre-training to "test-time compute" during inference. Inspired by the architectures of specialized reasoning models, students explore academic research demonstrating how allocating additional computational resources during inference significantly enhances complex reasoning capabilities.The curriculum distinguishes between "System-1" thinking, which relies on fast, intuitive pattern-matching, and "System-2" thinking, which utilizes slow, logical, deliberative reasoning. Students learn that traditional large language models rely almost exclusively on System-1 patterns, making them highly susceptible to distribution shifts and complex logic failures. To induce System-2 reasoning, developers are taught specific test-time scaling strategies, including repeated sampling, self-correction loops, and Monte Carlo tree search, effectively reframing inference as an optimization problem where computation must be carefully allocated across alternative reasoning paths.The curriculum delves deeply into the theoretical limits of test-time scaling. Students analyze the "reasoning floor," a newly identified performance plateau indicating that non-reasoning models fundamentally cannot match the accuracy of specialized reasoning models, regardless of how much inference compute is applied. Furthermore, they study the "Kinetics scaling law," which reveals that prior scaling laws drastically overestimated the effectiveness of small models. Kinetics dictates that computational resources are best spent first on increasing model size up to a critical threshold (empirically around 14 billion parameters) before investing heavily in test-time strategies like extended chains of thought. Finally, students explore how test-time strategies disproportionately increase memory access costs over parameter costs, highlighting the absolute necessity of sparse attention mechanisms to enable longer, more parallel generation within constrained compute budgets.Engineering Autonomous Agents and Multi-Agent WorkflowsThe absolute pinnacle of the developer curriculum is the engineering of fully autonomous agents. Utilizing Anthropic's extensive engineering documentation on building effective agents, students learn to transition from rigid, non-deterministic agent logic to highly transparent, composable, and scalable systems.Developers learn that the foundational building block of any agentic system is an augmented LLM equipped with retrieval capabilities, long-term memory, and functional tools. From this foundation, they master complex predefined workflows:Prompt Chaining: Decomposing massive tasks into linear, sequential subtasks with programmatic gating to ensure accuracy.Routing: Classifying input dynamically to direct queries to specialized downstream models, optimizing cost by routing easy queries to smaller models and complex queries to highly capable models.Parallelization: Distributing subtasks across multiple LLM calls concurrently for speed (sectioning), or utilizing multiple instances to evaluate the same task and relying on voting mechanisms for high-confidence outputs.Orchestrator-Workers: Utilizing a central orchestrator LLM to dynamically break down unpredictable tasks, delegate them to specialized worker LLMs, and synthesize the final results.Evaluator-Optimizer: Establishing continuous iterative loops where one LLM generates an output and a secondary LLM critiques it, refining the output until strict evaluation criteria are met.Beyond structured workflows, students design fully autonomous agents capable of self-directed tool usage, complex planning, and environmental feedback loops. To facilitate extensive tool usage, developers implement the Model Context Protocol (MCP), an open-source, universal standard that replaces highly fragmented, custom API integrations. MCP allows developers to build a single client-server architecture, enabling AI agents to seamlessly discover, invoke, and exchange data with external enterprise systems, content repositories, and development environments.Students gain hands-on experience using the Microsoft Foundry SDK to build generative AI applications with the Responses API, integrating custom functions, code interpreters, and file search capabilities. They also transition to the OpenAI Realtime API, learning to manage low-latency, multimodal voice agents that require strong reasoning, exact entity handling, and state management over long conversational horizons.Architectural Abstraction and Managed SandboxesWhen building long-horizon agents, developers must learn advanced architectural abstractions to ensure systemic stability and security. Drawing on Anthropic's "Managed Agents" design philosophy, students learn to decisively decouple the agent's brain (the LLM and its harness), its hands (the sandboxes and external tools), and its session (the append-only event log).This decoupled architecture prevents catastrophic data loss if an execution container fails. The stateless harness can instantly reboot and resume operations simply by reading the independent, durable session log. Developers learn to construct highly secure boundaries, ensuring that untrusted, AI-generated code runs in completely isolated sandboxes, while sensitive credentials and OAuth tokens are kept in secure vaults entirely outside the execution environment. This "pets versus cattle" approach to containerization—where containers are provisioned dynamically only when needed—is a critical DevOps skill for deploying scalable, resilient AI systems with low latency.AI Security: Mitigating Indirect Prompt InjectionsAs autonomous agents gain the ability to interact with external environments and execute code, the cybersecurity attack surface expands exponentially. Therefore, the developer curriculum mandates a rigorous module on AI cybersecurity, focusing heavily on the threats outlined in the OWASP guidelines for large language models, specifically OWASP LLM01: Prompt Injection.Specifically, developers study the insidious nature of Indirect Prompt Injections. Unlike direct prompt injections, where a human user maliciously alters a prompt, indirect injections occur when an LLM processes seemingly benign external data—such as a scraped website, a downloaded PDF document, or an incoming email—that contains hidden, malicious instructions. Because current LLMs cannot reliably distinguish between trusted system instructions provided by the developer and instructions embedded within external content, the agent may unwittingly execute the hidden commands.Students explore severe attack vectors where an agent reading a malicious document is hijacked to trigger unauthorized tool calls, exfiltrate sensitive corporate data, or pivot to compromise other agents within a multi-agent framework. The curriculum teaches critical mitigation strategies, including rigid input validation, strict separation of privilege for agent tools, human-in-the-loop authentication for high-risk actions, and the implementation of robust agent-computer interface (ACI) guardrails.Multi-Dimensional Evaluation: The AgentBench FrameworkThe final component of the developer curriculum is rigorous, quantitative evaluation. The industry has realized that testing a large language model's ability to answer simple multiple-choice questions is wildly insufficient for determining its efficacy as an autonomous agent operating over extended horizons. Therefore, students must utilize the AgentBench framework, a comprehensive benchmark designed specifically to evaluate reasoning and decision-making in complex, interactive environments.AgentBench tests agents across eight distinct, isolated environments: Operating Systems (executing genuine bash commands), Databases (navigating authentic SQL interfaces), Knowledge Graphs (tool-assisted search), Digital Card Games (tactical planning), Lateral Thinking Puzzles, Household Simulations (embodied chores), Web Shopping, and Web Browsing.Developers learn to use AgentBench to analyze complex failure modes in multi-step tasks, measure exact instruction following, and compare open-source models against proprietary commercial APIs. By evaluating their custom agents against this framework, students learn that poor long-term reasoning, contextual degradation over thousands of tokens, and decision-making fatigue are the primary obstacles to usable agentic systems. Furthermore, the introduction of General AgentBench allows for evaluating systems across search, coding, and tool-use domains simultaneously via the Model Context Protocol, ensuring agents can seamlessly transition between disparate skill sets in real-world scenarios.Developer Curriculum ArchitectureThe following table delineates the end-to-end, highly technical flow of the Artificial Intelligence for Developers curriculum.Curriculum ModuleCore Subject FocusPrimary Technology StackKey Pedagogical ObjectivesModule 1: InfrastructureAccelerated Compute & HardwareNvidia DLI, CUDA C++Master tensor operations, model parallelism, RAPIDS, and ONNX deployment architectures.Module 2: CustomizationFine-Tuning and MLOpsOpenAI API, Azure MLExecute supervised fine-tuning; manage loss functions; measure perplexity; deploy via PEFT.Module 3: RetrievalGraph-Based Knowledge SystemsMicrosoft GraphRAG, CypherBuild knowledge graphs; execute community detection; contrast with cosine similarity vector RAG.Module 4: InferenceTest-Time Compute OptimizationDeepSeek-R1, OpenAI o1Implement tree search; apply the Kinetics scaling law; optimize sparse attention memory access.Module 5: OrchestrationComposable AI WorkflowsAnthropic API, LangChainDesign dynamic routing, parallelization (voting/sectioning), and evaluator-optimizer loops.Module 6: Autonomous AgentsDecoupled Agentic SystemsMicrosoft Foundry, AnthropicBuild self-directed agents; deploy the Model Context Protocol (MCP); manage stateless sandboxes.Module 7: ModalityMultimodal and Realtime APIsOpenAI Realtime APIProcess streaming audio/visual data; maintain low-latency session states for complex voice agents.Module 8: CybersecurityAgent Security and GuardrailsOWASP LLM Top 10Defend against indirect prompt injections; isolate tool execution environments; implement least-privilege.Module 9: BenchmarkingMulti-Dimensional EvaluationAgentBenchEvaluate agents across multi-turn environments (OS, SQL, Web); analyze long-horizon reasoning degradation.Pedagogical Delivery and Infrastructure ImplementationExecuting this highly ambitious curriculum by 2027 requires specialized pedagogical delivery mechanisms. Traditional, passive video lectures must be heavily minimized in favor of continuous, interactive, project-based labs.For the business track, educational delivery relies heavily on case study analysis, tabletop exercises, and simulated corporate dashboards. Business students must engage in highly realistic role-playing scenarios, such as analyzing the exact cost-benefit ratio of deploying a generative customer service AI versus the reputational risk of potential hallucinations or compliance failures.For the developer track, the physical and cloud infrastructure must provide isolated, perfectly reproducible sandboxes. Students require immediate access to cloud-based development environments equipped with GPU accelerators to train, tune, and run models both locally and in the cloud. The AgentBench evaluation framework itself requires strict Docker containerization to safely evaluate agent-generated bash commands and SQL queries without risking compromise to the host system or network.Ultimately, assignments and grading mechanisms must transition from deterministic coding tests to probabilistic evaluations. Grading a student's agent requires running it through thousands of multi-turn interactions, assessing not just basic task completion, but the quality of systemic collaboration, tool selection efficiency, and the agent's ability to gracefully recover from inevitable errors. By establishing this rigorous, ecosystem-agnostic curriculum, educational institutions will successfully bridge the widening gap between theoretical AI capabilities and reliable, scalable, real-world deployment.
+deeplearning.ai
+AI for Everyone - DeepLearning.AI
+Opens in a new window
+
+coursera.org
+AI For Everyone - Coursera
+Opens in a new window
+
+learn.deeplearning.ai
+Log In to Continue - AI for Everyone - DeepLearning.AI
+Opens in a new window
+
+learn.deeplearning.ai
+AI for Everyone - DeepLearning.AI
+Opens in a new window
+
+mammothclub.com
+Microsoft Azure AI Course: Complete 2026 Learning Guide
+Opens in a new window
+
+learn.microsoft.com
+Microsoft Certified: Azure AI Fundamentals - Certifications
+Opens in a new window
+
+learn.microsoft.com
+Develop generative AI apps on Microsoft Foundry - Training
+Opens in a new window
+
+skills.google
+Beginner: Introduction to Generative AI - Google Skills
+Opens in a new window
+
+cloud.google.com
+New generative AI trainings from Google Cloud
+Opens in a new window
+
+skillmeup.ai
+GCP Generative AI - SkillMeUp.ai
+Opens in a new window
+
+aboutcontent.de
+Generative AI - aboutcontent — Google Cloud engineering & training
+Opens in a new window
+
+auroratrust.ai
+EU AI Act Compliance Guide for Businesses 2026 - Aurora Trust
+Opens in a new window
+
+softwareimprovementgroup.com
+A comprehensive EU AI Act Summary [August 2026 update] - SIG
+Opens in a new window
+
+aiireland.ie
+EU AI Act Update: What Businesses Need to Know in 2026 - AI Ireland
+Opens in a new window
+
+mammothclub.com
+AI Course Coursera: Complete 2026 Platform Guide | MammothClub
+Opens in a new window
+
+flane.de
+NVIDIA Deep Learning Institute (DLI) Training - Fast Lane
+Opens in a new window
+
+dam-cdn.nvd.orangelogic.com
+NVIDIA Training and Certification Learning Paths - Orange Logic
+Opens in a new window
+
+ascendientlearning.com
+AI on NVIDIA Training Courses - Ascendient Learning
+Opens in a new window
+
+learning.dell.com
+Training Plan - Dell Learning
+Opens in a new window
+
+coursera.org
+NVIDIA: Large Language Models and Generative AI Deployment
+Opens in a new window
+
+nvidia.com
+Generative AI and LLM Learning Paths - NVIDIA
+Opens in a new window
+
+coursera.org
+Microsoft Generative AI Engineering Professional Certificate
+Opens in a new window
+
+developers.openai.com
+Supervised fine-tuning | OpenAI API
+Opens in a new window
+
+developers.openai.com
+Fine-tuning best practices | OpenAI API
+Opens in a new window
+
+learn.microsoft.com
+Course AI-103T00-A: Develop AI apps and agents on Azure - Training
+Opens in a new window
+
+learn.microsoft.com
+Microsoft Certified: Azure AI Apps and Agents Developer Associate
+Opens in a new window
+
+neo4j.com
+The GraphRAG manifesto: Adding knowledge to GenAI - Neo4j
+Opens in a new window
+
+microsoft.com
+GraphRAG: Unlocking LLM discovery on narrative private data
+Opens in a new window
+
+ibm.com
+What is GraphRAG? - IBM
+Opens in a new window
+
+github.com
+microsoft/graphrag: A modular graph-based Retrieval ... - GitHub
+Opens in a new window
+
+medium.com
+6 Graph RAG Architectures : the Development Direction of ... - Medium
+Opens in a new window
+
+microsoft.github.io
+Architecture - GraphRAG - Microsoft Open Source
+Opens in a new window
+
+arxiv.org
+What If We Allocate Test-Time Compute Adaptively? - arXiv
+Opens in a new window
+
+arxiv.org
+Rethinking Inference-Time Scaling: Efficiency Limits and Linguistic
+Opens in a new window
+
+arxiv.org
+A Survey of Test-Time Compute: From Intuitive Inference to ... - arXiv
+Opens in a new window
+
+arxiv.org
+Kinetics: Rethinking Test-Time Scaling Laws - arXiv
+Opens in a new window
+
+anthropic.com
+Building Effective AI Agents - Anthropic
+Opens in a new window
+
+datawalk.com
+What is MCP? The Model Context Protocol Explained - DataWalk
+Opens in a new window
+
+anthropic.com
+Introducing the Model Context Protocol - Anthropic
+Opens in a new window
+
+modelcontextprotocol.io
+Specification - What is the Model Context Protocol (MCP)?
+Opens in a new window
+
+developers.openai.com
+Realtime and audio | OpenAI API
+Opens in a new window
+
+developers.openai.com
+Using realtime models | OpenAI API
+Opens in a new window
+
+genai.owasp.org
+LLM01:2025 Prompt Injection - OWASP Gen AI Security Project
+Opens in a new window
+
+christian-schneider.net
+From LLM to agentic AI: prompt injection got worse
+Opens in a new window
+
+owasp.org
+Prompt Injection - OWASP Foundation
+Opens in a new window
+
+auth0.com
+Hiding Prompts in Plain Sight: A New AI Security Risk - Auth0
+Opens in a new window
+
+waxell.ai
+Why Indirect Prompt Injection Is Now Your AI Agent's #1 Security Risk
+Opens in a new window
+
+cheatsheetseries.owasp.org
+LLM Prompt Injection Prevention - OWASP Cheat Sheet Series
+Opens in a new window
+
+reddit.com
+How is your org handling prompt injection now that LLM agents
+Opens in a new window
+
+unit42.paloaltonetworks.com
+Web-Based Indirect Prompt Injection Observed in the Wild
+Opens in a new window
+
+cheatsheetseries.owasp.org
+AI Agent Security - OWASP Cheat Sheet Series
+Opens in a new window
+
+forkast.news
+What Is AgentBench? The LLM Agent Benchmark Explained
+Opens in a new window
+
+arxiv.org
+Evaluating the Collaboration and Competition of LLM agents - arXiv
+Opens in a new window
+
+semanticscholar.org
+[PDF] AgentBench: Evaluating LLMs as Agents - Semantic Scholar
+Opens in a new window
+
+arxiv.org
+[2308.03688] AgentBench: Evaluating LLMs as Agents - arXiv
+Opens in a new window
+
+github.com
+GitHub - THUDM/AgentBench: A Comprehensive Benchmark to
+Opens in a new window
+
+agentic-design.ai
+AgentBench - Agentic Design
+Opens in a new window
+
+researchgate.net
+(PDF) AgentBench: Evaluating LLMs as Agents - ResearchGate
+Opens in a new window
+
+proceedings.iclr.cc
+AGENTBENCH: EVALUATING LLMS AS AGENTS - ICLR Proceedings
+Opens in a new window
+
+alphaxiv.org
+Benchmark Test-Time Scaling of General LLM Agents - alphaXiv
+Opens in a new window
+
+deeplearning.ai
+AI Courses - DeepLearning.AI

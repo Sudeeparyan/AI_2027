@@ -1,0 +1,614 @@
+{
+  "s01": {
+    "title": "Week 04 · Transformers without heavy mathematics",
+    "explanation": "The confusing sentence\n\nIn “Ava told Bea that she won,” which earlier word does “she” refer to? A model must use context, yet ambiguity can remain.",
+    "speaker_notes": "TEACHER SCRIPT — OPEN. Show the visual for ten seconds, then ask for an initial decision. Do not reveal the answer yet. Ask a student to name the source or measurement that would change their mind. This week’s case is: A document assistant must choose what earlier words matter when drafting a sentence. The visible slide states: The confusing sentence\n\nIn “Ava told Bea that she won,” which earlier word does “she” refer to? A model must use context, yet ambiguity can remain. Reveal that the case will be revisited after four short concept cycles. The target is: Explain tokens, attention weights, masking and model roles. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "story",
+      "items": [
+        "The confusing sentence",
+        "What is known?",
+        "What must we check?"
+      ]
+    },
+    "teaching_stage": "open"
+  },
+  "s02": {
+    "title": "First vote: what would you do?",
+    "explanation": "In “Ava told Bea that she won,” which earlier word does “she” refer to? A model must use context, yet ambiguity can remain.\n\nChoose an initial answer and name one piece of evidence you need.",
+    "speaker_notes": "TEACHER SCRIPT — QUESTION. Take a show of hands for each choice before showing the mechanism. Ask pairs to defend a choice with evidence. Save the strongest wrong reason for the reveal later in this cycle. This week’s case is: A document assistant must choose what earlier words matter when drafting a sentence. The visible slide states: In “Ava told Bea that she won,” which earlier word does “she” refer to? A model must use context, yet ambiguity can remain.\n\nChoose an initial answer and name one piece of evidence you need. Accept reasonable uncertainty; record the initial votes to revisit at the end. The target is: Explain tokens, attention weights, masking and model roles. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "Accept the first plausible result",
+        "Check the source or measurement"
+      ]
+    },
+    "teaching_stage": "question"
+  },
+  "s03": {
+    "title": "The journey through today’s case",
+    "explanation": "We will predict, connect an analogy, trace a mechanism, work an example, then explain a decision.",
+    "speaker_notes": "TEACHER SCRIPT — OPEN. Show the visual for ten seconds, then ask for an initial decision. Do not reveal the answer yet. Ask a student to name the source or measurement that would change their mind. This week’s case is: A document assistant must choose what earlier words matter when drafting a sentence. The visible slide states: We will predict, connect an analogy, trace a mechanism, work an example, then explain a decision. Point to the four named ideas, then show where the notebook experiment fits. The target is: Explain tokens, attention weights, masking and model roles. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "Token",
+        "Attention",
+        "Mask",
+        "Model roles"
+      ]
+    },
+    "teaching_stage": "open"
+  },
+  "s04": {
+    "title": "1. Predict · Token",
+    "explanation": "Why can word count differ from token count?\n\nMake a choice before we explain the diagram.",
+    "speaker_notes": "TEACHER SCRIPT — QUESTION. Take a show of hands for each choice before showing the mechanism. Ask pairs to defend a choice with evidence. Save the strongest wrong reason for the reveal later in this cycle. This week’s case is: A document assistant must choose what earlier words matter when drafting a sentence. The visible slide states: Why can word count differ from token count?\n\nMake a choice before we explain the diagram. The intended answer is A tokenizer may split a word into several pieces. The tempting claim is One word always equals one token. Do not show which card is correct until the reveal. The target is: Explain tokens, attention weights, masking and model roles. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "A tokenizer may split a word into several pieces.",
+        "One word always equals one token."
+      ]
+    },
+    "teaching_stage": "question"
+  },
+  "s05": {
+    "title": "Token · a familiar picture",
+    "explanation": "A sentence is cut into tiles before a game reads it.\n\nWhat matches our case, and where does the analogy stop?",
+    "speaker_notes": "TEACHER SCRIPT — ANALOGY. Begin with the familiar scene. Invite learners to describe each part in everyday language. Then ask where the comparison might fail before introducing the technical vocabulary. This week’s case is: A document assistant must choose what earlier words matter when drafting a sentence. The visible slide states: A sentence is cut into tiles before a game reads it.\n\nWhat matches our case, and where does the analogy stop? The boundary is: Token pieces need not be complete words; the vocabulary is model-specific. The target is: Explain tokens, attention weights, masking and model roles. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "analogy",
+      "items": [
+        "Sentence",
+        "Tiles",
+        "Tile numbers"
+      ],
+      "caption": "A sentence is cut into tiles before a game reads it."
+    },
+    "teaching_stage": "analogy"
+  },
+  "s06": {
+    "title": "Token · map the parts",
+    "explanation": "Match each everyday part to the technical part.\n\nAnalogy limit: Token pieces need not be complete words; the vocabulary is model-specific.",
+    "speaker_notes": "TEACHER SCRIPT — MAPPING. Point from each familiar element to the corresponding technical element. Have students cover the right column and reconstruct the three matches. Read the limitation aloud. This week’s case is: A document assistant must choose what earlier words matter when drafting a sentence. The visible slide states: Match each everyday part to the technical part.\n\nAnalogy limit: Token pieces need not be complete words; the vocabulary is model-specific. The three precise mappings are [['Sentence', 'input string'], ['Tiles', 'tokens'], ['Tile numbers', 'IDs']]. The target is: Explain tokens, attention weights, masking and model roles. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "map",
+      "pairs": [
+        [
+          "Sentence",
+          "input string"
+        ],
+        [
+          "Tiles",
+          "tokens"
+        ],
+        [
+          "Tile numbers",
+          "IDs"
+        ]
+      ]
+    },
+    "teaching_stage": "mapping"
+  },
+  "s07": {
+    "title": "Token · how it works",
+    "explanation": "A model processes pieces of text represented as IDs. A word may use more than one token.\n\nTrace the arrows from left to right.",
+    "speaker_notes": "TEACHER SCRIPT — MECHANISM. Trace every arrow slowly from the input to the output. Ask what information crosses the boundary at each arrow. Pause if students confuse a simplified notebook with a trained model. This week’s case is: A document assistant must choose what earlier words matter when drafting a sentence. The visible slide states: A model processes pieces of text represented as IDs. A word may use more than one token.\n\nTrace the arrows from left to right. The weekly example is: “unbelievable” might be one piece or several; record the tokenizer used before counting. State what the analogy does not explain: Token pieces need not be complete words; the vocabulary is model-specific. The target is: Explain tokens, attention weights, masking and model roles. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Sentence",
+        "Token pieces",
+        "Token IDs"
+      ]
+    },
+    "teaching_stage": "mechanism"
+  },
+  "s08": {
+    "title": "Token · work one case",
+    "explanation": "“unbelievable” might be one piece or several; record the tokenizer used before counting.\n\nPoint to the evidence before giving your conclusion.",
+    "speaker_notes": "TEACHER SCRIPT — WORKED. Work the specific numbers or source wording aloud. Give students thirty seconds to write a conclusion, then ask which source line or calculation supports it. This week’s case is: A document assistant must choose what earlier words matter when drafting a sentence. The visible slide states: “unbelievable” might be one piece or several; record the tokenizer used before counting.\n\nPoint to the evidence before giving your conclusion. The expected reasoning concludes: A tokenizer may split a word into several pieces. Distinguish measured results from illustrative numbers. The target is: Explain tokens, attention weights, masking and model roles. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "work",
+      "items": [
+        "“unbelievable” might be one piece or several; record the tokenizer used before counting.",
+        "Why can word count differ from token count?",
+        "A tokenizer may split a word into several pieces."
+      ]
+    },
+    "teaching_stage": "worked"
+  },
+  "s09": {
+    "title": "Token · answer and explain",
+    "explanation": "A tokenizer may split a word into several pieces.\n\nTempting mistake: One word always equals one token.",
+    "speaker_notes": "TEACHER SCRIPT — REVEAL. Return to the earlier choice. Explain the correct answer and why the tempting claim fails. Ask one learner to say the answer in a single sentence without reading it. This week’s case is: A document assistant must choose what earlier words matter when drafting a sentence. The visible slide states: A tokenizer may split a word into several pieces.\n\nTempting mistake: One word always equals one token. The earlier question was Why can word count differ from token count? Ask how this differs from the wrong claim. The target is: Explain tokens, attention weights, masking and model roles. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "reveal",
+      "items": [
+        "One word always equals one token.",
+        "A tokenizer may split a word into several pieces."
+      ],
+      "caption": "Token pieces need not be complete words; the vocabulary is model-specific."
+    },
+    "teaching_stage": "reveal"
+  },
+  "s10": {
+    "title": "2. Predict · Attention",
+    "explanation": "Do weights identify a proven causal explanation?\n\nMake a choice before we explain the diagram.",
+    "speaker_notes": "TEACHER SCRIPT — QUESTION. Take a show of hands for each choice before showing the mechanism. Ask pairs to defend a choice with evidence. Save the strongest wrong reason for the reveal later in this cycle. This week’s case is: A document assistant must choose what earlier words matter when drafting a sentence. The visible slide states: Do weights identify a proven causal explanation?\n\nMake a choice before we explain the diagram. The intended answer is No. They show one computation, not the whole model’s reason. The tempting claim is The largest attention cell proves the final answer. Do not show which card is correct until the reveal. The target is: Explain tokens, attention weights, masking and model roles. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "No. They show one computation, not the whole model’s reason.",
+        "The largest attention cell proves the final answer."
+      ]
+    },
+    "teaching_stage": "question"
+  },
+  "s11": {
+    "title": "Attention · a familiar picture",
+    "explanation": "A reader highlights earlier words that matter to the current word.\n\nWhat matches our case, and where does the analogy stop?",
+    "speaker_notes": "TEACHER SCRIPT — ANALOGY. Begin with the familiar scene. Invite learners to describe each part in everyday language. Then ask where the comparison might fail before introducing the technical vocabulary. This week’s case is: A document assistant must choose what earlier words matter when drafting a sentence. The visible slide states: A reader highlights earlier words that matter to the current word.\n\nWhat matches our case, and where does the analogy stop? The boundary is: Attention weights alone are not a complete explanation of model decisions. The target is: Explain tokens, attention weights, masking and model roles. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "analogy",
+      "items": [
+        "Current word",
+        "Highlight strength",
+        "Notes"
+      ],
+      "caption": "A reader highlights earlier words that matter to the current word."
+    },
+    "teaching_stage": "analogy"
+  },
+  "s12": {
+    "title": "Attention · map the parts",
+    "explanation": "Match each everyday part to the technical part.\n\nAnalogy limit: Attention weights alone are not a complete explanation of model decisions.",
+    "speaker_notes": "TEACHER SCRIPT — MAPPING. Point from each familiar element to the corresponding technical element. Have students cover the right column and reconstruct the three matches. Read the limitation aloud. This week’s case is: A document assistant must choose what earlier words matter when drafting a sentence. The visible slide states: Match each everyday part to the technical part.\n\nAnalogy limit: Attention weights alone are not a complete explanation of model decisions. The three precise mappings are [['Current word', 'query'], ['Highlight strength', 'attention weight'], ['Notes', 'weighted context']]. The target is: Explain tokens, attention weights, masking and model roles. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "map",
+      "pairs": [
+        [
+          "Current word",
+          "query"
+        ],
+        [
+          "Highlight strength",
+          "attention weight"
+        ],
+        [
+          "Notes",
+          "weighted context"
+        ]
+      ]
+    },
+    "teaching_stage": "mapping"
+  },
+  "s13": {
+    "title": "Attention · how it works",
+    "explanation": "Each query uses scores to weight available tokens; the weighted combination carries contextual information.\n\nTrace the arrows from left to right.",
+    "speaker_notes": "TEACHER SCRIPT — MECHANISM. Trace every arrow slowly from the input to the output. Ask what information crosses the boundary at each arrow. Pause if students confuse a simplified notebook with a trained model. This week’s case is: A document assistant must choose what earlier words matter when drafting a sentence. The visible slide states: Each query uses scores to weight available tokens; the weighted combination carries contextual information.\n\nTrace the arrows from left to right. The weekly example is: Scores [1,2,0] yield about [0.245,0.665,0.090]; the middle token gets most weight. State what the analogy does not explain: Attention weights alone are not a complete explanation of model decisions. The target is: Explain tokens, attention weights, masking and model roles. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Query token",
+        "Attention scores",
+        "Weighted context"
+      ]
+    },
+    "teaching_stage": "mechanism"
+  },
+  "s14": {
+    "title": "Attention · work one case",
+    "explanation": "Scores [1,2,0] yield about [0.245,0.665,0.090]; the middle token gets most weight.\n\nPoint to the evidence before giving your conclusion.",
+    "speaker_notes": "TEACHER SCRIPT — WORKED. Work the specific numbers or source wording aloud. Give students thirty seconds to write a conclusion, then ask which source line or calculation supports it. This week’s case is: A document assistant must choose what earlier words matter when drafting a sentence. The visible slide states: Scores [1,2,0] yield about [0.245,0.665,0.090]; the middle token gets most weight.\n\nPoint to the evidence before giving your conclusion. The expected reasoning concludes: No. They show one computation, not the whole model’s reason. Distinguish measured results from illustrative numbers. The target is: Explain tokens, attention weights, masking and model roles. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "work",
+      "items": [
+        "Scores [1,2,0] yield about [0.245,0.665,0.090]; the middle token gets most weight.",
+        "Do weights identify a proven causal explanation?",
+        "No. They show one computation, not the whole model’s reason."
+      ]
+    },
+    "teaching_stage": "worked"
+  },
+  "s15": {
+    "title": "Attention · answer and explain",
+    "explanation": "No. They show one computation, not the whole model’s reason.\n\nTempting mistake: The largest attention cell proves the final answer.",
+    "speaker_notes": "TEACHER SCRIPT — REVEAL. Return to the earlier choice. Explain the correct answer and why the tempting claim fails. Ask one learner to say the answer in a single sentence without reading it. This week’s case is: A document assistant must choose what earlier words matter when drafting a sentence. The visible slide states: No. They show one computation, not the whole model’s reason.\n\nTempting mistake: The largest attention cell proves the final answer. The earlier question was Do weights identify a proven causal explanation? Ask how this differs from the wrong claim. The target is: Explain tokens, attention weights, masking and model roles. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "reveal",
+      "items": [
+        "The largest attention cell proves the final answer.",
+        "No. They show one computation, not the whole model’s reason."
+      ],
+      "caption": "Attention weights alone are not a complete explanation of model decisions."
+    },
+    "teaching_stage": "reveal"
+  },
+  "s16": {
+    "title": "3. Predict · Mask",
+    "explanation": "What happens to the forbidden position?\n\nMake a choice before we explain the diagram.",
+    "speaker_notes": "TEACHER SCRIPT — QUESTION. Take a show of hands for each choice before showing the mechanism. Ask pairs to defend a choice with evidence. Save the strongest wrong reason for the reveal later in this cycle. This week’s case is: A document assistant must choose what earlier words matter when drafting a sentence. The visible slide states: What happens to the forbidden position?\n\nMake a choice before we explain the diagram. The intended answer is Its weight is zero; visible positions are renormalised. The tempting claim is Masking deletes a token from the vocabulary. Do not show which card is correct until the reveal. The target is: Explain tokens, attention weights, masking and model roles. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "Its weight is zero; visible positions are renormalised.",
+        "Masking deletes a token from the vocabulary."
+      ]
+    },
+    "teaching_stage": "question"
+  },
+  "s17": {
+    "title": "Mask · a familiar picture",
+    "explanation": "An exam candidate may consult earlier pages, not tomorrow’s answer sheet.\n\nWhat matches our case, and where does the analogy stop?",
+    "speaker_notes": "TEACHER SCRIPT — ANALOGY. Begin with the familiar scene. Invite learners to describe each part in everyday language. Then ask where the comparison might fail before introducing the technical vocabulary. This week’s case is: A document assistant must choose what earlier words matter when drafting a sentence. The visible slide states: An exam candidate may consult earlier pages, not tomorrow’s answer sheet.\n\nWhat matches our case, and where does the analogy stop? The boundary is: A mask is an enforced attention constraint; it does not ensure factual accuracy. The target is: Explain tokens, attention weights, masking and model roles. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "analogy",
+      "items": [
+        "Earlier page",
+        "Covered page",
+        "Allowed view"
+      ],
+      "caption": "An exam candidate may consult earlier pages, not tomorrow’s answer sheet."
+    },
+    "teaching_stage": "analogy"
+  },
+  "s18": {
+    "title": "Mask · map the parts",
+    "explanation": "Match each everyday part to the technical part.\n\nAnalogy limit: A mask is an enforced attention constraint; it does not ensure factual accuracy.",
+    "speaker_notes": "TEACHER SCRIPT — MAPPING. Point from each familiar element to the corresponding technical element. Have students cover the right column and reconstruct the three matches. Read the limitation aloud. This week’s case is: A document assistant must choose what earlier words matter when drafting a sentence. The visible slide states: Match each everyday part to the technical part.\n\nAnalogy limit: A mask is an enforced attention constraint; it does not ensure factual accuracy. The three precise mappings are [['Earlier page', 'past token'], ['Covered page', 'masked future token'], ['Allowed view', 'causal context']]. The target is: Explain tokens, attention weights, masking and model roles. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "map",
+      "pairs": [
+        [
+          "Earlier page",
+          "past token"
+        ],
+        [
+          "Covered page",
+          "masked future token"
+        ],
+        [
+          "Allowed view",
+          "causal context"
+        ]
+      ]
+    },
+    "teaching_stage": "mapping"
+  },
+  "s19": {
+    "title": "Mask · how it works",
+    "explanation": "A decoder mask prevents a token from using future tokens while generating left to right.\n\nTrace the arrows from left to right.",
+    "speaker_notes": "TEACHER SCRIPT — MECHANISM. Trace every arrow slowly from the input to the output. Ask what information crosses the boundary at each arrow. Pause if students confuse a simplified notebook with a trained model. This week’s case is: A document assistant must choose what earlier words matter when drafting a sentence. The visible slide states: A decoder mask prevents a token from using future tokens while generating left to right.\n\nTrace the arrows from left to right. The weekly example is: Mask the third of three scores [1,2,0]; renormalised weights are about [0.269,0.731,0]. State what the analogy does not explain: A mask is an enforced attention constraint; it does not ensure factual accuracy. The target is: Explain tokens, attention weights, masking and model roles. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Past tokens",
+        "Causal mask",
+        "Visible positions"
+      ]
+    },
+    "teaching_stage": "mechanism"
+  },
+  "s20": {
+    "title": "Mask · work one case",
+    "explanation": "Mask the third of three scores [1,2,0]; renormalised weights are about [0.269,0.731,0].\n\nPoint to the evidence before giving your conclusion.",
+    "speaker_notes": "TEACHER SCRIPT — WORKED. Work the specific numbers or source wording aloud. Give students thirty seconds to write a conclusion, then ask which source line or calculation supports it. This week’s case is: A document assistant must choose what earlier words matter when drafting a sentence. The visible slide states: Mask the third of three scores [1,2,0]; renormalised weights are about [0.269,0.731,0].\n\nPoint to the evidence before giving your conclusion. The expected reasoning concludes: Its weight is zero; visible positions are renormalised. Distinguish measured results from illustrative numbers. The target is: Explain tokens, attention weights, masking and model roles. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "work",
+      "items": [
+        "Mask the third of three scores [1,2,0]; renormalised weights are about [0.269,0.731,0].",
+        "What happens to the forbidden position?",
+        "Its weight is zero; visible positions are renormalised."
+      ]
+    },
+    "teaching_stage": "worked"
+  },
+  "s21": {
+    "title": "Mask · answer and explain",
+    "explanation": "Its weight is zero; visible positions are renormalised.\n\nTempting mistake: Masking deletes a token from the vocabulary.",
+    "speaker_notes": "TEACHER SCRIPT — REVEAL. Return to the earlier choice. Explain the correct answer and why the tempting claim fails. Ask one learner to say the answer in a single sentence without reading it. This week’s case is: A document assistant must choose what earlier words matter when drafting a sentence. The visible slide states: Its weight is zero; visible positions are renormalised.\n\nTempting mistake: Masking deletes a token from the vocabulary. The earlier question was What happens to the forbidden position? Ask how this differs from the wrong claim. The target is: Explain tokens, attention weights, masking and model roles. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "reveal",
+      "items": [
+        "Masking deletes a token from the vocabulary.",
+        "Its weight is zero; visible positions are renormalised."
+      ],
+      "caption": "A mask is an enforced attention constraint; it does not ensure factual accuracy."
+    },
+    "teaching_stage": "reveal"
+  },
+  "s22": {
+    "title": "4. Predict · Model roles",
+    "explanation": "Which role suits translation in this simplified comparison?\n\nMake a choice before we explain the diagram.",
+    "speaker_notes": "TEACHER SCRIPT — QUESTION. Take a show of hands for each choice before showing the mechanism. Ask pairs to defend a choice with evidence. Save the strongest wrong reason for the reveal later in this cycle. This week’s case is: A document assistant must choose what earlier words matter when drafting a sentence. The visible slide states: Which role suits translation in this simplified comparison?\n\nMake a choice before we explain the diagram. The intended answer is An encoder reads source text and a decoder writes target text. The tempting claim is An encoder always generates the final long reply. Do not show which card is correct until the reveal. The target is: Explain tokens, attention weights, masking and model roles. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "An encoder reads source text and a decoder writes target text.",
+        "An encoder always generates the final long reply."
+      ]
+    },
+    "teaching_stage": "question"
+  },
+  "s23": {
+    "title": "Model roles · a familiar picture",
+    "explanation": "A reader, a writer, and a reader-writer have different jobs.\n\nWhat matches our case, and where does the analogy stop?",
+    "speaker_notes": "TEACHER SCRIPT — ANALOGY. Begin with the familiar scene. Invite learners to describe each part in everyday language. Then ask where the comparison might fail before introducing the technical vocabulary. This week’s case is: A document assistant must choose what earlier words matter when drafting a sentence. The visible slide states: A reader, a writer, and a reader-writer have different jobs.\n\nWhat matches our case, and where does the analogy stop? The boundary is: Many current systems combine components; this is a useful role sketch, not a full taxonomy. The target is: Explain tokens, attention weights, masking and model roles. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "analogy",
+      "items": [
+        "Reader",
+        "Writer",
+        "Read and write"
+      ],
+      "caption": "A reader, a writer, and a reader-writer have different jobs."
+    },
+    "teaching_stage": "analogy"
+  },
+  "s24": {
+    "title": "Model roles · map the parts",
+    "explanation": "Match each everyday part to the technical part.\n\nAnalogy limit: Many current systems combine components; this is a useful role sketch, not a full taxonomy.",
+    "speaker_notes": "TEACHER SCRIPT — MAPPING. Point from each familiar element to the corresponding technical element. Have students cover the right column and reconstruct the three matches. Read the limitation aloud. This week’s case is: A document assistant must choose what earlier words matter when drafting a sentence. The visible slide states: Match each everyday part to the technical part.\n\nAnalogy limit: Many current systems combine components; this is a useful role sketch, not a full taxonomy. The three precise mappings are [['Reader', 'encoder'], ['Writer', 'decoder'], ['Read and write', 'encoder–decoder']]. The target is: Explain tokens, attention weights, masking and model roles. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "map",
+      "pairs": [
+        [
+          "Reader",
+          "encoder"
+        ],
+        [
+          "Writer",
+          "decoder"
+        ],
+        [
+          "Read and write",
+          "encoder–decoder"
+        ]
+      ]
+    },
+    "teaching_stage": "mapping"
+  },
+  "s25": {
+    "title": "Model roles · how it works",
+    "explanation": "Encoders read inputs; decoders generate; encoder-decoder models read then generate from a separate component.\n\nTrace the arrows from left to right.",
+    "speaker_notes": "TEACHER SCRIPT — MECHANISM. Trace every arrow slowly from the input to the output. Ask what information crosses the boundary at each arrow. Pause if students confuse a simplified notebook with a trained model. This week’s case is: A document assistant must choose what earlier words matter when drafting a sentence. The visible slide states: Encoders read inputs; decoders generate; encoder-decoder models read then generate from a separate component.\n\nTrace the arrows from left to right. The weekly example is: Classify a sentence: encoder. Continue it: decoder. Translate it: encoder–decoder. State what the analogy does not explain: Many current systems combine components; this is a useful role sketch, not a full taxonomy. The target is: Explain tokens, attention weights, masking and model roles. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Encoder: read",
+        "Decoder: write",
+        "Encoder-decoder: both"
+      ]
+    },
+    "teaching_stage": "mechanism"
+  },
+  "s26": {
+    "title": "Model roles · work one case",
+    "explanation": "Classify a sentence: encoder. Continue it: decoder. Translate it: encoder–decoder.\n\nPoint to the evidence before giving your conclusion.",
+    "speaker_notes": "TEACHER SCRIPT — WORKED. Work the specific numbers or source wording aloud. Give students thirty seconds to write a conclusion, then ask which source line or calculation supports it. This week’s case is: A document assistant must choose what earlier words matter when drafting a sentence. The visible slide states: Classify a sentence: encoder. Continue it: decoder. Translate it: encoder–decoder.\n\nPoint to the evidence before giving your conclusion. The expected reasoning concludes: An encoder reads source text and a decoder writes target text. Distinguish measured results from illustrative numbers. The target is: Explain tokens, attention weights, masking and model roles. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "work",
+      "items": [
+        "Classify a sentence: encoder. Continue it: decoder. Translate it: encoder–decoder.",
+        "Which role suits translation in this simplified comparison?",
+        "An encoder reads source text and a decoder writes target text."
+      ]
+    },
+    "teaching_stage": "worked"
+  },
+  "s27": {
+    "title": "Model roles · answer and explain",
+    "explanation": "An encoder reads source text and a decoder writes target text.\n\nTempting mistake: An encoder always generates the final long reply.",
+    "speaker_notes": "TEACHER SCRIPT — REVEAL. Return to the earlier choice. Explain the correct answer and why the tempting claim fails. Ask one learner to say the answer in a single sentence without reading it. This week’s case is: A document assistant must choose what earlier words matter when drafting a sentence. The visible slide states: An encoder reads source text and a decoder writes target text.\n\nTempting mistake: An encoder always generates the final long reply. The earlier question was Which role suits translation in this simplified comparison? Ask how this differs from the wrong claim. The target is: Explain tokens, attention weights, masking and model roles. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "reveal",
+      "items": [
+        "An encoder always generates the final long reply.",
+        "An encoder reads source text and a decoder writes target text."
+      ],
+      "caption": "Many current systems combine components; this is a useful role sketch, not a full taxonomy."
+    },
+    "teaching_stage": "reveal"
+  },
+  "s28": {
+    "title": "Evidence trail: input → result",
+    "explanation": "Softmax weights approximately 0.245, 0.665, 0.090.\n\nIf the third token is future text, its masked weight becomes 0.",
+    "speaker_notes": "TEACHER SCRIPT — WORKED. Work the specific numbers or source wording aloud. Give students thirty seconds to write a conclusion, then ask which source line or calculation supports it. This week’s case is: A document assistant must choose what earlier words matter when drafting a sentence. The visible slide states: Softmax weights approximately 0.245, 0.665, 0.090.\n\nIf the third token is future text, its masked weight becomes 0. Have one student point to an exact source word or number for each conclusion. The target is: Explain tokens, attention weights, masking and model roles. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "work",
+      "items": [
+        "Scores for three tokens: 1, 2, 0.",
+        "Softmax weights approximately 0.245, 0.665, 0.090.",
+        "If the third token is future text, its masked weight becomes 0."
+      ]
+    },
+    "teaching_stage": "worked"
+  },
+  "s29": {
+    "title": "Notebook: run the prepared example",
+    "explanation": "Compute attention for three tokens and explain one mask.\n\nRead the original output before editing.",
+    "speaker_notes": "TEACHER SCRIPT — PRACTICE. Open the matching notebook and demonstrate the first run. Have learners predict one change, run only that change, and record input, setting, output and an error explanation. This week’s case is: A document assistant must choose what earlier words matter when drafting a sentence. The visible slide states: Compute attention for three tokens and explain one mask.\n\nRead the original output before editing. Use Week_04_Lab.ipynb. This lab is a prepared classroom demonstration with its limitations documented. The target is: Explain tokens, attention weights, masking and model roles. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "Tokenize a tiny three-word classroom example",
+        "Compute normalized attention weights from simple scores",
+        "Apply a mask to hide a future word",
+        "Compare an encoder and a decoder task"
+      ]
+    },
+    "teaching_stage": "practice"
+  },
+  "s30": {
+    "title": "Find the input and check in Python",
+    "explanation": "Locate the supplied input, the transformation, the checking line and the printed result.",
+    "speaker_notes": "TEACHER SCRIPT — PRACTICE. Open the matching notebook and demonstrate the first run. Have learners predict one change, run only that change, and record input, setting, output and an error explanation. This week’s case is: A document assistant must choose what earlier words matter when drafting a sentence. The visible slide states: Locate the supplied input, the transformation, the checking line and the printed result. The weekly lab change is: Mask the last token and recompute the weights. The target is: Explain tokens, attention weights, masking and model roles. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Input data",
+        "Python operation",
+        "Check",
+        "Recorded result"
+      ]
+    },
+    "teaching_stage": "practice"
+  },
+  "s31": {
+    "title": "Predict one controlled change",
+    "explanation": "Mask the last token and recompute the weights.\n\nWhat should change in the result? What stays fixed?",
+    "speaker_notes": "TEACHER SCRIPT — PRACTICE. Open the matching notebook and demonstrate the first run. Have learners predict one change, run only that change, and record input, setting, output and an error explanation. This week’s case is: A document assistant must choose what earlier words matter when drafting a sentence. The visible slide states: Mask the last token and recompute the weights.\n\nWhat should change in the result? What stays fixed? Ask learners to write their prediction before rerunning the cell. The target is: Explain tokens, attention weights, masking and model roles. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "compare",
+      "left": "Before: original case",
+      "right": "After: one change",
+      "caption": "Keep all other inputs fixed."
+    },
+    "teaching_stage": "practice"
+  },
+  "s32": {
+    "title": "Run, compare and record",
+    "explanation": "Record the input, the one changed setting, the observed result and a reason for any difference.",
+    "speaker_notes": "TEACHER SCRIPT — PRACTICE. Open the matching notebook and demonstrate the first run. Have learners predict one change, run only that change, and record input, setting, output and an error explanation. This week’s case is: A document assistant must choose what earlier words matter when drafting a sentence. The visible slide states: Record the input, the one changed setting, the observed result and a reason for any difference. The required evidence is: Annotated attention table and one model-role choice. The target is: Explain tokens, attention weights, masking and model roles. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "table",
+      "rows": [
+        [
+          "Input",
+          "Setting",
+          "Result"
+        ],
+        [
+          "Original",
+          "baseline",
+          "record"
+        ],
+        [
+          "Changed",
+          "one edit",
+          "compare"
+        ]
+      ]
+    },
+    "teaching_stage": "practice"
+  },
+  "s33": {
+    "title": "Measure without hiding the denominator",
+    "explanation": "Weights sum to one over visible tokens\n\nWrite the numerator, denominator and one failure case.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: A document assistant must choose what earlier words matter when drafting a sentence. The visible slide states: Weights sum to one over visible tokens\n\nWrite the numerator, denominator and one failure case. Where a measure is qualitative, show the concrete source comparison. Example: If the third token is future text, its masked weight becomes 0. The target is: Explain tokens, attention weights, masking and model roles. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Define success",
+        "Count successes",
+        "Count cases",
+        "Inspect errors"
+      ]
+    },
+    "teaching_stage": "check"
+  },
+  "s34": {
+    "title": "Error detective: find the layer",
+    "explanation": "Plausible wrong claim: Attention weights are a complete explanation of a model decision.\n\nCorrect it using the case evidence.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: A document assistant must choose what earlier words matter when drafting a sentence. The visible slide states: Plausible wrong claim: Attention weights are a complete explanation of a model decision.\n\nCorrect it using the case evidence. The correction is They show one internal weighting operation; they do not prove causal importance or factual correctness. The target is: Explain tokens, attention weights, masking and model roles. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "reveal",
+      "items": [
+        "Attention weights are a complete explanation of a model decision.",
+        "They show one internal weighting operation; they do not prove causal importance or factual correctness."
+      ],
+      "caption": "Name a test that would catch this failure."
+    },
+    "teaching_stage": "check"
+  },
+  "s35": {
+    "title": "Transfer to a new situation",
+    "explanation": "A drafting decoder has the next word hidden. What happens to that column in its attention grid?\n\nExplain which source or test would settle it.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: A document assistant must choose what earlier words matter when drafting a sentence. The visible slide states: A drafting decoder has the next word hidden. What happens to that column in its attention grid?\n\nExplain which source or test would settle it. This is a fresh scenario, so ask for a reason before accepting either short answer. The target is: Explain tokens, attention weights, masking and model roles. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "Use the visible evidence",
+        "Flag missing or unsafe evidence"
+      ]
+    },
+    "teaching_stage": "check"
+  },
+  "s36": {
+    "title": "Explain it to a partner",
+    "explanation": "Without reading the slide, name the input, one processing step and the check. Your partner should ask “How do you know?”",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: A document assistant must choose what earlier words matter when drafting a sentence. The visible slide states: Without reading the slide, name the input, one processing step and the check. Your partner should ask “How do you know?” Listen for a causal explanation and one limitation, then revisit a difficult arrow on the board. The target is: Explain tokens, attention weights, masking and model roles. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Token IDs",
+        "Query and keys",
+        "Next token"
+      ]
+    },
+    "teaching_stage": "check"
+  },
+  "s37": {
+    "title": "Exam rehearsal · explain and apply",
+    "explanation": "Why does a decoder use a causal mask?\n\nWrite a short answer, then compare with the guide.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: A document assistant must choose what earlier words matter when drafting a sentence. The visible slide states: Why does a decoder use a causal mask?\n\nWrite a short answer, then compare with the guide. Model answer after discussion: To ensure generation at a position depends only on permitted earlier/current positions, not future target tokens. Practice marks: 4. The target is: Explain tokens, attention weights, masking and model roles. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "State the core idea",
+        "Use a case detail or calculation",
+        "Add a limitation",
+        "Compare with the Word guide"
+      ]
+    },
+    "teaching_stage": "check"
+  },
+  "s38": {
+    "title": "Exam rehearsal · explain and apply",
+    "explanation": "For weights 0.25, 0.65, 0.10, which input receives most weight?\n\nWrite a short answer, then compare with the guide.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: A document assistant must choose what earlier words matter when drafting a sentence. The visible slide states: For weights 0.25, 0.65, 0.10, which input receives most weight?\n\nWrite a short answer, then compare with the guide. Model answer after discussion: The second input, with 0.65. The three weights sum to 1. Practice marks: 4. The target is: Explain tokens, attention weights, masking and model roles. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "State the core idea",
+        "Use a case detail or calculation",
+        "Add a limitation",
+        "Compare with the Word guide"
+      ]
+    },
+    "teaching_stage": "check"
+  },
+  "s39": {
+    "title": "What to hand in",
+    "explanation": "Annotated attention table and one model-role choice.\n\nInclude the one changed input and an error explanation.",
+    "speaker_notes": "TEACHER SCRIPT — PRACTICE. Open the matching notebook and demonstrate the first run. Have learners predict one change, run only that change, and record input, setting, output and an error explanation. This week’s case is: A document assistant must choose what earlier words matter when drafting a sentence. The visible slide states: Annotated attention table and one model-role choice.\n\nInclude the one changed input and an error explanation. This weekly evidence receives formative feedback according to the module sequence; refer to the assessment brief for graded work. The target is: Explain tokens, attention weights, masking and model roles. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "Original run",
+        "One changed input",
+        "Comparison",
+        "Explanation + source"
+      ]
+    },
+    "teaching_stage": "practice"
+  },
+  "s40": {
+    "title": "Three ideas to recall next week",
+    "explanation": "Tokenise, score visible context, and choose the model role for reading or writing.\n\nRead the linked official sources in the Word guide and redraw one diagram from memory.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: A document assistant must choose what earlier words matter when drafting a sentence. The visible slide states: Tokenise, score visible context, and choose the model role for reading or writing.\n\nRead the linked official sources in the Word guide and redraw one diagram from memory. Return to the opening vote and ask whether the evidence changed anyone’s mind. The next week builds on this outcome: Explain tokens, attention weights, masking and model roles. The target is: Explain tokens, attention weights, masking and model roles. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "Token",
+        "Attention",
+        "Mask",
+        "Model roles"
+      ]
+    },
+    "teaching_stage": "check"
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "outcomes": "LO3, LO4",
+  "plain_explanation": "Choose a method based on the failure. A clearer prompt can improve instructions. RAG supplies current facts. Fine-tuning changes learned behavior from examples. LoRA trains low-rank update matrices while freezing most base parameters. Small adaptation datasets still need separate evaluation.",
+  "worked_example": "The supplied practice scores are base 6/10, prompted 8/10, tuned 9/10. On final cases prompted is 7/10 and tuned is 6/10. These small samples do not prove a general advantage for tuning. A changed policy should first be updated in the evidence source.",
+  "exam": [
+    {
+      "question": "Which method suits a policy that changed yesterday?",
+      "model_answer": "Update the authoritative document and retrieval data. Fine-tuning is not a dependable store for rapidly changing facts.",
+      "marks": 4
+    },
+    {
+      "question": "What does LoRA reduce compared with full fine-tuning?",
+      "model_answer": "The number of trainable parameters by using low-rank updates. It does not remove the need for data quality or evaluation.",
+      "marks": 4
+    },
+    {
+      "question": "Can 9/10 on practice cases prove deployment quality?",
+      "model_answer": "No. Use a separate test set, examine failures and report the small denominator.",
+      "marks": 4
+    }
+  ],
+  "resources": [
+    {
+      "id": "O1",
+      "publisher": "OpenAI",
+      "title": "Evaluation best practices",
+      "url": "https://developers.openai.com/api/docs/guides/evaluation-best-practices",
+      "type": "Official guide",
+      "use": "Task-specific testing, repeated outputs and separate evaluation cases.",
+      "checked_date": "2026-09-28",
+      "verification": "Official page/search metadata reviewed"
+    },
+    {
+      "id": "N2",
+      "publisher": "NVIDIA",
+      "title": "NeMo Framework overview",
+      "url": "https://docs.nvidia.com/nemo-framework/user-guide/latest/overview.html",
+      "type": "Official documentation",
+      "use": "Instructor background on model customization; no NVIDIA setup required in core labs.",
+      "checked_date": "2026-09-28",
+      "verification": "Official page/search metadata reviewed"
+    },
+    {
+      "id": "N3",
+      "publisher": "NVIDIA",
+      "title": "Supported PEFT methods: LoRA",
+      "url": "https://docs.nvidia.com/nemo-framework/user-guide/25.02/sft_peft/supported_methods.html",
+      "type": "Official versioned guide",
+      "use": "Frozen base weights and low-rank updates. Read the concept section; live setup is optional.",
+      "checked_date": "2026-09-28",
+      "verification": "Official indexed source reviewed"
+    }
+  ],
+  "study_task": "Draw the main diagram from memory, explain each arrow, then check it against the slides. Answer the three questions without notes before reading the model answers.",
+  "reference_note": "Selected source concepts inform the lesson. Examples, figures, questions and solutions are original classroom material; no exam questions are claimed to be official."
+}

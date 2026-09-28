@@ -1,0 +1,112 @@
+Section 7: Module Descriptors
+AI Technologies
+Note: The hours outlined in the table above represent the base mode of full-time on campus delivery.  This programme will also be available through part-time online delivery.  The required hours of learning effort for this delivery mode are available in the Programme Schedule
+Note: The assessment techniques outlined in the table above represent the base mode of full-time on campus delivery.  This programme will also be available through part-time online delivery. The assessment techniques for this delivery mode are available in the Programme Schedule.
+
+
+
+
+
+Note: The assessment strategy outlined in the table above represent the base mode of full-time on campus delivery.  This programme will also be available through part-time online delivery.  The assessment strategy for this delivery mode is available in the Programme Schedule
+
+
+
+7.1	Module Overview (copy and paste for other modules)
+Module Number |  | Module Title | AI Technologies
+Stage of Principal Programme | 1 | Semester
+(if applicable) | Duration. (Weeks F/T) | 12 | ECTS | 10
+Mandatory / Elective (M/E) | M | Hours of Learner Effort / Week | 4 | 
+Analysis of required hours of learning effort
+Teaching and Learning Modalities | ✔if relevant to this module | Approx. proportion of total (hours)
+Direct Contact Hours
+On-site face-to-face  | ✔ |  48
+Synchronous online | 
+Synchronous blended | 
+Indirect/Non-contact Hours
+Asynchronous  | 
+Independent Learning  | 
+Work Based | 
+Other (Identify) | ✔ | 202
+Total | 250
+Pre-Requisite Module, if any.  Module Number and Title | N/A
+Co-Requisite Module, if any.  Module Number and Title | N/A
+Maximum number of learners per instance of the module | 70
+Specification of the qualifications (academic, pedagogical and professional/occupational) and experience required of staff working in this module.
+Role e.g., 
+Tutor, Mentor, Lecturer, Research Supervisor, etc. | 
+Qualifications & experience required | 
+Staff (X) : Learner (Y) Ratio  
+Express as X:Y
+Lecture | Master’s/PhD in computing or AI/Data Analytics.  Industry experience from this domain is applicable.  | 1:70
+
+Tutor | Master’s degree in a computing or cognate discipline. May have industry experience also.  | 1:25
+
+
+Assessment Techniques – percentage contribution
+Continuous Assessment  |  | Proctored Exam – in person | Practical Skills Based
+Project | 100% | Proctored Exam - online |  | Work Based
+Capstone modules (Yes/No)? | N | If Yes, provide details | 
+7.2	Minimum Intended Module Learning Outcomes (MIMLOs)
+MIMLO
+On successful completion of this module a learner will be able to: | Related MIPLO #
+Critically evaluate and synthesise contemporary Artificial Intelligence technologies including Machine Learning, Deep Learning, Generative AI, foundation models, and agent-based AI systems to determine their strategic relevance and organisational impact across diverse business contexts. | 1, 3
+Analyse organisational business and data requirements and formulate feasible, end-to-end AI-enabled solutions aligning technological capabilities with strategic and operational objectives. | 2, 3
+Critically assess and apply principles of data governance, ethical AI, regulatory compliance, explainability, and sustainability to ensure responsible, transparent, and trustworthy deployment of AI in enterprise and societal contexts. | 1, 5
+Synthesize and communicate AI-driven transformation opportunities and implementation strategies to technical and non-technical stakeholders, demonstrating leadership, professional judgement.  | 2, 4
+Conduct and integrate evidence-based academic and market research to justify AI technology selection, enterprise adoption strategies, and innovation initiatives in business environments. | 3, 6
+7.3	Indicative Module Content, Organisation and Structure
+
+
+7.4	Work based learning and practice-placement (if applicable)
+
+N/A
+
+7.5	Specific module resources required (if applicable)
+
+Access to NCI’s Student Portal (e.g., Moodle, Helpdesk, Library resources, student email, and timetables) 
+Access to high speed Wi-Fi network. 
+BYOD laptop Requirements: 16GB of RAM (32GB recommended); a 64-bit x86 processor (Intel i7 or superior); 100+ GB of hard disk; and a recent installed release of Linux, Mac OS or Windows operating system 
+Laptop charging points 
+Library resources (see further details below)
+7.6	Application of programme teaching, learning and assessment strategies to this module
+Teaching & Learning: 
+The learning strategy combines lectures, tutorials, case studies, exercises, group discussions and independent learning. The module follows a learner-centred and will be assigned tasks and exercises (both independent and group) related to lecture content so that they can connect the theory to practice. Students will benefit from mentoring and formative feedback during classes. All module resources are made available to learners via the Moodle learning management system. 
+Sessions are highly interactive, incorporating opportunities for learning by doing, collaborative discussion, and peer feedback. 
+Techniques such as flipped classroom resources, online videos with step-by-step demonstrations, and Moodle tools (forums, lessons, and submission checkpoints) may be used to support independent learning.  
+
+Assessment: 
+Produce a project report of studies that critically demonstrates your understanding of AI concepts and techniques along with identifying AI applications in any Industry or Domain. The goal of this project is to develop a high-level understanding of AI concepts and methods that can reveal business solutions in different industries where AI can be applied. Identify AI applications and possible solutions, state-of-the-art techniques used in the system, tools, and publications. Projects will be assessed based on their novelty, technical quality, potential impact, insightfulness, depth, clarity, and reproducibility. Algorithms and techniques used in publications should be described as completely as possible to allow reproducibility. This includes industry research, problem identification, investigation, evaluations, and conclusion.  
+
+Re-assessment: 
+
+Re-assessment of this module will consist of the resubmission of an individual project that demonstrates achievement of the minimum intended learning outcomes.  All learning outcomes will be reassessed in the repeat attempt, and students will be afforded opportunities to resubmit at specified times throughout the academic year. 
+7.7	Summative Assessment Strategy for this module
+MIMLOs | Technique(s) | Weighting
+1,2,3,4,5 | Group Project  | 100%
+
+
+7.8	Sample Assessment Materials
+Sample assessment materials can be found in Appendix. 
+7.9	Indicative reading lists and other information resources
+Recommended 
+•	Davenport, T. H. (2024). All Hands on Tech: The AI-Powered Enterprise. MIT Press. 
+•	(Enterprise-wide perspective on AI technologies, analytics, and organisational impact.) 
+•	 Iansiti, M. & Lakhani, K. R. (2024). Competing in the Age of AI: Strategy and Leadership (Updated Edition). Harvard Business School Press. 
+•	Marr, B. (2024). Future Skills: The 20 Skills and Competencies Everyone Needs to Succeed in a Digital World. Wiley. 
+•	Gartner. (2024). Magic Quadrant for Analytics and Business Intelligence Platforms. 
+Supplementary  
+•	Marr, B. (2023). Artificial Intelligence in Practice (2nd ed.). Wiley. 
+•	McKinsey Global Institute. (2023). The State of AI in 2023. 
+ 
+Additional Online / Information Resources (2024–2025) 
+•	Gartner (2024–2025). Hype Cycle for Artificial Intelligence 
+•	McKinsey Global Institute (2024). The Economic Potential of Generative AI and Advanced Analytics 
+•	World Economic Forum (2025). Artificial Intelligence in Business: Adoption, Value, and Risk 
+ Industry Reports (Non-technical) 
+McKinsey Global Institute – AI Frontier Report 
+Deloitte – State of AI in the Enterprise 
+Accenture – AI: Built to Scale 
+Gartner – AI Maturity & Strategy 
+ACM Digital Library – comprehensive resources in computer science and information systems. 
+NCI Library Harvard Referencing Guide – for guidance on academic referencing. 
+Harvard Business Review 

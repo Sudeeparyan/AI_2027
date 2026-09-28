@@ -1,0 +1,46 @@
+{
+  "outcomes": "LO4, LO5",
+  "plain_explanation": "A clear extraction prompt specifies the fields, the source and the missing-value rule. Validate the result in layers: syntax, schema, factual support, then business rules. A schema-valid dictionary can still contain a wrong amount.",
+  "worked_example": "An invoice shows quantity 3 and unit price 12 but no printed total. The extracted listed_total should remain None. A separate calculated_total may be 36. Keeping these fields separate prevents a calculation being misrepresented as transcription.",
+  "exam": [
+    {
+      "question": "Write a missing-value instruction for invoice extraction.",
+      "model_answer": "Use only the provided invoice. Return null for an absent field and do not infer or invent the printed total.",
+      "marks": 4
+    },
+    {
+      "question": "A JSON response contains a valid number for an absent total. Does it pass?",
+      "model_answer": "It may pass schema validation but fails evidence validation.",
+      "marks": 4
+    },
+    {
+      "question": "Why store listed_total and calculated_total separately?",
+      "model_answer": "They answer different questions: what the document says and what arithmetic implies.",
+      "marks": 4
+    }
+  ],
+  "resources": [
+    {
+      "id": "O1",
+      "publisher": "OpenAI",
+      "title": "Evaluation best practices",
+      "url": "https://developers.openai.com/api/docs/guides/evaluation-best-practices",
+      "type": "Official guide",
+      "use": "Task-specific testing, repeated outputs and separate evaluation cases.",
+      "checked_date": "2026-09-28",
+      "verification": "Official page/search metadata reviewed"
+    },
+    {
+      "id": "O3",
+      "publisher": "OpenAI Academy",
+      "title": "Prompting",
+      "url": "https://academy.openai.com/en/public/clubs/work-users-ynjqu/resources/prompting",
+      "type": "Official learning resource",
+      "use": "Task, context, expected format and iterative improvement.",
+      "checked_date": "2026-09-28",
+      "verification": "Official page/search metadata reviewed"
+    }
+  ],
+  "study_task": "Draw the main diagram from memory, explain each arrow, then check it against the slides. Answer the three questions without notes before reading the model answers.",
+  "reference_note": "Selected source concepts inform the lesson. Examples, figures, questions and solutions are original classroom material; no exam questions are claimed to be official."
+}

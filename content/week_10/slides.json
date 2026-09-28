@@ -1,0 +1,614 @@
+{
+  "s01": {
+    "title": "Week 10 · Working with an image or document",
+    "explanation": "The €54 invoice\n\nAn invoice image lists two items at €20 and €5 tax, yet displays €54 total. A model reads €54 correctly. Should the payment pass?",
+    "speaker_notes": "TEACHER SCRIPT — OPEN. Show the visual for ten seconds, then ask for an initial decision. Do not reveal the answer yet. Ask a student to name the source or measurement that would change their mind. This week’s case is: A synthetic invoice image has fields supplied by a prepared transcription. The visible slide states: The €54 invoice\n\nAn invoice image lists two items at €20 and €5 tax, yet displays €54 total. A model reads €54 correctly. Should the payment pass? Reveal that the case will be revisited after four short concept cycles. The target is: Distinguish reading from independently checking a document value. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "story",
+      "items": [
+        "The €54 invoice",
+        "What is known?",
+        "What must we check?"
+      ]
+    },
+    "teaching_stage": "open"
+  },
+  "s02": {
+    "title": "First vote: what would you do?",
+    "explanation": "An invoice image lists two items at €20 and €5 tax, yet displays €54 total. A model reads €54 correctly. Should the payment pass?\n\nChoose an initial answer and name one piece of evidence you need.",
+    "speaker_notes": "TEACHER SCRIPT — QUESTION. Take a show of hands for each choice before showing the mechanism. Ask pairs to defend a choice with evidence. Save the strongest wrong reason for the reveal later in this cycle. This week’s case is: A synthetic invoice image has fields supplied by a prepared transcription. The visible slide states: An invoice image lists two items at €20 and €5 tax, yet displays €54 total. A model reads €54 correctly. Should the payment pass?\n\nChoose an initial answer and name one piece of evidence you need. Accept reasonable uncertainty; record the initial votes to revisit at the end. The target is: Distinguish reading from independently checking a document value. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "Accept the first plausible result",
+        "Check the source or measurement"
+      ]
+    },
+    "teaching_stage": "question"
+  },
+  "s03": {
+    "title": "The journey through today’s case",
+    "explanation": "We will predict, connect an analogy, trace a mechanism, work an example, then explain a decision.",
+    "speaker_notes": "TEACHER SCRIPT — OPEN. Show the visual for ten seconds, then ask for an initial decision. Do not reveal the answer yet. Ask a student to name the source or measurement that would change their mind. This week’s case is: A synthetic invoice image has fields supplied by a prepared transcription. The visible slide states: We will predict, connect an analogy, trace a mechanism, work an example, then explain a decision. Point to the four named ideas, then show where the notebook experiment fits. The target is: Distinguish reading from independently checking a document value. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "Multimodal input",
+        "Extraction",
+        "Verification",
+        "Uncertainty"
+      ]
+    },
+    "teaching_stage": "open"
+  },
+  "s04": {
+    "title": "1. Predict · Multimodal input",
+    "explanation": "What capability is represented by the supplied transcription?\n\nMake a choice before we explain the diagram.",
+    "speaker_notes": "TEACHER SCRIPT — QUESTION. Take a show of hands for each choice before showing the mechanism. Ask pairs to defend a choice with evidence. Save the strongest wrong reason for the reveal later in this cycle. This week’s case is: A synthetic invoice image has fields supplied by a prepared transcription. The visible slide states: What capability is represented by the supplied transcription?\n\nMake a choice before we explain the diagram. The intended answer is An upstream reading step, whose accuracy still needs checking. The tempting claim is The notebook itself recognises image pixels. Do not show which card is correct until the reveal. The target is: Distinguish reading from independently checking a document value. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "An upstream reading step, whose accuracy still needs checking.",
+        "The notebook itself recognises image pixels."
+      ]
+    },
+    "teaching_stage": "question"
+  },
+  "s05": {
+    "title": "Multimodal input · a familiar picture",
+    "explanation": "A person can read a photo and a text note together.\n\nWhat matches our case, and where does the analogy stop?",
+    "speaker_notes": "TEACHER SCRIPT — ANALOGY. Begin with the familiar scene. Invite learners to describe each part in everyday language. Then ask where the comparison might fail before introducing the technical vocabulary. This week’s case is: A synthetic invoice image has fields supplied by a prepared transcription. The visible slide states: A person can read a photo and a text note together.\n\nWhat matches our case, and where does the analogy stop? The boundary is: This notebook uses a prepared transcription; it does not run OCR or test a vision model. The target is: Distinguish reading from independently checking a document value. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "analogy",
+      "items": [
+        "Photo",
+        "Reader",
+        "Typed note"
+      ],
+      "caption": "A person can read a photo and a text note together."
+    },
+    "teaching_stage": "analogy"
+  },
+  "s06": {
+    "title": "Multimodal input · map the parts",
+    "explanation": "Match each everyday part to the technical part.\n\nAnalogy limit: This notebook uses a prepared transcription; it does not run OCR or test a vision model.",
+    "speaker_notes": "TEACHER SCRIPT — MAPPING. Point from each familiar element to the corresponding technical element. Have students cover the right column and reconstruct the three matches. Read the limitation aloud. This week’s case is: A synthetic invoice image has fields supplied by a prepared transcription. The visible slide states: Match each everyday part to the technical part.\n\nAnalogy limit: This notebook uses a prepared transcription; it does not run OCR or test a vision model. The three precise mappings are [['Photo', 'visual input'], ['Reader', 'OCR or vision step'], ['Typed note', 'transcribed text']]. The target is: Distinguish reading from independently checking a document value. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "map",
+      "pairs": [
+        [
+          "Photo",
+          "visual input"
+        ],
+        [
+          "Reader",
+          "OCR or vision step"
+        ],
+        [
+          "Typed note",
+          "transcribed text"
+        ]
+      ]
+    },
+    "teaching_stage": "mapping"
+  },
+  "s07": {
+    "title": "Multimodal input · how it works",
+    "explanation": "A system may process text, images or other signals. Here the transcription stands in for an image reader.\n\nTrace the arrows from left to right.",
+    "speaker_notes": "TEACHER SCRIPT — MECHANISM. Trace every arrow slowly from the input to the output. Ask what information crosses the boundary at each arrow. Pause if students confuse a simplified notebook with a trained model. This week’s case is: A synthetic invoice image has fields supplied by a prepared transcription. The visible slide states: A system may process text, images or other signals. Here the transcription stands in for an image reader.\n\nTrace the arrows from left to right. The weekly example is: The prepared text records quantity 2, unit price €20, tax €5 and listed total €54. State what the analogy does not explain: This notebook uses a prepared transcription; it does not run OCR or test a vision model. The target is: Distinguish reading from independently checking a document value. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Image or scan",
+        "Vision/OCR reader",
+        "Transcribed text"
+      ]
+    },
+    "teaching_stage": "mechanism"
+  },
+  "s08": {
+    "title": "Multimodal input · work one case",
+    "explanation": "The prepared text records quantity 2, unit price €20, tax €5 and listed total €54.\n\nPoint to the evidence before giving your conclusion.",
+    "speaker_notes": "TEACHER SCRIPT — WORKED. Work the specific numbers or source wording aloud. Give students thirty seconds to write a conclusion, then ask which source line or calculation supports it. This week’s case is: A synthetic invoice image has fields supplied by a prepared transcription. The visible slide states: The prepared text records quantity 2, unit price €20, tax €5 and listed total €54.\n\nPoint to the evidence before giving your conclusion. The expected reasoning concludes: An upstream reading step, whose accuracy still needs checking. Distinguish measured results from illustrative numbers. The target is: Distinguish reading from independently checking a document value. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "work",
+      "items": [
+        "The prepared text records quantity 2, unit price €20, tax €5 and listed total €54.",
+        "What capability is represented by the supplied transcription?",
+        "An upstream reading step, whose accuracy still needs checking."
+      ]
+    },
+    "teaching_stage": "worked"
+  },
+  "s09": {
+    "title": "Multimodal input · answer and explain",
+    "explanation": "An upstream reading step, whose accuracy still needs checking.\n\nTempting mistake: The notebook itself recognises image pixels.",
+    "speaker_notes": "TEACHER SCRIPT — REVEAL. Return to the earlier choice. Explain the correct answer and why the tempting claim fails. Ask one learner to say the answer in a single sentence without reading it. This week’s case is: A synthetic invoice image has fields supplied by a prepared transcription. The visible slide states: An upstream reading step, whose accuracy still needs checking.\n\nTempting mistake: The notebook itself recognises image pixels. The earlier question was What capability is represented by the supplied transcription? Ask how this differs from the wrong claim. The target is: Distinguish reading from independently checking a document value. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "reveal",
+      "items": [
+        "The notebook itself recognises image pixels.",
+        "An upstream reading step, whose accuracy still needs checking."
+      ],
+      "caption": "This notebook uses a prepared transcription; it does not run OCR or test a vision model."
+    },
+    "teaching_stage": "reveal"
+  },
+  "s10": {
+    "title": "2. Predict · Extraction",
+    "explanation": "What does a source pointer let another person do?\n\nMake a choice before we explain the diagram.",
+    "speaker_notes": "TEACHER SCRIPT — QUESTION. Take a show of hands for each choice before showing the mechanism. Ask pairs to defend a choice with evidence. Save the strongest wrong reason for the reveal later in this cycle. This week’s case is: A synthetic invoice image has fields supplied by a prepared transcription. The visible slide states: What does a source pointer let another person do?\n\nMake a choice before we explain the diagram. The intended answer is Find and verify the value in the original document. The tempting claim is A correctly formatted field proves its source. Do not show which card is correct until the reveal. The target is: Distinguish reading from independently checking a document value. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "Find and verify the value in the original document.",
+        "A correctly formatted field proves its source."
+      ]
+    },
+    "teaching_stage": "question"
+  },
+  "s11": {
+    "title": "Extraction · a familiar picture",
+    "explanation": "An auditor writes the page and line beside every copied number.\n\nWhat matches our case, and where does the analogy stop?",
+    "speaker_notes": "TEACHER SCRIPT — ANALOGY. Begin with the familiar scene. Invite learners to describe each part in everyday language. Then ask where the comparison might fail before introducing the technical vocabulary. This week’s case is: A synthetic invoice image has fields supplied by a prepared transcription. The visible slide states: An auditor writes the page and line beside every copied number.\n\nWhat matches our case, and where does the analogy stop? The boundary is: A pointer can be wrong or ambiguous, especially with poor image quality. The target is: Distinguish reading from independently checking a document value. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "analogy",
+      "items": [
+        "Printed number",
+        "Copied value",
+        "Page pointer"
+      ],
+      "caption": "An auditor writes the page and line beside every copied number."
+    },
+    "teaching_stage": "analogy"
+  },
+  "s12": {
+    "title": "Extraction · map the parts",
+    "explanation": "Match each everyday part to the technical part.\n\nAnalogy limit: A pointer can be wrong or ambiguous, especially with poor image quality.",
+    "speaker_notes": "TEACHER SCRIPT — MAPPING. Point from each familiar element to the corresponding technical element. Have students cover the right column and reconstruct the three matches. Read the limitation aloud. This week’s case is: A synthetic invoice image has fields supplied by a prepared transcription. The visible slide states: Match each everyday part to the technical part.\n\nAnalogy limit: A pointer can be wrong or ambiguous, especially with poor image quality. The three precise mappings are [['Printed number', 'visible field'], ['Copied value', 'extraction'], ['Page pointer', 'source location']]. The target is: Distinguish reading from independently checking a document value. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "map",
+      "pairs": [
+        [
+          "Printed number",
+          "visible field"
+        ],
+        [
+          "Copied value",
+          "extraction"
+        ],
+        [
+          "Page pointer",
+          "source location"
+        ]
+      ]
+    },
+    "teaching_stage": "mapping"
+  },
+  "s13": {
+    "title": "Extraction · how it works",
+    "explanation": "Read fields present in the document and retain a pointer to the source.\n\nTrace the arrows from left to right.",
+    "speaker_notes": "TEACHER SCRIPT — MECHANISM. Trace every arrow slowly from the input to the output. Ask what information crosses the boundary at each arrow. Pause if students confuse a simplified notebook with a trained model. This week’s case is: A synthetic invoice image has fields supplied by a prepared transcription. The visible slide states: Read fields present in the document and retain a pointer to the source.\n\nTrace the arrows from left to right. The weekly example is: Record “listed_total = €54” with the invoice field location; keep calculation separate. State what the analogy does not explain: A pointer can be wrong or ambiguous, especially with poor image quality. The target is: Distinguish reading from independently checking a document value. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Visible field",
+        "Extract exact value",
+        "Source pointer"
+      ]
+    },
+    "teaching_stage": "mechanism"
+  },
+  "s14": {
+    "title": "Extraction · work one case",
+    "explanation": "Record “listed_total = €54” with the invoice field location; keep calculation separate.\n\nPoint to the evidence before giving your conclusion.",
+    "speaker_notes": "TEACHER SCRIPT — WORKED. Work the specific numbers or source wording aloud. Give students thirty seconds to write a conclusion, then ask which source line or calculation supports it. This week’s case is: A synthetic invoice image has fields supplied by a prepared transcription. The visible slide states: Record “listed_total = €54” with the invoice field location; keep calculation separate.\n\nPoint to the evidence before giving your conclusion. The expected reasoning concludes: Find and verify the value in the original document. Distinguish measured results from illustrative numbers. The target is: Distinguish reading from independently checking a document value. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "work",
+      "items": [
+        "Record “listed_total = €54” with the invoice field location; keep calculation separate.",
+        "What does a source pointer let another person do?",
+        "Find and verify the value in the original document."
+      ]
+    },
+    "teaching_stage": "worked"
+  },
+  "s15": {
+    "title": "Extraction · answer and explain",
+    "explanation": "Find and verify the value in the original document.\n\nTempting mistake: A correctly formatted field proves its source.",
+    "speaker_notes": "TEACHER SCRIPT — REVEAL. Return to the earlier choice. Explain the correct answer and why the tempting claim fails. Ask one learner to say the answer in a single sentence without reading it. This week’s case is: A synthetic invoice image has fields supplied by a prepared transcription. The visible slide states: Find and verify the value in the original document.\n\nTempting mistake: A correctly formatted field proves its source. The earlier question was What does a source pointer let another person do? Ask how this differs from the wrong claim. The target is: Distinguish reading from independently checking a document value. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "reveal",
+      "items": [
+        "A correctly formatted field proves its source.",
+        "Find and verify the value in the original document."
+      ],
+      "caption": "A pointer can be wrong or ambiguous, especially with poor image quality."
+    },
+    "teaching_stage": "reveal"
+  },
+  "s16": {
+    "title": "3. Predict · Verification",
+    "explanation": "Does reading €54 correctly make it a correct payable total?\n\nMake a choice before we explain the diagram.",
+    "speaker_notes": "TEACHER SCRIPT — QUESTION. Take a show of hands for each choice before showing the mechanism. Ask pairs to defend a choice with evidence. Save the strongest wrong reason for the reveal later in this cycle. This week’s case is: A synthetic invoice image has fields supplied by a prepared transcription. The visible slide states: Does reading €54 correctly make it a correct payable total?\n\nMake a choice before we explain the diagram. The intended answer is No. The independent arithmetic disagrees by €9. The tempting claim is Accurate OCR implies accurate arithmetic. Do not show which card is correct until the reveal. The target is: Distinguish reading from independently checking a document value. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "No. The independent arithmetic disagrees by €9.",
+        "Accurate OCR implies accurate arithmetic."
+      ]
+    },
+    "teaching_stage": "question"
+  },
+  "s17": {
+    "title": "Verification · a familiar picture",
+    "explanation": "A cashier recomputes a bill instead of trusting the printed sum.\n\nWhat matches our case, and where does the analogy stop?",
+    "speaker_notes": "TEACHER SCRIPT — ANALOGY. Begin with the familiar scene. Invite learners to describe each part in everyday language. Then ask where the comparison might fail before introducing the technical vocabulary. This week’s case is: A synthetic invoice image has fields supplied by a prepared transcription. The visible slide states: A cashier recomputes a bill instead of trusting the printed sum.\n\nWhat matches our case, and where does the analogy stop? The boundary is: Real invoices may have discounts and other rules; specify the case assumptions. The target is: Distinguish reading from independently checking a document value. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "analogy",
+      "items": [
+        "Items",
+        "Tax",
+        "Independent sum"
+      ],
+      "caption": "A cashier recomputes a bill instead of trusting the printed sum."
+    },
+    "teaching_stage": "analogy"
+  },
+  "s18": {
+    "title": "Verification · map the parts",
+    "explanation": "Match each everyday part to the technical part.\n\nAnalogy limit: Real invoices may have discounts and other rules; specify the case assumptions.",
+    "speaker_notes": "TEACHER SCRIPT — MAPPING. Point from each familiar element to the corresponding technical element. Have students cover the right column and reconstruct the three matches. Read the limitation aloud. This week’s case is: A synthetic invoice image has fields supplied by a prepared transcription. The visible slide states: Match each everyday part to the technical part.\n\nAnalogy limit: Real invoices may have discounts and other rules; specify the case assumptions. The three precise mappings are [['Items', '2 × €20'], ['Tax', '€5'], ['Independent sum', '€45']]. The target is: Distinguish reading from independently checking a document value. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "map",
+      "pairs": [
+        [
+          "Items",
+          "2 × €20"
+        ],
+        [
+          "Tax",
+          "€5"
+        ],
+        [
+          "Independent sum",
+          "€45"
+        ]
+      ]
+    },
+    "teaching_stage": "mapping"
+  },
+  "s19": {
+    "title": "Verification · how it works",
+    "explanation": "Recalculate totals and compare against the listed values.\n\nTrace the arrows from left to right.",
+    "speaker_notes": "TEACHER SCRIPT — MECHANISM. Trace every arrow slowly from the input to the output. Ask what information crosses the boundary at each arrow. Pause if students confuse a simplified notebook with a trained model. This week’s case is: A synthetic invoice image has fields supplied by a prepared transcription. The visible slide states: Recalculate totals and compare against the listed values.\n\nTrace the arrows from left to right. The weekly example is: 2 × €20 + €5 = €45; listed total €54, a €9 discrepancy. State what the analogy does not explain: Real invoices may have discounts and other rules; specify the case assumptions. The target is: Distinguish reading from independently checking a document value. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Quantity × price",
+        "Add tax",
+        "Compare listed total"
+      ]
+    },
+    "teaching_stage": "mechanism"
+  },
+  "s20": {
+    "title": "Verification · work one case",
+    "explanation": "2 × €20 + €5 = €45; listed total €54, a €9 discrepancy.\n\nPoint to the evidence before giving your conclusion.",
+    "speaker_notes": "TEACHER SCRIPT — WORKED. Work the specific numbers or source wording aloud. Give students thirty seconds to write a conclusion, then ask which source line or calculation supports it. This week’s case is: A synthetic invoice image has fields supplied by a prepared transcription. The visible slide states: 2 × €20 + €5 = €45; listed total €54, a €9 discrepancy.\n\nPoint to the evidence before giving your conclusion. The expected reasoning concludes: No. The independent arithmetic disagrees by €9. Distinguish measured results from illustrative numbers. The target is: Distinguish reading from independently checking a document value. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "work",
+      "items": [
+        "2 × €20 + €5 = €45; listed total €54, a €9 discrepancy.",
+        "Does reading €54 correctly make it a correct payable total?",
+        "No. The independent arithmetic disagrees by €9."
+      ]
+    },
+    "teaching_stage": "worked"
+  },
+  "s21": {
+    "title": "Verification · answer and explain",
+    "explanation": "No. The independent arithmetic disagrees by €9.\n\nTempting mistake: Accurate OCR implies accurate arithmetic.",
+    "speaker_notes": "TEACHER SCRIPT — REVEAL. Return to the earlier choice. Explain the correct answer and why the tempting claim fails. Ask one learner to say the answer in a single sentence without reading it. This week’s case is: A synthetic invoice image has fields supplied by a prepared transcription. The visible slide states: No. The independent arithmetic disagrees by €9.\n\nTempting mistake: Accurate OCR implies accurate arithmetic. The earlier question was Does reading €54 correctly make it a correct payable total? Ask how this differs from the wrong claim. The target is: Distinguish reading from independently checking a document value. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "reveal",
+      "items": [
+        "Accurate OCR implies accurate arithmetic.",
+        "No. The independent arithmetic disagrees by €9."
+      ],
+      "caption": "Real invoices may have discounts and other rules; specify the case assumptions."
+    },
+    "teaching_stage": "reveal"
+  },
+  "s22": {
+    "title": "4. Predict · Uncertainty",
+    "explanation": "What would be unsafe to store?\n\nMake a choice before we explain the diagram.",
+    "speaker_notes": "TEACHER SCRIPT — QUESTION. Take a show of hands for each choice before showing the mechanism. Ask pairs to defend a choice with evidence. Save the strongest wrong reason for the reveal later in this cycle. This week’s case is: A synthetic invoice image has fields supplied by a prepared transcription. The visible slide states: What would be unsafe to store?\n\nMake a choice before we explain the diagram. The intended answer is A guessed invoice ID presented as certain. The tempting claim is A plausible guess should be saved silently. Do not show which card is correct until the reveal. The target is: Distinguish reading from independently checking a document value. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "A guessed invoice ID presented as certain.",
+        "A plausible guess should be saved silently."
+      ]
+    },
+    "teaching_stage": "question"
+  },
+  "s23": {
+    "title": "Uncertainty · a familiar picture",
+    "explanation": "A reviewer marks an unreadable receipt field with a question mark.\n\nWhat matches our case, and where does the analogy stop?",
+    "speaker_notes": "TEACHER SCRIPT — ANALOGY. Begin with the familiar scene. Invite learners to describe each part in everyday language. Then ask where the comparison might fail before introducing the technical vocabulary. This week’s case is: A synthetic invoice image has fields supplied by a prepared transcription. The visible slide states: A reviewer marks an unreadable receipt field with a question mark.\n\nWhat matches our case, and where does the analogy stop? The boundary is: Uncertainty needs a clear workflow; marking everything uncertain is unhelpful. The target is: Distinguish reading from independently checking a document value. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "analogy",
+      "items": [
+        "Blurred area",
+        "Question mark",
+        "Second look"
+      ],
+      "caption": "A reviewer marks an unreadable receipt field with a question mark."
+    },
+    "teaching_stage": "analogy"
+  },
+  "s24": {
+    "title": "Uncertainty · map the parts",
+    "explanation": "Match each everyday part to the technical part.\n\nAnalogy limit: Uncertainty needs a clear workflow; marking everything uncertain is unhelpful.",
+    "speaker_notes": "TEACHER SCRIPT — MAPPING. Point from each familiar element to the corresponding technical element. Have students cover the right column and reconstruct the three matches. Read the limitation aloud. This week’s case is: A synthetic invoice image has fields supplied by a prepared transcription. The visible slide states: Match each everyday part to the technical part.\n\nAnalogy limit: Uncertainty needs a clear workflow; marking everything uncertain is unhelpful. The three precise mappings are [['Blurred area', 'uncertain observation'], ['Question mark', 'review flag'], ['Second look', 'verification']]. The target is: Distinguish reading from independently checking a document value. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "map",
+      "pairs": [
+        [
+          "Blurred area",
+          "uncertain observation"
+        ],
+        [
+          "Question mark",
+          "review flag"
+        ],
+        [
+          "Second look",
+          "verification"
+        ]
+      ]
+    },
+    "teaching_stage": "mapping"
+  },
+  "s25": {
+    "title": "Uncertainty · how it works",
+    "explanation": "Mark unreadable or absent fields for review rather than inventing a value.\n\nTrace the arrows from left to right.",
+    "speaker_notes": "TEACHER SCRIPT — MECHANISM. Trace every arrow slowly from the input to the output. Ask what information crosses the boundary at each arrow. Pause if students confuse a simplified notebook with a trained model. This week’s case is: A synthetic invoice image has fields supplied by a prepared transcription. The visible slide states: Mark unreadable or absent fields for review rather than inventing a value.\n\nTrace the arrows from left to right. The weekly example is: If INV-08/INV-03 cannot be distinguished, store an uncertain ID and request review. State what the analogy does not explain: Uncertainty needs a clear workflow; marking everything uncertain is unhelpful. The target is: Distinguish reading from independently checking a document value. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Blurred or absent field",
+        "Mark uncertain",
+        "Send for review"
+      ]
+    },
+    "teaching_stage": "mechanism"
+  },
+  "s26": {
+    "title": "Uncertainty · work one case",
+    "explanation": "If INV-08/INV-03 cannot be distinguished, store an uncertain ID and request review.\n\nPoint to the evidence before giving your conclusion.",
+    "speaker_notes": "TEACHER SCRIPT — WORKED. Work the specific numbers or source wording aloud. Give students thirty seconds to write a conclusion, then ask which source line or calculation supports it. This week’s case is: A synthetic invoice image has fields supplied by a prepared transcription. The visible slide states: If INV-08/INV-03 cannot be distinguished, store an uncertain ID and request review.\n\nPoint to the evidence before giving your conclusion. The expected reasoning concludes: A guessed invoice ID presented as certain. Distinguish measured results from illustrative numbers. The target is: Distinguish reading from independently checking a document value. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "work",
+      "items": [
+        "If INV-08/INV-03 cannot be distinguished, store an uncertain ID and request review.",
+        "What would be unsafe to store?",
+        "A guessed invoice ID presented as certain."
+      ]
+    },
+    "teaching_stage": "worked"
+  },
+  "s27": {
+    "title": "Uncertainty · answer and explain",
+    "explanation": "A guessed invoice ID presented as certain.\n\nTempting mistake: A plausible guess should be saved silently.",
+    "speaker_notes": "TEACHER SCRIPT — REVEAL. Return to the earlier choice. Explain the correct answer and why the tempting claim fails. Ask one learner to say the answer in a single sentence without reading it. This week’s case is: A synthetic invoice image has fields supplied by a prepared transcription. The visible slide states: A guessed invoice ID presented as certain.\n\nTempting mistake: A plausible guess should be saved silently. The earlier question was What would be unsafe to store? Ask how this differs from the wrong claim. The target is: Distinguish reading from independently checking a document value. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "reveal",
+      "items": [
+        "A plausible guess should be saved silently.",
+        "A guessed invoice ID presented as certain."
+      ],
+      "caption": "Uncertainty needs a clear workflow; marking everything uncertain is unhelpful."
+    },
+    "teaching_stage": "reveal"
+  },
+  "s28": {
+    "title": "Evidence trail: input → result",
+    "explanation": "Calculated total is €45.\n\nListed total of €54 triggers review, even if transcription is syntactically valid.",
+    "speaker_notes": "TEACHER SCRIPT — WORKED. Work the specific numbers or source wording aloud. Give students thirty seconds to write a conclusion, then ask which source line or calculation supports it. This week’s case is: A synthetic invoice image has fields supplied by a prepared transcription. The visible slide states: Calculated total is €45.\n\nListed total of €54 triggers review, even if transcription is syntactically valid. Have one student point to an exact source word or number for each conclusion. The target is: Distinguish reading from independently checking a document value. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "work",
+      "items": [
+        "Invoice shows 2 items at €20 plus €5 tax.",
+        "Calculated total is €45.",
+        "Listed total of €54 triggers review, even if transcription is syntactically valid."
+      ]
+    },
+    "teaching_stage": "worked"
+  },
+  "s29": {
+    "title": "Notebook: run the prepared example",
+    "explanation": "Check two synthetic invoices, including a mismatched total.\n\nRead the original output before editing.",
+    "speaker_notes": "TEACHER SCRIPT — PRACTICE. Open the matching notebook and demonstrate the first run. Have learners predict one change, run only that change, and record input, setting, output and an error explanation. This week’s case is: A synthetic invoice image has fields supplied by a prepared transcription. The visible slide states: Check two synthetic invoices, including a mismatched total.\n\nRead the original output before editing. Use Week_10_Lab.ipynb. This lab is a prepared classroom demonstration with its limitations documented. The target is: Distinguish reading from independently checking a document value. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "Inspect a synthetic source transcription",
+        "Extract amount, quantity, tax and stated total",
+        "Calculate the expected total independently",
+        "Flag mismatches and retain the source ID"
+      ]
+    },
+    "teaching_stage": "practice"
+  },
+  "s30": {
+    "title": "Find the input and check in Python",
+    "explanation": "Locate the supplied input, the transformation, the checking line and the printed result.",
+    "speaker_notes": "TEACHER SCRIPT — PRACTICE. Open the matching notebook and demonstrate the first run. Have learners predict one change, run only that change, and record input, setting, output and an error explanation. This week’s case is: A synthetic invoice image has fields supplied by a prepared transcription. The visible slide states: Locate the supplied input, the transformation, the checking line and the printed result. The weekly lab change is: Correct the listed total and rerun the checker. The target is: Distinguish reading from independently checking a document value. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Input data",
+        "Python operation",
+        "Check",
+        "Recorded result"
+      ]
+    },
+    "teaching_stage": "practice"
+  },
+  "s31": {
+    "title": "Predict one controlled change",
+    "explanation": "Correct the listed total and rerun the checker.\n\nWhat should change in the result? What stays fixed?",
+    "speaker_notes": "TEACHER SCRIPT — PRACTICE. Open the matching notebook and demonstrate the first run. Have learners predict one change, run only that change, and record input, setting, output and an error explanation. This week’s case is: A synthetic invoice image has fields supplied by a prepared transcription. The visible slide states: Correct the listed total and rerun the checker.\n\nWhat should change in the result? What stays fixed? Ask learners to write their prediction before rerunning the cell. The target is: Distinguish reading from independently checking a document value. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "compare",
+      "left": "Before: original case",
+      "right": "After: one change",
+      "caption": "Keep all other inputs fixed."
+    },
+    "teaching_stage": "practice"
+  },
+  "s32": {
+    "title": "Run, compare and record",
+    "explanation": "Record the input, the one changed setting, the observed result and a reason for any difference.",
+    "speaker_notes": "TEACHER SCRIPT — PRACTICE. Open the matching notebook and demonstrate the first run. Have learners predict one change, run only that change, and record input, setting, output and an error explanation. This week’s case is: A synthetic invoice image has fields supplied by a prepared transcription. The visible slide states: Record the input, the one changed setting, the observed result and a reason for any difference. The required evidence is: Source-linked field table and calculation. The target is: Distinguish reading from independently checking a document value. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "table",
+      "rows": [
+        [
+          "Input",
+          "Setting",
+          "Result"
+        ],
+        [
+          "Original",
+          "baseline",
+          "record"
+        ],
+        [
+          "Changed",
+          "one edit",
+          "compare"
+        ]
+      ]
+    },
+    "teaching_stage": "practice"
+  },
+  "s33": {
+    "title": "Measure without hiding the denominator",
+    "explanation": "Number of correctly checked fields / fields reviewed\n\nWrite the numerator, denominator and one failure case.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: A synthetic invoice image has fields supplied by a prepared transcription. The visible slide states: Number of correctly checked fields / fields reviewed\n\nWrite the numerator, denominator and one failure case. Where a measure is qualitative, show the concrete source comparison. Example: Listed total of €54 triggers review, even if transcription is syntactically valid. The target is: Distinguish reading from independently checking a document value. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Define success",
+        "Count successes",
+        "Count cases",
+        "Inspect errors"
+      ]
+    },
+    "teaching_stage": "check"
+  },
+  "s34": {
+    "title": "Error detective: find the layer",
+    "explanation": "Plausible wrong claim: The notebook performs OCR on a real image.\n\nCorrect it using the case evidence.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: A synthetic invoice image has fields supplied by a prepared transcription. The visible slide states: Plausible wrong claim: The notebook performs OCR on a real image.\n\nCorrect it using the case evidence. The correction is This core lab uses prepared transcription to teach verification. Image/OCR integration is an optional extension. The target is: Distinguish reading from independently checking a document value. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "reveal",
+      "items": [
+        "The notebook performs OCR on a real image.",
+        "This core lab uses prepared transcription to teach verification. Image/OCR integration is an optional extension."
+      ],
+      "caption": "Name a test that would catch this failure."
+    },
+    "teaching_stage": "check"
+  },
+  "s35": {
+    "title": "Transfer to a new situation",
+    "explanation": "A blurred invoice number looks like INV-08 or INV-03. Which field should be marked uncertain?\n\nExplain which source or test would settle it.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: A synthetic invoice image has fields supplied by a prepared transcription. The visible slide states: A blurred invoice number looks like INV-08 or INV-03. Which field should be marked uncertain?\n\nExplain which source or test would settle it. This is a fresh scenario, so ask for a reason before accepting either short answer. The target is: Distinguish reading from independently checking a document value. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "Use the visible evidence",
+        "Flag missing or unsafe evidence"
+      ]
+    },
+    "teaching_stage": "check"
+  },
+  "s36": {
+    "title": "Explain it to a partner",
+    "explanation": "Without reading the slide, name the input, one processing step and the check. Your partner should ask “How do you know?”",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: A synthetic invoice image has fields supplied by a prepared transcription. The visible slide states: Without reading the slide, name the input, one processing step and the check. Your partner should ask “How do you know?” Listen for a causal explanation and one limitation, then revisit a difficult arrow on the board. The target is: Distinguish reading from independently checking a document value. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Invoice image",
+        "Prepared text",
+        "Flag mismatch"
+      ]
+    },
+    "teaching_stage": "check"
+  },
+  "s37": {
+    "title": "Exam rehearsal · explain and apply",
+    "explanation": "What is the difference between extraction and verification?\n\nWrite a short answer, then compare with the guide.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: A synthetic invoice image has fields supplied by a prepared transcription. The visible slide states: What is the difference between extraction and verification?\n\nWrite a short answer, then compare with the guide. Model answer after discussion: Extraction records the visible value. Verification checks it against arithmetic, evidence or rules. Practice marks: 4. The target is: Distinguish reading from independently checking a document value. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "State the core idea",
+        "Use a case detail or calculation",
+        "Add a limitation",
+        "Compare with the Word guide"
+      ]
+    },
+    "teaching_stage": "check"
+  },
+  "s38": {
+    "title": "Exam rehearsal · explain and apply",
+    "explanation": "Calculate the total for 2 × 20 plus 5 tax.\n\nWrite a short answer, then compare with the guide.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: A synthetic invoice image has fields supplied by a prepared transcription. The visible slide states: Calculate the total for 2 × 20 plus 5 tax.\n\nWrite a short answer, then compare with the guide. Model answer after discussion: 45. A listed value of 54 differs by 9 and should be reviewed. Practice marks: 4. The target is: Distinguish reading from independently checking a document value. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "State the core idea",
+        "Use a case detail or calculation",
+        "Add a limitation",
+        "Compare with the Word guide"
+      ]
+    },
+    "teaching_stage": "check"
+  },
+  "s39": {
+    "title": "What to hand in",
+    "explanation": "Source-linked field table and calculation.\n\nInclude the one changed input and an error explanation.",
+    "speaker_notes": "TEACHER SCRIPT — PRACTICE. Open the matching notebook and demonstrate the first run. Have learners predict one change, run only that change, and record input, setting, output and an error explanation. This week’s case is: A synthetic invoice image has fields supplied by a prepared transcription. The visible slide states: Source-linked field table and calculation.\n\nInclude the one changed input and an error explanation. This weekly evidence receives formative feedback according to the module sequence; refer to the assessment brief for graded work. The target is: Distinguish reading from independently checking a document value. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "Original run",
+        "One changed input",
+        "Comparison",
+        "Explanation + source"
+      ]
+    },
+    "teaching_stage": "practice"
+  },
+  "s40": {
+    "title": "Three ideas to recall next week",
+    "explanation": "Read the source, preserve field pointers, calculate independently, and flag discrepancies.\n\nRead the linked official sources in the Word guide and redraw one diagram from memory.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: A synthetic invoice image has fields supplied by a prepared transcription. The visible slide states: Read the source, preserve field pointers, calculate independently, and flag discrepancies.\n\nRead the linked official sources in the Word guide and redraw one diagram from memory. Return to the opening vote and ask whether the evidence changed anyone’s mind. The next week builds on this outcome: Distinguish reading from independently checking a document value. The target is: Distinguish reading from independently checking a document value. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "Multimodal input",
+        "Extraction",
+        "Verification",
+        "Uncertainty"
+      ]
+    },
+    "teaching_stage": "check"
+  }
+}

@@ -1,0 +1,77 @@
+[
+  {
+    "id": "F01",
+    "question": "Are bus tickets part of student travel costs?",
+    "role": "student",
+    "expected_sources": [
+      "P1"
+    ]
+  },
+  {
+    "id": "F02",
+    "question": "How often may library loans be extended?",
+    "role": "student",
+    "expected_sources": [
+      "P2"
+    ]
+  },
+  {
+    "id": "F03",
+    "question": "What is the original due date extension rule?",
+    "role": "student",
+    "expected_sources": [
+      "P3"
+    ]
+  },
+  {
+    "id": "F04",
+    "question": "When must academic appeals be filed?",
+    "role": "student",
+    "expected_sources": [
+      "P4"
+    ]
+  },
+  {
+    "id": "F05",
+    "question": "Explain loans extended for seven days",
+    "role": "student",
+    "expected_sources": [
+      "P2"
+    ]
+  },
+  {
+    "id": "F06",
+    "question": "Explain the deadline extension and academic appeals rules",
+    "role": "student",
+    "expected_sources": [
+      "P3",
+      "P4"
+    ]
+  },
+  {
+    "id": "F07",
+    "question": "Can students see staff payroll changes?",
+    "role": "student",
+    "expected_sources": []
+  },
+  {
+    "id": "F08",
+    "question": "Does the college provide bicycle storage?",
+    "role": "student",
+    "expected_sources": []
+  },
+  {
+    "id": "F09",
+    "question": "What is the campus parking price?",
+    "role": "student",
+    "expected_sources": []
+  },
+  {
+    "id": "F10",
+    "question": "Who approves staff payroll changes?",
+    "role": "staff",
+    "expected_sources": [
+      "P5"
+    ]
+  }
+]

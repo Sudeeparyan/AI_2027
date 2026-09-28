@@ -1,0 +1,46 @@
+{
+  "n": 6,
+  "title": "Finding useful information",
+  "goal": "Compare search strategies while preserving source and access information.",
+  "case": "Five fictional college policies must answer student questions.",
+  "terms": [
+    [
+      "Chunk",
+      "A short passage from a larger source; keep its document ID and version."
+    ],
+    [
+      "Keyword search",
+      "Matches terms in a query and passage; useful when wording overlaps."
+    ],
+    [
+      "Vector search",
+      "Compares numerical representations of text; a production embedding model can capture semantic similarity."
+    ],
+    [
+      "Access filter",
+      "Only retrieve passages that the current role is allowed to read."
+    ]
+  ],
+  "steps": [
+    "Create a five-policy corpus with access labels",
+    "Search ten questions with token overlap",
+    "Use the supplied synonym expansion as a meaning-aware proxy",
+    "Measure whether the known policy is in the top two"
+  ],
+  "example": [
+    "P2 says library loans may be extended once.",
+    "Question uses the phrase renew a book.",
+    "Exact overlap may miss P2; a simple synonym mapping improves this case but can create other misses."
+  ],
+  "misconception": "The synonym mapping is a production embedding model.",
+  "correction": "It is an inspectable proxy for class discussion. A vector index would require a tested embedding model.",
+  "change": "Remove a synonym or lower top-k from 2 to 1 and compare recall.",
+  "metric": "Recall@2 on ten labelled questions",
+  "lab": "Compare token overlap and the synonym proxy on a fixed corpus.",
+  "output": "Corpus manifest and retrieval misses with evidence IDs.",
+  "reading": [
+    "Microsoft, Retrieval augmented generation",
+    "Lewis et al., Retrieval-Augmented Generation"
+  ],
+  "code": "search"
+}

@@ -1,0 +1,615 @@
+{
+  "s01": {
+    "title": "Week 03 · Diffusion and generated media",
+    "explanation": "The consent-safe poster\n\nA team requests a synthetic poster. The output looks vivid but may show a recognisable person. How do generation and review interact?",
+    "speaker_notes": "TEACHER SCRIPT — OPEN. Show the visual for ten seconds, then ask for an initial decision. Do not reveal the answer yet. Ask a student to name the source or measurement that would change their mind. This week’s case is: A college needs a synthetic poster image while respecting consent and image rights. The visible slide states: The consent-safe poster\n\nA team requests a synthetic poster. The output looks vivid but may show a recognisable person. How do generation and review interact? Reveal that the case will be revisited after four short concept cycles. The target is: Explain the denoising idea and judge an image with a consistent checklist. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "story",
+      "items": [
+        "The consent-safe poster",
+        "What is known?",
+        "What must we check?"
+      ]
+    },
+    "teaching_stage": "open"
+  },
+  "s02": {
+    "title": "First vote: what would you do?",
+    "explanation": "A team requests a synthetic poster. The output looks vivid but may show a recognisable person. How do generation and review interact?\n\nChoose an initial answer and name one piece of evidence you need.",
+    "speaker_notes": "TEACHER SCRIPT — QUESTION. Take a show of hands for each choice before showing the mechanism. Ask pairs to defend a choice with evidence. Save the strongest wrong reason for the reveal later in this cycle. This week’s case is: A college needs a synthetic poster image while respecting consent and image rights. The visible slide states: A team requests a synthetic poster. The output looks vivid but may show a recognisable person. How do generation and review interact?\n\nChoose an initial answer and name one piece of evidence you need. Accept reasonable uncertainty; record the initial votes to revisit at the end. The target is: Explain the denoising idea and judge an image with a consistent checklist. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "Accept the first plausible result",
+        "Check the source or measurement"
+      ]
+    },
+    "teaching_stage": "question"
+  },
+  "s03": {
+    "title": "The journey through today’s case",
+    "explanation": "We will predict, connect an analogy, trace a mechanism, work an example, then explain a decision.",
+    "speaker_notes": "TEACHER SCRIPT — OPEN. Show the visual for ten seconds, then ask for an initial decision. Do not reveal the answer yet. Ask a student to name the source or measurement that would change their mind. This week’s case is: A college needs a synthetic poster image while respecting consent and image rights. The visible slide states: We will predict, connect an analogy, trace a mechanism, work an example, then explain a decision. Point to the four named ideas, then show where the notebook experiment fits. The target is: Explain the denoising idea and judge an image with a consistent checklist. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "Forward noising",
+        "Denoising model",
+        "Conditioning",
+        "Image review"
+      ]
+    },
+    "teaching_stage": "open"
+  },
+  "s04": {
+    "title": "1. Predict · Forward noising",
+    "explanation": "Which direction is used while preparing training pairs?\n\nMake a choice before we explain the diagram.",
+    "speaker_notes": "TEACHER SCRIPT — QUESTION. Take a show of hands for each choice before showing the mechanism. Ask pairs to defend a choice with evidence. Save the strongest wrong reason for the reveal later in this cycle. This week’s case is: A college needs a synthetic poster image while respecting consent and image rights. The visible slide states: Which direction is used while preparing training pairs?\n\nMake a choice before we explain the diagram. The intended answer is Forward: progressively add noise to a clean example. The tempting claim is The model learns by removing noise before any noise is added. Do not show which card is correct until the reveal. The target is: Explain the denoising idea and judge an image with a consistent checklist. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "Forward: progressively add noise to a clean example.",
+        "The model learns by removing noise before any noise is added."
+      ]
+    },
+    "teaching_stage": "question"
+  },
+  "s05": {
+    "title": "Forward noising · a familiar picture",
+    "explanation": "A photograph becomes harder to see as fog builds in small steps.\n\nWhat matches our case, and where does the analogy stop?",
+    "speaker_notes": "TEACHER SCRIPT — ANALOGY. Begin with the familiar scene. Invite learners to describe each part in everyday language. Then ask where the comparison might fail before introducing the technical vocabulary. This week’s case is: A college needs a synthetic poster image while respecting consent and image rights. The visible slide states: A photograph becomes harder to see as fog builds in small steps.\n\nWhat matches our case, and where does the analogy stop? The boundary is: Noise is mathematically sampled; real fog is not the model’s training process. The target is: Explain the denoising idea and judge an image with a consistent checklist. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "analogy",
+      "items": [
+        "Clear image",
+        "Added fog",
+        "Fog level"
+      ],
+      "caption": "A photograph becomes harder to see as fog builds in small steps."
+    },
+    "teaching_stage": "analogy"
+  },
+  "s06": {
+    "title": "Forward noising · map the parts",
+    "explanation": "Match each everyday part to the technical part.\n\nAnalogy limit: Noise is mathematically sampled; real fog is not the model’s training process.",
+    "speaker_notes": "TEACHER SCRIPT — MAPPING. Point from each familiar element to the corresponding technical element. Have students cover the right column and reconstruct the three matches. Read the limitation aloud. This week’s case is: A college needs a synthetic poster image while respecting consent and image rights. The visible slide states: Match each everyday part to the technical part.\n\nAnalogy limit: Noise is mathematically sampled; real fog is not the model’s training process. The three precise mappings are [['Clear image', 'training example'], ['Added fog', 'forward noise'], ['Fog level', 'time step']]. The target is: Explain the denoising idea and judge an image with a consistent checklist. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "map",
+      "pairs": [
+        [
+          "Clear image",
+          "training example"
+        ],
+        [
+          "Added fog",
+          "forward noise"
+        ],
+        [
+          "Fog level",
+          "time step"
+        ]
+      ]
+    },
+    "teaching_stage": "mapping"
+  },
+  "s07": {
+    "title": "Forward noising · how it works",
+    "explanation": "In a common training setup, progressively add noise to a clean image.\n\nTrace the arrows from left to right.",
+    "speaker_notes": "TEACHER SCRIPT — MECHANISM. Trace every arrow slowly from the input to the output. Ask what information crosses the boundary at each arrow. Pause if students confuse a simplified notebook with a trained model. This week’s case is: A college needs a synthetic poster image while respecting consent and image rights. The visible slide states: In a common training setup, progressively add noise to a clean image.\n\nTrace the arrows from left to right. The weekly example is: At low noise the L-shaped grid remains visible; at high noise most cells are obscured. State what the analogy does not explain: Noise is mathematically sampled; real fog is not the model’s training process. The target is: Explain the denoising idea and judge an image with a consistent checklist. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Clean example",
+        "Add gradual noise",
+        "Noisy training input"
+      ]
+    },
+    "teaching_stage": "mechanism"
+  },
+  "s08": {
+    "title": "Forward noising · work one case",
+    "explanation": "At low noise the L-shaped grid remains visible; at high noise most cells are obscured.\n\nPoint to the evidence before giving your conclusion.",
+    "speaker_notes": "TEACHER SCRIPT — WORKED. Work the specific numbers or source wording aloud. Give students thirty seconds to write a conclusion, then ask which source line or calculation supports it. This week’s case is: A college needs a synthetic poster image while respecting consent and image rights. The visible slide states: At low noise the L-shaped grid remains visible; at high noise most cells are obscured.\n\nPoint to the evidence before giving your conclusion. The expected reasoning concludes: Forward: progressively add noise to a clean example. Distinguish measured results from illustrative numbers. The target is: Explain the denoising idea and judge an image with a consistent checklist. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "work",
+      "items": [
+        "At low noise the L-shaped grid remains visible; at high noise most cells are obscured.",
+        "Which direction is used while preparing training pairs?",
+        "Forward: progressively add noise to a clean example."
+      ]
+    },
+    "teaching_stage": "worked"
+  },
+  "s09": {
+    "title": "Forward noising · answer and explain",
+    "explanation": "Forward: progressively add noise to a clean example.\n\nTempting mistake: The model learns by removing noise before any noise is added.",
+    "speaker_notes": "TEACHER SCRIPT — REVEAL. Return to the earlier choice. Explain the correct answer and why the tempting claim fails. Ask one learner to say the answer in a single sentence without reading it. This week’s case is: A college needs a synthetic poster image while respecting consent and image rights. The visible slide states: Forward: progressively add noise to a clean example.\n\nTempting mistake: The model learns by removing noise before any noise is added. The earlier question was Which direction is used while preparing training pairs? Ask how this differs from the wrong claim. The target is: Explain the denoising idea and judge an image with a consistent checklist. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "reveal",
+      "items": [
+        "The model learns by removing noise before any noise is added.",
+        "Forward: progressively add noise to a clean example."
+      ],
+      "caption": "Noise is mathematically sampled; real fog is not the model’s training process."
+    },
+    "teaching_stage": "reveal"
+  },
+  "s10": {
+    "title": "2. Predict · Denoising model",
+    "explanation": "What extra information makes the toy restoration easier?\n\nMake a choice before we explain the diagram.",
+    "speaker_notes": "TEACHER SCRIPT — QUESTION. Take a show of hands for each choice before showing the mechanism. Ask pairs to defend a choice with evidence. Save the strongest wrong reason for the reveal later in this cycle. This week’s case is: A college needs a synthetic poster image while respecting consent and image rights. The visible slide states: What extra information makes the toy restoration easier?\n\nMake a choice before we explain the diagram. The intended answer is It has access to the original clean grid. The tempting claim is The toy denoiser proves real model image quality. Do not show which card is correct until the reveal. The target is: Explain the denoising idea and judge an image with a consistent checklist. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "It has access to the original clean grid.",
+        "The toy denoiser proves real model image quality."
+      ]
+    },
+    "teaching_stage": "question"
+  },
+  "s11": {
+    "title": "Denoising model · a familiar picture",
+    "explanation": "A restorer removes a little fog at a time after learning from many examples.\n\nWhat matches our case, and where does the analogy stop?",
+    "speaker_notes": "TEACHER SCRIPT — ANALOGY. Begin with the familiar scene. Invite learners to describe each part in everyday language. Then ask where the comparison might fail before introducing the technical vocabulary. This week’s case is: A college needs a synthetic poster image while respecting consent and image rights. The visible slide states: A restorer removes a little fog at a time after learning from many examples.\n\nWhat matches our case, and where does the analogy stop? The boundary is: A real model does not secretly have the exact clean target at generation time. The target is: Explain the denoising idea and judge an image with a consistent checklist. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "analogy",
+      "items": [
+        "Cloudy view",
+        "Estimated fog",
+        "Clearer view"
+      ],
+      "caption": "A restorer removes a little fog at a time after learning from many examples."
+    },
+    "teaching_stage": "analogy"
+  },
+  "s12": {
+    "title": "Denoising model · map the parts",
+    "explanation": "Match each everyday part to the technical part.\n\nAnalogy limit: A real model does not secretly have the exact clean target at generation time.",
+    "speaker_notes": "TEACHER SCRIPT — MAPPING. Point from each familiar element to the corresponding technical element. Have students cover the right column and reconstruct the three matches. Read the limitation aloud. This week’s case is: A college needs a synthetic poster image while respecting consent and image rights. The visible slide states: Match each everyday part to the technical part.\n\nAnalogy limit: A real model does not secretly have the exact clean target at generation time. The three precise mappings are [['Cloudy view', 'noisy sample'], ['Estimated fog', 'model prediction'], ['Clearer view', 'next step']]. The target is: Explain the denoising idea and judge an image with a consistent checklist. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "map",
+      "pairs": [
+        [
+          "Cloudy view",
+          "noisy sample"
+        ],
+        [
+          "Estimated fog",
+          "model prediction"
+        ],
+        [
+          "Clearer view",
+          "next step"
+        ]
+      ]
+    },
+    "teaching_stage": "mapping"
+  },
+  "s13": {
+    "title": "Denoising model · how it works",
+    "explanation": "A learned model estimates how to remove noise at each step; the course simulation uses the known clean target.\n\nTrace the arrows from left to right.",
+    "speaker_notes": "TEACHER SCRIPT — MECHANISM. Trace every arrow slowly from the input to the output. Ask what information crosses the boundary at each arrow. Pause if students confuse a simplified notebook with a trained model. This week’s case is: A college needs a synthetic poster image while respecting consent and image rights. The visible slide states: A learned model estimates how to remove noise at each step; the course simulation uses the known clean target.\n\nTrace the arrows from left to right. The weekly example is: The prepared notebook’s toy restorer uses a clean target to illustrate steps; label that shortcut. State what the analogy does not explain: A real model does not secretly have the exact clean target at generation time. The target is: Explain the denoising idea and judge an image with a consistent checklist. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Noisy input",
+        "Learned noise estimate",
+        "Less noisy step"
+      ]
+    },
+    "teaching_stage": "mechanism"
+  },
+  "s14": {
+    "title": "Denoising model · work one case",
+    "explanation": "The prepared notebook’s toy restorer uses a clean target to illustrate steps; label that shortcut.\n\nPoint to the evidence before giving your conclusion.",
+    "speaker_notes": "TEACHER SCRIPT — WORKED. Work the specific numbers or source wording aloud. Give students thirty seconds to write a conclusion, then ask which source line or calculation supports it. This week’s case is: A college needs a synthetic poster image while respecting consent and image rights. The visible slide states: The prepared notebook’s toy restorer uses a clean target to illustrate steps; label that shortcut.\n\nPoint to the evidence before giving your conclusion. The expected reasoning concludes: It has access to the original clean grid. Distinguish measured results from illustrative numbers. The target is: Explain the denoising idea and judge an image with a consistent checklist. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "work",
+      "items": [
+        "The prepared notebook’s toy restorer uses a clean target to illustrate steps; label that shortcut.",
+        "What extra information makes the toy restoration easier?",
+        "It has access to the original clean grid."
+      ]
+    },
+    "teaching_stage": "worked"
+  },
+  "s15": {
+    "title": "Denoising model · answer and explain",
+    "explanation": "It has access to the original clean grid.\n\nTempting mistake: The toy denoiser proves real model image quality.",
+    "speaker_notes": "TEACHER SCRIPT — REVEAL. Return to the earlier choice. Explain the correct answer and why the tempting claim fails. Ask one learner to say the answer in a single sentence without reading it. This week’s case is: A college needs a synthetic poster image while respecting consent and image rights. The visible slide states: It has access to the original clean grid.\n\nTempting mistake: The toy denoiser proves real model image quality. The earlier question was What extra information makes the toy restoration easier? Ask how this differs from the wrong claim. The target is: Explain the denoising idea and judge an image with a consistent checklist. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "reveal",
+      "items": [
+        "The toy denoiser proves real model image quality.",
+        "It has access to the original clean grid."
+      ],
+      "caption": "A real model does not secretly have the exact clean target at generation time."
+    },
+    "teaching_stage": "reveal"
+  },
+  "s16": {
+    "title": "3. Predict · Conditioning",
+    "explanation": "What stays fixed in a fair output comparison?\n\nMake a choice before we explain the diagram.",
+    "speaker_notes": "TEACHER SCRIPT — QUESTION. Take a show of hands for each choice before showing the mechanism. Ask pairs to defend a choice with evidence. Save the strongest wrong reason for the reveal later in this cycle. This week’s case is: A college needs a synthetic poster image while respecting consent and image rights. The visible slide states: What stays fixed in a fair output comparison?\n\nMake a choice before we explain the diagram. The intended answer is Keep the brief and checklist fixed; record changed generation settings. The tempting claim is A detailed prompt guarantees exact text in images. Do not show which card is correct until the reveal. The target is: Explain the denoising idea and judge an image with a consistent checklist. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "Keep the brief and checklist fixed; record changed generation settings.",
+        "A detailed prompt guarantees exact text in images."
+      ]
+    },
+    "teaching_stage": "question"
+  },
+  "s17": {
+    "title": "Conditioning · a familiar picture",
+    "explanation": "A poster brief steers an artist, but leaves room for choices.\n\nWhat matches our case, and where does the analogy stop?",
+    "speaker_notes": "TEACHER SCRIPT — ANALOGY. Begin with the familiar scene. Invite learners to describe each part in everyday language. Then ask where the comparison might fail before introducing the technical vocabulary. This week’s case is: A college needs a synthetic poster image while respecting consent and image rights. The visible slide states: A poster brief steers an artist, but leaves room for choices.\n\nWhat matches our case, and where does the analogy stop? The boundary is: The brief does not guarantee that every requested detail appears correctly. The target is: Explain the denoising idea and judge an image with a consistent checklist. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "analogy",
+      "items": [
+        "Brief",
+        "Artist decisions",
+        "Draft poster"
+      ],
+      "caption": "A poster brief steers an artist, but leaves room for choices."
+    },
+    "teaching_stage": "analogy"
+  },
+  "s18": {
+    "title": "Conditioning · map the parts",
+    "explanation": "Match each everyday part to the technical part.\n\nAnalogy limit: The brief does not guarantee that every requested detail appears correctly.",
+    "speaker_notes": "TEACHER SCRIPT — MAPPING. Point from each familiar element to the corresponding technical element. Have students cover the right column and reconstruct the three matches. Read the limitation aloud. This week’s case is: A college needs a synthetic poster image while respecting consent and image rights. The visible slide states: Match each everyday part to the technical part.\n\nAnalogy limit: The brief does not guarantee that every requested detail appears correctly. The three precise mappings are [['Brief', 'text condition'], ['Artist decisions', 'denoising path'], ['Draft poster', 'output']]. The target is: Explain the denoising idea and judge an image with a consistent checklist. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "map",
+      "pairs": [
+        [
+          "Brief",
+          "text condition"
+        ],
+        [
+          "Artist decisions",
+          "denoising path"
+        ],
+        [
+          "Draft poster",
+          "output"
+        ]
+      ]
+    },
+    "teaching_stage": "mapping"
+  },
+  "s19": {
+    "title": "Conditioning · how it works",
+    "explanation": "Text or other inputs can guide generation. The condition does not guarantee accurate details.\n\nTrace the arrows from left to right.",
+    "speaker_notes": "TEACHER SCRIPT — MECHANISM. Trace every arrow slowly from the input to the output. Ask what information crosses the boundary at each arrow. Pause if students confuse a simplified notebook with a trained model. This week’s case is: A college needs a synthetic poster image while respecting consent and image rights. The visible slide states: Text or other inputs can guide generation. The condition does not guarantee accurate details.\n\nTrace the arrows from left to right. The weekly example is: Use “blue campus poster” for both trials; compare date lettering and layout separately. State what the analogy does not explain: The brief does not guarantee that every requested detail appears correctly. The target is: Explain the denoising idea and judge an image with a consistent checklist. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Text condition",
+        "Denoising steps",
+        "Generated image"
+      ]
+    },
+    "teaching_stage": "mechanism"
+  },
+  "s20": {
+    "title": "Conditioning · work one case",
+    "explanation": "Use “blue campus poster” for both trials; compare date lettering and layout separately.\n\nPoint to the evidence before giving your conclusion.",
+    "speaker_notes": "TEACHER SCRIPT — WORKED. Work the specific numbers or source wording aloud. Give students thirty seconds to write a conclusion, then ask which source line or calculation supports it. This week’s case is: A college needs a synthetic poster image while respecting consent and image rights. The visible slide states: Use “blue campus poster” for both trials; compare date lettering and layout separately.\n\nPoint to the evidence before giving your conclusion. The expected reasoning concludes: Keep the brief and checklist fixed; record changed generation settings. Distinguish measured results from illustrative numbers. The target is: Explain the denoising idea and judge an image with a consistent checklist. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "work",
+      "items": [
+        "Use “blue campus poster” for both trials; compare date lettering and layout separately.",
+        "What stays fixed in a fair output comparison?",
+        "Keep the brief and checklist fixed; record changed generation settings."
+      ]
+    },
+    "teaching_stage": "worked"
+  },
+  "s21": {
+    "title": "Conditioning · answer and explain",
+    "explanation": "Keep the brief and checklist fixed; record changed generation settings.\n\nTempting mistake: A detailed prompt guarantees exact text in images.",
+    "speaker_notes": "TEACHER SCRIPT — REVEAL. Return to the earlier choice. Explain the correct answer and why the tempting claim fails. Ask one learner to say the answer in a single sentence without reading it. This week’s case is: A college needs a synthetic poster image while respecting consent and image rights. The visible slide states: Keep the brief and checklist fixed; record changed generation settings.\n\nTempting mistake: A detailed prompt guarantees exact text in images. The earlier question was What stays fixed in a fair output comparison? Ask how this differs from the wrong claim. The target is: Explain the denoising idea and judge an image with a consistent checklist. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "reveal",
+      "items": [
+        "A detailed prompt guarantees exact text in images.",
+        "Keep the brief and checklist fixed; record changed generation settings."
+      ],
+      "caption": "The brief does not guarantee that every requested detail appears correctly."
+    },
+    "teaching_stage": "reveal"
+  },
+  "s22": {
+    "title": "4. Predict · Image review",
+    "explanation": "What two reasons justify holding this image?\n\nMake a choice before we explain the diagram.",
+    "speaker_notes": "TEACHER SCRIPT — QUESTION. Take a show of hands for each choice before showing the mechanism. Ask pairs to defend a choice with evidence. Save the strongest wrong reason for the reveal later in this cycle. This week’s case is: A college needs a synthetic poster image while respecting consent and image rights. The visible slide states: What two reasons justify holding this image?\n\nMake a choice before we explain the diagram. The intended answer is Consent is unresolved and the date detail is incorrect. The tempting claim is A synthetic image needs no rights or quality review. Do not show which card is correct until the reveal. The target is: Explain the denoising idea and judge an image with a consistent checklist. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "Consent is unresolved and the date detail is incorrect.",
+        "A synthetic image needs no rights or quality review."
+      ]
+    },
+    "teaching_stage": "question"
+  },
+  "s23": {
+    "title": "Image review · a familiar picture",
+    "explanation": "A print editor checks a draft before it reaches the public.\n\nWhat matches our case, and where does the analogy stop?",
+    "speaker_notes": "TEACHER SCRIPT — ANALOGY. Begin with the familiar scene. Invite learners to describe each part in everyday language. Then ask where the comparison might fail before introducing the technical vocabulary. This week’s case is: A college needs a synthetic poster image while respecting consent and image rights. The visible slide states: A print editor checks a draft before it reaches the public.\n\nWhat matches our case, and where does the analogy stop? The boundary is: A release form cannot be inferred from pixels; ask for documented permission. The target is: Explain the denoising idea and judge an image with a consistent checklist. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "analogy",
+      "items": [
+        "Draft",
+        "Release form",
+        "Proofread"
+      ],
+      "caption": "A print editor checks a draft before it reaches the public."
+    },
+    "teaching_stage": "analogy"
+  },
+  "s24": {
+    "title": "Image review · map the parts",
+    "explanation": "Match each everyday part to the technical part.\n\nAnalogy limit: A release form cannot be inferred from pixels; ask for documented permission.",
+    "speaker_notes": "TEACHER SCRIPT — MAPPING. Point from each familiar element to the corresponding technical element. Have students cover the right column and reconstruct the three matches. Read the limitation aloud. This week’s case is: A college needs a synthetic poster image while respecting consent and image rights. The visible slide states: Match each everyday part to the technical part.\n\nAnalogy limit: A release form cannot be inferred from pixels; ask for documented permission. The three precise mappings are [['Draft', 'generated image'], ['Release form', 'consent check'], ['Proofread', 'image detail check']]. The target is: Explain the denoising idea and judge an image with a consistent checklist. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "map",
+      "pairs": [
+        [
+          "Draft",
+          "generated image"
+        ],
+        [
+          "Release form",
+          "consent check"
+        ],
+        [
+          "Proofread",
+          "image detail check"
+        ]
+      ]
+    },
+    "teaching_stage": "mapping"
+  },
+  "s25": {
+    "title": "Image review · how it works",
+    "explanation": "Check whether text, people, permissions and task-specific details meet the brief.\n\nTrace the arrows from left to right.",
+    "speaker_notes": "TEACHER SCRIPT — MECHANISM. Trace every arrow slowly from the input to the output. Ask what information crosses the boundary at each arrow. Pause if students confuse a simplified notebook with a trained model. This week’s case is: A college needs a synthetic poster image while respecting consent and image rights. The visible slide states: Check whether text, people, permissions and task-specific details meet the brief.\n\nTrace the arrows from left to right. The weekly example is: The poster is attractive, but a face resembles a classmate and the date is wrong: hold publication. State what the analogy does not explain: A release form cannot be inferred from pixels; ask for documented permission. The target is: Explain the denoising idea and judge an image with a consistent checklist. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Output image",
+        "Consent check",
+        "Detail check",
+        "Decision"
+      ]
+    },
+    "teaching_stage": "mechanism"
+  },
+  "s26": {
+    "title": "Image review · work one case",
+    "explanation": "The poster is attractive, but a face resembles a classmate and the date is wrong: hold publication.\n\nPoint to the evidence before giving your conclusion.",
+    "speaker_notes": "TEACHER SCRIPT — WORKED. Work the specific numbers or source wording aloud. Give students thirty seconds to write a conclusion, then ask which source line or calculation supports it. This week’s case is: A college needs a synthetic poster image while respecting consent and image rights. The visible slide states: The poster is attractive, but a face resembles a classmate and the date is wrong: hold publication.\n\nPoint to the evidence before giving your conclusion. The expected reasoning concludes: Consent is unresolved and the date detail is incorrect. Distinguish measured results from illustrative numbers. The target is: Explain the denoising idea and judge an image with a consistent checklist. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "work",
+      "items": [
+        "The poster is attractive, but a face resembles a classmate and the date is wrong: hold publication.",
+        "What two reasons justify holding this image?",
+        "Consent is unresolved and the date detail is incorrect."
+      ]
+    },
+    "teaching_stage": "worked"
+  },
+  "s27": {
+    "title": "Image review · answer and explain",
+    "explanation": "Consent is unresolved and the date detail is incorrect.\n\nTempting mistake: A synthetic image needs no rights or quality review.",
+    "speaker_notes": "TEACHER SCRIPT — REVEAL. Return to the earlier choice. Explain the correct answer and why the tempting claim fails. Ask one learner to say the answer in a single sentence without reading it. This week’s case is: A college needs a synthetic poster image while respecting consent and image rights. The visible slide states: Consent is unresolved and the date detail is incorrect.\n\nTempting mistake: A synthetic image needs no rights or quality review. The earlier question was What two reasons justify holding this image? Ask how this differs from the wrong claim. The target is: Explain the denoising idea and judge an image with a consistent checklist. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "reveal",
+      "items": [
+        "A synthetic image needs no rights or quality review.",
+        "Consent is unresolved and the date detail is incorrect."
+      ],
+      "caption": "A release form cannot be inferred from pixels; ask for documented permission."
+    },
+    "teaching_stage": "reveal"
+  },
+  "s28": {
+    "title": "Evidence trail: input → result",
+    "explanation": "Noise obscures the L at high strength.\n\nA toy restoration with access to the clean target restores it; a real model does not have that target.",
+    "speaker_notes": "TEACHER SCRIPT — WORKED. Work the specific numbers or source wording aloud. Give students thirty seconds to write a conclusion, then ask which source line or calculation supports it. This week’s case is: A college needs a synthetic poster image while respecting consent and image rights. The visible slide states: Noise obscures the L at high strength.\n\nA toy restoration with access to the clean target restores it; a real model does not have that target. Have one student point to an exact source word or number for each conclusion. The target is: Explain the denoising idea and judge an image with a consistent checklist. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "work",
+      "items": [
+        "Clean grid has an L-shaped bright pattern.",
+        "Noise obscures the L at high strength.",
+        "A toy restoration with access to the clean target restores it; a real model does not have that target."
+      ]
+    },
+    "teaching_stage": "worked"
+  },
+  "s29": {
+    "title": "Notebook: run the prepared example",
+    "explanation": "Run a denoising illustration and a consent checklist.\n\nRead the original output before editing.",
+    "speaker_notes": "TEACHER SCRIPT — PRACTICE. Open the matching notebook and demonstrate the first run. Have learners predict one change, run only that change, and record input, setting, output and an error explanation. This week’s case is: A college needs a synthetic poster image while respecting consent and image rights. The visible slide states: Run a denoising illustration and a consent checklist.\n\nRead the original output before editing. Use Week_03_Lab.ipynb. This lab is a prepared classroom demonstration with its limitations documented. The target is: Explain the denoising idea and judge an image with a consistent checklist. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "Inspect a 4 by 4 synthetic clean image",
+        "Add reproducible noise at two strengths",
+        "Use a transparent toy denoising demonstration",
+        "Compare two prepared descriptions using one rubric"
+      ]
+    },
+    "teaching_stage": "practice"
+  },
+  "s30": {
+    "title": "Find the input and check in Python",
+    "explanation": "Locate the supplied input, the transformation, the checking line and the printed result.",
+    "speaker_notes": "TEACHER SCRIPT — PRACTICE. Open the matching notebook and demonstrate the first run. Have learners predict one change, run only that change, and record input, setting, output and an error explanation. This week’s case is: A college needs a synthetic poster image while respecting consent and image rights. The visible slide states: Locate the supplied input, the transformation, the checking line and the printed result. The weekly lab change is: Increase noise strength from 0.15 to 0.45 and compare measured error. The target is: Explain the denoising idea and judge an image with a consistent checklist. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Input data",
+        "Python operation",
+        "Check",
+        "Recorded result"
+      ]
+    },
+    "teaching_stage": "practice"
+  },
+  "s31": {
+    "title": "Predict one controlled change",
+    "explanation": "Increase noise strength from 0.15 to 0.45 and compare measured error.\n\nWhat should change in the result? What stays fixed?",
+    "speaker_notes": "TEACHER SCRIPT — PRACTICE. Open the matching notebook and demonstrate the first run. Have learners predict one change, run only that change, and record input, setting, output and an error explanation. This week’s case is: A college needs a synthetic poster image while respecting consent and image rights. The visible slide states: Increase noise strength from 0.15 to 0.45 and compare measured error.\n\nWhat should change in the result? What stays fixed? Ask learners to write their prediction before rerunning the cell. The target is: Explain the denoising idea and judge an image with a consistent checklist. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "compare",
+      "left": "Before: original case",
+      "right": "After: one change",
+      "caption": "Keep all other inputs fixed."
+    },
+    "teaching_stage": "practice"
+  },
+  "s32": {
+    "title": "Run, compare and record",
+    "explanation": "Record the input, the one changed setting, the observed result and a reason for any difference.",
+    "speaker_notes": "TEACHER SCRIPT — PRACTICE. Open the matching notebook and demonstrate the first run. Have learners predict one change, run only that change, and record input, setting, output and an error explanation. This week’s case is: A college needs a synthetic poster image while respecting consent and image rights. The visible slide states: Record the input, the one changed setting, the observed result and a reason for any difference. The required evidence is: Step comparison and three task-specific image observations. The target is: Explain the denoising idea and judge an image with a consistent checklist. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "table",
+      "rows": [
+        [
+          "Input",
+          "Setting",
+          "Result"
+        ],
+        [
+          "Original",
+          "baseline",
+          "record"
+        ],
+        [
+          "Changed",
+          "one edit",
+          "compare"
+        ]
+      ]
+    },
+    "teaching_stage": "practice"
+  },
+  "s33": {
+    "title": "Measure without hiding the denominator",
+    "explanation": "Mean absolute pixel error; plus a human quality checklist\n\nWrite the numerator, denominator and one failure case.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: A college needs a synthetic poster image while respecting consent and image rights. The visible slide states: Mean absolute pixel error; plus a human quality checklist\n\nWrite the numerator, denominator and one failure case. Where a measure is qualitative, show the concrete source comparison. Example: A toy restoration with access to the clean target restores it; a real model does not have that target. The target is: Explain the denoising idea and judge an image with a consistent checklist. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Define success",
+        "Count successes",
+        "Count cases",
+        "Inspect errors"
+      ]
+    },
+    "teaching_stage": "check"
+  },
+  "s34": {
+    "title": "Error detective: find the layer",
+    "explanation": "Plausible wrong claim: Removing random noise with the original image in hand reproduces diffusion generation.\n\nCorrect it using the case evidence.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: A college needs a synthetic poster image while respecting consent and image rights. The visible slide states: Plausible wrong claim: Removing random noise with the original image in hand reproduces diffusion generation.\n\nCorrect it using the case evidence. The correction is This exercise visualizes steps only. Actual generation uses learned denoising without a clean target at inference. The target is: Explain the denoising idea and judge an image with a consistent checklist. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "reveal",
+      "items": [
+        "Removing random noise with the original image in hand reproduces diffusion generation.",
+        "This exercise visualizes steps only. Actual generation uses learned denoising without a clean target at inference."
+      ],
+      "caption": "Name a test that would catch this failure."
+    },
+    "teaching_stage": "check"
+  },
+  "s35": {
+    "title": "Transfer to a new situation",
+    "explanation": "A poster has readable-looking text that spells the event date incorrectly. Which check catches the error?\n\nExplain which source or test would settle it.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: A college needs a synthetic poster image while respecting consent and image rights. The visible slide states: A poster has readable-looking text that spells the event date incorrectly. Which check catches the error?\n\nExplain which source or test would settle it. This is a fresh scenario, so ask for a reason before accepting either short answer. The target is: Explain the denoising idea and judge an image with a consistent checklist. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "quiz",
+      "items": [
+        "Use the visible evidence",
+        "Flag missing or unsafe evidence"
+      ]
+    },
+    "teaching_stage": "check"
+  },
+  "s36": {
+    "title": "Explain it to a partner",
+    "explanation": "Without reading the slide, name the input, one processing step and the check. Your partner should ask “How do you know?”",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: A college needs a synthetic poster image while respecting consent and image rights. The visible slide states: Without reading the slide, name the input, one processing step and the check. Your partner should ask “How do you know?” Listen for a causal explanation and one limitation, then revisit a difficult arrow on the board. The target is: Explain the denoising idea and judge an image with a consistent checklist. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "flow",
+      "items": [
+        "Clean training image",
+        "Noising steps",
+        "New sample"
+      ]
+    },
+    "teaching_stage": "check"
+  },
+  "s37": {
+    "title": "Exam rehearsal · explain and apply",
+    "explanation": "Distinguish noising during training from denoising during generation.\n\nWrite a short answer, then compare with the guide.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: A college needs a synthetic poster image while respecting consent and image rights. The visible slide states: Distinguish noising during training from denoising during generation.\n\nWrite a short answer, then compare with the guide. Model answer after discussion: Training creates corrupted examples and learns a reverse prediction. Generation applies learned reverse steps to a noise sample. Practice marks: 4. The target is: Explain the denoising idea and judge an image with a consistent checklist. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "State the core idea",
+        "Use a case detail or calculation",
+        "Add a limitation",
+        "Compare with the Word guide"
+      ]
+    },
+    "teaching_stage": "check"
+  },
+  "s38": {
+    "title": "Exam rehearsal · explain and apply",
+    "explanation": "Does conditioning guarantee the requested text will be correct?\n\nWrite a short answer, then compare with the guide.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: A college needs a synthetic poster image while respecting consent and image rights. The visible slide states: Does conditioning guarantee the requested text will be correct?\n\nWrite a short answer, then compare with the guide. Model answer after discussion: No. The condition guides generation; the resulting image still needs inspection. Practice marks: 4. The target is: Explain the denoising idea and judge an image with a consistent checklist. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "State the core idea",
+        "Use a case detail or calculation",
+        "Add a limitation",
+        "Compare with the Word guide"
+      ]
+    },
+    "teaching_stage": "check"
+  },
+  "s39": {
+    "title": "What to hand in",
+    "explanation": "Step comparison and three task-specific image observations.\n\nInclude the one changed input and an error explanation.",
+    "speaker_notes": "TEACHER SCRIPT — PRACTICE. Open the matching notebook and demonstrate the first run. Have learners predict one change, run only that change, and record input, setting, output and an error explanation. This week’s case is: A college needs a synthetic poster image while respecting consent and image rights. The visible slide states: Step comparison and three task-specific image observations.\n\nInclude the one changed input and an error explanation. This weekly evidence receives formative feedback according to the module sequence; refer to the assessment brief for graded work. The target is: Explain the denoising idea and judge an image with a consistent checklist. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "Original run",
+        "One changed input",
+        "Comparison",
+        "Explanation + source"
+      ]
+    },
+    "teaching_stage": "practice"
+  },
+  "s40": {
+    "title": "Three ideas to recall next week",
+    "explanation": "Noise becomes an image through repeated learned denoising; check consent and details.\n\nRead the linked official sources in the Word guide and redraw one diagram from memory.",
+    "speaker_notes": "TEACHER SCRIPT — CHECK. Use this as a brief formative check. Ask for the conclusion, the evidence and one limitation. Revisit disagreements in the review session and offer an extension only after the core task. This week’s case is: A college needs a synthetic poster image while respecting consent and image rights. The visible slide states: Noise becomes an image through repeated learned denoising; check consent and details.\n\nRead the linked official sources in the Word guide and redraw one diagram from memory. Return to the opening vote and ask whether the evidence changed anyone’s mind. The next week builds on this outcome: Explain the denoising idea and judge an image with a consistent checklist. The target is: Explain the denoising idea and judge an image with a consistent checklist. Listen for an explanation of the actual arrow or calculation, not just a repeated label. If the answer is unsupported, mark that uncertainty and return to the source. Before moving on, ask for the main idea and one concrete change to the worked example.",
+    "diagram": {
+      "type": "steps",
+      "items": [
+        "Forward noising",
+        "Denoising model",
+        "Conditioning",
+        "Image review"
+      ]
+    },
+    "teaching_stage": "check"
+  }
+}

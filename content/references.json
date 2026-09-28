@@ -1,0 +1,14 @@
+{
+  "Google, Develop a generative AI application": "https://docs.cloud.google.com/docs/ai-ml/generative-ai/develop-generative-ai-application",
+  "Google, GAN overview": "https://cloud.google.com/discover/what-are-generative-adversarial-networks",
+  "Google, Transformer model overview": "https://cloud.google.com/discover/what-is-gpt",
+  "NVIDIA, NeMo framework overview": "https://docs.nvidia.com/nemo-framework/user-guide/latest/overview.html",
+  "OpenAI, Evaluation best practices": "https://developers.openai.com/api/docs/guides/evaluation-best-practices",
+  "OpenAI, Agent safety": "https://developers.openai.com/api/docs/guides/agent-builder-safety",
+  "Microsoft, Retrieval augmented generation": "https://learn.microsoft.com/en-us/azure/foundry/concepts/retrieval-augmented-generation",
+  "Anthropic, Building effective agents": "https://www.anthropic.com/engineering/building-effective-agents",
+  "Vaswani et al., Attention Is All You Need": "https://arxiv.org/abs/1706.03762",
+  "Lewis et al., Retrieval-Augmented Generation": "https://arxiv.org/abs/2005.11401",
+  "Hu et al., LoRA": "https://arxiv.org/abs/2106.09685",
+  "NIST, Generative AI Profile": "https://nvlpubs.nist.gov/nistpubs/ai/NIST.AI.600-1.pdf"
+}
