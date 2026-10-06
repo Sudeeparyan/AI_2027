@@ -1,0 +1,168 @@
+{
+  "n_images": 1000,
+  "zero_shot": {
+    "label only: '{}'": 0.872,
+    "'a photo of a {}.'": 0.886,
+    "ensemble of 5 templates": 0.894
+  },
+  "precision_at_k": {
+    "1": 1.0,
+    "5": 0.96,
+    "10": 0.9800000000000001
+  },
+  "loss_correct": 1.1377185583114624,
+  "loss_shuffled": 1.9853135347366333,
+  "loss_random": 1.791759469228055,
+  "mean_wer": 0.09080000000000002,
+  "asr_examples": [
+    {
+      "reference": "mister quilter is the apostle of the middle classes and we are glad to",
+      "whisper": "Mr. Quilter is the apostle of the middle classes, and we are glad to w",
+      "WER": 0.059
+    },
+    {
+      "reference": "nor is mister quilter's manner less interesting than his matter",
+      "whisper": "Nor is Mr. Quilter's manner less interesting than his matter.",
+      "WER": 0.1
+    },
+    {
+      "reference": "he tells us that at this festive season of the year with christmas and",
+      "whisper": "He tells us that at this festive season of the year, with Christmas an",
+      "WER": 0.062
+    }
+  ],
+  "confusion": [
+    [
+      95,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      6,
+      0
+    ],
+    [
+      0,
+      88,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      2
+    ],
+    [
+      2,
+      0,
+      76,
+      2,
+      3,
+      2,
+      0,
+      4,
+      2,
+      0
+    ],
+    [
+      0,
+      1,
+      0,
+      87,
+      1,
+      5,
+      1,
+      1,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      1,
+      79,
+      3,
+      0,
+      15,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      2,
+      13,
+      1,
+      103,
+      0,
+      0,
+      2,
+      0
+    ],
+    [
+      1,
+      0,
+      6,
+      8,
+      5,
+      4,
+      67,
+      2,
+      3,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      2,
+      0,
+      1,
+      0,
+      110,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      102,
+      0
+    ],
+    [
+      0,
+      2,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      2,
+      87
+    ]
+  ],
+  "classes": [
+    "airplane",
+    "automobile",
+    "bird",
+    "cat",
+    "deer",
+    "dog",
+    "frog",
+    "horse",
+    "ship",
+    "truck"
+  ]
+}

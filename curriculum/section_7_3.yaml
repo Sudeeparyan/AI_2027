@@ -1,0 +1,197 @@
+# Revised Section 7.3 "Indicative Module Content, Organisation and Structure".
+# Single source of truth for the descriptor table AND for every weekly pack.
+# Rules: lecture topics and week order are the head professor's originals (unchanged).
+# Detail and Tutorials are modernised for 2026/27. Name model *families*, never versions.
+# Each tutorial list item becomes one paragraph in the descriptor cell.
+
+weeks:
+  - week: 1
+    topic: "Introduction to Generative & Responsible AI"
+    slug: "Intro_Generative_and_Responsible_AI"
+    detail: >-
+      The landscape of Generative AI: foundation models, proprietary and open-weight model
+      families, and everyday AI tools (chat assistants, coding assistants, image, audio and
+      video generators). Core concepts: data, parameters, tokens, training vs. inference,
+      pre-training and post-training. Probabilistic Foundations: probability distributions,
+      likelihood and maximum likelihood, sampling and temperature, latent variables and the
+      generative vs. discriminative paradigm. Overview of generative model families
+      (autoregressive, VAE, GAN, diffusion). Responsible AI: hallucination, bias, privacy,
+      intellectual property, transparency and academic integrity.
+    tutorials:
+      - "Set up working environment (Python, Jupyter / Google Colab, Hugging Face account, safe handling of API keys)."
+      - "Examples on Probabilistic Foundations: estimate likelihood and sample from a simple character-level model at different temperatures."
+      - "Show a generative model in action. Students try different inputs or prompts across AI tools and an open model, compare outputs and record errors."
+
+  - week: 2
+    topic: "Variational Autoencoders (VAEs)"
+    slug: "Variational_Autoencoders"
+    detail: >-
+      Motivation: from autoencoders to probabilistic generative models. Concept of Latent space
+      and Exploration. Encoder-decoder architecture, probabilistic encoder and the
+      reparameterisation trick. Reconstruction and Regularization (KL divergence) Loss and the
+      evidence lower bound (ELBO). Training. Variants (e.g. Conditional VAE, β-VAE, VQ-VAE).
+      Evaluation of VAEs (reconstruction error, sample quality, latent traversals). Applications
+      of VAEs, including anomaly detection and the image autoencoder inside latent diffusion
+      models.
+    tutorials:
+      - "Implementing a VAE in PyTorch (e.g. MNIST or Fashion-MNIST)."
+      - "Visualize the latent space and latent space interpolation."
+      - "Generate new images from the learned latent distribution and compare the effect of the KL weight (β)."
+
+  - week: 3
+    topic: "Generative Adversarial Networks (GANs)"
+    slug: "Generative_Adversarial_Networks"
+    detail: >-
+      Motivation for adversarial learning. GAN Architecture (Generator, Discriminator). GAN
+      Objective Function (minimax game, non-saturating loss). Training Challenges (mode collapse,
+      instability, vanishing gradients) and stabilisation techniques (e.g. Wasserstein loss,
+      spectral normalisation). Variants (e.g. DCGAN, cGAN, Pix2Pix / CycleGAN, StyleGAN).
+      Evaluation of GANs (FID, Inception Score, precision and recall, human judgement).
+      Applications of GANs, including super-resolution, image-to-image translation and
+      adversarial distillation of fast diffusion models; misuse such as deepfakes.
+    tutorials:
+      - "Implementing a GAN (DCGAN) in PyTorch."
+      - "Visualizing generator outputs across epochs and diagnosing training through losses and mode collapse."
+      - "Exploring latent space interpolations."
+
+  - week: 4
+    topic: "Diffusion Models"
+    slug: "Diffusion_Models"
+    detail: >-
+      Motivation, Limitations of GANs and VAEs that diffusion models address. Theoretical
+      Foundations (forward noising process, noise schedules, learned reverse process,
+      noise-prediction objective, score-based view). Core Architecture (U-Net and diffusion
+      transformers; latent diffusion with an autoencoder and a text encoder). Denoising Process
+      and samplers (DDPM, DDIM, few-step sampling), classifier-free guidance. Variants (flow
+      matching / rectified flow, distilled few-step models, image editing and control, video and
+      audio diffusion). Evaluation (FID, CLIP score, human preference). Applications. Comparison
+      with other generative models.
+    tutorials:
+      - "Training a simple diffusion model and visualising the forward (noising) and reverse (denoising) processes."
+      - "Generate images using a pre-trained diffusion model (e.g., Stable Diffusion via Hugging Face Diffusers)."
+      - "Experiment with different noise steps, guidance scales, seeds and negative prompts."
+
+  - week: 5
+    topic: "Transformers & Attention"
+    slug: "Transformers_and_Attention"
+    detail: >-
+      Motivation, Limitations of recurrent architectures (long-term dependencies,
+      parallelisation). Tokenisation and embeddings. Attention Mechanism (scaled dot-product
+      Self-Attention with queries, keys and values, Multi-Head Attention, Cross-attention, causal
+      masking). Positional encoding (sinusoidal, rotary). Transformer Architecture and Components
+      (residual connections, layer normalisation, feed-forward layers; encoder-only,
+      decoder-only and encoder-decoder). Training (masked and next-token objectives), Evaluation
+      (perplexity), Variants and efficiency techniques (KV cache, efficient attention,
+      mixture-of-experts, long context), Applications (text, vision transformers, speech).
+    tutorials:
+      - "Lab balances coding, visualisation, and critical thinking. Students not only build simple transformer models (blocks and attention mechanisms) but also interrogate how transformers use them in practice."
+      - "Implement scaled dot-product and multi-head attention in PyTorch, train a small character-level transformer and visualise the attention maps of a pre-trained model."
+
+  - week: 6
+    topic: "Large Language Models (LLMs) and families"
+    slug: "LLMs_and_Families"
+    detail: >-
+      Evolution of NLP (n-grams, word embeddings, RNNs, Transformers, LLMs). How Transformers are
+      used in LLMs and generative models: pre-training, scaling laws, context windows and
+      decoding strategies (greedy, temperature, top-k, top-p). Architecture Overview. LLM
+      families: encoder (BERT), encoder-decoder (T5) and decoder-only (e.g. GPT, LLaMA, Gemini,
+      Claude, Mistral, Qwen, DeepSeek); proprietary vs. open-weight models, small language
+      models, mixture-of-experts and reasoning models (test-time compute). Model cards, licences
+      and benchmarks. Applications.
+    tutorials:
+      - "Use pretrained models (Hugging Face pipelines)."
+      - "Comparing outputs across families (e.g., BERT vs T5 vs GPT-style decoder models)."
+      - "Query a GPT or LLaMA-family model using the Hugging Face API or a local runtime; compare decoding settings and token counts."
+
+  - week: 7
+    topic: "Prompt Engineering and evaluation"
+    slug: "Prompt_Engineering_and_Evaluation"
+    detail: >-
+      The paradigm shift (pre-training vs fine-tuning vs prompt-based usage and in-context
+      learning). Anatomy of a prompt (system and user messages, instructions, context, examples,
+      output format). Basic Prompting Techniques (zero-shot, one-shot, few shot, role based),
+      Chain-of-Thought (CoT) prompting, self-consistency, prompt chaining and prompting reasoning
+      models. Structured outputs and context engineering. Prompting for Different Tasks (text,
+      code, data extraction, images). Evaluation Methods (test sets, rubrics, reference-based
+      metrics, LLM-as-a-judge, human evaluation). Limitations and Challenges (hallucination,
+      prompt sensitivity, prompt injection). Supporting tools.
+    tutorials:
+      - "Explore different case studies in prompt engineering and different prompt styles on pre-trained LLMs."
+      - "Build a small prompt evaluation set: compare zero-shot, few-shot and CoT prompts, validate structured (JSON) outputs and test a prompt-injection case."
+
+  - week: 8
+    topic: "Fine-Tuning and Domain Adaptation"
+    slug: "Fine_Tuning_and_Domain_Adaptation"
+    detail: >-
+      Choosing between prompting, retrieval and fine-tuning. Fine-tuning approaches: full
+      fine-tuning, supervised fine-tuning (SFT) and Instruction Tuning. Preference alignment:
+      reinforcement learning with human feedback (RLHF), direct preference optimisation (DPO)
+      and reinforcement learning with verifiable rewards for reasoning models.
+      Parameter-efficient tuning: LoRA, QLoRA, adapters, prompt tuning. Knowledge distillation.
+      Domain-Specific Fine-Tuning (data preparation, chat templates, overfitting, catastrophic
+      forgetting). Evaluation & Benchmarks.
+    tutorials:
+      - "Fine-tune a small pre-trained LLM for a domain-specific task."
+      - "Apply parameter-efficient fine-tuning (LoRA / QLoRA) with Hugging Face PEFT and TRL."
+      - "Compare base vs fine-tuned model performance on a held-out test set."
+
+  - week: 9
+    topic: "Foundations of Multimodal Generative AI"
+    slug: "Foundations_of_Multimodal_GenAI"
+    detail: >-
+      Definition of modalities (text, image, audio, video). Key Concepts & Terminology
+      (modality, cross modal, multi modal, alignment, fusion: early, late and cross-attention).
+      Representation learning across modalities (vision transformers, audio encoders, image and
+      audio tokens, shared embedding spaces). Key multimodal architectures and models (dual
+      encoders, fusion encoders, encoder-decoders, vision encoders connected to LLMs).
+      Contrastive Learning (CLIP, SigLIP; contrastive loss, zero-shot classification),
+      Vision-Language Transformers.
+    tutorials:
+      - "Understand modalities and embeddings."
+      - "Explore text–image embeddings, alignment, and retrieval using pre-trained models like CLIP (zero-shot classification and text-to-image search)."
+      - "Transcribe audio with a speech model (e.g. Whisper) and connect it to text and image embeddings."
+
+  - week: 10
+    topic: "Multimodal Generative AI Applications"
+    slug: "Multimodal_GenAI_Applications"
+    detail: >-
+      Multimodal LLMs (vision-language and natively multimodal models that accept text, images,
+      audio and video). Training & Fine-Tuning Multimodal Models (alignment pre-training, visual
+      instruction tuning, parameter-efficient adaptation). Generation across modalities
+      (text-to-image, image editing, text-to-speech and speech-to-speech, music, text-to-video).
+      Evaluation of Multimodal Generative AI (CLIP score, FID, task accuracy, human preference,
+      multimodal hallucination). Responsible use: deepfakes, consent, watermarking and content
+      provenance (e.g. C2PA). Applications.
+    tutorials:
+      - "Multimodal generative tasks for example: Text to Image, Image to Text (captioning and visual question answering), Text to Audio (speech), Speech to Text, Image to Image, Cross-modal reasoning over charts and documents."
+      - "Explore advanced models, real-world use cases and emerging trends."
+
+  - week: 11
+    topic: "Deployment and Frameworks."
+    slug: "Deployment_and_Frameworks"
+    detail: >-
+      Frameworks (Hugging Face, OpenAI / Azure OpenAI, Google Gemini API, vLLM, Ollama,
+      LangChain / LangGraph, LlamaIndex). API Platforms (authentication, tokens, pricing, rate
+      limits, streaming). Deployment options: cloud APIs vs. self-hosted and local models;
+      quantisation and serving efficiency (batching, caching). Building applications and
+      interfaces (e.g. Gradio, FastAPI, Docker). Deploy and monitor generative AI models using
+      standard frameworks and deployment tools (logging, tracing, latency and cost monitoring,
+      guardrails, versioning). Comparison.
+    tutorials:
+      - "Explore different tools and frameworks. Work with local and cloud based LLM models."
+      - "Build and deploy a small generative AI application with a web interface; measure latency and cost and add basic logging and guardrails."
+
+  - week: 12
+    topic: "Retrieval-Augmented Generation (RAG) & Agentic AI"
+    slug: "RAG_and_Agentic_AI"
+    detail: >-
+      Motivation. LLM limitations (e.g Static Knowledge, Hallucinations, no access to private
+      data). Embeddings and vector databases. RAG architectures and workflow (chunking, indexing,
+      dense and hybrid retrieval, re-ranking, grounded generation with citations; advanced RAG,
+      e.g. query rewriting, GraphRAG). RAG evaluation (retrieval quality, faithfulness, answer
+      relevance). Understand agentic AI concepts and components (LLM, tools / function calling,
+      memory, planning, ReAct loop; workflows vs. agents; multi-agent systems; Model Context
+      Protocol). Risks and guardrails (prompt injection, human oversight). Frameworks & Tools.
+    tutorials:
+      - "Build RAG pipelines (e.g document Q&A) with embeddings and a vector store. Compare with and without RAG and evaluate retrieval and faithfulness."
+      - "Implement a simple LLM agent that calls tools (e.g. a calculator and a search over the RAG index)."

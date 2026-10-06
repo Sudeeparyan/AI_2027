@@ -1,0 +1,472 @@
+subtitle: "How AI connects text, images, audio and video: representations, alignment, fusion, and contrastive models such as CLIP"
+mimlos: [1, 2, 4]
+objectives:
+  - "Define **modalities** and the key terms: modality, **cross-modal, multimodal, alignment, fusion** (early, late, cross-attention)."
+  - "Explain **representation learning across modalities**: vision transformers, audio encoders, image/audio tokens and **shared embedding spaces**."
+  - "Explain **contrastive learning** with **CLIP** and **SigLIP**, write the contrastive loss and use it for **zero-shot classification** and retrieval."
+  - "Compare multimodal architectures: **dual encoders, fusion encoders, encoder–decoders** and vision encoders connected to LLMs; describe **vision-language transformers**."
+  - "Transcribe speech with **Whisper** and evaluate with word error rate; evaluate multimodal models with retrieval and zero-shot metrics."
+  - "Discuss the responsible-AI issues of web-scale multimodal data: consent, bias, harmful content and surveillance."
+coverage:
+  - modality
+  - cross-modal
+  - multimodal
+  - alignment
+  - fusion
+  - early fusion
+  - late fusion
+  - cross-attention
+  - representation learning
+  - vision transformer
+  - audio
+  - spectrogram
+  - shared embedding space
+  - contrastive
+  - CLIP
+  - SigLIP
+  - zero-shot
+  - retrieval
+  - dual encoder
+  - fusion encoder
+  - encoder–decoder
+  - vision-language
+  - Whisper
+  - word error rate
+  - modality gap
+
+slides:
+  - type: title
+    figure: cover
+    notes: |
+      Welcome to week 9, the start of the multimodal part of the module. So far our models have handled one kind of data at a time: images in weeks 2 to 4, text in weeks 5 to 8. Real-world information mixes text, images, audio and video, and the most capable systems of 2026 handle them together. This week covers the foundations: what modalities are, how each becomes vectors or tokens, how different modalities are aligned in a shared space, with CLIP as the central example, and the architectures that combine them. Next week builds on this with multimodal LLMs and generation across modalities.
+
+  - type: outcomes
+    notes: |
+      Six outcomes, matching the descriptor's week 9 and MIMLO 2, which asks students to analyse and apply multimodal techniques including alignment and cross-modal reasoning. The first two are vocabulary and representations. The third, contrastive learning with CLIP, is the technical core and includes a loss students should be able to write and compute. The fourth surveys architectures and vision-language transformers. The fifth adds audio with Whisper and evaluation metrics, touching MIMLO 4. The sixth is the responsible-AI lens, which is particularly important for web-scale image and audio data.
+
+  - type: agenda
+    icon: "fa:FaRoute"
+    items:
+      - {title: "Warm-up: search photos with no captions", minutes: 5}
+      - {title: "1 · Modalities and terminology", minutes: 15}
+      - {title: "2 · Representation learning across modalities", minutes: 17}
+      - {title: "3 · Contrastive learning: CLIP and SigLIP", minutes: 33}
+      - {title: "4 · Multimodal architectures", minutes: 20}
+      - {title: "5 · Audio, evaluation and responsible AI", minutes: 20}
+      - {title: "Lab preview and wrap-up", minutes: 7}
+    notes: |
+      The plan follows the descriptor: definition of modalities; key concepts and terminology; representation learning across modalities; key multimodal architectures and models; contrastive learning with CLIP; and vision-language transformers. Section three is the longest because it contains the maths and the real results from the lab, run in advance on CIFAR-10. Take the break after section three.
+
+  - type: discussion
+    title: "Warm-up"
+    icon: "fa:FaImages"
+    prompt: "You have 10,000 holiday photos with no captions or tags. How could a computer find 'a dog on a beach at sunset'?"
+    points:
+      - "Could you train a classifier? Which classes would you need, and where would labels come from?"
+      - "What if the next search is 'a red umbrella in the rain'?"
+      - "What would a system need so that **any** text query can be compared with **any** image?"
+    notes: |
+      Give two minutes. Students usually propose training a classifier, then realise that they would need a class for every possible query and labelled data for each. The key insight to draw out is the last point: if text and images can be turned into vectors in the same space, where a matching image and description land close together, then any query can be compared with any image by a similarity score, with no task-specific training. That is exactly what CLIP does, and by the end of section three students will have done it in the lab.
+
+  # ------------------------------------------------ section 1
+  - type: section
+    number: 1
+    title: "Modalities and terminology"
+    question: "What exactly does 'multimodal' mean?"
+    icon: "fa:FaLayerGroup"
+    notes: |
+      Section one establishes the vocabulary: modalities and how each is represented, the precise meanings of cross-modal, multimodal, alignment and fusion, the difference between multimodal understanding and generation, and the three ways of fusing modalities. These terms appear in the exam and in every multimodal paper. About fifteen minutes.
+
+  - type: figure
+    title: "Four main modalities, one idea: turn everything into vectors"
+    figure: modalities
+    notes: |
+      A modality is a type of data with its own structure: text is a sequence of discrete symbols; images are two-dimensional grids of pixels; audio is a one-dimensional waveform, usually converted to a time-frequency spectrogram; video is a sequence of images with time and often audio. Each modality is split into units: sub-word tokens, image patches, spectrogram frames or codec tokens, and video frames with patches. A modality-specific encoder turns those units into vectors. Multimodal models then either place these vectors in a shared space or feed them into a shared model, which is the rest of today's lecture.
+
+  - type: table
+    title: "Key terms"
+    header: ["Term", "Meaning", "Example"]
+    rows:
+      - ["Modality", "A type of data with its own structure", "Text, image, audio, video, depth, sensor data"]
+      - ["Unimodal", "Uses one modality", "A text-only LLM; an image classifier"]
+      - ["Cross-modal", "Input in one modality, output or query in another", "Text-to-image search; image captioning; speech-to-text"]
+      - ["Multimodal", "Processes or combines several modalities", "A model answering questions about an image and text"]
+      - ["Alignment", "Mapping modalities so corresponding content matches", "The photo of a dog and 'a dog' get similar vectors"]
+      - ["Fusion", "Combining information from modalities inside a model", "Early, late or cross-attention fusion"]
+      - ["Grounding", "Linking words to specific regions, times or objects", "'the red car' ↔ its bounding box"]
+    notes: |
+      These definitions come straight from the descriptor's list: modality, cross-modal, multimodal, alignment and fusion; grounding is added because it appears in many vision-language papers. The distinction between cross-modal and multimodal is subtle: cross-modal emphasises going from one modality to another, for example text-to-image search, while multimodal means processing several together. Alignment is about correspondence between modalities; fusion is about how information is combined inside a model. Encourage students to use these terms precisely in their reports.
+
+  - type: compare
+    title: "Multimodal understanding vs. multimodal generation"
+    columns:
+      - head: "Understanding (this week)"
+        icon: "fa:FaEye"
+        points:
+          - "Image/audio/video in → text, labels or vectors out"
+          - "Zero-shot classification, retrieval, captioning, visual question answering, speech recognition"
+          - "Models: CLIP, SigLIP, BLIP, Whisper, vision-language LLMs"
+      - head: "Generation (weeks 4 and 10)"
+        icon: "fa:FaPaintBrush"
+        points:
+          - "Text in → image, audio or video out"
+          - "Text-to-image, text-to-speech, text-to-video, image editing"
+          - "Models: diffusion/flow models conditioned on text encoders; speech and video generators"
+    callout: "Generation depends on understanding: text-to-image models use a text encoder (often CLIP's) and are evaluated with CLIP score."
+    notes: |
+      Separate the two directions. Understanding maps non-text inputs to text, labels or vectors; generation maps text to non-text outputs. They are closely linked: the text encoder inside Stable Diffusion from week 4 is CLIP's text transformer, and we measured prompt alignment with CLIP score in the week 4 lab. This week focuses on understanding and alignment; next week covers multimodal LLMs and generation across modalities, including audio and video.
+
+  - type: figure
+    title: "Three ways to fuse modalities"
+    figure: fusion
+    bullets:
+      - "**Early fusion**: combine inputs or tokens first; one model learns fine-grained interactions (e.g. native multimodal transformers)."
+      - "**Late fusion**: separate encoders, combine at the end (e.g. CLIP's similarity score): efficient, good for retrieval."
+      - "**Cross-attention fusion**: one modality attends to the other inside the network (e.g. Flamingo, diffusion U-Nets)."
+    stack: true
+    notes: |
+      Fusion is about where information is combined. Early fusion puts all modalities into one model from the start, allowing rich interactions, at higher cost; natively multimodal models such as those in the Gemini family process interleaved text and image tokens. Late fusion keeps separate encoders and combines only their outputs, as CLIP does with a similarity score; it is efficient because each item is encoded once, which is ideal for search over millions of images. Cross-attention fusion, from week 5, lets one modality query the other inside the network, as in DeepMind's Flamingo or the diffusion U-Net attending to the prompt.
+
+  - type: quiz
+    question: "CLIP encodes images and texts separately and compares them with cosine similarity. Which fusion strategy is this?"
+    options:
+      - "Early fusion"
+      - "Late fusion"
+      - "Cross-attention fusion"
+      - "No fusion: CLIP is unimodal"
+    answer: 1
+    notes: |
+      Answer: B, late fusion. CLIP's image and text encoders never see each other's inputs; the modalities meet only at the end, in the similarity score between two embeddings. This is what makes CLIP so efficient for retrieval: you can encode a million images once, store the vectors, and compare any new text query against them. A and C describe designs where modalities interact inside the network. D is wrong: CLIP is multimodal because it aligns two modalities in one space.
+
+  # ------------------------------------------------ section 2
+  - type: section
+    number: 2
+    title: "Representation learning across modalities"
+    question: "How does each modality become vectors that can be compared?"
+    icon: "fa:FaVectorSquare"
+    notes: |
+      Section two covers representation learning: how images, audio and video are turned into sequences of vectors that transformers can process, and the idea of a shared embedding space in which different modalities can be compared directly. It links back to tokens and embeddings from weeks 5 and 6. About seventeen minutes.
+
+  - type: bullets
+    title: "Representation learning: vectors that capture meaning"
+    icon: "fa:FaCompass"
+    bullets:
+      - "A **representation** is a vector that captures the content relevant for many tasks (week 5 embeddings)."
+      - "**Unimodal pre-training** learns good representations within one modality: BERT for text, ViT for images, Whisper's encoder for audio."
+      - "**Multimodal alignment** learns representations that correspond **across** modalities, usually from naturally paired data: images with captions, videos with speech, audio with descriptions."
+      - "Web-scale paired data is weak supervision: noisy but enormous."
+    notes: |
+      Representation learning is the thread connecting this whole module: VAE latents, transformer embeddings and now multimodal embeddings are all vectors that capture meaning. Unimodal models learn good representations within one modality by self-supervision. Multimodal alignment needs paired data, where two modalities describe the same thing, and the web provides it at enormous scale: images with alt-text captions, videos with subtitles, podcasts with transcripts. This data is noisy, since captions often do not describe the image well, but scale compensates, which is the key lesson of CLIP.
+
+  - type: cards
+    title: "Every modality as a sequence of tokens"
+    cards:
+      - {icon: "fa:FaTh", head: "Images", text: "Split into patches (e.g. 16 × 16 px), embed each patch, add positions: a Vision Transformer (week 5)."}
+      - {icon: "fa:FaWaveSquare", head: "Audio", text: "Convert to a log-mel spectrogram; frames become tokens (Whisper), or use discrete audio-codec tokens for generation."}
+      - {icon: "fa:FaFilm", head: "Video", text: "Frames × patches (+ time): very many tokens; models sample frames or use spatio-temporal 'tubelets'."}
+      - {icon: "fa:FaCubes", head: "Discrete tokens", text: "VQ-style tokenizers (week 2) turn images and audio into codebook IDs, so an LLM can read and write them."}
+    notes: |
+      The unifying trick of modern multimodal AI is to turn every modality into a sequence of tokens, so the same transformer machinery applies. Images become patches, as in the Vision Transformer from week 5. Audio is first converted into a spectrogram, a picture of frequency content over time; its frames become tokens, as in Whisper, or audio can be compressed into discrete codec tokens for generation. Video is the most expensive: a minute of video contains thousands of frames, each with hundreds of patches, so models sample frames or group patches across time. Discrete tokenizers based on the VQ-VAE idea from week 2 let a language model read and write images and audio as tokens.
+
+  - type: figure
+    title: "Audio as input: the Whisper pipeline"
+    figure: whisper_pipeline
+    bullets:
+      - "An encoder–decoder transformer: the decoder generates text while cross-attending to the audio encoding."
+      - "Multilingual recognition, translation into English and timestamps from one model."
+    stack: true
+    notes: |
+      Whisper, released by OpenAI in 2022 and available as open weights, is the standard example of audio representation learning. The waveform, sampled at sixteen kilohertz, is converted into a log-mel spectrogram, which the encoder processes like an image. The decoder is a text transformer that generates the transcript token by token, attending to the audio through cross-attention, the encoder-decoder design from week 5. It was trained on 680,000 hours of weakly supervised audio with transcripts from the web, the same scale-over-cleanliness strategy as CLIP. Students transcribe real speech with Whisper in the lab.
+
+  - type: bullets
+    title: "Shared embedding spaces"
+    icon: "fa:FaProjectDiagram"
+    bullets:
+      - "Train encoders so that **corresponding** items (a photo and its caption) get **nearby** vectors, and unrelated items are far apart."
+      - "Then any modality can be compared with any other by cosine similarity: search, zero-shot classification, recommendation, clustering."
+      - "Examples: CLIP / SigLIP (image–text), CLAP (audio–text), ImageBind (six modalities bound through images)."
+      - "The same space provides conditioning signals for generators (week 4) and features for multimodal LLMs (week 10)."
+    notes: |
+      A shared embedding space is the direct answer to the warm-up. If a photo of a dog on a beach and the text a dog on a beach at sunset map to nearby vectors, search becomes a nearest-neighbour lookup. The space enables many applications without retraining: retrieval in both directions, zero-shot classification by comparing an image with class descriptions, deduplication and clustering of image collections. CLAP does this for audio and text. Meta's ImageBind in 2023 aligned six modalities, including audio, depth and thermal images, by pairing each with images. These encoders also supply the features used by generators and multimodal LLMs.
+
+  # ------------------------------------------------ section 3
+  - type: section
+    number: 3
+    title: "Contrastive learning: CLIP and SigLIP"
+    question: "How do you teach a model that a picture and a sentence mean the same thing?"
+    icon: "fa:FaMagnet"
+    notes: |
+      Section three is the technical core. We describe CLIP, its training data and objective, write the contrastive loss, and then look at what CLIP can do without further training, zero-shot classification and retrieval, using real results from the lab run on CIFAR-10. We then introduce SigLIP's sigmoid loss and the modality gap. About thirty minutes; take the break afterwards.
+
+  - type: bullets
+    title: "CLIP: Contrastive Language–Image Pre-training (OpenAI, 2021)"
+    icon: "fa:FaLink"
+    bullets:
+      - "Trained on **400 million** image–text pairs collected from the web."
+      - "Two encoders: an image encoder (ViT or ResNet) and a text transformer, each followed by a linear projection to a shared space (e.g. 512-d)."
+      - "Objective: in each batch, match every image with its own caption among all captions, and vice versa."
+      - "Huge batches (32,768 pairs) supply many negatives per step."
+      - "Result: strong **zero-shot** performance on many image tasks, and embeddings used across generative AI."
+    notes: |
+      CLIP, by Radford and colleagues in 2021, is one of the most influential models in generative AI. Its data was four hundred million image-text pairs collected from the internet. Its architecture is a dual encoder: an image encoder, a Vision Transformer in the model we use, and a text transformer, each projecting into a shared five-hundred-and-twelve-dimensional space. The training objective is contrastive: within each batch, every image must pick out its own caption from all the captions, and every caption its own image. CLIP's zero-shot ImageNet accuracy matched a supervised ResNet-50 without using ImageNet labels, and its text encoder became part of Stable Diffusion.
+
+  - type: figure
+    title: "The contrastive objective as a matrix"
+    figure: clip_matrix
+    notes: |
+      Picture a batch of N image-caption pairs as an N by N matrix of similarities: row i is image i, column j is caption j. The correct pairs are on the diagonal. Training increases the diagonal similarities and decreases the off-diagonal ones, treating each row as a classification problem, which caption belongs to this image, and each column as a classification problem, which image belongs to this caption. All other captions in the batch serve as negative examples for free, which is why larger batches, with more negatives, give better embeddings.
+
+  - type: equation
+    title: "The contrastive (InfoNCE) loss"
+    eq:
+      - "\\mathcal{L}_{\\mathrm{img}\\to\\mathrm{txt}} = -\\dfrac{1}{N}\\sum_{i=1}^{N} \\left[ s_{ii} - \\log \\sum_{j=1}^{N} \\exp(s_{ij}) \\right]"
+      - "s_{ij} = \\dfrac{u_i \\cdot v_j}{\\tau}, \\qquad \\mathcal{L}_{\\mathrm{CLIP}} = \\frac{1}{2}\\left(\\mathcal{L}_{\\mathrm{img}\\to\\mathrm{txt}} + \\mathcal{L}_{\\mathrm{txt}\\to\\mathrm{img}}\\right)"
+    read_as:
+      - "Cosine similarities (normalised u, v) divided by a learned **temperature** τ become logits."
+      - "Each row is a softmax classification whose correct class is the diagonal: the bracket is log softmax(s_i·)[i], i.e. cross-entropy."
+      - "Average the image→text and text→image directions. A random model scores ln N."
+    terms:
+      - ["u_i, v_j", "normalised image and text embeddings"]
+      - ["τ", "temperature (learned; ≈ 0.01 in CLIP)"]
+      - ["N", "batch size"]
+    panel_h: 2.2
+    notes: |
+      Write the loss on the board. The similarity s i j is the cosine similarity between image i and text j, divided by a temperature; CLIP learns the temperature and it ends up around one hundredth, which sharpens the softmax, the same temperature idea as in week 1. For each image, the softmax over all captions should put its probability on the matching caption; the loss is the negative log of that probability, a cross-entropy with the diagonal as the target. The same is done column-wise for texts, and the two directions are averaged. A model that has learned nothing gives each caption equal probability, so its loss is the log of N.
+
+  - type: bullets
+    title: "The loss in numbers (from the lab)"
+    icon: "fa:FaCalculator"
+    bullets:
+      - "{{LOSS_NOTES}}"
+      - "Correct pairs: low loss, because each diagonal entry dominates its row and column."
+      - "Shuffled pairs: the 'correct' targets are no longer the most similar, so the loss exceeds ln N."
+    notes: |
+      These numbers come from the lab run: six CIFAR-10 images from different classes and six matching captions, embedded with the pretrained CLIP. With the correct pairing the loss is far below the random baseline of the log of six, about 1.79, because each image is most similar to its own caption. When the captions are shuffled the loss rises above that baseline, because the model is now confidently wrong. Students compute exactly this in part four of the lab, which makes the abstract equation concrete.
+
+  - type: figure
+    title: "Zero-shot classification: describe the classes, then compare"
+    figure: zeroshot_pipeline
+    notes: |
+      Zero-shot classification with CLIP takes no training. Write each class name into a caption template such as a photo of a cat, embed all the captions with the text encoder, embed the image with the image encoder, and predict the class whose caption is most similar. The classifier is defined entirely by text, so changing the classes means changing a list of words. This is also why prompt engineering matters for CLIP, as the next slide shows.
+
+  - type: figure
+    title: "Real results: prompt templates matter for CLIP too"
+    figure: zeroshot_results
+    bullets:
+      - "{{ZS_NOTES}}"
+      - "CLIP was trained on captions, so 'a photo of a …' resembles its training text more than a bare word."
+      - "Averaging several templates (prompt ensembling) usually helps a little more."
+    stack: true
+    notes: |
+      Real results from the lab: CLIP ViT-B/32 classifying CIFAR-10 test images zero-shot, with only the text prompt changing. Using the bare class name is noticeably worse than using the template a photo of a, because CLIP's text encoder was trained on natural captions. Averaging several templates, including ones that mention blur and low resolution, which suits CIFAR's tiny images, can help further. The lesson from week 7 transfers: prompts are part of the model and must be evaluated. Chance level is ten percent, so CLIP is doing a great deal without any CIFAR training.
+
+  - type: figure
+    title: "Where zero-shot CLIP goes wrong (real confusion matrix)"
+    figure: lab_confusion
+    bullets:
+      - "Most errors are between visually similar classes: cat ↔ dog, automobile ↔ truck, deer ↔ horse."
+      - "CIFAR images are 32 × 32 pixels, upscaled to 224 × 224: far from CLIP's training distribution."
+    figure_width: 6.0
+    notes: |
+      The confusion matrix from the lab run shows where the zero-shot classifier fails. The diagonal is strong, and the typical off-diagonal errors are between classes that look alike at low resolution: cats and dogs, automobiles and trucks, deer and horses. CIFAR's thirty-two by thirty-two images are upscaled to CLIP's input size, which is a distribution shift from the web photos it was trained on. This is a good example of error analysis from week 7: the errors are understandable and suggest remedies, such as better templates, higher-resolution data or a small amount of fine-tuning.
+
+  - type: figure
+    title: "Text-to-image retrieval (real)"
+    figure: lab_retrieval
+    bullets:
+      - "Embed the query once; rank all stored image embeddings by cosine similarity."
+      - "{{PREC_NOTES}}"
+      - "The basis of semantic photo search and of multimodal RAG (week 12)."
+    stack: true
+    notes: |
+      Retrieval uses the same embeddings in the other direction. The query text is embedded once and compared with the stored embeddings of all images; the top results are returned. The strip shows the top six CIFAR images for a free-text query about a red sports car, and the bullet gives the measured precision at k for class-name queries. Because image embeddings are computed once and stored in a vector index, this scales to millions of images, which is how semantic search in photo apps works and how multimodal retrieval-augmented generation retrieves images in week 12.
+
+  - type: equation
+    title: "SigLIP: a sigmoid loss instead of softmax (Zhai et al., 2023)"
+    eq: "\\mathcal{L}_{\\mathrm{SigLIP}} = -\\frac{1}{N}\\sum_{i=1}^{N}\\sum_{j=1}^{N} \\log \\sigma\\left(z_{ij}\\left(t\\, u_i \\cdot v_j + b\\right)\\right), \\qquad z_{ij} = +1 \\ \\mathrm{if}\\ i = j,\\ \\mathrm{else}\\ -1"
+    read_as:
+      - "Treat every image–text pair as an independent **binary** question: match or not?"
+      - "No normalisation over the whole batch, so it works well with smaller batches and scales efficiently."
+      - "SigLIP encoders are used in many recent vision-language models."
+    terms:
+      - ["σ", "sigmoid function"]
+      - ["t, b", "learned temperature and bias"]
+      - ["z_ij", "label: +1 for matching pairs, −1 otherwise"]
+    notes: |
+      SigLIP, from Google in 2023, replaces the softmax over the batch with an independent sigmoid, a logistic regression, for every image-text pair: matching pairs should score high, all others low. Because each pair is scored separately, there is no need to normalise over the whole batch, which reduces communication between devices and works well even with smaller batches. SigLIP image encoders are widely used as the vision backbone of recent open vision-language models. The lab's optional extension compares SigLIP's zero-shot accuracy with CLIP's.
+
+  - type: figure
+    title: "The modality gap (real embeddings from the lab)"
+    figure: lab_modality_gap
+    bullets:
+      - "Image and text embeddings occupy **different regions** of the shared space (Liang et al., 2022)."
+      - "Matching is still meaningful: rankings, not absolute distances, carry the information."
+      - "Implication: do not compare image–text similarities with image–image similarities on the same scale."
+    figure_width: 6.4
+    notes: |
+      A surprising property of CLIP-style spaces is visible when we project real embeddings to two dimensions with PCA: images and texts form two separate clouds. This modality gap, studied by Liang and colleagues in 2022, arises from initialisation and the contrastive objective. It does not break retrieval, because what matters is which caption is closest to an image relative to the others. But it has practical consequences: image-to-image similarities are typically much higher than image-to-text similarities, so thresholds must be set separately for each comparison type.
+
+  - type: quiz
+    question: "Why did CLIP use very large batches (32,768 pairs)?"
+    options:
+      - "To reduce the number of parameters"
+      - "Each batch supplies the negatives: more pairs means more, and harder, negatives per step"
+      - "Because images are large files"
+      - "Batch size does not affect contrastive learning"
+    answer: 1
+    notes: |
+      Answer: B. In the contrastive loss, every other caption in the batch is a negative for a given image. With a larger batch, each image must be distinguished from more, and more similar, captions, which forces the embeddings to capture finer distinctions. A and C are irrelevant. D is wrong for softmax-based contrastive learning, although SigLIP's sigmoid loss reduces the dependence on batch size, which is one of its selling points.
+
+  # ------------------------------------------------ section 4
+  - type: section
+    number: 4
+    title: "Multimodal architectures and vision-language transformers"
+    question: "Beyond matching: how do models reason about images and text together?"
+    icon: "fa:FaSitemap"
+    notes: |
+      Welcome back. Section four surveys the architectures named in the descriptor: dual encoders like CLIP, fusion encoders, encoder-decoders, and the now-dominant design that connects a vision encoder to a large language model. We trace the history of vision-language transformers and finish with a map of important models.
+
+  - type: figure
+    title: "Four families of multimodal architecture"
+    figure: architectures
+    notes: |
+      Four families. Dual encoders, like CLIP and SigLIP, encode each modality separately and compare them: fast and ideal for retrieval and zero-shot classification, but unable to reason about detailed interactions. Fusion encoders process image and text jointly with attention, which suits understanding tasks like visual question answering. Encoder-decoders encode one modality and generate another, such as image captioning or Whisper's speech recognition. The fourth family, connecting a vision encoder to an LLM through a small projection, is the basis of almost every modern multimodal assistant and is the focus of next week.
+
+  - type: bullets
+    title: "Vision-language transformers: a short history"
+    icon: "fa:FaHistory"
+    bullets:
+      - "**2019** ViLBERT, LXMERT, VisualBERT: BERT-style transformers over image regions + words (single- or dual-stream)."
+      - "**2021** CLIP, ALIGN: contrastive dual encoders at web scale."
+      - "**2022** Flamingo: frozen LLM + gated cross-attention to image features; few-shot visual tasks. BLIP: unified captioning and retrieval."
+      - "**2023** BLIP-2 (Q-Former bridge), LLaVA (simple projector + visual instruction tuning)."
+      - "**2024–26** Natively multimodal models trained on interleaved text, image, audio and video (week 10)."
+    notes: |
+      The history shows a convergence. Early vision-language transformers in 2019 extended BERT to image regions detected by an object detector, with either one shared stream or two streams linked by cross-attention. CLIP and Google's ALIGN in 2021 showed the power of contrastive learning at web scale. DeepMind's Flamingo in 2022 connected a frozen language model to image features with gated cross-attention, enabling few-shot visual tasks. BLIP-2 and LLaVA in 2023 showed that a pretrained vision encoder and a pretrained LLM can be connected cheaply by a small bridge. Frontier models now train natively on interleaved modalities.
+
+  - type: flow
+    title: "The LLaVA recipe: connect a vision encoder to an LLM"
+    steps:
+      - {label: "Image", sub: "e.g. 336 × 336 photo, chart or document"}
+      - {label: "Vision encoder", sub: "Pretrained CLIP or SigLIP ViT (often frozen)"}
+      - {label: "Projector", sub: "Small MLP maps patch features to LLM token embeddings", highlight: true}
+      - {label: "LLM", sub: "Reads visual tokens + text tokens; generates the answer"}
+    bullets:
+      - "Stage 1: train the projector on image–caption pairs (alignment). Stage 2: **visual instruction tuning** on image–question–answer conversations."
+      - "Cheap to build from existing parts; the vision encoder's resolution limits fine detail such as small text."
+    notes: |
+      LLaVA, by Liu and colleagues in 2023, made this design popular because it is remarkably simple. A pretrained CLIP vision encoder turns the image into a grid of patch features; a small projection network maps each patch feature into the LLM's token-embedding space, producing visual tokens; the LLM reads them followed by the text prompt and generates an answer. Training has two stages: first the projector alone is trained on captions to align the spaces, then the projector and LLM are fine-tuned on image-based conversations, called visual instruction tuning. Next week we use models built this way and discuss their evaluation.
+
+  - type: table
+    title: "A map of important multimodal models"
+    header: ["Model (year)", "Modalities", "Type", "Typical use"]
+    rows:
+      - ["CLIP (2021), SigLIP (2023)", "Image–text", "Dual encoder, contrastive", "Retrieval, zero-shot, features for generators"]
+      - ["ALIGN (2021)", "Image–text", "Dual encoder, noisy web data", "Retrieval"]
+      - ["Flamingo (2022)", "Image/video + text", "Frozen LLM + cross-attention", "Few-shot visual QA"]
+      - ["BLIP-2 (2023)", "Image + text", "Q-Former bridge to LLM", "Captioning, VQA"]
+      - ["LLaVA (2023)", "Image + text", "Projector + LLM", "Visual chat; open research baseline"]
+      - ["Whisper (2022)", "Audio → text", "Encoder–decoder", "Speech recognition, translation"]
+      - ["CLAP (2022–23)", "Audio–text", "Dual encoder, contrastive", "Audio search and tagging"]
+      - ["ImageBind (2023)", "Six modalities", "Encoders bound via images", "Cross-modal retrieval"]
+    notes: |
+      This table is a map for revision and for choosing components in the project. Dual encoders for search and zero-shot tasks; bridge-to-LLM models for question answering and chat about images; encoder-decoders for converting speech to text; audio-text contrastive models such as CLAP for sound search; and ImageBind for experiments across many modalities. Most are available as open weights on Hugging Face. Next week adds the natively multimodal assistants and generators.
+
+  # ------------------------------------------------ section 5
+  - type: section
+    number: 5
+    title: "Audio, evaluation and responsible AI"
+    question: "How well does it work, and at what cost to whom?"
+    icon: "fa:FaBalanceScale"
+    notes: |
+      The final section returns to audio with real Whisper results, defines word error rate, summarises how multimodal models are evaluated, and discusses the responsible-AI issues of multimodal data, which are serious: consent, harmful content in scraped datasets, bias in zero-shot classification, and surveillance. About twenty minutes.
+
+  - type: figure
+    title: "Speech recognition with Whisper (real)"
+    figure: lab_spectrogram
+    bullets:
+      - "{{WER_NOTES}}"
+      - "This plot illustrates audio frequency content. Whisper internally reads log-mel features."
+    stack: true
+    notes: |
+      An illustrative spectrogram of the first LibriSpeech clip from the lab, with time on the horizontal axis and linear frequency bins on the vertical. This plot is not Whisper's exact preprocessing, which uses log-mel features. Bright bands show harmonics of the speaker's voice. Whisper transcribed ten clips in the lab run with the word error rate reported in the bullet. LibriSpeech is clean read audiobook speech, one of the easier benchmarks. Accuracy can be lower for noisy audio, strong accents, overlapping speakers and low-resource languages, which is a fairness issue we return to on the responsible-AI slide.
+
+  - type: equation
+    title: "Word error rate (WER)"
+    eq: "\\mathrm{WER} = \\frac{S + D + I}{N}"
+    read_as:
+      - "Align the transcript with the reference using edit distance on words."
+      - "S substitutions, D deletions, I insertions; N words in the reference. Lower is better; can exceed 100%."
+      - "Example: reference 'the cat sat on the mat' (6), hypothesis 'the cat sat on mat' → 1 deletion → WER = 1/6 ≈ 17%."
+    terms:
+      - ["S", "substituted words"]
+      - ["D", "deleted words"]
+      - ["I", "inserted words"]
+      - ["N", "reference word count"]
+    notes: |
+      Word error rate is the standard metric for speech recognition. The hypothesis is aligned to the reference with the minimum number of word edits, the edit or Levenshtein distance used in the lab's TODO, and the errors are divided by the number of reference words. Work through the example. Note that WER can exceed one hundred percent if the system inserts many words, and that it treats all errors equally, so a wrong name costs the same as a wrong article. Text normalisation, such as case and punctuation, changes WER substantially, so it must be reported.
+
+  - type: table
+    title: "How multimodal models are evaluated"
+    header: ["Capability", "Metric", "Common benchmark"]
+    rows:
+      - ["Zero-shot classification", "Top-1 / top-5 accuracy", "ImageNet and variants, CIFAR"]
+      - ["Retrieval", "Recall@k (image→text and text→image)", "MS-COCO, Flickr30k"]
+      - ["Captioning", "CIDEr, BLEU, CLIPScore, human rating", "MS-COCO Captions, NoCaps"]
+      - ["Visual question answering", "Accuracy", "VQAv2, TextVQA, ChartQA, DocVQA"]
+      - ["Speech recognition", "Word error rate", "LibriSpeech, Common Voice, FLEURS"]
+      - ["Robustness and fairness", "Performance across groups, domains, accents", "Custom audits"]
+    notes: |
+      Each capability has standard metrics and benchmarks. Retrieval uses recall at k in both directions, typically on MS-COCO and Flickr30k. Captioning uses reference-based metrics such as CIDEr plus CLIPScore and human rating. Visual question answering has many benchmarks, including ones for charts and documents that matter for business applications. Speech recognition uses word error rate on benchmarks such as LibriSpeech and the multilingual FLEURS. The last row is the most important for responsible deployment and is usually missing from leaderboards: performance must be broken down by domain, accent and demographic group.
+
+  - type: bullets
+    title: "Responsible AI lens: multimodal data and models"
+    icon: "fa:FaUserShield"
+    bullets:
+      - "**Consent and copyright**: web images, voices and videos were scraped at scale, mostly without consent."
+      - "**Harmful content**: a 2023 audit found child sexual abuse material in the LAION-5B image–text dataset; it was withdrawn and later re-released after cleaning."
+      - "**Bias**: CLIP's own evaluation found images of people misclassified into crime-related and non-human categories at different rates by race and gender."
+      - "**Attacks**: typographic attacks (a label written on an apple makes CLIP see an iPod); adversarial audio."
+      - "**Surveillance**: face and voice matching enable tracking; speech recognition works worse for some accents and languages."
+    notes: |
+      Multimodal data raises the sharpest responsible-AI issues of the module. Scraped images, voices and videos rarely come with consent. In December 2023 the Stanford Internet Observatory reported child sexual abuse material in LAION-5B, a dataset used to train open image models; LAION withdrew it and released a cleaned version in 2024. CLIP's own paper and follow-up audits reported biased misclassification of people into offensive categories. OpenAI showed that writing a word on an object can fool CLIP. Face and voice matching enable surveillance, and speech systems perform worse for some accents. The EU AI Act restricts some biometric uses. Students should evaluate across groups in any project using these models.
+
+  - type: lab
+    title: "Lab 9: CLIP embeddings, zero-shot classification and Whisper"
+    steps:
+      - "Embed images and captions with **CLIP**; plot the similarity matrix."
+      - "**Zero-shot** classify 1,000 CIFAR-10 images; compare three prompt templates; inspect the confusion matrix."
+      - "**Retrieve** images from text queries; compute precision@k."
+      - "Implement the **contrastive loss**; compare correct vs shuffled pairs vs ln N."
+      - "Visualise the **modality gap** with PCA."
+      - "Transcribe speech with **Whisper**, implement **WER**, and chain speech → text → image retrieval. Optional: SigLIP."
+    runtime: "Google Colab T4 GPU (≈ 10 min) or CPU (slower)"
+    deliverable: "Notebook with similarity plots, accuracy table, retrieval metrics, loss values, WER table and three answers"
+    notes: |
+      The lab implements the descriptor's tutorial: understand modalities and embeddings; explore text-image embeddings, alignment and retrieval with pretrained models like CLIP. It adds the contrastive loss, so students connect the equation to real embeddings, and a speech part with Whisper and word error rate, so that audio is covered as the descriptor's modality list requires. The slide results came from this notebook. The chained speech-to-image retrieval previews the cross-modal systems of week 10.
+
+  - type: summary
+    points:
+      - "A **modality** is a data type; multimodal AI turns each into tokens/vectors with modality-specific encoders."
+      - "**Alignment** makes corresponding content match; **fusion** combines modalities: early, late or cross-attention."
+      - "**Shared embedding spaces** enable cross-modal search and zero-shot tasks."
+      - "**CLIP**: dual encoder trained contrastively on 400 M web pairs; loss = symmetric cross-entropy over the batch similarity matrix."
+      - "**Zero-shot** classification = compare an image with class descriptions; prompts matter."
+      - "**SigLIP** uses a pairwise sigmoid loss; embeddings show a **modality gap**."
+      - "Architectures: dual encoder, fusion encoder, encoder–decoder (Whisper), **vision encoder + LLM** (LLaVA)."
+      - "Evaluate with accuracy, precision@k (this lab), recall@k (paired retrieval benchmarks), WER and **group-wise** audits."
+    notes: |
+      Recap the eight points. Students should be able to define the key terms, write and explain the contrastive loss, and describe how zero-shot classification and retrieval work. Next week we build on these foundations: multimodal LLMs that chat about images and documents, generation across modalities including speech and video, how multimodal generation is evaluated, and responsible use including deepfakes and content provenance.
+
+  - type: resources
+    items:
+      - {kind: paper, label: "Radford et al. (2021) CLIP", note: "Learning Transferable Visual Models from Natural Language Supervision", url: "https://arxiv.org/abs/2103.00020"}
+      - {kind: paper, label: "Zhai et al. (2023) SigLIP", note: "Sigmoid loss for language-image pre-training", url: "https://arxiv.org/abs/2303.15343"}
+      - {kind: paper, label: "Radford et al. (2022) Whisper", note: "Robust speech recognition via large-scale weak supervision", url: "https://arxiv.org/abs/2212.04356"}
+      - {kind: doc, label: "Hugging Face blog: Vision language models explained", note: "Architectures and training", url: "https://huggingface.co/blog/vlms"}
+      - {kind: course, label: "Hugging Face Community Computer Vision Course", note: "Multimodal units (CLIP, VLMs)", url: "https://huggingface.co/learn/computer-vision-course/unit0/welcome/welcome"}
+      - {kind: course, label: "Hugging Face Audio Course", note: "Spectrograms, Whisper, speech models", url: "https://huggingface.co/learn/audio-course/chapter0/introduction"}
+      - {kind: video, label: "3Blue1Brown / Welch Labs: How AI images and videos work", note: "Includes a clear CLIP explanation", url: "https://www.youtube.com/watch?v=iv-5mZ_9CPY"}
+      - {kind: book, label: "Foster (2023) Generative Deep Learning, ch. 13 'Multimodal Models'", note: "Core module text", url: "https://www.oreilly.com/library/view/generative-deep-learning/9781098134174/"}
+    notes: |
+      The CLIP paper is long, but its first sections are very readable and its bias analysis is worth reading. SigLIP and Whisper are the other two primary sources for today. Hugging Face's blog post on vision language models is an excellent, current overview of architectures. The computer vision and audio courses from Hugging Face have hands-on units on exactly today's models. The Welch Labs video explains CLIP visually. Foster's chapter 13 covers multimodal models including DALL-E and Flamingo. All links were checked in September 2026.

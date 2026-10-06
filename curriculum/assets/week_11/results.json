@@ -1,0 +1,121 @@
+{
+  "model": "Qwen/Qwen2.5-0.5B-Instruct",
+  "device": "cuda",
+  "gpu": "NVIDIA GeForce GTX 1650",
+  "latency": [
+    {
+      "question": "What is a large language model? Answer i",
+      "TTFT (s)": 0.236,
+      "total (s)": 3.56,
+      "output tokens": 46,
+      "tokens/s": 13.5
+    },
+    {
+      "question": "Give three tips for writing a good promp",
+      "TTFT (s)": 0.284,
+      "total (s)": 9.26,
+      "output tokens": 128,
+      "tokens/s": 14.2
+    },
+    {
+      "question": "Explain what an API rate limit is to a n",
+      "TTFT (s)": 0.237,
+      "total (s)": 9.32,
+      "output tokens": 128,
+      "tokens/s": 14.0
+    }
+  ],
+  "quant": [
+    {
+      "scheme": "fp16",
+      "perplexity": 52.34,
+      "weight error (layer 0)": "0%",
+      "approx. size (MB)": 988
+    },
+    {
+      "scheme": "int8, per row",
+      "perplexity": 54.96,
+      "weight error (layer 0)": "1.1%",
+      "approx. size (MB)": 494
+    },
+    {
+      "scheme": "int4, per row",
+      "perplexity": 97.45,
+      "weight error (layer 0)": "20.5%",
+      "approx. size (MB)": 247
+    },
+    {
+      "scheme": "int4, groups of 64",
+      "perplexity": 64.96,
+      "weight error (layer 0)": "11.8%",
+      "approx. size (MB)": 262
+    }
+  ],
+  "quant_layer_error": {
+    "int8, per row": 0.011395281180739403,
+    "int4, per row": 0.20494921505451202,
+    "int4, groups of 64": 0.11778222769498825
+  },
+  "batch": [
+    {
+      "batch size": 1,
+      "requests": 8,
+      "seconds": 29.11,
+      "tokens/s": 13.2
+    },
+    {
+      "batch size": 2,
+      "requests": 8,
+      "seconds": 14.86,
+      "tokens/s": 25.8
+    },
+    {
+      "batch size": 4,
+      "requests": 8,
+      "seconds": 7.95,
+      "tokens/s": 48.3
+    },
+    {
+      "batch size": 8,
+      "requests": 8,
+      "seconds": 4.45,
+      "tokens/s": 86.2
+    }
+  ],
+  "cost": [
+    {
+      "option": "small hosted model",
+      "USD / month": 60.0
+    },
+    {
+      "option": "mid-size hosted model",
+      "USD / month": 300.0
+    },
+    {
+      "option": "frontier hosted model",
+      "USD / month": 1380.0
+    },
+    {
+      "option": "self-hosted small GPU, always on",
+      "USD / month": 432.0
+    }
+  ],
+  "requests_per_month": 300000,
+  "monitor": {
+    "requests": 10,
+    "blocked": 1,
+    "redacted": 2,
+    "p50 latency (s)": 2.85,
+    "p95 latency (s)": 5.72,
+    "avg completion tokens": 39.0,
+    "est. cost of these requests at small-model prices (USD)": 0.000183
+  },
+  "api_answer": "FastAPI is a popular Python library for building web applications that use the Model-View-Controller (MVC) architectural pattern. It provides an elegant and concise way to create RESTful APIs with minimal boilerplate code.\n\nTwo primary uses of FastAPI include:\n\n1. **Web API Development**: FastAPI allows developers to",
+  "api_usage": {
+    "completion_tokens": 64,
+    "prompt_tokens": 36,
+    "total_tokens": 100,
+    "completion_tokens_details": null,
+    "prompt_tokens_details": null
+  }
+}

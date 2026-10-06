@@ -1,0 +1,7 @@
+{
+  "LOSS_NOTES": "Batch of N = 6 image–caption pairs: correct pairs 1.14; captions shuffled 1.99; random model ln N = 1.79.",
+  "ZS_NOTES": "Zero-shot accuracy on 1000 CIFAR-10 test images: label only: '{}' 87.2%; 'a photo of a {}.' 88.6%; ensemble of 5 templates 89.4%.",
+  "PREC_NOTES": "Text→image retrieval precision @1 1.00, @5 0.96, @10 0.98 (fraction of top-k images of the queried class).",
+  "WER_NOTES": "Whisper on LibriSpeech sample clips: mean WER 9.1%. Example: “mister quilter is the apostle of the middle…” → “Mr. Quilter is the apostle of the middle…” (“mister” vs “Mr.” counts as an error unless text is normalised).",
+  "RESULTS_NOTES": "| Prompt template | Zero-shot accuracy |\n|---|---|\n| label only: '{}' | 87.2% |\n| 'a photo of a {}.' | 88.6% |\n| ensemble of 5 templates | 89.4% |\n\nRetrieval precision @1 1.00, @5 0.96, @10 0.98. Contrastive loss: batch of N = 6 image–caption pairs: correct pairs 1.14; captions shuffled 1.99; random model ln N = 1.79. Whisper on LibriSpeech sample clips: mean WER 9.1%. Example: “mister quilter is the apostle of the middle…” → “Mr. Quilter is the apostle of the middle…” (“mister” vs “Mr.” counts as an error unless text is normalised)."
+}

@@ -1,0 +1,162 @@
+# Reference ledger. Every URL is checked by tools/check_links.py (YouTube via oEmbed title).
+# kind: book | paper | doc | course | video | tool
+# weeks: where the source is recommended.
+sources:
+  # ---- Descriptor 7.9 books ----
+  - id: foster2023
+    kind: book
+    label: "Foster (2023) Generative Deep Learning, 2nd ed., O'Reilly"
+    url: https://www.oreilly.com/library/view/generative-deep-learning/9781098134174/
+    weeks: [1, 2, 3, 4, 5, 9, 10]
+  - id: tunstall2022
+    kind: book
+    label: "Tunstall, von Werra & Wolf (2022) Natural Language Processing with Transformers, O'Reilly"
+    url: https://www.oreilly.com/library/view/natural-language-processing/9781098136789/
+    weeks: [5, 6, 8, 11]
+  - id: rothman2022
+    kind: book
+    label: "Rothman (2022) Transformers for Natural Language Processing, 2nd ed., Packt"
+    url: https://www.packtpub.com/en-us/product/transformers-for-natural-language-processing-9781803247335
+    weeks: [5, 6]
+  - id: ozdemir2023
+    kind: book
+    label: "Ozdemir (2023) Quick Start Guide to Large Language Models, Addison-Wesley"
+    url: https://www.informit.com/store/quick-start-guide-to-large-language-models-strategies-9780138199197
+    weeks: [6, 7, 8, 12]
+
+  # ---- Official courses and docs ----
+  - {id: ms_genai_beginners, kind: course, label: "Microsoft: Generative AI for Beginners (21 lessons)", url: "https://github.com/microsoft/generative-ai-for-beginners", weeks: [1, 7, 11, 12]}
+  - {id: ms_learn_fundamentals, kind: course, label: "Microsoft Learn: Introduction to generative AI and agents", url: "https://learn.microsoft.com/en-us/training/modules/fundamentals-generative-ai/", weeks: [1]}
+  - {id: ms_agents_beginners, kind: course, label: "Microsoft: AI Agents for Beginners", url: "https://github.com/microsoft/ai-agents-for-beginners", weeks: [12]}
+  - {id: ms_rag_eval, kind: doc, label: "Microsoft Foundry: RAG evaluators (retrieval, groundedness, relevance)", url: "https://learn.microsoft.com/en-us/azure/foundry/concepts/evaluation-evaluators/rag-evaluators", weeks: [12]}
+  - {id: google_skills_genai, kind: course, label: "Google Skills: Introduction to Generative AI (learning path)", url: "https://www.skills.google/paths/118", weeks: [1, 6]}
+  - {id: google_mlcc_llm, kind: course, label: "Google ML Crash Course: Introduction to LLMs", url: "https://developers.google.com/machine-learning/crash-course/llm", weeks: [5, 6, 8]}
+  - {id: google_mlcc_embeddings, kind: course, label: "Google ML Crash Course: Embeddings", url: "https://developers.google.com/machine-learning/crash-course/embeddings", weeks: [9, 12]}
+  - {id: google_gan_course, kind: course, label: "Google for Developers: Generative Adversarial Networks course", url: "https://developers.google.com/machine-learning/gan", weeks: [3]}
+  - {id: gemini_prompting, kind: doc, label: "Google Gemini API: Prompt design strategies", url: "https://ai.google.dev/gemini-api/docs/prompting-strategies", weeks: [7]}
+  - {id: gemini_structured, kind: doc, label: "Google Gemini API: Structured output", url: "https://ai.google.dev/gemini-api/docs/structured-output", weeks: [7]}
+  - {id: gemini_function_calling, kind: doc, label: "Google Gemini API: Function calling", url: "https://ai.google.dev/gemini-api/docs/function-calling", weeks: [12]}
+  - {id: gemini_quickstart, kind: doc, label: "Google Gemini API: Quickstart (free API key in AI Studio)", url: "https://ai.google.dev/gemini-api/docs/get-started", weeks: [1, 6, 7, 11]}
+  - {id: gemini_image_understanding, kind: doc, label: "Google Gemini API: Image understanding", url: "https://ai.google.dev/gemini-api/docs/image-understanding", weeks: [10]}
+  - {id: openai_prompt_guide, kind: doc, label: "OpenAI: Prompt engineering guide", url: "https://developers.openai.com/api/docs/guides/prompt-engineering", weeks: [7]}
+  - {id: openai_structured, kind: doc, label: "OpenAI: Structured outputs", url: "https://developers.openai.com/api/docs/guides/structured-outputs", weeks: [7]}
+  - {id: openai_function_calling, kind: doc, label: "OpenAI: Function calling", url: "https://developers.openai.com/api/docs/guides/function-calling", weeks: [12]}
+  - {id: openai_evals, kind: doc, label: "OpenAI: Evaluation best practices", url: "https://developers.openai.com/api/docs/guides/evaluation-best-practices", weeks: [7]}
+  - {id: openai_academy, kind: course, label: "OpenAI Academy (free courses and prompting resources)", url: "https://academy.openai.com/", weeks: [1, 7]}
+  - {id: anthropic_prompt_tutorial, kind: course, label: "Anthropic: Interactive prompt engineering tutorial (9 chapters)", url: "https://github.com/anthropics/prompt-eng-interactive-tutorial", weeks: [7]}
+  - {id: anthropic_effective_agents, kind: doc, label: "Anthropic: Building effective agents", url: "https://www.anthropic.com/engineering/building-effective-agents", weeks: [12]}
+  - {id: anthropic_context_eng, kind: doc, label: "Anthropic: Effective context engineering for AI agents", url: "https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents", weeks: [7, 12]}
+  - {id: anthropic_contextual_retrieval, kind: doc, label: "Anthropic: Contextual retrieval", url: "https://www.anthropic.com/engineering/contextual-retrieval", weeks: [12]}
+  - {id: hf_llm_course, kind: course, label: "Hugging Face LLM Course", url: "https://huggingface.co/learn/llm-course/chapter1/1", weeks: [5, 6, 8]}
+  - {id: hf_llm_course_sft, kind: course, label: "Hugging Face LLM Course: Supervised fine-tuning with TRL and LoRA", url: "https://huggingface.co/learn/llm-course/chapter11/1", weeks: [8]}
+  - {id: hf_diffusion_course, kind: course, label: "Hugging Face Diffusion Models Course", url: "https://huggingface.co/learn/diffusion-course/unit0/1", weeks: [4]}
+  - {id: hf_agents_course, kind: course, label: "Hugging Face AI Agents Course", url: "https://huggingface.co/learn/agents-course/unit0/introduction", weeks: [12]}
+  - {id: hf_mcp_course, kind: course, label: "Hugging Face MCP Course", url: "https://huggingface.co/learn/mcp-course/unit0/introduction", weeks: [12]}
+  - {id: hf_audio_course, kind: course, label: "Hugging Face Audio Course", url: "https://huggingface.co/learn/audio-course/chapter0/introduction", weeks: [9, 10]}
+  - {id: hf_cv_course, kind: course, label: "Hugging Face Community Computer Vision Course (multimodal units)", url: "https://huggingface.co/learn/computer-vision-course/unit0/welcome/welcome", weeks: [9, 10]}
+  - {id: hf_peft_docs, kind: doc, label: "Hugging Face PEFT documentation (LoRA, QLoRA)", url: "https://huggingface.co/docs/peft/index", weeks: [8]}
+  - {id: hf_trl_docs, kind: doc, label: "Hugging Face TRL documentation (SFT, DPO, GRPO)", url: "https://huggingface.co/docs/trl/index", weeks: [8]}
+  - {id: hf_diffusers_docs, kind: doc, label: "Hugging Face Diffusers documentation", url: "https://huggingface.co/docs/diffusers/index", weeks: [4, 10]}
+  - {id: hf_pipelines, kind: doc, label: "Hugging Face Transformers: Pipelines", url: "https://huggingface.co/docs/transformers/main_classes/pipelines", weeks: [6, 10]}
+  - {id: hf_inference_providers, kind: doc, label: "Hugging Face Inference Providers", url: "https://huggingface.co/docs/inference-providers/index", weeks: [6, 11]}
+  - {id: hf_chat_templates, kind: doc, label: "Hugging Face: Chat templates", url: "https://huggingface.co/docs/transformers/chat_templating", weeks: [6, 8]}
+  - {id: hf_open_llm_leaderboard, kind: tool, label: "Arena (formerly LMArena): crowd-sourced model comparisons", url: "https://arena.ai/", weeks: [6]}
+  - {id: pytorch_dcgan, kind: doc, label: "PyTorch tutorial: DCGAN", url: "https://docs.pytorch.org/tutorials/beginner/dcgan_faces_tutorial.html", weeks: [3]}
+  - {id: tf_cvae, kind: doc, label: "TensorFlow tutorial: Convolutional VAE", url: "https://www.tensorflow.org/tutorials/generative/cvae", weeks: [2]}
+  - {id: ollama_docs, kind: tool, label: "Ollama: run open models locally", url: "https://ollama.com/", weeks: [11]}
+  - {id: vllm_docs, kind: doc, label: "vLLM documentation", url: "https://docs.vllm.ai/en/latest/", weeks: [11]}
+  - {id: langchain_docs, kind: doc, label: "LangChain documentation", url: "https://docs.langchain.com/", weeks: [11, 12]}
+  - {id: llamaindex_docs, kind: doc, label: "LlamaIndex documentation", url: "https://developers.llamaindex.ai/python/framework/", weeks: [11, 12]}
+  - {id: gradio_docs, kind: doc, label: "Gradio quickstart", url: "https://gradio.app/guides/quickstart", weeks: [11]}
+  - {id: azure_openai, kind: doc, label: "Microsoft Foundry: Azure OpenAI and models sold directly by Azure", url: "https://learn.microsoft.com/en-us/azure/foundry/foundry-models/concepts/models-sold-directly-by-azure", weeks: [11]}
+  - {id: mcp_intro, kind: doc, label: "Model Context Protocol: Introduction", url: "https://modelcontextprotocol.io/", weeks: [12]}
+  - {id: c2pa, kind: doc, label: "C2PA: Content credentials and provenance standard", url: "https://c2pa.org/", weeks: [10]}
+  - {id: synthid, kind: doc, label: "Google DeepMind: SynthID watermarking", url: "https://deepmind.google/models/synthid/", weeks: [10]}
+  - {id: eu_ai_act, kind: doc, label: "EU AI Act explorer (official text, articles on transparency)", url: "https://artificialintelligenceact.eu/", weeks: [1, 10]}
+  - {id: eu_ai_act_art50, kind: doc, label: "EU AI Act, Article 50: transparency obligations (from 2 Aug 2026)", url: "https://artificialintelligenceact.eu/article/50/", weeks: [1, 10]}
+  - {id: ec_transparency_guidelines, kind: doc, label: "European Commission: Guidelines on AI transparency obligations (July 2026)", url: "https://digital-strategy.ec.europa.eu/en/policies/guidelines-ai-transparency-obligations", weeks: [1, 10]}
+  - {id: nist_genai_profile, kind: doc, label: "NIST AI 600-1: Generative AI Profile (risk management)", url: "https://nvlpubs.nist.gov/nistpubs/ai/NIST.AI.600-1.pdf", weeks: [1, 7]}
+  - {id: ms_responsible_ai, kind: doc, label: "Microsoft Responsible AI principles", url: "https://www.microsoft.com/en-us/ai/responsible-ai", weeks: [1]}
+
+  # ---- Blogs and explainers ----
+  - {id: weng_vae, kind: doc, label: "Lilian Weng: From Autoencoder to Beta-VAE", url: "https://lilianweng.github.io/posts/2018-08-12-vae/", weeks: [2]}
+  - {id: weng_diffusion, kind: doc, label: "Lilian Weng: What are diffusion models?", url: "https://lilianweng.github.io/posts/2021-07-11-diffusion-models/", weeks: [4]}
+  - {id: weng_agents, kind: doc, label: "Lilian Weng: LLM powered autonomous agents", url: "https://lilianweng.github.io/posts/2023-06-23-agent/", weeks: [12]}
+  - {id: alammar_transformer, kind: doc, label: "Jay Alammar: The Illustrated Transformer", url: "https://jalammar.github.io/illustrated-transformer/", weeks: [5]}
+  - {id: alammar_sd, kind: doc, label: "Jay Alammar: The Illustrated Stable Diffusion", url: "https://jalammar.github.io/illustrated-stable-diffusion/", weeks: [4]}
+  - {id: mit_flow_matching, kind: course, label: "MIT 6.S184: Introduction to Flow Matching and Diffusion Models (lecture notes)", url: "https://diffusion.csail.mit.edu/", weeks: [4]}
+  - {id: hf_rlhf_blog, kind: doc, label: "Hugging Face blog: Illustrating RLHF", url: "https://huggingface.co/blog/rlhf", weeks: [8]}
+  - {id: hf_mixtral_moe_blog, kind: doc, label: "Hugging Face blog: Mixture of Experts explained", url: "https://huggingface.co/blog/moe", weeks: [5, 6]}
+  - {id: hf_vlm_blog, kind: doc, label: "Hugging Face blog: Vision language models explained", url: "https://huggingface.co/blog/vlms", weeks: [9, 10]}
+
+  # ---- Papers ----
+  - {id: p_vae, kind: paper, label: "Kingma & Welling (2013) Auto-Encoding Variational Bayes", url: "https://arxiv.org/abs/1312.6114", weeks: [2]}
+  - {id: p_betavae, kind: paper, label: "Higgins et al. (2017) beta-VAE (ICLR)", url: "https://openreview.net/forum?id=Sy2fzU9gl", weeks: [2]}
+  - {id: p_vqvae, kind: paper, label: "van den Oord et al. (2017) Neural Discrete Representation Learning (VQ-VAE)", url: "https://arxiv.org/abs/1711.00937", weeks: [2]}
+  - {id: p_gan, kind: paper, label: "Goodfellow et al. (2014) Generative Adversarial Networks", url: "https://arxiv.org/abs/1406.2661", weeks: [3]}
+  - {id: p_dcgan, kind: paper, label: "Radford et al. (2015) DCGAN", url: "https://arxiv.org/abs/1511.06434", weeks: [3]}
+  - {id: p_wgan, kind: paper, label: "Arjovsky et al. (2017) Wasserstein GAN", url: "https://arxiv.org/abs/1701.07875", weeks: [3]}
+  - {id: p_stylegan, kind: paper, label: "Karras et al. (2019) StyleGAN", url: "https://arxiv.org/abs/1812.04948", weeks: [3]}
+  - {id: p_fid, kind: paper, label: "Heusel et al. (2017) GANs trained by a two time-scale update rule (FID)", url: "https://arxiv.org/abs/1706.08500", weeks: [3, 4]}
+  - {id: p_ddpm, kind: paper, label: "Ho, Jain & Abbeel (2020) Denoising Diffusion Probabilistic Models", url: "https://arxiv.org/abs/2006.11239", weeks: [4]}
+  - {id: p_ldm, kind: paper, label: "Rombach et al. (2022) High-Resolution Image Synthesis with Latent Diffusion Models", url: "https://arxiv.org/abs/2112.10752", weeks: [2, 4]}
+  - {id: p_cfg, kind: paper, label: "Ho & Salimans (2022) Classifier-Free Diffusion Guidance", url: "https://arxiv.org/abs/2207.12598", weeks: [4]}
+  - {id: p_flow_matching, kind: paper, label: "Lipman et al. (2022) Flow Matching for Generative Modeling", url: "https://arxiv.org/abs/2210.02747", weeks: [4]}
+  - {id: p_dit, kind: paper, label: "Peebles & Xie (2022) Scalable Diffusion Models with Transformers (DiT)", url: "https://arxiv.org/abs/2212.09748", weeks: [4]}
+  - {id: p_transformer, kind: paper, label: "Vaswani et al. (2017) Attention Is All You Need", url: "https://arxiv.org/abs/1706.03762", weeks: [5]}
+  - {id: p_rope, kind: paper, label: "Su et al. (2021) RoFormer: Rotary Position Embedding", url: "https://arxiv.org/abs/2104.09864", weeks: [5]}
+  - {id: p_bert, kind: paper, label: "Devlin et al. (2018) BERT", url: "https://arxiv.org/abs/1810.04805", weeks: [6]}
+  - {id: p_t5, kind: paper, label: "Raffel et al. (2019) T5: Exploring the Limits of Transfer Learning", url: "https://arxiv.org/abs/1910.10683", weeks: [6]}
+  - {id: p_gpt3, kind: paper, label: "Brown et al. (2020) Language Models are Few-Shot Learners (GPT-3)", url: "https://arxiv.org/abs/2005.14165", weeks: [6, 7]}
+  - {id: p_scaling, kind: paper, label: "Hoffmann et al. (2022) Training Compute-Optimal LLMs (Chinchilla)", url: "https://arxiv.org/abs/2203.15556", weeks: [6]}
+  - {id: p_llama, kind: paper, label: "Touvron et al. (2023) LLaMA: Open and Efficient Foundation Language Models", url: "https://arxiv.org/abs/2302.13971", weeks: [6]}
+  - {id: p_deepseek_r1, kind: paper, label: "DeepSeek-AI (2025) DeepSeek-R1: reasoning via reinforcement learning", url: "https://arxiv.org/abs/2501.12948", weeks: [6, 8]}
+  - {id: p_cot, kind: paper, label: "Wei et al. (2022) Chain-of-Thought Prompting", url: "https://arxiv.org/abs/2201.11903", weeks: [7]}
+  - {id: p_self_consistency, kind: paper, label: "Wang et al. (2022) Self-Consistency Improves Chain of Thought", url: "https://arxiv.org/abs/2203.11171", weeks: [7]}
+  - {id: p_llm_judge, kind: paper, label: "Zheng et al. (2023) Judging LLM-as-a-Judge (MT-Bench)", url: "https://arxiv.org/abs/2306.05685", weeks: [7]}
+  - {id: p_instructgpt, kind: paper, label: "Ouyang et al. (2022) Training LMs to follow instructions with human feedback (InstructGPT)", url: "https://arxiv.org/abs/2203.02155", weeks: [8]}
+  - {id: p_dpo, kind: paper, label: "Rafailov et al. (2023) Direct Preference Optimization", url: "https://arxiv.org/abs/2305.18290", weeks: [8]}
+  - {id: p_lora, kind: paper, label: "Hu et al. (2021) LoRA: Low-Rank Adaptation of LLMs", url: "https://arxiv.org/abs/2106.09685", weeks: [8]}
+  - {id: p_qlora, kind: paper, label: "Dettmers et al. (2023) QLoRA", url: "https://arxiv.org/abs/2305.14314", weeks: [8]}
+  - {id: p_clip, kind: paper, label: "Radford et al. (2021) CLIP: Learning Transferable Visual Models from Natural Language Supervision", url: "https://arxiv.org/abs/2103.00020", weeks: [9]}
+  - {id: p_siglip, kind: paper, label: "Zhai et al. (2023) Sigmoid Loss for Language Image Pre-Training (SigLIP)", url: "https://arxiv.org/abs/2303.15343", weeks: [9]}
+  - {id: p_vit, kind: paper, label: "Dosovitskiy et al. (2020) An Image is Worth 16x16 Words (ViT)", url: "https://arxiv.org/abs/2010.11929", weeks: [5, 9]}
+  - {id: p_whisper, kind: paper, label: "Radford et al. (2022) Whisper: Robust Speech Recognition", url: "https://arxiv.org/abs/2212.04356", weeks: [9]}
+  - {id: p_llava, kind: paper, label: "Liu et al. (2023) Visual Instruction Tuning (LLaVA)", url: "https://arxiv.org/abs/2304.08485", weeks: [9, 10]}
+  - {id: p_rag, kind: paper, label: "Lewis et al. (2020) Retrieval-Augmented Generation", url: "https://arxiv.org/abs/2005.11401", weeks: [12]}
+  - {id: p_react, kind: paper, label: "Yao et al. (2022) ReAct: Synergizing Reasoning and Acting", url: "https://arxiv.org/abs/2210.03629", weeks: [12]}
+  - {id: p_ragas, kind: paper, label: "Es et al. (2023) RAGAS: Automated Evaluation of RAG", url: "https://arxiv.org/abs/2309.15217", weeks: [12]}
+  - {id: p_graphrag, kind: paper, label: "Edge et al. (2024) From Local to Global: A GraphRAG Approach", url: "https://arxiv.org/abs/2404.16130", weeks: [12]}
+  - {id: p_stochastic_parrots, kind: paper, label: "Bender et al. (2021) On the Dangers of Stochastic Parrots", url: "https://dl.acm.org/doi/10.1145/3442188.3445922", weeks: [1]}
+  - {id: p_hallucination_survey, kind: paper, label: "Huang et al. (2023) A Survey on Hallucination in LLMs", url: "https://arxiv.org/abs/2311.05232", weeks: [1, 7]}
+
+  # ---- Videos (verified by oEmbed title) ----
+  - {id: v_3b1b_llm_brief, kind: video, label: "3Blue1Brown: Large Language Models explained briefly (8 min)", url: "https://www.youtube.com/watch?v=LPZh9BOjkQs", weeks: [1, 6]}
+  - {id: v_3b1b_gpt, kind: video, label: "3Blue1Brown: Transformers, the tech behind LLMs", url: "https://www.youtube.com/watch?v=wjZofJX0v4M", weeks: [5]}
+  - {id: v_3b1b_attention, kind: video, label: "3Blue1Brown: Attention in transformers, step-by-step", url: "https://www.youtube.com/watch?v=eMlx5fFNoYc", weeks: [5]}
+  - {id: v_3b1b_diffusion, kind: video, label: "3Blue1Brown / Welch Labs: But how do AI images and videos actually work?", url: "https://www.youtube.com/watch?v=iv-5mZ_9CPY", weeks: [4, 9]}
+  - {id: v_karpathy_intro, kind: video, label: "Andrej Karpathy: Intro to Large Language Models (1 h)", url: "https://www.youtube.com/watch?v=zjkBMFhNj_g", weeks: [1, 6]}
+  - {id: v_karpathy_deepdive, kind: video, label: "Andrej Karpathy: Deep Dive into LLMs like ChatGPT", url: "https://www.youtube.com/watch?v=7xTGNNLPyMI", weeks: [6, 8]}
+  - {id: v_karpathy_gpt, kind: video, label: "Andrej Karpathy: Let's build GPT from scratch, in code", url: "https://www.youtube.com/watch?v=kCc8FmEb1nY", weeks: [5]}
+  - {id: v_karpathy_tokenizer, kind: video, label: "Andrej Karpathy: Let's build the GPT Tokenizer", url: "https://www.youtube.com/watch?v=zduSFxRajkE", weeks: [5, 6]}
+  - {id: v_karpathy_howiuse, kind: video, label: "Andrej Karpathy: How I use LLMs", url: "https://www.youtube.com/watch?v=EWvNQjAaOHw", weeks: [1, 7]}
+  - {id: v_google_intro_genai, kind: video, label: "Google Cloud Tech: Introduction to Generative AI", url: "https://www.youtube.com/watch?v=G2fqAlgmoPo", weeks: [1]}
+  - {id: v_google_intro_llm, kind: video, label: "Google Cloud Tech: Introduction to large language models", url: "https://www.youtube.com/watch?v=zizonToFXDs", weeks: [6]}
+  - {id: v_statquest_transformer, kind: video, label: "StatQuest: Transformer Neural Networks, clearly explained", url: "https://www.youtube.com/watch?v=zxQyTK8quyY", weeks: [5]}
+  - {id: v_ms_genai_beginners, kind: video, label: "Microsoft: Generative AI for Beginners video series", url: "https://www.youtube.com/watch?v=k7HaeJs-N-o", weeks: [1, 7]}
+
+  # ---- Added for weeks 10-12 (September 2026) ----
+  - {id: owasp_llm, kind: doc, label: "OWASP Top 10 for LLM Applications", url: "https://genai.owasp.org/llm-top-10/", weeks: [7, 11, 12]}
+  - {id: ec_transparency_faq, kind: doc, label: "European Commission: Transparency obligations under Article 50 (FAQ)", url: "https://digital-strategy.ec.europa.eu/en/faqs/transparency-obligations-under-article-50-ai-act", weeks: [10]}
+  - {id: gemini_openai_compat, kind: doc, label: "Gemini API: OpenAI compatibility", url: "https://ai.google.dev/gemini-api/docs/openai", weeks: [11]}
+  - {id: fastapi_tutorial, kind: doc, label: "FastAPI tutorial", url: "https://fastapi.tiangolo.com/tutorial/", weeks: [11]}
+  - {id: hf_spaces, kind: doc, label: "Hugging Face Spaces documentation", url: "https://huggingface.co/docs/hub/spaces", weeks: [11]}
+  - {id: p_pagedattention, kind: paper, label: "Kwon et al. (2023) Efficient Memory Management for LLM Serving with PagedAttention", url: "https://arxiv.org/abs/2309.06180", weeks: [11]}
+  - {id: p_llm_int8, kind: paper, label: "Dettmers et al. (2022) LLM.int8(): 8-bit Matrix Multiplication for Transformers at Scale", url: "https://arxiv.org/abs/2208.07339", weeks: [11]}
+  - {id: p_speculative, kind: paper, label: "Leviathan et al. (2023) Fast Inference from Transformers via Speculative Decoding", url: "https://arxiv.org/abs/2211.17192", weeks: [11]}
+  - {id: p_pope, kind: paper, label: "Li et al. (2023) Evaluating Object Hallucination in Large Vision-Language Models (POPE)", url: "https://arxiv.org/abs/2305.10355", weeks: [10]}
+  - {id: p_sdedit, kind: paper, label: "Meng et al. (2021) SDEdit: Guided Image Synthesis and Editing with SDEs", url: "https://arxiv.org/abs/2108.01073", weeks: [10]}
+  - {id: p_add, kind: paper, label: "Sauer et al. (2023) Adversarial Diffusion Distillation (SD-Turbo)", url: "https://arxiv.org/abs/2311.17042", weeks: [4, 10]}
+  - {id: p_hyde, kind: paper, label: "Gao et al. (2022) Precise Zero-Shot Dense Retrieval without Relevance Labels (HyDE)", url: "https://arxiv.org/abs/2212.10496", weeks: [12]}
+  - {id: p_indirect_injection, kind: paper, label: "Greshake et al. (2023) Indirect Prompt Injection", url: "https://arxiv.org/abs/2302.12173", weeks: [12]}
+  - {id: mcp_aaif, kind: doc, label: "MCP joins the Agentic AI Foundation (Dec 2025)", url: "https://blog.modelcontextprotocol.io/posts/2025-12-09-mcp-joins-agentic-ai-foundation/", weeks: [12]}

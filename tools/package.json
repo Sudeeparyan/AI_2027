@@ -1,0 +1,16 @@
+{
+  "name": "genai-teaching-pack-tools",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Builders for the Generative AI teaching pack (slides and teaching notes).",
+  "type": "commonjs",
+  "dependencies": {
+    "docx": "^9.8.1",
+    "marked": "^12.0.2",
+    "pptxgenjs": "^4.0.1",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "react-icons": "^5.7.0",
+    "sharp": "^0.35.5"
+  }
+}

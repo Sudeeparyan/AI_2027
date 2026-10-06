@@ -1,4 +1,4 @@
-.venv/
+.venv-labs/
 __pycache__/
 *.pyc
 
@@ -8,3 +8,9 @@ __pycache__/
 config/providers.local.json
 *.key
 drafts/**/.lock
+
+# Environments, caches and build output of the curriculum pipeline (rebuildable)
+.venv/
+.venv-gpu/
+build/
+tools/node_modules/

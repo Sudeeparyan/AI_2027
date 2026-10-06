@@ -1,0 +1,108 @@
+{
+  "week": 1,
+  "prerequisites": [
+    {"term": "Probability", "meaning": "A number from 0 to 1 describing how likely an outcome is.", "check": "If two possible outcomes have probabilities 0.7 and 0.3, what is their sum?"},
+    {"term": "Array index", "meaning": "A numbered position used to select an item or a matrix row.", "check": "In N[i, j], which index selects the row?"},
+    {"term": "Loop", "meaning": "Code that repeats a task for several items or steps.", "check": "How many adjacent pairs are in the sequence . e m m a .?"}
+  ],
+  "diagrams": [
+    {
+      "id": "overview",
+      "title": "Learn a name model, then generate",
+      "subtitle": "Training stores transition probabilities; generation repeatedly uses them.",
+      "steps": [
+        {"title": "Read names", "detail": "Add '.' before and after each name.", "code": "words"},
+        {"title": "Count pairs", "detail": "Record previous-character to next-character transitions.", "code": "N"},
+        {"title": "Make probabilities", "detail": "Smooth counts and make each row sum to one.", "code": "P"},
+        {"title": "Choose next character", "detail": "Read the current row, adjust temperature, and sample.", "code": "sample_name"},
+        {"title": "Build a name", "detail": "Append letters; stop at '.' or the length limit.", "code": "sample_name"}
+      ],
+      "arrows": ["character pairs", "count matrix", "probability table + current character", "sampled character"],
+      "feedback": "For a sampled letter, use that letter as the previous character and repeat.",
+      "feedback_to": 3,
+      "trace": [
+        "The training name emma gives five pairs: .→e, e→m, m→m, m→a, a→..",
+        "Each pair increases one cell of N; the row for e counts letters after e.",
+        "P turns each smoothed count row into probabilities that sum to 1.",
+        "A possible generation path samples e, m, m, a, then '.'; other paths are possible.",
+        "avg_nll scores a supplied name; sample_name creates a new one using the same P."
+      ],
+      "explanation": "A generative model describes possible data so that we can draw new examples. This first model learns from counts instead of a neural network. A bigram is a pair of neighbouring characters. The matrix N stores how often each pair occurs; its row identifies the previous character and its column identifies the next character. Adding one to every count prevents unseen pairs from receiving zero probability. Dividing by each row's total creates P, a conditional distribution: probabilities for the next character given the previous one. Generation begins with the special start marker '.'. The sampler chooses a character from the corresponding row, moves to that character's row, and repeats. A sampled '.' ends the name. Temperature changes the choices during sampling, while the learned counts remain fixed. This model remembers one previous character, so locally plausible pairs can still produce unusual names.",
+      "check_question": "After generating e, which row of P supplies the next-character probabilities?",
+      "check_answer": "The row indexed by stoi['e']; the model conditions on the most recently generated character."
+    },
+    {
+      "id": "mechanism",
+      "insert_before_title": "An LLM outputs a probability distribution over the next token",
+      "title": "One language-model generation step",
+      "subtitle": "A text prompt becomes scores, probabilities, and one more token.",
+      "steps": [
+        {"title": "Provide context", "detail": "Start with text such as 'The cat sat on the'.", "code": "prompt"},
+        {"title": "Encode tokens", "detail": "Map text pieces to integer vocabulary IDs.", "code": "tok"},
+        {"title": "Predict scores", "detail": "Use fixed weights to score every possible next token.", "code": "model"},
+        {"title": "Make probabilities", "detail": "Temperature and softmax turn scores into a distribution.", "code": "next_token_probs"},
+        {"title": "Select a token", "detail": "Sample with decoding settings, or choose the highest-scoring token.", "code": "chat"},
+        {"title": "Extend context", "detail": "Append the token; repeat until stopping, then decode text.", "code": "chat"}
+      ],
+      "arrows": ["prompt text", "token IDs", "next-token logits", "next-token probabilities", "selected token ID"],
+      "feedback": "The extended token sequence becomes the model's input for the next prediction.",
+      "feedback_to": 2,
+      "trace": [
+        "tok maps 'The cat sat on the' to IDs; exact pieces depend on the tokenizer.",
+        "model returns logits for all positions; [0, -1] selects next-token scores for this prompt.",
+        "next_token_probs shows the top five candidates at T = 0.5, 1.0, and 1.5.",
+        "chat uses model.generate to select and append tokens repeatedly, then decodes the new tokens."
+      ],
+      "explanation": "A token is a text piece from a fixed vocabulary, represented by an integer ID. It can be a word, part of a word, or punctuation. The tokenizer maps the prompt into these IDs. The language model uses learned parameters, also called weights, to assign a logit to every possible next token. A logit is an unnormalised score, not a probability. For positive temperature T, dividing scores by T and applying softmax creates probabilities that sum to one. Lower T concentrates probability on stronger candidates; higher T spreads it more widely. In the lab, next_token_probs exposes this distribution but does not generate an answer. The chat function calls model.generate, which repeatedly selects tokens and extends the context. Its top-p setting limits the candidates used in sampling. This is inference: the input grows, but model weights do not change. Fluent output still needs checking against evidence.",
+      "check_question": "Does changing temperature from 0.5 to 1.5 retrain the model?",
+      "check_answer": "No. It changes how the fixed next-token scores become sampling probabilities."
+    },
+    {
+      "id": "lab",
+      "title": "Follow the Week 1 experiments",
+      "subtitle": "Connect probability, generation, classification, and verification to actual code.",
+      "steps": [
+        {"title": "Build the table", "detail": "Load names, count pairs, and normalise rows.", "code": "N / P"},
+        {"title": "Score and sample", "detail": "Compare name likelihoods and temperature-controlled samples.", "code": "avg_nll / sample_name"},
+        {"title": "Compare classifiers", "detail": "Classify points, then sample the generative class distribution.", "code": "disc / genm"},
+        {"title": "Inspect tokens", "detail": "Load the language model and print token pieces.", "code": "tok / model"},
+        {"title": "Inspect generation", "detail": "Compare next-token probabilities and generated answers.", "code": "next_token_probs / chat"},
+        {"title": "Verify and record", "detail": "Test a fictional paper prompt and record checking evidence.", "code": "fake / chat"}
+      ],
+      "arrows": ["learned P", "probability ideas", "generative versus discriminative distinction", "token IDs and model", "answers to check"],
+      "trace": [
+        "Check that every row of P sums to 1 before interpreting any sampled names.",
+        "Use avg_nll on emma and xqzz; inspect scores without assuming a particular result.",
+        "QDA stores a mean and covariance for each class; compare new_points with the real scatter plot.",
+        "Print tokenizer pieces and the top-five candidates before using chat on a full question.",
+        "The deliberately fictional paper prompt tests unsupported claims; record what you actually observed."
+      ],
+      "explanation": "The lab uses three small systems to make the same distinction visible: learning a distribution, using it, and checking the result. First, N and P form a character model. avg_nll measures how surprising a supplied name is under that model; sample_name draws a new name. Second, logistic regression predicts a class from a point, while QDA also describes the point distribution within each class. That learned distribution lets QDA produce new class-0 points. Third, a pretrained language model provides next-token scores and generated text. You inspect the tokenizer and probabilities before comparing complete answers. The fictional paper prompt is a controlled verification test: a plausible summary is not evidence that the paper exists. Keep the model, settings, observations, and verification method together in the evidence table. Compare actual runs, because random sampling and different model configurations can change the outputs.",
+      "check_question": "Which operation creates a new name: avg_nll or sample_name?",
+      "check_answer": "sample_name creates a name; avg_nll scores a name supplied to it."
+    }
+  ],
+  "glossary": [
+    {"term": "Bigram", "meaning": "Two neighbouring symbols; this model predicts from the previous character only."},
+    {"term": "Conditional probability", "meaning": "The probability of an outcome when some other information is already given."},
+    {"term": "Sampling", "meaning": "Drawing an outcome randomly according to a probability distribution."},
+    {"term": "Negative log-likelihood", "meaning": "A score measuring how surprising observed data is; lower is better for those data."},
+    {"term": "Temperature", "meaning": "A positive scaling setting that changes how concentrated sampling probabilities are."},
+    {"term": "Training", "meaning": "Learning a model's parameters or probability table from data."},
+    {"term": "Inference", "meaning": "Using an already learned model to make predictions or generate outputs."},
+    {"term": "Hallucination", "meaning": "Generated content that presents an unsupported or incorrect claim as if it were reliable."}
+  ],
+  "pitfalls": [
+    "A low negative log-likelihood measures agreement with a model's distribution; it does not prove factual correctness.",
+    "Increasing temperature changes sampling probabilities, not learned counts or neural-network weights.",
+    "Token IDs are vocabulary labels, not word meanings or whole words in every case."
+  ],
+  "code_walkthrough": [
+    {"symbol": "N", "role": "Counts character transitions before generation.", "inspect": "Compare matrix rows and axes; each row is a previous character."},
+    {"symbol": "P", "role": "Stores smoothed next-character probabilities.", "inspect": "Verify row sums equal 1 and compare the row for '.' with a letter row."},
+    {"symbol": "avg_nll", "role": "Scores a supplied name without changing P.", "inspect": "Count the predictions including the final '.' and compare real versus unusual names."},
+    {"symbol": "sample_name", "role": "Repeats next-character choices to create a name.", "inspect": "Find the start index, termination check, and maximum-length safeguard."},
+    {"symbol": "next_token_probs", "role": "Exposes one neural-model next-token distribution.", "inspect": "Observe the last-position selection and compare top candidates at different temperatures."},
+    {"symbol": "chat", "role": "Generates complete text using the pretrained model.", "inspect": "Compare generated-token decoding with token probability inspection."}
+  ]
+}

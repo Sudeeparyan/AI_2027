@@ -1,0 +1,130 @@
+{
+  "vlm": "Qwen/Qwen3-VL-2B-Instruct",
+  "device": "cpu",
+  "gpu": "CPU",
+  "qa": [
+    {
+      "question": "Which day had the most tickets? Answer with the day onl",
+      "gold": "tue",
+      "answer": "Tue",
+      "correct": 1,
+      "seconds": 8.4
+    },
+    {
+      "question": "How many tickets were there on Thursday? Answer with a ",
+      "gold": "25",
+      "answer": "25",
+      "correct": 1,
+      "seconds": 8.6
+    },
+    {
+      "question": "What is the total number of tickets from Monday to Frid",
+      "gold": "94",
+      "answer": "60",
+      "correct": 0,
+      "seconds": 7.8
+    },
+    {
+      "question": "What is the invoice number? Answer with the number only",
+      "gold": "2027-0415",
+      "answer": "2027-0415",
+      "correct": 1,
+      "seconds": 9.6
+    },
+    {
+      "question": "What is the total due in EUR? Answer with the number on",
+      "gold": "35",
+      "answer": "35.00",
+      "correct": 1,
+      "seconds": 8.1
+    },
+    {
+      "question": "Who is the customer? Answer with the name only.",
+      "gold": "dublin robotics",
+      "answer": "Dublin Robotics Ltd",
+      "correct": 1,
+      "seconds": 7.5
+    }
+  ],
+  "qa_accuracy": 0.8333333333333334,
+  "pope": [
+    {
+      "question": "Is there a flower in the image? Answer yes or no.",
+      "gold": "yes",
+      "answer": "yes",
+      "correct": 1
+    },
+    {
+      "question": "Is there a dog in the image? Answer yes or no.",
+      "gold": "no",
+      "answer": "no",
+      "correct": 1
+    },
+    {
+      "question": "Is there a building in the image? Answer yes or no.",
+      "gold": "yes",
+      "answer": "yes",
+      "correct": 1
+    },
+    {
+      "question": "Is there a car in the image? Answer yes or no.",
+      "gold": "no",
+      "answer": "no",
+      "correct": 1
+    },
+    {
+      "question": "Does the chart show data for Saturday? Answer yes or no.",
+      "gold": "no",
+      "answer": "no",
+      "correct": 1
+    },
+    {
+      "question": "Does the invoice mention VAT? Answer yes or no.",
+      "gold": "no",
+      "answer": "no",
+      "correct": 1
+    }
+  ],
+  "pope_accuracy": 1.0,
+  "t2i": [
+    {
+      "prompt": "a watercolour painting of a lighthouse a",
+      "CLIP score (own prompt)": 36.0,
+      "CLIP score (other prompts, mean)": 11.5
+    },
+    {
+      "prompt": "a robot reading a book in a library, dig",
+      "CLIP score (own prompt)": 35.6,
+      "CLIP score (other prompts, mean)": 11.5
+    },
+    {
+      "prompt": "a bowl of ramen on a wooden table, photo",
+      "CLIP score (own prompt)": 29.2,
+      "CLIP score (other prompts, mean)": 7.8
+    }
+  ],
+  "speech": [
+    {
+      "text": "The lab opens at nine in the morning.",
+      "transcript": "The lab opens at 9 in the morning.",
+      "WER": 0.125,
+      "seconds of audio": 2.7
+    },
+    {
+      "text": "Generative models can create images, text and speech.",
+      "transcript": "Generative models can create images, text and speech.",
+      "WER": 0.0,
+      "seconds of audio": 4.4
+    },
+    {
+      "text": "Please submit your project report by the fifteenth of March.",
+      "transcript": "Please submit your project report by the 15th of March.",
+      "WER": 0.1,
+      "seconds of audio": 3.6
+    }
+  ],
+  "captions": {
+    "temple": "A traditional Chinese pagoda with red walls and orange-tiled roofs stands majestically on a hill overlooking a vast lake, surrounded by lush green trees under a hazy sky.",
+    "flower": "A close-up of a vibrant, peach-colored dahlia flower with a soft, blurred green background."
+  }
+}

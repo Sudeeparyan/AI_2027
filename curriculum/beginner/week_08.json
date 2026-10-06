@@ -1,0 +1,106 @@
+{
+  "week": 8,
+  "prerequisites": [
+    {"term": "Model weight", "meaning": "A learned number used by a neural network to transform its input.", "check": "Do ordinary prompt-only calls update stored model weights?"},
+    {"term": "Train / validation / test", "meaning": "Separate examples for learning, choosing settings and final measurement.", "check": "Which split must not be used to train the adapter?"},
+    {"term": "Matrix projection", "meaning": "Multiplying a vector by learned weights to produce another vector.", "check": "If a projection maps 8 numbers to 4 numbers, what is its output length?"}
+  ],
+  "diagrams": [
+    {
+      "id": "overview",
+      "title": "Adapt a banking classifier",
+      "subtitle": "Measure whether training improves on a strong prompting baseline",
+      "steps": [
+        {"title": "Separate data", "detail": "Create train and validation; preserve held-out test messages", "code": "train_ds / val_ds / test_ds"},
+        {"title": "Measure baselines", "detail": "Run zero-shot and few-shot prompts before training", "code": "df_zero / df_few"},
+        {"title": "Format examples", "detail": "Pair each customer prompt with its known intent", "code": "to_chat"},
+        {"title": "Add adapters", "detail": "Freeze base weights; create small trainable LoRA matrices", "code": "lora_config"},
+        {"title": "Train responses", "detail": "Learn intent-label tokens; monitor validation prediction error", "code": "SFTTrainer / trainer.train"},
+        {"title": "Compare fairly", "detail": "Use the same test messages, parser and decoding settings", "code": "df_tuned / comparison"}
+      ],
+      "arrows": ["separate labelled examples", "baseline measures", "prompt/completion pairs", "adapted model configuration", "trained adapter + loss history"],
+      "trace": [
+        "A message about a missing card has a reference banking-intent label.",
+        "The unmodified model is evaluated with no examples and with one example per intent.",
+        "Training pairs put the customer message in the prompt and the intent in the completion.",
+        "Only the LoRA adapter parameters learn from the training examples.",
+        "The tuned model uses the original zero-shot format on the same held-out test messages."
+      ],
+      "explanation": "Fine-tuning changes learned parameters, whereas prompting changes the current input. This lab adapts a pretrained language model to emit banking intent labels. The training examples teach the task; validation examples help monitor learning; test examples provide the final comparison. The lab also measures a few-shot baseline so that training must improve on a useful prompting approach. Supervised fine-tuning means learning from known prompt/response pairs. LoRA describes which parameters change: small adapter matrices learn while the base weights remain frozen. These are different choices and can be combined. The trainer measures loss on completion tokens, rather than asking the model to reproduce the prompt. After training, the same parser and test messages are used for comparison. Reduced training loss alone cannot establish better routing accuracy, and the original customer labels can contain ambiguity.",
+      "check_question": "Why compare the tuned model with the few-shot baseline as well as the zero-shot baseline?",
+      "check_answer": "Few-shot prompting is a stronger alternative that needs no training; the adapter's improvement should justify its extra work."
+    },
+    {
+      "id": "mechanism",
+      "insert_before_title": "LoRA: learn a low-rank update",
+      "title": "A LoRA training update",
+      "subtitle": "Trace information forward and learning backward while the base stays frozen",
+      "steps": [
+        {"title": "Layer input x", "detail": "Token vectors enter a targeted attention projection", "code": "lora_config.target_modules"},
+        {"title": "Two parallel paths", "detail": "Frozen W x and trainable B(Ax) use the same input", "code": "lora_config"},
+        {"title": "Add correction", "detail": "Combine base output with scaled adapter output", "code": "trainer.model"},
+        {"title": "Predict completion", "detail": "Remaining model layers score the intent-label tokens", "code": "trainer.model"},
+        {"title": "Completion loss", "detail": "Compare predictions with known label tokens", "code": "sft_train / SFTTrainer"},
+        {"title": "Update A and B", "detail": "Gradients adjust adapter parameters; W remains unchanged", "code": "trainer.train"}
+      ],
+      "arrows": ["input vector", "base + adapter outputs", "corrected layer output", "label-token predictions", "gradients"],
+      "feedback": "The next training step uses the updated adapter matrices",
+      "feedback_to": 1,
+      "trace": [
+        "For an illustrative 8-input, 8-output projection, the frozen W has 64 entries.",
+        "Rank r=2 uses A with shape [2, 8] and B with shape [8, 2]: 32 trainable entries total.",
+        "W x and B(Ax) are parallel contributions; the adapter is not a layer after W.",
+        "Their summed output feeds the remaining network and its completion-token loss.",
+        "The optimizer updates A and B, while W keeps its pretrained values."
+      ],
+      "explanation": "LoRA adds a learned correction to selected weight matrices. If a base projection maps k input features to d output features, its matrix W contains d times k weights. The adapter first projects the same input through A into r features, then through B back into d features. The small number r is the rank and controls the size of the correction. The forward result is the original W x plus the scaled B(Ax) contribution; these are parallel paths. The trainable count is r times the sum of d and k, rather than d times k. Backpropagation uses the completion loss to adjust A and B while W is frozen. Freezing W preserves the original base parameters, but the active adapter can still change general-answer behaviour. Disabling the adapter restores the base path.",
+      "check_question": "Does the adapter take W x as its input, or does it use the same x as the base projection?",
+      "check_answer": "It uses the same x. The base and adapter paths run in parallel and their outputs are added."
+    },
+    {
+      "id": "lab",
+      "title": "From labels to a saved adapter",
+      "subtitle": "Read the learning curve and the held-out decisions together",
+      "steps": [
+        {"title": "Filter and split", "detail": "Select ten intents and separate the example sets", "code": "INTENTS / split"},
+        {"title": "Format and baseline", "detail": "Build chat pairs; save base-model routing results", "code": "to_chat / evaluate"},
+        {"title": "Count trainables", "detail": "Inspect how many adapter parameters can change", "code": "trainable / total"},
+        {"title": "Train and monitor", "detail": "Collect training and validation loss across steps", "code": "trainer / hist"},
+        {"title": "Inspect test errors", "detail": "Compare labels, invalid outputs and a confusion table", "code": "comparison / errors"},
+        {"title": "Check and save", "detail": "Test adapter-off behaviour and measure saved adapter size", "code": "tuned.disable_adapter / tuned.save_pretrained"}
+      ],
+      "arrows": ["separate data splits", "formatted pairs + baseline rows", "LoRA configuration", "trained model + log history", "measured routing outcomes"],
+      "trace": [
+        "Check that the train and validation data come from the training split, while test messages remain separate.",
+        "Inspect one to_chat pair before running the trainer.",
+        "Watch validation loss alongside training loss rather than choosing by training loss alone.",
+        "A recognised wrong intent is a decision error; no recognised intent is a parser/format failure.",
+        "Ask a general question with the adapter on and off, then save the small adapter artifact."
+      ],
+      "explanation": "The code connects data preparation, training and evaluation. INTENTS filters the source dataset to ten routing categories. to_chat creates conversational prompt/completion pairs, while evaluate records raw outputs, parsed labels and correctness. normalise is deliberately lenient: a label wrapped in explanatory text can still count as recognised, so the invalid rate is defined by this parser rather than by strict label-only output. The trainer records loss history for learning-curve inspection. After training, comparison uses the same test examples for both baselines and the tuned model, and the error table reveals which categories were confused. The adapter-off question is one illustrative check of specialisation, rather than a broad general-capability benchmark. Finally, the saved adapter's disk size is compared with the base parameters' in-memory byte count, so the size figures have slightly different definitions.",
+      "check_question": "What two different failures should you distinguish in the test output table?",
+      "check_answer": "A recognised but incorrect intent is a decision error; an output with no recognised intent is an invalid/parser-format outcome."
+    }
+  ],
+  "glossary": [
+    {"term": "Intent", "meaning": "A category describing what a customer's message is asking about."},
+    {"term": "Supervised fine-tuning", "meaning": "Learning from supplied input prompts and known desired responses."},
+    {"term": "Frozen parameter", "meaning": "A model weight held unchanged by the optimizer during training."},
+    {"term": "LoRA adapter", "meaning": "Small trainable matrices adding a low-rank correction to selected base-model projections."},
+    {"term": "Rank", "meaning": "The adapter's intermediate feature dimension, controlling its correction capacity and parameter count."},
+    {"term": "Overfitting", "meaning": "Learning training examples in a way that fails to improve predictions on separate examples."}
+  ],
+  "pitfalls": [
+    "SFT describes the training examples and objective; LoRA describes the trainable parameters. They can be used together.",
+    "Frozen base weights do not guarantee unchanged behaviour while the adapter is active.",
+    "A lower training loss or one successful sample is insufficient evidence of better held-out routing."
+  ],
+  "code_walkthrough": [
+    {"symbol": "to_chat", "role": "Converts a labelled message into a prompt/completion training example.", "inspect": "Identify which tokens belong to the input and which represent the supervised response."},
+    {"symbol": "normalise", "role": "Finds a recognised intent label inside generated text.", "inspect": "Check how wrapped labels and multiple label mentions are interpreted."},
+    {"symbol": "evaluate", "role": "Collects routing predictions and correctness for the same test examples.", "inspect": "Read raw, pred and gold together; distinguish parser failure from wrong classification."},
+    {"symbol": "lora_config", "role": "Selects adapter rank and the attention projections receiving adapters.", "inspect": "Compare trainable with total and relate the count to rank."},
+    {"symbol": "hist", "role": "Holds trainer log history for the learning curve.", "inspect": "Follow validation loss as well as training loss; smoke mode omits validation evaluation."},
+    {"symbol": "tuned.disable_adapter", "role": "Temporarily uses the unchanged base projection paths.", "inspect": "Compare the same general question with the adapter active and disabled."}
+  ]
+}

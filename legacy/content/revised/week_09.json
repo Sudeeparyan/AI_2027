@@ -1,0 +1,101 @@
+{
+  "n": 9,
+  "title": "Tools workflows and agents",
+  "outcomes": [
+    "LO4",
+    "LO5"
+  ],
+  "overview": "An AI assistant becomes more useful when it can obtain information or request a calculation. This week follows one request through a small tool workflow, then explains what changes when a model can choose its next step. Students learn the difference between a model proposal, an executed action and a verified result. MCP and multi-agent systems receive a short overview, with one bounded workflow as the practical focus.",
+  "objectives": [
+    "Trace a tool request from model proposal to checked result.",
+    "Compare a fixed workflow with a bounded agent loop.",
+    "Explain MCP and choose permissions suitable for a simple assistant."
+  ],
+  "prerequisites": "Bring the previous notebook and a short record of what you tried. Basic Python lists, dictionaries and functions are sufficient for the guided code.",
+  "concepts": [
+    {
+      "title": "Tool calling",
+      "explanation": "A language model can propose a tool name and arguments. Application code validates the request, executes an allowed function and returns its result to the model. The model can then explain that result. These are separate steps: writing a function call in text does not execute it. A tool description should state what the tool does and the arguments it accepts. A schema checks structure, while application rules check meaning. A calculator that accepts two prices still needs to reject impossible quantities. Start with read-only tools because their results are easy to check. Record the request and result so a learner can identify whether an error came from choosing a tool, choosing its arguments, executing it or explaining its result.",
+      "example": "A student asks for the price of three notebooks at EUR 4 each. The proposed call is multiply(quantity=3, unit_price=4). Code checks both numbers, computes 12 and returns the value with its currency. The assistant should explain EUR 12. If it says EUR 14, the calculation succeeded but the final explanation failed. These values form an invented classroom example.",
+      "misconception": "A model that writes the right function name has completed the task.",
+      "correction": "Completion requires valid arguments, successful execution and a final answer consistent with the tool result.",
+      "question": "The calculator returns 12 but the answer says 14. Which step needs checking?",
+      "answer": "Check how the tool result was supplied to the model and how the final answer was validated. Do not blame the arithmetic function without evidence."
+    },
+    {
+      "title": "Workflows and bounded agents",
+      "explanation": "A workflow follows steps selected by its designer. An agent uses model output to choose some of its next actions. Both can use language models and ordinary software. For a fixed task such as extract an invoice, calculate its total and request review, a workflow is often easier to explain and test. An agent can help when the necessary steps depend on information discovered during the task. It still needs a stopping rule, a maximum number of tool calls and a way to report failure. More autonomy adds possible paths to evaluate. Human review belongs before a consequential action, with a concrete description of what would happen. A chat interface alone does not tell us how much autonomy a system has.",
+      "example": "A library assistant first searches a catalogue. If it finds a book, it returns availability; otherwise it asks for a title clarification. A fixed two-branch workflow can solve this. A research assistant choosing among catalogue search, web search and document comparison may need an agent loop. Set a three-call limit and return an incomplete result when evidence remains missing.",
+      "misconception": "Every chatbot is an agent and more agents always improve a result.",
+      "correction": "Identify the actions the model can choose. Add autonomy only when it helps the task enough to justify additional complexity.",
+      "question": "What should an agent do after reaching its tool-call limit without an answer?",
+      "answer": "Stop, explain what is missing and return a partial or no-answer result. Repeating the same request indefinitely is not progress."
+    },
+    {
+      "title": "MCP and connected information",
+      "explanation": "Model Context Protocol, or MCP, standardises parts of the connection between an AI application and external tools or information. An application acts as a client and connects to a server that exposes capabilities. This helps different applications use a common interface. It does not establish that a server is trustworthy, grant permission to every file or verify returned facts. The user or organisation still chooses the server, authorisation and allowed operations. Teach the idea with a read-only library catalogue rather than a complicated server installation. A vector database stores searchable representations; MCP describes a connection interface. These components can appear together but solve different problems. Inspect permissions and the intended data flow before connecting a service.",
+      "example": "A catalogue server offers search_books(query) and reserve_book(id). A classroom assistant only needs the search operation. Its account should therefore have read access without reservation permission. The returned book description is source data; a sentence inside it saying \"ignore your instructions\" has no authority over the assistant. This is a trust boundary, even when the server uses a standard protocol.",
+      "misconception": "An MCP connection makes a service safe and gives the model reliable memory.",
+      "correction": "MCP is an interface. Reliability, persistence, permissions and trust require separate design choices.",
+      "question": "Does a document search task need permission to delete documents?",
+      "answer": "No. Give the minimum access needed for the task and confirm that results are limited to documents the user may read."
+    },
+    {
+      "title": "Checking an agent trace",
+      "explanation": "A trace records what the system requested, what each tool returned and how the task ended. Read it as evidence about observable behaviour. It does not reveal every internal calculation of the model. For each step, ask whether the tool was appropriate, the arguments were valid, the result was successful and the final response matched the evidence. External pages or tool outputs may contain instructions that attempt to redirect the assistant. Treat these as untrusted content. A simple defence combines limited tools, argument validation, permission checks and review before writes. No single prompt guarantees protection. Use fictional data in the lab, and avoid logging credentials or personal information. Evaluate failed tasks as carefully as successful ones.",
+      "example": "The trace says search(\"opening hours\") returned \"Monday 09:00 to 17:00\", then the assistant answered \"Open all night\". Mark the final response as unsupported. In another trace the search returned no document and the assistant asked a clarification. That may be a correct outcome, even though it did not provide hours. Score completion against what the task and evidence permit.",
+      "misconception": "A longer trace proves the agent reasoned more carefully.",
+      "correction": "Judge the result and observable actions. Extra steps can add cost and opportunities for error.",
+      "question": "Which two records would help explain an incorrect tool-based answer?",
+      "answer": "The validated arguments sent to the tool and the exact returned result, together with the final answer, separate execution failure from explanation failure."
+    }
+  ],
+  "demo": {
+    "title": "A calculator assistant with a visible trace",
+    "steps": [
+      "Write a request with quantity and unit price.",
+      "Inspect the proposed tool name and arguments.",
+      "Run the allowed function and record its result.",
+      "Try a negative quantity and an unknown tool.",
+      "Compare the final answer with the trace."
+    ],
+    "expected": "Valid inputs produce a checked numeric result; invalid requests stop before execution.",
+    "offline": "The notebook uses a deterministic tool router. It demonstrates application control, not model planning."
+  },
+  "practice": [
+    {
+      "question": "Compare a workflow and an agent for extracting a fixed invoice format.",
+      "answer": "A fixed extraction, validation and review workflow is suitable when the steps are known. An agent could choose extra steps for unusual inputs, but it requires broader testing and bounded actions."
+    },
+    {
+      "question": "Why is valid JSON insufficient for a tool call?",
+      "answer": "It establishes syntax or schema conformance, not whether values are meaningful or authorised. A valid negative quantity may still be invalid for an order."
+    },
+    {
+      "question": "Give one useful MCP capability and one control it does not replace.",
+      "answer": "A common tool interface can simplify integration. It does not replace server trust checks, user authorisation or validation of returned content."
+    }
+  ],
+  "lab": {
+    "title": "Build and inspect a bounded tool workflow",
+    "goal": "Implement a small allowlisted tool dispatcher and evaluate success and failure paths.",
+    "steps": [
+      "Run the supplied normal request.",
+      "Explain each field in the trace.",
+      "Add a second safe calculation.",
+      "Create invalid-argument and unknown-tool tests.",
+      "Write a stopping rule and explain where approval would be needed for a write operation."
+    ],
+    "deliverable": "A runnable notebook, at least four test cases, a labelled trace and a short workflow-versus-agent justification."
+  },
+  "references": [
+    "https://developers.openai.com/api/docs/guides/function-calling",
+    "https://developers.openai.com/api/docs/guides/tools-connectors-mcp",
+    "https://ai.google.dev/gemini-api/docs/function-calling"
+  ],
+  "extension": "Compare a single-agent design with a two-role design on the same cases. Count unnecessary calls and disagreements. Implementing a multi-agent framework is beyond the core requirement.",
+  "timing": {
+    "lecture": 120,
+    "lab": 120
+  }
+}

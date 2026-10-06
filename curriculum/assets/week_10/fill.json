@@ -1,0 +1,8 @@
+{
+  "CAPTIONS": "temple: “A traditional Chinese pagoda with red walls and orange-tiled roofs stands majestically on a hill overlooking…”; flower: “A close-up of a vibrant, peach-colored dahlia flower with a soft, blurred green background.”",
+  "QA_NOTES": "Qwen3-VL-2B-Instruct answered 5 of 6 questions correctly: missed “What is the total number of tickets from Monday to…” (said “60”, gold 94).",
+  "POPE_NOTES": "Qwen3-VL-2B-Instruct: 6 of 6 yes/no probes correct; it said “yes” to 0 of 4 absent objects or fields.",
+  "T2I_NOTES": "CLIP score against its own prompt 29.2–36.0 vs other prompts 7.8–11.5: every image matches its own prompt best.",
+  "SPEECH_NOTES": "mean WER 7.5% over 3 sentences (e.g. “The lab opens at nine in the morning.” → “The lab opens at 9 in the morning.”).",
+  "RESULTS_NOTES": "Vision-language model: Qwen3-VL-2B-Instruct on a laptop CPU.\n\n| Question | Gold | Answer |  |\n|---|---|---|---|\n| Which day had the most tickets? Answer with the… | tue | Tue | ✓ |\n| How many tickets were there on Thursday? Answer… | 25 | 25 | ✓ |\n| What is the total number of tickets from Monday… | 94 | 60 | ✗ |\n| What is the invoice number? Answer with the… | 2027-0415 | 2027-0415 | ✓ |\n| What is the total due in EUR? Answer with the… | 35 | 35.00 | ✓ |\n| Who is the customer? Answer with the name only. | dublin robotics | Dublin Robotics Ltd | ✓ |\n\nHallucination probe: Qwen3-VL-2B-Instruct: 6 of 6 yes/no probes correct; it said “yes” to 0 of 4 absent objects or fields. Text-to-image: CLIP score against its own prompt 29.2–36.0 vs other prompts 7.8–11.5: every image matches its own prompt best. Speech round trip: mean WER 7.5% over 3 sentences (e.g. “The lab opens at nine in the morning.” → “The lab opens at 9 in the morning.”)."
+}

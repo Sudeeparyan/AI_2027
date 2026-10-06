@@ -1,0 +1,108 @@
+{
+  "week": 7,
+  "prerequisites": [
+    {"term": "Prompt", "meaning": "Instructions and context supplied to a model for one request.", "check": "Does rewriting a prompt change the model's stored weights?"},
+    {"term": "Ground truth", "meaning": "A reference answer used to check a prediction.", "check": "For a labelled ticket, which field supplies the expected team?"},
+    {"term": "Accuracy", "meaning": "The fraction of evaluated examples counted as correct.", "check": "If 32 of 40 predictions are correct, what is the accuracy?"}
+  ],
+  "diagrams": [
+    {
+      "id": "overview",
+      "title": "The prompt evaluation loop",
+      "subtitle": "Follow one labelled student-services ticket through the harness",
+      "steps": [
+        {"title": "Labelled item", "detail": "A message and its known correct team", "code": "ticket_ds"},
+        {"title": "Build prompt", "detail": "Add the task, permitted labels and optional examples", "code": "zero_shot / few_shot"},
+        {"title": "Generate text", "detail": "Run the same model with declared decoding settings", "code": "llm"},
+        {"title": "Parse and score", "detail": "Find a label; compare it with ground truth", "code": "label_scorer"},
+        {"title": "Collect measures", "detail": "Store scores, output-token counts and elapsed time", "code": "evaluate"},
+        {"title": "Review errors", "detail": "Inspect invalid outputs and mistaken category decisions", "code": "errors"}
+      ],
+      "arrows": ["input text", "chat messages", "raw response", "score + note", "results table"],
+      "feedback": "Use development errors to revise prompts; keep a final test set separate",
+      "feedback_to": 1,
+      "trace": [
+        "The ticket about an expired Moodle password has the reference label IT_ACCESS.",
+        "A prompt lists the five permitted teams and asks for a single label.",
+        "The scorer searches the returned text for a recognised label.",
+        "One wrong answer among 40 changes accuracy by 2.5 percentage points.",
+        "Inspect both invalid outputs and valid-but-wrong labels before changing the prompt."
+      ],
+      "explanation": "The harness turns prompt design into a measurable experiment. Each item contains input text and a reference answer. A prompt function converts that item into messages, and llm returns generated text plus its output-token count. The scorer then interprets the reply and compares its label with the reference. evaluate stores one row per item and computes summary measures. An invalid reply and a recognised but wrong label are different failure types. Compare prompts on the same items with declared settings so that observed differences have meaning. This is a small development dataset, so repeatedly improving a prompt on these examples can overfit them. Reserve new examples for a final check. The harness stores shortened previews of text and output, so those table cells are useful summaries rather than complete records of every response.",
+      "check_question": "If a prompt improves from 32 to 34 correct answers out of 40, how many examples account for the gain?",
+      "check_answer": "Two examples. That is a five-percentage-point gain, which a small dataset alone may not establish reliably."
+    },
+    {
+      "id": "mechanism",
+      "insert_before_title": "Structured outputs: a schema as a contract",
+      "title": "JSON extraction with a check",
+      "subtitle": "Validate structure, then check whether the values match the email",
+      "steps": [
+        {"title": "Source email", "detail": "The original text contains the facts to extract", "code": "EMAILS"},
+        {"title": "Schema prompt", "detail": "Request named fields and permitted request categories", "code": "extract_prompt / SCHEMA_HINT"},
+        {"title": "Model response", "detail": "The model proposes a JSON object", "code": "llm"},
+        {"title": "Parse JSON", "detail": "Find the object and decode its syntax", "code": "try_parse"},
+        {"title": "Validate fields", "detail": "Check required types, labels, ID and date patterns", "code": "Request"},
+        {"title": "Decide + compare", "detail": "Accept valid data, check references, or attempt one repair", "code": "parse_with_retry / rows_extract"}
+      ],
+      "arrows": ["email text", "schema + source messages", "raw text", "decoded field values", "valid object or error"],
+      "feedback": "On a validation error, append the error and retry once",
+      "feedback_to": 2,
+      "trace": [
+        "Aoife's email supplies a name, an eight-digit ID, an extension request and a date.",
+        "The prompt asks for those four fields, with null when no date is present.",
+        "Malformed JSON or a seven-digit ID triggers the error-handling branch.",
+        "A corrected response is checked once more; a second failure returns None.",
+        "A valid object is separately compared with gold values to measure correctness."
+      ],
+      "explanation": "A schema is a contract about output structure. Here the Request model specifies fields, allowed request labels and checks for the ID and date spelling. try_parse first finds a JSON object and decodes it, then constructs Request to run those checks. parse_with_retry returns immediately when validation succeeds. If parsing or validation fails, it sends the response and error back to the model and tries once more; a second failure returns None. This is a controlled repair path rather than an unlimited loop. Validation is weaker than factual checking: a different eight-digit ID can pass while referring to the wrong student. The date validator checks a YYYY-MM-DD pattern, rather than whether that date exists in the calendar. The lab therefore also compares extracted fields with the labelled reference values.",
+      "check_question": "Would the wrong student ID pass validation if it still contained eight digits?",
+      "check_answer": "Yes. The format check would pass; comparison with the source and reference is needed to detect the wrong value."
+    },
+    {
+      "id": "lab",
+      "title": "Five prompt experiments",
+      "subtitle": "Use a different success check for each task",
+      "steps": [
+        {"title": "Route tickets", "detail": "Compare prompt strategies with the same labelled messages", "code": "evaluate / label_scorer"},
+        {"title": "Score numbers", "detail": "Compare direct answers, written steps and sampled votes", "code": "num_scorer / majority_vote"},
+        {"title": "Extract fields", "detail": "Separate schema validity from field correctness", "code": "parse_with_retry"},
+        {"title": "Test injection", "detail": "Compare summary prompts on documents containing hostile instructions", "code": "defended_prompt / hijacked"},
+        {"title": "Swap judge order", "detail": "Check whether answer position changes the verdict", "code": "judge"},
+        {"title": "Summarise evidence", "detail": "Report correctness, costs, failures and measurement limits", "code": "summaries / res / inj"}
+      ],
+      "arrows": ["classification table", "number-task measures", "extraction measures", "attack-test table", "judge verdicts"],
+      "trace": [
+        "For ticket routing, score the permitted label rather than the confidence of the prose.",
+        "For arithmetic, extract the final number and compare it with the known answer.",
+        "For extraction, count valid output and correct fields as separate results.",
+        "For hostile documents, inspect the output as well as the keyword detector.",
+        "For judging, swap A and B and inspect invalid verdicts before reporting consistency."
+      ],
+      "explanation": "The lab reuses model calls but changes the success criterion for each task. Classification checks a team label; arithmetic checks the final numerical answer; extraction checks structure and values separately. Self-consistency samples several responses and selects the most common parsed answer, increasing output-token cost without guaranteeing truth. The injection experiment compares a simple summary prompt with one that explicitly treats document text as data. Its hijacked detector is a keyword heuristic, so a flagged word may appear in a harmless quotation and an attack may succeed without those words. The judge experiment swaps answer order to reveal position effects. Inspect the actual A/B verdicts: the current consistency expression can count two invalid replies as consistent. These are separate experiments, and each metric should be read together with concrete output examples and its limitations.",
+      "check_question": "Why inspect examples even after an automatic metric has been calculated?",
+      "check_answer": "Parsers and detectors can miss failures or flag harmless outputs; examples show what the measurement actually counted."
+    }
+  ],
+  "glossary": [
+    {"term": "Zero-shot", "meaning": "A prompt describing the task without including worked input/output examples."},
+    {"term": "Few-shot", "meaning": "A prompt containing several examples of the desired input/output behaviour."},
+    {"term": "Evaluation harness", "meaning": "Code that runs examples, scores outputs and collects comparable measures."},
+    {"term": "Schema", "meaning": "A specification of output fields, types and allowed values."},
+    {"term": "Prompt injection", "meaning": "Instructions inside supplied content that attempt to redirect the model's task."},
+    {"term": "Position bias", "meaning": "A judge's preference for an answer's placement rather than its quality."}
+  ],
+  "pitfalls": [
+    "A valid JSON object can contain incorrect facts or a calendar-impossible date that matches the current pattern check.",
+    "Adding examples to a prompt supplies context rather than performing fine-tuning.",
+    "A tiny accuracy gain, a keyword attack detector or invalid judge replies can create misleading conclusions."
+  ],
+  "code_walkthrough": [
+    {"symbol": "evaluate", "role": "Runs a prompt against every selected example and collects scores.", "inspect": "Check the number of items, fixed settings, score definition and preview truncation."},
+    {"symbol": "label_scorer", "role": "Recognises labels and distinguishes invalid from wrong replies.", "inspect": "Read outputs that mention zero, one or multiple permitted labels."},
+    {"symbol": "majority_vote", "role": "Chooses the most frequent parsed answer among samples.", "inspect": "Observe missing parses and ties before interpreting the vote."},
+    {"symbol": "Request", "role": "Defines the extracted-data structure and format checks.", "inspect": "Distinguish pattern validity from agreement with the email's facts."},
+    {"symbol": "hijacked", "role": "Flags selected keywords as a simple attack-outcome heuristic.", "inspect": "Inspect flagged text and unflagged attacks to assess measurement errors."},
+    {"symbol": "judge", "role": "Requests and parses an A/B comparison.", "inspect": "Check raw verdicts in both orders; treat '?' as invalid evidence."}
+  ]
+}

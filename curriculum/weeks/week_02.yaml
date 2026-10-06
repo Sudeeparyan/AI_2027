@@ -1,0 +1,493 @@
+subtitle: "Learning a smooth latent space you can sample from: autoencoders, the ELBO and the reparameterisation trick"
+mimlos: [1, 3, 4]
+objectives:
+  - "Explain why a plain **autoencoder** is a poor generator and how a **VAE** fixes this."
+  - "Describe the VAE model: prior p(z), probabilistic **encoder** q(z | x) and **decoder** p(x | z)."
+  - "Write down and interpret the **ELBO**: reconstruction term plus **KL divergence** regulariser; compute KL for Gaussians."
+  - "Explain and implement the **reparameterisation trick**."
+  - "Implement, train and evaluate a VAE in PyTorch; explore the latent space by sampling, interpolation and changing β."
+  - "Describe variants (**conditional VAE, β-VAE, VQ-VAE**) and applications, including the autoencoder inside latent diffusion."
+coverage:
+  - autoencoder
+  - latent space
+  - encoder
+  - decoder
+  - reparameterisation
+  - reconstruction
+  - KL divergence
+  - ELBO
+  - evidence lower bound
+  - Conditional VAE
+  - β-VAE
+  - VQ-VAE
+  - interpolation
+  - anomaly detection
+  - latent diffusion
+  - PyTorch
+
+slides:
+  - type: title
+    figure: cover
+    notes: |
+      Welcome to week 2. Last week we said that every generative model learns a probability distribution and samples from it, and that latent variables let us generate complex data from simple hidden causes. Today we build the first deep generative model of the module that uses that idea directly: the variational autoencoder, or VAE. The image on this slide is not a drawing: it was produced by a small VAE trained on handwritten digits, decoding a grid of points from its two-dimensional latent space. By the end of today you will understand, and in the lab implement, every part of that model.
+
+  - type: outcomes
+    notes: |
+      Six outcomes today. The first two are conceptual: why plain autoencoders fail as generators and what the three parts of a VAE are. The third is the mathematical core, the evidence lower bound or ELBO, which students must be able to write down and interpret for the exam. The fourth, the reparameterisation trick, is a small idea with huge influence; it appears again in diffusion models. The fifth is practical: in the lab you implement and train a VAE in PyTorch. This week practises MIMLO 1 on concepts and maths, MIMLO 3 on implementing a model, and MIMLO 4 on evaluating it.
+
+  - type: agenda
+    icon: "fa:FaRoute"
+    items:
+      - {title: "Warm-up: compress a face into 32 numbers?", minutes: 7}
+      - {title: "1 · From autoencoders to VAEs", minutes: 20}
+      - {title: "2 · The VAE model and the ELBO", minutes: 33}
+      - {title: "3 · Training: the reparameterisation trick", minutes: 17}
+      - {title: "4 · Exploring and evaluating the latent space", minutes: 20}
+      - {title: "5 · Variants and applications", minutes: 15}
+      - {title: "Lab preview and wrap-up", minutes: 8}
+    notes: |
+      Here is the plan. Section two, the model and the ELBO, is the mathematical heart and takes the most time; take the break after it. Section four shows real results from VAEs trained for these slides, so students can see what the maths produces before they reproduce it in the lab. If you run short of time, shorten section five, since variants return in weeks 4 and 9: the VQ-VAE idea reappears when we discuss image and audio tokens, and the latent-diffusion autoencoder reappears next-but-one week.
+
+  - type: discussion
+    title: "Warm-up"
+    icon: "fa:FaCompressArrowsAlt"
+    prompt: "Could you describe any face using just 32 numbers, and then redraw it from those numbers?"
+    points:
+      - "Which 32 properties would you choose? (age, hair length, smile, pose, lighting…)"
+      - "Could you invent a **new** face by picking 32 new numbers?"
+      - "What would go wrong if two very different faces got almost the same numbers, or if some combinations of numbers never appeared in your data?"
+    notes: |
+      Give two minutes in pairs. Students will propose interpretable features such as age, pose, glasses and smile. Point out that this is exactly what an encoder does automatically, except that a neural network chooses the features, and they are usually not so interpretable. The second question leads to generation: if the numbers are a good description, choosing new numbers should give a new face. The third question previews the key problem of today: if some combinations of numbers were never seen in training, the decoder has no idea what to draw there. VAEs are designed to fill those gaps.
+
+  # -------------------------------------------------- section 1
+  - type: section
+    number: 1
+    title: "From autoencoders to VAEs"
+    question: "An autoencoder can compress and rebuild images. Why can't it generate new ones?"
+    icon: "fa:FaCompress"
+    notes: |
+      Section one motivates the VAE. We start with the ordinary autoencoder, which students may have seen in a deep learning module: a network trained to reproduce its input through a narrow bottleneck. It is great at compression and denoising but poor at generation. We will see, using real models trained on handwritten digits, exactly why, and what change turns an autoencoder into a generative model. This section takes about twenty minutes.
+
+  - type: figure
+    title: "An autoencoder: squeeze, then rebuild"
+    figure: ae_diagram
+    stack: true
+    bullets:
+      - "**Encoder** compresses the input x to a short **code** z; **decoder** rebuilds x̂ from z."
+      - "Trained only to make x̂ close to x (e.g. mean squared error or binary cross-entropy)."
+      - "Uses: compression, denoising, feature learning, anomaly detection."
+    notes: |
+      An autoencoder has two networks. The encoder maps a 784-pixel digit image to a code of perhaps two to thirty-two numbers; the decoder maps the code back to an image. Training minimises reconstruction error, so the code must keep the information needed to redraw the input. Because the bottleneck is narrow, the network is forced to learn structure rather than copy pixels. Autoencoders are useful for compression, removing noise, learning features for other tasks, and spotting unusual inputs that reconstruct badly. Ask: if the code were as large as the image, what would the autoencoder learn? Probably just to copy, which is useless.
+
+  - type: figure
+    title: "The problem: an autoencoder's latent space has gaps"
+    figure: latent_ae_vs_vae
+    caption: "Real models trained on MNIST with a 2-D code. Each dot is a test image, coloured by digit."
+    notes: |
+      These are real results. Both models have a two-dimensional code so that we can plot it. On the left, the plain autoencoder places each digit class somewhere in the plane, but the clusters are irregular, stretched and separated by empty regions, and their scale is arbitrary. On the right, the VAE's codes are packed into a roughly circular region around zero, with classes touching each other. The VAE was told to keep its codes close to a standard Gaussian. Ask students: if you picked a random point in the left-hand plot, would you land on a digit? Often not.
+
+  - type: figure
+    title: "Consequence: random codes decode to nonsense in an autoencoder"
+    figure: samples_ae_vs_vae
+    caption: "The same 16 random points z ~ N(0, I) decoded by each model."
+    callout: "To generate, we need a latent space with no holes, where every region decodes to something realistic."
+    notes: |
+      Here we feed the same sixteen random points drawn from a standard Gaussian into each decoder. The autoencoder produces many smudges and blends that are not digits, because those points fall in regions it never saw during training, or the Gaussian does not even match the scale of its codes. The VAE produces recognisable, if slightly blurry, digits almost everywhere. The lesson is that generation needs a latent space that is continuous, with nearby points giving similar outputs, and complete, with the whole region we sample from being meaningful. The VAE achieves both with one extra term in the loss.
+
+  - type: compare
+    title: "Autoencoder vs. variational autoencoder"
+    columns:
+      - head: "Autoencoder"
+        icon: "fa:FaDotCircle"
+        points:
+          - "Encoder outputs a **point** z"
+          - "Loss: reconstruction only"
+          - "Latent space: irregular, with gaps"
+          - "Good for compression and features"
+          - "Cannot reliably generate"
+      - head: "Variational autoencoder"
+        icon: "fa:FaBullseye"
+        points:
+          - "Encoder outputs a **distribution** q(z | x) = N(μ, σ²)"
+          - "Loss: reconstruction **+ KL to a prior** N(0, I)"
+          - "Latent space: smooth and filled"
+          - "A true probabilistic generative model"
+          - "Sample z ~ N(0, I), decode → new data"
+    callout: "A VAE is an autoencoder whose code is a probability distribution, regularised to look like a simple prior."
+    notes: |
+      This comparison is the one-slide summary of the section. Two changes turn an autoencoder into a VAE. First, the encoder outputs the mean and variance of a Gaussian instead of a single point, so each input maps to a small cloud of possible codes. Second, the loss adds a penalty, the KL divergence, that pulls every cloud towards a standard Gaussian prior. Clouds overlap and fill the space, and the decoder learns to produce sensible outputs across the whole region. The result is a proper probabilistic generative model with a principled training objective, which we derive next.
+
+  - type: quiz
+    question: "Why do random codes decode to nonsense in a plain autoencoder?"
+    options:
+      - "The decoder is too small to draw digits"
+      - "Nothing in training forces the codes to fill a known region, so random points land where the decoder has never been trained"
+      - "Autoencoders cannot use more than two latent dimensions"
+      - "The reconstruction loss is computed on the wrong pixels"
+    answer: 1
+    notes: |
+      Answer: B. The autoencoder is only trained to reconstruct training images, so it only ever sees codes produced by its encoder. Those codes can sit anywhere, at any scale, with gaps between clusters. A random point from a standard Gaussian often lands in a gap where the decoder's behaviour is undefined. A is wrong because the same decoder reconstructs real digits well. C is wrong: autoencoders can use any code size. D is a distractor. This answer sets up the KL term: it is precisely the thing that forces codes to fill a known region.
+
+  # -------------------------------------------------- section 2
+  - type: section
+    number: 2
+    title: "The VAE model and the ELBO"
+    question: "What exactly does a VAE maximise, and why a 'lower bound'?"
+    icon: "fa:FaSquareRootAlt"
+    notes: |
+      Section two is the mathematical core of the week. We write the VAE as a latent variable model, see why its likelihood cannot be computed directly, introduce the approximate posterior produced by the encoder, and derive the evidence lower bound. Then we read the bound term by term, compute the KL divergence for Gaussians with worked numbers, and connect the reconstruction term to familiar loss functions. Go slowly; students who follow this section will find diffusion models in week 4 much easier.
+
+  - type: flow
+    title: "The VAE as a probabilistic model"
+    steps:
+      - {label: "Prior", sub: "z ~ p(z) = N(0, I): simple, fixed"}
+      - {label: "Decoder", sub: "pθ(x | z): a neural network outputs pixel probabilities"}
+      - {label: "Data", sub: "x: the image we observe"}
+      - {label: "Encoder", sub: "qφ(z | x) ≈ p(z | x): guesses which codes explain x", highlight: true}
+    bullets:
+      - "**Generation** uses only the prior and the decoder: sample z, decode."
+      - "**Training** also needs the encoder, because we must know which z explains each training image."
+      - "θ = decoder parameters, φ = encoder parameters; both are learned together."
+    notes: |
+      Here is the probabilistic story. Nature, in our model, first draws a hidden code from a standard Gaussian, then the decoder turns it into an image. That is all we need to generate. To train, however, we need to know which codes are responsible for each real image, which is the posterior p of z given x. The true posterior is intractable, so we train a second network, the encoder, to approximate it. That is why it is called variational: variational inference approximates a hard distribution with a simpler, parameterised one. Theta and phi are just the two networks' weights.
+
+  - type: figure
+    title: "VAE architecture in one picture"
+    figure: vae_arch
+    notes: |
+      Walk through the diagram from left to right. The encoder reads the image and outputs two vectors, the mean mu and the log-variance, one number per latent dimension. We use the log-variance because it can be any real number, while a variance must be positive. We then draw a code by adding scaled noise to the mean; this is the reparameterisation trick we meet in section three. The decoder turns the code into a reconstruction. The loss has two parts, written at the bottom: how well we rebuild the input, and how far each encoder distribution is from the prior. Students implement exactly this in the lab.
+
+  - type: equation
+    title: "Why we cannot maximise the likelihood directly"
+    eq:
+      - "p_\\theta(x) = \\int p_\\theta(x \\mid z)\\, p(z)\\, dz"
+      - "p_\\theta(z \\mid x) = \\dfrac{p_\\theta(x \\mid z)\\, p(z)}{p_\\theta(x)}"
+    read_as:
+      - "The likelihood of an image averages the decoder over **every** possible code: an integral over a high-dimensional space with a neural network inside, which has no closed form."
+      - "The true posterior needs that same integral in its denominator, so it is intractable too."
+      - "Fix: learn an approximation qφ(z | x) and maximise a **lower bound** on log pθ(x) instead."
+    terms:
+      - ["p(z)", "prior over codes, N(0, I)"]
+      - ["pθ(x | z)", "decoder"]
+      - ["pθ(z | x)", "true posterior (intractable)"]
+      - ["qφ(z | x)", "encoder's approximation"]
+    notes: |
+      Last week we met the latent variable integral. For a VAE, the decoder is a neural network, so the integral over all codes has no formula, and estimating it by randomly sampling codes is hopelessly inefficient because almost all random codes explain a given image very poorly. Bayes' rule shows that the posterior has the same integral in the denominator. The variational idea is to stop trying to compute these exactly and instead introduce a flexible approximation, the encoder, and optimise a quantity we can compute that is guaranteed to lie below the true log-likelihood.
+
+  - type: equation
+    title: "The evidence lower bound (ELBO)"
+    eq:
+      - "\\log p_\\theta(x) \\;\\geq\\; \\mathbb{E}_{q_\\phi(z \\mid x)}\\left[\\log p_\\theta(x \\mid z)\\right] \\;-\\; D_{\\mathrm{KL}}\\left(q_\\phi(z \\mid x)\\,\\|\\,p(z)\\right)"
+      - "\\log p_\\theta(x) = \\mathrm{ELBO} + D_{\\mathrm{KL}}\\left(q_\\phi(z \\mid x)\\,\\|\\,p_\\theta(z \\mid x)\\right)"
+    read_as:
+      - "First term: **reconstruction**. Codes drawn from the encoder should let the decoder rebuild x."
+      - "Second term: **regularisation**. The encoder's distribution should stay close to the prior N(0, I)."
+      - "The gap between log p(x) and the ELBO is exactly how wrong the encoder's posterior is; since KL ≥ 0, the ELBO is a lower bound."
+    panel_h: 2.0
+    notes: |
+      This is the most important equation of the week. The evidence is another name for log p of x, hence evidence lower bound. The first term rewards good reconstructions of x from codes sampled from the encoder. The second term penalises encoder distributions that stray from the prior. The second line explains why it is a bound: the true log-likelihood equals the ELBO plus a KL divergence between the approximate and true posteriors, and KL divergences are never negative. So maximising the ELBO both pushes the likelihood up and makes the encoder a better approximation. We train by minimising the negative ELBO.
+
+  - type: compare
+    title: "Reading the ELBO: two forces in tension"
+    columns:
+      - head: "Reconstruction term"
+        icon: "fa:FaImage"
+        points:
+          - "Wants each code to carry **all** the detail of its image"
+          - "Alone, it gives a plain autoencoder: tiny σ, codes far apart"
+          - "Measured with binary cross-entropy or squared error"
+      - head: "KL term"
+        icon: "fa:FaMagnet"
+        points:
+          - "Wants every q(z | x) to look like N(0, I)"
+          - "Alone, it ignores the input: every image gets the same code"
+          - "Makes codes overlap, so the space is smooth and filled"
+    callout: "Training balances the two: enough information to reconstruct, enough overlap to sample. β controls the balance (section 4)."
+    notes: |
+      Present the two terms as forces pulling in opposite directions. The reconstruction term wants a precise, unique code for each image, which pushes variances towards zero and codes apart. The KL term wants every image's distribution to be the same standard Gaussian, which would destroy all information. The trained VAE is a compromise: codes carry enough information to reconstruct, but they overlap enough that the whole region is covered. This compromise is also why VAE samples tend to be slightly blurry: overlapping codes mean the decoder averages over similar images. We will see the effect of changing the balance with beta.
+
+  - type: equation
+    title: "KL divergence between two Gaussians has a closed form"
+    eq: "D_{\\mathrm{KL}}\\left(\\mathcal{N}(\\mu, \\sigma^2)\\,\\|\\,\\mathcal{N}(0, 1)\\right) = \\frac{1}{2}\\left(\\mu^2 + \\sigma^2 - \\log \\sigma^2 - 1\\right)"
+    read_as:
+      - "For a d-dimensional code with independent dimensions, sum this over the d dimensions."
+      - "It is 0 only when μ = 0 and σ = 1; moving the mean or shrinking the spread costs nats."
+      - "In code: `kl = -0.5 * sum(1 + logvar - mu**2 - logvar.exp())`."
+    terms:
+      - ["μ", "encoder mean for one latent dimension"]
+      - ["σ²", "encoder variance"]
+      - ["log σ²", "what the network actually outputs"]
+    notes: |
+      KL divergence measures how different one distribution is from another; it is zero only when they are identical and it is not symmetric. For two Gaussians it has a formula, which is one reason VAEs use Gaussian encoders and priors: no sampling is needed for this term. Point out each part. Mu squared penalises codes whose mean is far from zero. Sigma squared minus log sigma squared minus one is zero at sigma equal to one and grows when the spread is either too small or too large. Show how the formula becomes the one line of PyTorch that students write in the lab.
+
+  - type: figure
+    title: "Worked examples: how far is the encoder from the prior?"
+    figure: kl_gaussians
+    stack: true
+    bullets:
+      - "μ = 1, σ = 1: ½(1 + 1 − 0 − 1) = **0.50**.  μ = 0, σ = 0.5: ½(0 + 0.25 + 1.39 − 1) = **0.32**."
+      - "μ = 2, σ = 0.5: ½(4 + 0.25 + 1.39 − 1) = **2.32**. Confident codes far from zero are expensive."
+    notes: |
+      Work these on the board. With mean zero and standard deviation one, the encoder equals the prior and the KL is zero. Shifting the mean to one costs half a nat. Shrinking the standard deviation to one half costs 0.32 nats, because the log of 0.25 is minus 1.39. Both together, a confident code far from zero, costs 2.32 nats. In a trained VAE each latent dimension pays a cost like this, and the total KL printed during training, typically a few nats per image for a small latent space, is the sum over dimensions averaged over images.
+
+  - type: equation
+    title: "The reconstruction term in practice"
+    eq: "-\\log p_\\theta(x \\mid z) = -\\sum_{i=1}^{784}\\left[x_i \\log \\hat{x}_i + (1 - x_i)\\log(1 - \\hat{x}_i)\\right]"
+    read_as:
+      - "For pixels in [0, 1] (MNIST) the decoder outputs a probability per pixel: this is **binary cross-entropy**."
+      - "For real-valued data with a Gaussian decoder, it becomes **mean squared error** (up to constants)."
+      - "The expectation over q is estimated with **one sample** of z per image per step; that is enough in practice."
+    terms:
+      - ["xᵢ", "true intensity of pixel i"]
+      - ["x̂ᵢ", "decoder's predicted probability for pixel i"]
+      - ["784", "28 × 28 pixels"]
+    notes: |
+      The reconstruction term is just a familiar loss function once we choose the decoder's output distribution. For MNIST we treat each pixel as a Bernoulli variable, so the negative log-likelihood is binary cross-entropy summed over pixels. For colour photographs a Gaussian decoder is common, giving squared error. The expectation over the encoder's distribution is estimated with a single sampled code per image in each training step; the noise averages out over many steps. Important implementation detail: sum over pixels rather than averaging, otherwise the KL term dominates and samples become very blurry.
+
+  - type: quiz
+    question: "Which part of the VAE loss makes codes of different images overlap and fill the latent space?"
+    options:
+      - "The reconstruction (binary cross-entropy) term"
+      - "The KL divergence to the prior N(0, I)"
+      - "The Adam optimiser's learning rate"
+      - "The size of the decoder's hidden layer"
+    answer: 1
+    notes: |
+      Answer: B. The KL term pulls every encoder distribution towards the same standard Gaussian, so distributions for different images overlap and there are no empty regions. Without it, the model behaves like a plain autoencoder. A is the opposite force: reconstruction pushes codes apart so that each image can be rebuilt precisely. C and D affect optimisation and capacity, not the shape of the latent space. A good follow-up question: what happens if the KL weight is huge? The codes ignore the input and every sample looks like the average digit.
+
+  # -------------------------------------------------- section 3
+  - type: section
+    number: 3
+    title: "Training: the reparameterisation trick"
+    question: "How do we backpropagate through a random sample?"
+    icon: "fa:FaRandom"
+    notes: |
+      Welcome back from the break. We know what to maximise; now we need to train it with gradient descent. The obstacle is that the loss depends on a random sample of the code, and you cannot differentiate a random draw. The reparameterisation trick removes that obstacle with one line of algebra. After that we look at the complete PyTorch model in about twenty lines, and at practical training details, including how to monitor the two loss terms and a failure mode called posterior collapse.
+
+  - type: equation
+    title: "The reparameterisation trick"
+    eq: "z = \\mu_\\phi(x) + \\sigma_\\phi(x) \\odot \\epsilon, \\qquad \\epsilon \\sim \\mathcal{N}(0, I)"
+    read_as:
+      - "Instead of sampling z ~ N(μ, σ²) directly, sample **fixed** noise ε and transform it."
+      - "The randomness now enters as an input; z is a deterministic, differentiable function of μ and σ."
+      - "So gradients of the loss flow back through z into the encoder."
+    terms:
+      - ["ε", "standard Gaussian noise"]
+      - ["⊙", "element-wise product"]
+      - ["σ", "exp(½ · log σ²)"]
+    notes: |
+      The trick rewrites a sample from a Gaussian with mean mu and standard deviation sigma as mu plus sigma times standard noise. Mathematically the distribution of z is identical. Computationally, the difference is decisive: the random part epsilon no longer depends on the network's parameters, so z is an ordinary function of mu and sigma and we can backpropagate through it. Kingma and Welling introduced this in the original 2013 VAE paper. The same idea, writing a noisy variable as a clean one plus scaled noise, is central to diffusion models in week 4, so it is worth making sure everyone understands it now.
+
+  - type: figure
+    title: "Why the trick matters for backpropagation"
+    figure: reparam
+    notes: |
+      The left diagram shows the problem: a sampling node sits between the encoder's outputs and the loss, and there is no gradient through a random draw, so the encoder cannot learn. The right diagram shows the fix: the noise is drawn outside the network and combined with mu and sigma by multiplication and addition, which are differentiable. Gradients now flow back to mu and sigma and into the encoder weights. An alternative, the score-function or REINFORCE estimator, can handle non-differentiable sampling but has much higher variance, which is why the reparameterisation trick made VAEs practical.
+
+  - type: code
+    title: "A complete VAE in PyTorch"
+    code: |
+      class VAE(nn.Module):
+          def __init__(self, zdim=2, h=400):
+              super().__init__()
+              self.enc = nn.Sequential(nn.Flatten(),
+                                       nn.Linear(784, h), nn.ReLU())
+              self.mu = nn.Linear(h, zdim)
+              self.logvar = nn.Linear(h, zdim)
+              self.dec = nn.Sequential(nn.Linear(zdim, h), nn.ReLU(),
+                                       nn.Linear(h, 784))
+
+          def forward(self, x):
+              hid = self.enc(x)
+              mu, logvar = self.mu(hid), self.logvar(hid)
+              eps = torch.randn_like(mu)
+              z = mu + torch.exp(0.5 * logvar) * eps  # the trick
+              return self.dec(z), mu, logvar          # logits
+
+      def vae_loss(logits, x, mu, logvar, beta=1.0):
+          rec = F.binary_cross_entropy_with_logits(
+              logits, x.view(-1, 784), reduction="sum")
+          kl = -0.5 * torch.sum(1 + logvar - mu**2 - logvar.exp())
+          return (rec + beta * kl) / x.size(0)
+    bullets:
+      - "Encoder → two heads: **μ** and **log σ²**."
+      - "One line implements the trick with `torch.randn_like`."
+      - "Loss = **negative ELBO**: BCE summed over pixels + β · KL."
+      - "Generate: `torch.sigmoid(model.dec(torch.randn(16, zdim)))`."
+    notes: |
+      This is essentially the lab model. Walk through it line by line. The encoder is one hidden layer here; convolutional encoders give sharper results but the idea is identical. The two linear heads output mu and log-variance. The reparameterisation is the single line with randn like. The decoder outputs logits, and the loss uses binary cross-entropy with logits for numerical stability. The KL line is the closed form from the earlier slide. Generating is just decoding random normal vectors and applying a sigmoid. Emphasise that fewer than twenty lines give a complete, principled generative model.
+
+  - type: figure
+    title: "Training in practice: watch both terms"
+    figure: training_curves
+    bullets:
+      - "Adam, learning rate 10⁻³, batch 128, 10 epochs: about a minute on a Colab T4 GPU."
+      - "Reconstruction falls steadily; after a dip in epoch 2, **KL rises** as codes carry more information about each image."
+      - "**Posterior collapse**: KL → 0 and the decoder ignores z (common with powerful decoders). Remedies: KL warm-up, free bits, a weaker decoder."
+    stack: true
+    notes: |
+      These curves come from the model that produced today's figures. Always log the two terms separately, never just the total. Reconstruction error falls quickly. In this run the KL term dips after the first epoch, as the encoder first pulls its codes towards the prior, and then rises steadily: as the model learns to use the code, each image's distribution moves away from the prior to carry more information. Both terms are still changing at epoch ten, which is normal for a short run. If the KL stays near zero the model has suffered posterior collapse: the decoder has learned to generate without using the code at all, a common problem with powerful autoregressive decoders. Remedies include gradually increasing beta from zero, called warm-up, or guaranteeing a minimum KL per dimension, called free bits.
+
+  # -------------------------------------------------- section 4
+  - type: section
+    number: 4
+    title: "Exploring and evaluating the latent space"
+    question: "What has the model learned, and how do we measure it?"
+    icon: "fa:FaSearch"
+    notes: |
+      Section four is visual. We look at reconstructions, decode a whole grid of latent points, interpolate between digits, and change beta to see the trade-off between sharpness and a well-behaved latent space. All images are from real models trained for these slides with the same code students use in the lab. Then we discuss how to evaluate a VAE properly, because pretty pictures are not enough evidence for a report or a project.
+
+  - type: figure
+    title: "Reconstructions: good, but a little blurry"
+    figure: reconstructions
+    callout: "Blur comes from the model averaging over plausible images when codes overlap, and from pixel-wise losses."
+    notes: |
+      The top row shows test images the model never saw during training; the bottom row shows the VAE's reconstructions from a sixteen-dimensional code. The digits are clearly recognisable, but edges are softer. Ask students why. Two reasons: the KL term forces overlapping codes, so a code is compatible with several slightly different images and the decoder outputs their average; and pixel-wise losses reward predicting the average intensity when uncertain, which looks blurry. GANs, next week, attack exactly this weakness, at the price of harder training. Diffusion models later combine sharpness and stable training.
+
+  - type: figure
+    title: "Decoding a grid of latent points: a map of the learned space"
+    figure: manifold
+    bullets:
+      - "Each image decodes one point of a 15 × 15 grid over the 2-D latent space."
+      - "Neighbouring points give similar digits: the space is **continuous**."
+      - "Every position decodes to something digit-like: the space is **complete**."
+      - "Transitions show the model's notion of similarity (e.g. 4 ↔ 9, 3 ↔ 5 ↔ 8)."
+    figure_width: 5.6
+    notes: |
+      This is the classic VAE picture. With a two-dimensional code we can decode a regular grid of points, spaced so that it covers the Gaussian evenly. Every cell is a digit and neighbouring cells change gradually: one continuously morphs into seven, four into nine. This shows the two properties we wanted: continuity and completeness. The layout also reveals what the model finds similar: digits that share strokes sit next to each other. Two dimensions are too few for sharp digits, which is why higher-dimensional codes are used in practice; then we explore with interpolation instead of grids.
+
+  - type: figure
+    title: "Interpolation: walk in a straight line through latent space"
+    figure: interpolation
+    bullets:
+      - "Encode two images, take points (1 − t)·z₁ + t·z₂ for t from 0 to 1, decode each."
+      - "Smooth, realistic transitions are evidence that the latent space is well organised."
+      - "For high-dimensional Gaussian latents, **spherical** interpolation (slerp) often looks better."
+    stack: true
+    notes: |
+      Interpolation is the main tool for exploring higher-dimensional latent spaces. Encode two test images to their means, draw a straight line between them, and decode points along it. In a well-trained VAE every intermediate image looks like a plausible digit, which a pixel-space blend of the two images would not. Mention spherical interpolation: in high dimensions, samples from a Gaussian concentrate near a sphere, and the straight line between two such points passes through the lower-norm interior, so walking along the sphere often gives better images. Students implement interpolation in the lab as a TODO.
+
+  - type: figure
+    title: "β changes the balance between sharpness and structure"
+    figure: beta_samples
+    bullets:
+      - "Samples from the prior for three KL weights (16-D latent, 5 epochs)."
+      - "**Small β**: low reconstruction error, but codes spread out, so prior samples are often malformed."
+      - "**Large β**: codes hug the prior, samples are smooth and generic, details lost."
+    stack: true
+    notes: |
+      Beta multiplies the KL term. With a small beta the model behaves more like an autoencoder: reconstructions are good but the aggregate distribution of codes does not match the prior, so sampling from the prior gives more broken digits. With a large beta the codes are forced very close to the prior; samples are well formed but blurrier and less varied, and reconstructions lose detail. Beta equal to one corresponds to the true ELBO. The numbers in each title are the measured reconstruction and KL terms. Beta-VAE, with beta larger than one, is also used to encourage disentangled latent dimensions. This is the rate-distortion trade-off: the KL is the rate, how many nats the code carries, and reconstruction error is the distortion; every nat saved costs detail.
+
+  - type: table
+    title: "How to evaluate a VAE"
+    header: ["What", "Metric", "Watch out for"]
+    rows:
+      - ["Fit to data", "Negative ELBO on held-out data (nats, or bits per dimension)", "Only a bound; compare models with the same likelihood setup"]
+      - ["Reconstruction", "BCE or MSE on held-out images; side-by-side pictures", "Low error can coexist with poor samples"]
+      - ["Sample quality", "FID against real images (week 3); human rating", "FID needs thousands of samples; humans need a rubric"]
+      - ["Latent space", "Interpolations, traversals, disentanglement scores", "Visual inspection is subjective; report seeds"]
+      - ["Usefulness", "Downstream task, e.g. anomaly-detection ROC AUC", "Test on realistic, held-out anomalies"]
+    notes: |
+      A VAE is evaluated on several axes because no single number captures everything. The held-out negative ELBO is the principled measure of fit, but it is a bound, so comparisons are only fair across models with the same decoder likelihood. Reconstruction error and pictures show fidelity. Sample quality needs a metric such as the Fréchet Inception Distance, which we define next week, or careful human evaluation. Latent-space quality is usually shown with traversals. Finally, if the VAE serves a task, measure the task. In the project, students must report at least one quantitative and one human-centred evaluation, which links to MIMLO 4.
+
+  # -------------------------------------------------- section 5
+  - type: section
+    number: 5
+    title: "Variants and applications"
+    question: "Where are VAEs used in 2026?"
+    icon: "fa:FaSitemap"
+    notes: |
+      Section five looks beyond the basic model. Pure VAEs are rarely the image generator of choice today, because diffusion models produce sharper samples. But VAE ideas are everywhere: conditional generation, disentanglement, discrete image tokens with VQ-VAE, and most importantly the autoencoder that compresses images inside latent diffusion models such as Stable Diffusion and FLUX. We finish with applications and a responsible AI lens before the lab preview.
+
+  - type: cards
+    title: "Important VAE variants"
+    cards:
+      - {icon: "fa:FaTags", head: "Conditional VAE", text: "Encoder and decoder also receive a label or text y. Generate a chosen class: p(x | z, y)."}
+      - {icon: "fa:FaSlidersH", head: "β-VAE", text: "β > 1 pushes latent dimensions to capture separate factors (pose, size) at the cost of blur."}
+      - {icon: "fa:FaTh", head: "VQ-VAE", text: "Codes are chosen from a learned codebook of vectors: images become grids of discrete tokens."}
+      - {icon: "fa:FaLayerGroup", head: "Hierarchical VAEs", text: "Several layers of latents (e.g. NVAE) give much sharper images than a single code."}
+    notes: |
+      Four variants students should know by name. A conditional VAE feeds a label or other condition into both networks, so you can ask for a specific digit or attribute; students can try this as a lab extension. Beta-VAE uses beta greater than one to encourage each latent dimension to capture one factor of variation, useful for interpretability. VQ-VAE replaces the continuous Gaussian code with the nearest entry in a learned codebook, so an image becomes a grid of discrete tokens; this idea underlies image tokenizers used by autoregressive and multimodal models, and audio codecs. Hierarchical VAEs stack several latent layers and close much of the quality gap.
+
+  - type: flow
+    title: "Where you meet VAEs every day: inside latent diffusion"
+    steps:
+      - {label: "Image", sub: "512 × 512 × 3 pixels (786,432 numbers)"}
+      - {label: "VAE encoder", sub: "Compress to a 64 × 64 × 4 latent (48× fewer numbers)"}
+      - {label: "Diffusion in latent space", sub: "Denoise, guided by the text prompt (week 4)", highlight: true}
+      - {label: "VAE decoder", sub: "Turn the final latent back into pixels"}
+    bullets:
+      - "Stable Diffusion and many later image and video models use this design; the VAE makes generation affordable."
+      - "The VAE is trained first with a small KL weight plus perceptual and adversarial losses, so reconstructions stay sharp."
+    notes: |
+      This is the most important modern application. Diffusion directly in pixel space is expensive for large images. Latent diffusion, introduced by Rombach and colleagues in 2022 and used in Stable Diffusion, first trains an autoencoder that compresses a 512 by 512 colour image into a 64 by 64 grid with four channels, forty-eight times fewer numbers, and then runs the diffusion process in that latent space. The decoder turns the result back into an image. These autoencoders use only a small KL penalty and add perceptual and adversarial losses so that reconstructions are sharp. Next week's GAN ideas therefore also reappear here.
+
+  - type: cards
+    title: "Applications of VAEs"
+    cards:
+      - {icon: "fa:FaExclamationTriangle", head: "Anomaly detection", text: "Inputs unlike the training data reconstruct badly: flag high reconstruction error (lab part 6)."}
+      - {icon: "fa:FaDatabase", head: "Synthetic data", text: "Sample new tabular, image or sensor data to augment small datasets, with privacy caveats."}
+      - {icon: "fa:FaFlask", head: "Molecule and design search", text: "Optimise in a smooth latent space, then decode candidate molecules or shapes."}
+      - {icon: "fa:FaFileArchive", head: "Compression & tokens", text: "Learned image, audio and video codecs; latent spaces for diffusion and multimodal models."}
+    notes: |
+      Beyond latent diffusion, VAEs are used for anomaly detection in manufacturing, cybersecurity and medicine, because unusual inputs reconstruct poorly. They generate synthetic data to augment small datasets, although synthetic data can leak information about real records. In drug discovery, molecules are encoded into a continuous space where optimisation is easier, then decoded. Learned compression for images, audio and video relies on autoencoder ideas, and VQ-style codes turn images and sounds into tokens for multimodal transformers, which we meet in weeks 9 and 10.
+
+  - type: figure
+    title: "Application demo: detecting unusual inputs"
+    figure: anomaly
+    bullets:
+      - "VAE trained on digits only; test on digits vs. clothing images (Fashion-MNIST)."
+      - "Clothing reconstructs badly, so its error is high; a simple threshold separates them well."
+      - "Real anomalies are subtler: always test on realistic, held-out cases."
+    figure_width: 7.4
+    notes: |
+      This is a real result, and students reproduce it in the lab. We trained the VAE only on handwritten digits, then measured reconstruction error on unseen digits and on clothing images from Fashion-MNIST. The two histograms barely overlap and the ROC area under the curve, shown in the title, is close to one, meaning reconstruction error is an excellent anomaly score here. Stress the limitation: clothing versus digits is an easy, artificial anomaly. A defect on a circuit board or an unusual heart rhythm is much subtler, and some anomalies can even reconstruct well. Evaluation must use realistic anomalies.
+
+  - type: bullets
+    title: "Responsible AI lens: VAEs and synthetic data"
+    icon: "fa:FaBalanceScale"
+    bullets:
+      - "**Privacy**: synthetic data can memorise and leak training records; test for near-copies and consider differential privacy."
+      - "**Bias**: an anomaly detector flags whatever differs from its training data, which can mean under-represented groups. Ask: normal for whom?"
+      - "**Consent & licences**: MNIST is public; faces, medical scans and voices need consent and a lawful basis."
+      - "**Honest reporting**: show failure cases and blurry samples, not only the best interpolations."
+    notes: |
+      Each week has a responsible AI lens tied to the model family. For VAEs, synthetic data is the headline risk: people often assume generated data is automatically anonymous, but models can memorise rare training examples. Anomaly detection raises fairness questions: if the training data under-represents a group, their normal inputs look anomalous, for example in fraud or medical screening. Data rights matter as soon as students move from MNIST to faces or health data. Finally, report honestly: cherry-picked interpolations are a common form of overclaiming, which the project marking scheme penalises.
+
+  - type: lab
+    title: "Lab 2: implement and explore a VAE in PyTorch"
+    steps:
+      - "Load MNIST with torchvision; build encoder, **reparameterisation** and decoder (TODOs)."
+      - "Implement the **negative ELBO** loss: binary cross-entropy + β · KL."
+      - "Train for 10 epochs; plot reconstruction and KL separately."
+      - "Visualise the 2-D latent space, decode a grid and **interpolate** between two digits."
+      - "Train with β = 0.1, 1 and 4; compare samples and losses; justify a choice."
+      - "Use reconstruction error to detect Fashion-MNIST images; compute ROC AUC. Extension: conditional VAE."
+    runtime: "Google Colab T4 GPU (about 1 minute per training run) or CPU (about 5 minutes)"
+    deliverable: "Notebook with completed TODOs, figures, the β comparison table and three written answers"
+    notes: |
+      The lab follows the lecture exactly. Students fill in the encoder output, the reparameterisation line and the loss, then train. With the two-dimensional model they reproduce the latent scatter and grid; with a sixteen-dimensional model they interpolate. The beta experiment asks them to connect numbers to pictures, and the anomaly detection part turns the model into a tool and asks for a proper metric, ROC AUC. The conditional VAE extension is for students who finish early. Remind them that the trained model and the evaluation code can be reused in the group project.
+
+  - type: summary
+    points:
+      - "Plain autoencoders compress well but their latent space has gaps, so they generate poorly."
+      - "A VAE's encoder outputs a **distribution** q(z | x); a **KL** term pulls it towards the prior N(0, I)."
+      - "We maximise the **ELBO** = reconstruction − KL, a lower bound on log p(x)."
+      - "KL between Gaussians: ½(μ² + σ² − log σ² − 1) per dimension."
+      - "The **reparameterisation trick** z = μ + σ ⊙ ε makes sampling differentiable."
+      - "Explore with grids and **interpolation**; evaluate with held-out ELBO, reconstructions, samples and tasks."
+      - "**β** trades sharpness for a well-structured latent space."
+      - "VAE ideas live on in CVAE, β-VAE, VQ-VAE and the autoencoder inside latent diffusion."
+    notes: |
+      Recap the eight points, ideally asking students to supply the key word before you reveal it. If they remember one equation, it should be the ELBO; if they remember one trick, the reparameterisation. Next week we meet the other classic answer to blurry samples: generative adversarial networks, which drop the likelihood altogether and train a generator against a critic. Ask students to finish the lab, read Foster chapter 3 and watch the suggested video before next week.
+
+  - type: resources
+    items:
+      - {kind: book, label: "Foster (2023) Generative Deep Learning, 2nd ed., ch. 3 'Variational Autoencoders'", note: "Core module text", url: "https://www.oreilly.com/library/view/generative-deep-learning/9781098134174/"}
+      - {kind: paper, label: "Kingma & Welling (2013) Auto-Encoding Variational Bayes", note: "The original VAE paper", url: "https://arxiv.org/abs/1312.6114"}
+      - {kind: doc, label: "Lilian Weng: From Autoencoder to Beta-VAE", note: "Clear derivations and variants", url: "https://lilianweng.github.io/posts/2018-08-12-vae/"}
+      - {kind: doc, label: "TensorFlow tutorial: Convolutional VAE", note: "Alternative implementation in TensorFlow", url: "https://www.tensorflow.org/tutorials/generative/cvae"}
+      - {kind: paper, label: "van den Oord et al. (2017) VQ-VAE", note: "Discrete latent codes and tokens", url: "https://arxiv.org/abs/1711.00937"}
+      - {kind: paper, label: "Rombach et al. (2022) Latent Diffusion Models", note: "The VAE inside Stable Diffusion (preview of week 4)", url: "https://arxiv.org/abs/2112.10752"}
+    notes: |
+      Foster chapter 3 follows almost the same path as this lecture with Keras code, which is useful for students who prefer TensorFlow; the descriptor allows either framework. The original Kingma and Welling paper is short and readable after today. Lilian Weng's blog post is the best single written reference for the derivations and variants. The TensorFlow tutorial is a convolutional VAE students can compare with our PyTorch model. The VQ-VAE and latent diffusion papers are for students who want to look ahead. All links were checked in September 2026.

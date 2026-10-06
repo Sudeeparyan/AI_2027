@@ -1,0 +1,99 @@
+{
+  "n": 7,
+  "title": "Embeddings and retrieval-augmented generation",
+  "outcomes": [
+    "LO1",
+    "LO4",
+    "LO5"
+  ],
+  "overview": "Build a small document-question-answering workflow and explain each stage. Use retrieved evidence to support answers, while checking retrieval failures and unsupported claims.",
+  "prerequisites": "Tokens, context windows, prompting, structured output and basic vector arithmetic.",
+  "objectives": [
+    "Explain an embedding and use similarity to rank candidate passages.",
+    "Trace document preparation, retrieval, prompt construction and answer generation in a RAG workflow.",
+    "Evaluate retrieval and answer quality separately, including unanswered and conflicting questions."
+  ],
+  "concepts": [
+    {
+      "title": "Embeddings represent useful similarities",
+      "explanation": "An embedding represents an item as a vector of numbers. A trained embedding model learns representations that make some relationships useful for a task, such as finding passages with related meanings. Cosine similarity compares vector directions: the dot product is divided by the product of the vector lengths. A higher score can indicate a closer match within the chosen representation, but it is not a probability that a passage is true. Different embedding models and tasks produce different similarities. A simple bag-of-words representation is a useful baseline because its behaviour is easy to inspect, although it can miss synonyms and context. Label that baseline accurately; counting word overlap does not demonstrate a trained semantic embedding model. Neither approach establishes the authority of a document.",
+      "example": "A student asks, 'Where can I borrow a notebook computer?' One passage mentions 'laptop loans' and another repeats 'computer' while describing a shop. Word overlap may favour the shop, while a suitable semantic representation may retrieve the loan policy. Students inspect both passages and explain why a high similarity score still needs a relevance and source-authority check.",
+      "misconception": "A cosine similarity of 0.9 means the passage has a 90 percent chance of being correct.",
+      "correction": "It is a geometric similarity measure in a particular representation, not a calibrated truth probability.",
+      "question": "What happens if a vector has zero length in the cosine formula?",
+      "answer": "The denominator is zero. The implementation must handle that case explicitly rather than divide by zero."
+    },
+    {
+      "title": "Retrieval prepares the evidence",
+      "explanation": "A document collection must be prepared before it can support reliable answers. Split long documents into passages that preserve useful meaning, and keep metadata such as title, date and source identifier. Create a searchable representation of the passages, then retrieve a small set for the question. Chunk size changes the trade-off: small chunks can omit necessary context, while large chunks can include distracting material. Retrieval may use keywords, embeddings or a combination. A vector database helps manage and search vectors at scale, but a small classroom collection can be searched in memory. After ranking, inspect whether the selected passages actually answer the question. Updating the document collection is different from updating the language model. Retrieval cannot recover information that is absent from the collection.",
+      "example": "A library policy says loans last seven days, followed by a separate sentence that final-year project equipment has a different limit. A chunk boundary separates the exception from the main rule. A question about project equipment retrieves only the seven-day sentence. Students change the chunk boundary or add overlap, then check whether the exception is now available.",
+      "misconception": "Choosing a popular vector database automatically produces good retrieval.",
+      "correction": "Document quality, chunking, representation, query design and evaluation still determine whether useful evidence is retrieved.",
+      "question": "Why keep a passage's document date and title?",
+      "answer": "They help identify its origin, assess whether it is current and present an inspectable citation."
+    },
+    {
+      "title": "Generation uses evidence without changing weights",
+      "explanation": "Retrieval-augmented generation combines an information-retrieval step with an answer-generation step. The application places relevant retrieved passages into the model's context and asks it to answer using them. The model's learned weights normally remain unchanged during this process. The answer should make clear which claims the passages support and identify missing or conflicting evidence. A citation is helpful only when it points to a real source that supports the associated claim. Simply appending a document title is not enough. Retrieved text can also contain misleading instructions or outdated statements, so the application must preserve the boundary between evidence and instructions. RAG can reduce some knowledge-related errors, but it does not guarantee that retrieval is relevant or that generation uses the evidence faithfully.",
+      "example": "A course FAQ states that assignment feedback is normally returned within fifteen working days. The student asks whether it will arrive tomorrow. A grounded answer reports the stated window and says the source does not establish tomorrow's release. A poor answer promises tomorrow and cites the FAQ anyway. Students explain why the presence of the citation does not make the promise supported.",
+      "misconception": "RAG retrains the model on the retrieved documents each time a question is asked.",
+      "correction": "A typical RAG application supplies documents as inference-time context; fine-tuning is a separate weight-update process.",
+      "question": "What should the answer do if the retrieved passages do not contain the requested deadline?",
+      "answer": "State that the evidence is insufficient and identify an appropriate source or person to consult, rather than inventing a date."
+    },
+    {
+      "title": "Evaluate retrieval and answers separately",
+      "explanation": "A RAG system can fail before generation if it retrieves the wrong passages. It can also retrieve good evidence and then produce an unsupported answer. Evaluate these stages separately. For retrieval, record whether the passages include the evidence needed for each question. For the answer, check relevance, factual support, completeness and appropriate handling of uncertainty. Build a small test set with straightforward questions, paraphrases, missing answers and conflicting documents. Keep expected supporting passages or reference answers so the evaluation is reproducible. Human review is useful for judging meaning, while simple code can check source identifiers and known facts. Automated or model-based judges can help, but their scores also require scrutiny. A single successful demonstration is insufficient evidence that the system works across the intended task.",
+      "example": "Test four questions: a direct loan-period question, a paraphrase, an unsupported opening-hours question and a question with conflicting policy versions. Record retrieved passage IDs and answer scores in separate columns. A correct loan answer does not compensate for an invented opening time. Use the failure pattern to decide whether to improve retrieval, the prompt, the documents or the refusal rule.",
+      "misconception": "If an answer is wrong, the language model must be the only cause.",
+      "correction": "Errors can come from missing documents, chunking, retrieval, outdated evidence, prompt construction or generation.",
+      "question": "Retrieval finds the correct policy, but the answer changes seven days to fourteen. Which stage needs attention first?",
+      "answer": "Generation and its factual validation; retrieval already supplied the relevant evidence for that case."
+    }
+  ],
+  "demo": {
+    "title": "A question with and without source passages",
+    "steps": [
+      "Show a small synthetic collection with stable source IDs and one deliberate policy conflict.",
+      "Ask a question without supplying its answer as context and record uncertainty or unsupported claims.",
+      "Rank passages with the notebook's explicitly labelled retrieval method.",
+      "Build an evidence-bounded prompt and generate or inspect a labelled prepared answer.",
+      "Check the answer against passages and test a question that the collection cannot answer."
+    ],
+    "expected": "Students can identify the retrieved evidence, show the assembled prompt and explain both a retrieval and an answer failure.",
+    "offline": "The notebook can retrieve passages and assemble prompts locally. A template or prepared answer is an offline teaching substitute, not a live generative-model result."
+  },
+  "practice": [
+    {
+      "question": "Why might a keyword baseline fail on 'borrow a notebook computer' versus 'laptop loans'?",
+      "answer": "It may not recognise that different words express similar meanings."
+    },
+    {
+      "question": "Is a source-supported answer necessarily current and true?",
+      "answer": "No. It may faithfully report an outdated or incorrect source; source quality must also be checked."
+    },
+    {
+      "question": "What does a no-answer case test?",
+      "answer": "Whether the system recognises insufficient evidence rather than filling the gap with an unsupported claim."
+    }
+  ],
+  "lab": {
+    "title": "Build and inspect a small RAG workflow",
+    "goal": "Implement retrieval and prompt construction, then evaluate supported and unsupported answers.",
+    "steps": [
+      "Load the small synthetic document collection and inspect dates, source IDs and conflicts.",
+      "Create and label the representation used for retrieval; run a query and inspect the ranking.",
+      "Select passages and construct a prompt that asks for source-supported answers and explicit uncertainty.",
+      "Use an approved live or local generative model, or separately labelled prepared outputs for the offline route.",
+      "Evaluate direct, paraphrased, no-answer and conflicting-source questions; revise one stage and compare."
+    ],
+    "deliverable": "The retrieval code, assembled prompts, source-labelled answers and a test table separating retrieval relevance from answer support. State any offline substitution."
+  },
+  "references": [
+    "https://developers.google.com/machine-learning/crash-course/embeddings",
+    "https://learn.microsoft.com/en-us/azure/foundry/concepts/evaluation-evaluators/rag-evaluators",
+    "https://learn.microsoft.com/en-us/azure/foundry-classic/openai/concepts/customizing-llms",
+    "https://arxiv.org/abs/2005.11401"
+  ],
+  "extension": "Compare the transparent keyword baseline with a downloaded, approved pretrained embedding model on paraphrased questions. Record whether semantic retrieval improves evidence selection and where it fails."
+}

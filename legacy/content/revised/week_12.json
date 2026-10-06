@@ -1,0 +1,103 @@
+{
+  "n": 12,
+  "title": "Integration and critical comparison",
+  "outcomes": [
+    "LO1",
+    "LO2",
+    "LO3",
+    "LO4",
+    "LO5"
+  ],
+  "overview": "The final week connects model understanding, practical tool use and evidence about results. Students present a small application, explain the model family and adaptation choices, and demonstrate a normal case and a failure case. This is a formative integration activity that prepares students for the unchanged group project and examination in the professor’s descriptor.",
+  "objectives": [
+    "Explain how the model, context, tools and interface work together.",
+    "Compare an application against a baseline using unseen cases.",
+    "Present evidence across all five unchanged learning outcomes."
+  ],
+  "prerequisites": "Bring the previous notebook and a short record of what you tried. Basic Python lists, dictionaries and functions are sufficient for the guided code.",
+  "concepts": [
+    {
+      "title": "A coherent application",
+      "explanation": "Start with a specific user and a small task. A museum learning assistant might answer questions from a supplied guide and produce an accessible description of an exhibit. The model generates wording, retrieval supplies relevant evidence, and application code manages inputs and output checks. A tool should solve a need that ordinary generation cannot reliably meet, such as an exact calculation. Describe every component by its purpose. Avoid adding agents, tuning or a vector database solely to increase the component count. A modest application with a clear baseline and carefully analysed limits is easier to defend. Where a technique is required for a learning outcome but unnecessary for the final use case, include its guided experiment as separate evidence.",
+      "example": "A museum guide states opening hours and ticket prices. The assistant retrieves the relevant passage, quotes its source identifier and declines an unrelated medical question. A separate multimodal activity describes an exhibit image and checks visible details. The student explains why a calculator helps price totals and why the simple opening-hours task does not require multiple agents.",
+      "misconception": "Every technique covered in the module must be placed inside one application.",
+      "correction": "Choose components that serve the use case and provide separate, clearly labelled learning evidence for the other techniques.",
+      "question": "What makes a component justified in the application?",
+      "answer": "A specific requirement and evidence that the component helps meet it more effectively than a simpler baseline."
+    },
+    {
+      "title": "Evidence across learning outcomes",
+      "explanation": "The original descriptor sets five learning outcomes. Evidence should cover model-family principles, multimodal alignment, implementation and parameter-efficient fine-tuning, output evaluation, and deployment with retrieval or agentic behaviour. A slide listing these phrases is insufficient. Show an experiment or artefact and explain what it demonstrates. For the guided small models, state their architecture, data and limitations. For fine-tuning, identify frozen and trainable parameters and compare held-out behaviour before and after adaptation. For multimodal work, include more than a text-only conversation about images. A lecturer can use a portfolio checklist to identify gaps while the work is still formative. The institutional assessment scheme and marking brief remain authoritative.",
+      "example": "A portfolio contains a VAE/GAN comparison, an attention calculation, a checked image-and-caption task, actual LoRA training logs, a held-out evaluation and a local model endpoint. The RAG demonstration includes supporting passages. Each artefact has a short interpretation. Training loss alone would not establish successful adaptation, so the student also discusses generated outputs and held-out loss.",
+      "misconception": "Running all notebook cells automatically demonstrates every learning outcome.",
+      "correction": "Execution is evidence of an activity. Students must interpret results, justify choices and identify limitations.",
+      "question": "Which evidence is needed to support a parameter-efficient tuning claim?",
+      "answer": "The trainable-parameter count, frozen-base check, training process and a before-and-after comparison on held-out data, with honest interpretation of the result."
+    },
+    {
+      "title": "A convincing comparison",
+      "explanation": "Compare a baseline and a revised system on the same task and sources. Change one major factor when you want to identify its effect. For example, compare a question answered without supplied evidence against the same question answered with a retrieved passage. Retain a held-out set and include missing-information cases. A correct refusal or clarification can be a success when the source cannot answer. Record unsuccessful changes; they explain why the final design looks as it does. Results from a small classroom corpus should not be presented as a general benchmark. For generated media, use a rubric for prompt alignment, visible errors and appropriateness rather than relying only on an attractive example.",
+      "example": "An invented four-case comparison includes two answerable questions, one outdated-source question and one unsupported question. The revised assistant answers the first two and handles the last two with an explanation. The baseline invents answers to both unsupported cases. Report the case-level outcomes rather than hiding them behind one average. A different corpus could change the result.",
+      "misconception": "An abstaining system is always worse than one that answers every question.",
+      "correction": "Whether abstention is correct depends on available evidence and the task. Unsupported certainty should not count as success.",
+      "question": "Why keep a case-level table alongside the overall score?",
+      "answer": "It exposes which behaviours improved or failed and lets a reviewer inspect the evidence behind the aggregate."
+    },
+    {
+      "title": "A clear demonstration and reflection",
+      "explanation": "A useful demonstration begins with the user need, shows a normal task and then exposes a meaningful limitation. Keep a saved result as an outage fallback, but identify it as recorded evidence. Explain which steps actually ran live. Present sources and settings so another student can reproduce the small experiment. Reflection should name a specific failure, its likely cause and a justified next step. Sometimes the best next step is better data, a clearer prompt, a different interface or human review rather than more training. Students should also disclose AI assistance in their submitted work according to institutional policy. The class discussion should test understanding by asking why a choice was made and what evidence could change it.",
+      "example": "In five minutes, a student states the question-answering task, shows one source-backed response and one missing-source response, explains a failed tuning attempt and ends with a targeted improvement. A peer asks how retrieval differs from fine-tuning. The student points to the retrieved context and the separately trained adapter, showing that the mechanisms change different things.",
+      "misconception": "A polished demonstration can replace a reproducible experiment.",
+      "correction": "A demonstration communicates the result; reproducible inputs, settings, code and evidence make the claim assessable.",
+      "question": "What is a useful reflection on a failed result?",
+      "answer": "Describe the observed failure, identify a plausible cause supported by evidence and propose a test that distinguishes it from other explanations."
+    }
+  ],
+  "demo": {
+    "title": "A short application defence",
+    "steps": [
+      "State the user and task in one sentence.",
+      "Show the baseline and revised design.",
+      "Run one normal and one failure case.",
+      "Point to evidence for the relevant learning outcomes.",
+      "Answer a peer question and record one improvement."
+    ],
+    "expected": "A reproducible demonstration with specific claims and visible limitations.",
+    "offline": "Use the included deterministic integration notebook and clearly labelled saved training evidence when live tools are unavailable. A saved demonstration does not count as a new model run."
+  },
+  "practice": [
+    {
+      "question": "How does RAG differ from fine-tuning?",
+      "answer": "RAG supplies retrieved information in context at inference time. Fine-tuning updates trainable parameters using examples. Their suitability depends on whether the problem concerns information, behaviour or both."
+    },
+    {
+      "question": "What should an application do when its source cannot answer?",
+      "answer": "State the evidence gap, ask an appropriate clarification or direct the user to a suitable source. Do not invent a supported-sounding answer."
+    },
+    {
+      "question": "Give a concise defence of a simple design.",
+      "answer": "State the task, explain why each component is needed, compare it with a baseline on matched cases and show the limitations that remain."
+    }
+  ],
+  "lab": {
+    "title": "Integrate and explain the evidence",
+    "goal": "Assemble a small application demonstration and a learning-outcome portfolio.",
+    "steps": [
+      "Run the integration notebook.",
+      "Add one new answerable and one unanswerable case.",
+      "Complete the case-level comparison.",
+      "Link the required model-training, multimodal and deployment evidence.",
+      "Write a reflection and rehearse a five-minute explanation."
+    ],
+    "deliverable": "A runnable integration notebook, a case-level evaluation, the five-outcome evidence checklist and a short reflection. This formative activity does not alter the official assessment brief."
+  },
+  "references": [
+    "https://developers.openai.com/api/docs/guides/evaluation-best-practices",
+    "https://learn.microsoft.com/en-us/training/modules/fundamentals-generative-ai/"
+  ],
+  "extension": "Extend one component only after establishing the baseline. Define the expected benefit and an evaluation that could show the extension was unnecessary.",
+  "timing": {
+    "lecture": 120,
+    "lab": 120
+  }
+}

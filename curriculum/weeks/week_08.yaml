@@ -1,0 +1,516 @@
+subtitle: "Adapting pretrained models to your task: supervised and instruction tuning, preference alignment, and parameter-efficient methods such as LoRA"
+mimlos: [1, 3, 4]
+objectives:
+  - "Decide when to use **prompting, retrieval or fine-tuning**, and justify the choice with evaluation evidence."
+  - "Explain **supervised fine-tuning (SFT)** and **instruction tuning**, including chat templates and data preparation."
+  - "Explain preference alignment: **RLHF** (reward model + PPO), **DPO**, and reinforcement learning with verifiable rewards for reasoning models."
+  - "Explain and compute the cost of **parameter-efficient** methods: **LoRA, QLoRA, adapters, prompt tuning**; explain knowledge **distillation**."
+  - "Fine-tune a small LLM for a **domain-specific** task with LoRA using Hugging Face PEFT and TRL."
+  - "Evaluate base vs fine-tuned models on held-out data, recognise **overfitting and catastrophic forgetting**, and use appropriate benchmarks."
+coverage:
+  - full fine-tuning
+  - supervised fine-tuning
+  - instruction tuning
+  - chat template
+  - RLHF
+  - reward model
+  - PPO
+  - DPO
+  - verifiable rewards
+  - GRPO
+  - LoRA
+  - QLoRA
+  - adapters
+  - prompt tuning
+  - distillation
+  - domain
+  - overfitting
+  - catastrophic forgetting
+  - data leakage
+  - held-out
+  - benchmark
+  - PEFT
+  - TRL
+
+slides:
+  - type: title
+    figure: cover
+    notes: |
+      Welcome to week 8, fine-tuning and domain adaptation. Last week we adapted models by changing the input. This week we change the model itself. We will cover the three kinds of fine-tuning in modern practice: supervised fine-tuning and instruction tuning, which teach a model what good outputs look like; preference alignment, which turned base models into assistants like ChatGPT and today trains reasoning models; and parameter-efficient methods such as LoRA, which make fine-tuning affordable on a single free GPU. In the lab students fine-tune a real model and measure whether it beats prompting.
+
+  - type: outcomes
+    notes: |
+      Six outcomes. The first is the decision: when is fine-tuning the right tool at all? The second and third cover the three families of fine-tuning named in the descriptor: supervised and instruction tuning, and reinforcement learning from human feedback, extended with direct preference optimisation and the reinforcement learning with verifiable rewards used for reasoning models. The fourth is parameter-efficient tuning: LoRA, QLoRA, adapters and prompt tuning, plus distillation. The fifth and sixth are practical: fine-tune for a domain and evaluate honestly. This week is the core of MIMLO 3, design, implement and fine-tune with parameter-efficient methods.
+
+  - type: agenda
+    icon: "fa:FaRoute"
+    items:
+      - {title: "Warm-up: prompt, retrieve or fine-tune?", minutes: 5}
+      - {title: "1 · When to fine-tune", minutes: 13}
+      - {title: "2 · Supervised and instruction fine-tuning", minutes: 20}
+      - {title: "3 · Preference alignment: RLHF, DPO, RL for reasoning", minutes: 25}
+      - {title: "4 · Parameter-efficient fine-tuning", minutes: 25}
+      - {title: "5 · Domain adaptation in practice", minutes: 25}
+      - {title: "Lab preview and wrap-up", minutes: 7}
+    notes: |
+      The plan follows the descriptor's week 8: fine-tuning approaches, supervised fine-tuning and RLHF; parameter-efficient tuning with LoRA, adapters and prompt tuning; instruction tuning; domain-specific fine-tuning; evaluation and benchmarks. Section three has the most mathematics, the reward model and DPO losses; take the break after it. Section five shows real results from the lab notebook, run in advance, comparing the base model with prompting against the LoRA-tuned model on a banking task.
+
+  - type: discussion
+    title: "Warm-up"
+    icon: "fa:FaComments"
+    prompt: "A bank wants an assistant that (a) uses its brand voice, (b) knows this week's interest rates, and (c) routes 50,000 messages a day cheaply. Prompt, retrieve or fine-tune, for each?"
+    points:
+      - "Which needs **knowledge** that changes often?"
+      - "Which needs **consistent behaviour or format**?"
+      - "Which is about **cost and latency** at high volume?"
+    notes: |
+      Give three minutes. A good answer: brand voice, a) can often be achieved with a good system prompt and examples, and if that is not consistent enough, fine-tuning on examples of the voice. This week's interest rates, b), change often, so they belong in retrieval or a tool, not in model weights. Routing at high volume, c), is an ideal fine-tuning case: a stable task where a small fine-tuned model can be accurate, fast and cheap. The general lesson: knowledge that changes goes into retrieval; behaviour goes into prompts or weights; cost at scale favours small fine-tuned models.
+
+  # ------------------------------------------------ section 1
+  - type: section
+    number: 1
+    title: "When to fine-tune"
+    question: "Prompting, retrieval or fine-tuning: what problem does each solve?"
+    icon: "fa:FaQuestionCircle"
+    notes: |
+      Section one is about the decision, which is where many real projects go wrong: teams fine-tune to add facts, which retrieval does better, or without an evaluation set, so they cannot tell whether it helped. We compare the three approaches, give a decision process, and list good and bad reasons to fine-tune. About thirteen minutes.
+
+  - type: table
+    title: "Prompting vs. retrieval vs. fine-tuning"
+    header: ["", "Prompting", "Retrieval (RAG)", "Fine-tuning"]
+    rows:
+      - ["Changes", "The input", "The input (adds documents)", "The weights"]
+      - ["Solves", "Task description, format", "Missing or changing knowledge", "Behaviour, style, format, specialised skills"]
+      - ["Data needed", "A few examples", "A document collection", "Hundreds–thousands of labelled examples"]
+      - ["Update cost", "Edit text", "Re-index documents", "Re-train and re-evaluate"]
+      - ["Traceability", "High", "High (citations)", "Low (knowledge hidden in weights)"]
+    callout: "Knowledge that changes belongs in retrieval; behaviour that must be consistent can belong in the weights."
+    notes: |
+      Walk through the rows. Prompting changes the input and solves task specification. Retrieval also changes the input, adding documents, and solves missing or changing knowledge with traceable citations, which is why it is the right answer for this week's interest rates. Fine-tuning changes weights and is best for consistent behaviour, style and format, and specialised skills such as a classification task with many fine distinctions. It needs labelled data and a re-training cycle whenever things change, and knowledge in weights cannot be cited or easily corrected. Microsoft's guidance on customising LLMs, linked in the resources, makes the same distinctions.
+
+  - type: figure
+    title: "A decision process"
+    figure: decision
+    notes: |
+      This flowchart turns the table into a process. Start with a good prompt and an evaluation set from week 7. If quality is sufficient, ship and monitor. If not, diagnose: if errors come from missing or outdated knowledge, add retrieval; if they come from behaviour, format, style or a specialised skill that examples in the prompt cannot teach, or if you need a smaller, cheaper model to reach the same quality, fine-tune. In practice the approaches combine: a fine-tuned model that follows your format well can still use retrieval for facts. The key requirement at every step is the evaluation set; without it you cannot tell whether a change helped.
+
+  - type: compare
+    title: "Good and bad reasons to fine-tune"
+    columns:
+      - head: "Good reasons"
+        icon: "fa:FaCheck"
+        points:
+          - "Consistent output format or style that prompts cannot enforce"
+          - "Specialised classification or extraction with subtle categories"
+          - "Domain language (legal, medical, internal jargon)"
+          - "Cheaper, faster: a small tuned model replaces a large prompted one"
+          - "Reliable tool-calling or a new language"
+      - head: "Bad reasons"
+        icon: "fa:FaTimes"
+        points:
+          - "Adding facts that change (use retrieval)"
+          - "Fixing hallucination in general (fine-tuning on facts can increase it)"
+          - "Only a few dozen examples and no evaluation set"
+          - "'Everyone is doing it'"
+          - "The base model's licence forbids it"
+    notes: |
+      Go through both columns. Among good reasons, cost is often the decisive one: a small model fine-tuned on a narrow task can match a large general model at a fraction of the price and latency, which is exactly the lab scenario. Among bad reasons, the most common misconception is that fine-tuning is the way to teach a model new facts; research shows that fine-tuning on new factual knowledge is slow and can even increase hallucination, while retrieval handles facts transparently. Always check the licence: some models and API terms restrict fine-tuning or the use of outputs.
+
+  # ------------------------------------------------ section 2
+  - type: section
+    number: 2
+    title: "Supervised and instruction fine-tuning"
+    question: "How do we teach a model what good outputs look like?"
+    icon: "fa:FaChalkboardTeacher"
+    notes: |
+      Section two covers supervised fine-tuning, the workhorse of adaptation, and instruction tuning, the step that turns a base model into an assistant. We look at the loss, chat templates and, most importantly, data preparation, where most of the quality comes from. Keep asking students what the model sees during training. About twenty minutes.
+
+  - type: compare
+    title: "Full fine-tuning vs. supervised fine-tuning (SFT)"
+    columns:
+      - head: "Full fine-tuning"
+        icon: "fa:FaWeightHanging"
+        points:
+          - "Update **all** weights on your data"
+          - "Highest flexibility; highest memory and compute"
+          - "A full copy of the model per task"
+          - "Higher risk of forgetting general abilities"
+      - head: "Supervised fine-tuning (SFT)"
+        icon: "fa:FaClipboardList"
+        points:
+          - "Train on (input, desired output) pairs with next-token loss"
+          - "Can update all weights **or** only small adapters (LoRA, section 4)"
+          - "The standard first stage of post-training"
+          - "Loss computed on the **output** tokens only"
+    notes: |
+      Clarify terms, because they are used loosely. Full fine-tuning means updating every parameter, which gives maximum flexibility but needs the most memory, as we calculate later, and produces a complete copy of the model for each task. Supervised fine-tuning describes the training signal: pairs of inputs and desired outputs, trained with the same next-token loss as pre-training. SFT can be done with full fine-tuning or with parameter-efficient methods. In practice, the loss is computed only on the output tokens, so the model learns to produce answers rather than to reproduce the questions.
+
+  - type: equation
+    title: "The SFT loss: next-token prediction on the answer"
+    eq: "\\mathcal{L}_{\\mathrm{SFT}}(\\theta) = -\\sum_{(x, y)} \\sum_{t=1}^{|y|} \\log p_\\theta\\left(y_t \\mid x, y_{<t}\\right)"
+    read_as:
+      - "For each training pair, maximise the likelihood of the desired response y given the prompt x."
+      - "Prompt tokens are **masked** out of the loss; the model still reads them as context."
+      - "Same objective as pre-training (week 1), applied to curated examples."
+    terms:
+      - ["x", "prompt (instruction + input)"]
+      - ["y", "desired response"]
+      - ["y_{<t}", "response tokens so far"]
+    notes: |
+      The SFT loss is the negative log-likelihood of the response tokens given the prompt and the earlier response tokens, which is exactly maximum likelihood from week 1, but on curated pairs instead of raw web text. The prompt tokens are fed to the model but excluded from the loss by masking their labels, so the model is not trained to generate questions. In the TRL library used in the lab, providing the data as prompt and completion pairs does this masking automatically. Ask students: why would training on the prompt tokens be harmful? It wastes capacity learning to predict user text and can make the model continue questions rather than answer them.
+
+  - type: bullets
+    title: "Instruction tuning: from base model to assistant"
+    icon: "fa:FaCommentDots"
+    bullets:
+      - "Fine-tune on many tasks phrased as instructions with good responses (FLAN, 2021; InstructGPT SFT stage, 2022)."
+      - "The model learns to **follow instructions in general**, including unseen tasks."
+      - "**Chat templates** wrap messages in special tokens; you must use the same template at training and inference."
+      - "**Quality beats quantity**: LIMA (2023) got strong results from 1,000 carefully curated examples."
+    notes: |
+      Instruction tuning is SFT on a broad mixture of tasks written as instructions, such as summarise this, translate that, answer this question. Google's FLAN work in 2021 showed that this makes models better at following instructions for tasks they never saw; OpenAI's InstructGPT used it as the first stage of post-training. Chat models also learn a chat template: special tokens that mark system, user and assistant turns. Mismatched templates between training and inference are a common bug. The LIMA paper showed that a thousand high-quality examples can be enough for good assistant behaviour, supporting the idea that post-training mainly shapes behaviour.
+
+  - type: code
+    title: "What a chat template produces (Qwen family)"
+    code: |
+      messages = [
+          {"role": "system", "content": "You classify banking messages."},
+          {"role": "user", "content": "I lost my card!"},
+          {"role": "assistant", "content": "lost_or_stolen_card"},
+      ]
+      print(tok.apply_chat_template(messages, tokenize=False))
+
+      # <|im_start|>system
+      # You classify banking messages.<|im_end|>
+      # <|im_start|>user
+      # I lost my card!<|im_end|>
+      # <|im_start|>assistant
+      # lost_or_stolen_card<|im_end|>
+    bullets:
+      - "Special tokens mark roles and turn ends."
+      - "Each model family has its own template; the tokenizer stores it."
+      - "SFT data should be converted with the **model's own** template."
+    notes: |
+      Show what the model actually sees. The apply chat template method turns a list of messages into a single string with the model's special tokens; this example is the format used by the Qwen family. Other families use different tokens. During fine-tuning the training data must be formatted with the same template the model will see at inference, which libraries such as TRL do automatically when the data are given as messages. If you format data by hand with the wrong tokens, the fine-tuned model will behave strangely. Students print their own template in the lab.
+
+  - type: cards
+    title: "Data preparation: where most of the quality comes from"
+    cards:
+      - {icon: "fa:FaGem", head: "Quality", text: "Correct, consistent labels and exemplary responses; review a sample by hand."}
+      - {icon: "fa:FaRandom", head: "Diversity", text: "Cover the real input distribution: phrasings, lengths, edge cases, languages."}
+      - {icon: "fa:FaCut", head: "Clean splits", text: "Train / validation / test with no duplicates across them: avoid data leakage."}
+      - {icon: "fa:FaUserSecret", head: "Privacy & rights", text: "Remove personal data; check you have the right to use the data and the base model."}
+      - {icon: "fa:FaBalanceScale", head: "Balance", text: "Watch class imbalance; the model will favour frequent labels."}
+      - {icon: "fa:FaFileAlt", head: "Document", text: "Datasheet: source, size, labelling process, known gaps."}
+    notes: |
+      Emphasise that data preparation determines most of the outcome. Label quality matters more than quantity: a few hundred clean examples usually beat thousands of noisy ones. The data must reflect the real distribution of inputs, including awkward phrasings and edge cases. Splits must be clean: near-duplicate messages in both training and test sets inflate the measured accuracy, which is data leakage. Personal data must be removed, because fine-tuned models can memorise it. And the process should be documented in a datasheet, a companion to the model card from week 6.
+
+  # ------------------------------------------------ section 3
+  - type: section
+    number: 3
+    title: "Preference alignment: RLHF, DPO and RL for reasoning"
+    question: "How do we teach a model which of two good-looking answers people prefer?"
+    icon: "fa:FaThumbsUp"
+    notes: |
+      Section three covers the second stage of post-training. SFT teaches from examples of good answers, but for many tasks it is easier for people to compare two answers than to write the ideal one. Preference alignment learns from such comparisons. We cover reinforcement learning from human feedback as used for InstructGPT, direct preference optimisation which simplified it, AI feedback, and reinforcement learning with verifiable rewards, which produces today's reasoning models. About twenty-five minutes.
+
+  - type: figure
+    title: "Reinforcement learning from human feedback (RLHF)"
+    figure: rlhf
+    notes: |
+      The RLHF pipeline from Ouyang and colleagues' InstructGPT paper, the method behind the first ChatGPT. Step one is supervised fine-tuning on demonstrations. Step two collects comparisons: people see several model answers to the same prompt and rank them. Step three trains a reward model, usually a copy of the language model with a scalar output, to predict those preferences. Step four uses reinforcement learning, specifically proximal policy optimisation, to adjust the language model to produce answers with high reward, while a penalty keeps it close to the SFT model. A striking result: people preferred the outputs of a 1.3-billion-parameter InstructGPT model over those of the 175-billion-parameter GPT-3.
+
+  - type: equation
+    title: "The reward model and the RL objective"
+    eq:
+      - "\\mathcal{L}_{\\mathrm{RM}} = -\\log \\sigma\\left(r_\\phi(x, y_w) - r_\\phi(x, y_l)\\right)"
+      - "\\max_{\\pi_\\theta} \\; \\mathbb{E}_{y \\sim \\pi_\\theta(\\cdot \\mid x)}\\left[r_\\phi(x, y)\\right] - \\beta\\, D_{\\mathrm{KL}}\\left(\\pi_\\theta(\\cdot \\mid x) \\,\\|\\, \\pi_{\\mathrm{ref}}(\\cdot \\mid x)\\right)"
+    read_as:
+      - "Reward model: the preferred answer y_w should score higher than the rejected y_l (a Bradley–Terry comparison model)."
+      - "RL: generate answers that the reward model scores highly…"
+      - "…but stay close to the reference (SFT) model: the **KL penalty** prevents 'reward hacking' and gibberish."
+    terms:
+      - ["y_w, y_l", "preferred (winner) and rejected (loser) answers"]
+      - ["r_φ", "reward model"]
+      - ["π_θ, π_ref", "policy being trained; frozen reference model"]
+      - ["β", "strength of the KL penalty"]
+    panel_h: 2.2
+    notes: |
+      Two equations. The reward model loss says the reward difference between the preferred and rejected answers, passed through a sigmoid, should approach one: the probability that the preferred answer wins. This is the Bradley-Terry model of pairwise comparisons. The RL objective maximises expected reward minus a KL divergence to the reference model, the same KL as in week 2. Without the penalty, the policy finds ways to exploit flaws in the reward model, producing strange text that scores highly, which is called reward hacking. RLHF works but is complex: four models in memory and an unstable RL loop.
+
+  - type: equation
+    title: "Direct Preference Optimisation (DPO)"
+    eq: "\\mathcal{L}_{\\mathrm{DPO}} = -\\log \\sigma\\left(\\beta \\log \\dfrac{\\pi_\\theta(y_w \\mid x)}{\\pi_{\\mathrm{ref}}(y_w \\mid x)} - \\beta \\log \\dfrac{\\pi_\\theta(y_l \\mid x)}{\\pi_{\\mathrm{ref}}(y_l \\mid x)}\\right)"
+    read_as:
+      - "Increase the probability of preferred answers and decrease that of rejected ones, relative to the reference model."
+      - "Mathematically equivalent to RLHF's objective under its assumptions, but with **no reward model and no RL loop**: just a classification-style loss."
+      - "Simple and stable; widely used for open models. Variants: IPO, KTO, ORPO, SimPO."
+    terms:
+      - ["π_θ", "model being trained"]
+      - ["π_ref", "frozen SFT model"]
+      - ["β", "how far from the reference the model may move"]
+    notes: |
+      Rafailov and colleagues showed in 2023 that the RLHF objective has a closed-form optimal policy, which lets you skip the reward model and the reinforcement learning. The resulting DPO loss looks like the reward model loss, but the reward is implicitly defined by the log-ratio of the trained model's probabilities to the reference model's. In words: make preferred answers relatively more likely and rejected answers relatively less likely, without drifting too far from the reference. DPO is much simpler and more stable than PPO-based RLHF and is available in TRL; the lab includes an optional snippet.
+
+  - type: compare
+    title: "Three ways to learn from feedback"
+    columns:
+      - head: "RLHF (PPO)"
+        icon: "fa:FaUsers"
+        points:
+          - "Human preference pairs → reward model → RL"
+          - "Powerful and flexible; complex, unstable, costly"
+          - "InstructGPT, early ChatGPT"
+      - head: "DPO and variants"
+        icon: "fa:FaBalanceScale"
+        points:
+          - "Preference pairs → direct loss, no RL"
+          - "Simple, stable, cheap"
+          - "Common for open-weight chat models"
+      - head: "RL with verifiable rewards"
+        icon: "fa:FaCheckDouble"
+        points:
+          - "Reward = automatic check (maths answer, unit tests)"
+          - "GRPO: compare a group of sampled answers to each other"
+          - "Trains reasoning models (DeepSeek-R1, 2025)"
+    notes: |
+      Summarise the landscape. RLHF with PPO is the original, most flexible and most complex. DPO and its many variants are the practical default for preference tuning of open models. The newest branch is reinforcement learning with verifiable rewards: for maths problems or code, correctness can be checked automatically, so no human preferences or learned reward model are needed. DeepSeek's group relative policy optimisation, GRPO, samples several answers per problem and rewards those better than the group average. DeepSeek-R1 showed that long step-by-step reasoning emerges from this training, which is how the reasoning models of week 6 are made.
+
+  - type: bullets
+    title: "AI feedback, and what can go wrong"
+    icon: "fa:FaExclamationTriangle"
+    bullets:
+      - "**RLAIF / Constitutional AI** (Anthropic, 2022): a model critiques and ranks answers against written principles; scales feedback cheaply."
+      - "**Reward hacking**: the policy exploits reward-model flaws (verbosity, flattery, confident tone)."
+      - "**Sycophancy**: preference training can reward agreeing with the user (week 7)."
+      - "**Whose preferences?** Raters' demographics and guidelines shape the model's values."
+    notes: |
+      Human preference data is expensive, so AI feedback is now common: in Constitutional AI, a model critiques and revises answers according to a written set of principles and generates preference labels, with humans writing the principles rather than labelling every example. Preference training has characteristic failures. Reward hacking exploits imperfections in the reward, for example making answers longer because raters tended to prefer detail. Sycophancy, agreeing with the user, is partly a product of preference training. And the question of whose preferences and values are encoded is a real ethical issue, linking to the responsible-AI lens later.
+
+  - type: quiz
+    question: "What is the main practical advantage of DPO over PPO-based RLHF?"
+    options:
+      - "It needs no preference data"
+      - "It removes the separate reward model and RL loop, making training simpler and more stable"
+      - "It always produces a better model"
+      - "It works only for image models"
+    answer: 1
+    notes: |
+      Answer: B. DPO still needs preference pairs, so A is wrong, but it turns alignment into a direct supervised-style loss, removing the reward model and the unstable reinforcement learning loop. C overstates: results depend on data and settings, and PPO can still outperform in some studies. D is simply wrong. Follow-up question: when would you use reinforcement learning with verifiable rewards instead? When correctness can be checked automatically, such as maths answers or code with unit tests.
+
+  # ------------------------------------------------ section 4
+  - type: section
+    number: 4
+    title: "Parameter-efficient fine-tuning (PEFT)"
+    question: "How do we fine-tune billions of parameters on a free GPU?"
+    icon: "fa:FaCompressArrowsAlt"
+    notes: |
+      Welcome back. Section four is about making fine-tuning affordable. Updating every weight of a multi-billion-parameter model needs data-centre hardware. Parameter-efficient methods freeze the original weights and train a tiny number of new parameters. We focus on LoRA, which students use in the lab, and QLoRA, then compare other methods, estimate memory, and cover knowledge distillation.
+
+  - type: figure
+    title: "LoRA: learn a low-rank update"
+    figure: lora
+    notes: |
+      Low-rank adaptation, LoRA, by Hu and colleagues in 2021, rests on the observation that the change needed to adapt a large model to a task has low intrinsic rank. Instead of learning a full update to a weight matrix W, we learn two thin matrices, B and A, whose product is the update. Only A and B are trained; W stays frozen. B is initialised to zero, so at the start the model is exactly the pretrained model. For a four-thousand by four-thousand matrix with rank sixteen, the adapter has about 131 thousand weights instead of 16.8 million, under one percent.
+
+  - type: equation
+    title: "LoRA in equations"
+    eq:
+      - "h = W x + \\frac{\\alpha}{r} B A x, \\qquad B \\in \\mathbb{R}^{d \\times r},\\; A \\in \\mathbb{R}^{r \\times k},\\; r \\ll \\min(d, k)"
+      - "\\#\\mathrm{params}: \\; r(d + k) \\;\\; \\mathrm{vs.} \\;\\; d \\cdot k"
+    read_as:
+      - "The adapted layer adds a low-rank path to the frozen one; α/r scales its contribution."
+      - "Worked example: d = k = 4096, r = 16 → 16 × 8192 = 131,072 vs 16,777,216 (0.78%)."
+      - "After training, **merge** BA into W for zero extra inference cost, or keep adapters separate and swap them per task."
+    terms:
+      - ["r", "rank, typically 4–64"]
+      - ["α", "scaling factor, often 2r"]
+      - ["target modules", "which layers get adapters, e.g. q, k, v, o projections"]
+    panel_h: 2.0
+    notes: |
+      Go through the worked example on the board: rank sixteen times the sum of the two dimensions gives 131,072 trainable parameters, compared with nearly 16.8 million in the frozen matrix. The hyperparameters students set in the lab are the rank, the scaling alpha, often twice the rank, dropout, and the target modules, the layers that receive adapters, commonly the attention projections and sometimes the MLP layers. Two deployment options follow. You can merge the product BA into W after training, so inference costs nothing extra, or keep the adapter separate, a few megabytes, and swap adapters per task on one shared base model.
+
+  - type: figure
+    title: "How many weights does LoRA train? (the lab model)"
+    figure: param_compare
+    bullets:
+      - "{{LORA_PARAMS}}"
+      - "Fewer trainable weights → far less optimizer memory and much smaller checkpoints."
+      - "Original paper: 10,000× fewer trainable parameters and 3× less GPU memory than full fine-tuning of GPT-3."
+    stack: true
+    notes: |
+      These numbers come from the lab model, Qwen 2.5 with half a billion parameters, with rank-sixteen adapters on the four attention projections. The bar chart uses a log scale because the difference is several orders of magnitude. The memory saving comes mainly from the optimizer: Adam stores two extra numbers per trainable parameter, so training only adapters removes most of that memory. The LoRA paper reported ten thousand times fewer trainable parameters and three times less GPU memory for GPT-3, with quality comparable to full fine-tuning on the tasks they tested.
+
+  - type: bullets
+    title: "QLoRA: fine-tune on top of a 4-bit model"
+    icon: "fa:FaMicrochip"
+    bullets:
+      - "Store the frozen base model in **4-bit NormalFloat (NF4)**; train LoRA adapters in 16-bit (Dettmers et al., 2023)."
+      - "Double quantisation and paged optimizers save more memory."
+      - "Made fine-tuning a 65 B model possible on a **single 48 GB GPU**, and 7–8 B models on a free Colab T4."
+      - "Small quality cost vs 16-bit LoRA in most tasks; slower per step (de-quantisation)."
+    notes: |
+      QLoRA combines LoRA with quantisation. The frozen base weights are stored in four bits using a data type called NormalFloat, designed for normally distributed weights, and are de-quantised on the fly during the forward pass, while the adapters are trained in sixteen-bit precision. Double quantisation also compresses the quantisation constants, and paged optimizers handle memory spikes. The QLoRA paper fine-tuned a sixty-five-billion-parameter model on a single forty-eight-gigabyte GPU. For students this means that seven- or eight-billion-parameter models can be fine-tuned on a free Colab T4 GPU; the lab includes an optional QLoRA snippet.
+
+  - type: table
+    title: "Parameter-efficient methods compared"
+    header: ["Method", "What is trained", "Pros", "Cons"]
+    rows:
+      - ["LoRA", "Low-rank updates to chosen weight matrices", "Strong quality; mergeable; swappable adapters", "Choose rank and target modules"]
+      - ["QLoRA", "LoRA on a 4-bit frozen base", "Large models on small GPUs", "Slower; small quality cost"]
+      - ["Adapters (Houlsby et al., 2019)", "Small bottleneck layers inserted in each block", "Modular; well studied", "Extra inference latency"]
+      - ["Prompt / prefix tuning", "Learned 'soft prompt' vectors prepended to the input", "Tiny; one model, many tasks", "Weaker on smaller models; less interpretable"]
+      - ["Full fine-tuning", "All weights", "Maximum flexibility", "Memory, cost, one full copy per task"]
+    notes: |
+      The descriptor names LoRA, adapters and prompt tuning. Adapters, from Houlsby and colleagues in 2019, insert small bottleneck networks into each transformer block; they are modular but add a little inference latency because they cannot be merged. Prompt tuning and prefix tuning learn continuous vectors that are prepended to the input or to every layer's keys and values, like a learned prompt in embedding space; they are extremely small but work best on large models. LoRA has become the default because it combines quality, mergeability and simplicity; all are implemented in Hugging Face's PEFT library.
+
+  - type: table
+    title: "Rough GPU memory to fine-tune a 7–8 B model"
+    header: ["Approach", "Weights", "Gradients + optimizer", "Rough total", "Hardware"]
+    rows:
+      - ["Full fine-tuning (16-bit, Adam)", "≈ 15 GB", "≈ 60–90 GB", "≈ 100+ GB", "Multiple data-centre GPUs"]
+      - ["LoRA (16-bit base)", "≈ 15 GB", "< 1 GB", "≈ 18–24 GB", "One 24 GB GPU"]
+      - ["QLoRA (4-bit base)", "≈ 4–5 GB", "< 1 GB", "≈ 7–12 GB", "Colab T4 (16 GB)"]
+    callout: "Rules of thumb only: activations depend on sequence length and batch size. Measure on your own setup."
+    notes: |
+      These are order-of-magnitude estimates students can reproduce. Sixteen-bit weights need two bytes per parameter, so about fifteen gigabytes for a seven-to-eight-billion-parameter model. Full fine-tuning with Adam in mixed precision needs roughly sixteen bytes per parameter in total for weights, gradients, master weights and optimizer states, well over a hundred gigabytes. LoRA keeps the base frozen, so gradients and optimizer states exist only for the tiny adapters. QLoRA shrinks the base to about half a byte per parameter. Activations add memory depending on sequence length and batch size, so always measure.
+
+  - type: bullets
+    title: "Knowledge distillation: big teacher, small student"
+    icon: "fa:FaChild"
+    bullets:
+      - "Train a small **student** to imitate a large **teacher**: match its output probabilities (soft labels) or fine-tune on its generated answers."
+      - "Produces fast, cheap models that keep much of the teacher's quality on the target task."
+      - "Many small open models are distilled from larger ones (e.g. DeepSeek-R1 distilled into small Qwen and Llama models)."
+      - "Check terms: some API providers forbid using outputs to train competing models."
+    notes: |
+      Distillation, from Hinton and colleagues in 2015, trains a small student model to reproduce a large teacher's behaviour, either by matching its full output distributions, which carry more information than hard labels, or, for LLMs, by fine-tuning on answers generated by the teacher, sometimes called synthetic data. It is a key reason small models improved so fast. DeepSeek released versions of R1 distilled into small Qwen and Llama models. Two cautions: distillation inherits the teacher's errors and biases, and many commercial API terms prohibit using outputs to develop competing models.
+
+  # ------------------------------------------------ section 5
+  - type: section
+    number: 5
+    title: "Domain adaptation in practice"
+    question: "How do we fine-tune for a real domain and prove it worked?"
+    icon: "fa:FaBriefcase"
+    notes: |
+      The final section puts everything together for a domain-specific task: a workflow, the common pitfalls, real results from the lab notebook run on a banking customer-support task, evaluation and benchmarks, examples of domain models, and the responsible-AI issues specific to fine-tuning. The real results from the lab anchor the whole section, so leave time for questions on them. About twenty-five minutes.
+
+  - type: flow
+    title: "A domain fine-tuning workflow"
+    steps:
+      - {label: "Define task & metric", sub: "Inputs, outputs, success criteria; held-out test set first"}
+      - {label: "Prepare data", sub: "Clean, label, split, format with the chat template"}
+      - {label: "Baseline", sub: "Best prompting result on the same test set"}
+      - {label: "LoRA SFT", sub: "Small learning rate, few epochs, validation loss", highlight: true}
+      - {label: "Evaluate & decide", sub: "Task metric, general-ability check, cost; iterate or deploy"}
+    notes: |
+      This workflow is what the project expects when a group fine-tunes. Create the held-out test set first and never train on it. Prepare and format data carefully. Establish the best prompting baseline on the same test set, because fine-tuning is only justified if it beats that baseline by a meaningful margin. Train with LoRA using conservative settings and watch the validation loss. Evaluate the task metric, check that general abilities have not collapsed, and compare cost and latency. Then decide whether to iterate, deploy or go back to prompting and retrieval.
+
+  - type: cards
+    title: "Common pitfalls"
+    cards:
+      - {icon: "fa:FaChartLine", head: "Overfitting", text: "Training loss falls, validation loss rises: fewer epochs, lower rank or learning rate, more data."}
+      - {icon: "fa:FaEraser", head: "Catastrophic forgetting", text: "The model loses general abilities; mix in general data, keep adapters separable, test general skills."}
+      - {icon: "fa:FaTint", head: "Data leakage", text: "Test examples (or near-duplicates) in training data inflate results."}
+      - {icon: "fa:FaCode", head: "Template mismatch", text: "Different chat format at training and inference: strange outputs."}
+      - {icon: "fa:FaTachometerAlt", head: "Learning rate", text: "Too high destroys the base model; LoRA typically uses 1e-4 to 3e-4."}
+      - {icon: "fa:FaVial", head: "Weak evaluation", text: "Judging by a few hand-picked examples or by training loss alone."}
+    notes: |
+      Each pitfall is common in student projects. Overfitting is visible when validation loss rises while training loss falls. Catastrophic forgetting means the model loses abilities it had before; we demonstrate it in the lab by asking the banking model a general-knowledge question, and show that switching off the LoRA adapter restores the base behaviour. Data leakage is the most damaging because it produces impressive but false results. Chat-template mismatch produces odd outputs. Learning rates that are fine for LoRA can destroy a model in full fine-tuning. And evaluation must use the held-out set, not examples or losses.
+
+  - type: figure
+    title: "Real results: prompting vs. LoRA fine-tuning (Banking77, 10 intents)"
+    figure: results_bar
+    bullets:
+      - "{{RESULTS_SUMMARY}}"
+      - "Same base model (Qwen2.5-0.5B-Instruct), same held-out test messages, greedy decoding."
+      - "The bar to beat is the **best prompt** (few-shot), not zero-shot: fine-tuning must earn its cost."
+    stack: true
+    notes: |
+      These are real results from the lab notebook, run in advance on the lecture machine. The task is routing real banking customer messages to ten intents from the public Banking77 dataset. With a zero-shot prompt the base model gets about half the messages right and sometimes answers with no valid label. Ten examples in the prompt, one per intent, lift it to the mid-eighties: few-shot prompting is a strong, cheap baseline, and it is the bar fine-tuning has to beat. LoRA fine-tuning on about a thousand examples reaches the high nineties with no invalid outputs. With two hundred test messages the margin of error is about five points at eighty-five per cent, so the gain is real. Ask the class whether twelve points are worth it: for a high-volume routing system, yes, because every call also drops ten examples from the prompt, which makes it cheaper and faster. That is the situation where fine-tuning is justified: a stable task, subtle categories, plenty of examples and a need for cheap, fast inference.
+
+  - type: figure
+    title: "Real training curve"
+    figure: loss_curve
+    bullets:
+      - "Loss on the answer tokens drops quickly; validation loss follows, with no sign of overfitting after one epoch."
+      - "The adapter is a few MB, versus about 2 GB for the full fp32 model: {{ADAPTER_SIZE}}"
+    stack: true
+    notes: |
+      The training curve from the same run. The loss, computed only on the answer tokens, falls within the first few dozen steps as the model learns the output format, and then more slowly as it learns the decision boundaries. The validation loss tracks it without rising, so one epoch did not overfit. The size comparison makes the practical point: the saved adapter is a few megabytes, so many adapters can be stored and swapped on one base model, and rolling back a bad fine-tune means removing a small file.
+
+  - type: table
+    title: "Evaluating a fine-tuned model"
+    header: ["What to check", "How"]
+    rows:
+      - ["Task performance", "Held-out test set: accuracy / F1 / exact match; compare with the prompting baseline; margins of error"]
+      - ["General capabilities", "A small regression suite of general prompts or a benchmark subset (e.g. MMLU questions)"]
+      - ["Safety", "Refusal and harmful-content tests before and after tuning"]
+      - ["Robustness", "Paraphrases, typos, new time periods or channels (distribution shift)"]
+      - ["Cost and latency", "Tokens per request, seconds per request, hardware"]
+      - ["Human review", "Domain experts rate a sample with a rubric"]
+    notes: |
+      Evaluation after fine-tuning must go beyond the task metric. Compare with the prompting baseline on the same test set, with margins of error from week 7. Check that general capabilities have not regressed. Re-run safety tests, because fine-tuning can weaken safety behaviour, as the next slides show. Test robustness to paraphrases and to data from a different period. Measure cost and latency, since they are often the reason for fine-tuning. For high-stakes domains, add expert review. Benchmarks are useful for the general-ability check, but the held-out domain test set is what decides.
+
+  - type: bullets
+    title: "Domain-specific models: build, adapt or retrieve?"
+    icon: "fa:FaIndustry"
+    bullets:
+      - "**Trained from scratch or heavily**: BloombergGPT (finance, 50 B, 2023) mixed financial and general data."
+      - "**Adapted general models**: medical and legal assistants built by fine-tuning strong general models."
+      - "Trend: general frontier models plus retrieval often **match or beat** older domain-specific models; fine-tune for format, cost and specialised skills."
+      - "Domain data is usually **sensitive**: privacy, consent and governance come first."
+    notes: |
+      The descriptor mentions domain-specific fine-tuning, and the business module mentions domain models such as BloombergGPT. BloombergGPT, released in 2023, was a fifty-billion-parameter model trained on a mix of financial and general data and did well on financial tasks at the time. Since then, strong general models combined with retrieval have often matched or exceeded such domain-specific models, so the common practice today is to adapt a general model for format, cost and specialised skills rather than train from scratch. Domain data, in health, finance or law, is typically sensitive, so governance and privacy requirements shape what is possible.
+
+  - type: bullets
+    title: "Responsible AI lens: fine-tuning"
+    icon: "fa:FaBalanceScale"
+    bullets:
+      - "**Safety can erode**: fine-tuning aligned models, even on benign data, can weaken refusals (Qi et al., 2023); re-test safety."
+      - "**Memorisation**: fine-tuned models can reproduce training records; remove personal data, test for leakage."
+      - "**Bias amplification**: skewed labels teach skewed decisions; audit performance by group."
+      - "**Licences and terms**: base-model licences and API terms may restrict fine-tuning or use of outputs."
+      - "**Documentation**: publish a model card for your adapter: data, evaluation, limits."
+    notes: |
+      Fine-tuning creates a new model with new responsibilities. Qi and colleagues showed in 2023 that fine-tuning safety-aligned models, even on harmless-looking data, can substantially weaken their refusal behaviour, so safety evaluation must be repeated after fine-tuning. Models memorise training examples, which matters for personal data. Biased labels produce biased decisions, so evaluate performance across relevant groups. Licences and API terms may restrict fine-tuning or the use of outputs. And documentation, a model card for the adapter describing data, evaluation and limitations, is both good practice and increasingly a regulatory expectation.
+
+  - type: lab
+    title: "Lab 8: LoRA fine-tuning for a banking domain task"
+    steps:
+      - "Prepare **Banking77** (10 intents) as prompt–completion chat data; keep a held-out test set."
+      - "Measure **zero-shot and few-shot** prompting baselines on the base model."
+      - "Configure **LoRA** (r = 16) with PEFT; count trainable parameters."
+      - "Fine-tune with TRL's **SFTTrainer**; plot training and validation loss."
+      - "Compare **base vs fine-tuned** on the same test set; analyse errors with a confusion table."
+      - "Check **forgetting**, switch the adapter off, compare adapter vs model size. Optional: QLoRA, DPO."
+    runtime: "Google Colab T4 GPU (≈ 5–8 min training); CPU only for a short smoke test"
+    deliverable: "Notebook with baseline vs fine-tuned table, loss curve, error analysis and three written answers"
+    notes: |
+      The lab implements the descriptor's tutorial exactly: fine-tune a pre-trained LLM for a domain-specific task, apply parameter-efficient fine-tuning with LoRA and optionally QLoRA, and compare base with fine-tuned performance. The domain is banking customer support, using the public Banking77 dataset under a CC-BY licence. Students must use the held-out test set for all comparisons and interpret the differences with the statistics from week 7. The optional extensions cover QLoRA on a larger model and DPO preference tuning.
+
+  - type: summary
+    points:
+      - "Prompt first; **retrieve** for knowledge; **fine-tune** for behaviour, format, specialised skills or cost."
+      - "**SFT**: next-token loss on curated (prompt, response) pairs, prompt masked; **instruction tuning** makes assistants."
+      - "Use the model's **chat template**; data quality and clean splits decide the outcome."
+      - "**RLHF**: reward model + PPO with a KL penalty; **DPO**: direct preference loss; **RLVR/GRPO**: reasoning models."
+      - "**LoRA**: W + (α/r)BA, < 1% trainable; **QLoRA**: 4-bit base; adapters and prompt tuning are alternatives."
+      - "**Distillation** transfers a teacher's skill to a small student."
+      - "Evaluate on **held-out** data vs the prompting baseline; check forgetting, safety and cost."
+      - "Fine-tuning creates a new model: re-test safety, protect data, respect licences, document."
+    notes: |
+      Recap the eight points. Students should be able to explain when to fine-tune, write the SFT and DPO losses, compute LoRA parameter counts, and describe an honest evaluation. Next week we open the multimodal half of the module: how models connect text with images, audio and video, starting with representation learning and contrastive models such as CLIP, which students met briefly in the diffusion lab's CLIP score. The fine-tuning skills from today apply directly to multimodal models in week 10.
+
+  - type: resources
+    items:
+      - {kind: course, label: "Hugging Face LLM Course: Supervised fine-tuning with TRL and LoRA", note: "Official chapter with notebooks", url: "https://huggingface.co/learn/llm-course/chapter11/1"}
+      - {kind: doc, label: "Hugging Face PEFT documentation", note: "LoRA, QLoRA, adapters, prompt tuning", url: "https://huggingface.co/docs/peft/index"}
+      - {kind: doc, label: "Hugging Face TRL documentation", note: "SFT, DPO, GRPO trainers", url: "https://huggingface.co/docs/trl/index"}
+      - {kind: doc, label: "Hugging Face blog: Illustrating RLHF", note: "Clear walkthrough of the pipeline", url: "https://huggingface.co/blog/rlhf"}
+      - {kind: course, label: "Google ML Crash Course: LLMs (fine-tuning, distillation)", note: "Official concise module", url: "https://developers.google.com/machine-learning/crash-course/llm"}
+      - {kind: paper, label: "Hu et al. (2021) LoRA", note: "Low-rank adaptation", url: "https://arxiv.org/abs/2106.09685"}
+      - {kind: paper, label: "Rafailov et al. (2023) Direct Preference Optimization", note: "DPO", url: "https://arxiv.org/abs/2305.18290"}
+      - {kind: paper, label: "Ouyang et al. (2022) InstructGPT", note: "SFT + RLHF", url: "https://arxiv.org/abs/2203.02155"}
+    notes: |
+      The Hugging Face LLM Course chapter on supervised fine-tuning follows the same TRL and PEFT workflow as the lab. The PEFT and TRL documentation are the references for the code. The Illustrating RLHF blog post explains the pipeline clearly. Google's crash course covers fine-tuning and distillation concisely. The LoRA, DPO and InstructGPT papers are the key primary sources; the QLoRA and DeepSeek-R1 papers are in the teaching notes. Tunstall and colleagues' book, from the descriptor list, covers classic fine-tuning of transformers. All links were checked in September 2026.

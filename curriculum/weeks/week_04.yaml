@@ -1,0 +1,504 @@
+subtitle: "From noise to images: the forward and reverse processes, latent diffusion, guidance, fast samplers and flow matching"
+mimlos: [1, 2, 3, 4]
+objectives:
+  - "Explain which limitations of **GANs and VAEs** diffusion models address, and what they cost."
+  - "Describe the **forward (noising)** process and its closed form, and the learned **reverse (denoising)** process."
+  - "Derive and implement the **noise-prediction** training objective; relate it to the score-based view."
+  - "Describe the core architecture: **U-Net** and **diffusion transformers**, and **latent diffusion** with a VAE and text encoder."
+  - "Use a pretrained pipeline and explain the effect of **steps, samplers, classifier-free guidance, seeds and negative prompts**."
+  - "Explain modern variants (**flow matching**, distillation, editing, video and audio) and evaluate outputs (FID, CLIP score, human preference)."
+coverage:
+  - forward process
+  - noise schedule
+  - reverse process
+  - noise prediction
+  - score
+  - U-Net
+  - diffusion transformer
+  - latent diffusion
+  - text encoder
+  - DDPM
+  - DDIM
+  - classifier-free guidance
+  - negative prompt
+  - seed
+  - flow matching
+  - rectified flow
+  - distill
+  - inpainting
+  - ControlNet
+  - video
+  - audio
+  - FID
+  - CLIP score
+  - human preference
+  - Stable Diffusion
+  - Diffusers
+
+slides:
+  - type: title
+    figure: cover
+    notes: |
+      Welcome to week 4, diffusion models. Almost every image and video generator you have used since 2022 is built on the ideas of today: Stable Diffusion, the image generators in chat assistants, Midjourney-style tools, and video models. The images on this slide were generated for this lecture by Stable Diffusion running on an ordinary laptop. Today we connect three threads: last week's GANs, whose sample quality diffusion matches; week 2's VAEs, whose latent space diffusion runs in; and week 1's probability, because diffusion is trained with a bound on the likelihood. The lab trains a small diffusion model and uses a pretrained one.
+
+  - type: outcomes
+    notes: |
+      Six outcomes. The first sets up the motivation by comparing with the previous two weeks. Outcomes two and three are the theoretical core: the forward process with its closed form, the reverse process, and the remarkably simple training objective of predicting the noise. Outcome four covers the architecture used in practice, particularly latent diffusion, which explains how Stable Diffusion works. Outcome five is hands-on: in the lab students generate images and vary steps, guidance, seeds and negative prompts. Outcome six brings us to 2026: flow matching, few-step distillation, editing, video and audio, and how to evaluate generators. This week touches MIMLOs 1 to 4.
+
+  - type: agenda
+    icon: "fa:FaRoute"
+    items:
+      - {title: "Warm-up: restoring a photo from static", minutes: 5}
+      - {title: "1 · Why diffusion?", minutes: 12}
+      - {title: "2 · Forward and reverse processes", minutes: 33}
+      - {title: "3 · Architecture and latent diffusion", minutes: 17}
+      - {title: "4 · Sampling, guidance and prompts", minutes: 23}
+      - {title: "5 · Variants, evaluation and responsible use", minutes: 22}
+      - {title: "Lab preview and wrap-up", minutes: 8}
+    notes: |
+      The plan follows the descriptor: motivation and limitations of GANs and VAEs, theoretical foundations, core architecture, the denoising process, variants, evaluation and applications, and a comparison with other generative models. Section two has the equations, so take the break after it. Section four shows real Stable Diffusion outputs generated for these slides, so students can see what each setting does before trying it themselves. If time is short, compress the variants cards; the video and audio models return in week 10.
+
+  - type: discussion
+    title: "Warm-up"
+    icon: "fa:FaTv"
+    prompt: "Could you restore a photo covered in light static? What if you had to start from pure static and remove a little at a time, a thousand times?"
+    points:
+      - "Removing a **little** noise is an easy, local problem. Why?"
+      - "If you always start from different random static, will you get the same photo?"
+      - "What information would help you decide what the final photo should show?"
+    notes: |
+      Two minutes in pairs. The key intuitions: removing a small amount of noise is easy because the image is still mostly visible; starting from different random noise leads to different final images, which is where diversity comes from; and a description, such as 'a lighthouse at sunset', helps decide what to restore, which is text conditioning. This is exactly the structure of today's lecture: a fixed noising process, a learned denoiser applied many times, randomness from the starting noise, and guidance from a prompt.
+
+  # ------------------------------------------------ section 1
+  - type: section
+    number: 1
+    title: "Why diffusion?"
+    question: "What did GANs and VAEs get wrong, and what does diffusion do differently?"
+    icon: "fa:FaQuestionCircle"
+    notes: |
+      Section one motivates diffusion by comparison with the two families we have studied. We summarise their limitations, place the three families on a trade-off triangle of quality, diversity and speed, and state the core idea of diffusion in one slide. Ask students to recall one weakness of VAEs and one of GANs before you show the next slide. About twelve minutes.
+
+  - type: table
+    title: "Limitations of VAEs and GANs that diffusion addresses"
+    header: ["", "VAE (week 2)", "GAN (week 3)", "Diffusion (today)"]
+    rows:
+      - ["Sample quality", "Blurry", "Sharp", "Sharp, highly detailed"]
+      - ["Coverage / diversity", "Good", "Mode collapse risk", "Good (likelihood-based)"]
+      - ["Training", "Stable", "Unstable game", "Stable: a simple regression loss"]
+      - ["Conditioning on text", "Possible, weak", "Possible, hard to scale", "Excellent (guidance)"]
+      - ["Sampling speed", "One pass", "One pass", "Many passes (10–1000), now reduced"]
+    notes: |
+      The table summarises why diffusion won the image generation race around 2021 to 2022. VAEs are stable and cover the data but blur; GANs are sharp but unstable and can drop modes. Diffusion models are trained with a plain mean-squared-error loss, so training is as stable as ordinary regression; they are likelihood-based, so they cover the data; and they produce very detailed images that can be steered by text. The price is in the last row: sampling needs many network evaluations. A large part of research since 2022 has reduced that cost, which we cover in sections four and five.
+
+  - type: figure
+    title: "The generative trilemma: quality, diversity, speed"
+    figure: trilemma
+    bullets:
+      - "Each family historically gave up one corner."
+      - "Diffusion: quality **and** coverage, but slow."
+      - "Distillation and flow matching pull diffusion towards the fast corner (1–4 steps)."
+      - "Use this triangle to justify model choices in your project."
+    figure_width: 6.6
+    notes: |
+      This triangle, sometimes called the generative learning trilemma, is a useful mental model. GANs sit near high quality and fast sampling but can lack diversity. VAEs are fast and cover the data but lack quality. Diffusion models achieve quality and coverage but are slow. The arrow shows the direction of recent research: distilled diffusion models and flow-matching models generate in one to four steps while keeping most of the quality. In the project, students should justify their choice of model family using exactly these three properties plus cost and controllability.
+
+  - type: bullets
+    title: "The core idea in one slide"
+    icon: "fa:FaLightbulb"
+    bullets:
+      - "**Forward process (fixed):** add a little Gaussian noise, many times, until the image is pure noise. No learning."
+      - "**Reverse process (learned):** train a network to remove a little noise at a time."
+      - "Each reverse step is an easy **denoising** problem; chaining many easy steps solves a hard one."
+      - "**Generate:** start from pure noise and apply the learned reverse step repeatedly."
+      - "Randomness in the starting noise gives **diversity**; a text prompt gives **control**."
+    callout: "Diffusion turns generation, a hard problem, into many small denoising problems, each of them an ordinary supervised regression."
+    notes: |
+      State the idea plainly before any equations. We destroy structure gradually with a fixed noising process that has no parameters. We then learn to undo one small step of noising. Because each step removes only a little noise, the network's job at each step is an easy local problem, and training is plain supervised regression. Generation chains these small steps together from pure noise. This decomposition is why diffusion trains stably. The idea goes back to Sohl-Dickstein and colleagues in 2015; the 2020 DDPM paper by Ho, Jain and Abbeel made it work well.
+
+  # ------------------------------------------------ section 2
+  - type: section
+    number: 2
+    title: "Forward and reverse processes"
+    question: "What exactly is added, what exactly is learned?"
+    icon: "fa:FaExchangeAlt"
+    notes: |
+      Section two gives the theoretical foundations. We define the forward process and its very useful closed form, look at real images being noised and at noise schedules, define the reverse process, and derive the training objective that predicts the added noise. We then connect this to the score-based view, show the training and sampling code, and see real results from small diffusion models trained for these slides. This is the core exam material; allow about thirty minutes.
+
+  - type: equation
+    title: "The forward (noising) process"
+    eq:
+      - "q(x_t \\mid x_{t-1}) = \\mathcal{N}\\left(\\sqrt{1 - \\beta_t}\\, x_{t-1},\\; \\beta_t I\\right)"
+      - "q(x_t \\mid x_0) = \\mathcal{N}\\left(\\sqrt{\\bar{\\alpha}_t}\\, x_0,\\; (1 - \\bar{\\alpha}_t) I\\right), \\quad \\bar{\\alpha}_t = \\prod_{s=1}^{t}(1 - \\beta_s)"
+    read_as:
+      - "Each step shrinks the image slightly and adds a little Gaussian noise; β_t is small (0.0001 to 0.02)."
+      - "Closed form: jump straight to any step, x_t = √ᾱ_t · x_0 + √(1 − ᾱ_t) · ε. No need to simulate t steps."
+      - "After T = 1000 steps ᾱ_T ≈ 0: the image is indistinguishable from pure noise N(0, I)."
+    terms:
+      - ["x₀", "clean image; x_t noisy image at step t"]
+      - ["β_t", "noise added at step t (the schedule)"]
+      - ["ᾱ_t", "fraction of original signal variance left"]
+      - ["ε", "standard Gaussian noise"]
+    panel_h: 2.1
+    notes: |
+      Define the forward process as a Markov chain: each step multiplies the current image by the square root of one minus beta and adds Gaussian noise with variance beta. The scaling keeps the overall variance constant, which is why it is called variance-preserving. Because Gaussians compose, we can jump to any step directly, and the reparameterised form, x t equals root alpha-bar times x nought plus root one minus alpha-bar times epsilon, is the one we implement. Point out the link to week 2: this is exactly the reparameterisation trick. After a thousand steps essentially no signal remains.
+
+  - type: figure
+    title: "The forward process on real digits"
+    figure: forward_mnist
+    caption: "Real MNIST digits noised with the DDPM linear schedule (T = 1000). ᾱ shows the fraction of signal variance remaining."
+    notes: |
+      Three real digits at increasing timesteps. At t equals fifty the digit is clearly visible; by five hundred it is barely perceptible; by nine hundred and ninety-nine only noise remains. Ask students: if you were the network and saw the image at t equals seven hundred and fifty, could you predict exactly which noise was added? Not exactly, but you could make a reasonable guess of which digit shape is underneath, and that partial information is what the model learns to exploit. Note that most information is destroyed in the middle timesteps, which motivates better schedules on the next slide.
+
+  - type: figure
+    title: "Noise schedules decide how fast information is destroyed"
+    figure: schedules
+    bullets:
+      - "Linear β (DDPM) destroys information quickly: many late steps are almost pure noise."
+      - "The cosine schedule (Nichol & Dhariwal, 2021) removes signal more evenly, improving quality."
+      - "The **signal-to-noise ratio** (right) is what really matters; modern models choose or learn it."
+    stack: true
+    notes: |
+      The schedule is a design choice. With the original linear schedule, alpha-bar falls to near zero well before the last step, so many training steps are spent on almost pure noise. The cosine schedule keeps more signal for longer. The plot on the right shows the signal-to-noise ratio on a log scale, which is the quantity that later work, such as the EDM framework of Karras and colleagues, identified as the natural way to describe schedules. Students do not need to memorise schedules, but should know that the schedule affects both training quality and how many sampling steps are needed.
+
+  - type: equation
+    title: "The reverse (denoising) process is learned"
+    eq:
+      - "p_\\theta(x_{t-1} \\mid x_t) = \\mathcal{N}\\left(\\mu_\\theta(x_t, t),\\; \\sigma_t^2 I\\right)"
+      - "\\mu_\\theta(x_t, t) = \\frac{1}{\\sqrt{\\alpha_t}}\\left(x_t - \\frac{\\beta_t}{\\sqrt{1 - \\bar{\\alpha}_t}}\\, \\epsilon_\\theta(x_t, t)\\right)"
+    read_as:
+      - "For small steps, the reverse of adding Gaussian noise is (approximately) Gaussian too."
+      - "A network ε_θ predicts the noise present in x_t; from it we compute the mean of the less-noisy x_{t−1}."
+      - "One network, shared across all timesteps, is told which step t it is at."
+    terms:
+      - ["ε_θ(x_t, t)", "the network's noise prediction"]
+      - ["α_t", "1 − β_t"]
+      - ["σ_t²", "sampling noise, often β_t"]
+    panel_h: 2.1
+    notes: |
+      The reverse process runs the chain backwards. When each forward step adds only a small amount of noise, the true reverse step is also approximately Gaussian, so we model it as a Gaussian whose mean is produced by a network. DDPM parameterises that mean through a noise-prediction network: given the noisy image and the timestep, it predicts the noise, and the formula converts that prediction into the mean of the slightly cleaner image. The same network is used at every step and receives the timestep as an extra input, usually through a sinusoidal embedding like the positional encodings we meet next week.
+
+  - type: equation
+    title: "Training objective: predict the noise"
+    eq: "\\mathcal{L}_{\\mathrm{simple}}(\\theta) = \\mathbb{E}_{x_0,\\, t,\\, \\epsilon}\\left[\\left\\| \\epsilon - \\epsilon_\\theta\\left(\\sqrt{\\bar{\\alpha}_t}\\, x_0 + \\sqrt{1 - \\bar{\\alpha}_t}\\, \\epsilon,\\; t\\right)\\right\\|^2\\right]"
+    read_as:
+      - "Pick a training image, a random timestep and random noise; make the noisy image in one line; ask the network to predict the noise; use mean squared error."
+      - "This is a simplified, reweighted form of the **ELBO**: a diffusion model is like a deep hierarchical VAE whose encoder (the noising) is fixed."
+      - "Plain regression, no adversary: that is why training is stable."
+    terms:
+      - ["t", "uniform random step in 1…T"]
+      - ["ε", "the noise we added (the target)"]
+      - ["ε_θ", "the network's guess"]
+    notes: |
+      This is the most important equation of the week, and it is remarkably simple. The training loop picks a real image, a random step, and random noise, creates the noisy image with the closed form, and regresses the added noise with mean squared error. Ho and colleagues derived it from the evidence lower bound, the same bound as in week 2, and found that dropping the bound's weighting improved sample quality. So diffusion models are likelihood-based, like VAEs, and can be seen as a very deep hierarchical VAE with a fixed encoder. No discriminator is needed, which is why training is stable.
+
+  - type: code
+    title: "Training and sampling in a few lines"
+    code: |
+      # ---- training step
+      t   = torch.randint(0, T, (batch,))
+      eps = torch.randn_like(x0)
+      xt  = abar[t].sqrt() * x0 + (1 - abar[t]).sqrt() * eps
+      loss = F.mse_loss(model(xt, t), eps)
+
+      # ---- sampling (DDPM ancestral)
+      x = torch.randn(n, 1, 28, 28)
+      for t in reversed(range(T)):
+          e = model(x, t)
+          x = (x - beta[t] / (1 - abar[t]).sqrt() * e) / alpha[t].sqrt()
+          if t > 0:
+              x = x + beta[t].sqrt() * torch.randn_like(x)
+    bullets:
+      - "Training: one random step per image, **not** a loop over all steps."
+      - "Sampling: T network calls, each removing a little noise."
+      - "In the lab you implement both for MNIST."
+    notes: |
+      Show that the maths becomes a handful of lines. Training samples a single random timestep per image, so each training step costs one network evaluation, exactly like supervised learning. Sampling loops over all timesteps from the last to the first, calling the network each time and adding a little fresh noise except at the final step. This asymmetry is important: training is cheap per example, sampling is expensive. With a thousand steps, generating one image costs a thousand network calls, which motivates the faster samplers in section four.
+
+  - type: bullets
+    title: "The score-based view (Song et al., 2021)"
+    icon: "fa:FaCompass"
+    bullets:
+      - "The **score** ∇ₓ log p_t(x) points towards regions of higher data probability at noise level t."
+      - "Predicting noise is equivalent to predicting the score: ε_θ(x_t, t) ≈ −√(1 − ᾱ_t) · ∇ₓ log p_t(x_t)."
+      - "Diffusion can be written as a **stochastic differential equation**; its deterministic twin, the **probability-flow ODE**, gives fast, reproducible samplers (DDIM, DPM-Solver)."
+      - "Same models, two languages: 'denoising diffusion' and 'score-based generative modelling'."
+    notes: |
+      Many papers use a second vocabulary, so students need to recognise it. The score of a distribution is the gradient of the log density with respect to the data; it points uphill towards more likely data. Predicting the noise in a noisy sample turns out to be equivalent, up to a scale factor, to estimating the score of the noised data distribution, a method called denoising score matching. Song and colleagues showed that diffusion is the discretisation of a stochastic differential equation and that an equivalent deterministic ordinary differential equation exists. Deterministic ODE solvers are the basis of the fast samplers used in practice.
+
+  - type: figure
+    title: "A real diffusion model on 2-D data: noise becomes structure"
+    figure: reverse_2d
+    caption: "A small MLP trained with the noise-prediction loss on a 2-D swiss roll (grey). Blue: 2,000 samples during the reverse process."
+    notes: |
+      A real result on data we can see. We trained a tiny three-layer network on points from a two-dimensional swiss roll using exactly the loss on the previous slides, then ran the reverse process from pure Gaussian noise. At the first reverse step the points are a shapeless cloud; as the steps proceed, they are pulled onto the spiral, and at the end they lie on the data. No adversary, no encoder, and the whole distribution is covered, including the thin ends of the spiral that a GAN might drop. Students train this model in the first part of the lab.
+
+  - type: figure
+    title: "A tiny diffusion model on MNIST, trained for this lecture"
+    figure: reverse_mnist
+    bullets:
+      - "Tiny U-Net (under 1 M parameters), a few epochs."
+      - "Structure appears in the middle steps; details are refined at the end."
+      - "The lab trains the same model on a Colab GPU."
+    figure_width: 8.0
+    notes: |
+      These digits come from a very small U-Net trained for a few epochs with the same code as the lab. Reading down the rows, the reverse process starts from noise, coarse shapes emerge around the middle timesteps, and fine strokes are refined at the end. This coarse-to-fine behaviour is typical of diffusion: early reverse steps decide the global layout, late steps add detail. It is also why editing methods such as SDEdit start from a partially noised image: they keep the layout decided by the input and let the model repaint details.
+
+  - type: quiz
+    question: "During DDPM training, what does the network learn to predict?"
+    options:
+      - "The clean image directly from pure noise, in one step"
+      - "The Gaussian noise that was added to create x_t, for a randomly chosen step t"
+      - "The class label of the image"
+      - "The value of the next pixel given the previous pixels"
+    answer: 1
+    notes: |
+      Answer: B. The network receives a noisy image and its timestep and predicts the noise that was mixed in; the loss is mean squared error against the true noise. A is what we would love to do, but it is far too hard in one step, which is exactly why diffusion splits it into many small steps. Some variants do predict the clean image or a velocity, but always at a given noise level, not from pure noise in one shot. C and D describe classifiers and autoregressive models respectively. D is a good distractor because it is how autoregressive image models such as PixelCNN work.
+
+  # ------------------------------------------------ section 3
+  - type: section
+    number: 3
+    title: "Architecture and latent diffusion"
+    question: "What network does the denoising, and how does text get in?"
+    icon: "fa:FaProjectDiagram"
+    notes: |
+      Welcome back. Section three moves from maths to engineering. Which network predicts the noise, U-Net or transformer? Why do practical systems run diffusion in the latent space of an autoencoder, connecting back to week 2? And how does a text prompt influence the denoiser? By the end students should be able to explain the full Stable Diffusion pipeline component by component, which is a common exam question.
+
+  - type: figure
+    title: "Two denoiser architectures: U-Net and diffusion transformer"
+    figure: unet_dit
+    bullets:
+      - "**U-Net**: convolutional encoder–decoder with skip connections and attention layers; output has the same shape as the input."
+      - "**Diffusion transformer (DiT)**: split the latent into patches (tokens) and process them with transformer blocks; scales better with compute."
+      - "Both receive the **timestep** and the **text** at every block."
+    stack: true
+    notes: |
+      The denoiser must map a noisy image to a noise prediction of the same shape. The U-Net, originally from medical image segmentation, is ideal for this: it downsamples to capture global context, upsamples back to full resolution, and uses skip connections to preserve detail; attention layers are inserted at lower resolutions. Stable Diffusion 1 and 2 and SDXL use U-Nets. Peebles and Xie showed in 2022 that a plain transformer over image patches, the diffusion transformer, scales better, and recent models such as Stable Diffusion 3, FLUX and most video generators use transformer backbones. Next week's transformer lecture explains the blocks.
+
+  - type: figure
+    title: "Latent diffusion: the Stable Diffusion pipeline"
+    figure: ldm_pipeline
+    bullets:
+      - "**VAE** (week 2) compresses 512 × 512 × 3 images to 64 × 64 × 4 latents; diffusion runs there."
+      - "**Text encoder** (CLIP or T5, weeks 5–9) turns the prompt into token embeddings."
+      - "The denoiser reads the text through **cross-attention** at every step."
+    stack: true
+    notes: |
+      Walk through the pipeline left to right. The prompt is tokenised and encoded by a pretrained text encoder, CLIP's text transformer in Stable Diffusion 1.5, T5 as well in later models. Generation starts from random noise in the latent space, not in pixel space. The denoiser runs for a number of steps, each time attending to the text embeddings through cross-attention, a mechanism explained next week. The final clean latent is decoded to pixels by the VAE decoder. For scale: Stable Diffusion 1.5 has a U-Net of about 860 million parameters, a 123-million-parameter CLIP text encoder and an 84-million-parameter VAE.
+
+  - type: cards
+    title: "What each component contributes"
+    cards:
+      - {icon: "fa:FaCompressArrowsAlt", head: "Autoencoder (VAE)", text: "Removes imperceptible detail so diffusion works on 48× fewer numbers: affordable training and sampling."}
+      - {icon: "fa:FaFont", head: "Text encoder", text: "Maps words to vectors that capture meaning; its quality limits prompt understanding (e.g. counting, spelling)."}
+      - {icon: "fa:FaBrain", head: "Denoiser", text: "The large network that is trained with the noise-prediction loss on image–caption pairs."}
+      - {icon: "fa:FaClock", head: "Scheduler / sampler", text: "The algorithm that turns noise predictions into steps; swappable without retraining (section 4)."}
+    notes: |
+      Summarise the division of labour. The autoencoder is trained first and frozen; it makes the whole system affordable, which is why latent diffusion made open-source image generation possible on consumer GPUs. The text encoder is usually a frozen pretrained model; weaknesses in prompt following, such as counting objects or rendering text, often trace back to it, which is why newer models use larger text encoders. The denoiser is the part trained on hundreds of millions of image-caption pairs. The scheduler is not a network at all; in the Hugging Face Diffusers library you can swap it with one line, which students do in the lab.
+
+  # ------------------------------------------------ section 4
+  - type: section
+    number: 4
+    title: "Sampling, guidance and prompts"
+    question: "Why do steps, guidance scale, seeds and negative prompts change the picture?"
+    icon: "fa:FaSlidersH"
+    notes: |
+      Section four is practical and visual. Every image generator exposes a few controls: number of steps, sampler, guidance scale, seed and negative prompt. Students will use all of them in the lab and in the project. We explain what each one does in terms of the maths from section two, using real Stable Diffusion outputs generated with a fixed seed so that only one setting changes at a time.
+
+  - type: compare
+    title: "Samplers: from 1000 steps to a handful"
+    columns:
+      - head: "DDPM (ancestral)"
+        icon: "fa:FaWalking"
+        points:
+          - "Stochastic: adds fresh noise each step"
+          - "Needs hundreds to 1000 steps"
+          - "The original algorithm (2020)"
+      - head: "ODE solvers"
+        icon: "fa:FaRunning"
+        points:
+          - "DDIM, DPM-Solver, Euler, Heun"
+          - "Deterministic updates; DDIM can skip selected timesteps"
+          - "20–50 steps; same seed → same image"
+          - "Swap in without retraining"
+      - head: "Distilled models"
+        icon: "fa:FaRocket"
+        points:
+          - "Consistency models, adversarial distillation (SD-Turbo, SDXL-Turbo)"
+          - "1–4 steps"
+          - "Some loss of diversity or detail"
+    notes: |
+      Three groups of samplers. DDPM's ancestral sampler follows a stochastic reverse chain. This lab's DDIM uses deterministic updates over selected timesteps spanning the full schedule; ODE solvers such as DPM-Solver are another route to fewer evaluations. Neither requires retraining the noise predictor. Simply lowering the steps argument in the lab's DDPM function truncates its loop, so use the full DDPM schedule as the baseline and DDIM for timestep skipping. Measure quality and runtime in the actual experiment. Distillation goes further by training a student model for large jumps, giving few-step generation. Consistency models and adversarial diffusion distillation, which connects with last week's GAN discriminator, are examples.
+
+  - type: figure
+    title: "Effect of the number of steps (Stable Diffusion 1.5, same seed)"
+    figure: sd_steps
+    caption: "DPM-Solver++ sampler, guidance 7.5, seed 42. Real outputs generated for this lecture."
+    notes: |
+      Real outputs with everything fixed except the number of steps. With two steps the image is a blurry colour layout, showing that the global composition is decided early. By five steps the scene is recognisable; ten steps add most details; twenty-five steps refine textures. Beyond about twenty-five to thirty steps with a good solver, improvements are small, which is why most tools default to twenty to fifty. Ask students to connect this with the coarse-to-fine MNIST figure. The computation time scales linearly with steps; the timings are in the teaching notes.
+
+  - type: equation
+    title: "Classifier-free guidance (Ho & Salimans, 2022)"
+    eq: "\\hat{\\epsilon} = \\epsilon_\\theta(x_t, \\varnothing) + w \\cdot \\left(\\epsilon_\\theta(x_t, c) - \\epsilon_\\theta(x_t, \\varnothing)\\right)"
+    read_as:
+      - "Train one model both **with** the prompt c and **without** it (drop the prompt ~10% of the time)."
+      - "At sampling, run both and move further in the direction the prompt suggests, scaled by the **guidance scale** w."
+      - "w = 1: plain conditional model; w ≈ 5–8: typical; very large w: over-saturated, less diverse images."
+    terms:
+      - ["c", "text condition (prompt embedding)"]
+      - ["∅", "empty prompt"]
+      - ["w", "guidance scale"]
+    notes: |
+      Classifier-free guidance is the single most important trick behind prompt-following image generation. During training, the prompt is replaced by an empty prompt some of the time, so one network learns both conditional and unconditional noise predictions. At sampling time we compute both and extrapolate from the unconditional prediction towards the conditional one. The difference vector points in the direction that makes the image more like the prompt; multiplying it by w greater than one exaggerates that direction. The cost is two network evaluations per step. It replaced classifier guidance, which needed a separate noise-aware classifier.
+
+  - type: figure
+    title: "Effect of the guidance scale (same seed)"
+    figure: sd_guidance
+    bullets:
+      - "w = 1: follows the prompt weakly; muted, sometimes incoherent."
+      - "w = 3–7.5: good balance of prompt adherence and natural look."
+      - "w = 15: strong adherence but over-saturated colours and harsher contrast."
+      - "Guidance trades **diversity and naturalness** for **prompt adherence**."
+    stack: true
+    notes: |
+      Real outputs with only the guidance scale changing. At one, the model is the plain conditional model and the image often ignores parts of the prompt. Around seven and a half, the default for Stable Diffusion 1.5, the lighthouse, cliff and sunset are all present. At fifteen, colours saturate and contrast becomes harsh, a characteristic artefact of excessive guidance. This is also a diversity trade-off: higher guidance makes different seeds look more alike. Connect to GANs: the truncation trick in BigGAN trades diversity for quality in a similar way.
+
+  - type: figure
+    title: "Seeds and negative prompts"
+    figure: seeds_negative
+    bullets:
+      - "**Seed** = the starting noise. Same seed + same settings = same image; different seeds = variety. Record seeds for reproducibility."
+      - "**Negative prompt**: replaces the empty prompt ∅ in guidance, so sampling moves **away** from it."
+    stack: true
+    notes: |
+      The top row shows four seeds for the same prompt: composition, viewpoint and colours vary, which is the diversity that comes from the starting noise. Always record the seed in experiments, together with the model, sampler, steps and guidance. The bottom row shows a negative prompt. Mechanically, it is simple: in the guidance formula the empty-prompt prediction is replaced by the prediction for the negative prompt, so the image is pushed away from those concepts; here the lamp is removed and the image is cleaner. Negative prompts are useful but blunt: they cannot reliably remove small details.
+
+  # ------------------------------------------------ section 5
+  - type: section
+    number: 5
+    title: "Variants, evaluation and responsible use"
+    question: "What has changed since Stable Diffusion, and how do we judge the results?"
+    icon: "fa:FaStar"
+    notes: |
+      The final section brings us to the current state of the field. Flow matching and rectified flow, used by Stable Diffusion 3 and FLUX; few-step distillation, with a real SD-Turbo example; the many variants for editing, control, video and audio; how to evaluate image generators; a comparison of all the generative families so far; and responsible use, including copyright and memorisation, which are live issues for diffusion models.
+
+  - type: figure
+    title: "Flow matching and rectified flow: straighter paths"
+    figure: flow_paths
+    notes: |
+      Flow matching, introduced by Lipman and colleagues and in rectified flow by Liu and colleagues in 2022, learns a velocity field that transports noise to data along simple paths, usually straight lines between a noise sample and a data sample. Diffusion's variance-preserving paths are curved, as the left panel illustrates. Straighter paths can be followed accurately with fewer and larger steps, which is why rectified-flow models such as Stable Diffusion 3 and FLUX generate high-quality images in fewer steps. Conceptually they are close relatives of diffusion: both learn to turn noise into data gradually with a regression loss.
+
+  - type: equation
+    title: "The flow-matching objective"
+    eq:
+      - "x_t = (1 - t)\\, x_0 + t\\, \\epsilon, \\qquad t \\in [0, 1]"
+      - "\\mathcal{L}_{\\mathrm{FM}} = \\mathbb{E}_{x_0, \\epsilon, t}\\left[\\left\\| v_\\theta(x_t, t) - (\\epsilon - x_0) \\right\\|^2\\right]"
+    read_as:
+      - "Mix data and noise linearly; the network predicts the **velocity** (direction from data to noise)."
+      - "Generate by integrating backwards from noise (t = 1) to data (t = 0) with an ODE solver."
+      - "Still plain regression; conventions differ between papers (some put data at t = 1)."
+    terms:
+      - ["x₀", "data sample"]
+      - ["ε", "noise sample"]
+      - ["v_θ", "predicted velocity"]
+    notes: |
+      The objective is as simple as DDPM's. Mix a data point and a noise sample with a linear interpolation, and train the network to predict the constant velocity of that straight path, the noise minus the data. At sampling time, start from noise and integrate the learned velocity field back to the data with a few ODE steps. Warn students that sign and time conventions vary between papers: some write the data at time one. The important ideas are the linear path, the velocity target and the regression loss. In the lab, the optional extension converts the MNIST model to flow matching with a two-line change.
+
+  - type: figure
+    title: "Few-step generation with a distilled model (SD-Turbo)"
+    figure: sd_turbo
+    bullets:
+      - "SD-Turbo: Stable Diffusion 2.1 distilled with **adversarial diffusion distillation**; guidance off."
+      - "One network call instead of 25 × 2: near real-time on a GPU."
+      - "Costs: lower resolution (512 px), less diversity, weaker prompt control."
+    stack: true
+    notes: |
+      A real result from SD-Turbo, released by Stability AI in 2023. It was distilled from Stable Diffusion 2.1 using adversarial diffusion distillation, which combines a distillation loss with a GAN discriminator, connecting last week and this week. With one step it already produces a coherent image, and four steps add detail. Compare with the twenty-five steps and classifier-free guidance, meaning fifty network calls, used on the previous slides. The timings measured on the lecture machine are in the notes. The costs: fixed resolution, somewhat less diversity, and weaker control through negative prompts, since guidance is disabled.
+
+  - type: cards
+    title: "Beyond text-to-image: diffusion variants"
+    cards:
+      - {icon: "fa:FaEdit", head: "Editing", text: "Image-to-image (SDEdit), inpainting and outpainting: noise part of an image, then denoise with a prompt."}
+      - {icon: "fa:FaDraftingCompass", head: "Control", text: "ControlNet and adapters add edge maps, depth or pose as extra conditions; IP-Adapter uses a reference image."}
+      - {icon: "fa:FaUserTag", head: "Personalisation", text: "DreamBooth and LoRA fine-tune a model on a few images of a subject or style (week 8)."}
+      - {icon: "fa:FaFilm", head: "Video", text: "Spatio-temporal diffusion transformers generate coherent clips (e.g. Sora, Veo families)."}
+      - {icon: "fa:FaMusic", head: "Audio", text: "Latent diffusion over spectrograms or audio latents for music and sound effects."}
+      - {icon: "fa:FaDna", head: "Science", text: "Protein and molecule design, weather and materials: diffusion beyond media."}
+    notes: |
+      Diffusion is a general recipe, so it has spread far beyond text-to-image. Editing methods exploit the coarse-to-fine structure: noise an existing image partly, then denoise with a new prompt; inpainting restricts changes to a mask. ControlNet adds a trainable copy of the encoder that reads structural conditions such as edges, depth maps or human pose. Personalisation methods, including LoRA, which we study in week 8, teach a model a new subject from a handful of images. Video models extend diffusion transformers to space and time; audio models diffuse in spectrogram or codec latent spaces. In science, diffusion designs proteins and forecasts weather. Week 10 revisits video and audio.
+
+  - type: table
+    title: "Evaluating image generators"
+    header: ["Aspect", "Metric", "Notes"]
+    rows:
+      - ["Realism and diversity", "FID (week 3), KID", "Needs thousands of images; depends on feature network"]
+      - ["Prompt alignment", "CLIP score", "Cosine similarity of CLIP image and text embeddings (week 9); rewards keyword matching"]
+      - ["Compositional correctness", "Benchmarks such as GenEval, T2I-CompBench", "Counting, colours, spatial relations; object-detector based"]
+      - ["Human preference", "Pairwise human votes; learned preference models; public arenas", "Closest to real use; costly and subjective; needs a rubric"]
+      - ["Efficiency", "Steps, seconds per image, memory", "Report hardware; matters for deployment (week 11)"]
+    notes: |
+      Evaluation of text-to-image models needs several metrics because they fail in several ways. FID measures realism and diversity against a reference set. CLIP score measures how well the image matches the prompt, using the CLIP model from week 9, but it can be fooled by images containing the right keywords. Compositional benchmarks such as GenEval check whether the image has the right number of objects, colours and positions using object detectors. Human preference studies, including large public arenas, remain the most trusted, but they need careful design. Finally, efficiency is a first-class metric for deployment. The project should report at least one automatic and one human evaluation.
+
+  - type: table
+    title: "Comparing the generative families (weeks 2–4)"
+    header: ["", "VAE", "GAN", "Diffusion", "Flow matching"]
+    rows:
+      - ["Training loss", "ELBO", "Adversarial game", "Noise regression (ELBO-based)", "Velocity regression"]
+      - ["Stability", "High", "Low", "High", "High"]
+      - ["Sample quality", "Blurry", "Sharp", "Very high", "Very high"]
+      - ["Diversity", "Good", "Collapse risk", "Good", "Good"]
+      - ["Sampling cost", "1 pass", "1 pass", "20–50 passes (1–4 distilled)", "Few passes"]
+      - ["Main use in 2026", "Latent compression", "Super-resolution, distillation", "Image, video, audio", "Latest image/video models"]
+    notes: |
+      This table completes the comparison with other generative models required by the descriptor and is a strong revision aid. It also shows how the families work together in practice: the VAE provides the latent space, diffusion or flow matching does the generation, and GAN losses keep decoders sharp and help distil fast samplers. Transformers, next week, supply both the text encoder and, increasingly, the denoiser backbone. Encourage students to use this table to structure an exam answer on choosing a model family.
+
+  - type: bullets
+    title: "Responsible AI lens: diffusion models"
+    icon: "fa:FaBalanceScale"
+    bullets:
+      - "**Training data and copyright:** models trained on billions of scraped image–text pairs; legal disputes over consent and licensing continue in several countries."
+      - "**Memorisation:** researchers extracted near-copies of training images from diffusion models (Carlini et al., 2023), especially duplicated ones."
+      - "**Bias:** prompts such as 'a CEO' or 'a nurse' reproduce stereotypes; audit outputs across groups."
+      - "**Misuse and provenance:** safety filters, watermarks and C2PA credentials (week 10); EU AI Act Art. 50 labelling."
+      - "**Energy:** many steps per image; distillation and smaller models reduce cost."
+    notes: |
+      Each point is a live issue. Copyright: diffusion models were trained on large scraped datasets such as LAION, and courts in several countries are considering claims by artists and image libraries; students should not assume training use is settled law. Memorisation: Carlini and colleagues showed that images duplicated many times in training can be regenerated almost exactly, a privacy and copyright risk. Bias audits of Stable Diffusion found strong occupational and racial stereotypes. Safety filters and provenance tools help, and Article 50 of the EU AI Act requires disclosure of AI-generated images. In the lab, the pipeline's safety checker is discussed rather than removed silently.
+
+  - type: lab
+    title: "Lab 4: train a diffusion model and use Stable Diffusion"
+    steps:
+      - "Implement the **forward process** in closed form and visualise noising."
+      - "Train a DDPM on 2-D data (CPU) and a tiny U-Net DDPM on MNIST (GPU); implement the **sampling loop**."
+      - "Load **Stable Diffusion** with Hugging Face **Diffusers**; generate from a prompt."
+      - "Sweep **steps, guidance scale and seeds**; try **negative prompts**; swap the **scheduler**."
+      - "Compare with **SD-Turbo** (1–4 steps); measure time per image."
+      - "Score images with **CLIP score**; write a short evaluation with one failure case."
+    runtime: "Google Colab T4 GPU (Stable Diffusion needs a GPU; parts 1–2 also run on CPU)"
+    deliverable: "Notebook with trained models, sweep grids, timing and CLIP-score table, and written answers"
+    notes: |
+      The lab has two halves. First, students implement the forward process and the training and sampling loops themselves, on 2-D data where everything is fast, and then on MNIST with a tiny U-Net on the Colab GPU. Second, they use the Hugging Face Diffusers library with Stable Diffusion 1.5 and SD-Turbo, sweeping the controls we discussed and measuring time. They finish with a small evaluation using CLIP score, which previews week 9, and a failure case. Remind students that Stable Diffusion's licence has use restrictions, and that generated images of real people are not permitted in the lab.
+
+  - type: summary
+    points:
+      - "Diffusion adds noise with a **fixed forward process** and learns to **reverse** it step by step."
+      - "Closed form: x_t = √ᾱ_t · x₀ + √(1 − ᾱ_t) · ε; train by **predicting the noise** with MSE (an ELBO-based loss)."
+      - "Equivalent **score-based** view; deterministic ODE samplers (DDIM, DPM-Solver) need 20–50 steps."
+      - "**Latent diffusion**: VAE + text encoder + U-Net/DiT denoiser with cross-attention."
+      - "**Classifier-free guidance** trades diversity for prompt adherence; seeds and negative prompts give control."
+      - "**Flow matching** (straight paths) and **distillation** (1–4 steps) make generation fast."
+      - "Evaluate with FID, CLIP score, compositional benchmarks and human preference."
+      - "Watch copyright, memorisation, bias and provenance."
+    notes: |
+      Recap the eight points. The key equation is the noise-prediction loss with the closed-form forward process; the key system is the latent diffusion pipeline; the key controls are steps, guidance, seed and negative prompt. Next week we open the black box that appears everywhere in today's pipeline: the transformer and its attention mechanism, which powers the text encoder, the diffusion transformer and, in week 6, large language models. Ask students to finish the lab and read Foster chapter 8.
+
+  - type: resources
+    items:
+      - {kind: book, label: "Foster (2023) Generative Deep Learning, 2nd ed., ch. 8 'Diffusion Models'", note: "Core module text", url: "https://www.oreilly.com/library/view/generative-deep-learning/9781098134174/"}
+      - {kind: paper, label: "Ho, Jain & Abbeel (2020) Denoising Diffusion Probabilistic Models", note: "The DDPM paper", url: "https://arxiv.org/abs/2006.11239"}
+      - {kind: course, label: "Hugging Face Diffusion Models Course", note: "Free units with notebooks (Diffusers)", url: "https://huggingface.co/learn/diffusion-course/unit0/1"}
+      - {kind: video, label: "3Blue1Brown / Welch Labs: But how do AI images and videos actually work?", note: "Visual explanation incl. CLIP and guidance", url: "https://www.youtube.com/watch?v=iv-5mZ_9CPY"}
+      - {kind: doc, label: "Lilian Weng: What are diffusion models?", note: "Derivations, samplers, guidance", url: "https://lilianweng.github.io/posts/2021-07-11-diffusion-models/"}
+      - {kind: doc, label: "Jay Alammar: The Illustrated Stable Diffusion", note: "Pipeline explained visually", url: "https://jalammar.github.io/illustrated-stable-diffusion/"}
+      - {kind: course, label: "MIT 6.S184: Flow Matching and Diffusion Models", note: "Lecture notes for flow matching", url: "https://diffusion.csail.mit.edu/"}
+      - {kind: paper, label: "Rombach et al. (2022) Latent Diffusion Models", note: "Stable Diffusion's architecture", url: "https://arxiv.org/abs/2112.10752"}
+    notes: |
+      Foster chapter 8 builds a diffusion model step by step in Keras. The DDPM paper is short and readable after today. The Hugging Face Diffusion Models Course is the best hands-on follow-up and uses the same Diffusers library as the lab. The Welch Labs video on the 3Blue1Brown channel is an excellent visual explanation, including classifier-free guidance. Lilian Weng's post covers the maths in depth; Jay Alammar's illustrated guide explains the pipeline; the MIT course notes are the reference for flow matching. All links were checked in September 2026.

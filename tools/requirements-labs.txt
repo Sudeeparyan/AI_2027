@@ -1,0 +1,27 @@
+# Python packages to execute the lab notebooks locally (Colab installs what it needs in each notebook's first cell).
+# Install PyTorch first for your hardware from https://pytorch.org (CPU or CUDA build).
+transformers>=5.0
+diffusers>=0.40
+accelerate>=1.10
+peft>=0.21
+trl>=1.14
+datasets>=5.0
+sentence-transformers>=6.0
+torchvision
+soundfile
+pandas
+matplotlib
+scikit-learn
+pydantic>=2.0
+openai>=3.0
+fastapi
+uvicorn
+gradio>=6.0
+langchain-core
+langchain-openai
+faiss-cpu
+rank-bm25
+chromadb
+bitsandbytes; platform_system == "Linux"
+ipykernel
+nbclient

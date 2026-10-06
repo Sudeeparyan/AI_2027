@@ -1,0 +1,102 @@
+{
+  "n": 11,
+  "title": "Using and deploying generative models",
+  "outcomes": [
+    "LO3",
+    "LO4",
+    "LO5"
+  ],
+  "overview": "Students distinguish a chat product, a model library and an application endpoint, then run a small local service around a trained model. They compare local and hosted options using task quality, privacy, resources and cost. The aim is a working classroom deployment with known limitations, accompanied by a clear explanation of what a production service would additionally require.",
+  "objectives": [
+    "Run a trained generative model behind a local interface.",
+    "Compare local models and hosted APIs using explicit constraints.",
+    "Record latency, quality and resource assumptions without inventing provider prices."
+  ],
+  "prerequisites": "Bring the previous notebook and a short record of what you tried. Basic Python lists, dictionaries and functions are sufficient for the guided code.",
+  "concepts": [
+    {
+      "title": "Products models and frameworks",
+      "explanation": "A chat product packages a model with an interface and features such as file upload or search. An API exposes functions that software can call. A model library loads or trains model weights, while a serving framework makes inference available through a service. These layers can come from different organisations. Hugging Face libraries support model use, local tools can run compatible downloaded models, and hosted APIs provide managed inference. Students should choose according to their task rather than the number of frameworks in a design. Record the model identifier, software versions and generation settings. Product names and available models change quickly, so the lab uses a small trained classroom model plus an optional approved service chosen at teaching time.",
+      "example": "A student uses a chat interface to brainstorm museum labels, then uses a Python function to generate a label in a small application. These interfaces can expose different settings even if they use a related model. A successful chat demonstration does not prove that the application handles missing input or unavailable service responses. Test the actual interface being delivered.",
+      "misconception": "A model file is already a complete application.",
+      "correction": "An application also needs an interface, input handling, inference settings and a way to return or report failure.",
+      "question": "Which component receives a request and sends back a model output?",
+      "answer": "The application or serving layer. The model supplies the generative computation within that layer."
+    },
+    {
+      "title": "Local and hosted choices",
+      "explanation": "Local inference runs on equipment you control; hosted inference runs on a provider service. Local execution can help keep inputs on that machine, but downloaded software, storage, logs and network features still require attention. Hardware capacity constrains model size and speed. Hosted services can reduce setup work but introduce network dependence, account permissions, data-processing terms and usage costs. Neither option is automatically best. Compare them on a small representative task and state your constraints. Quantisation stores some values with fewer bits and can reduce memory use, sometimes with quality trade-offs. Do not assume a smaller file always gives faster end-to-end responses. A classroom model is deliberately small enough to make the whole deployment visible.",
+      "example": "A teaching room has ordinary laptops and unreliable internet. A small local model gives a dependable demonstration of inference. A hosted model may produce more useful language for a realistic task if an approved account is available. Keep the same evaluation questions for both and report their different scale and capabilities. The small model demonstrates deployment mechanics, not parity with a large language model.",
+      "misconception": "Local automatically means private, free and production ready.",
+      "correction": "Local deployment still has hardware, maintenance, storage and access considerations. Check the complete data path.",
+      "question": "What should you inspect before uploading a student record to a hosted model?",
+      "answer": "Institutional permission, the service and account data controls, the necessity of each field and whether the task can use fictional or minimised data instead."
+    },
+    {
+      "title": "Requests responses and failure handling",
+      "explanation": "A minimal service receives an input, checks it, runs inference and returns an output with a status. Check empty inputs and maximum length before generation. Time limits and output limits prevent one request from using unbounded resources. Separate invalid input, unavailable model and generation failure so the caller can respond appropriately. Store secrets outside source code and notebooks. A classroom endpoint should bind to the local machine unless remote access is intentionally configured. Serving a model locally demonstrates deployment, but it does not establish production reliability, authentication or safe public access. Keep a known working version so that a failed change can be reversed. Students should be able to explain one complete request rather than installing a large deployment stack.",
+      "example": "A local endpoint accepts a short seed text and returns generated characters from the trained model. An empty seed receives a clear validation error. A request for an excessive number of output characters is capped or rejected. The notebook sends a normal request and an invalid one, then shuts down the server. It never opens a public internet service.",
+      "misconception": "A service is reliable because one request worked.",
+      "correction": "Test ordinary, empty, oversized and failure inputs, and record which behaviours you observed.",
+      "question": "Why should the teaching endpoint bind to 127.0.0.1?",
+      "answer": "It keeps the demonstration accessible from the same machine rather than exposing an unprotected classroom server to the network."
+    },
+    {
+      "title": "Quality latency and cost",
+      "explanation": "Deployment decisions balance output quality with response time, resource use and operational constraints. Measure elapsed time around the same part of the process each time. Loading a model for the first request can be slower than subsequent inference, so distinguish those conditions. For a hosted text API, an illustrative cost estimate multiplies input and output token counts by their respective prices and adds any other billed components. Actual billing depends on the selected product and current terms. Record the price source and date rather than embedding a permanent number in lecture notes. A cheaper model that fails many tasks may create more human rework. Use a small report that connects measured quality to the resource assumptions.",
+      "example": "For an invented tariff of EUR 1 per million input tokens and EUR 4 per million output tokens, 2,000 input and 500 output tokens cost EUR 0.004: 0.002 plus 0.002. This is a calculation example, not any vendor price. If retries double the token use, include them. Compare the output quality before deciding that the lowest per-call estimate is preferable.",
+      "misconception": "Token price alone determines the total cost of using an AI application.",
+      "correction": "Include repeated requests, tool charges where relevant, hosting and human review or correction effort.",
+      "question": "Why record cold-start and later response times separately?",
+      "answer": "Model loading and initialisation can dominate the first request and would distort a comparison with already-running inference."
+    }
+  ],
+  "demo": {
+    "title": "A local generative service",
+    "steps": [
+      "Load the small trained model from the guided notebook.",
+      "Start the supplied local service on an available loopback port.",
+      "Send a short request and read the response.",
+      "Send an invalid input and inspect the status.",
+      "Record timing and stop the service."
+    ],
+    "expected": "One successful local inference response, one handled invalid input and a timing record.",
+    "offline": "The local model can run without a hosted API. Describe its limited training data and vocabulary."
+  },
+  "practice": [
+    {
+      "question": "Name two reasons to choose a local model for a classroom.",
+      "answer": "A small local model can run without reliable internet and keeps the inference process inspectable. The choice still depends on hardware and task quality."
+    },
+    {
+      "question": "Calculate 2,000 input and 500 output tokens at the fictional prices in the example.",
+      "answer": "Input: 2000/1000000 times EUR 1 = EUR 0.002. Output: 500/1000000 times EUR 4 = EUR 0.002. Total EUR 0.004 before any other costs."
+    },
+    {
+      "question": "What evidence distinguishes a deployed classroom model from a saved notebook?",
+      "answer": "An interface receives requests and returns inference results. Test records show normal and invalid requests, the model version and the service boundary."
+    }
+  ],
+  "lab": {
+    "title": "Run and test a local interface",
+    "goal": "Expose the trained classroom model through a local interface and record its limits.",
+    "steps": [
+      "Execute the model setup.",
+      "Make a direct inference call.",
+      "Serve the same model through a local endpoint.",
+      "Test invalid input and an output limit.",
+      "Compare direct and endpoint results, then shut the server down."
+    ],
+    "deliverable": "Request and response records, timing observations, and a local-versus-hosted choice justified for one scenario."
+  },
+  "references": [
+    "https://huggingface.co/docs/transformers/pipeline_tutorial",
+    "https://docs.ollama.com/api/introduction",
+    "https://developers.openai.com/api/docs/guides/production-best-practices"
+  ],
+  "extension": "Use an institution-approved local or hosted foundation model behind the same interface. Record the exact model and settings, permissions and measured task quality.",
+  "timing": {
+    "lecture": 120,
+    "lab": 120
+  }
+}

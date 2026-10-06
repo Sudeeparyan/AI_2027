@@ -1,0 +1,106 @@
+{
+  "week": 6,
+  "prerequisites": [
+    {"term": "Token ID", "meaning": "An integer identifying a text unit in one particular tokenizer's vocabulary.", "check": "Must two different tokenizers assign the same IDs to 'Dublin'?"},
+    {"term": "Probability distribution", "meaning": "Nonnegative probabilities for possible outcomes, adding to one.", "check": "Do [0.6, 0.3, 0.1] form a probability distribution?"},
+    {"term": "Causal language model", "meaning": "A model predicting the next token from the tokens already present.", "check": "What input is available before the next answer token is generated?"}
+  ],
+  "diagrams": [
+    {
+      "id": "overview",
+      "title": "A decoder chat request",
+      "subtitle": "Trace a user's question through the local model",
+      "steps": [
+        {"title": "User question", "detail": "A request with an output-token budget", "code": "chat"},
+        {"title": "Chat template", "detail": "Wrap message roles using the model's expected format", "code": "tok.apply_chat_template"},
+        {"title": "Input IDs", "detail": "Token IDs represent the entire formatted conversation", "code": "inputs"},
+        {"title": "Model generation", "detail": "Predict and choose the next token repeatedly", "code": "model.generate"},
+        {"title": "New token slice", "detail": "Separate generated tokens from the original input", "code": "new"},
+        {"title": "Answer + measures", "detail": "Decode text; record output tokens and elapsed time", "code": "chat"}
+      ],
+      "arrows": ["user message", "formatted messages", "conversation IDs", "input plus output IDs", "new token IDs"],
+      "trace": [
+        "The question 'What is the capital of Ireland?' is placed in a user message.",
+        "The chat template adds the role and assistant-start formatting expected by Qwen.",
+        "Generation repeatedly predicts another token until stopping or reaching its budget.",
+        "The code slices off the input so the returned answer contains new tokens only.",
+        "The same helper returns a token count and elapsed seconds for comparison."
+      ],
+      "explanation": "A chat interface hides several transformations. First, the user's question becomes a message with a role. A chat template adds the model-specific formatting that distinguishes user text from the assistant reply. The tokenizer converts that formatted input into IDs. The decoder then predicts successive tokens; its generation settings determine how each prediction is chosen. The returned tensor includes both the input and generated continuation, so the helper slices away the input before decoding the answer. No training happens during this call: the model's learned weights stay fixed. The lab compares this decoder workflow with BERT's masked-token prediction and Flan-T5's separate input encoder and output decoder. Those families perform different operations even when their demonstrations use similar questions. The token count and elapsed time describe this measured call, rather than guaranteeing answer quality.",
+      "check_question": "Why does chat slice the generated tensor at the original input length?",
+      "check_answer": "Because decoder generation returns input IDs followed by the continuation; the helper returns only the new answer."
+    },
+    {
+      "id": "mechanism",
+      "insert_before_title": "Decoding strategies compared",
+      "title": "Choose one next token",
+      "subtitle": "Separate model scores from the decoding policy",
+      "steps": [
+        {"title": "Current prefix", "detail": "IDs for text generated so far", "code": "ids"},
+        {"title": "Next-token logits", "detail": "Read the last position's vocabulary scores", "code": "dec(ids).logits"},
+        {"title": "Temperature", "detail": "Rescale scores to change probability concentration", "code": "sample"},
+        {"title": "Filter candidates", "detail": "Keep a top-k threshold or top-p probability nucleus", "code": "top_k_filter / top_p_filter"},
+        {"title": "Sample one ID", "detail": "Draw from the remaining normalised probability distribution", "code": "torch.multinomial"},
+        {"title": "Append ID", "detail": "The chosen token becomes part of the next prefix", "code": "sample"}
+      ],
+      "arrows": ["prefix IDs", "vocabulary scores", "rescaled scores", "filtered logits", "chosen ID"],
+      "feedback": "Run the next iteration with the extended prefix",
+      "feedback_to": 0,
+      "trace": [
+        "The lab's five scores [2, 1, 0.5, 0.1, -1] give probabilities about [0.56, 0.21, 0.12, 0.08, 0.03].",
+        "Top-k with k=2 retains the two highest-scoring candidates in this example.",
+        "Top-p with p=0.8 instead retains three: their cumulative probability first exceeds 0.8.",
+        "Removed candidates get zero probability; retained probabilities are renormalised.",
+        "Sampling selects one ID, which is appended before the next model call."
+      ],
+      "explanation": "The neural model provides logits, unnormalised scores for all vocabulary tokens. Decoding is the policy used to turn those scores into a continuation. Greedy decoding chooses the highest-scoring token; the sample helper instead draws a token from probabilities. Temperature rescales logits: a lower positive value concentrates probability on stronger candidates, while a higher value spreads it. Top-k filtering uses a score threshold based on the kth candidate; ties at that threshold can retain additional tokens. Top-p filtering keeps enough leading candidates to reach a chosen cumulative probability, so its retained count depends on model confidence. The chosen token changes the next prefix and therefore the next prediction. A more diverse output is not necessarily more accurate. The manual loop runs its specified number of steps; it does not contain an explicit end-of-sequence stopping test.",
+      "check_question": "Why can top-p retain different numbers of candidates at successive positions?",
+      "check_answer": "The probability distribution changes with the prefix; a confident distribution needs fewer candidates to reach p."
+    },
+    {
+      "id": "lab",
+      "title": "Compare models with evidence",
+      "subtitle": "Different experiments answer different comparison questions",
+      "steps": [
+        {"title": "Compare tokenisers", "detail": "Count pieces for the same English, Irish and code", "code": "tokenizers / df_tok"},
+        {"title": "Compare families", "detail": "Mask filling, text-to-text and decoder chat", "code": "fill / t5_generate / chat"},
+        {"title": "Compare decoding", "detail": "Hold a prompt fixed; vary token-selection settings", "code": "sample / outputs"},
+        {"title": "Measure predictability", "detail": "Calculate loss on the supplied text", "code": "perplexity"},
+        {"title": "Log model calls", "detail": "Record local and available hosted-route output measures", "code": "log"},
+        {"title": "Check thinking", "detail": "Score final answers across modes and sampled seeds", "code": "reason_df"}
+      ],
+      "arrows": ["tokenisation observations", "family outputs", "decoding outputs", "loss/PPL table", "token/time observations"],
+      "trace": [
+        "Count tokens for identical source text before comparing the models' outputs.",
+        "BERT fills [MASK]; T5 and Qwen generate text using different architectures.",
+        "Use the same story prefix for greedy, beam and sampled continuations.",
+        "Treat perplexity under different tokenisers as different prediction measurements.",
+        "For the scheduling puzzle, compare final-answer correctness, tokens and time across runs."
+      ],
+      "explanation": "This lab is a sequence of comparison experiments, rather than one shared model pipeline. Token counts show how the same text becomes different pieces. The family demonstrations then expose different output interfaces: BERT ranks words for a blank, Flan-T5 transforms input text into output text, and Qwen continues a formatted conversation. Decoding experiments keep a story prefix fixed while changing how tokens are selected. Perplexity measures the predictability of supplied text, but differences in token boundaries prevent a direct per-token ranking across model families. The call log measures output length and elapsed time. Finally, the thinking experiment checks final numerical answers across sampled seeds, rather than trusting persuasive intermediate text. Different mode settings also use different token budgets and sampling parameters, so the comparison reflects the complete settings used, rather than isolating the thinking switch alone.",
+      "check_question": "Can lower perplexity from one tokenizer prove that its model answers questions better?",
+      "check_answer": "No. Tokenisers define different prediction units, and text predictability is not the same measurement as question-answer correctness."
+    }
+  ],
+  "glossary": [
+    {"term": "Encoder", "meaning": "A network producing contextual representations of an input sequence."},
+    {"term": "Decoder", "meaning": "A network predicting output tokens using the preceding output tokens and available input context."},
+    {"term": "Chat template", "meaning": "Model-specific formatting used to represent roles and messages as a token sequence."},
+    {"term": "Temperature", "meaning": "A positive divisor on logits that changes the concentration of sampling probabilities."},
+    {"term": "Nucleus", "meaning": "The leading token candidates retained by a top-p cumulative-probability threshold."},
+    {"term": "Latency", "meaning": "The elapsed time taken to produce a response."}
+  ],
+  "pitfalls": [
+    "A fluent answer can still be wrong; output diversity is a different measure from correctness.",
+    "Few examples inside a prompt change context, rather than updating the model's weights.",
+    "Visible thinking text and a longer token budget do not guarantee a correct final answer."
+  ],
+  "code_walkthrough": [
+    {"symbol": "df_tok", "role": "Summarises tokens per whitespace-delimited word.", "inspect": "Compare columns for the same source text; inspect actual token pieces as well."},
+    {"symbol": "t5_generate", "role": "Runs an encoder-decoder text-to-text model.", "inspect": "Contrast its input/output interface with masked filling and chat."},
+    {"symbol": "chat", "role": "Formats a chat request and returns generated text plus measures.", "inspect": "Locate the boundary between input tokens and newly generated answer tokens."},
+    {"symbol": "sample", "role": "Shows the repeated next-token loop directly.", "inspect": "Track prefix length and the number of retained candidates at each step."},
+    {"symbol": "perplexity", "role": "Measures next-token predictability on supplied text.", "inspect": "Compare normal and shuffled text within each tokenizer/model pair."},
+    {"symbol": "reason_df", "role": "Collects thinking-mode outcomes across repeated runs.", "inspect": "Inspect finished, correct, tokens and seconds together; avoid judging one example."}
+  ]
+}

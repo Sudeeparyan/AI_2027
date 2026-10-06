@@ -1,0 +1,103 @@
+{
+  "n": 2,
+  "title": "VAEs and GANs: learning to generate",
+  "outcomes": [
+    "LO1",
+    "LO3",
+    "LO4"
+  ],
+  "overview": "Study two different ways to learn a generative model. Use simple numerical examples and a small implementation to connect latent variables, training objectives and generated samples.",
+  "prerequisites": "Week 1 probability and training/inference vocabulary. Review mean, squared error and a basic neural-network forward pass using the supplied worked examples.",
+  "objectives": [
+    "Explain the encoder, sampled latent variable and decoder in a VAE.",
+    "Explain the generator/discriminator training loop in a GAN.",
+    "Modify a small implementation and compare training evidence, sample quality and diversity."
+  ],
+  "concepts": [
+    {
+      "title": "A VAE learns a distribution of latent codes",
+      "explanation": "An ordinary autoencoder maps an input into a code and reconstructs it. A variational autoencoder instead learns parameters of a distribution over possible latent codes for each input. In a common example, the encoder produces a mean and variance for a Gaussian distribution. A sampled code z is passed through a decoder to reconstruct the input. Sampling allows nearby codes to produce varied outputs. To create a new sample after training, draw z from the chosen prior and decode it. The latent space is a learned mathematical representation; its axes do not automatically mean human concepts such as happiness or colour. Reconstruction helps us inspect learned information, while generation asks whether samples from the prior are useful and diverse.",
+      "example": "For one toy input, suppose the encoder gives mean 0.5 and standard deviation 0.2. With a noise draw epsilon = -1, the sampled latent value is z = 0.5 + 0.2 × (-1) = 0.3. The decoder maps 0.3 to an output. A different noise draw changes z while using the same encoder and decoder. These illustrative values make the sampling step visible.",
+      "misconception": "A VAE is just a file compressor that always returns the exact input.",
+      "correction": "A VAE is a probabilistic generative model with a reconstruction objective. Information can be lost, and different latent samples can produce different reconstructions.",
+      "question": "For mean 1, standard deviation 0.5 and epsilon 2, what is z?",
+      "answer": "z = 1 + 0.5 × 2 = 2. The sampled value is then passed to the decoder."
+    },
+    {
+      "title": "Reconstruction and regularisation",
+      "explanation": "A useful VAE must reconstruct examples while keeping its latent distributions organised enough to sample from. A common training loss has a reconstruction term plus a Kullback–Leibler divergence term, often written KL. Reconstruction penalises differences between input and output. KL measures how far the inferred latent distribution is from the chosen prior, typically a standard Gaussian. The standard objective can be understood as maximising an evidence lower bound, or equivalently minimising its negative. For classroom comparison we may weight KL by beta and inspect the trade-off. Too little pressure toward the prior can make sampling unreliable; too much can reduce useful information in the latent code. We inspect components separately rather than declaring that one smaller total loss proves better images.",
+      "example": "An illustrative run has reconstruction loss 0.12 and KL 0.08. With beta = 1, the weighted total is 0.20; with beta = 0.5 it is 0.16 for those same component values. This arithmetic does not predict the losses after retraining. Changing beta also changes the learned solution, so the experiment must generate and inspect fresh results.",
+      "misconception": "A lower reported VAE loss always means sharper or more useful samples.",
+      "correction": "The loss depends on the objective, scaling and data. Inspect reconstruction, prior samples, coverage and the downstream task using a consistent comparison.",
+      "question": "Why record the two loss components instead of only their sum?",
+      "answer": "Their sum can hide a trade-off. Good reconstruction with poor prior matching differs from strong regularisation with weak reconstruction, even when total values are similar."
+    },
+    {
+      "title": "A GAN learns through adversarial feedback",
+      "explanation": "A generative adversarial network contains a generator G and discriminator D. The generator maps a random latent input to a sample. The discriminator learns to distinguish training examples from generated samples. Training alternates: update the discriminator using real and generated data, then update the generator so its samples are more likely to be judged real. Gradients carry the feedback; the discriminator does not write editing instructions. In the original minimax formulation, the discriminator maximises the expected log score for real data plus the expected log score for rejecting generated data. A commonly used generator loss is -log D(G(z)). The exact loss must match the implementation. At inference, generating a sample normally needs the generator, not the discriminator.",
+      "example": "Suppose D gives one generated sample a realness score of 0.2. The non-saturating generator loss for this sample is -ln(0.2), approximately 1.61. If its score becomes 0.8, the loss is about 0.22. This illustrates the direction of the objective. It does not prove that a human will prefer the sample or that all modes of the training distribution are represented.",
+      "misconception": "The discriminator generates the final picture after checking it.",
+      "correction": "The generator produces the sample. The discriminator provides a learned training signal, and ordinary generation uses G alone.",
+      "question": "Why do we alternate updates rather than treating the discriminator as a fixed answer key?",
+      "answer": "The discriminator is also learned and must adapt as the generator changes. The two models influence each other, so training can be unstable."
+    },
+    {
+      "title": "Compare sample quality and coverage",
+      "explanation": "Generative evaluation needs more than a loss curve. A model can produce attractive samples while repeating the same kind of output. In a GAN this can appear as mode collapse: the generator covers only a narrow part of the data distribution. A VAE can reconstruct common shapes yet blur details or poorly represent rare examples. Compare samples with a held-out reference distribution and inspect several random seeds. For a tiny one-dimensional exercise, histograms, means and the fraction of samples in each region are understandable checks. For images, use a transparent human rubric and recognise that sophisticated metrics have assumptions. Record the data, implementation and training budget. A short CPU exercise teaches the mechanism, not a general ranking of the two model families.",
+      "example": "A fictional training set contains equal numbers of circles and triangles. Generator A returns ten excellent circles. Generator B returns five recognisable circles and five recognisable triangles with some rough edges. A sharpness-only rubric may favour A, but a coverage check exposes its missing triangles. The class should report both observations rather than collapsing them into an unexplained single score.",
+      "misconception": "One convincing image demonstrates that the generator learned the whole dataset.",
+      "correction": "One sample shows only one outcome. Check diversity, missing modes and held-out evidence across multiple generated samples.",
+      "question": "What simple test detects a generator that always returns nearly the same value?",
+      "answer": "Generate many samples from different latent inputs, inspect their spread or histogram and compare it with the reference distribution. Very low variation is a warning, not a full diagnosis."
+    }
+  ],
+  "demo": {
+    "title": "Trace two real learning loops",
+    "steps": [
+      "Draw the VAE encoder → distribution → sampled z → decoder path and the GAN latent z → generator path.",
+      "Inspect the small notebook models, data split and losses; point to the actual trainable parameters.",
+      "Run the short training examples and compare generated samples before and after learning.",
+      "Change one permitted parameter, keeping the data and comparison method fixed.",
+      "Explain one gain, one failure and why a favourable plot is not a proof of general quality."
+    ],
+    "expected": "Actual parameter updates and samples from small models, accompanied by a loss explanation and a limited comparison. Exact numeric scores depend on the run.",
+    "offline": "Use the local small-model notebook. Instructor checkpoints support explanation during an outage, but learners still complete the implementation and modification exercise when the environment is available."
+  },
+  "practice": [
+    {
+      "question": "Name the VAE component used when generating from a prior sample.",
+      "answer": "The decoder. An encoder is needed to infer a latent distribution from an input, but new generation can start by sampling z from the prior."
+    },
+    {
+      "question": "A GAN has lower generator loss but less sample diversity. What should the report say?",
+      "answer": "Report the lower loss and reduced diversity separately. The discriminator-based objective does not alone establish better overall generation."
+    },
+    {
+      "question": "Why should a learner change a real trainable model instead of only moving a point in a hand-drawn latent plot?",
+      "answer": "The real model connects the claimed architecture to parameter learning and measurable outputs. A diagram is useful for explanation but does not demonstrate implementation."
+    }
+  ],
+  "lab": {
+    "title": "Modify a small generative model",
+    "goal": "Connect model components, parameter updates and evaluation using manageable data.",
+    "steps": [
+      "Inspect the small dataset and mark which examples are reserved for checking.",
+      "Execute the supplied VAE and GAN learning examples and save their outputs.",
+      "Label where each implementation samples z and where its parameters change.",
+      "Change one training or latent setting, rerun the chosen model and compare using the same samples or seeds where appropriate.",
+      "Submit a two-column explanation of mechanism and evidence, including one failure case."
+    ],
+    "deliverable": "Executed model notebook, an annotated architecture sketch, a controlled modification and a quality/coverage comparison."
+  },
+  "references": [
+    "https://arxiv.org/abs/1312.6114",
+    "https://arxiv.org/abs/1406.2661",
+    "https://www.tensorflow.org/tutorials/generative/cvae",
+    "https://docs.pytorch.org/tutorials/beginner/dcgan_faces_tutorial.html"
+  ],
+  "extension": "Follow the official image-based VAE or DCGAN tutorial with a permitted dataset and appropriate compute. Keep the original small experiment as the basis for a clear explanation.",
+  "timing": {
+    "lecture": 120,
+    "lab": 120
+  }
+}

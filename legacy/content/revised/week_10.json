@@ -1,0 +1,99 @@
+{
+  "n": 10,
+  "title": "Evaluation and responsible use",
+  "outcomes": [
+    "LO4"
+  ],
+  "overview": "A fluent answer can still be wrong, incomplete or unsuitable. This week makes quality measurable with a small, explicit rubric and separate test cases. Students combine numerical checks with human judgement, inspect uneven performance and connect privacy, attribution and disclosure to actual AI-tool use. Detailed legal interpretation and assurance frameworks remain with the companion modules.",
+  "objectives": [
+    "Design a task-specific evaluation using a baseline and held-out cases.",
+    "Calculate and interpret simple quality measures.",
+    "Explain risks and document a proportionate human review process."
+  ],
+  "prerequisites": "Bring the previous notebook and a short record of what you tried. Basic Python lists, dictionaries and functions are sufficient for the guided code.",
+  "concepts": [
+    {
+      "title": "A fair comparison",
+      "explanation": "Begin with the task and what counts as success. A summary might need accurate facts, coverage of three important points and a length limit. A code assistant might need working behaviour on tests and an explanation that matches the code. Write the criteria before looking at candidate outputs. Keep some cases for development and some separate for final evaluation. Changing the prompt after inspecting a test case makes that case part of development. Compare methods on matched inputs, with the same source version and settings where possible. Include an ordinary software or human baseline when it is appropriate. Repeated model runs reveal variation, but repeating a fixed saved response does not. Small classroom samples support learning and diagnosis rather than broad claims about a model.",
+      "example": "Create six development questions and four held-out questions about a fictional museum. Improve a prompt using only the first six. Then compare the original and revised prompts on the final four without further editing. If the revised prompt supports three answers and the original supports two, report 3/4 and 2/4 for this small set. Do not claim universal superiority.",
+      "misconception": "The prompt with the best example answer is the best prompt.",
+      "correction": "Use a fixed rubric over multiple representative cases, include failure cases and report the sample size.",
+      "question": "Can you keep calling a set held-out after adjusting prompts using its answers?",
+      "answer": "No. Once it informs development it is no longer an independent final test set. Reserve fresh cases."
+    },
+    {
+      "title": "Metrics and their limits",
+      "explanation": "A metric summarises a particular property, so choose one that matches the task. Exact match suits outputs with a unique correct value; it can penalise valid paraphrases. Precision asks what share of returned items are correct, while recall asks what share of the relevant items were found. A groundedness check asks whether claims are supported by the supplied source. Support is different from source truth: an inaccurate document can support an inaccurate answer. Human rubrics can judge usefulness, completeness and tone, but reviewers need shared examples and a way to handle disagreement. Automatic language or image similarity measures provide additional signals, not a complete verdict. An LLM judge also needs calibration against human labels and can have systematic preferences.",
+      "example": "A search retrieves four passages; three are relevant. Five relevant passages exist in the small collection. Precision is 3/4 = 75% and recall is 3/5 = 60%. An answer may still omit an essential fact even with those retrieval scores. Evaluate retrieval and answer quality separately. These are invented counts for a calculation exercise.",
+      "misconception": "One high score proves a generative system is accurate, fair and useful.",
+      "correction": "Report which property the score measures and add checks for the other important requirements.",
+      "question": "What does a groundedness score fail to tell us about the source?",
+      "answer": "It does not establish that the source itself is correct, current or authoritative."
+    },
+    {
+      "title": "Bias and human judgement",
+      "explanation": "Generative systems can perform unevenly across languages, dialects, topics or groups. A single average can hide this. Use relevant, ethically constructed test cases, compare outcomes and investigate differences rather than assuming a cause. Avoid collecting sensitive data just to make a classroom demonstration. Matched fictional cases can show how a change in wording affects a response, but a handful of examples cannot establish population fairness. Ask two reviewers to apply the same rubric independently before discussing differences. Record disagreements because they can reveal ambiguous criteria. Accessibility also matters: an image description, transcript or plain-language answer may be the outcome the user needs. Quality should be judged in the context of actual users and tasks.",
+      "example": "Two fictional scholarship enquiries differ only in a name. One answer offers clear instructions and the other discourages applying. This is a reason to investigate, not proof of a population-level bias estimate. Repeat with multiple controlled examples, inspect the underlying information and consider whether the task should be automated. Do not use real applicants for the classroom exercise.",
+      "misconception": "If two outputs match, the model has been proved fair.",
+      "correction": "A small matched test can detect some problems but cannot establish fairness across all contexts or users.",
+      "question": "Why should two human reviewers score independently first?",
+      "answer": "Independent scoring reveals disagreement that a group discussion can otherwise hide and helps improve the rubric."
+    },
+    {
+      "title": "Responsible use in everyday work",
+      "explanation": "Responsible use starts with the material supplied to a tool and the decision made from its output. Use fictional or approved data in practice. Check whether you have permission to upload a document, generate a likeness or reuse media. Keep a record of the original source, the AI assistance and the human changes when producing academic work. An AI-generated citation must be opened and checked before it becomes evidence. For decisions affecting people, identify who reviews the output and who remains accountable. Privacy controls and institutional rules depend on the specific service and account, so review them at the time of use. This course teaches a practical decision process; it does not replace institutional policy or specialised legal guidance.",
+      "example": "A student creates an image for a presentation and an AI summary of a paper. The student records the tool and date, verifies each factual claim against the paper, labels the synthetic image where relevant and explains the assistance according to course policy. If the summary invents a reference, the student removes it rather than citing it as though it existed.",
+      "misconception": "An AI disclosure makes every use acceptable.",
+      "correction": "Disclosure helps transparency but does not replace permission, accurate attribution, verification or institutional rules.",
+      "question": "What should a student do with a convincing citation that cannot be found?",
+      "answer": "Treat it as unverified, search the original publication record and exclude it unless the source can be verified."
+    }
+  ],
+  "demo": {
+    "title": "Two reviewers score the same answers",
+    "steps": [
+      "Agree factual support and completeness criteria.",
+      "Score three responses independently.",
+      "Calculate agreement.",
+      "Discuss one disagreement using the source.",
+      "Revise the rubric and score a fresh example."
+    ],
+    "expected": "A transparent score table with denominators and an explanation of reviewer disagreement.",
+    "offline": "Use the fictional source and responses supplied in the notebook. Saved responses test the rubric, not live model variability."
+  },
+  "practice": [
+    {
+      "question": "Three of four retrieved passages are relevant; five relevant passages exist. Calculate precision and recall.",
+      "answer": "Precision is 3/4 = 0.75. Recall is 3/5 = 0.60. The denominators answer different questions."
+    },
+    {
+      "question": "Why might exact match be unsuitable for a summary?",
+      "answer": "Many different wordings can express the same facts correctly. Use factual-support and completeness criteria alongside format checks."
+    },
+    {
+      "question": "A model performs well on average but poorly on one language. What should the report include?",
+      "answer": "Report the separate result and sample size, investigate the relevant examples, state uncertainty and avoid hiding the difference in the average."
+    }
+  ],
+  "lab": {
+    "title": "Evaluate outputs with evidence",
+    "goal": "Build a rubric and compute a small evaluation report with meaningful failure categories.",
+    "steps": [
+      "Read the source and reference answers.",
+      "Score the baseline outputs.",
+      "Compute counts and percentages.",
+      "Inspect cases where metrics disagree.",
+      "Add fresh cases and explain the limits of the sample."
+    ],
+    "deliverable": "A score table, two explained failures, a revised rubric and a short responsible-use decision."
+  },
+  "references": [
+    "https://developers.openai.com/api/docs/guides/evaluation-best-practices",
+    "https://learn.microsoft.com/en-us/azure/ai-foundry/concepts/evaluation-approach-gen-ai"
+  ],
+  "extension": "Calibrate an available model judge against the human rubric. Report disagreements rather than presenting the judge as ground truth.",
+  "timing": {
+    "lecture": 120,
+    "lab": 120
+  }
+}

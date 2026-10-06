@@ -1,0 +1,460 @@
+subtitle: "Models that see, listen, speak and create: multimodal LLMs, generation across modalities, evaluation and responsible use"
+mimlos: [2, 3, 4]
+objectives:
+  - "Explain how **multimodal LLMs** work (modular bridge models vs **natively multimodal** models) and what they can do with images, documents, charts, audio and video."
+  - "Describe how multimodal models are **trained and fine-tuned**: alignment pre-training, **visual instruction tuning**, preference tuning and parameter-efficient adaptation."
+  - "Use models for **text-to-image, image editing, text-to-speech, speech-to-text** and cross-modal reasoning, and explain music and **text-to-video** generation."
+  - "Evaluate multimodal generation with **CLIP score, FID, task accuracy, human preference** and **multimodal hallucination** probes."
+  - "Assess risks (**deepfakes**, consent, likeness and voice rights) and mitigations: **watermarking and content provenance (C2PA)**, disclosure duties."
+  - "Design a multimodal application with verification, human review and labelling."
+coverage:
+  - multimodal LLM
+  - natively multimodal
+  - omni
+  - visual instruction tuning
+  - alignment pre-training
+  - parameter-efficient
+  - text-to-image
+  - image editing
+  - text-to-speech
+  - speech-to-speech
+  - music
+  - text-to-video
+  - CLIP score
+  - FID
+  - human preference
+  - multimodal hallucination
+  - deepfake
+  - consent
+  - watermark
+  - provenance
+  - C2PA
+  - chart
+  - document
+  - captioning
+  - visual question answering
+
+slides:
+  - type: title
+    figure: cover
+    notes: |
+      Welcome to week 10, multimodal generative AI applications. Last week we learned how models align modalities in a shared space. This week we look at the systems built on those foundations: multimodal LLMs that read photos, documents, charts and audio and answer in text or speech; generators that turn text into images, speech, music and video; and how to evaluate them and use them responsibly. Everything in the lab uses open models, and the slides show real outputs produced for the lecture, including where the models fail.
+
+  - type: outcomes
+    notes: |
+      Six outcomes matching the descriptor's week 10: multimodal LLMs; training and fine-tuning multimodal models; evaluation of multimodal generative AI; and applications, extended with generation across modalities and responsible use, which the revised 7.3 adds explicitly because deepfakes and content provenance are now regulated. The practical outcome is designing an application that combines a multimodal model with verification and labelling, which feeds directly into projects that process images, documents or speech. This week practises MIMLO 2, 3 and 4.
+
+  - type: agenda
+    icon: "fa:FaRoute"
+    items:
+      - {title: "Warm-up: a photo of a receipt", minutes: 5}
+      - {title: "1 · Multimodal LLMs", minutes: 25}
+      - {title: "2 · Training and fine-tuning multimodal models", minutes: 13}
+      - {title: "3 · Generation across modalities", minutes: 25}
+      - {title: "4 · Evaluating multimodal generative AI", minutes: 17}
+      - {title: "5 · Responsible use, applications and trends", minutes: 22}
+      - {title: "Lab preview and wrap-up", minutes: 6}
+    notes: |
+      The plan follows the revised descriptor. Sections one and three contain the real outputs from the lab run: captions, chart and document question answering, text-to-image, image editing and speech round trips. Take the break after section three. Section five covers deepfakes, provenance and applications, and ends with a design pattern that students can reuse in their projects.
+
+  - type: discussion
+    title: "Warm-up"
+    icon: "fa:FaReceipt"
+    prompt: "You photograph a restaurant receipt and ask a chat assistant to split the bill between four people. What could go wrong?"
+    points:
+      - "Reading: blurry numbers, unusual layout, handwriting, currency symbols."
+      - "Reasoning: adding line items, tips, rounding, who ordered what."
+      - "Privacy: what else is on the receipt (card digits, location, names)?"
+    notes: |
+      Two minutes in pairs. Students usually identify reading errors first, then arithmetic errors, and some notice privacy: receipts can contain partial card numbers, locations and times. Add a fourth risk: the model may confidently report numbers that are not on the receipt, which is multimodal hallucination. This warm-up maps onto the lecture: section one shows that current models read and reason well but not perfectly; section four measures hallucination; section five covers privacy. The design lesson, extract then verify with code, appears at the end.
+
+  # ------------------------------------------------ section 1
+  - type: section
+    number: 1
+    title: "Multimodal LLMs"
+    question: "How do chat models see, read and listen?"
+    icon: "fa:FaEye"
+    notes: |
+      Section one covers multimodal large language models, also called vision-language models or MLLMs. We compare the two main designs, list their capabilities, survey the model families, and look at real outputs from open models on photos, a chart and a document, including errors. About twenty-five minutes.
+
+  - type: figure
+    title: "Two designs: modular bridge vs. natively multimodal"
+    figure: mllm_types
+    bullets:
+      - "**Modular**: pretrained encoders connected to an LLM by a projector (week 9's LLaVA recipe); usually text output."
+      - "**Native ('omni')**: one model trained on interleaved text, images and audio tokens; can take and produce several modalities, e.g. real-time voice."
+    stack: true
+    notes: |
+      There are two broad designs. Modular models connect separately pretrained encoders to a language model through a projector, as in LLaVA from last week; they are cheap to build and common among open models, and usually output text. Natively multimodal, sometimes called omni, models are trained from the start on interleaved sequences of text, image and audio tokens, so they can process and often generate several modalities in one model, which enables low-latency voice conversations and reasoning over audio and video. Several frontier model families, such as GPT and Gemini, and open families such as Qwen's Omni models, follow this direction.
+
+  - type: cards
+    title: "What multimodal LLMs can do"
+    cards:
+      - {icon: "fa:FaImage", head: "Describe & answer", text: "Captioning, visual question answering, comparing images, alt text for accessibility."}
+      - {icon: "fa:FaFileInvoice", head: "Documents & OCR", text: "Read invoices, forms, PDFs and handwriting; extract fields into structured data."}
+      - {icon: "fa:FaChartBar", head: "Charts & tables", text: "Read values, trends and comparisons from plots, dashboards and tables."}
+      - {icon: "fa:FaVideo", head: "Video", text: "Summarise or answer questions about clips by sampling frames (and audio)."}
+      - {icon: "fa:FaMicrophone", head: "Speech", text: "Understand spoken questions and answer in voice with low latency."}
+      - {icon: "fa:FaMousePointer", head: "Screens (GUI)", text: "Understand screenshots and operate interfaces: 'computer use' agents (week 12)."}
+    notes: |
+      Multimodal LLMs have a wide range of capabilities. Describing and answering questions about images supports accessibility, for example generating alt text. Document understanding, reading invoices, forms and PDFs, is one of the most valuable business uses. Chart and table reading supports analytics. Video understanding samples frames and sometimes audio. Speech models understand and produce voice. Screen understanding lets agents operate graphical interfaces, previewed in week 12. For every capability, accuracy varies with image quality, resolution and domain, so evaluation is essential.
+
+  - type: table
+    title: "Multimodal model families (examples, 2026)"
+    header: ["Family", "Access", "Inputs", "Notes"]
+    rows:
+      - ["GPT (OpenAI)", "Proprietary", "Text, images, audio (and more)", "Native voice and image generation in the app"]
+      - ["Gemini (Google)", "Proprietary", "Text, images, audio, video, long PDFs", "Natively multimodal; long video context"]
+      - ["Claude (Anthropic)", "Proprietary", "Text, images, PDFs", "Strong document and chart reading"]
+      - ["Qwen-VL / Qwen-Omni", "Open-weight", "Images, video; audio in Omni", "Small to large sizes; strong on documents"]
+      - ["LLaVA", "Open research", "Images", "The reference modular design"]
+      - ["SmolVLM, Gemma, Llama vision", "Open-weight", "Images", "Small models for laptops and devices"]
+    notes: |
+      A snapshot of families, without version numbers, which change monthly. The proprietary families from OpenAI, Google and Anthropic all accept images and documents; OpenAI and Google also handle audio natively, and Gemini is notable for very long video and document contexts. Among open-weight models, the Qwen vision-language and omni families are strong on documents and charts; LLaVA is the research reference; small models such as SmolVLM run on laptops. In the lab we use Qwen3-VL-2B on a GPU and SmolVLM on a CPU, both Apache-licensed.
+
+  - type: figure
+    title: "Real captions from an open VLM"
+    figure: lab_caption
+    bullets:
+      - "{{CAPTIONS}}"
+      - "Captions are fluent; check them for invented details before using them as alt text."
+    stack: true
+    notes: |
+      These are the two sample photographs from scikit-learn's standard image set, a temple in China and a flower, captioned by the open vision-language model in the lab run; the captions are quoted in the bullet. Generally such captions are accurate at the level of objects and scenes, but can add details that are not there, such as a time of day or a location. For accessibility uses such as alt text, a human should check captions, or at least the model should be asked to describe only what is clearly visible.
+
+  - type: bullets
+    title: "How images become tokens, and why resolution matters"
+    icon: "fa:FaTh"
+    bullets:
+      - "Images are cut into patches: a 336 × 336 image with 14 × 14 patches gives 576 visual tokens."
+      - "Higher resolution → more tokens → better small-text reading, but more cost and latency."
+      - "Many models **tile** large images or use **dynamic resolution**; documents need high resolution."
+      - "Video: sample frames (e.g. 1 per second); an hour of video can be hundreds of thousands of tokens."
+      - "API pricing for images and video is in tokens: estimate costs before processing thousands of files."
+    notes: |
+      Connect to weeks 5 and 9. A vision encoder cuts the image into patches; a three-hundred-and-thirty-six-pixel image with fourteen-pixel patches gives twenty-four by twenty-four, which is 576 visual tokens, each passed to the LLM. Reading small text in documents requires high resolution, so models tile large images or process them at their native resolution, which multiplies the token count. Video is sampled at a few frames per second, so long videos consume enormous numbers of tokens. The practical consequence is cost: providers price images and video in tokens, so processing thousands of scanned pages needs a budget estimate.
+
+  - type: figure
+    title: "Cross-modal reasoning over a chart and a document (real)"
+    figure: lab_chart
+    bullets:
+      - "{{QA_NOTES}}"
+      - "We **generated** the chart and invoice ourselves, so every answer can be scored exactly."
+    stack: true
+    notes: |
+      This is the lab's evaluation design: we generated a bar chart and an invoice-style document, so the correct answers are known exactly: which day had the most tickets, a single value, a total that requires adding five numbers, the invoice number, the total due and the customer name. The bullet reports the measured accuracy of the open VLM. Typically single values and text fields are read correctly, while aggregation, adding up the bars, is less reliable because the model estimates rather than computes. This is the evidence behind the design rule on the next slide.
+
+  - type: quiz
+    question: "You need the total of 200 line items across 50 scanned invoices. What is the most reliable design?"
+    options:
+      - "Ask the VLM for the grand total in one prompt"
+      - "Ask the VLM to extract each line item into a validated schema, then sum in code and cross-check with each invoice's printed total"
+      - "Use a higher temperature so the model tries harder"
+      - "Ask the model whether it is confident"
+    answer: 1
+    notes: |
+      Answer: B. Separate perception from computation: use the model for what it is good at, reading fields into a schema validated in code, as in week 7, then compute totals with code and cross-check them against the totals printed on the invoices to detect reading errors automatically. A relies on the model's arithmetic across many images, which is error-prone and unverifiable. C adds randomness. D is unreliable: models' self-reported confidence is poorly calibrated. Add human review for invoices where the checks disagree.
+
+  # ------------------------------------------------ section 2
+  - type: section
+    number: 2
+    title: "Training and fine-tuning multimodal models"
+    question: "How are these models built, and how can you adapt one?"
+    icon: "fa:FaCogs"
+    notes: |
+      Section two briefly explains how multimodal LLMs are trained, which the descriptor lists as training and fine-tuning multimodal models, and how you can adapt one to your own domain with the parameter-efficient methods from week 8. Keep it brief: students need the pipeline and the vocabulary, not the details of each stage. About thirteen minutes.
+
+  - type: figure
+    title: "A typical training pipeline for a vision-language model"
+    figure: vlm_training
+    bullets:
+      - "Most compute goes into the separately pre-trained parts; the multimodal stages are comparatively cheap."
+      - "**Visual instruction tuning** data: image-based conversations, chart and document questions, OCR, grounding."
+    stack: true
+    notes: |
+      Walk through the stages. The vision encoder, typically CLIP or SigLIP, and the LLM are pretrained separately at great cost. Alignment trains the projector on image-caption pairs so that visual features land in the LLM's input space. Visual instruction tuning, introduced by LLaVA, fine-tunes on conversations about images, now including charts, documents, OCR and grounding tasks, often generated synthetically with the help of stronger models. Preference tuning or reinforcement learning, as in week 8, reduces hallucination and improves helpfulness. Finally, users can adapt the model to their domain with LoRA.
+
+  - type: bullets
+    title: "Data for multimodal training"
+    icon: "fa:FaDatabase"
+    bullets:
+      - "**Image–caption pairs** (web alt-text, re-captioned by models for quality)."
+      - "**Interleaved documents**: web pages with images and text in natural order."
+      - "**Task data**: OCR, charts, tables, screenshots, grounding boxes, video QA; much of it synthetic."
+      - "**Audio**: speech with transcripts; audio with descriptions."
+      - "Quality, deduplication, **licensing and consent** matter even more than for text (week 9's LAION lesson)."
+    notes: |
+      Multimodal training data comes in several forms. Web image-caption pairs are plentiful but noisy, so many teams re-caption images with a strong model to get more detailed descriptions. Interleaved documents teach models to handle mixed sequences. Task-specific data, for OCR, charts, screenshots and video, is often generated synthetically, for example by rendering charts with known values, exactly what we do in the lab for evaluation. Audio data pairs speech with transcripts. Last week's LAION case showed why curation, licensing and consent are critical for images and voices.
+
+  - type: bullets
+    title: "Adapting a multimodal model to your domain"
+    icon: "fa:FaWrench"
+    bullets:
+      - "Examples: reading a company's forms, inspecting products for defects, describing medical or satellite images."
+      - "Usually **freeze the vision encoder** and apply **LoRA** to the LLM (and optionally the projector), as in week 8."
+      - "Needs labelled image–question–answer examples and a held-out test set of **your** images."
+      - "Try prompting and extraction schemas first; fine-tune when reading or format errors persist."
+    notes: |
+      The week 8 approach carries over directly. For a domain such as a company's own forms, industrial inspection images or satellite imagery, you collect image-question-answer examples, freeze the vision encoder and apply LoRA to the language model and possibly the projector, using libraries such as TRL, which supports vision-language fine-tuning. The same decision rule applies: start with prompting and structured extraction; fine-tune when evaluation on your own images shows persistent reading or format errors. In regulated domains such as medical imaging, fine-tuned models need clinical validation and oversight.
+
+  # ------------------------------------------------ section 3
+  - type: section
+    number: 3
+    title: "Generation across modalities"
+    question: "From text to images, speech, music and video"
+    icon: "fa:FaMagic"
+    notes: |
+      Section three surveys generation across modalities, the descriptor's list of text to image, image to image, text to audio, text to video and so on. We look at real text-to-image and image-editing outputs from the lab, a speech round trip, and the state of music and video generation. About twenty-five minutes; take the break afterwards.
+
+  - type: figure
+    title: "Generation across modalities: a map"
+    figure: generation_map
+    notes: |
+      This map summarises the main generation tasks, how they work and example model families. Images use latent diffusion or flow transformers from week 4. Editing uses partial noising, inpainting and control signals. Speech synthesis uses neural text-to-speech, increasingly language models over audio-codec tokens, which also enable voice cloning from short samples. Speech-to-speech models power real-time voice assistants. Music and sound use diffusion or token language models over audio codecs. Video uses spatio-temporal diffusion transformers. The common thread: diffusion or autoregressive models over tokens or latents, conditioned on text encoders.
+
+  - type: figure
+    title: "Text → image with a distilled model (real)"
+    figure: lab_t2i
+    bullets:
+      - "SD-Turbo, 2 steps, no guidance: seconds per image on a GPU."
+      - "{{T2I_NOTES}}"
+    stack: true
+    notes: |
+      Three prompts rendered by SD-Turbo with two steps in the lab run. Quality is good for a distilled model, and each image takes a second or two on a GPU. The bullet reports the CLIP scores: each image scores higher against its own prompt than against the other prompts, a simple sanity check of prompt alignment that the lab automates. Remind students that SD-Turbo is a research release whose commercial use needs Stability AI's licence, which matters for projects.
+
+  - type: figure
+    title: "Image → image: editing with partial noise (real)"
+    figure: lab_i2i
+    bullets:
+      - "**Strength** = how much noise is added before denoising: low keeps the original, high follows the new prompt."
+      - "The same idea powers inpainting (edit only a masked region) and style transfer."
+    stack: true
+    notes: |
+      Image-to-image editing, from week 4's SDEdit idea, adds noise to an existing image and denoises it with a new prompt. The strength parameter sets how far into the noise schedule we go: at 0.3 the result stays close to the original lighthouse painting with a hint of sketch style; at 0.9 most of the original structure is replaced. Inpainting restricts the change to a mask, and control methods such as ControlNet preserve edges or pose exactly. These are the building blocks of editing features in design tools.
+
+  - type: bullets
+    title: "Editing, control and personalisation"
+    icon: "fa:FaSlidersH"
+    bullets:
+      - "**Inpainting / outpainting**: regenerate a masked region or extend the canvas."
+      - "**Control**: ControlNet and adapters follow edges, depth, pose or a reference image."
+      - "**Instruction-based editing**: 'make it winter', 'remove the person'; natively multimodal models edit conversationally."
+      - "**Personalisation**: LoRA / DreamBooth on a few images of a subject or style (week 8); raises likeness and style-rights questions."
+    notes: |
+      Beyond simple image-to-image, four editing families matter in practice. Inpainting and outpainting regenerate or extend regions. Control methods follow structural guides such as edges, depth maps or human pose. Instruction-based editing lets users describe changes in words, and natively multimodal models now support conversational editing. Personalisation with LoRA or DreamBooth teaches a model a specific person, product or artistic style from a handful of images, which is powerful for product photography and dangerous for impersonation and style imitation.
+
+  - type: bullets
+    title: "Speech: text-to-speech, cloning and speech-to-speech"
+    icon: "fa:FaVolumeUp"
+    bullets:
+      - "**TTS**: text → linguistic features or tokens → acoustic model → vocoder (e.g. VITS/MMS), or LMs over audio-codec tokens."
+      - "**Voice cloning** from seconds of audio: accessibility and dubbing uses; fraud and impersonation risks."
+      - "**Speech-to-speech assistants**: listen and answer in voice with sub-second latency."
+      - "Real round trip (MMS-TTS → Whisper): {{SPEECH_NOTES}}"
+    notes: |
+      Speech generation has changed quickly. Classic neural text-to-speech converts text into acoustic features and then a waveform with a vocoder; VITS-based models such as Meta's MMS, used in the lab, do this end to end. Newer systems treat audio as codec tokens and use language models, enabling voice cloning from a few seconds of speech, valuable for accessibility and dubbing, but also used in fraud. Speech-to-speech assistants respond in voice with sub-second latency. The bullet reports our lab's round trip: synthesise a sentence, transcribe it with Whisper, and measure word error rate as a cheap intelligibility check.
+
+  - type: bullets
+    title: "Music, sound and video"
+    icon: "fa:FaFilm"
+    bullets:
+      - "**Music and sound effects**: diffusion or token LMs over audio codecs (e.g. MusicGen, Stable Audio); copyright disputes with the music industry."
+      - "**Text-to-video**: diffusion transformers over spacetime patches (e.g. Sora, Veo families); since 2025 some generate synchronised audio."
+      - "Hard problems: temporal consistency, physics, long durations, compute cost."
+      - "Video raises the strongest deepfake concerns (section 5)."
+    notes: |
+      Music generation uses the same toolkit: Meta's MusicGen is a language model over audio-codec tokens; Stable Audio is a latent diffusion model. The music industry has sued several music-generation companies over training data, a live copyright issue. Text-to-video models such as OpenAI's Sora and Google's Veo families extend diffusion transformers to space and time, and since 2025 some also generate synchronised sound. The open problems are temporal consistency, realistic physics, long durations and cost. Realistic video with sound makes deepfakes far more convincing, which is why provenance matters.
+
+  - type: quiz
+    question: "In image-to-image editing, what does increasing the 'strength' from 0.3 to 0.9 do?"
+    options:
+      - "Makes the output sharper"
+      - "Adds more noise to the original before denoising, so the output follows the prompt more and the original less"
+      - "Increases the guidance scale"
+      - "Uses more GPU memory but produces the same image"
+    answer: 1
+    notes: |
+      Answer: B. Strength controls how far along the noise schedule the original image is pushed before the model denoises it with the new prompt. Low strength keeps structure and colours; high strength keeps little of the original. It is related to the number of effective denoising steps, which is why the lab multiplies steps by strength. A, C and D confuse strength with other settings. This is the same forward process from week 4, applied to an existing image instead of pure noise.
+
+  # ------------------------------------------------ section 4
+  - type: section
+    number: 4
+    title: "Evaluating multimodal generative AI"
+    question: "How do you measure quality, alignment and truthfulness across modalities?"
+    icon: "fa:FaClipboardCheck"
+    notes: |
+      Welcome back. Section four is about evaluation, which the descriptor lists explicitly for multimodal models. We summarise metrics by task, focus on multimodal hallucination with a real probe from the lab, and discuss how to design human evaluation for images and audio. About seventeen minutes.
+
+  - type: table
+    title: "Metrics by task"
+    header: ["Task", "Automatic metrics", "Human evaluation"]
+    rows:
+      - ["Text → image", "FID (realism), CLIP score (alignment), GenEval (composition)", "Side-by-side human preference; rubric for alignment, artefacts"]
+      - ["Image → text (captions)", "CIDEr, BLEU, CLIPScore", "Correctness, completeness, hallucinated details"]
+      - ["Visual question answering", "Accuracy vs ground truth", "Error analysis by question type"]
+      - ["Text → speech", "WER via ASR, speaker similarity", "Mean Opinion Score (naturalness), intelligibility tests"]
+      - ["Text → video", "FVD, CLIP-based consistency", "Motion quality, physics, prompt adherence"]
+      - ["MLLM hallucination", "POPE yes/no probing, CHAIR (object hallucination in captions)", "Audit of invented objects, numbers, text"]
+    notes: |
+      This table maps each task to its usual metrics. Images reuse FID and CLIP score from week 4, plus compositional benchmarks. Captions use CIDEr and CLIPScore. Question answering uses accuracy, which requires ground truth, which is why generating our own chart and invoice was useful. Speech uses word error rate through a recogniser and human Mean Opinion Scores for naturalness. Video uses Fréchet Video Distance and human rating. For multimodal LLMs, hallucination has its own benchmarks: POPE asks yes/no questions about objects, and CHAIR counts objects mentioned in captions that are not in the image.
+
+  - type: bullets
+    title: "Multimodal hallucination"
+    icon: "fa:FaGhost"
+    bullets:
+      - "Describing objects that are not there, misreading numbers, inventing text, agreeing with leading questions."
+      - "**POPE** (Li et al., 2023): ask 'Is there a {object} in the image?' for present and absent objects; measure accuracy and yes-bias."
+      - "Real probe from the lab: {{POPE_NOTES}}"
+      - "Mitigate: higher resolution, 'answer only from what is visible', extraction + verification, preference tuning against hallucination."
+    notes: |
+      Hallucination in multimodal models takes specific forms: naming objects that are absent, reading numbers wrongly, inventing text in documents, and answering yes to leading questions. POPE, from Li and colleagues in 2023, measures object hallucination with balanced yes/no questions and reveals a tendency to say yes. Our lab probe asked about present and absent objects in the photos, chart and invoice; the measured result is in the bullet. Mitigations include higher resolution, instructions to rely only on visible content, extraction with verification as in the quiz, and training methods that penalise hallucination.
+
+  - type: bullets
+    title: "Designing human evaluation for images and audio"
+    icon: "fa:FaUsers"
+    bullets:
+      - "Compare **side by side** (A/B) rather than rating in isolation; randomise order to avoid position bias."
+      - "Use a **rubric**: fidelity to the prompt, artefacts, realism, style consistency; for speech: naturalness, intelligibility."
+      - "Include diverse raters and **diverse content** (skin tones, accents, languages, cultures)."
+      - "Report agreement between raters; keep automated metrics as a supplement, not a replacement."
+    notes: |
+      Automated metrics for images and audio are only partial, so human evaluation is usually required, and week 7's principles apply. Pairwise comparisons are more reliable than absolute ratings, and randomising order prevents position bias. Rubrics make criteria explicit. Rater diversity and content diversity matter particularly for multimodal outputs: image generators and speech recognisers have documented disparities across skin tones, accents and languages. Report inter-rater agreement. The project's evaluation of any multimodal component must include such a small human study.
+
+  # ------------------------------------------------ section 5
+  - type: section
+    number: 5
+    title: "Responsible use, applications and trends"
+    question: "What can go wrong, how do we label synthetic media, and where is this useful?"
+    icon: "fa:FaBalanceScale"
+    notes: |
+      The final section covers the harms of realistic synthetic media, the layered approach to provenance and labelling, consent and rights, the most valuable applications, emerging trends for 2026 and 2027, a design pattern for multimodal applications, and a responsible-use checklist. Leave time for the labelling discussion. About twenty-two minutes.
+
+  - type: cards
+    title: "Harms of realistic synthetic media"
+    cards:
+      - {icon: "fa:FaPhoneAlt", head: "Fraud and impersonation", text: "Cloned voices and deepfake video calls used to authorise payments (a 2024 case cost a firm about US$25 million)."}
+      - {icon: "fa:FaUserSlash", head: "Non-consensual imagery", text: "Sexualised deepfakes of real people, including minors: severe harm, now criminalised in many countries."}
+      - {icon: "fa:FaNewspaper", head: "Disinformation", text: "Fake images, audio and video of public figures and events; the 'liar's dividend' for real evidence."}
+      - {icon: "fa:FaUserSecret", head: "Harassment and scams", text: "Targeted fake content, romance and investment scams using synthetic personas."}
+    notes: |
+      These harms are real and current. In early 2024 an employee of the engineering firm Arup in Hong Kong transferred about twenty-five million US dollars after a video call in which the other participants were deepfakes. Non-consensual sexual deepfakes, including of minors, are one of the most damaging uses, and many jurisdictions have criminalised them. Synthetic media spreads disinformation, and the existence of fakes lets people dismiss genuine evidence, the liar's dividend. Scammers use synthetic personas. Students building multimodal applications should consider these misuse scenarios in their risk assessment.
+
+  - type: figure
+    title: "Provenance and labelling: no single layer is enough"
+    figure: provenance
+    bullets:
+      - "Combine layers: visible disclosure, **C2PA** content credentials, invisible **watermarks** (e.g. SynthID), detection."
+      - "EU AI Act Art. 50 (from 2 Aug 2026): machine-readable marking of AI-generated content; disclosure of deepfakes."
+    stack: true
+    notes: |
+      Provenance works in layers, each with weaknesses. Visible labels are simple but easy to remove. C2PA content credentials, backed by major technology and media companies, cryptographically sign the history of an asset; some cameras and platforms support them, but credentials can be stripped. Invisible watermarks, such as Google DeepMind's SynthID for images, audio, video and text, survive common edits but exist only if the generator adds them. Detectors predict whether media is synthetic but are in an arms race. The EU AI Act's Article 50 now requires machine-readable marking and disclosure of deepfakes. The lab shows how quickly simple metadata disappears.
+
+  - type: discussion
+    title: "Discuss: where should the label go?"
+    icon: "fa:FaTag"
+    prompt: "A phone's camera app uses generative AI to remove a stranger from a holiday photo and brighten the sky. Should the photo carry an 'AI-edited' label?"
+    points:
+      - "Where is the line between editing, enhancement and generation?"
+      - "Who is harmed if it is unlabelled: a family album vs. a news photo vs. an insurance claim?"
+      - "Which layer would you use: visible label, C2PA credential, watermark?"
+    notes: |
+      Three minutes in pairs, then take two or three views. There is no single right answer, which is the point: labelling rules depend on context and harm. Most students agree that a family photo needs no visible label, but a news photograph or an insurance claim does, because people rely on it as evidence. Note that the EU AI Act's deepfake disclosure focuses on content that falsely appears authentic, with lighter duties for evidently artistic or satirical work, and that C2PA credentials can record edits without a visible label, leaving the decision to the platform showing the image.
+
+  - type: bullets
+    title: "Consent, likeness and rights"
+    icon: "fa:FaIdCard"
+    bullets:
+      - "**Voice and likeness**: use a real person's face or voice only with explicit consent; several jurisdictions protect likeness and voice."
+      - "**Artists and styles**: imitating living artists' styles and training on their work without consent is contested."
+      - "**Music and film**: rights holders have sued generative audio and video companies over training data."
+      - "**Images of people contain personal data** (GDPR): faces, locations, documents in the background."
+    notes: |
+      Rights issues are central to multimodal work. Faces and voices identify people, so using them requires consent, and laws protecting voice and likeness are spreading. Training on and imitating living artists' work is ethically and legally contested. Music and film rights holders have brought lawsuits against generative audio and video companies. Under GDPR, images of people and scanned documents are personal data, so processing them through third-party APIs needs a lawful basis and data-protection checks. These points go into the project's responsible-AI section.
+
+  - type: cards
+    title: "Valuable applications"
+    cards:
+      - {icon: "fa:FaUniversalAccess", head: "Accessibility", text: "Alt text, live captions, audio description, reading documents aloud."}
+      - {icon: "fa:FaFileInvoice", head: "Document processing", text: "Invoices, forms, contracts, receipts: extract, validate, route."}
+      - {icon: "fa:FaHeadset", head: "Voice assistants", text: "Customer service and booking by phone; multilingual support."}
+      - {icon: "fa:FaGraduationCap", head: "Education", text: "Explaining diagrams, marking handwritten work with review, language practice."}
+      - {icon: "fa:FaPalette", head: "Design and marketing", text: "Concept art, product mock-ups, localised visuals, with labelling."}
+      - {icon: "fa:FaRobot", head: "Robotics and inspection", text: "Visual inspection, vision-language-action models for robots."}
+    notes: |
+      Multimodal AI has many beneficial applications. Accessibility is perhaps the clearest: image descriptions and captions help blind and deaf users. Document processing, reading invoices, forms and contracts, is a major enterprise use. Voice assistants handle customer service in many languages. In education, models explain diagrams and give feedback on handwritten work, with teacher review. Design and marketing use image generation for concepts and localisation. Industrial inspection and robotics use vision-language models, including vision-language-action models that output robot actions. Each of these needs the evaluation and safeguards covered today.
+
+  - type: bullets
+    title: "Emerging trends (2026–27)"
+    icon: "fa:FaRocket"
+    bullets:
+      - "**Any-to-any** models: one model reading and generating text, images, audio and video."
+      - "**Real-time voice and video agents** with sub-second latency."
+      - "**Video generation with sound**, longer and more controllable clips."
+      - "**Computer-use agents** that see and operate screens (week 12)."
+      - "**World models** for simulation and robotics; **on-device** multimodal small models."
+    notes: |
+      Looking ahead to the period when students graduate: models are converging on any-to-any designs; voice and video agents are becoming real time; video generation is adding sound, length and control; agents that see and operate computer screens are moving into products, which connects to week 12; world models that simulate environments are being developed for robotics and games; and small multimodal models run on phones. Remind students to verify any product claims when they encounter them: this area changes monthly.
+
+  - type: flow
+    title: "A design pattern for multimodal applications"
+    steps:
+      - {label: "Input", sub: "Image, document, audio or video; check quality and consent"}
+      - {label: "Perceive", sub: "VLM / ASR extracts content into a schema"}
+      - {label: "Verify", sub: "Code checks: totals, formats, cross-references", highlight: true}
+      - {label: "Act or generate", sub: "Answer, route, or generate media"}
+      - {label: "Review & label", sub: "Human review for risky cases; provenance labels on outputs"}
+    callout: "Let models perceive, let code compute and check, let people decide when stakes are high."
+    notes: |
+      This design pattern summarises the lecture and suits most projects. Check input quality and consent. Use a multimodal model to perceive and extract content into a structured schema. Verify with code: totals, formats, cross-references and business rules. Then act, answer or generate. Finally, route risky or uncertain cases to human review and label any generated media with provenance. The callout is the slogan: models perceive, code computes and checks, people decide when the stakes are high.
+
+  - type: bullets
+    title: "Responsible-use checklist for multimodal projects"
+    icon: "fa:FaClipboardList"
+    bullets:
+      - "**Purpose**: is multimodal AI needed? Could it harm people shown or heard?"
+      - "**Consent & data**: faces, voices and documents are personal data; minimise, anonymise, get consent."
+      - "**Verify**: test reading accuracy and hallucination on your own data; check across groups."
+      - "**Label**: disclose AI-generated media; add content credentials or watermarks where possible."
+      - "**Record**: models, versions, settings and licences (several multimodal models restrict commercial use)."
+    notes: |
+      This adapts the five-step checklist from week 1 to multimodal work. Purpose includes asking whether people shown or heard could be harmed. Consent and data protection are central because faces, voices and documents are personal data. Verification must include hallucination and group-wise checks. Labelling synthetic media is now a legal duty in the EU. Recording licences matters because several popular multimodal models, including two in today's lab, restrict commercial use.
+
+  - type: lab
+    title: "Lab 10: multimodal generative tasks, measured"
+    steps:
+      - "Caption photos and answer questions with a **VLM** (Qwen3-VL or SmolVLM)."
+      - "Answer questions about a **generated chart and invoice**; score against ground truth; run a **hallucination** probe."
+      - "Generate images with **SD-Turbo** (text → image) and edit them (image → image, varying strength)."
+      - "Score prompt alignment with **CLIP score**."
+      - "Synthesise speech (**MMS-TTS**), transcribe it with **Whisper**, compute WER."
+      - "Label an image with provenance metadata and see it disappear when re-saved."
+    runtime: "Google Colab T4 GPU (≈ 15 min); CPU works with smaller models"
+    deliverable: "Notebook with QA accuracy table, hallucination probe, generated images with CLIP scores, speech WER table and three answers"
+    notes: |
+      The lab covers the descriptor's list of multimodal generative tasks: image to text, cross-modal reasoning, text to image, image to image, text to audio and speech to text, with text to video discussed rather than run because of cost. Every part has a measurement, so students practise evaluation as well as generation. The provenance exercise makes the fragility of metadata concrete. Remind students of the licence restrictions of SD-Turbo (research release) and MMS-TTS (non-commercial).
+
+  - type: summary
+    points:
+      - "Multimodal LLMs: **modular** (encoder + projector + LLM) or **natively multimodal** (omni)."
+      - "They read photos, documents, charts, audio and video; resolution and tokens drive cost."
+      - "Trained by alignment, **visual instruction tuning** and preference tuning; adapt with LoRA."
+      - "Generation: text→image, editing, TTS and cloning, speech-to-speech, music, **text-to-video**."
+      - "Evaluate with task accuracy, CLIP score/FID, WER/MOS, **hallucination probes** and human studies."
+      - "Harms: fraud, non-consensual imagery, disinformation; **consent and rights** matter."
+      - "Provenance in layers: labels, **C2PA**, watermarks, detection; EU AI Act Art. 50."
+      - "Design pattern: models perceive, **code verifies**, people decide."
+    notes: |
+      Recap the eight points. Students should be able to explain the two MLLM designs, list generation tasks and their methods, choose evaluation metrics for each, and propose a layered provenance strategy. Next week we move from models to systems: deploying generative AI with frameworks and APIs, local and cloud serving, cost and latency, monitoring and guardrails, which every project will need.
+
+  - type: resources
+    items:
+      - {kind: doc, label: "Hugging Face blog: Vision language models explained", note: "Architectures, training, evaluation", url: "https://huggingface.co/blog/vlms"}
+      - {kind: doc, label: "Google Gemini API: Image understanding", note: "Official guide to multimodal prompting", url: "https://ai.google.dev/gemini-api/docs/image-understanding"}
+      - {kind: doc, label: "Hugging Face Diffusers documentation", note: "Text-to-image, img2img, inpainting", url: "https://huggingface.co/docs/diffusers/index"}
+      - {kind: course, label: "Hugging Face Audio Course", note: "TTS and speech models", url: "https://huggingface.co/learn/audio-course/chapter0/introduction"}
+      - {kind: doc, label: "C2PA: Content credentials", note: "Provenance standard", url: "https://c2pa.org/"}
+      - {kind: doc, label: "Google DeepMind: SynthID", note: "Watermarking for AI content", url: "https://deepmind.google/models/synthid/"}
+      - {kind: doc, label: "EU AI Act, Article 50", note: "Transparency obligations", url: "https://artificialintelligenceact.eu/article/50/"}
+      - {kind: paper, label: "Liu et al. (2023) Visual Instruction Tuning (LLaVA)", note: "The modular MLLM recipe", url: "https://arxiv.org/abs/2304.08485"}
+    notes: |
+      The Hugging Face blog on vision language models is the best technical overview. Google's image understanding guide shows how a frontier API handles images and documents. The Diffusers documentation covers the generation pipelines used in the lab. The Hugging Face Audio course covers speech synthesis and recognition. For provenance, the C2PA site, Google DeepMind's SynthID page and the text of Article 50 are the primary sources. The LLaVA paper is the key reference for multimodal instruction tuning. Foster chapter 13 and chapter 11 on music generation are the textbook readings. All links were checked in September 2026.

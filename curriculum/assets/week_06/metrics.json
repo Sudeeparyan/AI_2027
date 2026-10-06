@@ -1,0 +1,346 @@
+{
+  "tokenizers": {
+    "vocab": {
+      "GPT-2": 50257,
+      "BERT": 30522,
+      "Flan-T5": 32100,
+      "Qwen2.5": 151665,
+      "SmolLM2": 49152
+    },
+    "counts": {
+      "GPT-2": {
+        "English": 15,
+        "Irish": 38,
+        "Python code": 33
+      },
+      "BERT": {
+        "English": 16,
+        "Irish": 33,
+        "Python code": 30
+      },
+      "Flan-T5": {
+        "English": 17,
+        "Irish": 55,
+        "Python code": 37
+      },
+      "Qwen2.5": {
+        "English": 15,
+        "Irish": 35,
+        "Python code": 21
+      },
+      "SmolLM2": {
+        "English": 15,
+        "Irish": 39,
+        "Python code": 27
+      }
+    }
+  },
+  "families": {
+    "bert_fill_mask": [
+      [
+        "dublin",
+        0.731
+      ],
+      [
+        "galway",
+        0.093
+      ],
+      [
+        "belfast",
+        0.054
+      ],
+      [
+        "cork",
+        0.054
+      ],
+      [
+        "limerick",
+        0.015
+      ]
+    ],
+    "bert_fill_mask_2": [
+      [
+        "generate",
+        0.342
+      ],
+      [
+        "create",
+        0.206
+      ],
+      [
+        "produce",
+        0.18
+      ],
+      [
+        "provide",
+        0.02
+      ],
+      [
+        "make",
+        0.014
+      ]
+    ],
+    "t5": {
+      "What is the capital of Ireland?": "dublin",
+      "Translate English to German: How old are you?": "Wie old sind Sie?",
+      "Summarize: Generative models learn a probability distribution over data and can sample new examples that look like the training data.": "Understand how to use generative models."
+    },
+    "qwen": {
+      "What is the capital of Ireland?": "The capital of Ireland is Dublin.",
+      "Translate English to German: How old are you?": "Wie alt bist du?",
+      "Summarize in one sentence: Generative models learn a probability distribution over data and can sample new examples that look like the training data.": "Generative models generate new samples from their learned probability distributions, allowing them to mimic real-world data patterns."
+    }
+  },
+  "next_token_model": "Qwen/Qwen2.5-0.5B (base)",
+  "next_token": {
+    "The capital of Ireland is": [
+      [
+        "' ______'",
+        0.193
+      ],
+      [
+        "' located'",
+        0.091
+      ],
+      [
+        "' the'",
+        0.055
+      ],
+      [
+        "' Dublin'",
+        0.052
+      ],
+      [
+        "'\\n'",
+        0.038
+      ],
+      [
+        "' known'",
+        0.036
+      ],
+      [
+        "' ____'",
+        0.036
+      ],
+      [
+        "' in'",
+        0.031
+      ]
+    ],
+    "My favourite food is": [
+      [
+        "' ______'",
+        0.065
+      ],
+      [
+        "' ____'",
+        0.051
+      ],
+      [
+        "' pizza'",
+        0.039
+      ],
+      [
+        "' __'",
+        0.039
+      ],
+      [
+        "' chicken'",
+        0.037
+      ],
+      [
+        "' fish'",
+        0.037
+      ],
+      [
+        "'____'",
+        0.035
+      ],
+      [
+        "' rice'",
+        0.025
+      ]
+    ]
+  },
+  "perplexity_gpt2": {
+    "normal": 311.50043001404066,
+    "shuffled words": 2635.346679598333,
+    "Irish": 1443.2075691767946,
+    "code": 50.88837818570075
+  },
+  "reasoning": {
+    "model": "Qwen/Qwen3-0.6B",
+    "device": "cuda",
+    "gpu": "NVIDIA GeForce GTX 1650",
+    "sampling": {
+      "thinking": {
+        "temperature": 0.6,
+        "top_p": 0.95,
+        "top_k": 20
+      },
+      "no_thinking": {
+        "temperature": 0.7,
+        "top_p": 0.8,
+        "top_k": 20
+      }
+    },
+    "problems": {
+      "word problem": {
+        "question": "Tom has 3 boxes with 4 apples each. He gives away 5 apples, then buys twice as many apples as he has left. How many apples does he have now? Answer with a number.",
+        "correct_answer": 21,
+        "no_thinking": {
+          "runs": [
+            {
+              "seed": 0,
+              "tokens": 143,
+              "seconds": 14.8,
+              "finished": true,
+              "answer": 21.0,
+              "answer_tail": " **twice as many apples as he has left**. Since he has 7 apples left, he buys:\n\n$$\n2 \\times 7 = 14 \\text{ apples}\n$$\n\nNow, he has:\n\n$$\n7 + 14 = 21 \\text{ apples}\n$$\n\n### ✅ Final Answer: **21 apples**.",
+              "correct": true
+            },
+            {
+              "seed": 1,
+              "tokens": 185,
+              "seconds": 17.4,
+              "finished": true,
+              "answer": 21.0,
+              "answer_tail": "t! That can't be right. Let's re-calculate:\n\n- He has 7 apples left.\n- He buys twice that: $ 2 \\times 7 = 14 $ apples.\n- So he now has $ 7 + 14 = 21 $ apples.\n\nSo, the final answer is:\n\n**21 apples**.",
+              "correct": true
+            },
+            {
+              "seed": 2,
+              "tokens": 134,
+              "seconds": 12.9,
+              "finished": true,
+              "answer": 21.0,
+              "answer_tail": "les left}\n$$\n\nHe then buys **twice as many apples as he has left**, so he buys:\n\n$$\n2 \\times 7 = 14 \\text{ apples}\n$$\n\nNow he has:\n\n$$\n7 + 14 = 21 \\text{ apples}\n$$\n\n### Final Answer:\n$$\n\\boxed{21}\n$$",
+              "correct": true
+            }
+          ],
+          "correct": 3,
+          "n": 3,
+          "mean_tokens": 154,
+          "mean_seconds": 15.0,
+          "unfinished": 0,
+          "budget": 300
+        },
+        "thinking": {
+          "runs": [
+            {
+              "seed": 0,
+              "tokens": 813,
+              "seconds": 75.4,
+              "finished": true,
+              "answer": 21.0,
+              "answer_tail": "times 2 = 14 \\text{ apples bought}\n$$\n\n---\n\n### Step 4: Add the apples he has now\n\nNow, add the apples he has left to the apples he bought:\n\n$$\n7 + 14 = 21\n$$\n\n---\n\n### Final Answer:\n\n$$\n\\boxed{21}\n$$",
+              "correct": true
+            },
+            {
+              "seed": 1,
+              "tokens": 836,
+              "seconds": 78.3,
+              "finished": true,
+              "answer": 21.0,
+              "answer_tail": " left. Since he has 7 apples, twice that amount is:\n\n$$\n7 \\times 2 = 14 \\text{ apples}\n$$\n\nFinally, the total number of apples he has now is:\n\n$$\n7 + 14 = 21\n$$\n\n---\n\n**Final Answer**\n$$\n\\boxed{21}\n$$",
+              "correct": true
+            },
+            {
+              "seed": 2,
+              "tokens": 699,
+              "seconds": 66.3,
+              "finished": true,
+              "answer": 21.0,
+              "answer_tail": "ining apples: $ 7 \\times 2 = 14 $.\n\n4. **Final total apples:**  \n   Adding the apples given away and the apples bought:  \n   $ 7 + 14 = 21 $.\n\n---\n\n**Final Answer:**  \nTom now has $\\boxed{21}$ apples.",
+              "correct": true
+            }
+          ],
+          "correct": 3,
+          "n": 3,
+          "mean_tokens": 783,
+          "mean_seconds": 73.3,
+          "unfinished": 0,
+          "budget": 2048
+        }
+      },
+      "scheduling puzzle": {
+        "question": "A lab has 3 GPUs. Each training run needs 2 GPUs for 4 hours. How many hours are needed to finish 5 runs if runs can execute in parallel whenever GPUs are free? Answer with a number.",
+        "correct_answer": 20,
+        "no_thinking": {
+          "runs": [
+            {
+              "seed": 0,
+              "tokens": 118,
+              "seconds": 11.3,
+              "finished": true,
+              "answer": 40.0,
+              "answer_tail": "8 \\text{ hours}\n$$\n\nNow, we want to **finish 5 runs** in parallel.\n\nSince each run can be executed in **8 hours**, the total time needed is:\n\n$$\n5 \\times 8 = 40 \\text{ hours}\n$$\n\n**Answer: 40 hours**.",
+              "correct": false
+            },
+            {
+              "seed": 1,
+              "tokens": 135,
+              "seconds": 12.9,
+              "finished": true,
+              "answer": 13.33,
+              "answer_tail": "\\text{ hours per run}\n$$\n\nNow, if runs can execute in **parallel**, the total time needed to finish **5 runs** is:  \n$$\n5 \\times 2.67 \\approx 13.33 \\text{ hours}\n$$\n\n### Final Answer: **13.33 hours**.",
+              "correct": false
+            },
+            {
+              "seed": 2,
+              "tokens": 97,
+              "seconds": 9.6,
+              "finished": true,
+              "answer": 20.0,
+              "answer_tail": " total time needed for 5 runs as:\n\n- Each run takes 4 hours.\n- Since there are 5 runs, the total time is:\n\n$$\n5 \\text{ runs} \\times 4 \\text{ hours per run} = 20 \\text{ hours}\n$$\n\n**Answer: 20 hours.**",
+              "correct": true
+            }
+          ],
+          "correct": 1,
+          "n": 3,
+          "mean_tokens": 117,
+          "mean_seconds": 11.3,
+          "unfinished": 0,
+          "budget": 300
+        },
+        "thinking": {
+          "runs": [
+            {
+              "seed": 0,
+              "tokens": 2048,
+              "seconds": 190.6,
+              "finished": false,
+              "answer": null,
+              "answer_tail": "2 hours? But that seems odd.\n\nAlternatively, maybe the question is that each run takes 4 hours, regardless of how many GPUs are available. So, 5 runs would take 5*4=20 hours. But that would be if each",
+              "correct": false
+            },
+            {
+              "seed": 1,
+              "tokens": 2048,
+              "seconds": 198.3,
+              "finished": false,
+              "answer": null,
+              "answer_tail": "nce there are 3 GPUs, maybe the fourth run can use GPU 1 and GPU 2 again. Then the fifth run would need GPU 1 and GPU 3. So each of these would take 4 hours. Therefore, total time is 5 * 4 = 20 hours.",
+              "correct": false
+            },
+            {
+              "seed": 2,
+              "tokens": 2048,
+              "seconds": 213.9,
+              "finished": false,
+              "answer": null,
+              "answer_tail": "eed 5 * 4 = 20 hours, but since you have 3 GPUs, you can do 3 runs in parallel, and then 2 more runs, but since they can run in parallel, maybe those 2 runs can also be done in parallel with the first",
+              "correct": false
+            }
+          ],
+          "correct": 0,
+          "n": 3,
+          "mean_tokens": 2048,
+          "mean_seconds": 200.9,
+          "unfinished": 3,
+          "budget": 2048
+        }
+      }
+    }
+  }
+}

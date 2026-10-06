@@ -1,0 +1,13 @@
+{
+  "dcgan": {
+    "epochs": 8,
+    "final_loss_D": 0.7732394933700562,
+    "final_loss_G": 1.1399065256118774,
+    "final_D_real": 0.6779413819313049,
+    "final_D_fake": 0.27897974848747253
+  },
+  "ring": {
+    "vanilla_final_modes": 7,
+    "wgan_final_modes": 8
+  }
+}

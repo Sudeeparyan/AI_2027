@@ -1,0 +1,6 @@
+{
+  "LORA_PARAMS": "LoRA (r = 16, attention projections) trains 2,162,688 of 496,195,456 parameters (0.44%).",
+  "RESULTS_SUMMARY": "Accuracy on 200 held-out messages: base, zero-shot 52%, base, few-shot 85%, LoRA fine-tuned 97%.",
+  "ADAPTER_SIZE": "measured 8.7 MB vs 1,976 MB.",
+  "RESULTS_NOTES": "| Model | Accuracy | Invalid answers |\n|---|---|---|\n| base, zero-shot | 52% | 6.5% (13 of 200) |\n| base, few-shot | 85% | 1.0% (2 of 200) |\n| LoRA fine-tuned | 97% | 0.5% (1 of 200) |\n\nTest set: 200 held-out Banking77 messages (10 intents). Training: 1216 training examples, 1 epoch, 76 min on a laptop CPU. Adapter: 8.7 MB."
+}

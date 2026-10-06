@@ -1,0 +1,102 @@
+{
+  "n": 3,
+  "title": "Diffusion and generated media",
+  "outcomes": [
+    "LO1",
+    "LO2",
+    "LO4"
+  ],
+  "overview": "Explain generation through learned denoising, distinguish a training example from a generation step, and use a clear rubric to judge generated media. Image generation is the central example; audio and video establish the wider landscape before the multimodal week.",
+  "prerequisites": "Week 1 probability and Week 2 training objectives. Review mean squared error and the role of random noise.",
+  "objectives": [
+    "Explain the forward noising process and the learned reverse process.",
+    "Identify what a denoiser receives during training and during generation.",
+    "Compare media outputs using prompt adherence, quality, diversity and responsible-use criteria."
+  ],
+  "concepts": [
+    {
+      "title": "Start by adding known noise",
+      "explanation": "Diffusion training begins with data and a specified process that adds noise. At a selected time step, the original sample is combined with Gaussian noise at a chosen strength. One common expression is x_t = sqrt(alpha_bar_t) x_0 + sqrt(1-alpha_bar_t) epsilon. Here x_0 is the clean training sample, epsilon is sampled noise, and alpha_bar_t controls how much original signal remains. The subscript t is a noise level, not the time a camera captured an image. During training we know the clean sample and the added noise, so we can construct learning targets. The forward process is not the learned act of image creation. It prepares noisy examples from which the network learns information needed for the reverse process.",
+      "example": "Take a single illustrative pixel x_0 = 0.8, alpha_bar_t = 0.64 and noise epsilon = -0.5. The noisy value is sqrt(0.64) × 0.8 + sqrt(0.36) × (-0.5) = 0.64 - 0.30 = 0.34. A real image has many pixels or latent values, each with sampled noise. The calculation explains one step without claiming to be an image generator.",
+      "misconception": "Diffusion training only shows the model fully random images with no targets.",
+      "correction": "Training constructs noisy examples from known data and noise. The objective uses the chosen target, such as the added noise, to learn denoising behaviour.",
+      "question": "As alpha_bar_t approaches zero, which part increasingly dominates x_t?",
+      "answer": "The noise term dominates because its coefficient approaches one while the clean-signal coefficient approaches zero."
+    },
+    {
+      "title": "Learn a reverse process",
+      "explanation": "A denoising network is trained to predict a quantity that helps recover structure from a noisy sample, often the added noise. Its inputs include the noisy sample and the noise level; conditional models also receive information such as a text representation. A noise-prediction objective can use mean squared error between the actual added noise and the prediction. At generation time, begin from random noise and repeatedly apply the learned prediction with a scheduler. The scheduler determines the update rules across steps. Crucially, the original clean target is unavailable for a new generated sample. A classroom animation that blends a noisy image back toward its known original illustrates restoration, but it is not a trained generative reverse process. The practical work should make that boundary visible.",
+      "example": "Suppose the known training noise vector is [0.4, -0.2] and the network predicts [0.1, -0.1]. The squared errors are 0.09 and 0.01, so mean squared error is 0.05. Training adjusts parameters to reduce this error over many examples. Later generation must use the learned prediction alone; supplying the original noise vector at inference would give the algorithm information it should not have.",
+      "misconception": "During generation the model compares every step with the exact image it is trying to reveal.",
+      "correction": "A new sample has no hidden clean target supplied to the model. Generation uses learned parameters, current noisy state, time information and any conditioning.",
+      "question": "What is wrong with a claimed diffusion generator that repeatedly moves toward an already stored clean image?",
+      "answer": "It uses the target as an oracle and demonstrates interpolation or restoration, not learned generation from an unknown target."
+    },
+    {
+      "title": "Conditioning and controllable generation",
+      "explanation": "Conditioning gives a generative system information about the desired output. A text-to-image pipeline may encode a prompt, use that representation during denoising and decode an image from a learned latent space. A latent diffusion system performs much of its denoising in a compressed representation rather than directly in full-resolution pixels. Controls can include the initial random seed, number of inference steps and guidance strength, where supported. These controls interact with the particular model and scheduler. More steps or stronger guidance does not universally improve a result. Compare one change at a time using the same task and a fixed rubric. Retain the model and settings with each output so classmates can understand the experiment without assuming another platform has equivalent controls.",
+      "example": "The brief is \"a blue paper boat on a plain white background\". Generate two outputs while changing only the number of inference steps, keeping the model and seed fixed where the tool allows it. Check colour, object, background and visible artifacts separately. If a tool does not expose seeds, record that limitation and use several samples instead of claiming a tightly controlled comparison.",
+      "misconception": "A stronger guidance setting guarantees every instruction will be followed.",
+      "correction": "Guidance changes the sampling behaviour and can introduce trade-offs. Measure adherence and visual quality on actual outputs.",
+      "question": "Why record the scheduler as well as the number of steps?",
+      "answer": "The scheduler determines the numerical update procedure. Equal step counts with different schedulers need not mean equivalent computation or results."
+    },
+    {
+      "title": "Images, audio and video need different checks",
+      "explanation": "Generated media covers more than attractive pictures. Image tasks include generation, editing and inpainting; audio tasks include speech and music; video tasks add change over time. Many architectures are used, so not every media generator is a diffusion model. Evaluation must match the task. For an image, inspect object count, lettering and composition. For speech, check the transcript, intelligibility and timing. For video, look for inconsistent objects and actions across frames. Also ask whether the input data and requested likeness are appropriate for the exercise, and disclose synthetic content when relevant. A generated portrait is not evidence that a person attended an event. Keep responsible-use discussion connected to a concrete output rather than treating visual realism as proof of truth.",
+      "example": "A fictional event campaign includes a poster, a spoken invitation and a five-second clip. The poster shows the wrong date, the speech mispronounces the venue and the video changes the number of chairs between frames. All three may look or sound polished. Separate checklists expose different failures, and a verified text brief acts as the shared reference for the whole campaign.",
+      "misconception": "Realistic media is reliable evidence of a real event.",
+      "correction": "Generation can create plausible scenes that never happened. Verify provenance and factual claims independently of perceptual quality.",
+      "question": "What extra criterion does video need beyond judging isolated still images?",
+      "answer": "Temporal consistency: objects, identities, counts, motion and actions should remain coherent across frames for the intended task."
+    }
+  ],
+  "demo": {
+    "title": "From noisy training examples to learned denoising",
+    "steps": [
+      "Show the forward-noise equation with the one-pixel example, then a small array.",
+      "Inspect the small denoiser training inputs and targets; identify the actual loss.",
+      "Train the supplied small model and compare a learned prediction with its held-out target.",
+      "Inspect a generation or sampling demonstration and confirm the clean target is not supplied at inference.",
+      "Review one generated-media output against the brief and separate technical quality from factual support."
+    ],
+    "expected": "A numerical noise calculation, evidence from an actual learned denoiser and a clear statement of what the small demonstration can and cannot generate.",
+    "offline": "The small numerical experiment runs locally. A documented instructor output can support the media review when a hosted image tool is unavailable; label the output as a saved example."
+  },
+  "practice": [
+    {
+      "question": "Why does the model receive the noise level t?",
+      "answer": "The amount of corruption changes across steps. Time or noise-level information helps the network choose a prediction appropriate to the current state."
+    },
+    {
+      "question": "A classroom code cell subtracts the exact noise it added. Has it learned to denoise?",
+      "answer": "No. It reverses a known calculation using privileged information. A learned denoiser must predict from allowed inputs and be checked on separate examples."
+    },
+    {
+      "question": "A poster is visually excellent but invents the event date. How should it be graded?",
+      "answer": "Record visual quality and date correctness separately. It fails a factual requirement and must be corrected before use."
+    }
+  ],
+  "lab": {
+    "title": "Denoising evidence and a media review",
+    "goal": "Understand the training mechanism and judge media with explicit criteria.",
+    "steps": [
+      "Calculate one noisy value by hand and verify the notebook result.",
+      "Run the learned small-denoiser experiment and identify its parameters, training inputs and target.",
+      "Change one noise or training setting and compare held-out error using the same cases.",
+      "Inspect the sampling demonstration and state whether it is unconditional, conditioned or only a denoising component.",
+      "Complete image/audio/video review examples and write one limitation for each modality."
+    ],
+    "deliverable": "Executed notebook, the noise calculation, a controlled denoiser comparison and a media-specific review table."
+  },
+  "references": [
+    "https://arxiv.org/abs/2006.11239",
+    "https://huggingface.co/docs/diffusers/en/using-diffusers/unconditional_image_generation",
+    "https://huggingface.co/docs/diffusers/en/quicktour"
+  ],
+  "extension": "Use an approved pretrained diffusion pipeline to compare two settings on the same harmless brief. Record hardware, model licence, runtime and any access requirements; do not assume the optional pipeline runs on every laptop.",
+  "timing": {
+    "lecture": 120,
+    "lab": 120
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "mnist_ddpm": {
+    "epochs": 8,
+    "device": "cuda (NVIDIA GeForce GTX 1650)",
+    "train_minutes": 8.1,
+    "final_loss": 0.025352471480225652,
+    "unet_params": 254337
+  },
+  "sd_dtype": "torch.float32",
+  "sd_times_seconds": {
+    "sd15_25steps_g1.0": 163.6,
+    "sd15_25steps_g3.0": 344.1,
+    "sd15_25steps_g7.5": 471.4,
+    "sd15_25steps_g15.0": 482.2,
+    "sd15_2steps": 45.3,
+    "sd15_5steps": 88.2,
+    "sd15_10steps": 162.7,
+    "sd15_25steps": 418.6,
+    "sdturbo_1steps": 25.0,
+    "sdturbo_2steps": 30.0,
+    "sdturbo_4steps": 46.5
+  },
+  "sd_device": "cpu",
+  "ddpm2d_final_loss": 0.2756601321697235
+}

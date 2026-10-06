@@ -1,0 +1,98 @@
+{
+  "n": 5,
+  "title": "Prompting, context and structured outputs",
+  "outcomes": [
+    "LO1",
+    "LO4"
+  ],
+  "overview": "Write clear prompts, select useful evidence and check the result. Compare alternative prompts on the same task rather than judging a single fluent answer.",
+  "prerequisites": "Weeks 1–4: model families, tokens, transformer attention, training versus inference and basic output evaluation.",
+  "objectives": [
+    "Write a prompt with a clear task, relevant context, constraints and an output format.",
+    "Compare prompt variants with a fixed set of examples and a simple rubric.",
+    "Validate both the structure and factual content of a model response."
+  ],
+  "concepts": [
+    {
+      "title": "A prompt is a task specification",
+      "explanation": "A useful prompt tells the model what to do, what information to use and what a successful answer should look like. Start with a task such as summarise, extract, compare or explain. Add the intended audience and any constraints that matter. Specify the output format when it makes the answer easier to check. A role can suggest a style, but it does not give the model professional competence or access to missing facts. Prompting changes the information presented at inference time; it does not update the model's learned weights. Treat a prompt as a hypothesis about how to obtain a useful response. Test it on several cases, record failures and improve it using evidence.",
+      "example": "A weak instruction says, 'Help with this notice.' A stronger instruction says, 'Using the notice below, write a three-sentence explanation for new students. Include the deadline and room. If either is absent, state that it is not provided. Do not invent details.' Give the model a notice with a deadline but no room. Check whether it preserves the deadline and explicitly reports the missing room.",
+      "misconception": "A detailed role such as expert professor guarantees a correct answer.",
+      "correction": "A role can influence style. Evidence, task design and checking determine whether the answer is useful.",
+      "question": "Which part of the stronger prompt prevents an invented room number?",
+      "answer": "The instruction to use the supplied notice and explicitly report missing information; this helps but the output still needs checking."
+    },
+    {
+      "title": "Select context and separate it from instructions",
+      "explanation": "Context is information made available to the model for the current task. It may include a conversation, a document, examples, images or tool results. The context window limits how much the model can process in one request, and a large window does not guarantee that every detail will be used correctly. Choose material that helps answer the question, keep source labels and remove irrelevant duplication. Use clear boundaries between your instructions and quoted material. A document may contain instructions written by someone else; these are data to inspect, not authority to change the task. Supplying a document is different from training on it. The application may retain information separately, so context and persistent memory also need distinct explanations.",
+      "example": "Students receive two course notices: an older room booking and a newer correction. Label them Notice A and Notice B with dates. Ask for the current room and a supporting quotation. Add an unrelated club notice. Compare the answer before and after removing the distraction. Discuss why the document date and the quoted evidence matter more than the model's confident tone.",
+      "misconception": "Uploading a document permanently teaches the underlying model its contents.",
+      "correction": "The document usually supplies task context; changes to model weights require a separate training process.",
+      "question": "What should happen if the two notices disagree and neither has a reliable date?",
+      "answer": "Report the conflict and request an authoritative clarification rather than inventing which notice is current."
+    },
+    {
+      "title": "Examples, decomposition and controlled comparisons",
+      "explanation": "Zero-shot prompting gives instructions without a worked example. Few-shot prompting includes a small number of examples that show the desired behaviour. Examples are useful when a label, tone or output convention is difficult to describe, but they can also introduce mistakes and narrow the model's responses. Choose examples that cover meaningful variations, including a missing-information case. Break a complicated task into smaller steps when the intermediate results can be checked. For example, extract claims first, verify them second and write a summary last. Do not assume that more steps always improve performance. Compare alternatives using the same inputs and scoring rules. Change one important feature at a time, and keep a separate set of cases for the final comparison.",
+      "example": "A helpdesk routes messages to timetable, access or other. Provide one short example for each category and one ambiguous message that should be labelled uncertain. Compare this prompt with an instruction-only version on six new messages. Record correct labels and explanations for failures. A prompt that performs well on the shown examples but fails on the new messages needs revision.",
+      "misconception": "A long prompt with many examples must outperform a short prompt.",
+      "correction": "Relevant examples can help, while irrelevant or misleading examples can reduce performance. Measure the effect on unseen cases.",
+      "question": "Why should the final comparison use messages that were not used while editing the prompt?",
+      "answer": "It tests whether the improvement transfers beyond the examples used to design the prompt."
+    },
+    {
+      "title": "Structured output still needs semantic checks",
+      "explanation": "Structured output places a response into an agreed format, such as a table or a JSON object with named fields. This makes results easier to inspect and process. A schema describes the fields, data types and allowed categories. Some APIs can constrain output to supported schema rules, while a plain chat instruction only asks the model to follow the format. In both cases, valid structure does not establish that the values are true. Validate required fields, types and sensible ranges, then compare important values with the source. Represent missing information explicitly rather than filling every field with a guess. A safe workflow has an error path: reject, repair or send uncertain output for human review before using it.",
+      "example": "A booking extractor returns a JSON object with date, attendees and room. The source says '18 students meet on 12 November; room to follow.' One response is valid JSON but gives 81 attendees and Room 204. A format validator accepts the types. A source check rejects the count and room. The corrected object uses 18 and a null room value.",
+      "misconception": "If a response passes JSON validation, it is correct.",
+      "correction": "Schema validation checks structure. A separate check must verify meaning, evidence and constraints.",
+      "question": "Give one format check and one factual check for the booking object.",
+      "answer": "Check that attendees is an integer, then check that its value equals the number stated in the source."
+    }
+  ],
+  "demo": {
+    "title": "Improve a student-notice extractor",
+    "steps": [
+      "Show a short synthetic notice with a missing room and a clear deadline.",
+      "Run or inspect an instruction-only response and identify an unsupported detail.",
+      "Add task, context boundaries, missing-information rules and a requested format.",
+      "Validate the structured response and check each value against the notice.",
+      "Test a new notice and record whether the revised prompt transfers."
+    ],
+    "expected": "Students distinguish prompt quality, format compliance and evidence accuracy, and explain at least one failure.",
+    "offline": "Use clearly labelled prepared responses; validate them with Python. This evaluates examples of output and does not simulate a live LLM."
+  },
+  "practice": [
+    {
+      "question": "A response is fluent but changes the deadline. Which success criterion failed?",
+      "answer": "Factual fidelity to the supplied notice, even if clarity and format are good."
+    },
+    {
+      "question": "When could a few-shot example make a response worse?",
+      "answer": "When it has a wrong label, an inconsistent format or a pattern that does not fit the actual task."
+    },
+    {
+      "question": "A quoted webpage tells the assistant to ignore its task. How should it be handled?",
+      "answer": "Treat the quoted instruction as untrusted source content and continue the authorised task; do not let the webpage redefine it."
+    }
+  ],
+  "lab": {
+    "title": "A small prompt comparison with validation",
+    "goal": "Produce evidence that a revised prompt improves a specific extraction task.",
+    "steps": [
+      "Create six synthetic notices with known answers; reserve two for the final check.",
+      "Write a baseline and a revised prompt without changing the task or sources.",
+      "Collect permitted live outputs or inspect the supplied labelled response set.",
+      "Run structure checks and score factual accuracy, missing-information handling and clarity.",
+      "Use the reserved cases and write a short explanation of improvement and remaining failures."
+    ],
+    "deliverable": "A prompt pair, an eight-column results table with source checks, and a short justified recommendation. Record whether outputs are live or supplied."
+  },
+  "references": [
+    "https://ai.google.dev/gemini-api/docs/prompting-strategies",
+    "https://ai.google.dev/gemini-api/docs/structured-output",
+    "https://ai.google.dev/gemini-api/docs/long-context",
+    "https://ai.google.dev/gemini-api/docs/safety-guidance"
+  ],
+  "extension": "Compare a prompt-only format request with a supported structured-output API on the same cases. Record model, date, configuration and any parsing failures."
+}

@@ -1,0 +1,72 @@
+{
+  "model": "Qwen/Qwen2.5-1.5B-Instruct",
+  "classification": [
+    {
+      "prompt": "zero-shot",
+      "n": 40,
+      "accuracy": 0.7,
+      "avg_tokens": 4.6,
+      "seconds": 75.3,
+      "invalid": 0
+    },
+    {
+      "prompt": "one-shot",
+      "n": 40,
+      "accuracy": 0.6,
+      "avg_tokens": 4.9,
+      "seconds": 77.6,
+      "invalid": 0
+    },
+    {
+      "prompt": "few-shot",
+      "n": 40,
+      "accuracy": 0.725,
+      "avg_tokens": 4.8,
+      "seconds": 102.1,
+      "invalid": 0
+    },
+    {
+      "prompt": "role + few-shot",
+      "n": 40,
+      "accuracy": 0.675,
+      "avg_tokens": 5.0,
+      "seconds": 117.8,
+      "invalid": 0
+    }
+  ],
+  "reasoning": [
+    {
+      "prompt": "direct",
+      "n": 16,
+      "accuracy": 0.5,
+      "avg_tokens": 3.4,
+      "seconds": 18.1
+    },
+    {
+      "prompt": "chain-of-thought",
+      "n": 16,
+      "accuracy": 0.812,
+      "avg_tokens": 189.4,
+      "seconds": 653.5
+    },
+    {
+      "prompt": "self-consistency (k=5)",
+      "n": 16,
+      "accuracy": 0.875,
+      "avg_tokens": 914.0,
+      "seconds": null
+    }
+  ],
+  "extraction": {
+    "valid_rate": 0.5,
+    "correct_rate": 0.3333333333333333
+  },
+  "injection": {
+    "defended": 0.6666666666666666,
+    "naive": 1.0
+  },
+  "judge": {
+    "consistent_rate": 0.75,
+    "correct_both_rate": 0.75
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "bert_it_animal_head": {
+    "layer": 9,
+    "head": 11,
+    "weight": 0.6755205988883972
+  },
+  "chargpt_params": 1829441,
+  "chargpt": {
+    "steps": 3000,
+    "device": "cuda",
+    "minutes": 8.7,
+    "val_loss_start": 4.372134733200073,
+    "val_loss_end": 1.5145168781280518,
+    "val_ppl_end": 4.547223732841856,
+    "vocab": 65
+  },
+  "chargpt_samples": {
+    "0": "ROMEO:\ndJU;gf:MizAhT,lXeibxua: J$:H;xdyStqR!jCtHxhKTRMCNogCWu&FXYbXcWHuSLKTKkGJkNaIqWrN?Lom.RQqsnOxXdZC:-zGinrUK&R ;U.PZR!X!WZCV,IysKSwAZmIawhfDyBMunWHqjeW-,ICWkL3w$XB,iBBWyhGYDS,:rA$&GJX",
+    "300": "ROMEO:\nI thy and whe, the hum fousing fore the hen.\n\nMENRONTIO:\nYou wese and bestay sor? om then hond and fing you here\nBisterin, you wir I whatt to the ent,\nComence with the as mirkselli",
+    "3000": "ROMEO:\nI think my heart is uncle.\n\nMENENIUS:\nMy lord, I would leave you me for grace.\n\nCORIOLANUS:\nCome,--\nIn the noble ribbour that the matter;\nI cannot be our great king, hear mistress'"
+  }
+}

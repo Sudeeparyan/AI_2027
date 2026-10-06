@@ -1,0 +1,101 @@
+{
+  "n": 4,
+  "title": "Transformers and large language models",
+  "outcomes": [
+    "LO1",
+    "LO3"
+  ],
+  "overview": "Connect tokens, embeddings, attention and next-token generation without hiding the essential mathematics. Use small arrays to inspect the mechanism and a small generator to see why a full language model needs more than an attention grid.",
+  "prerequisites": "Week 1 conditional probability and Week 2 neural-network training. The worksheet refreshes dot products, weighted averages and normalisation.",
+  "objectives": [
+    "Trace text through tokenisation, embeddings and a transformer block.",
+    "Calculate simple attention weights and apply a causal mask.",
+    "Distinguish encoder, decoder and encoder-decoder roles, and explain the limits of fluent generation."
+  ],
+  "concepts": [
+    {
+      "title": "Tokens, embeddings and position",
+      "explanation": "A model first represents text in a form that a neural network can process. A tokenizer splits text into tokens and maps them to vocabulary IDs. Tokens can be whole words, subword pieces or other units; token count is not generally word count. A learned embedding maps each ID to a vector. The vector is not a dictionary definition, but a set of learned numbers used by the model. Position information is also needed because a sequence is more than a bag of words. Different transformer designs encode position differently. A context window limits what can be processed in a request, and the product may reserve part of that capacity for output or other context. Do not infer exact product limits from a toy notebook.",
+      "example": "The sentences \"the dog chased the cat\" and \"the cat chased the dog\" contain the same word types but describe different events. A bag of word counts loses the roles. Ordered tokens and position information let a model distinguish their arrangements. In a tiny teaching vocabulary, a word can have an ID; a real subword tokenizer may split the same word into several tokens.",
+      "misconception": "Every English word is one token, so words and tokens are interchangeable units.",
+      "correction": "Tokenisation depends on the tokenizer, spelling and language. Measure with the actual tokenizer when a real system has a token budget.",
+      "question": "Why is an embedding ID different from the embedding vector?",
+      "answer": "The ID selects an entry in a learned table; the vector is the numerical representation used in computation. Adjacent IDs do not necessarily represent similar meanings."
+    },
+    {
+      "title": "Attention is a weighted information mix",
+      "explanation": "Self-attention lets a token combine information from permitted positions in the same sequence. Learned projections produce queries Q, keys K and values V. Query-key similarities provide scores; dividing by the square root of the key dimension controls their scale. Softmax turns the scores into positive weights that sum to one. Multiplying those weights by V produces a weighted mixture. The standard expression is Attention(Q,K,V) = softmax(QK^T / sqrt(d_k))V. Start with one query and a few scalar scores before looking at the matrix form. Multiple heads learn different projections and combine their outputs. Attention is one part of a transformer block; feed-forward layers, residual connections and normalisation also matter. A heatmap shows a computation, not a complete causal explanation of a model answer.",
+      "example": "For illustrative scaled scores [1, 2, 0], softmax gives approximately [0.245, 0.665, 0.090]. With scalar values [10, 20, 30], the output is 0.245 × 10 + 0.665 × 20 + 0.090 × 30 ≈ 18.45. The largest weight belongs to the middle value, but the result combines all three. These supplied scores demonstrate the calculation rather than a learned linguistic relationship.",
+      "misconception": "The largest attention weight reveals the model's true reason for its final answer.",
+      "correction": "It identifies a strong contribution within one attention calculation. The full model has many layers and interactions, so the weight alone is not a faithful explanation.",
+      "question": "If attention weights are [0.25, 0.75] and values are [4, 8], what is the mixed output?",
+      "answer": "0.25 × 4 + 0.75 × 8 = 7. It is a weighted mixture, not simply a copy of the highest-weight value."
+    },
+    {
+      "title": "Causal generation and model roles",
+      "explanation": "An autoregressive decoder predicts the next token from earlier tokens. During training it must not look at the future token it is supposed to predict. A causal attention mask blocks those future positions before softmax, producing zero attention weight there. At inference, the model generates a token, adds it to the context and repeats until it stops or reaches a limit. Encoder models usually build contextual representations using both sides of an input; BERT is a familiar masked-language encoder example, not a drop-in chat generator. Encoder-decoder models first represent an input and then generate an output conditioned on it, as in translation. These roles organise the concepts, while individual modern systems can combine architectures and training objectives in different ways.",
+      "example": "A decoder is learning to continue \"the library opens\". When predicting the next token, it may use \"the\", \"library\" and \"opens\", but it must not see the correct answer already written later in the sequence. For scores [1, 2, 0], masking the last position gives weights approximately [0.269, 0.731, 0]. The remaining weights are renormalised rather than left unchanged.",
+      "misconception": "A decoder mask hides future tokens only during the final demonstration, so training can use them.",
+      "correction": "The causal constraint matters during training too; otherwise the model could exploit the answer it is meant to predict.",
+      "question": "Why is comparing BERT and a chat decoder on free conversation without task adaptation misleading?",
+      "answer": "Their standard architectures and objectives support different interfaces and tasks. Compare appropriately configured systems on a stated task rather than assuming all language models are interchangeable chatbots."
+    },
+    {
+      "title": "From language modelling to an assistant",
+      "explanation": "A transformer architecture becomes useful through data, training and an application around it. Pretraining learns broad regularities using a prediction objective. Further instruction training and preference-based methods can shape response behaviour. At use time, prompts, supplied documents, retrieval and tools influence the answer without necessarily changing weights. Sampling settings control how tokens are selected; lower temperature usually concentrates probability on more likely options, but does not guarantee factual correctness. A model may generate a persuasive solution or explanation that contains an error. Evaluate the answer and its evidence, not the length of its reasoning text. A small classroom generator is valuable when learners can identify what was actually trained and changed. It should not be presented as matching a large production assistant.",
+      "example": "A model writes \"7 × 8 = 54\" in an otherwise clear explanation. The text can be checked by a simple independent multiplication, giving 56. Asking for a longer explanation may produce more fluent text without fixing the arithmetic. A well-designed application can route the multiplication to a calculator and then explain the checked result, connecting model output with a more appropriate tool.",
+      "misconception": "Low temperature and a long step-by-step answer make a response trustworthy.",
+      "correction": "They affect output behaviour and presentation. Verify the result with task-appropriate evidence, tests or tools; explanatory text is not guaranteed to expose internal reasoning.",
+      "question": "What evidence would show that a notebook changed model parameters rather than only changed the prompt?",
+      "answer": "A training step with gradients or another update method, changed parameter values and a controlled before/after evaluation. A new prompt alone does not establish training."
+    }
+  ],
+  "demo": {
+    "title": "Compute attention and inspect generation",
+    "steps": [
+      "Tokenise two short sentences and inspect IDs, vector shapes and order.",
+      "Calculate one attention row from supplied Q, K and V values.",
+      "Apply a causal mask and verify forbidden weights are zero and each allowed row sums to one.",
+      "Run the supplied small text-generation example and distinguish its learned components from the illustrative arithmetic.",
+      "Change a permitted input or setting, compare outputs and identify one error that needs an independent check."
+    ],
+    "expected": "Correct attention arithmetic, a visible causal-mask effect and a reasoned explanation of the small generation model's capabilities and limits.",
+    "offline": "The supplied arrays and small model are local. An optional large-model example can be replaced by a dated saved response for discussion, without relabelling the replay as a new inference run."
+  },
+  "practice": [
+    {
+      "question": "Why is softmax applied after the causal mask?",
+      "answer": "Disallowed scores are made effectively negative infinity before normalisation so their probabilities become zero and the allowed positions are renormalised."
+    },
+    {
+      "question": "Which simplified architecture role suits reading an input sentence and writing its translation?",
+      "answer": "An encoder-decoder: the encoder represents the source and the decoder generates a translation conditioned on that representation."
+    },
+    {
+      "question": "An attention worksheet works correctly. Does it implement a complete transformer LLM?",
+      "answer": "No. A complete model also needs learned embeddings and projections, multiple layers and supporting components, an output distribution, training and decoding. The worksheet isolates one mechanism."
+    }
+  ],
+  "lab": {
+    "title": "Attention, masks and a small language generator",
+    "goal": "Use mathematics and code to explain the path from context to a generated token.",
+    "steps": [
+      "Run the token and embedding examples; label each array dimension.",
+      "Compute a dot product and softmax row by hand, then compare with the notebook.",
+      "Apply a causal mask and test that no future-position weight remains.",
+      "Run and modify the supplied small generation example, recording what is learned and what is fixed.",
+      "Submit a model-role comparison and a checked explanation of one generated error."
+    ],
+    "deliverable": "Executed notebook, one worked attention calculation, mask checks and a short model/application comparison."
+  },
+  "references": [
+    "https://arxiv.org/abs/1706.03762",
+    "https://developers.google.com/machine-learning/crash-course/llm/transformers",
+    "https://developers.google.com/machine-learning/crash-course/llm"
+  ],
+  "extension": "Trace a full small transformer block including feed-forward and residual paths. Compare tokenisation for two languages using one documented tokenizer without treating token counts as a measure of language complexity.",
+  "timing": {
+    "lecture": 120,
+    "lab": 120
+  }
+}

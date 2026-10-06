@@ -1,0 +1,8 @@
+{
+  "UNET_PARAMS": "254,337",
+  "MNIST_EPOCHS": "8",
+  "MNIST_DEVICE": "an NVIDIA GTX 1650 laptop GPU",
+  "MNIST_MIN": "8",
+  "SD_DEVICE": "a laptop CPU, float32",
+  "SD_TIMES": "SD 1.5, 2 steps: 45 s; 10 steps: 163 s; 25 steps: 419 s; SD-Turbo, 1 step: 25 s; SD-Turbo, 4 steps: 46 s per 512 × 512 image"
+}

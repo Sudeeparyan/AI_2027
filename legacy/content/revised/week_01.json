@@ -1,0 +1,100 @@
+{
+  "n": 1,
+  "title": "Generative AI foundations and responsible tool use",
+  "outcomes": [
+    "LO1",
+    "LO4"
+  ],
+  "overview": "Learn what a generative model does, use a small text generator, and check the usefulness and accuracy of its output. The first practical task is deliberately small: explain every stage before relying on a large AI tool.",
+  "prerequisites": "Bring basic Python list, dictionary and function knowledge. A supplied notebook introduces execution, seeds and simple percentages; no prior generative AI or GPU is assumed.",
+  "objectives": [
+    "Distinguish generation, prediction, retrieval and the surrounding AI application.",
+    "Calculate a simple conditional probability and explain training versus generation.",
+    "Compare outputs against a stated task and record one limitation and one improvement."
+  ],
+  "concepts": [
+    {
+      "title": "What is generated?",
+      "explanation": "Generative AI learns patterns from examples and produces a sample such as a sentence, image, sound or video. A classifier may label a review positive or negative; a generator may write a reply to it. Both rely on prediction, so the distinction concerns the modelling task and the output. Retrieval is different again: a search system selects existing material. An AI assistant can combine a generative model with search, a calculator and an interface. Ask what each component contributes. The model proposes content; the application decides which information and tools it receives and what checks surround it. A fluent result can be useful without being a reliable statement of fact. This week treats every output as something to inspect.",
+      "example": "A student asks when the library closes. A search engine returns the opening-hours page. A classifier labels the question as a library query. A generative model writes a friendly reply. A useful assistant might retrieve the current page and then write a reply based on it. If the page is missing, the model can still write a convincing time; that is exactly the failure the class should notice.",
+      "misconception": "A generated answer is a retrieved fact.",
+      "correction": "Generation proposes content. A source must be retrieved and checked separately when the task needs factual support.",
+      "question": "Which component supplies current library opening hours: the model weights or a current official page?",
+      "answer": "The current official page provides evidence. The model may have learned old hours, but its fluent wording does not establish which hours apply today."
+    },
+    {
+      "title": "Probability and sampling",
+      "explanation": "A language model assigns probabilities to possible continuations given the preceding text. Write this as P(next token | earlier tokens). A token may be a word, part of a word or punctuation, depending on the tokenizer. A simple classroom model can count which word follows another and convert the counts into probabilities. A large model learns much richer relationships, but probability and sampling remain useful foundations. Choosing the highest-probability option is greedy decoding. Sampling selects an option according to a distribution and can produce different continuations. A random seed makes an experiment easier to repeat in a fixed environment. Probability here concerns model predictions, not the probability that a whole statement is true. A likely continuation can still be unsupported.",
+      "example": "After the word \"please\", a tiny training corpus contains \"read\" six times, \"check\" three times and \"wait\" once. The estimated probabilities are 0.6, 0.3 and 0.1. A random draw of 0.75 falls in the \"check\" interval from 0.6 to 0.9. Another draw can choose \"read\". These are invented teaching counts, not a performance claim about any commercial model.",
+      "misconception": "A token with probability 0.9 makes the answer 90% factually correct.",
+      "correction": "Token probability describes the model distribution for a continuation. Factual correctness requires separate evidence and evaluation.",
+      "question": "If the counts are 4, 3 and 1, what is the probability of the first continuation?",
+      "answer": "There are eight observations, so the probability is 4/8 = 0.5. It is an estimate from this tiny corpus, not a universal language rule."
+    },
+    {
+      "title": "Training, inference and model families",
+      "explanation": "Training changes a model using examples and a learning objective. Inference uses the learned model to produce an output. Changing a prompt normally changes the input, not the learned weights. Fine-tuning is additional training on a narrower dataset; it is different from inserting a document into a prompt. The module introduces four important families. A variational autoencoder learns a probabilistic latent representation and decoder. A generative adversarial network trains a generator with feedback from a discriminator. A diffusion model learns a denoising process. A transformer uses attention to combine information across token positions and can support language generation. These families are not four successive versions of the same tool. Different systems can combine components, and model choice depends on the task and available resources.",
+      "example": "Imagine generating simple icons. A VAE samples a latent code and decodes it. A GAN generator maps random input to an icon after adversarial training. A diffusion system generates through learned denoising steps. A language model can write a description or SVG code for an icon. All can contribute to a design workflow, but the representation and training objective differ.",
+      "misconception": "Every chat interaction retrains the underlying model.",
+      "correction": "Ordinary inference uses existing weights. Product memory, conversation context and any provider training policy are separate mechanisms.",
+      "question": "A user pastes three examples into a prompt. Is that necessarily fine-tuning?",
+      "answer": "No. It is in-context use of examples unless a separate training process changes learned parameters."
+    },
+    {
+      "title": "Useful outputs need a check",
+      "explanation": "Begin evaluation by stating what success means for the task. A summary may need correct facts, appropriate length and readable language. An extracted record may need the right fields, types and source values. Choose a few examples, write expected answers or a rubric, and compare every attempted output. Record the denominator: eight correct answers out of ten is more informative than \"80% accurate\" alone. Keep some cases separate for later checking so improvement does not become memorising the examples. Human review complements numeric measures, especially for misleading wording and harmful assumptions. Use public or fictional data in initial tool practice. Record the tool, date, prompt, settings and corrections so another learner can understand how the evidence was produced.",
+      "example": "A fictional note says: \"The robotics club meets on Thursday at 16:00 in room B2.\" A generated summary says Tuesday at 16:00 in B2. Its grammar is excellent, but one of the three factual fields is wrong. A field checklist catches the day error. A readability-only score would miss it. The class should correct the summary using the note and save both versions.",
+      "misconception": "If a reply sounds confident and polite, it is ready to use.",
+      "correction": "Style and correctness are separate criteria. Compare factual claims with the relevant evidence before use.",
+      "question": "Why should the test set contain a question the source cannot answer?",
+      "answer": "It checks whether the system recognises missing evidence instead of inventing a plausible answer. A useful system may need to say it does not know."
+    }
+  ],
+  "demo": {
+    "title": "Train and inspect a tiny next-word generator",
+    "steps": [
+      "Read the short fictional training sentences and identify the words used as tokens.",
+      "Run the supplied counting code and inspect a next-word probability table.",
+      "Generate three short samples using recorded seeds; compare repetition and missing context.",
+      "Change one training sentence, rebuild the counts and predict which continuation changes.",
+      "Compare a generated reply with its source using a three-field correctness checklist."
+    ],
+    "expected": "A working small statistical generator and a visible explanation of why its output changes. It is a learned count model, not an LLM or evidence of large-model capability.",
+    "offline": "The count-based generator uses included text and runs locally; the optional browser-tool comparison can use an instructor-saved response with its provenance clearly labelled."
+  },
+  "practice": [
+    {
+      "question": "A system returns the exact paragraph containing a requested date. Is generation necessary?",
+      "answer": "No. Retrieval may be sufficient. Generation can improve presentation, but adds a separate opportunity to change or invent a detail."
+    },
+    {
+      "question": "Two of ten summaries contain invented dates. Give a suitable metric and its limit.",
+      "answer": "Date correctness is 8/10 = 80% on these ten examples. It does not measure style, all factual claims or future performance; describe the sample and failures."
+    },
+    {
+      "question": "Why is a next-word counting model a useful first lab despite its weak text?",
+      "answer": "It exposes training data, conditional probabilities and sampling in a form learners can inspect. It illustrates a principle without claiming to reproduce a transformer LLM."
+    }
+  ],
+  "lab": {
+    "title": "A small generator and an output evidence sheet",
+    "goal": "Build a baseline understanding of generation, then judge an output against its task.",
+    "steps": [
+      "Run the notebook from its first cell and record the environment and seed.",
+      "Inspect the corpus, calculate one probability by hand and check the code agrees.",
+      "Generate three outputs and label one useful pattern and one limitation.",
+      "Change one corpus item or sampling setting and explain the observed effect.",
+      "Complete a source-check table for a fictional summary and write a 100-word reflection."
+    ],
+    "deliverable": "Executed notebook, one probability calculation, before/after outputs and a short checked-output table."
+  },
+  "references": [
+    "https://developers.google.com/machine-learning/crash-course/llm",
+    "https://developers.google.com/machine-learning/crash-course"
+  ],
+  "extension": "Compare the count model with an institution-approved chat tool on the same harmless task. Identify which capabilities the small baseline lacks; do not rank tools from one example.",
+  "timing": {
+    "lecture": 120,
+    "lab": 120
+  }
+}

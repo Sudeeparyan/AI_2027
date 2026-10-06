@@ -1,0 +1,13 @@
+# Python packages for the build tools (tools/*.py). Node packages are in tools/package.json.
+PyYAML>=6.0
+lxml>=6.0
+matplotlib>=3.10
+numpy>=2.0
+Pillow>=11.0
+PyMuPDF>=1.26
+nbformat>=5.10
+nbclient>=0.10
+ipykernel>=6.29
+requests>=2.32
+scikit-learn>=1.6
+scipy>=1.14

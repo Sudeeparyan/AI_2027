@@ -1,0 +1,63 @@
+# Week-by-week rationale for the proposed Section 7.3 revision (for the head of module / programme team).
+# "added" = main additions to Detail; "tutorials" = change to Tutorials; "why" = reason; "sources" = ids in curriculum/sources.yaml.
+weeks:
+  - week: 1
+    added: "Landscape of today's AI tools (chat, coding, image, audio and video assistants); proprietary vs. open-weight model families; core concepts (tokens, parameters, training vs. inference, pre- and post-training); sampling and temperature; overview of the four model families; responsible AI and academic integrity."
+    tutorials: "Environment now includes a Hugging Face account and safe API-key handling; the probability example becomes a character-level model sampled at several temperatures; students compare AI tools with an open model and record errors."
+    why: "The module brief is a high-level overview that also teaches students to use AI tools. Tokens, temperature and hallucination are needed from week 1 because every later week relies on them, and responsible-use rules (including the EU AI Act transparency duties applying from August 2026) must be set before students use AI tools in coursework."
+    sources: [eu_ai_act_art50, ms_learn_fundamentals, google_mlcc_llm]
+  - week: 2
+    added: "Probabilistic encoder and the reparameterisation trick; KL term and the evidence lower bound (ELBO); β-VAE and VQ-VAE; evaluation by reconstruction, sample quality and latent traversals; VAEs as the image autoencoder inside latent diffusion."
+    tutorials: "Names a concrete dataset (MNIST / Fashion-MNIST) and adds a β (KL-weight) experiment."
+    why: "The ELBO and reparameterisation are the core ideas examiners expect. Today VAEs matter mostly as the compression stage of latent diffusion and as discrete tokenisers (VQ) for multimodal models, which links week 2 to weeks 4 and 9."
+    sources: [p_vae, p_vqvae]
+  - week: 3
+    added: "Minimax and non-saturating losses; named training failures (mode collapse, instability, vanishing gradients) and stabilisation (Wasserstein loss, spectral normalisation); Pix2Pix / CycleGAN; FID, Inception Score, precision/recall; GANs in super-resolution and adversarial distillation of fast diffusion models; deepfake misuse."
+    tutorials: "Specifies DCGAN and adds diagnosing training through losses and mode collapse."
+    why: "GANs are no longer the leading image generators, so the week now explains why (training instability) and where adversarial training survives in 2026: discriminators inside fast diffusion models, super-resolution and deepfake detection."
+    sources: [p_gan, p_wgan]
+  - week: 4
+    added: "Forward and reverse processes, noise schedules and the noise-prediction objective; score-based view; U-Net and diffusion transformers; latent diffusion with a text encoder; samplers (DDPM, DDIM, few-step); classifier-free guidance; flow matching / rectified flow; distilled few-step models; editing, control, video and audio; FID, CLIP score and human preference."
+    tutorials: "Adds visualising the forward and reverse processes, names Hugging Face Diffusers and adds seeds and negative prompts."
+    why: "Diffusion and flow-matching transformers now power leading image, video and audio generators. The original text listed headings only; the revision names the concepts students need to read current model cards."
+    sources: [p_ddpm, p_ldm, p_flow_matching, hf_diffusion_course]
+  - week: 5
+    added: "Tokenisation and embeddings; queries, keys and values; causal masking; sinusoidal and rotary positional encoding; residual connections and normalisation; encoder-only, decoder-only and encoder-decoder; masked vs. next-token objectives; perplexity; KV cache, efficient attention, mixture-of-experts and long context; vision and speech transformers."
+    tutorials: "Original wording kept; adds implementing attention, training a small character-level transformer and visualising attention in a pre-trained model."
+    why: "These are the components every current LLM uses (rotary positions, KV cache, mixture-of-experts) and the vocabulary of model documentation. The added tutorial makes the original lab description concrete."
+    sources: [p_transformer, v_3b1b_attention, v_karpathy_gpt]
+  - week: 6
+    added: "Evolution of NLP from n-grams to LLMs; pre-training, scaling laws, context windows and decoding strategies; current families (GPT, LLaMA, Gemini, Claude, Mistral, Qwen, DeepSeek); proprietary vs. open-weight; small language models, mixture-of-experts and reasoning models; model cards, licences and benchmarks."
+    tutorials: "Pipelines named; comparison across encoder, encoder-decoder and decoder families; querying through the Hugging Face API or a local runtime, comparing decoding settings and token counts."
+    why: "The original list (GPT, BERT, LLaMA, T5) predates open-weight frontier models, small models and reasoning models, which students now use daily. Families are named without version numbers so the text stays valid as versions change."
+    sources: [v_karpathy_intro, p_scaling, hf_llm_course]
+  - week: 7
+    added: "In-context learning; anatomy of a prompt (system and user messages, context, examples, output format); self-consistency, prompt chaining and prompting reasoning models; structured outputs and context engineering; evaluation with test sets, rubrics, LLM-as-a-judge and human evaluation; prompt injection."
+    tutorials: "Adds building a small evaluation set comparing zero-shot, few-shot and chain-of-thought prompts, validating JSON outputs and testing a prompt-injection case."
+    why: "Prompting is only useful professionally when it is measured. Structured outputs, context engineering and prompt injection are now standard topics in the official OpenAI, Google and Anthropic guides, and prompt injection is the top OWASP risk for LLM applications."
+    sources: [openai_prompt_guide, gemini_prompting, anthropic_prompt_tutorial, owasp_llm]
+  - week: 8
+    added: "Choosing between prompting, retrieval and fine-tuning; full fine-tuning; DPO and reinforcement learning with verifiable rewards alongside RLHF; QLoRA; knowledge distillation; chat templates, overfitting and catastrophic forgetting."
+    tutorials: "Names Hugging Face PEFT and TRL and specifies a held-out test set."
+    why: "Preference optimisation (DPO) and reinforcement learning with verifiable rewards are how current assistant and reasoning models are trained. The decision between prompting, RAG and fine-tuning is the most common practical question in projects."
+    sources: [p_lora, p_qlora, p_dpo, hf_trl_docs]
+  - week: 9
+    added: "Early, late and cross-attention fusion; vision transformers, audio encoders, image and audio tokens, shared embedding spaces; dual encoders, fusion encoders and vision encoders connected to LLMs; SigLIP, the contrastive loss and zero-shot classification."
+    tutorials: "Adds zero-shot classification and text-to-image search with CLIP, and speech transcription with Whisper."
+    why: "Makes the foundations concrete and adds audio, which the original listed as a modality but did not practise. SigLIP-style encoders are used in many current vision-language models."
+    sources: [p_clip, p_siglip, p_whisper, hf_vlm_blog]
+  - week: 10
+    added: "Vision-language and natively multimodal models; alignment pre-training, visual instruction tuning and parameter-efficient adaptation; generation across modalities (image editing, speech, music, video); multimodal hallucination; deepfakes, consent, watermarking and content provenance (C2PA)."
+    tutorials: "Specifies captioning, visual question answering, speech and cross-modal reasoning over charts and documents."
+    why: "Multimodal assistants and realistic synthetic media are now mainstream, and the EU AI Act requires machine-readable marking of AI-generated content from August 2026. Evaluation and responsible use of generated media therefore belong in this week."
+    sources: [hf_vlm_blog, p_llava, c2pa, eu_ai_act_art50]
+  - week: 11
+    added: "Gemini API and LlamaIndex / LangGraph alongside the original frameworks; API platform details (authentication, tokens, pricing, rate limits, streaming); cloud vs. self-hosted vs. local deployment; quantisation, batching and caching; Gradio, FastAPI and Docker; logging, tracing, latency and cost monitoring, guardrails and versioning."
+    tutorials: "Adds building and deploying a small application with a web interface, measuring latency and cost, and adding logging and guardrails."
+    why: "The original listed frameworks but not the operational skills needed to deploy them. Cost, latency, monitoring and guardrails are what distinguish a demo from a deployable system, and they directly support MIMLO 5 and the group project."
+    sources: [vllm_docs, ollama_docs, gradio_docs, azure_openai, owasp_llm]
+  - week: 12
+    added: "No access to private data as a motivation; embeddings and vector databases; chunking, indexing, dense and hybrid retrieval, re-ranking and citations; advanced RAG (query rewriting, GraphRAG); RAG evaluation (retrieval quality, faithfulness, answer relevance); tools and function calling, memory, planning, the ReAct loop, workflows vs. agents, multi-agent systems and the Model Context Protocol; prompt injection and human oversight."
+    tutorials: "Adds evaluating retrieval and faithfulness, and an agent calling a calculator and a search tool over the RAG index."
+    why: "RAG and agents are the most common designs in current applications and student projects. Evaluation and guardrails are essential because agents act on untrusted content, and the Model Context Protocol has become an open standard for tool access."
+    sources: [p_rag, p_react, anthropic_effective_agents, mcp_intro, p_ragas]

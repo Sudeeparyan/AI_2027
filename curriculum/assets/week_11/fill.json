@@ -1,0 +1,7 @@
+{
+  "LAT_NOTES": "Qwen2.5-0.5B-Instruct on an NVIDIA GTX 1650 laptop GPU: TTFT 0.24–0.28 s, full answers 3.6–9.3 s at 14 tokens/s.",
+  "QUANT_NOTES": "Perplexity: fp16 52.3 (≈ 988 MB); int8 per row 55.0 (≈ 494 MB); int4 per row 97.5 (≈ 247 MB); int4 groups of 64 65.0 (≈ 262 MB).",
+  "BATCH_NOTES": "13 tokens/s at batch 1 → 86 tokens/s at batch 8 (6.5× on an NVIDIA GTX 1650 laptop GPU).",
+  "MONITOR_NOTES": "10 requests: 1 blocked (injection), 2 with personal data redacted; p50 2.85 s, p95 5.72 s.",
+  "RESULTS_NOTES": "Model Qwen2.5-0.5B-Instruct on an NVIDIA GTX 1650 laptop GPU (fp16 weights).\n\n| Question | TTFT (s) | Total (s) | Output tokens | Tokens/s |\n|---|---|---|---|---|\n| What is a large language model? Answer i | 0.236 | 3.56 | 46 | 13.5 |\n| Give three tips for writing a good promp | 0.284 | 9.26 | 128 | 14.2 |\n| Explain what an API rate limit is to a n | 0.237 | 9.32 | 128 | 14.0 |\n\n| Quantisation | Perplexity | Weight error (layer 0) | Approx. size (MB) |\n|---|---|---|---|\n| fp16 | 52.34 | 0% | 988 |\n| int8, per row | 54.96 | 1.1% | 494 |\n| int4, per row | 97.45 | 20.5% | 247 |\n| int4, groups of 64 | 64.96 | 11.8% | 262 |\n\n| Batch size | Seconds for 8 requests | Tokens/s |\n|---|---|---|\n| 1 | 29.11 | 13.2 |\n| 2 | 14.86 | 25.8 |\n| 4 | 7.95 | 48.3 |\n| 8 | 4.45 | 86.2 |\n\nMonitoring summary: 10 requests: 1 blocked (injection), 2 with personal data redacted; p50 2.85 s, p95 5.72 s."
+}

@@ -1,0 +1,98 @@
+{
+  "n": 6,
+  "title": "Multimodal generative AI: text, images, audio and video",
+  "outcomes": [
+    "LO2",
+    "LO4"
+  ],
+  "overview": "Understand how systems connect information across modalities. Use simple image, audio and video tasks to distinguish what the evidence shows from what a model infers or invents.",
+  "prerequisites": "Prompt design, context selection, probability-based generation, embeddings at an introductory level and output checking.",
+  "objectives": [
+    "Explain modality, alignment and cross-modal reasoning using a concrete example.",
+    "Compare generation and understanding tasks across text, image, audio and video.",
+    "Evaluate multimodal outputs for evidence, consistency, accessibility and responsible use."
+  ],
+  "concepts": [
+    {
+      "title": "Modalities and alignment",
+      "explanation": "A modality is a form of information, such as text, an image, audio or video. A multimodal system handles more than one form and connects information between them. Alignment means learning or representing useful correspondences: a caption should match the image it describes, and spoken words should match their transcript. Different systems achieve this through different architectures and training objectives. A simple teaching example places related image and text representations near each other in an embedding space. This is an illustration of correspondence, not proof that the system understands a scene as a person does. Cross-modal reasoning combines evidence from several inputs, such as comparing a written instruction with a photograph. It can fail when the inputs conflict, omit details or contain misleading cues.",
+      "example": "Show a photograph of a library entrance and three captions: 'library entrance', 'sports hall entrance' and 'a library that closes at six'. The first matches visible evidence; the second mismatches it; the third adds a claim the image may not support. Ask students to separate image-text relevance from the truth of every claim in the caption.",
+      "misconception": "A good image-text match means every sentence about the image is true.",
+      "correction": "Similarity can show a relevant connection without verifying details that are invisible or absent.",
+      "question": "Can a photograph of a closed door establish the library's usual opening hours?",
+      "answer": "No. It may show that the door was closed at that moment, but a reliable schedule is needed for usual opening hours."
+    },
+    {
+      "title": "Image understanding and image generation",
+      "explanation": "Image understanding takes an image as input and produces a description, extracted information or an answer. Image generation creates or edits visual content from instructions and other inputs. These are related capabilities, but they are not interchangeable. A system may read a chart well and still produce a chart with incorrect labels. When prompting for understanding, ask the model to identify visible evidence and separate observations from interpretations. When prompting for generation, specify purpose, audience, composition and the details that must be checked. Diffusion is an important image-generation family, but not every visual system uses the same architecture. Evaluate the output against the task, including text accuracy, spatial relationships, consistency and accessibility. Visual realism alone does not establish factual accuracy.",
+      "example": "Students design an illustration explaining safe battery recycling. A generated poster looks polished but places an ordinary waste-bin symbol beside the instruction. Ask students to find the contradiction and rewrite the visual brief. Then inspect a teacher-provided corrected illustration with a text alternative. The exercise checks communication and consistency rather than simply rating which picture looks attractive.",
+      "misconception": "A realistic generated image is reliable evidence of a real event.",
+      "correction": "Generation creates a possible image. Establishing an event requires independent provenance and evidence.",
+      "question": "Why should a generated diagram's labels be checked separately from its appearance?",
+      "answer": "The diagram may look convincing while labels, quantities or relationships are incorrect."
+    },
+    {
+      "title": "Audio and video need temporal evidence",
+      "explanation": "Audio tasks include transcription, translation, summarisation and speech generation. Video adds changing images over time and often includes audio. A useful answer must preserve who said what, when an event happened and which evidence supports a claim. Short clips can hide important context, and sampled frames may miss a brief event. A transcript also loses visual information and may mishear names, numbers or accents. Use timestamps to make claims easier to verify, but check the timestamps themselves. Distinguish transcription from interpretation: a hesitant voice does not prove a person's intention or emotional state. Use consented recordings or synthetic material in class. Compare outputs with a reference transcript or direct inspection rather than assuming that a fluent summary represents the recording accurately.",
+      "example": "A synthetic ten-second announcement says, 'The lab moves from Room 210 to Room 201 on Thursday.' A prepared transcript swaps the room numbers. A video frame shows a sign for Room 210, recorded before the announcement. Students identify the transcription error and explain the apparent conflict. They state which source is current and which part of the conclusion still needs checking.",
+      "misconception": "A video summary necessarily uses every frame and every spoken word.",
+      "correction": "Processing varies by tool; sampling, transcription and context limits can omit important evidence.",
+      "question": "Why is the room number a higher-priority transcription check than a minor punctuation difference?",
+      "answer": "Changing the number changes the action students take, while punctuation may leave the meaning intact."
+    },
+    {
+      "title": "Evaluate multimodal outputs with a task rubric",
+      "explanation": "Multimodal evaluation should reflect the purpose of the task. For a chart description, check values, comparisons and whether uncertainty is stated. For an image, inspect required objects, relationships and misleading details. For audio, check intelligibility, important words and consent. For video, check sequence, timing and consistency between sound and images. A single numerical score rarely captures all of these dimensions. Use a small rubric and explain disagreements between reviewers. Accessibility belongs in the task requirements: useful alternative text communicates the relevant meaning, and captions help readers who cannot hear the audio. Record whether the material was generated or captured. Avoid including personal recordings or confidential documents without appropriate permission. Human review is especially valuable when an error could mislead the audience.",
+      "example": "Two students assess a generated description of a bar chart. One gives full marks because the prose is clear; the other notices that the largest bar is named incorrectly. Apply separate scores for factual accuracy, coverage and clarity. The description can score well for clarity and poorly for accuracy. The revised text reports the correct comparison and omits an unsupported explanation of why it occurred.",
+      "misconception": "One overall quality score reveals whether a multimodal result is suitable.",
+      "correction": "Separate criteria reveal different failure types and make revision more targeted.",
+      "question": "What is the difference between useful alternative text and a list of every visible colour?",
+      "answer": "Useful alternative text communicates the image's purpose and important information; incidental colours matter only when they carry meaning."
+    }
+  ],
+  "demo": {
+    "title": "Compare a chart, its caption and its spoken summary",
+    "steps": [
+      "Show a simple teacher-created chart with four labelled values.",
+      "Ask for a short description with a clear separation between observed values and possible explanations.",
+      "Compare the response with a prepared caption containing one numerical error.",
+      "Inspect a short recorded or synthetic spoken summary and its transcript.",
+      "Apply an accuracy, coverage and accessibility rubric to the three outputs."
+    ],
+    "expected": "Students find an error across modalities and justify a correction using the original chart.",
+    "offline": "Use local chart, transcript and prepared responses. If no audio is played, identify the activity as transcript analysis rather than audio-model testing."
+  },
+  "practice": [
+    {
+      "question": "Does recognising an object in an image demonstrate knowledge of its owner's intention?",
+      "answer": "No. The object may be visible while intention is unsupported."
+    },
+    {
+      "question": "What evidence would you request for a claim about the order of two events in a video?",
+      "answer": "The relevant timestamped segments or frames, with enough surrounding context to confirm the order."
+    },
+    {
+      "question": "Why should a generated educational image include a text alternative?",
+      "answer": "It makes the important content accessible and provides another opportunity to check the intended explanation."
+    }
+  ],
+  "lab": {
+    "title": "A multimodal evidence audit",
+    "goal": "Analyse alignment and errors across text, image, audio and video examples.",
+    "steps": [
+      "Inspect a teacher-created chart or image and write a short reference description.",
+      "Compare two candidate captions and score factual agreement with the image.",
+      "Compare an audio transcript with supplied ground truth, checking names and numbers.",
+      "Review a short video or timestamped storyboard and identify a temporal or cross-modal inconsistency.",
+      "Create an improved accessible description and document which parts involved a real model, recorded output or offline example."
+    ],
+    "deliverable": "A four-modality evidence table, a corrected description and a short account of one failure that a text-only check would miss."
+  },
+  "references": [
+    "https://ai.google.dev/gemini-api/docs/image-understanding",
+    "https://ai.google.dev/gemini-api/docs/audio",
+    "https://ai.google.dev/gemini-api/docs/video-understanding",
+    "https://ai.google.dev/gemini-api/docs/safety-guidance"
+  ],
+  "extension": "Run an approved multimodal tool on a non-sensitive image and compare it with the offline examples. Investigate how a different crop changes the answer without assuming that one tool behaves like all others."
+}
