@@ -1,0 +1,881 @@
+{
+  "title": "Generative AI course glossary",
+  "terms": [
+    {
+      "term": "Abstention",
+      "meaning": "Declining to supply an answer when sufficient evidence is unavailable.",
+      "weeks": [
+        12
+      ]
+    },
+    {
+      "term": "Accuracy",
+      "meaning": "The fraction of evaluated examples counted as correct.",
+      "weeks": [
+        7
+      ]
+    },
+    {
+      "term": "Adapter",
+      "meaning": "Small added weights trained while the base is fixed.",
+      "weeks": [
+        8
+      ]
+    },
+    {
+      "term": "API",
+      "meaning": "An interface through which one program asks another to do work.",
+      "weeks": [
+        11
+      ]
+    },
+    {
+      "term": "Array index",
+      "meaning": "A numbered position used to select an item or a matrix row.",
+      "weeks": [
+        1
+      ]
+    },
+    {
+      "term": "ASR",
+      "meaning": "Automatic speech recognition: turning speech audio into text.",
+      "weeks": [
+        10
+      ]
+    },
+    {
+      "term": "Attention head",
+      "meaning": "One set of query, key and value projections and its weighted information mixture.",
+      "weeks": [
+        5
+      ]
+    },
+    {
+      "term": "Autoregressive generation",
+      "meaning": "Generate a next token from the input and previously generated tokens.",
+      "weeks": [
+        10
+      ]
+    },
+    {
+      "term": "Batching",
+      "meaning": "Processing several inputs together in one model operation.",
+      "weeks": [
+        11
+      ]
+    },
+    {
+      "term": "Bigram",
+      "meaning": "Two neighbouring symbols; this model predicts from the previous character only.",
+      "weeks": [
+        1
+      ]
+    },
+    {
+      "term": "Binary classification",
+      "meaning": "Predicting between two labels, here real and generated.",
+      "weeks": [
+        3
+      ]
+    },
+    {
+      "term": "BM25",
+      "meaning": "A keyword-ranking method based on term matches and their frequency.",
+      "weeks": [
+        12
+      ]
+    },
+    {
+      "term": "Cache",
+      "meaning": "Stored results reused when an equivalent request returns.",
+      "weeks": [
+        11
+      ]
+    },
+    {
+      "term": "Causal language model",
+      "meaning": "A model predicting the next token from the tokens already present.",
+      "weeks": [
+        6
+      ]
+    },
+    {
+      "term": "Causal mask",
+      "meaning": "A rule preventing a position from attending to later positions.",
+      "weeks": [
+        5
+      ]
+    },
+    {
+      "term": "Chat template",
+      "meaning": "Model-specific formatting used to represent roles and messages as a token sequence.",
+      "weeks": [
+        6
+      ]
+    },
+    {
+      "term": "Chunk",
+      "meaning": "A passage cut from a document for indexing and retrieval.",
+      "weeks": [
+        12
+      ]
+    },
+    {
+      "term": "CLIP score",
+      "meaning": "A similarity between image and text representations; it is not a complete quality measure.",
+      "weeks": [
+        4
+      ]
+    },
+    {
+      "term": "Conditional probability",
+      "meaning": "The probability of an outcome when some other information is already given.",
+      "weeks": [
+        1
+      ]
+    },
+    {
+      "term": "Context",
+      "meaning": "The input text made available to a language model for a response.",
+      "weeks": [
+        12
+      ]
+    },
+    {
+      "term": "Cosine similarity",
+      "meaning": "A comparison of vector directions, independent of vector length.",
+      "weeks": [
+        9
+      ]
+    },
+    {
+      "term": "Decoder",
+      "meaning": "A network that turns a representation or previous outputs into predictions for the output.",
+      "weeks": [
+        2,
+        6
+      ]
+    },
+    {
+      "term": "Denoiser",
+      "meaning": "The learned network; here it predicts added noise from noisy data and a timestep.",
+      "weeks": [
+        4
+      ]
+    },
+    {
+      "term": "Dense retrieval",
+      "meaning": "Rank passages by similarity between learned question and passage vectors.",
+      "weeks": [
+        12
+      ]
+    },
+    {
+      "term": "Detach",
+      "meaning": "Keep tensor values while disconnecting their gradient path for an operation.",
+      "weeks": [
+        3
+      ]
+    },
+    {
+      "term": "Diffusion",
+      "meaning": "Generation through learned denoising of a noisy representation.",
+      "weeks": [
+        10
+      ]
+    },
+    {
+      "term": "Discriminator",
+      "meaning": "A network trained to distinguish dataset examples from generated examples.",
+      "weeks": [
+        3
+      ]
+    },
+    {
+      "term": "Editing strength",
+      "meaning": "An image-to-image setting controlling how much the input is perturbed before denoising.",
+      "weeks": [
+        10
+      ]
+    },
+    {
+      "term": "ELBO",
+      "meaning": "A lower bound on data log-likelihood; its negative balances reconstruction and KL at beta = 1.",
+      "weeks": [
+        2
+      ]
+    },
+    {
+      "term": "Embedding",
+      "meaning": "A numerical vector representing an item, often learned, for prediction or comparison.",
+      "weeks": [
+        5,
+        9,
+        12
+      ]
+    },
+    {
+      "term": "Encoder",
+      "meaning": "A network that converts input data into numerical representations or distribution parameters.",
+      "weeks": [
+        2,
+        6,
+        9
+      ]
+    },
+    {
+      "term": "Endpoint",
+      "meaning": "A URL and request handler through which a program exposes an operation.",
+      "weeks": [
+        11
+      ]
+    },
+    {
+      "term": "Epoch",
+      "meaning": "One pass through the training data.",
+      "weeks": [
+        2
+      ]
+    },
+    {
+      "term": "Evaluation harness",
+      "meaning": "Code that runs examples, scores outputs and collects comparable measures.",
+      "weeks": [
+        7
+      ]
+    },
+    {
+      "term": "Feature vector",
+      "meaning": "A numerical representation extracted from an intermediate layer of a network.",
+      "weeks": [
+        3
+      ]
+    },
+    {
+      "term": "Feed-forward network (MLP)",
+      "meaning": "A small neural network applied separately at each token position.",
+      "weeks": [
+        5
+      ]
+    },
+    {
+      "term": "Few-shot",
+      "meaning": "A prompt containing several examples of the desired input/output behaviour.",
+      "weeks": [
+        7
+      ]
+    },
+    {
+      "term": "Forward process",
+      "meaning": "A fixed procedure that progressively corrupts clean data with noise.",
+      "weeks": [
+        4
+      ]
+    },
+    {
+      "term": "Frozen parameter",
+      "meaning": "A model weight held unchanged by the optimizer during training.",
+      "weeks": [
+        8
+      ]
+    },
+    {
+      "term": "Function",
+      "meaning": "A named piece of code taking inputs and returning an output.",
+      "weeks": [
+        11
+      ]
+    },
+    {
+      "term": "Gaussian noise",
+      "meaning": "Random numerical values drawn from a bell-shaped distribution.",
+      "weeks": [
+        4
+      ]
+    },
+    {
+      "term": "Generator",
+      "meaning": "A network that transforms a random code into a generated example.",
+      "weeks": [
+        3
+      ]
+    },
+    {
+      "term": "Gradient",
+      "meaning": "A measure of how changing a quantity would change a loss.",
+      "weeks": [
+        3
+      ]
+    },
+    {
+      "term": "Gradient penalty",
+      "meaning": "A training cost encouraging the critic's input-gradient norm to stay near one on sampled interpolates.",
+      "weeks": [
+        3
+      ]
+    },
+    {
+      "term": "Ground truth",
+      "meaning": "A reference answer or observation used to check a model output.",
+      "weeks": [
+        7,
+        10
+      ]
+    },
+    {
+      "term": "Guidance",
+      "meaning": "Combining conditional and reference predictions to influence prompt-following during sampling.",
+      "weeks": [
+        4
+      ]
+    },
+    {
+      "term": "Hallucination",
+      "meaning": "Generated content that presents an unsupported or incorrect claim as if it were reliable.",
+      "weeks": [
+        1,
+        10
+      ]
+    },
+    {
+      "term": "Image tensor",
+      "meaning": "A numerical array holding a batch of images, their channels, rows, and columns.",
+      "weeks": [
+        2
+      ]
+    },
+    {
+      "term": "Indirect prompt injection",
+      "meaning": "An instruction planted in retrieved data that tries to redirect the assistant.",
+      "weeks": [
+        12
+      ]
+    },
+    {
+      "term": "Inference",
+      "meaning": "Using a trained model to predict or generate without updating its learned weights.",
+      "weeks": [
+        1,
+        9
+      ]
+    },
+    {
+      "term": "Intent",
+      "meaning": "A category describing what a customer's message is asking about.",
+      "weeks": [
+        8
+      ]
+    },
+    {
+      "term": "JSON",
+      "meaning": "A structured text format for exchanging fields and values, including objects and lists.",
+      "weeks": [
+        7,
+        11
+      ]
+    },
+    {
+      "term": "KL divergence",
+      "meaning": "A non-negative measure of how one probability distribution differs from another.",
+      "weeks": [
+        2
+      ]
+    },
+    {
+      "term": "Latency",
+      "meaning": "The elapsed time from a request to its result; first-token latency measures the initial wait.",
+      "weeks": [
+        6,
+        11
+      ]
+    },
+    {
+      "term": "Latent code",
+      "meaning": "A shorter hidden numerical representation used by the model.",
+      "weeks": [
+        2
+      ]
+    },
+    {
+      "term": "Latent diffusion",
+      "meaning": "Generating in a compact image representation before a decoder converts it to pixels.",
+      "weeks": [
+        4
+      ]
+    },
+    {
+      "term": "Logit",
+      "meaning": "An unnormalised model score. Sigmoid or softmax can turn logits into probabilities.",
+      "weeks": [
+        3,
+        5
+      ]
+    },
+    {
+      "term": "Loop",
+      "meaning": "Code that repeats a task for several items or steps.",
+      "weeks": [
+        1
+      ]
+    },
+    {
+      "term": "LoRA adapter",
+      "meaning": "Small trainable matrices adding a low-rank correction to selected base-model projections.",
+      "weeks": [
+        8
+      ]
+    },
+    {
+      "term": "Loss",
+      "meaning": "A number measuring prediction error during training.",
+      "weeks": [
+        8
+      ]
+    },
+    {
+      "term": "Matrix projection",
+      "meaning": "Multiplying a vector by learned weights to produce another vector.",
+      "weeks": [
+        8
+      ]
+    },
+    {
+      "term": "Matrix shape",
+      "meaning": "The number of rows and columns in a table of numbers.",
+      "weeks": [
+        5
+      ]
+    },
+    {
+      "term": "MCP",
+      "meaning": "A protocol through which applications discover and call tools and access resources.",
+      "weeks": [
+        12
+      ]
+    },
+    {
+      "term": "Mean and standard deviation",
+      "meaning": "The centre of a distribution and a measure of its spread.",
+      "weeks": [
+        2
+      ]
+    },
+    {
+      "term": "Mean squared error",
+      "meaning": "The average squared difference between predicted and target numbers.",
+      "weeks": [
+        4
+      ]
+    },
+    {
+      "term": "Modality",
+      "meaning": "A type of data, such as text, images or audio, with its own structure.",
+      "weeks": [
+        9,
+        10
+      ]
+    },
+    {
+      "term": "Mode collapse",
+      "meaning": "A generator produces only a small part of the variety present in the training distribution.",
+      "weeks": [
+        3
+      ]
+    },
+    {
+      "term": "Model weight",
+      "meaning": "A learned number used by a neural network to transform its input.",
+      "weeks": [
+        8
+      ]
+    },
+    {
+      "term": "MRR",
+      "meaning": "Mean reciprocal rank: average one over each first relevant result's rank; missing results score zero.",
+      "weeks": [
+        12
+      ]
+    },
+    {
+      "term": "Negative log-likelihood",
+      "meaning": "A score measuring how surprising observed data is; lower is better for those data.",
+      "weeks": [
+        1
+      ]
+    },
+    {
+      "term": "Neural-network weights",
+      "meaning": "Learned numbers used to transform an input into a prediction.",
+      "weeks": [
+        3
+      ]
+    },
+    {
+      "term": "Noise schedule",
+      "meaning": "Numbers specifying how much signal and noise appear at each timestep.",
+      "weeks": [
+        4
+      ]
+    },
+    {
+      "term": "Non-saturating loss",
+      "meaning": "The generator objective that asks D to label generated samples as real.",
+      "weeks": [
+        3
+      ]
+    },
+    {
+      "term": "Nucleus",
+      "meaning": "The leading token candidates retained by a top-p cumulative-probability threshold.",
+      "weeks": [
+        6
+      ]
+    },
+    {
+      "term": "Overfitting",
+      "meaning": "Learning training examples in a way that fails to improve predictions on separate examples.",
+      "weeks": [
+        8
+      ]
+    },
+    {
+      "term": "p95 latency",
+      "meaning": "A latency value at or below which roughly 95% of measured requests fall.",
+      "weeks": [
+        11
+      ]
+    },
+    {
+      "term": "Pair",
+      "meaning": "Two examples marked as describing the same content.",
+      "weeks": [
+        9
+      ]
+    },
+    {
+      "term": "PCA",
+      "meaning": "A projection that compresses vectors into fewer dimensions for inspection.",
+      "weeks": [
+        9
+      ]
+    },
+    {
+      "term": "Perplexity",
+      "meaning": "The exponential of average negative log-probability, summarising prediction uncertainty.",
+      "weeks": [
+        5
+      ]
+    },
+    {
+      "term": "Position bias",
+      "meaning": "A judge's preference for an answer's placement rather than its quality.",
+      "weeks": [
+        7
+      ]
+    },
+    {
+      "term": "Precision@k",
+      "meaning": "The fraction of the k returned results that are relevant.",
+      "weeks": [
+        9
+      ]
+    },
+    {
+      "term": "Prior",
+      "meaning": "The chosen code distribution used for generating new examples, here N(0, I).",
+      "weeks": [
+        2
+      ]
+    },
+    {
+      "term": "Probability",
+      "meaning": "A number from 0 to 1 describing how likely an outcome is.",
+      "weeks": [
+        1
+      ]
+    },
+    {
+      "term": "Probability distribution",
+      "meaning": "Nonnegative probabilities for possible outcomes, adding to one.",
+      "weeks": [
+        6
+      ]
+    },
+    {
+      "term": "Projector",
+      "meaning": "A learned mapping connecting feature dimensions or representation spaces.",
+      "weeks": [
+        10
+      ]
+    },
+    {
+      "term": "Prompt",
+      "meaning": "Instructions and context supplied to a model for one request.",
+      "weeks": [
+        7
+      ]
+    },
+    {
+      "term": "Prompt injection",
+      "meaning": "Instructions inside supplied content that attempt to redirect the model's task.",
+      "weeks": [
+        7
+      ]
+    },
+    {
+      "term": "Provenance",
+      "meaning": "Information about a media item's origin and editing history.",
+      "weeks": [
+        10
+      ]
+    },
+    {
+      "term": "Quantisation",
+      "meaning": "Representing weights with a limited set of values, often to store fewer bits.",
+      "weeks": [
+        11
+      ]
+    },
+    {
+      "term": "Query, key and value",
+      "meaning": "Learned vectors used to compare tokens and mix their information.",
+      "weeks": [
+        5
+      ]
+    },
+    {
+      "term": "Rank",
+      "meaning": "The adapter's intermediate feature dimension, controlling its correction capacity and parameter count.",
+      "weeks": [
+        8
+      ]
+    },
+    {
+      "term": "Re-ranker",
+      "meaning": "A model that reorders candidate passages by reading them with the question.",
+      "weeks": [
+        12
+      ]
+    },
+    {
+      "term": "Regression",
+      "meaning": "Learning to predict numerical values rather than selecting a class label.",
+      "weeks": [
+        4
+      ]
+    },
+    {
+      "term": "Reparameterisation",
+      "meaning": "Writing a random code as learned shift and scale applied to independent noise.",
+      "weeks": [
+        2
+      ]
+    },
+    {
+      "term": "Residual connection",
+      "meaning": "Adding a sublayer's output to the vector entering that sublayer.",
+      "weeks": [
+        5
+      ]
+    },
+    {
+      "term": "RRF",
+      "meaning": "Reciprocal rank fusion: combine rankings using candidates' rank positions.",
+      "weeks": [
+        12
+      ]
+    },
+    {
+      "term": "Sampler",
+      "meaning": "The procedure that uses model predictions to turn starting noise into an output.",
+      "weeks": [
+        4
+      ]
+    },
+    {
+      "term": "Sampling",
+      "meaning": "Drawing an outcome randomly according to a probability distribution.",
+      "weeks": [
+        1
+      ]
+    },
+    {
+      "term": "Schema",
+      "meaning": "A specification of output fields, types and allowed values.",
+      "weeks": [
+        7
+      ]
+    },
+    {
+      "term": "Shared space",
+      "meaning": "A vector space where corresponding inputs from different modalities can be compared.",
+      "weeks": [
+        9
+      ]
+    },
+    {
+      "term": "Similarity",
+      "meaning": "A score comparing two representations; larger means more similar here.",
+      "weeks": [
+        9
+      ]
+    },
+    {
+      "term": "Softmax",
+      "meaning": "Turns a row of scores into nonnegative numbers summing to one.",
+      "weeks": [
+        5
+      ]
+    },
+    {
+      "term": "Supervised fine-tuning",
+      "meaning": "Learning from supplied input prompts and known desired responses.",
+      "weeks": [
+        8
+      ]
+    },
+    {
+      "term": "Temperature",
+      "meaning": "A positive divisor on model scores that changes how concentrated sampling probabilities are.",
+      "weeks": [
+        1,
+        6
+      ]
+    },
+    {
+      "term": "Tensor",
+      "meaning": "An array whose axes name groups such as batch, token position and feature.",
+      "weeks": [
+        5
+      ]
+    },
+    {
+      "term": "Tensor shape",
+      "meaning": "The number of entries along each dimension of an array.",
+      "weeks": [
+        4
+      ]
+    },
+    {
+      "term": "Throughput",
+      "meaning": "Work completed per unit time, such as total generated tokens per second.",
+      "weeks": [
+        11
+      ]
+    },
+    {
+      "term": "Token",
+      "meaning": "A unit processed or generated by a model; a text token can be a word, word part or character.",
+      "weeks": [
+        7,
+        11
+      ]
+    },
+    {
+      "term": "Token ID",
+      "meaning": "An integer identifying a text unit in one particular tokenizer's vocabulary.",
+      "weeks": [
+        6
+      ]
+    },
+    {
+      "term": "Tool",
+      "meaning": "A named function application code can run for the model.",
+      "weeks": [
+        12
+      ]
+    },
+    {
+      "term": "Tool call",
+      "meaning": "A structured request for the program to run a named function.",
+      "weeks": [
+        12
+      ]
+    },
+    {
+      "term": "Train / validation / test",
+      "meaning": "Separate examples for learning, choosing settings and final measurement.",
+      "weeks": [
+        8
+      ]
+    },
+    {
+      "term": "Training",
+      "meaning": "Learning a model's parameters or probability table from data.",
+      "weeks": [
+        1
+      ]
+    },
+    {
+      "term": "Training loss",
+      "meaning": "A number used to measure mistakes and guide weight updates.",
+      "weeks": [
+        2
+      ]
+    },
+    {
+      "term": "Training target",
+      "meaning": "The known answer used to measure a model's prediction error.",
+      "weeks": [
+        5
+      ]
+    },
+    {
+      "term": "TTFT",
+      "meaning": "Time to first token; this lab approximates it with first non-empty decoded text.",
+      "weeks": [
+        11
+      ]
+    },
+    {
+      "term": "TTS",
+      "meaning": "Text-to-speech: turning written words into an audio waveform.",
+      "weeks": [
+        10
+      ]
+    },
+    {
+      "term": "U-Net",
+      "meaning": "An image network with shrinking and expanding spatial stages joined by skip connections.",
+      "weeks": [
+        4
+      ]
+    },
+    {
+      "term": "Vector",
+      "meaning": "An ordered list of numbers used to represent an item.",
+      "weeks": [
+        5,
+        9
+      ]
+    },
+    {
+      "term": "VLM",
+      "meaning": "A vision-language model that processes images together with text.",
+      "weeks": [
+        10
+      ]
+    },
+    {
+      "term": "Word error rate",
+      "meaning": "Word substitutions, deletions and insertions divided by reference word count.",
+      "weeks": [
+        9
+      ]
+    },
+    {
+      "term": "Zero-shot",
+      "meaning": "A prompt describing the task without including worked input/output examples.",
+      "weeks": [
+        7
+      ]
+    },
+    {
+      "term": "Zero-shot classification",
+      "meaning": "Select a class by comparing descriptions, without training on that task's labels.",
+      "weeks": [
+        9
+      ]
+    }
+  ]
+}

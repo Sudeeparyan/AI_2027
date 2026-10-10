@@ -1,0 +1,150 @@
+{
+  "measured_utc": "2026-10-09T12:05:27.446172+00:00",
+  "run_mode": "full",
+  "names": 32033,
+  "vocab": 27,
+  "device": "cpu",
+  "model_id": "HuggingFaceTB/SmolLM2-360M-Instruct",
+  "model_params": 361821120,
+  "name_nll": {
+    "emma": 2.5143283223514827,
+    "anna": 1.9054199254146837,
+    "xqzz": 4.886490491754225
+  },
+  "dataset_nll": {
+    "uniform": 3.295836866004329,
+    "unigram": 2.8180985284378894,
+    "bigram": 2.4605745506980163
+  },
+  "name_samples": {
+    "0.5": [
+      "mari",
+      "ton",
+      "h",
+      "shah",
+      "kan",
+      "mayna",
+      "ja",
+      "keumai",
+      "ai",
+      "kan"
+    ],
+    "1.0": [
+      "eron",
+      "maa",
+      "rinlema",
+      "mbllilicakaisa",
+      "eendoonn",
+      "a",
+      "na",
+      "kanaicie",
+      "ayriaynige",
+      "th"
+    ],
+    "1.5": [
+      "fiausomini",
+      "j",
+      "kea",
+      "maylen",
+      "yko",
+      "khvikahel",
+      "stamanannn",
+      "wa",
+      "letteyamaya",
+      "jysruumarmcardya"
+    ]
+  },
+  "accuracy": {
+    "logistic_regression": 0.9277777777777778,
+    "qda": 0.9277777777777778
+  },
+  "token_counts": {
+    "English": 11,
+    "Irish": 33,
+    "Hindi": 56
+  },
+  "top_tokens": {
+    "0.5": [
+      [
+        " mat",
+        1.0
+      ],
+      [
+        " windows",
+        0.0001583099365234375
+      ],
+      [
+        " couch",
+        0.00012302398681640625
+      ],
+      [
+        " so",
+        1.6689300537109375e-05
+      ],
+      [
+        " chair",
+        1.150369644165039e-05
+      ]
+    ],
+    "1.0": [
+      [
+        " mat",
+        0.9453125
+      ],
+      [
+        " windows",
+        0.01190185546875
+      ],
+      [
+        " couch",
+        0.010498046875
+      ],
+      [
+        " so",
+        0.0038604736328125
+      ],
+      [
+        " chair",
+        0.003204345703125
+      ]
+    ],
+    "1.5": [
+      [
+        " mat",
+        0.5625
+      ],
+      [
+        " windows",
+        0.03173828125
+      ],
+      [
+        " couch",
+        0.028076171875
+      ],
+      [
+        " so",
+        0.0150146484375
+      ],
+      [
+        " chair",
+        0.01324462890625
+      ]
+    ]
+  },
+  "answers": {
+    "0.2": [
+      "Generative AI is a type of artificial intelligence that generates new data or information based on patterns and rules learned from existing data, such as images, text, or audio.",
+      "Generative AI is a type of artificial intelligence that creates new data or information from existing data, such as images, text, or audio, using algorithms and techniques like deep learning and neural networks.",
+      "Generative AI is a type of artificial intelligence that creates new data or information from existing data, such as images, text, or music, using algorithms and techniques like deep learning and neural networks."
+    ],
+    "1.2": [
+      "A type of artificial intelligence that can learn from data, generate new data, and improve by self-improvement.",
+      "A powerful AI model capable of generating novel representations or models that are essentially copies of other models or systems, leading to the creation of new knowledge and systems, without requiring human-in-the-loop supervision.",
+      "Generative AI refers to systems or algorithms that can create new, original data or objects from existing patterns, or modify, transform, and shape them into novel, meaningful, or useful forms."
+    ]
+  },
+  "fictional_paper": {
+    "plain": "The 2019 paper 'Quantum Gradient Folding for Transformers' by Smith and Okafor, published by Hugging Face, focuses on the development of quantum algorithms for transformers, a type of neural network used for natural language processing (NLP). The paper presents a novel quantum algorithm called 'Gradient Folding' that can efficiently train transformers.\n\nThe paper's main findings include:\n\nThe authors propose a new quantum",
+    "honesty_instruction": "The 2019 paper \"Quantum Gradient Folding for Transformers\" by Smith and Okafor provides a new approach to train neural networks with high accuracy and stability in the presence of quantum noise. The authors propose a novel technique called \"quantum gradient folding\" that combines the benefits of quantum annealing and gradient-based methods. This technique can help mitigate the effects of quantum noise and improve the stability of neural network training."
+  }
+}

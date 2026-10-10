@@ -5,7 +5,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 
-from _style import ACCENT, INK, MUTED, PRIMARY, SERIES, TEAL, TEXT, TINT, arrow, box, save
+from _style import role_box, role_legend, routed_arrow, save_editable_scene, ACCENT, INK, MUTED, PRIMARY, SERIES, TEAL, TEXT, TINT, arrow, box, save
 
 ASSETS = Path(__file__).resolve().parents[1] / "assets" / "week_10"
 ORANGE = "#FFF1E6"
@@ -25,101 +25,105 @@ def cover(path):
         ax.add_patch(plt.Circle((x, y), 0.17, color=c, alpha=0.9))
         ax.text(x, y, t, ha="center", va="center", fontsize=34, color="white", fontweight="bold")
     for (x1, y1), (x2, y2) in [((0.2, 0.75), (0.75, 0.2)), ((0.75, 0.75), (0.2, 0.2)), ((0.2, 0.75), (0.75, 0.75)), ((0.2, 0.2), (0.75, 0.2))]:
-        ax.plot([x1, x2], [y1, y2], color="#C7D2FE", lw=2, alpha=0.6, zorder=0)
+        # Start and stop at the circle edges (radius 0.17) so no line runs under an icon.
+        dx, dy = x2 - x1, y2 - y1
+        k = 0.17 / (dx * dx + dy * dy) ** 0.5
+        ax.plot([x1 + k * dx, x2 - k * dx], [y1 + k * dy, y2 - k * dy], color="#C7D2FE", lw=2, alpha=0.6, zorder=0)
     ax.set_xlim(0, 1)
     ax.set_ylim(0, 1)
     save(fig, path, transparent=True)
 
 
 def mllm_types(path):
-    fig, axes = plt.subplots(1, 2, figsize=(13, 4.6))
-    a = axes[0]
-    a.axis("off")
-    a.set_xlim(0, 6.5)
-    a.set_ylim(0, 4.4)
-    a.set_title("Modular (bridge) MLLM", loc="left", fontsize=15)
-    for i, (m, c) in enumerate([("image", TEAL), ("audio", ACCENT)]):
-        y = 2.8 - i * 1.4
-        box(a, 0.1, y, 1.2, 0.7, m, fc=TINT, size=11.5)
-        box(a, 1.6, y, 1.5, 0.7, f"{m} encoder", fc="white", ec=c, color=c, size=10.5)
-        box(a, 3.35, y, 0.9, 0.7, "proj", fc=ORANGE, ec=ACCENT, size=10.5)
-        arrow(a, 1.3, y + 0.35, 1.6, y + 0.35)
-        arrow(a, 3.1, y + 0.35, 3.35, y + 0.35)
-        arrow(a, 4.25, y + 0.35, 4.7, 2.2)
-    box(a, 4.7, 1.6, 1.7, 1.3, "LLM\n(text out)", fc="white", size=12)
-    a.text(0.1, 0.35, "LLaVA, BLIP-2, Qwen-VL: pretrained parts joined; outputs text", fontsize=11, color=TEXT)
-    b = axes[1]
-    b.axis("off")
-    b.set_xlim(0, 6.5)
-    b.set_ylim(0, 4.4)
-    b.set_title("Natively multimodal ('omni') model", loc="left", fontsize=15)
-    toks = [("T", PRIMARY), ("T", PRIMARY), ("I", TEAL), ("I", TEAL), ("I", TEAL), ("A", ACCENT), ("A", ACCENT), ("T", PRIMARY)]
-    for i, (t, c) in enumerate(toks):
-        b.add_patch(plt.Rectangle((0.2 + i * 0.5, 3.0), 0.42, 0.42, color=c, alpha=0.85))
-        b.text(0.41 + i * 0.5, 3.21, t, ha="center", va="center", color="white", fontsize=11, fontweight="bold")
-    box(b, 0.9, 1.6, 3.4, 0.9, "one transformer trained on\ninterleaved text, image, audio (video)", fc=ORANGE, ec=ACCENT, size=11)
-    arrow(b, 2.2, 3.0, 2.4, 2.5)
-    box(b, 4.8, 1.6, 1.5, 0.9, "text, speech\n(or images)", fc="white", size=11)
-    arrow(b, 4.3, 2.05, 4.8, 2.05)
-    b.text(0.2, 0.35, "e.g. GPT, Gemini, Qwen-Omni families: real-time voice, any-to-any", fontsize=11, color=TEXT)
-    save(fig, path)
+    fig, ax = _diagram_canvas(2.9)
+    ax.text(0.15, 2.52, "Modular bridge", fontsize=20, fontweight="bold", color=INK)
+    ax.text(6.65, 2.52, "Joint multimodal training", fontsize=20, fontweight="bold", color=INK)
+    left = [("Image", "data"), ("Encoder", "model"), ("Bridge", "model"), ("LLM", "model")]
+    for i, (label, role) in enumerate(left):
+        x = 0.15 + i * 1.5
+        role_box(ax, x, 1.35, 1.2, 0.85, label, role, size=18)
+        if i < 3:
+            arrow(ax, x + 1.2, 1.775, x + 1.5, 1.775)
+    role_box(ax, 6.65, 1.35, 2.4, 0.85, "Supported\ninput types", "data", size=18)
+    role_box(ax, 9.45, 1.35, 3.2, 0.85, "Multimodal model", "model", size=18)
+    arrow(ax, 9.05, 1.775, 9.45, 1.775)
+    ax.text(0.15, 0.85, "LLaVA joins pretrained vision and language parts.", fontsize=16, color=TEXT)
+    ax.text(6.65, 0.85, "Inputs and outputs depend on the checkpoint.", fontsize=16, color=TEXT)
+    role_legend(ax, 0.08, size=16)
+    _diagram_finish(fig, path)
+
 
 
 def generation_map(path):
-    fig, ax = plt.subplots(figsize=(10.5, 5.2))
-    ax.axis("off")
-    ax.set_xlim(0, 10.5)
-    ax.set_ylim(0, 5.2)
-    rows = [("Text → image", "latent diffusion / flow transformers (week 4)", "Stable Diffusion, FLUX, Imagen, GPT image models"),
-            ("Image → image", "noise-and-denoise editing, inpainting, control", "SDEdit, ControlNet, instruction-based editors"),
-            ("Text → speech", "neural TTS: acoustic model + vocoder, or codec LMs", "VITS/MMS, Bark, Kokoro, voice cloning systems"),
-            ("Speech → speech", "speech LLMs: listen and answer in voice, low latency", "real-time voice modes of assistants"),
-            ("Text → music / audio", "diffusion or token LMs over audio codecs", "MusicGen, Stable Audio, Suno-style tools"),
-            ("Text → video", "spatio-temporal diffusion transformers", "Sora, Veo families, open video models")]
-    for i, (task, how, ex) in enumerate(rows):
-        y = 4.75 - i * 0.84
-        c = SERIES[i % len(SERIES)]
-        box(ax, 0.05, y - 0.31, 2.55, 0.64, task, fc="white", ec=c, color=c, size=14)
-        ax.text(2.85, y + 0.13, how, fontsize=14, color=TEXT, va="center")
-        ax.text(2.85, y - 0.21, "e.g. " + ex, fontsize=12.5, color=MUTED, va="center")
-    save(fig, path)
+    fig, ax = _diagram_canvas(4.7)
+    rows = [("Text to image", "Diffusion / flow models", "SD-Turbo, FLUX"),
+            ("Image editing", "Noise, denoise, control", "SDEdit, ControlNet"),
+            ("Text to speech", "Acoustics + waveform", "VITS / MMS"),
+            ("Speech to speech", "Listen and respond", "Voice assistants"),
+            ("Text to audio", "Diffusion or codec tokens", "MusicGen, Stable Audio"),
+            ("Text to video", "Model space and time", "Video diffusion models")]
+    # A table drawn as a diagram: column headings instead of a role key, since every box is a task.
+    for x, head in ((0.15, "Task"), (3.5, "How it works"), (8.6, "Examples")):
+        ax.text(x, 4.42, head, fontsize=18, fontweight="bold", color=INK, va="center")
+    for i, (task, how, example) in enumerate(rows):
+        y = 3.6 - i * 0.62
+        role_box(ax, 0.15, y, 3.0, 0.48, task, "data", size=18)
+        ax.text(3.5, y + 0.24, how, fontsize=18, color=TEXT, va="center")
+        ax.text(8.6, y + 0.24, example, fontsize=18, color=INK, va="center")
+    _diagram_finish(fig, path)
+
 
 
 def vlm_training(path):
-    fig, ax = plt.subplots(figsize=(13, 3.8))
-    ax.axis("off")
-    ax.set_xlim(0, 13)
-    ax.set_ylim(0, 3.8)
-    stages = [("1. Pre-train parts", "vision encoder (CLIP/SigLIP)\nand LLM, separately"),
-              ("2. Alignment", "train the projector on\nimage–caption pairs"),
-              ("3. Visual instruction\ntuning", "image-based conversations,\ncharts, documents, OCR"),
-              ("4. Preference / RL", "reduce hallucination,\nimprove helpfulness"),
-              ("5. Adapt (optional)", "LoRA on your domain\nimages (week 8)")]
-    for i, (t, sub) in enumerate(stages):
-        x = 0.1 + i * 2.6
-        box(ax, x, 1.7, 2.3, 1.1, t, fc=TINT if i != 2 else ORANGE, ec=PRIMARY if i != 2 else ACCENT, size=11.5)
-        ax.text(x + 1.15, 1.45, sub, ha="center", va="top", fontsize=10.5, color=TEXT)
-        if i < 4:
-            arrow(ax, x + 2.3, 2.25, x + 2.6, 2.25)
-    save(fig, path)
+    fig, ax = _diagram_canvas(2.55)
+    _sequence(ax, [("1. Pretrained\nvision + language", "model"), ("2. Train bridge\npaired captions", "loss"),
+                   ("3. Instruction\nimage questions", "loss"), ("4. Preferences\noptional", "loss"),
+                   ("5. Domain tuning\noptional", "loss")], 1.0, height=1.05, size=17)
+    ax.text(0.15, 0.62, "Illustrative recipe: check which components each method trains.", fontsize=18, color=TEXT)
+    role_legend(ax, 0.08, size=16)
+    _diagram_finish(fig, path)
+
 
 
 def provenance(path):
-    fig, ax = plt.subplots(figsize=(10.5, 4.2))
+    fig, ax = _diagram_canvas(3.0)
+    rows = [("Visible disclosure", "Tells the viewer", "May be cropped"),
+            ("Signed C2PA history", "Records origin and edits", "Does not prove truth"),
+            ("Invisible watermark", "Signals synthetic content", "May weaken after edits"),
+            ("Detection classifier", "Estimates synthetic origin", "Can make mistakes")]
+    for x, head in ((0.15, "Layer"), (4.1, "What it does"), (9.0, "Limit")):
+        ax.text(x, 2.72, head, fontsize=18, fontweight="bold", color=INK, va="center")
+    for i, (label, purpose, limit) in enumerate(rows):
+        y = 1.98 - i * 0.6
+        role_box(ax, 0.15, y, 3.6, 0.44, label, "tool", size=18)
+        ax.text(4.1, y + 0.22, purpose, fontsize=18, color=TEXT, va="center")
+        ax.text(9.0, y + 0.22, limit, fontsize=18, color=ACCENT, va="center")
+    _diagram_finish(fig, path)
+
+
+
+
+def _diagram_canvas(height):
+    fig, ax = plt.subplots(figsize=(13, height))
+    fig.subplots_adjust(left=0.025, right=0.99, bottom=0.04, top=0.97)
     ax.axis("off")
-    ax.set_xlim(0, 10.5)
-    ax.set_ylim(0, 4.2)
-    layers = [("Visible label / disclosure", "'AI-generated' caption; required for deepfakes (EU AI Act Art. 50)", "easy to crop or omit"),
-              ("Content credentials (C2PA)", "cryptographically signed history: tool, edits, author", "can be stripped; needs platform support"),
-              ("Invisible watermark", "signal in pixels / audio / text (e.g. SynthID)", "only if the generator adds it; heavy edits weaken it"),
-              ("Detection classifiers", "predict whether media is synthetic", "arms race; false positives on real media")]
-    for i, (t, how, weak) in enumerate(layers):
-        y = 3.75 - i * 1.0
-        c = SERIES[i % len(SERIES)]
-        box(ax, 0.05, y - 0.33, 3.05, 0.66, t, fc="white", ec=c, color=c, size=13.5)
-        ax.text(3.3, y + 0.13, how, fontsize=13.5, color=TEXT, va="center")
-        ax.text(3.3, y - 0.22, "✗ " + weak, fontsize=12.5, color="#B91C1C", va="center")
-    save(fig, path)
+    ax.set_xlim(0, 13)
+    ax.set_ylim(0, height)
+    return fig, ax
+
+
+def _sequence(ax, labels, y, width=12.6, height=0.95, size=18):
+    gap = 0.28
+    block = (width - gap * (len(labels) - 1)) / len(labels)
+    for i, (label, role) in enumerate(labels):
+        x = 0.15 + i * (block + gap)
+        role_box(ax, x, y, block, height, label, role, size=size)
+        if i < len(labels) - 1:
+            arrow(ax, x + block, y + height / 2, x + block + gap, y + height / 2)
+
+
+def _diagram_finish(fig, path):
+    save_editable_scene(fig, path)
 
 
 FIGURES = {"cover": cover, "mllm_types": mllm_types, "generation_map": generation_map, "vlm_training": vlm_training,

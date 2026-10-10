@@ -1,9 +1,24 @@
 {
   "week": 3,
   "prerequisites": [
-    {"term": "Neural-network weights", "meaning": "Learned numbers used to transform an input into a prediction.", "check": "Which operation changes weights: opt.step or plotting a sample?"},
-    {"term": "Binary classification", "meaning": "Predicting between two labels, here real and generated.", "check": "In this lab, is label 1 used for real or generated images during the discriminator update?"},
-    {"term": "Gradient", "meaning": "A measure of how changing a quantity would change a loss.", "check": "Why must a generator receive feedback about its output to improve?"}
+    {
+      "term": "Neural-network weights",
+      "meaning": "Learned numbers used to transform an input into a prediction.",
+      "check": "Which operation changes weights: opt.step or plotting a sample?",
+      "answer": "opt.step changes weights, using the gradients from backward."
+    },
+    {
+      "term": "Binary classification",
+      "meaning": "Predicting between two labels, here real and generated.",
+      "check": "In this lab, is label 1 used for real or generated images during the discriminator update?",
+      "answer": "Real images get label 1; generated images get label 0."
+    },
+    {
+      "term": "Gradient",
+      "meaning": "A measure of how changing a quantity would change a loss.",
+      "check": "Why must a generator receive feedback about its output to improve?",
+      "answer": "Without feedback on its own output, it cannot tell which weight changes would make its images more realistic."
+    }
   ],
   "diagrams": [
     {
@@ -11,18 +26,54 @@
       "title": "A GAN learns from a discriminator",
       "subtitle": "Two networks learn different tasks; only the generator creates new images.",
       "steps": [
-        {"title": "Draw inputs", "detail": "Sample noise; load real digits on a parallel data path.", "code": "train_dl / Z_DIM"},
-        {"title": "Generate images", "detail": "Map each 64-number noise code into one digit image.", "code": "Generator / G"},
-        {"title": "Score real and fake", "detail": "The discriminator reads both real and generated images.", "code": "Discriminator / D"},
-        {"title": "Form two losses", "detail": "D separates sources; G wants its fakes accepted as real.", "code": "d_loss_fn / g_loss_fn"},
-        {"title": "Alternate updates", "detail": "Update D first, then update G through the new D.", "code": "opt_D / opt_G"},
-        {"title": "Inspect progress", "detail": "Compare fixed-noise images, class coverage, and feature distance.", "code": "snapshots / frechet_distance"}
+        {
+          "title": "Draw inputs",
+          "detail": "Noise to G; real digits to D.",
+          "code": "train_dl / Z_DIM",
+          "role": "data"
+        },
+        {
+          "title": "Generate images",
+          "detail": "64-number codes become digits.",
+          "code": "G",
+          "role": "model"
+        },
+        {
+          "title": "Score both sources",
+          "detail": "D reads real and fake images.",
+          "code": "D",
+          "role": "model"
+        },
+        {
+          "title": "Form two losses",
+          "detail": "D separates; G seeks target 1.",
+          "code": "d_loss_fn / g_loss_fn",
+          "role": "loss"
+        },
+        {
+          "title": "Alternate updates",
+          "detail": "Step D, then step G through D.",
+          "code": "opt_D / opt_G",
+          "role": "model"
+        },
+        {
+          "title": "Inspect progress",
+          "detail": "Fixed-noise images and coverage.",
+          "code": "snapshots",
+          "role": "output"
+        }
       ],
-      "arrows": ["noise codes; real images bypass G", "fake images; real images join D", "real/fake logits", "losses and gradients", "trained G and recorded samples"],
-      "feedback": "Repeat generation and alternating updates on new batches using the updated G and D.",
+      "arrows": [
+        "noise codes z",
+        "fake images",
+        "real/fake logits",
+        "losses and gradients",
+        "trained G + snapshots"
+      ],
+      "feedback": "Repeat generation and both updates on the next batch.",
       "feedback_to": 1,
       "trace": [
-        "A real MNIST batch is scaled to [-1, 1]; G receives separate Gaussian codes of length 64.",
+        "A real MNIST batch is scaled to [−1, 1]; G receives separate Gaussian codes of length 64.",
         "G upsamples each code through 7×7, 14×14, and 28×28 feature grids.",
         "D scores real images and detached fake images; opt_D updates D using source labels.",
         "The original connected fakes pass through updated D; opt_G improves their real-labelled score.",
@@ -30,7 +81,17 @@
       ],
       "explanation": "A generative adversarial network, or GAN, contains two networks with different jobs. The generator G transforms a random latent code into an image. The discriminator D judges whether an image came from the dataset or the generator. Real images follow a separate path into D; they do not pass through G. Training alternates two updates. The discriminator learns to assign real labels to dataset images and fake labels to generated ones. The generator then learns to make its images receive the real label from the updated discriminator. Gradients from D guide G even though G never receives a matching target digit for each noise code. This creates a moving learning problem: improving either network changes the other network's task. Loss curves alone cannot show success. The lab compares fixed-code snapshots, predicted digit coverage, and a custom feature distance. Generation after training needs G and a fresh code, without D.",
       "check_question": "Which networks must run to generate a new digit after training?",
-      "check_answer": "Only G is needed. D supplied training feedback but is not part of the generation path."
+      "check_answer": "Only G is needed. D supplied training feedback but is not part of the generation path.",
+      "layout": "linear",
+      "feedback_from": 4,
+      "branches": [
+        {
+          "from": 0,
+          "to": 2,
+          "label": "real digits (bypass G)",
+          "lane": "bottom"
+        }
+      ]
     },
     {
       "id": "mechanism",
@@ -38,14 +99,44 @@
       "title": "One alternating GAN update",
       "subtitle": "Detach fakes for the D update; keep G connected for its own update.",
       "steps": [
-        {"title": "Make connected fakes", "detail": "G creates images with a gradient path to its weights.", "code": "G / fake"},
-        {"title": "Detach for D", "detail": "Give D real images and a disconnected view of fakes.", "code": "d_loss_fn"},
-        {"title": "Update D", "detail": "Train D with real targets 1 and fake targets 0.", "code": "opt_D"},
-        {"title": "Score original fakes", "detail": "Use updated D; original fakes still connect to G.", "code": "g_loss_fn"},
-        {"title": "Update G", "detail": "Backpropagate the real-target loss; step only G's optimiser.", "code": "opt_G"}
+        {
+          "title": "Make linked fakes",
+          "detail": "Images retain the G graph.",
+          "code": "G / fake",
+          "role": "model"
+        },
+        {
+          "title": "Detach for D",
+          "detail": "Real batch plus detached fakes.",
+          "code": "d_loss_fn",
+          "role": "model"
+        },
+        {
+          "title": "Update D",
+          "detail": "Real target 1; fake target 0.",
+          "code": "opt_D",
+          "role": "model"
+        },
+        {
+          "title": "Score linked fakes",
+          "detail": "Updated D; original G graph.",
+          "code": "g_loss_fn",
+          "role": "loss"
+        },
+        {
+          "title": "Update G",
+          "detail": "Target 1; step only G weights.",
+          "code": "opt_G",
+          "role": "model"
+        }
       ],
-      "arrows": ["fake images with graph", "real/fake D loss", "updated D; original fake tensor", "generator loss and gradient path"],
-      "feedback": "Updated G produces the fakes for the next batch's discriminator and generator updates.",
+      "arrows": [
+        "fake images",
+        "D loss: real 1, fake 0",
+        "updated D",
+        "G loss and gradients"
+      ],
+      "feedback": "Updated G makes the next batch’s fake images.",
       "feedback_to": 0,
       "trace": [
         "Suppose D confidently rejects a generated digit; that creates a large real-target generator cost.",
@@ -53,23 +144,69 @@
         "During the G step, g_loss_fn uses the original fake so gradients can travel through D to G.",
         "opt_G steps G's parameters; the discriminator is a scoring route rather than the optimiser target."
       ],
-      "explanation": "The important distinction is between a tensor's values and its gradient connection. fake.detach supplies the same image values to D while cutting the route back to G for that operation. This lets the discriminator learn from generated images without updating the generator from the discriminator's loss. The original fake tensor remains connected to G. After opt_D changes D's weights, g_loss_fn sends that original tensor through D and asks for the real label. This non-saturating generator objective rewards fakes that D accepts. Backpropagation follows the chain from the loss through D's operations, through the fake image, and into G's weights. The optimiser step then changes only the parameters registered with opt_G. The labels therefore serve different purposes in the two updates: fake means 0 when training D, but G's desired target is 1. Repeat this sequence for each training batch.",
+      "explanation": "The important distinction is between a tensor's values and its gradient connection. The call fake.detach() supplies the same image values to D while cutting the route back to G for that operation. This lets the discriminator learn from generated images without updating the generator from the discriminator's loss. The original fake tensor remains connected to G. After opt_D changes D's weights, g_loss_fn sends that original tensor through D and asks for the real label. This non-saturating generator objective rewards fakes that D accepts. Backpropagation follows the chain from the loss through D's operations, through the fake image, and into G's weights. The optimiser step then changes only the parameters registered with opt_G. The labels therefore serve different purposes in the two updates: fake means 0 when training D, but G's desired target is 1. Repeat this sequence for each training batch.",
       "check_question": "Why would detaching fake inside g_loss_fn stop the generator from learning?",
-      "check_answer": "It would cut the gradient path from the generator loss back to G's weights."
+      "check_answer": "It would cut the gradient path from the generator loss back to G's weights.",
+      "layout": "linear",
+      "feedback_from": 4,
+      "branches": [
+        {
+          "from": 0,
+          "to": 3,
+          "label": "same fakes, still linked to G",
+          "lane": "bottom"
+        }
+      ]
     },
     {
       "id": "lab",
       "title": "Train, inspect, and evaluate a GAN",
       "subtitle": "Check visual quality and coverage with evidence beyond the training loss.",
       "steps": [
-        {"title": "Prepare and build", "detail": "Scale digits and connect noise-to-image and image-to-score networks.", "code": "Generator / Discriminator"},
-        {"title": "Alternate training", "detail": "Record losses, discriminator probabilities, and fixed-code snapshots.", "code": "d_loss_fn / g_loss_fn / log"},
-        {"title": "Explore codes", "detail": "Compare straight and spherical paths between noise codes.", "code": "lerp / slerp"},
-        {"title": "Check class coverage", "detail": "Train a digit classifier and count predicted generated classes.", "code": "DigitCNN / counts"},
-        {"title": "Compare features", "detail": "Compare real and fake feature means and covariances.", "code": "feats / frechet_distance"},
-        {"title": "Test collapse", "detail": "Compare standard GAN and WGAN-GP on eight toy clusters.", "code": "train_toy / modes_covered"}
+        {
+          "title": "Prepare and build",
+          "detail": "Scale images; build networks.",
+          "code": "G / D",
+          "role": "model"
+        },
+        {
+          "title": "Alternate training",
+          "detail": "Record scores and snapshots.",
+          "code": "log",
+          "role": "model"
+        },
+        {
+          "title": "Explore codes",
+          "detail": "Decode two interpolation paths.",
+          "code": "lerp / slerp",
+          "role": "output"
+        },
+        {
+          "title": "Check classes",
+          "detail": "Count classifier predictions.",
+          "code": "DigitCNN / counts",
+          "role": "output"
+        },
+        {
+          "title": "Compare features",
+          "detail": "Real/fake means and spreads.",
+          "code": "feats",
+          "role": "output"
+        },
+        {
+          "title": "Test collapse",
+          "detail": "Count eight-cluster coverage.",
+          "code": "train_toy",
+          "role": "output"
+        }
       ],
-      "arrows": ["G, D, and real batches", "trained G + snapshots", "generated images", "classifier feature extractor", "quality and coverage questions"],
+      "arrows": [
+        "real batches; G and D",
+        "trained G + snapshots",
+        "generated images",
+        "classifier features",
+        "quality/coverage evidence"
+      ],
       "trace": [
         "Reuse z_fixed across epoch snapshots so image changes reflect training rather than new noise inputs.",
         "Compare lerp and slerp images and midpoint norms; neither path guarantees valid digits.",
@@ -79,18 +216,162 @@
       ],
       "explanation": "The lab asks two separate evaluation questions: do the images resemble digits, and does the generator cover varied digits? Fixed-noise snapshots answer a visual progress question because each epoch uses the same input codes. The digit classifier estimates class coverage, but its mistakes can distort the histogram, so first check its test accuracy and inspect samples. Its hidden features also define a custom Fréchet distance. This compares two sets of feature vectors through their means and covariance matrices; it is not the standard Inception-based FID. Real-versus-real features provide a reference for finite-sample differences. Keep the feature network, preprocessing, and sample count fixed when comparing generators. The toy ring makes missing modes easy to see. WGAN-GP changes the scoring objective and adds a gradient penalty, so its training feedback differs from ordinary real/fake classification. Better toy coverage is evidence for that experiment, not a guarantee for every dataset.",
       "check_question": "Can a low feature distance alone prove that every digit class is represented?",
-      "check_answer": "No. Inspect the coverage histogram and samples as well; the feature statistic summarises only some aspects of the distribution."
+      "check_answer": "No. Inspect the coverage histogram and samples as well; the feature statistic summarises only some aspects of the distribution.",
+      "layout": "linear"
+    },
+    {
+      "id": "training",
+      "title": "Where the GAN training feedback comes from",
+      "insert_before_title": "The minimax game (Goodfellow et al., 2014)",
+      "subtitle": "Real images train the discriminator. Its feedback trains the generator.",
+      "steps": [
+        {
+          "title": "Get real and fake",
+          "detail": "Real data; G makes a fake batch.",
+          "code": "train_dl / G",
+          "role": "data"
+        },
+        {
+          "title": "Train D",
+          "detail": "Real 1; detached fake 0.",
+          "code": "d_loss_fn / opt_D",
+          "role": "loss"
+        },
+        {
+          "title": "Recheck linked fakes",
+          "detail": "Updated D passes feedback to G.",
+          "code": "D / fake",
+          "role": "model"
+        },
+        {
+          "title": "Train G",
+          "detail": "Fake target 1; step only G.",
+          "code": "g_loss_fn / opt_G",
+          "role": "loss"
+        },
+        {
+          "title": "Record samples",
+          "detail": "Fixed noise reveals changes.",
+          "code": "snapshots",
+          "role": "output"
+        }
+      ],
+      "arrows": [
+        "real and detached fake batches",
+        "updated D",
+        "fake logits linked to G",
+        "updated G"
+      ],
+      "explanation": "A GAN has two losses and two weight updates. First, D learns to label real images as 1 and generated images as 0. The fake images are detached during this step so its loss does not update G. Next, updated D rates fake images that still have a gradient path back to G. The generator loss uses target 1: it asks G to make images D accepts as real. Only G's optimiser takes a step here. Fixed-noise snapshots show how those updates changed the generated images.",
+      "trace": [
+        "If D gives a fake image probability 0.1, the generator's non-saturating loss is −ln(0.1), about 2.30.",
+        "If it instead gives 0.8, the generator cost is about 0.22.",
+        "G learns changes that make D's fake score higher. D learns changes that separate the two sources.",
+        "A falling loss alone cannot show whether all digit classes are covered."
+      ],
+      "check_question": "Why is the generator target 1 for a fake image?",
+      "check_answer": "Target 1 expresses G's goal: make D accept its image as real. The discriminator still uses target 0 for fakes in its own update.",
+      "feedback": "Repeat both weight updates with a fresh batch.",
+      "feedback_to": 0,
+      "layout": "linear",
+      "feedback_from": 3,
+      "branches": [
+        {
+          "from": 0,
+          "to": 2,
+          "label": "linked fakes (G graph kept)",
+          "lane": "bottom"
+        }
+      ]
+    },
+    {
+      "id": "inference",
+      "title": "Use the trained generator on new noise",
+      "insert_before_title": "Real DCGAN samples across training epochs",
+      "subtitle": "After training, the generator can create images without a discriminator call.",
+      "steps": [
+        {
+          "title": "Keep trained G",
+          "detail": "Use stored BatchNorm statistics.",
+          "code": "G.eval",
+          "role": "model"
+        },
+        {
+          "title": "Draw code vectors",
+          "detail": "64 Gaussian values per code.",
+          "code": "torch.randn",
+          "role": "data"
+        },
+        {
+          "title": "Expand features",
+          "detail": "Learned layers upsample.",
+          "code": "Generator.forward",
+          "role": "model"
+        },
+        {
+          "title": "Return pixels",
+          "detail": "Produce 28 × 28 digit images.",
+          "code": "G",
+          "role": "output"
+        },
+        {
+          "title": "Check variety",
+          "detail": "Inspect images and class counts.",
+          "code": "counts",
+          "role": "output"
+        }
+      ],
+      "arrows": [
+        "fixed G weights",
+        "random codes z",
+        "image features",
+        "generated digit images"
+      ],
+      "explanation": "The generator is the part needed to create new images. It takes fresh random codes and runs one forward pass through its learned layers. The discriminator supplied training feedback, but it does not need to run during generation. Evaluation mode matters because layers such as batch normalisation should use their stored statistics. Compare many samples for quality and variety. A sharp-looking sample can still come from a model that only makes a few digit classes. Use the same noise codes when comparing two saved generator versions.",
+      "trace": [
+        "One random code has Z_DIM = 64 values in this lab.",
+        "A batch of 16 codes produces 16 digit images.",
+        "Reuse the same 16 codes after different epochs to see the effect of training.",
+        "Count predicted classes over a larger batch to look for missing digits."
+      ],
+      "check_question": "Which network is needed to create a new image after training?",
+      "check_answer": "The trained generator G. D is used for learning feedback, while separate evaluation checks can measure the resulting samples.",
+      "layout": "linear"
     }
   ],
   "glossary": [
-    {"term": "Generator", "meaning": "A network that transforms a random code into a generated example."},
-    {"term": "Discriminator", "meaning": "A network trained to distinguish dataset examples from generated examples."},
-    {"term": "Logit", "meaning": "An unnormalised classification score; sigmoid turns a binary logit into a probability."},
-    {"term": "Detach", "meaning": "Keep tensor values while disconnecting their gradient path for an operation."},
-    {"term": "Non-saturating loss", "meaning": "The generator objective that asks D to label generated samples as real."},
-    {"term": "Mode collapse", "meaning": "A generator produces only a small part of the variety present in the training distribution."},
-    {"term": "Feature vector", "meaning": "A numerical representation extracted from an intermediate layer of a network."},
-    {"term": "Gradient penalty", "meaning": "A training cost encouraging the critic's input-gradient norm to stay near one on sampled interpolates."}
+    {
+      "term": "Generator",
+      "meaning": "A network that transforms a random code into a generated example."
+    },
+    {
+      "term": "Discriminator",
+      "meaning": "A network trained to distinguish dataset examples from generated examples."
+    },
+    {
+      "term": "Logit",
+      "meaning": "An unnormalised classification score; sigmoid turns a binary logit into a probability."
+    },
+    {
+      "term": "Detach",
+      "meaning": "Keep tensor values while disconnecting their gradient path for an operation."
+    },
+    {
+      "term": "Non-saturating loss",
+      "meaning": "The generator objective that asks D to label generated samples as real."
+    },
+    {
+      "term": "Mode collapse",
+      "meaning": "A generator produces only a small part of the variety present in the training distribution."
+    },
+    {
+      "term": "Feature vector",
+      "meaning": "A numerical representation extracted from an intermediate layer of a network."
+    },
+    {
+      "term": "Gradient penalty",
+      "meaning": "A training cost encouraging the critic's input-gradient norm to stay near one on sampled interpolates."
+    }
   ],
   "pitfalls": [
     "A discriminator output near 0.5 can reflect balance or poor learning; inspect images and coverage as well.",
@@ -98,11 +379,75 @@
     "The DigitCNN feature distance has its own scale and cannot be directly compared with reported Inception FID values."
   ],
   "code_walkthrough": [
-    {"symbol": "Generator.forward", "role": "Maps one latent code to one 28 by 28 image.", "inspect": "Follow the code reshape and three spatial sizes in the transposed convolutions."},
-    {"symbol": "Discriminator.forward", "role": "Maps each image to one real/fake logit.", "inspect": "Compare its output shape with the batch of targets."},
-    {"symbol": "d_loss_fn", "role": "Trains D to separate real and generated sources.", "inspect": "Find the detached fake path and distinguish the two target labels."},
-    {"symbol": "g_loss_fn", "role": "Supplies generator feedback through D.", "inspect": "Check that the original fake tensor remains connected to G."},
-    {"symbol": "frechet_distance", "role": "Compares distributions of features extracted by the same classifier.", "inspect": "Identify means and covariance matrices; compare the real-versus-real reference."},
-    {"symbol": "gradient_penalty", "role": "Regularises the toy Wasserstein critic on real/fake interpolates.", "inspect": "Distinguish gradients with respect to input points from gradients updating model weights."}
-  ]
+    {
+      "symbol": "Generator.forward",
+      "role": "Maps one latent code to one 28 by 28 image.",
+      "inspect": "Follow the code reshape and three spatial sizes in the transposed convolutions."
+    },
+    {
+      "symbol": "Discriminator.forward",
+      "role": "Maps each image to one real/fake logit.",
+      "inspect": "Compare its output shape with the batch of targets."
+    },
+    {
+      "symbol": "d_loss_fn",
+      "role": "Trains D to separate real and generated sources.",
+      "inspect": "Find the detached fake path and distinguish the two target labels."
+    },
+    {
+      "symbol": "g_loss_fn",
+      "role": "Supplies generator feedback through D.",
+      "inspect": "Check that the original fake tensor remains connected to G."
+    },
+    {
+      "symbol": "frechet_distance",
+      "role": "Compares distributions of features extracted by the same classifier.",
+      "inspect": "Identify means and covariance matrices; compare the real-versus-real reference."
+    },
+    {
+      "symbol": "gradient_penalty",
+      "role": "Regularises the toy Wasserstein critic on real/fake interpolates.",
+      "inspect": "Distinguish gradients with respect to input points from gradients updating model weights."
+    }
+  ],
+  "recap": {
+    "title": "Week 3: what we learned",
+    "cards": [
+      {
+        "title": "Generator G",
+        "text": "Noise codes become images; generation after training needs G alone.",
+        "role": "model"
+      },
+      {
+        "title": "Discriminator D",
+        "text": "D learns to distinguish real data from generated images.",
+        "role": "model"
+      },
+      {
+        "title": "Alternate updates",
+        "text": "Detach fakes for D. Keep them linked for the generator’s own update.",
+        "role": "loss"
+      },
+      {
+        "title": "Stronger early feedback",
+        "text": "Non-saturating G loss asks D to call generated images real.",
+        "role": "loss"
+      },
+      {
+        "title": "Quality and coverage",
+        "text": "Inspect fixed-code images, class counts and feature distances together.",
+        "role": "output"
+      },
+      {
+        "title": "Synthetic-media duties",
+        "text": "Use authorised data; assess misuse, provenance and disclosure.",
+        "role": "output"
+      }
+    ],
+    "example": "Illustrative G loss: if D(fake) = 0.1, −ln(0.1) ≈ 2.30; at 0.8 it is ≈ 0.22.",
+    "question": "Why must fake stay linked to G during the generator update?",
+    "answer": "Gradients must travel from its loss through D and the fake image to G’s weights.",
+    "next": "In Week 4 we learn from known noise targets and generate by repeated denoising.",
+    "notes": "Ask two students to narrate the two update roles. One explains D’s real and fake labels; the other explains why G’s target for its fake image is one. Use the illustrative loss values to show what the generator wants without mistaking loss size for image quality. Point out that detach preserves pixel values while cutting a gradient route. Ask the exit question before showing the answer. Then show two equally sharp digit samples of the same class and ask why sharpness alone cannot demonstrate coverage. Close with one provenance or disclosure action and connect the next week to a fixed regression target."
+  }
 }

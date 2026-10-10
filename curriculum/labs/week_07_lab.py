@@ -39,9 +39,29 @@
 # Then inspect representative failures. Keep separate examples for a final
 # check when revising prompts repeatedly on a development set.
 #
+# **Read:** an **evaluation harness** is a repeatable program for checking
+# outputs. A **baseline** is the starting method used for comparison.
+# A **label** is the known category; **accuracy** is correct items divided by
+# all items. A **schema** describes required fields, types and allowed values.
+# **Run:** read a dataset item, its prompt and its scorer before running a
+# whole experiment. Follow the same item through `prompt_fn` → `llm` → `scorer`.
+# **Change:** revise one prompt component at a time on development examples.
+# **Check:** inspect wrong and invalid outputs, then use separate examples
+# for a final comparison. A good-looking answer can still fail the task.
+#
+# %% [markdown]
+# **What/why:** Install the model, tables and validation library.
+# **Expected output:** Installation logs followed by imports.
+# **Predict/check:** Validation happens in application code.
+#
 # %% tags=["colab-install"]
 %pip install -q transformers accelerate pydantic pandas
 
+# %% [markdown]
+# **What/why:** Load one model and define a request helper.
+# **Expected output:** Device, model and a working llm helper.
+# **Predict/check:** Keep the model and settings fixed during prompt comparisons.
+#
 # %%
 import collections
 import json
@@ -77,7 +97,35 @@ print(llm([{"role": "user", "content": "Say hello in five words."}])[0])
 # %% [markdown]
 # ## The evaluation harness
 #
-# `evaluate(prompt_fn, dataset, scorer)` runs every item through a prompt, scores it and returns a results table plus summary statistics. Keep **settings fixed** (model, temperature, max tokens) when comparing prompts.
+# `evaluate(name, prompt_fn, dataset, scorer)` runs every item through a prompt,
+# scores it and returns a results table plus summary statistics. Keep
+# **settings fixed** (model, temperature, max tokens) when comparing prompts.
+# Each scorer returns `(score, note)`: the number summarises success, while
+# the note helps explain a failure. For example, 32 correct items out of 40
+# gives `32/40=0.8`, or 80% accuracy. One changed item changes that score by 2.5 points.
+
+# %% [markdown]
+# **What/why:** Build an evaluation harness around a scorer.
+# **Expected output:** Per-example results and an aggregate row.
+# **Predict/check:** Read the scorer’s meaning before interpreting a metric.
+#
+#
+# ### Improve a prompt using evidence
+# This is prompt development: model weights stay fixed
+#
+# ![Improve a prompt using evidence](fig:beginner_training)
+#
+# 1. Suppose prompt A gets 32 of 40 labels right and prompt B gets 34.
+# 2. Accuracy changes from 80% to 85%; two examples produce the gain.
+# 3. Read those two and any newly wrong examples before choosing B.
+# 4. Run the selected version on fresh tickets before claiming a reliable improvement.
+#
+# **Predict before running:** Did the 80% to 85% improvement change any stored model weights?
+#
+# <!-- BEGIN ANSWER -->
+# **Instructor explanation:** No. Only the prompt changed; two additional examples were correct.
+# <!-- END ANSWER -->
+#
 
 # %%
 def evaluate(name, prompt_fn, dataset, scorer, max_new_tokens=64, temperature=0.0, limit=None):
@@ -98,6 +146,11 @@ def evaluate(name, prompt_fn, dataset, scorer, max_new_tokens=64, temperature=0.
 #
 # **Task:** route student-services messages to one of five teams. The labels are fixed, so we can measure accuracy exactly.
 
+# %% [markdown]
+# **What/why:** Inspect the labelled tickets, arithmetic cases and source emails.
+# **Expected output:** Defined data lists, without model calls.
+# **Predict/check:** These small teaching sets need fresh final cases for project claims.
+#
 # %%
 # DATA START
 LABELS = ["IT_ACCESS", "FEES_FINANCE", "TIMETABLE_EXAMS", "WELLBEING", "LIBRARY"]
@@ -180,6 +233,29 @@ DOCS = [
 # DATA END
 print(len(TICKETS), "tickets |", len(PROBLEMS), "problems |", len(EMAILS), "emails |", len(DOCS), "documents")
 
+# %% [markdown]
+# **What/why:** Create a zero-shot prompt and parse recognised labels.
+# **Expected output:** Prompt and scorer functions.
+# **Predict/check:** The parser accepts one label inside prose; it does not enforce label-only output.
+#
+#
+# ### Route one new message
+# Inference uses the selected prompt to make a prediction
+#
+# ![Route one new message](fig:beginner_inference)
+#
+# 1. New message: "I cannot sign in to Moodle."
+# 2. The prompt lists IT_ACCESS and the other permitted teams.
+# 3. The model replies "IT_ACCESS".
+# 4. The parser recognises the label; a sentence naming several teams needs inspection.
+#
+# **Predict before running:** Can a recognised label still be wrong?
+#
+# <!-- BEGIN ANSWER -->
+# **Instructor explanation:** Yes. A parser checks the form of the reply; it does not establish the correct team.
+# <!-- END ANSWER -->
+#
+
 # %%
 ticket_ds = [{"text": t, "label": l} for t, l in TICKETS]
 TASK = ("Classify the student message into exactly one category: " + ", ".join(LABELS) +
@@ -205,6 +281,11 @@ def one_shot(item):
 #
 # **TODO 2:** write `role_few_shot(item)`: the same few-shot content, plus a **system message** that gives the model a role (e.g. an experienced student-services triage officer) and the rule that the answer must be one of the labels.
 
+# %% [markdown]
+# **What/why:** Compare no, one and several examples with fixed settings.
+# **Expected output:** Accuracy, unparsed counts, tokens and seconds.
+# **Predict/check:** Changing only the prompt supports a fair comparison.
+#
 # %%
 EXAMPLES = [("My laptop can't connect to eduroam.", "IT_ACCESS"), ("Can I get a receipt for my deposit?", "FEES_FINANCE"),
             ("My timetable shows a clash on Tuesday.", "TIMETABLE_EXAMS"), ("I'm feeling very low and can't sleep.", "WELLBEING"),
@@ -233,6 +314,11 @@ for name, fn in [("zero-shot", zero_shot), ("one-shot", one_shot), ("few-shot", 
     summaries.append(s); details.append(df)
 pd.DataFrame(summaries)
 
+# %% [markdown]
+# **What/why:** Read the failed routing replies.
+# **Expected output:** Wrong-label and unparsed examples.
+# **Predict/check:** Aggregate scores cannot explain a failure by themselves.
+#
 # %%
 errors = pd.concat(details)
 errors[errors.score == 0][["prompt", "input", "output", "note"]].head(12)
@@ -251,10 +337,19 @@ errors[errors.score == 0][["prompt", "input", "output", "note"]].head(12)
 #
 # * **direct:** "answer with a number only";
 # * **chain-of-thought (CoT):** "think step by step, then give the final answer";
-# * **self-consistency:** sample several CoT answers at temperature 0.7 and take the **majority vote**.
+# * **self-consistency:** sample several CoT answers at temperature 0.7 and select the **most common parsed answer**. A strict majority is not required; see the tie rule below.
 #
 # **TODO 3:** complete `extract_number` (take the **last** number in the text) and `majority_vote`.
+# A vote combines parsed final answers, not the quality of their explanations.
+# For `[21, 21, 18, None]`, the winning number is 21 and the missing answer is
+# ignored. A tie has no strict majority; this helper selects the first tied
+# value encountered. Inspect vote lists when a result is close or truncated.
 
+# %% [markdown]
+# **What/why:** Score final numbers and aggregate sampled answers.
+# **Expected output:** Direct, step-by-step and vote measures.
+# **Predict/check:** Most common is a plurality; ties use the first encountered value.
+#
 # %%
 problem_ds = [{"q": q, "answer": a} for q, a in PROBLEMS]
 
@@ -308,7 +403,7 @@ pd.DataFrame(res)
 # ✍️ **Question 2.** Compare accuracy and **token cost** of the three strategies. Does CoT text prove the model reasoned correctly? When would you use a reasoning model instead of CoT prompting?
 #
 # <!-- BEGIN ANSWER -->
-# CoT usually improves accuracy on multi-step problems over direct answers, and self-consistency adds a further gain, but at 10–20× (CoT) and ×k again (self-consistency) the output tokens, so cost and latency rise sharply. The CoT text does not prove correct reasoning: models can reach right answers with flawed steps or write plausible steps that do not reflect how the answer was produced, so evaluate the final answer against ground truth (and spot-check the steps). Reasoning models are trained to do this internally and are preferable when accuracy on hard multi-step problems (maths, code, planning) matters more than cost; for them, explicit "think step by step" instructions add little. For simple lookups or classification, direct answers are cheaper and just as good.
+# State the measured accuracy and token counts for each strategy. Asking for intermediate steps may improve some multi-step answers, but can also produce longer wrong answers. Sampling several answers adds calls and tokens; repeated agreement does not guarantee correctness. Check the final number against the known answer and spot-check visible steps. A specialised reasoning model is another candidate to evaluate for difficult tasks, using correctness, time and token cost together. For straightforward tasks, a shorter direct prompt is a useful baseline. This small experiment does not establish a universal gain or a fixed token-cost multiplier.
 # <!-- END ANSWER -->
 
 # %% [markdown]
@@ -323,6 +418,34 @@ pd.DataFrame(res)
 # whether the extracted facts are right. A plausible eight-digit ID can pass
 # the first check while failing the second. The date pattern below checks
 # YYYY-MM-DD spelling; it does not verify that a date exists in the calendar.
+# **Trace one retry:** email → generated text → JSON parser → schema check.
+# If the check fails, the program returns the error to the model once and
+# checks the revised output. Passing these steps says the shape is acceptable;
+# compare every extracted field with the email to check the content.
+
+# %% [markdown]
+# **What/why:** Validate JSON, retry once and compare extracted facts.
+# **Expected output:** Valid-format and correct-field rates.
+# **Predict/check:** A passing schema does not prove source correctness.
+#
+#
+# ### JSON extraction with a check
+# Validate structure, then check whether the values match the email
+#
+# ![JSON extraction with a check](fig:beginner_mechanism)
+#
+# 1. Aoife's email supplies a name, an eight-digit ID, an extension request and a date.
+# 2. The prompt asks for those four fields, with null when no date is present.
+# 3. Malformed JSON or a seven-digit ID triggers the error-handling branch.
+# 4. A corrected response is checked once more; a second failure returns None.
+# 5. A valid object is separately compared with gold values to measure correctness.
+#
+# **Predict before running:** Would the wrong student ID pass validation if it still contained eight digits?
+#
+# <!-- BEGIN ANSWER -->
+# **Instructor explanation:** Yes. The format check would pass; comparison with the source and reference is needed to detect the wrong value.
+# <!-- END ANSWER -->
+#
 
 # %%
 from typing import Literal, Optional
@@ -406,7 +529,16 @@ pd.DataFrame(rows)
 # The assistant summarises documents from the college website. Some documents contain **injected instructions**. We measure how often the model obeys them, then try a mitigation.
 #
 # **TODO 5:** write `defended_prompt(doc)`: put the document inside clear delimiters, tell the model in the **system** message that document text is untrusted data and must never be followed as instructions, and ask for a one-sentence summary.
+# **Prompt injection** means input data tries to redirect the model's task.
+# Read the document as evidence to summarise, even when it contains commands.
+# Changing the prompt tests a mitigation. It does not create a hard security
+# boundary; compare the full outputs with the keyword detector's flags.
 
+# %% [markdown]
+# **What/why:** Compare source-document prompts under hostile text.
+# **Expected output:** Raw replies and keyword-flag rates.
+# **Predict/check:** Inspect flags manually; a heuristic rate is not established attack success.
+#
 # %%
 def naive_prompt(doc):
     return [{"role": "user", "content": f"Summarise this document in one sentence: {doc}"}]
@@ -434,14 +566,14 @@ for doc, injected in DOCS:
         out, _ = llm(fn(doc), max_new_tokens=60)
         rows.append({"prompt": name, "injected": injected, "hijacked": hijacked(out), "output": out[:90]})
 inj = pd.DataFrame(rows)
-print(inj[inj.injected].groupby("prompt").hijacked.mean().rename("attack success rate"))
+print(inj[inj.injected].groupby("prompt").hijacked.mean().rename("keyword-flag rate"))
 inj
 
 # %% [markdown]
 # ✍️ **Question 4.** Did the defence remove the problem? Why can prompting alone never fully solve prompt injection, and what else would you add in a real system that can take actions (e.g. send emails)?
 #
 # <!-- BEGIN ANSWER -->
-# Delimiters plus a system-level rule usually reduce the attack success rate but rarely to zero, and they can be defeated by other phrasings (e.g. fake closing tags or "SYSTEM:" text, as in document 6). Prompting cannot fully solve injection because instructions and data travel through the same channel (tokens): the model has no hard boundary between them, only learned tendencies. In systems with tools, add defence in depth: least privilege (the summariser has no email-sending tool), allow-lists and argument validation for tools, human approval for consequential actions, output filtering (e.g. block responses that reveal system prompts), separating untrusted content processing into a model with no tools, logging and monitoring, and red-team testing. Treat all retrieved or user-supplied content as untrusted (week 12).
+# Compare keyword-flag rates, then read the raw replies: a harmless quotation can be flagged, and an actual instruction-following failure can lack the keyword. These flags alone cannot establish attack success or defence effectiveness. Delimiters and a system-level rule help organise sources, but hostile text can still use fake closing tags or "SYSTEM:" text, as in document 6. In systems with tools, enforce permissions in application code: least privilege (the summariser has no email-sending tool), allow-lists and argument validation, approval for consequential actions, output checks, separating untrusted-content processing from tool execution, logging and adversarial tests. Treat retrieved or user-supplied source content as untrusted (week 12).
 # <!-- END ANSWER -->
 
 # %% [markdown]
@@ -451,11 +583,16 @@ inj
 #
 # **TODO 6:** complete `judge(question, a, b)` so it returns `"A"` or `"B"` (parse the model's reply).
 #
-# Inspect `good_in_A` and `good_in_B` before reading the summary. The current
-# consistency expression can be True when both replies are invalid (`?`).
-# Such a row supplies no evidence that the judge reliably chose an answer.
+# Inspect `good_in_A` and `good_in_B` before reading the summary. The
+# consistency check requires valid A/B replies in both orders.
+# Two invalid replies are counted as inconsistent, not as evidence of reliability.
 # `correct_both` provides a stricter check on these deliberately labelled pairs.
 
+# %% [markdown]
+# **What/why:** Judge each pair twice, with the answer order swapped.
+# **Expected output:** Two verdicts, correct_both and valid consistency.
+# **Predict/check:** Both replies must be A/B; two invalid replies are inconsistent.
+#
 # %%
 PAIRS = [
     ("What is a token?", "A token is a sub-word unit of text with an integer ID that a language model reads and writes.", "It's like a coin you use in an arcade."),
@@ -481,7 +618,7 @@ for q, good, bad in PAIRS[: 2 if SMOKE else None]:
     first = judge(q, good, bad)       # good answer in position A
     swapped = judge(q, bad, good)     # good answer in position B
     rows.append({"question": q, "good_in_A": first, "good_in_B": swapped,
-                 "correct_both": first == "A" and swapped == "B", "consistent": (first == "A") == (swapped == "B")})
+                 "correct_both": first == "A" and swapped == "B", "consistent": first in ("A", "B") and swapped in ("A", "B") and (first == "A") == (swapped == "B")})
 pd.DataFrame(rows)
 
 # %% [markdown]
@@ -498,9 +635,14 @@ pd.DataFrame(rows)
 # | Classification | | accuracy, invalid | | |
 # | Word problems | | accuracy | | |
 # | JSON extraction | | valid %, correct % | | |
-# | Injection | | attack success % | | |
+# | Injection | | keyword-flag rate + manual review | | |
 # | Judge | | consistency % | | |
 
+# %% [markdown]
+# **What/why:** Optionally export the measured instructor results.
+# **Expected output:** A JSON file only when a path is supplied.
+# **Predict/check:** New exports include raw judge verdicts and the consistency definition.
+#
 # %% tags=["solution-only"]
 # Instructor tooling: save the measured results for the lecture slides (only when requested).
 if os.environ.get("GENAI_RESULTS_PATH"):
@@ -510,7 +652,7 @@ if os.environ.get("GENAI_RESULTS_PATH"):
         "reasoning": res,
         "extraction": {"valid_rate": float(pd.DataFrame(rows_extract).valid.mean()), "correct_rate": float(pd.DataFrame(rows_extract).all_fields_correct.mean())},
         "injection": inj[inj.injected].groupby("prompt").hijacked.mean().to_dict(),
-        "judge": {"consistent_rate": float(pd.DataFrame(rows).consistent.mean()), "correct_both_rate": float(pd.DataFrame(rows).correct_both.mean())},
+        "judge": {"consistent_rate": float(pd.DataFrame(rows).consistent.mean()), "correct_both_rate": float(pd.DataFrame(rows).correct_both.mean()), "verdicts": rows, "consistency_requires_valid_verdicts": True},
     }
     with open(os.environ["GENAI_RESULTS_PATH"], "w", encoding="utf-8") as f:
         json.dump(payload, f, indent=2, default=float)

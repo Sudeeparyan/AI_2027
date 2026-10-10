@@ -1,505 +1,828 @@
-subtitle: "What generative models are, how they turn probability into content, and how to use AI tools responsibly"
-mimlos: [1, 4]
+subtitle: How AI learns from examples, creates new content and needs careful checking
+mimlos:
+- 1
+- 4
 objectives:
-  - "Describe the generative AI landscape: foundation models, proprietary vs. open-weight families, and the difference between a **model**, an **application** and an **AI tool**."
-  - "Explain core concepts: data, parameters, tokens, training vs. inference, pre-training vs. post-training."
-  - "Use probability to explain generation: distributions, **likelihood**, maximum likelihood, sampling and **temperature**."
-  - "Distinguish **generative** from **discriminative** models and explain what a **latent variable** is."
-  - "Compare the four main generative model families: autoregressive, VAE, GAN and diffusion."
-  - "Identify key responsible-AI risks and apply a five-step checklist whenever you use an AI tool."
+- Separate a model from its application.
+- Explain data, weights, tokens, training and inference.
+- Use likelihood, sampling and temperature.
+- Compare generative and discriminative models.
+- Recognise autoregressive, VAE, GAN and diffusion families.
+- Check evidence, protect data and disclose use.
 coverage:
-  - foundation model
-  - open-weight
-  - proprietary
-  - chat assistant
-  - coding assistant
-  - parameters
-  - token
-  - inference
-  - pre-training
-  - post-training
-  - probability distribution
-  - likelihood
-  - maximum likelihood
-  - temperature
-  - latent variable
-  - discriminative
-  - autoregressive
-  - VAE
-  - GAN
-  - diffusion
-  - hallucination
-  - bias
-  - privacy
-  - intellectual property
-  - transparency
-  - academic integrity
-
+- foundation model
+- open-weight
+- proprietary
+- chat assistant
+- coding assistant
+- parameters
+- token
+- inference
+- pre-training
+- post-training
+- probability distribution
+- likelihood
+- maximum likelihood
+- temperature
+- latent variable
+- discriminative
+- autoregressive
+- VAE
+- GAN
+- diffusion
+- hallucination
+- bias
+- privacy
+- intellectual property
+- transparency
+- academic integrity
 slides:
-  # ------------------------------------------------------------ opening
-  - type: title
-    figure: cover
-    notes: |
-      Welcome everyone to Generative AI. This module runs for twelve weeks: each week has a two-hour lecture like this one and a two-hour lab where you build and test real models. Today is the map for the whole journey. We will see what generative AI is, the vocabulary we will use every week, the probability ideas that sit underneath every generative model, and the habits of responsible use that we expect from day one. There is no heavy mathematics today; the equations we meet are short and every symbol will be explained. Ask questions at any time.
+- type: title
+  figure: cover
+  notes: 'Welcome everyone to Generative AI. This module runs for twelve weeks: each week has a two-hour lecture
+    like this one and a two-hour lab where you build and test real models. Today is the map for the whole journey.
+    We will see what generative AI is, the vocabulary we will use every week, the probability ideas that sit underneath
+    every generative model, and the habits of responsible use that we expect from day one. There is no heavy mathematics
+    today; the equations we meet are short and every symbol will be explained. Ask questions at any time.
 
-  - type: outcomes
-    notes: |
-      Read the six outcomes aloud and point out the bold words: these are the terms students must be able to define and use in the exam. On the right are the module learning outcomes this week practises. MIMLO 1 is about explaining concepts and the mathematics behind generative models; today we lay the foundations with probability. MIMLO 4 is about critically evaluating outputs, including bias and hallucination, which we start today with the responsible-use checklist. Tell students that every week opens with a slide like this, and the practice questions in the lab map to these outcomes.
+    '
+- type: outcomes
+  notes: 'Read the six outcomes aloud and point out the bold words: these are the terms students must be able to
+    define and use in the exam. On the right are the module learning outcomes this week practises. MIMLO 1 is about
+    explaining concepts and the mathematics behind generative models; today we lay the foundations with probability.
+    MIMLO 4 is about critically evaluating outputs, including bias and hallucination, which we start today with
+    the responsible-use checklist. Tell students that every week opens with a slide like this, and the practice
+    questions in the lab map to these outcomes.
 
-  - type: agenda
-    icon: "fa:FaRoute"
-    items:
-      - {title: "Warm-up: how do you use AI today?", minutes: 8}
-      - {title: "1 · The generative AI landscape", minutes: 22}
-      - {title: "2 · Core concepts: data, parameters, tokens", minutes: 18}
-      - {title: "3 · Probabilistic foundations", minutes: 35}
-      - {title: "Model families and the course map", minutes: 10}
-      - {title: "4 · Responsible AI from day one", minutes: 17}
-      - {title: "Lab preview and wrap-up", minutes: 10}
-    notes: |
-      This is the plan for the two hours, with approximate timings. The longest block is probabilistic foundations, because the whole module builds on it: every model we meet, from VAEs to diffusion to large language models, is a way of learning a probability distribution and sampling from it. We take a short break after section 2. Keep an eye on time during the warm-up discussion: it is easy to spend twenty minutes on it. If you are running late, the model-families table can be covered quickly because weeks 2 to 6 revisit each family in depth.
+    '
+- type: agenda
+  icon: fa:FaRoute
+  items:
+  - title: 'Warm-up: how do you use AI today?'
+    minutes: 8
+  - title: 1 · The generative AI landscape
+    minutes: 22
+  - title: '2 · Core concepts: data, parameters, tokens'
+    minutes: 18
+  - title: 3 · Probabilistic foundations
+    minutes: 35
+  - title: Model families and the course map
+    minutes: 10
+  - title: 4 · Responsible AI from day one
+    minutes: 17
+  - title: Lab preview and wrap-up
+    minutes: 10
+  notes: 'This is the plan for the two hours, with approximate timings. The longest block is probabilistic foundations,
+    because the whole module builds on it: every model we meet, from VAEs to diffusion to large language models,
+    is a way of learning a probability distribution and sampling from it. We take a short break after section 2.
+    Keep an eye on time during the warm-up discussion: it is easy to spend twenty minutes on it. If you are running
+    late, the model-families table can be covered quickly because weeks 2 to 6 revisit each family in depth.
 
-  - type: discussion
-    title: "Warm-up"
-    icon: "fa:FaComments"
-    prompt: "Which AI tools did you use this week, and did any of them get something wrong?"
+    '
+- type: discussion
+  title: Warm-up
+  icon: fa:FaComments
+  prompt: Which AI tools did you use this week, and did any of them get something wrong?
+  points:
+  - 'Turn to a neighbour: name one task where an AI tool helped you and one where it failed.'
+  - Was the failure a **wrong fact**, a **misunderstood request**, or a **made-up source**?
+  - How did you notice? Would a less expert user have noticed?
+  notes: 'Give two minutes for pair discussion, then take three or four examples from the room. Write them on the
+    board in two columns, helped and failed. You will usually hear coding help, summarising, email drafting and
+    translation on the helped side, and invented references, wrong numbers and outdated information on the failed
+    side. Keep this list: we come back to it in section 4 on hallucination. Ask how they noticed each failure; the
+    key point is that detecting errors needs expertise or checking, which is why verification is part of responsible
+    use.
+
+    '
+- type: section
+  number: 1
+  title: The generative AI landscape
+  question: What exactly is 'generative', and what is the difference between a model and a product?
+  icon: fa:FaGlobeEurope
+  notes: 'Section one gives us the big picture. We will define generative AI precisely, look at how the field developed
+    from 2013 to today, and separate three things people often confuse: a model, an application and a tool. We also
+    compare proprietary models that you reach through an API with open-weight models that you can download and run
+    yourself. By the end of this section students should be able to place any AI product they meet onto this map.
+    Allow about twenty minutes.
+
+    '
+- type: bullets
+  title: What is generative AI?
+  icon: fa:FaMagic
+  bullets:
+  - Learn patterns from examples.
+  - Sample new text, images, code or sound.
+  - A classifier labels; a generator creates.
+  - A foundation model supports many tasks.
+  callout: Learn a distribution → draw a sample.
+  notes: 'Give the definition slowly: a generative model learns the distribution of the data and can draw new samples
+    from it. Contrast with the classifiers students know from machine learning, which map an input to a label. A
+    spam filter is discriminative; a model that writes a new email is generative. The term foundation model comes
+    from a 2021 Stanford report and means a large model trained on broad data that many applications are built on.
+    Ask the class: is a translation system generative? Yes, because it produces a new sequence of text, even though
+    the task is well defined.
+
+    '
+- type: figure
+  title: 'A short history: from VAEs to agents'
+  figure: timeline
+  caption: Key milestones. Model names change monthly; the underlying ideas in this module are the ones on this
+    line.
+  notes: 'Walk left to right. 2013 and 2014 brought the two deep generative families we study in weeks 2 and 3:
+    variational autoencoders and GANs. 2017 introduced the transformer, the architecture behind almost every modern
+    language model. 2018 showed that pre-training and then adapting works: GPT-1 and BERT. 2020 showed few-shot
+    learning at scale with GPT-3, and diffusion models appeared. 2021 connected text and images with CLIP. 2022
+    made the technology public: Stable Diffusion released open weights and ChatGPT reached a mass audience. Since
+    2023 we see multimodal and open-weight models, then reasoning models, video, and agents. Stress that products
+    change monthly while these ideas stay.
+
+    '
+- type: cards
+  title: Foundation models come in several kinds
+  cards:
+  - icon: fa:FaFont
+    head: Language models
+    text: 'Continue text or code. Example: draft an email from three bullet points.'
+  - icon: fa:FaImage
+    head: Image & video generators
+    text: 'Create pictures or clips. Example: a poster image from a one-line prompt.'
+  - icon: fa:FaMicrophone
+    head: Speech & audio models
+    text: 'Recognise or generate sound. Example: subtitles for a recorded lecture.'
+  - icon: fa:FaLayerGroup
+    head: Multimodal assistants
+    text: 'Combine text, images or audio. Example: answer a question about a chart.'
+  notes: 'These are the four kinds of foundation model students will meet. Language models are the most widely used;
+    we name families rather than versions because versions change every few months. Image and video generators are
+    mostly diffusion or flow-matching models, covered in week 4. Speech and audio models include recognisers like
+    Whisper and speech synthesisers. The newest category is natively multimodal assistants that handle several modalities
+    in one model. Ask: which category does a tool that turns a sketch into a photo belong to? Image generator, conditioned
+    on an image.
+
+    '
+- type: table
+  title: 'Model, application, tool: three layers people confuse'
+  header:
+  - Layer
+  - What it is
+  - Example
+  rows:
+  - - Model
+    - Learned weights
+    - LLM
+  - - Application
+    - Model + interface + tools
+    - Chat assistant
+  - - Tool / workflow
+    - Help with one task
+    - Library search
+  callout: An application can change while its model stays fixed.
+  notes: 'This distinction prevents many misunderstandings. The model is only the trained weights. A chat assistant
+    is an application that wraps the model with hidden system instructions, conversation memory, sometimes web search
+    or document retrieval, tools such as code execution, safety filters and a user interface. When two apps use
+    the same model they can still behave differently because those other layers differ. In the exam, students lose
+    marks for calling a chat app a model. Ask: if a chat assistant can quote today''s news, is that the model knowing
+    it? No, it is usually a search tool added by the application.
+
+    '
+- type: compare
+  title: Proprietary vs. open-weight models
+  columns:
+  - head: Proprietary (closed-weight)
+    icon: fa:FaLock
     points:
-      - "Turn to a neighbour: name one task where an AI tool helped you and one where it failed."
-      - "Was the failure a **wrong fact**, a **misunderstood request**, or a **made-up source**?"
-      - "How did you notice? Would a less expert user have noticed?"
-    notes: |
-      Give two minutes for pair discussion, then take three or four examples from the room. Write them on the board in two columns, helped and failed. You will usually hear coding help, summarising, email drafting and translation on the helped side, and invented references, wrong numbers and outdated information on the failed side. Keep this list: we come back to it in section 4 on hallucination. Ask how they noticed each failure; the key point is that detecting errors needs expertise or checking, which is why verification is part of responsible use.
-
-  # ------------------------------------------------------------ section 1
-  - type: section
-    number: 1
-    title: "The generative AI landscape"
-    question: "What exactly is 'generative', and what is the difference between a model and a product?"
-    icon: "fa:FaGlobeEurope"
-    notes: |
-      Section one gives us the big picture. We will define generative AI precisely, look at how the field developed from 2013 to today, and separate three things people often confuse: a model, an application and a tool. We also compare proprietary models that you reach through an API with open-weight models that you can download and run yourself. By the end of this section students should be able to place any AI product they meet onto this map. Allow about twenty minutes.
-
-  - type: bullets
-    title: "What is generative AI?"
-    icon: "fa:FaMagic"
-    bullets:
-      - "A **generative model** learns the probability distribution of its training data, so it can **sample new examples** that look like that data."
-      - "Outputs: text, code, images, audio, speech, music, video, 3-D shapes, molecules…"
-      - "Contrast: a classifier answers *which label?*; a generator answers *what could a new example look like?*"
-      - {text: "Modern systems are **foundation models**: trained once on broad data, then adapted to many tasks.", sub: ["The same model can summarise, translate, write code and answer questions."]}
-    callout: "Generating = sampling from a learned probability distribution. Everything this term builds on that idea."
-    notes: |
-      Give the definition slowly: a generative model learns the distribution of the data and can draw new samples from it. Contrast with the classifiers students know from machine learning, which map an input to a label. A spam filter is discriminative; a model that writes a new email is generative. The term foundation model comes from a 2021 Stanford report and means a large model trained on broad data that many applications are built on. Ask the class: is a translation system generative? Yes, because it produces a new sequence of text, even though the task is well defined.
-
-  - type: figure
-    title: "A short history: from VAEs to agents"
-    figure: timeline
-    caption: "Key milestones. Model names change monthly; the underlying ideas in this module are the ones on this line."
-    notes: |
-      Walk left to right. 2013 and 2014 brought the two deep generative families we study in weeks 2 and 3: variational autoencoders and GANs. 2017 introduced the transformer, the architecture behind almost every modern language model. 2018 showed that pre-training and then adapting works: GPT-1 and BERT. 2020 showed few-shot learning at scale with GPT-3, and diffusion models appeared. 2021 connected text and images with CLIP. 2022 made the technology public: Stable Diffusion released open weights and ChatGPT reached a mass audience. Since 2023 we see multimodal and open-weight models, then reasoning models, video, and agents. Stress that products change monthly while these ideas stay.
-
-  - type: cards
-    title: "Foundation models come in several kinds"
-    cards:
-      - {icon: "fa:FaFont", head: "Language models", text: "Text and code in, text and code out. Families: GPT, Claude, Gemini, Llama, Qwen, Mistral, DeepSeek."}
-      - {icon: "fa:FaImage", head: "Image & video generators", text: "Text or images in, images or video out. Mostly diffusion or flow models (week 4)."}
-      - {icon: "fa:FaMicrophone", head: "Speech & audio models", text: "Speech recognition, text-to-speech, voice conversion and music generation (weeks 9–10)."}
-      - {icon: "fa:FaLayerGroup", head: "Multimodal assistants", text: "One model that reads and writes text, images, audio and video, and can call tools (weeks 10–12)."}
-    notes: |
-      These are the four kinds of foundation model students will meet. Language models are the most widely used; we name families rather than versions because versions change every few months. Image and video generators are mostly diffusion or flow-matching models, covered in week 4. Speech and audio models include recognisers like Whisper and speech synthesisers. The newest category is natively multimodal assistants that handle several modalities in one model. Ask: which category does a tool that turns a sketch into a photo belong to? Image generator, conditioned on an image.
-
-  - type: table
-    title: "Model, application, tool: three layers people confuse"
-    header: ["Layer", "What it is", "Example"]
-    rows:
-      - ["Model", "Trained weights that map inputs to a probability distribution over outputs", "An LLM family such as GPT, Llama or Gemini"]
-      - ["Application", "Model + system instructions + memory + retrieval + tools + safety filters + user interface", "A chat assistant app, a coding assistant in an editor"]
-      - ["Tool / workflow", "An application used for a specific task, often inside other software", "Meeting summaries in a video call, AI search in a library catalogue"]
-    callout: "When a product 'gets smarter overnight', the model, the instructions, the tools or the retrieval may have changed. Always ask which layer changed."
-    notes: |
-      This distinction prevents many misunderstandings. The model is only the trained weights. A chat assistant is an application that wraps the model with hidden system instructions, conversation memory, sometimes web search or document retrieval, tools such as code execution, safety filters and a user interface. When two apps use the same model they can still behave differently because those other layers differ. In the exam, students lose marks for calling a chat app a model. Ask: if a chat assistant can quote today's news, is that the model knowing it? No, it is usually a search tool added by the application.
-
-  - type: compare
-    title: "Proprietary vs. open-weight models"
-    columns:
-      - head: "Proprietary (closed-weight)"
-        icon: "fa:FaLock"
-        points:
-          - "Accessed through an app or API (e.g. GPT, Claude, Gemini families)"
-          - "Often the strongest general capability"
-          - "No hardware needed; pay per token"
-          - "Your data goes to the provider: check terms and retention"
-          - "Provider controls updates and retirements"
-      - head: "Open-weight"
-        icon: "fa:FaLockOpen"
-        points:
-          - "Weights downloadable (e.g. Llama, Qwen, Mistral, Gemma, DeepSeek families)"
-          - "Run locally or on your own cloud: privacy and control"
-          - "Can be fine-tuned (week 8) and inspected"
-          - "You manage hardware, updates and safety"
-          - "Licences vary; 'open-weight' ≠ 'open-source'"
-    callout: "Choosing between them is a trade-off between capability, cost, privacy and control, which we revisit in week 11 (deployment)."
-    notes: |
-      Proprietary models are used through a provider's interface and you never see the weights. Open-weight models publish the trained parameters, so anyone can run and fine-tune them, subject to the licence. Emphasise the nuance that open weights are not the same as open source: training data and training code are often not released, and some licences restrict commercial use. In practice organisations use both: a hosted frontier model for difficult reasoning and a small open model for private or high-volume tasks. Ask students which option a hospital processing patient notes might prefer, and why.
-
-  - type: cards
-    title: "Everyday AI tools you will meet"
-    cards:
-      - {icon: "fa:FaCommentDots", head: "Chat assistants", text: "ChatGPT, Gemini, Claude, Microsoft Copilot, Le Chat: general writing, analysis and Q&A."}
-      - {icon: "fa:FaCode", head: "Coding assistants", text: "GitHub Copilot, Cursor, Claude Code, Gemini Code Assist: complete, explain and edit code."}
-      - {icon: "fa:FaBookOpen", head: "Research & study", text: "NotebookLM, deep-research modes, AI search engines: work over sources you supply or search."}
-      - {icon: "fa:FaPaintBrush", head: "Image & design", text: "Image generators and editors inside design tools, e.g. Adobe Firefly, Midjourney, Imagen."}
-      - {icon: "fa:FaFilm", head: "Video & audio", text: "Text-to-video, voice and music tools, e.g. Veo, Sora, ElevenLabs, Suno."}
-      - {icon: "fa:FaServer", head: "Open models you run", text: "Hugging Face and Ollama let you run open-weight models on your own machine (weeks 6 and 11)."}
-    callout: "Products change monthly. Judge any tool with the same questions: which model, what data, which tools, how verified?"
-    notes: |
-      This is a quick tour, not an endorsement. The point is that students already use several of these and will meet more at work. Each is an application built on one or more models. Research tools like NotebookLM are interesting because they answer from sources you upload, which reduces but does not remove hallucination; we will build our own version of this idea, retrieval-augmented generation, in week 12. Encourage students to try at least two chat assistants in the lab on the same prompt and compare. Remind them of the institution's policy on using AI tools for assessed work.
-
-  - type: quiz
-    question: "ChatGPT, the Gemini app and Claude.ai are best described as…"
-    options:
-      - "Three large language models"
-      - "Applications that wrap model families with instructions, tools, memory and safety layers"
-      - "Search engines that look up stored answers"
-      - "Open-weight models you can download"
-    answer: 1
-    notes: |
-      Answer: B. These are applications. Each is built on a model family, GPT, Gemini and Claude respectively, but the product adds hidden system instructions, memory, tools such as web search and code execution, safety filters and an interface. A is the most common wrong answer and is worth discussing: the model name and the product name are often similar, which causes the confusion. C is wrong because the model generates text token by token rather than retrieving stored answers, although some apps add a search tool. D is wrong: these are proprietary and their weights are not published.
-
-  # ------------------------------------------------------------ section 2
-  - type: section
-    number: 2
-    title: "Core concepts: data, parameters, tokens"
-    question: "How is a model built, and what happens when you press Enter?"
-    icon: "fa:FaCogs"
-    notes: |
-      Section two introduces the vocabulary we will use every single week: data, parameters, tokens, training, inference, pre-training and post-training. These words appear in every model card, research paper and job advert in this field, so students need to be fluent with them. We finish the section with a few numbers that show the scale of modern models. Allow about eighteen minutes, then take a short break before the probability section.
-
-  - type: figure
-    title: "Tokens: how models see text"
-    figure: tokens
-    bullets:
-      - "A **token** is a sub-word piece; common words are one token, rare words are split."
-      - "Rule of thumb for English: about ¾ of a word per token."
-      - "Context window, pricing and speed are all measured in tokens."
-      - "Images and audio are also turned into tokens (weeks 9–10)."
-    stack: true
-    notes: |
-      Models do not read characters or words directly. A tokenizer splits text into sub-word pieces and maps each to an integer ID from a fixed vocabulary, typically tens of thousands to a couple of hundred thousand entries. Common words become one token; rare words, names and many non-English words are split into several, which is one reason models can be weaker and more expensive in some languages. Everything is counted in tokens: how much text fits in the context window, how much an API call costs, how long generation takes. In the lab students will tokenize their own sentences and count tokens.
-
-  - type: compare
-    title: "Training vs. inference"
-    columns:
-      - head: "Training"
-        icon: "fa:FaDumbbell"
-        points:
-          - "Learn the **parameters** (weights) from data"
-          - "Minimise a loss by gradient descent over many passes"
-          - "Very expensive: large GPU clusters, weeks to months"
-          - "Done rarely by the model provider"
-      - head: "Inference"
-        icon: "fa:FaBolt"
-        points:
-          - "Use the **fixed** parameters to produce an output"
-          - "One forward pass per generated token for an LLM"
-          - "Cheap per request, but adds up at scale"
-          - "Happens every time you send a prompt"
-    callout: "Chatting with a model does not train it. Your prompt changes the input, not the weights, unless the provider later uses your data for training."
-    notes: |
-      Parameters are the numbers inside the network, often billions of them. Training searches for parameter values that make the training data likely, by repeatedly computing a loss and nudging parameters with gradient descent. Inference is using those fixed parameters to answer a new input. A very common misconception is that a chatbot learns from your conversation in real time. It does not: within a conversation it only sees more context. Some providers may later use conversations to train future versions, which is a privacy issue and why data settings matter. Ask: when you fine-tune in week 8, is that training or inference? Training.
-
-  - type: flow
-    title: "From raw data to an assistant: pre-training, post-training, application"
-    steps:
-      - {label: "Data", sub: "Web text, books, code, images; filtered and deduplicated"}
-      - {label: "Pre-training", sub: "Predict the next token over trillions of tokens → base model"}
-      - {label: "Post-training", sub: "Instruction tuning, preference tuning (RLHF/DPO), RL for reasoning"}
-      - {label: "Assistant model", sub: "Follows instructions, refuses unsafe requests, reasons step by step"}
-      - {label: "Application", sub: "System prompt, tools, retrieval, guardrails, interface", highlight: true}
-    bullets:
-      - "A **base model** only continues text; **post-training** turns it into a helpful assistant (details in week 8)."
-      - "Most of the knowledge comes from pre-training; most of the *behaviour* comes from post-training."
-    notes: |
-      This pipeline is the backbone of the module. Pre-training teaches a model to predict the next token on a huge corpus; the result is a base model that is knowledgeable but only continues text. Post-training shapes behaviour: supervised instruction tuning on example conversations, preference tuning such as reinforcement learning from human feedback or direct preference optimisation, and more recently reinforcement learning on problems with checkable answers to improve reasoning. The application layer then adds instructions, tools and guardrails. Weeks 5 and 6 cover pre-training, week 8 post-training, and weeks 11 and 12 the application layer.
-
-  - type: stat
-    title: "The scale of modern models"
-    stats:
-      - {value: "175 B", label: "parameters in GPT-3 (2020), once considered huge"}
-      - {value: "15 T+", label: "tokens used to pre-train Llama 3 (Meta, 2024)"}
-      - {value: "2 M", label: "tokens in the largest context windows (Gemini 1.5 Pro, 2024), up from 2 K in 2020"}
-      - {value: "800 M", label: "weekly ChatGPT users reported by OpenAI (Oct 2025)"}
-    caption: "Figures are as reported by the developers at the time; they illustrate orders of magnitude, not current records."
-    notes: |
-      These numbers give a sense of scale. GPT-3 had 175 billion parameters in 2020. Meta reported pre-training Llama 3 on more than fifteen trillion tokens. Context windows grew from about two thousand tokens in GPT-3 to around two million tokens in some 2024 models, enough for several books at once. OpenAI reported eight hundred million weekly ChatGPT users in October 2025. Be careful with numbers: always say who reported them and when, and remember that bigger is not automatically better. Smaller, well-trained models now match much larger older ones, which we discuss in week 6.
-
-  # ------------------------------------------------------------ section 3
-  - type: section
-    number: 3
-    title: "Probabilistic foundations"
-    question: "How does a probability distribution become a sentence, an image or a song?"
-    icon: "fa:FaDiceFive"
-    notes: |
-      Welcome back from the break. This is the most important section of today and the longest. Every generative model in this module is a way of representing a probability distribution and drawing samples from it. We will look at next-token distributions, the chain rule that lets language models generate one token at a time, likelihood and maximum likelihood training, temperature and sampling strategies, the difference between generative and discriminative models, and latent variables. Students who are rusty on probability should revisit these slides and the teaching notes after class.
-
-  - type: figure
-    title: "An LLM outputs a probability distribution over the next token"
-    figure: next_token
-    bullets:
-      - "Given the context, the model assigns a probability to **every** token in its vocabulary."
-      - "Probabilities sum to 1; most tokens get almost zero."
-      - "Generating = **sampling** one token, appending it, and repeating."
-      - "Different samples from the same distribution give different, equally 'valid' outputs."
-    figure_width: 7.0
-    notes: |
-      Here is the key picture. For the context, the cat sat on the, the model outputs a probability for every token in its vocabulary; we show the top few. Mat is most likely, but floor, sofa and bed are plausible. The model then samples one token, appends it, and asks for the next distribution. This is why the same prompt can give different answers: each answer is one sample from a distribution. Ask: if the model always picked mat, what would happen to creative writing? It would become repetitive, which is why we sample rather than always taking the maximum.
-
-  - type: equation
-    title: "The chain rule: generating one token at a time"
-    eq: "p(x_1, x_2, \\ldots, x_T) = \\prod_{t=1}^{T} p(x_t \\mid x_1, \\ldots, x_{t-1})"
-    read_as:
-      - "The probability of a whole sequence is the product of next-token probabilities."
-      - "This factorisation is exact: no approximation is made."
-      - "A model that predicts the next token therefore defines a probability for **any** sequence. This is an **autoregressive** model."
-    terms:
-      - ["xₜ", "the token at position t"]
-      - ["T", "length of the sequence"]
-      - ["∏", "product over positions"]
-      - ["|", "'given'"]
-    notes: |
-      This is the chain rule of probability, which students met in statistics. Any joint distribution over a sequence can be written as a product of conditionals, each token given all previous tokens. Autoregressive models such as GPT learn each conditional with one neural network shared across positions. The consequence is powerful: if you can predict the next token well, you have a model of the whole sequence, and you can both score sequences and generate them. Image generators do not usually use this factorisation, which is one reason they need different families, covered in weeks 2 to 4.
-
-  - type: equation
-    title: "Likelihood and maximum likelihood training"
-    eq:
-      - "\\mathcal{L}(\\theta) = \\sum_{i=1}^{N} \\log p_\\theta(x^{(i)})"
-      - "\\theta^{*} = \\arg\\max_{\\theta} \\; \\mathcal{L}(\\theta) \\;=\\; \\arg\\min_{\\theta} \\; -\\frac{1}{N}\\sum_{i} \\log p_\\theta(x^{(i)})"
-    read_as:
-      - "**Likelihood**: how probable the model says the real training data is."
-      - "**Maximum likelihood**: choose parameters that make the training data as probable as possible."
-      - "Maximising log-likelihood = minimising **negative log-likelihood** (cross-entropy), the loss used to train LLMs."
-    terms:
-      - ["θ", "model parameters"]
-      - ["x⁽ⁱ⁾", "the i-th training example"]
-      - ["N", "number of examples"]
-      - ["log", "natural log (turns products into sums)"]
-    notes: |
-      Likelihood is the probability the model assigns to the observed data, viewed as a function of the parameters. Maximum likelihood estimation picks the parameters that make the data most probable. We use logarithms because products of many small probabilities underflow, while sums of logs are stable, and because the log is monotonic the maximiser is unchanged. Minimising the average negative log-likelihood is the same as minimising cross-entropy, the loss students will see printed during training in the labs. Important: VAEs, autoregressive models and diffusion models are all trained with likelihood or a bound on it; GANs are the exception, as we see in week 3.
-
-  - type: table
-    title: "Worked example: the likelihood of a short sentence"
-    header: ["Step", "Next-token probability", "log p (natural)"]
-    rows:
-      - ["p(the)", "0.06", "−2.81"]
-      - ["p(cat | the)", "0.01", "−4.61"]
-      - ["p(sat | the cat)", "0.20", "−1.61"]
-      - ["p(on | the cat sat)", "0.55", "−0.60"]
-      - ["Sequence", "0.06 × 0.01 × 0.20 × 0.55 = 6.6 × 10⁻⁵", "sum = −9.63"]
-    callout: "Average negative log-likelihood = 9.63 / 4 ≈ 2.41 nats per token. Perplexity = e^2.41 ≈ 11: the model is as uncertain as choosing among ~11 equally likely tokens."
-    notes: |
-      Work through this on the board. Multiply the four conditional probabilities to get the joint probability, about 6.6 times ten to the minus five. Summing logs gives the same result as the log of the product, minus 9.63. Dividing by four tokens gives the average negative log-likelihood, 2.41 nats per token, which is exactly the loss a language model reports. Exponentiate it to get perplexity, about 11: lower is better. Ask students which single step contributes most to the loss: cat given the, because the model found it surprising. Training would push that probability up if the sentence is common in real data.
-
-  - type: equation
-    title: "Temperature reshapes the distribution before sampling"
-    eq: "p_i = \\frac{\\exp(z_i / T)}{\\sum_j \\exp(z_j / T)}"
-    read_as:
-      - "The network outputs scores (**logits**) z; softmax turns them into probabilities."
-      - "Dividing by **temperature** T < 1 sharpens the distribution; T > 1 flattens it; T → 0 is greedy."
-      - "Example, logits [2, 1, 0]: T = 1 gives [0.67, 0.24, 0.09]; T = 0.5 gives [0.87, 0.12, 0.02]; T = 2 gives [0.51, 0.31, 0.19]."
-    terms:
-      - ["zᵢ", "logit (raw score) of token i"]
-      - ["T", "temperature (> 0)"]
-      - ["pᵢ", "probability used for sampling"]
-    notes: |
-      Softmax converts logits into probabilities that are positive and sum to one. Temperature divides the logits before the softmax. Low temperature exaggerates differences, so the top token dominates and outputs become more predictable; high temperature shrinks differences so less likely tokens are sampled more often, increasing variety and also errors. Check the worked numbers with the class using a calculator: exp of 2 is 7.39, exp of 1 is 2.72, exp of 0 is 1, sum 11.11, giving 0.67, 0.24 and 0.09. Temperature changes sampling only; it does not change what the model knows.
-
-  - type: figure
-    title: "Temperature in pictures"
-    figure: temperature
-    caption: "The same logits sampled at three temperatures. Lower entropy = more predictable output."
-    callout: "Use low temperature for factual extraction, code and grading; higher temperature for brainstorming and creative writing."
-    notes: |
-      These three charts use the same logits. At temperature 0.5 almost all the probability goes to mat, so outputs are nearly deterministic. At 1.0 we sample from the model's own distribution. At 1.5 the distribution flattens, so even moon gets a noticeable chance. Entropy, shown in bits, measures that spread. The practical guidance is on the callout. In the lab students will sample names from their own character model at these three temperatures and see the same effect: sensible but repetitive names at low temperature, creative but sometimes unpronounceable names at high temperature.
-
-  - type: bullets
-    title: "Decoding strategies: how we pick the next token"
-    icon: "fa:FaSlidersH"
-    bullets:
-      - "**Greedy**: always take the most likely token. Deterministic, but can loop and sound flat."
-      - "**Temperature sampling**: sample from the (re-scaled) distribution."
-      - "**Top-k**: sample only among the k most likely tokens."
-      - "**Top-p (nucleus)**: sample among the smallest set of tokens whose probabilities add up to p (e.g. 0.9)."
-      - "**Seeds**: fix the random seed to make sampling reproducible for experiments."
-    callout: "Decoding settings are part of your experimental method: always report them, like the random seed and the model version."
-    notes: |
-      These are the controls exposed by almost every API and library, so students need to recognise them. Greedy decoding is equivalent to temperature zero. Top-k cuts off the long tail of unlikely tokens at a fixed count; top-p adapts the cut-off to how confident the model is, which is why it is popular. Some reasoning models fix these values or ignore them, so always check the documentation. For evaluation work later in the module, we will insist that students report model, version, temperature, top-p, seed and date, because without them a result cannot be reproduced.
-
-  - type: figure
-    title: "Generative vs. discriminative models"
-    figure: gen_vs_disc
-    caption: "Left: a discriminative model only needs the boundary. Right: a generative model describes where the data lives, so it can also create new points (stars)."
-    notes: |
-      On the left, a discriminative model such as logistic regression learns only the probability of the label given the input, which amounts to a boundary between cats and dogs. It cannot tell you what a typical cat looks like. On the right, a generative model learns the distribution of the inputs themselves, here one Gaussian per class. That is more work, but it lets us sample new examples, the stars, detect unusual inputs that have low probability, and even classify using Bayes' rule on the next slide. In the lab students fit both kinds on the same 2-D data and sample from the generative one.
-
-  - type: equation
-    title: "Connecting the two views with Bayes' rule"
-    eq: "p(y \\mid x) = \\dfrac{p(x \\mid y)\\, p(y)}{\\sum_{y'} p(x \\mid y')\\, p(y')}"
-    read_as:
-      - "A **generative** classifier learns p(x | y) and p(y), then uses Bayes' rule to classify."
-      - "A **discriminative** classifier learns p(y | x) directly and skips modelling x."
-      - "Only the generative model can produce new x; the discriminative one is usually better at pure classification."
-    terms:
-      - ["x", "input (image, text, …)"]
-      - ["y", "label or class"]
-      - ["p(x | y)", "what inputs of class y look like"]
-      - ["p(y)", "how common each class is"]
-    callout: "Modern generative AI learns p(x) (unconditional) or p(x | condition), where the condition can be a label, a prompt or an image."
-    notes: |
-      Bayes' rule links the two approaches. Naive Bayes and Gaussian discriminant analysis are classic generative classifiers: they model how each class generates inputs and then invert with Bayes' rule. Logistic regression and most neural classifiers model the label given the input directly. The callout is the bridge to modern generative AI: text-to-image models learn p of an image given a prompt, and language models learn p of a response given the conversation so far. The condition is whatever we control. Ask: which is harder to learn, p of x or p of y given x, for a 512 by 512 image? p of x, by far.
-
-  - type: figure
-    title: "Latent variables: simple hidden causes, complex data"
-    figure: latent
-    bullets:
-      - "A **latent variable** z is an unobserved cause of the data (e.g. style, pose, lighting)."
-      - "Sample a simple z, then map it through a network g to get a complex x."
-      - "p(x) = ∫ p(x | z) p(z) dz: the data distribution is a mixture over latent causes."
-      - "VAEs, GANs and diffusion all use this idea (weeks 2–4)."
-    figure_width: 7.4
-    notes: |
-      Latent means hidden. The idea is to explain complicated data using a few hidden factors that follow a simple distribution, usually a standard Gaussian. A neural network, called a decoder or generator, maps each latent point to a data point. Here a two-dimensional Gaussian is bent into a spiral; in real models the latent space might be a few hundred dimensions and the output a face or a sentence. Moving smoothly in latent space changes the output smoothly, which is why latent interpolations are a favourite lab exercise in weeks 2 and 3. The integral says we average over all possible hidden causes.
-
-  - type: quiz
-    question: "You raise the sampling temperature from 0.7 to 1.5. What happens?"
-    options:
-      - "The model learns new facts from the higher temperature"
-      - "Outputs become more deterministic and repetitive"
-      - "Probability mass spreads to less likely tokens, so outputs become more varied and more error-prone"
-      - "The model's parameters are updated"
-    answer: 2
-    notes: |
-      Answer: C. A higher temperature flattens the distribution, so tokens that were unlikely get sampled more often. That makes outputs more diverse and often more creative, but also more likely to contain mistakes or nonsense. A and D are both wrong for the same reason: temperature is a decoding setting applied at inference time, and nothing changes in the parameters. B describes the opposite effect, lowering temperature. If students chose B, redraw the three charts from the previous slides and ask which one has the flattest bars.
-
-  # ------------------------------------------------------------ model families
-  - type: figure
-    title: "Four ways to generate: the model families of this module"
-    figure: families
-    caption: "Autoregressive models (weeks 5–6), VAEs (week 2), GANs (week 3) and diffusion / flow models (week 4)."
-    notes: |
-      Now we connect probability to the model families we study. Autoregressive models use the chain rule and generate one token at a time; they dominate text and code. VAEs learn an encoder to a latent space and a decoder back, trained with a bound on the likelihood. GANs train a generator against a discriminator in a two-player game, without an explicit likelihood. Diffusion and flow models learn to turn noise into data step by step; they dominate images, video and audio today. Many real systems combine families: Stable Diffusion uses a VAE plus a diffusion model plus a transformer text encoder.
-
-  - type: table
-    title: "Comparing the four families"
-    header: ["Family", "How it generates", "Strengths", "Weaknesses", "Where used today"]
-    rows:
-      - ["Autoregressive", "Next token given previous tokens", "Exact likelihood; excellent for text and code", "Slow, sequential generation", "LLMs, code models, speech tokens"]
-      - ["VAE", "Decode a sample from a latent space", "Smooth latent space; stable training", "Samples can be blurry", "Compression inside latent diffusion; anomaly detection"]
-      - ["GAN", "Generator fools a discriminator", "Sharp images; one-step, fast", "Unstable training; mode collapse", "Super-resolution; fast distilled generators"]
-      - ["Diffusion / flow", "Remove noise step by step", "Highest quality and diversity", "Many steps (being reduced)", "Image, video and audio generation"]
-    notes: |
-      Students should be able to reproduce this table by week 6; it is a classic exam question. Explain the trade-off triangle between quality, diversity and speed: GANs are fast and sharp but can miss parts of the data distribution; VAEs cover the data well but samples are blurrier; diffusion models achieve quality and diversity at the cost of many steps, and much current research reduces the number of steps. Autoregressive models give exact likelihoods, which is valuable for evaluation. Note that the boundaries blur: transformers are used inside diffusion models, and images can be generated autoregressively.
-
-  - type: figure
-    title: "Where we are going: the 12-week map"
-    figure: course_map
-    caption: "Foundations → image generators → language models → adaptation → multimodal → deployed systems, with evaluation and responsible AI every week."
-    notes: |
-      Here is the structure of the module. Weeks 2 to 4 cover the image generator families. Weeks 5 to 7 cover transformers, large language models and prompting. Week 8 is fine-tuning, including parameter-efficient methods like LoRA. Weeks 9 and 10 are multimodal. Weeks 11 and 12 turn models into systems: deployment, retrieval-augmented generation and agents. The group project, worth 60 percent, asks students to build and evaluate a generative AI application, so every lab produces something reusable. The exam, worth 40 percent, tests concepts, mathematics and interpretation. Encourage students to form project groups by week 4.
-
-  # ------------------------------------------------------------ section 4
-  - type: section
-    number: 4
-    title: "Responsible AI from day one"
-    question: "What can go wrong, and what habits keep you, your users and your data safe?"
-    icon: "fa:FaBalanceScale"
-    notes: |
-      The final section is responsible AI. It is not a separate topic added at the end of the module; every week includes a responsible-AI lens, and the project is assessed partly on it. Today we cover hallucination, the main risk categories, and a practical five-step checklist that students should use every time they use an AI tool, including for their studies. Other modules in the programme cover regulation and explainability in depth; here we focus on the risks specific to generative models and how to test for them.
-
-  - type: bullets
-    title: "Hallucination: fluent but false"
-    bullets:
-      - "Models are trained to produce **plausible** continuations, not verified facts."
-      - "**Hallucination** = output that is fluent and confident but false or unsupported: invented citations, wrong numbers, fake quotes."
-      - "More likely for rare facts, recent events, exact figures, long chains of reasoning, and questions with false premises."
-      - {text: "Reduce it:", sub: ["ground answers in sources (RAG, week 12) and check the citations", "use tools such as calculators, code and search", "lower temperature for factual tasks; ask the model to say when it is unsure", "keep a human reviewer for anything that matters"]}
-    callout: "Fluency is not evidence. A confident tone tells you nothing about correctness."
-    callout_label: "Remember"
-    notes: |
-      Return to the warm-up board: most of the failures students listed are hallucinations. Explain the mechanism in one sentence: a language model maximises the likelihood of text that looks like its training data, and a plausible-looking reference is highly likely text even when the paper does not exist. Hallucination rates have fallen as models improved and gained tools, but they are not zero, and they rise for obscure topics. The mitigations preview later weeks. In the lab students will deliberately probe a small model with a question about a fictional paper and watch it invent details.
-
-  - type: cards
-    title: "Six risks to check with any generative AI system"
-    cards:
-      - {icon: "fa:FaBalanceScaleLeft", head: "Bias & fairness", text: "Outputs reflect patterns and gaps in training data, e.g. stereotyped images of professions. Test across groups."}
-      - {icon: "fa:FaUserShield", head: "Privacy", text: "Do not paste personal or confidential data into tools without approval. Check retention and training settings."}
-      - {icon: "fa:FaCopyright", head: "Intellectual property", text: "Training-data copyright is contested; check output licences and attribute your sources."}
-      - {icon: "fa:FaEye", head: "Transparency & law", text: "EU AI Act Art. 50 (from 2 Aug 2026): disclose AI interaction and label AI-generated or manipulated content."}
-      - {icon: "fa:FaGraduationCap", head: "Academic integrity", text: "Follow the module's AI-use policy, disclose use, and remember you are accountable for what you submit."}
-      - {icon: "fa:FaShieldAlt", head: "Security & misuse", text: "Prompt injection, deepfakes and harmful content: safety filters reduce but do not remove risk."}
-    notes: |
-      Go through each card with a concrete example. Bias: image generators asked for a CEO historically over-produced one demographic. Privacy: pasting a customer list into a public chatbot may breach GDPR. Intellectual property: several lawsuits about training data are ongoing, and output ownership depends on terms and jurisdiction. Transparency: since 2 August 2026, Article 50 of the EU AI Act requires telling people when they interact with an AI system and marking AI-generated or manipulated content, with a short grace period for the machine-readable marking of systems already on the market. Academic integrity: point to the local policy. Security: prompt injection is covered in weeks 7 and 12.
-
-  - type: flow
-    title: "A five-step checklist for using AI tools"
-    steps:
-      - {label: "Purpose", sub: "Is AI appropriate and allowed for this task?"}
-      - {label: "Protect data", sub: "No personal or confidential data without approval"}
-      - {label: "Prompt clearly", sub: "Task, context, format, constraints (week 7)"}
-      - {label: "Verify", sub: "Check facts, numbers, citations, code; test edge cases", highlight: true}
-      - {label: "Disclose & record", sub: "Say how AI was used; keep prompts and model versions"}
-    callout: "Use this checklist in every lab and in your group project. It is also a good exam answer structure."
-    notes: |
-      This is the habit we want students to form. Purpose: some tasks, such as assessed individual reflections, may not permit AI at all. Protect data: think before pasting. Prompt clearly: we spend all of week 7 on this. Verify is highlighted because it is the step most often skipped: check every fact and citation, run the code, and test unusual inputs. Disclose and record: say how AI was used and keep enough detail, such as prompts, model and date, for someone else to reproduce the work. Each lab notebook ends with a short evidence table built on these five steps.
-
-  - type: discussion
-    title: "Case discussion"
-    icon: "fa:FaUserGraduate"
-    prompt: "A student asks a chat assistant for five references on diffusion models for a literature review. Two of the references do not exist."
+    - Provider runs the model.
+    - Use an app or API.
+    - Check data handling and cost.
+  - head: Open-weight
+    icon: fa:FaLockOpen
     points:
-      - "What mechanism produced the fake references?"
-      - "Who is responsible for the error in the submitted review?"
-      - "Which checklist step failed, and what process would have prevented it?"
-      - "Would a research tool that answers only from uploaded papers remove the risk entirely?"
-    notes: |
-      Give three minutes in groups, then discuss. Mechanism: the model generated plausible author names, titles and venues because they are likely text, not because it looked them up. Responsibility: the student, who submitted unverified work; tools are not authors. The failed step is verify: every reference should be opened and checked, for example on Google Scholar or the publisher's site. The last question tests nuance: grounding in uploaded sources greatly reduces invented references, but the model can still misquote or misattribute a source, so checking remains necessary. This case links directly to retrieval-augmented generation in week 12.
+    - Download and run weights.
+    - Manage compute and safety.
+    - Read the licence.
+  callout: Open weights do not automatically mean open source.
+  notes: 'Proprietary models are used through a provider''s interface and you never see the weights. Open-weight
+    models publish the trained parameters, so anyone can run and fine-tune them, subject to the licence. Emphasise
+    the nuance that open weights are not the same as open source: training data and training code are often not
+    released, and some licences restrict commercial use. In practice organisations use both: a hosted frontier model
+    for difficult reasoning and a small open model for private or high-volume tasks. Ask students which option a
+    hospital processing patient notes might prefer, and why.
 
-  # ------------------------------------------------------------ wrap-up
-  - type: lab
-    title: "Lab 1: probability, sampling and a first look at an LLM"
-    steps:
-      - "Set up Google Colab (T4 GPU), a Hugging Face account and safe storage for API keys."
-      - "Build a **character-level bigram model** of names; compute likelihood and negative log-likelihood."
-      - "Sample new names at temperatures 0.5, 1.0 and 1.5; explain the differences."
-      - "Fit a **generative** and a **discriminative** classifier on 2-D data; sample from the generative one."
-      - "Run a small open LLM: inspect its next-token probabilities; vary temperature and top-p."
-      - "Probe hallucination and compare with a hosted assistant; complete the evidence table."
-    runtime: "Google Colab (T4 GPU) or local Jupyter; everything also runs on a CPU"
-    deliverable: "Completed notebook: code TODOs, three short written answers and the evidence table"
-    notes: |
-      Preview the lab so students arrive ready. Part one builds a tiny generative model from counts, which makes likelihood and temperature concrete. Part two contrasts generative and discriminative classifiers on the same data. Part three loads a small open-weight language model from Hugging Face; it runs even on a laptop CPU. The last part asks students to probe hallucination and compare the small model with a large hosted assistant. The optional API cell uses a free Google AI Studio key; students without a key simply use the chat interface instead. Remind them never to paste keys into shared notebooks.
+    '
+- type: cards
+  title: Everyday AI tools you will meet
+  cards:
+  - icon: fa:FaCommentDots
+    head: Chat assistants
+    text: Draft and explain.
+  - icon: fa:FaCode
+    head: Coding assistants
+    text: Write and debug.
+  - icon: fa:FaBookOpen
+    head: Research & study
+    text: Find and check sources.
+  - icon: fa:FaPaintBrush
+    head: Image & design
+    text: Create or edit images.
+  - icon: fa:FaFilm
+    head: Video & audio
+    text: Create clips or sound.
+  - icon: fa:FaServer
+    head: Open models you run
+    text: Choose weights and hardware.
+  callout: Check model, data, tools and evidence.
+  notes: 'This is a quick tour, not an endorsement. The point is that students already use several of these and
+    will meet more at work. Each is an application built on one or more models. Research tools like NotebookLM are
+    interesting because they answer from sources you upload, which reduces but does not remove hallucination; we
+    will build our own version of this idea, retrieval-augmented generation, in week 12. Encourage students to try
+    at least two chat assistants in the lab on the same prompt and compare. Remind them of the institution''s policy
+    on using AI tools for assessed work.
 
-  - type: summary
+    '
+- type: quiz
+  question: ChatGPT, the Gemini app and Claude.ai are best described as…
+  options:
+  - Three large language models, each answering directly from its trained weights
+  - Applications that wrap model families with instructions, tools, memory and safety layers
+  - Search engines that look up stored answers in an index of web pages
+  - Open-weight models whose parameters anyone can download and run locally
+  answer: 1
+  notes: 'Answer: B. These are applications. Each is built on a model family, GPT, Gemini and Claude respectively,
+    but the product adds hidden system instructions, memory, tools such as web search and code execution, safety
+    filters and an interface. A is the most common wrong answer and is worth discussing: the model name and the
+    product name are often similar, which causes the confusion. C is wrong because the model generates text token
+    by token rather than retrieving stored answers, although some apps add a search tool. D is wrong: these are
+    proprietary and their weights are not published.
+
+    '
+- type: section
+  number: 2
+  title: 'Core concepts: data, parameters, tokens'
+  question: How is a model built, and what happens when you press Enter?
+  icon: fa:FaCogs
+  notes: 'Section two introduces the vocabulary we will use every single week: data, parameters, tokens, training,
+    inference, pre-training and post-training. These words appear in every model card, research paper and job advert
+    in this field, so students need to be fluent with them. We finish the section with a few numbers that show the
+    scale of modern models. Allow about eighteen minutes, then take a short break before the probability section.
+
+    '
+- type: figure
+  title: 'Tokens: how models see text'
+  figure: tokens
+  notes: 'Models do not read characters or words directly. A tokenizer splits text into sub-word pieces and maps
+    each to an integer ID from a fixed vocabulary, typically tens of thousands to a couple of hundred thousand entries.
+    Common words become one token; rare words, names and many non-English words are split into several, which is
+    one reason models can be weaker and more expensive in some languages. Everything is counted in tokens: how much
+    text fits in the context window, how much an API call costs, how long generation takes. In the lab students
+    will tokenize their own sentences and count tokens.
+
+
+    Figure discussion prompts: Token = text piece + vocabulary ID. A tokenizer maps text to IDs. Count with the
+    chosen tokenizer. Context, cost and speed depend on tokens.
+
+    '
+- type: compare
+  title: Training vs. inference
+  columns:
+  - head: Training
+    icon: fa:FaDumbbell
     points:
-      - "Generative models learn a probability distribution over data and **sample** new content."
-      - "A **model** (weights) is not an **application** (model + instructions + tools + retrieval + safety + UI)."
-      - "Pre-training gives knowledge; post-training gives behaviour; inference uses fixed weights."
-      - "LLMs use the chain rule and are trained by **maximum likelihood** (minimising negative log-likelihood)."
-      - "Temperature, top-k and top-p change **how we sample**, not what the model knows."
-      - "Generative models learn p(x) or p(x | condition); discriminative models learn p(y | x)."
-      - "**Latent variables** are simple hidden causes mapped to complex data (weeks 2–4)."
-      - "Fluency is not evidence: purpose, protect, prompt, **verify**, disclose."
-    notes: |
-      Recap each point in one sentence and ask the class to complete the sentence before you reveal it, if you have time. These eight points are the minimum students should retain. Next week we build the first of our model families, the variational autoencoder, which uses latent variables and a bound on the likelihood that we derived from today's ideas. Ask students to review the probability section of the teaching notes, especially likelihood and the chain rule, and to watch the three-minute and eight-minute videos on the next slide before the lab.
+    - Examples → loss → weight update.
+    - An optimiser changes learned numbers.
+    - 'Lab example: counting name pairs builds the table P.'
+  - head: Inference
+    icon: fa:FaBolt
+    points:
+    - Prompt → scores → output.
+    - Ordinary generation uses fixed weights.
+    - 'Lab example: sampling a new name reads P but never changes it.'
+  callout: More context does not retrain the model.
+  notes: 'Parameters are the numbers inside the network, often billions of them. Training searches for parameter
+    values that make the training data likely, by repeatedly computing a loss and nudging parameters with gradient
+    descent. Inference is using those fixed parameters to answer a new input. A very common misconception is that
+    a chatbot learns from your conversation in real time. It does not: within a conversation it only sees more context.
+    Some providers may later use conversations to train future versions, which is a privacy issue and why data settings
+    matter. Ask: when you fine-tune in week 8, is that training or inference? Training.
 
-  - type: resources
-    items:
-      - {kind: book, label: "Foster (2023) Generative Deep Learning, 2nd ed., ch. 1 'Generative Modeling'", note: "Core module text (descriptor 7.9)", url: "https://www.oreilly.com/library/view/generative-deep-learning/9781098134174/"}
-      - {kind: video, label: "3Blue1Brown: Large Language Models explained briefly", note: "8-minute visual overview", url: "https://www.youtube.com/watch?v=LPZh9BOjkQs"}
-      - {kind: video, label: "Google Cloud Tech: Introduction to Generative AI", note: "Short introduction from Google", url: "https://www.youtube.com/watch?v=G2fqAlgmoPo"}
-      - {kind: video, label: "Andrej Karpathy: Intro to Large Language Models", note: "1-hour talk: pre-training, post-training, risks", url: "https://www.youtube.com/watch?v=zjkBMFhNj_g"}
-      - {kind: course, label: "Microsoft Learn: Introduction to generative AI and agents", note: "Free module with a knowledge check", url: "https://learn.microsoft.com/en-us/training/modules/fundamentals-generative-ai/"}
-      - {kind: course, label: "Microsoft: Generative AI for Beginners, lessons 1–3", note: "Includes 'Using generative AI responsibly'", url: "https://github.com/microsoft/generative-ai-for-beginners"}
-      - {kind: doc, label: "EU AI Act, Article 50: transparency obligations", note: "Applies from 2 August 2026", url: "https://artificialintelligenceact.eu/article/50/"}
-      - {kind: doc, label: "NIST AI 600-1: Generative AI risk profile", note: "Risk categories and mitigations", url: "https://nvlpubs.nist.gov/nistpubs/ai/NIST.AI.600-1.pdf"}
-    notes: |
-      These resources are chosen to be short, reliable and free, apart from the core textbook, which the library provides. The 3Blue1Brown video is the best visual introduction to next-token prediction. The Google video is an accessible overview for students new to the area. Karpathy's talk is longer and excellent on pre-training and post-training. The Microsoft materials include a responsible-AI lesson with practical guidance. The EU AI Act article and the NIST profile are primary sources for the risk discussion. All links were checked in September 2026; product-specific pages change, so recheck before teaching.
+    '
+- type: flow
+  title: 'From raw data to an assistant: pre-training, post-training, application'
+  steps:
+  - label: Data
+    sub: Prepare examples
+  - label: Pre-training
+    sub: Learn next-token patterns
+  - label: Post-training
+    sub: Learn from instructions and feedback
+  - label: Assistant model
+    sub: Use adapted weights
+  - label: Application
+    sub: Add tools and interface
+    highlight: true
+  bullets:
+  - Pre-training learns patterns; post-training shapes behaviour.
+  notes: 'This pipeline is the backbone of the module. Pre-training teaches a model to predict the next token on
+    a huge corpus; the result is a base model that is knowledgeable but only continues text. Post-training shapes
+    behaviour: supervised instruction tuning on example conversations, preference tuning such as reinforcement learning
+    from human feedback or direct preference optimisation, and more recently reinforcement learning on problems
+    with checkable answers to improve reasoning. The application layer then adds instructions, tools and guardrails.
+    Weeks 5 and 6 cover pre-training, week 8 post-training, and weeks 11 and 12 the application layer.
+
+    '
+- type: stat
+  title: The scale of modern models
+  stats:
+  - value: 175 B
+    label: parameters in GPT-3 (2020), once considered huge
+  - value: 15 T+
+    label: tokens used to pre-train Llama 3 (Meta, 2024)
+  - value: 2 M
+    label: tokens in the largest context windows (Gemini 1.5 Pro, 2024), up from 2 K in 2020
+  - value: 800 M
+    label: weekly ChatGPT users reported by OpenAI (Oct 2025)
+  caption: Figures are as reported by the developers at the time; they illustrate orders of magnitude, not current
+    records.
+  notes: 'These numbers give a sense of scale. GPT-3 had 175 billion parameters in 2020. Meta reported pre-training
+    Llama 3 on more than fifteen trillion tokens. Context windows grew from about two thousand tokens in GPT-3 to
+    around two million tokens in some 2024 models, enough for several books at once. OpenAI reported eight hundred
+    million weekly ChatGPT users in October 2025. Be careful with numbers: always say who reported them and when,
+    and remember that bigger is not automatically better. Smaller, well-trained models now match much larger older
+    ones, which we discuss in week 6.
+
+    '
+- type: section
+  number: 3
+  title: Probabilistic foundations
+  question: How does a probability distribution become a sentence, an image or a song?
+  icon: fa:FaDiceFive
+  notes: 'Welcome back from the break. This is the most important section of today and the longest. Every generative
+    model in this module is a way of representing a probability distribution and drawing samples from it. We will
+    look at next-token distributions, the chain rule that lets language models generate one token at a time, likelihood
+    and maximum likelihood training, temperature and sampling strategies, the difference between generative and
+    discriminative models, and latent variables. Students who are rusty on probability should revisit these slides
+    and the teaching notes after class.
+
+    '
+- type: figure
+  title: An LLM outputs a probability distribution over the next token
+  figure: next_token
+  caption: Illustrative numbers. A real model gives every token in its vocabulary a probability; together they add to 1.
+  notes: 'Different sampled outputs are possible under the same model. This does not make every answer correct.
+    Ask students to name a generated claim and the evidence needed to check it. Temperature only changes the probability
+    choices. The current context supplies the input, and the model weights remain fixed during inference. Use the
+    diagram to trace one token from scores through probabilities to the appended context.
+
+
+    Figure discussion prompts: Context → next-token scores → probabilities. Choose one token. Append it; predict
+    again. Likely text still needs factual checking.
+
+    '
+- type: equation
+  title: 'The chain rule: generating one token at a time'
+  eq: p(x_1, x_2, \ldots, x_T) = \prod_{t=1}^{T} p(x_t \mid x_1, \ldots, x_{t-1})
+  read_as:
+  - Multiply next-token probabilities to score a sequence.
+  - 'Example: 0.5 × 0.2 × 0.1 = 0.01.'
+  - Autoregressive generation repeats next-item prediction.
+  terms:
+  - - xₜ
+    - the token at position t
+  - - T
+    - length of the sequence
+  - - ∏
+    - product over positions
+  - - '|'
+    - '''given'''
+  notes: 'This is the chain rule of probability, which students met in statistics. Any joint distribution over a
+    sequence can be written as a product of conditionals, each token given all previous tokens. Autoregressive models
+    such as GPT learn each conditional with one neural network shared across positions. The consequence is powerful:
+    if you can predict the next token well, you have a model of the whole sequence, and you can both score sequences
+    and generate them. Image generators do not usually use this factorisation, which is one reason they need different
+    families, covered in weeks 2 to 4.
+
+    '
+- type: equation
+  title: Likelihood and maximum likelihood training
+  eq:
+  - \mathcal{L}(\theta) = \sum_{i=1}^{N} \, \log p_\theta(x^{(i)})
+  - \theta^{*} = \arg\max_{\theta} \; \mathcal{L}(\theta) \;=\; \arg\min_{\theta} \; -\frac{1}{N}\sum_{i} \, \log p_\theta(x^{(i)})
+  read_as:
+  - Likelihood scores observed data under candidate parameters.
+  - Choose parameters giving higher data likelihood.
+  - Minimise average negative log-likelihood (NLL).
+  terms:
+  - - θ
+    - model parameters
+  - - pθ(x)
+    - probability the model gives example x
+  - - x⁽ⁱ⁾
+    - the i-th training example
+  - - N
+    - number of examples
+  - - ℒ(θ)
+    - total log-likelihood of the data
+  - - θ*
+    - parameters with the highest likelihood
+  - - log
+    - natural log (turns products into sums)
+  notes: 'Likelihood is the probability the model assigns to the observed data, viewed as a function of the parameters.
+    Maximum likelihood estimation picks the parameters that make the data most probable. We use logarithms because
+    products of many small probabilities underflow, while sums of logs are stable, and because the log is monotonic
+    the maximiser is unchanged. Minimising the average negative log-likelihood is the same as minimising cross-entropy,
+    the loss students will see printed during training in the labs. Important: VAEs, autoregressive models and diffusion
+    models are all trained with likelihood or a bound on it; GANs are the exception, as we see in week 3.
+
+    '
+- type: table
+  title: 'Worked example: the likelihood of a short sentence'
+  header:
+  - Step
+  - Next-token probability
+  - log p (natural)
+  rows:
+  - - p(the)
+    - '0.06'
+    - −2.81
+  - - p(cat | the)
+    - '0.01'
+    - −4.61
+  - - p(sat | the cat)
+    - '0.20'
+    - −1.61
+  - - p(on | the cat sat)
+    - '0.55'
+    - −0.60
+  - - Sequence
+    - 0.06 × 0.01 × 0.20 × 0.55 = 6.6 × 10⁻⁵
+    - sum = −9.63
+  callout: Average NLL ≈ 2.41 nats/token. Perplexity ≈ 11.1.
+  notes: 'Work through this on the board. Multiply the four conditional probabilities to get the joint probability,
+    about 6.6 times ten to the minus five. Summing logs gives the same result as the log of the product, minus 9.63.
+    Dividing by four tokens gives the average negative log-likelihood, 2.41 nats per token, which is exactly the
+    loss a language model reports. Exponentiate it to get perplexity, about 11: lower is better. Ask students which
+    single step contributes most to the loss: cat given the, because the model found it surprising. Training would
+    push that probability up if the sentence is common in real data.
+
+    '
+- type: equation
+  title: Temperature reshapes the distribution before sampling
+  eq: p_i = \frac{\exp(z_i / T)}{\sum_j \exp(z_j / T)}
+  read_as:
+  - Logits are scores; softmax makes probabilities.
+  - Lower positive T concentrates choices. Higher T spreads them.
+  - Temperature changes sampling, while weights stay fixed.
+  terms:
+  - - zᵢ
+    - logit (raw score) of token i
+  - - T
+    - temperature (> 0)
+  - - pᵢ
+    - probability used for sampling
+  notes: 'Softmax converts logits into probabilities that are positive and sum to one. Temperature divides the logits
+    before the softmax. Low temperature exaggerates differences, so the top token dominates and outputs become more
+    predictable; high temperature shrinks differences so less likely tokens are sampled more often, increasing variety
+    and also errors. Check the worked numbers with the class using a calculator: exp of 2 is 7.39, exp of 1 is 2.72,
+    exp of 0 is 1, sum 11.11, giving 0.67, 0.24 and 0.09. Temperature changes sampling only; it does not change
+    what the model knows.
+
+    '
+- type: figure
+  title: Temperature in pictures
+  figure: temperature
+  caption: The same scores at three temperatures. Lower entropy means less uncertainty in the next choice.
+  callout: Lower temperature often gives more repeatable output. It does not verify facts or add knowledge.
+  notes: 'These three charts use the same scores as the previous distribution, so the middle chart matches it exactly.
+    At temperature 0.5 about three quarters of the probability goes to mat, so outputs are nearly repeatable. At
+    1.0 we sample from the model''s own distribution. At 1.5 the distribution flattens: mat falls to about 0.26,
+    while the twenty rare tokens grouped as others rise from 0.08 to about 0.23. That growing tail is why high temperatures
+    produce odd words. Entropy, shown in bits, measures that spread. The practical
+    guidance is on the callout. In the lab students will sample names from their own character model at these three
+    temperatures and see the same effect: sensible but repetitive names at low temperature, creative but sometimes
+    unpronounceable names at high temperature.
+
+    '
+- type: bullets
+  title: 'Decoding strategies: how we pick the next token'
+  icon: fa:FaSlidersH
+  bullets:
+  - 'Greedy: choose the highest score.'
+  - 'Temperature: rescale scores, then sample.'
+  - 'Top-k: keep k candidates.'
+  - 'Top-p: keep the likeliest tokens until their probabilities add up to p.'
+  - 'Seed: set the random sequence.'
+  callout: Report the rule and settings.
+  notes: 'These are the controls exposed by almost every API and library, so students need to recognise them. For
+    this Transformers lab, greedy decoding uses do_sample=False. The positive-temperature softmax has a greedy limit
+    as T approaches zero; do not divide by zero. Top-k cuts off the long tail of unlikely tokens at a fixed count;
+    top-p adapts the cut-off to how confident the model is, which is why it is popular. Some reasoning models fix
+    these values or ignore them, so always check the documentation. For evaluation work later in the module, we
+    will insist that students report model, version, temperature, top-p, seed and date, because without them a result
+    cannot be reproduced.
+
+    '
+- type: figure
+  title: Generative vs. discriminative models
+  figure: gen_vs_disc
+  caption: 'Left: a discriminative model only needs the boundary. Right: a generative model describes where the
+    data lives, so it can also create new points (stars).'
+  notes: 'On the left, a discriminative model such as logistic regression learns only the probability of the label
+    given the input, which amounts to a boundary between cats and dogs. It cannot tell you what a typical cat looks
+    like. On the right, a generative model learns the distribution of the inputs themselves, here one Gaussian per
+    class. That is more work, but it lets us sample new examples, the stars, detect unusual inputs that have low
+    probability, and even classify using Bayes'' rule on the next slide. In the lab students fit both kinds on the
+    same 2-D data and sample from the generative one.
+
+    '
+- type: equation
+  title: Connecting the two views with Bayes' rule
+  eq: p(y \mid x) = \dfrac{p(x \mid y)\, p(y)}{\sum_{y'} p(x \mid y')\, p(y')}
+  read_as:
+  - 'Generative: learn p(x | y) and p(y).'
+  - Bayes’ rule turns these into class probabilities.
+  - 'Discriminative: learn p(y | x) directly.'
+  terms:
+  - - x
+    - input (image, text, …)
+  - - y
+    - label or class
+  - - p(x | y)
+    - what inputs of class y look like
+  - - p(y)
+    - how common each class is
+  - - Σ over y′
+    - add the same product for every class y′
+  callout: Conditional generation models p(output | prompt).
+  notes: 'Bayes'' rule links the two approaches. Naive Bayes and Gaussian discriminant analysis are classic generative
+    classifiers: they model how each class generates inputs and then invert with Bayes'' rule. Logistic regression
+    and most neural classifiers model the label given the input directly. The callout is the bridge to modern generative
+    AI: text-to-image models learn p of an image given a prompt, and language models learn p of a response given
+    the conversation so far. The condition is whatever we control. Ask: which is harder to learn, p of x or p of
+    y given x, for a 512 by 512 image? p of x, by far.
+
+    '
+- type: figure
+  title: 'Latent variables: simple hidden causes, complex data'
+  figure: latent
+  notes: 'Latent means hidden. The idea is to explain complicated data using a few hidden factors that follow a
+    simple distribution, usually a standard Gaussian. A neural network, called a decoder or generator, maps each
+    latent point to a data point. Here a two-dimensional Gaussian is bent into a spiral; in real models the latent
+    space might be a few hundred dimensions and the output a face or a sentence. Moving gradually through latent
+    space often changes the output gradually, but intermediate samples can be poor or unclear. Students inspect
+    this in weeks 2 and 3. The Word notes give the formula p(x) = ∫ p(x | z) p(z) dz, which adds up the contribution
+    of every possible hidden cause.
+
+
+    Figure discussion prompts: z is a hidden numerical code. Draw z; decode an output x. The formula in the notes
+    sums over every possible code. A coordinate need not have a human label.
+
+    '
+- type: quiz
+  question: You raise the sampling temperature from 0.7 to 1.5. What happens?
+  options:
+  - The model learns new facts from the higher temperature setting
+  - Probability concentrates on the top token, so outputs become more repetitive
+  - Probability spreads to less likely tokens, so samples become more varied
+  - The model's parameters are updated to favour less likely tokens
+  answer: 2
+  notes: 'Answer: C. A higher temperature flattens the distribution, so tokens that were unlikely get sampled more
+    often. That makes outputs more diverse and often more creative, but also more likely to contain mistakes or
+    nonsense. A and D are both wrong for the same reason: temperature is a decoding setting applied at inference
+    time, and nothing changes in the parameters. B describes the opposite effect, lowering temperature. If students
+    chose B, redraw the three charts from the previous slides and ask which one has the flattest bars.
+
+    '
+- type: figure
+  title: 'Four ways to generate: the model families of this module'
+  figure: families
+  caption: Autoregressive models (weeks 5–6), VAEs (week 2), GANs (week 3) and diffusion / flow models (week 4).
+  notes: 'Now we connect probability to the model families we study. Autoregressive models use the chain rule and
+    generate one token at a time; they dominate text and code. VAEs learn an encoder to a latent space and a decoder
+    back, trained with a bound on the likelihood. GANs train a generator against a discriminator in a two-player
+    game, without an explicit likelihood. Diffusion and flow models learn to turn noise into data step by step;
+    they dominate images, video and audio today. Many real systems combine families: Stable Diffusion uses a VAE
+    plus a diffusion model plus a transformer text encoder.
+
+    '
+- type: table
+  title: Comparing the four families
+  header:
+  - Family
+  - How it generates
+  - Strengths
+  - Weaknesses
+  - Where used today
+  rows:
+  - - Autoregressive
+    - Predict the next token, append, repeat
+    - Gives each sequence a probability
+    - One network call per token
+    - Text, code, speech
+  - - VAE
+    - Decode a sampled latent code
+    - Smooth, useful latent space
+    - Samples can be blurry
+    - Compression, latent spaces
+  - - GAN
+    - A generator turns noise into a sample
+    - Sharp samples in one step
+    - Unstable; can miss variety
+    - Restoration, super-resolution
+  - - Diffusion / flow
+    - Remove noise step by step
+    - High quality and variety
+    - Many network calls
+    - Images, video, audio
+  notes: 'Compare useful quality, varied coverage, generation time and conditioning on a shared task. GANs can produce
+    sharp samples quickly but can miss modes; basic VAEs can blur uncertain details; traditional diffusion requires
+    many network calls. Quality and coverage are measurements, not family guarantees. Autoregressive models provide
+    an explicit probability for a sequence under their learned distribution. Analogy: compare vehicles using a shared
+    journey and load. Ask which measurements would justify a choice. Common mistake: treating a low loss or family
+    name as proof of useful samples. Transformers can appear inside diffusion models, and images can also be generated
+    autoregressively.'
+- type: figure
+  title: 'Where we are going: the 12-week map'
+  figure: course_map
+  caption: Foundations → image generators → language models → adaptation → multimodal → deployed systems, with evaluation
+    and responsible AI every week.
+  notes: 'Here is the structure of the module. Weeks 2 to 4 cover the image generator families. Weeks 5 to 7 cover
+    transformers, large language models and prompting. Week 8 is fine-tuning, including parameter-efficient methods
+    like LoRA. Weeks 9 and 10 are multimodal. Weeks 11 and 12 turn models into systems: deployment, retrieval-augmented
+    generation and agents. The group project, worth 60 percent, asks students to build and evaluate a generative
+    AI application, so every lab produces something reusable. The exam, worth 40 percent, tests concepts, mathematics
+    and interpretation. Encourage students to form project groups by week 4.
+
+    '
+- type: section
+  number: 4
+  title: Responsible AI from day one
+  question: What can go wrong, and what habits keep you, your users and your data safe?
+  icon: fa:FaBalanceScale
+  notes: 'The final section is responsible AI. It is not a separate topic added at the end of the module; every
+    week includes a responsible-AI lens, and the project is assessed partly on it. Today we cover hallucination,
+    the main risk categories, and a practical five-step checklist that students should use every time they use an
+    AI tool, including for their studies. Other modules in the programme cover regulation and explainability in
+    depth; here we focus on the risks specific to generative models and how to test for them.
+
+    '
+- type: bullets
+  title: 'Hallucination: fluent but false'
+  bullets:
+  - A claim can be false or unsupported.
+  - 'Example: an invented paper.'
+  - Fluent wording is insufficient evidence.
+  - Open sources; check numbers and code.
+  callout: Verify claims before using them.
+  callout_label: Remember
+  notes: 'Return to the warm-up board: most of the failures students listed are hallucinations. Explain the mechanism
+    in one sentence: a language model maximises the likelihood of text that looks like its training data, and a
+    plausible-looking reference is highly likely text even when the paper does not exist. Hallucination rates have
+    fallen as models improved and gained tools, but they are not zero, and they rise for obscure topics. The ways
+    to reduce the risk preview later weeks. In the lab students will deliberately probe a small model with a question
+    about a fictional paper and record whether it invents details, admits uncertainty or behaves differently.
+
+    '
+- type: cards
+  title: Six risks to check with any generative AI system
+  cards:
+  - icon: fa:FaBalanceScaleLeft
+    head: Bias & fairness
+    text: Test outputs across groups, names and languages.
+  - icon: fa:FaUserShield
+    head: Privacy
+    text: Keep personal data out of prompts; check how inputs are stored.
+  - icon: fa:FaCopyright
+    head: Intellectual property
+    text: Check data rights and the licence for model and outputs.
+  - icon: fa:FaEye
+    head: Transparency & law
+    text: Tell people when content or a chat is AI; follow the EU AI Act.
+  - icon: fa:FaGraduationCap
+    head: Academic integrity
+    text: Follow the module's AI-use policy and say how AI helped.
+  - icon: fa:FaShieldAlt
+    head: Security & misuse
+    text: Test hidden instructions (prompt injection) and harmful requests.
+  notes: 'Explain the six risk areas using one concrete example each. For transparency, distinguish EU AI Act Article
+    50 roles: direct-interaction notice, provider machine-readable marking, and deployer disclosure of deepfakes
+    or relevant public-interest text. There are exceptions and transition details, so use the notes and official
+    links. The rules apply from 2 August 2026; for systems already on the market, the 2 December 2026 transition
+    concerns the Article 50(2) marking duty only. Ask students to open a claimed source before trusting it. They remain accountable for submitted work.
+
+    '
+- type: flow
+  title: A five-step checklist for using AI tools
+  steps:
+  - label: Purpose
+    sub: Appropriate and permitted?
+  - label: Protect data
+    sub: Check policy and settings
+  - label: Prompt clearly
+    sub: Task, context, constraints
+  - label: Verify
+    sub: Open sources; run checks
+    highlight: true
+  - label: Disclose & record
+    sub: Use, model, settings, date
+  callout: Use this checklist in each lab.
+  notes: 'This is the habit we want students to form. Purpose: some tasks, such as assessed individual reflections,
+    may not permit AI at all. Protect data: think before pasting. Prompt clearly: we spend all of week 7 on this.
+    Verify is highlighted because it is the step most often skipped: check every fact and citation, run the code,
+    and test unusual inputs. Disclose and record: say how AI was used and keep enough detail, such as prompts, model
+    and date, for someone else to reproduce the work. Each lab notebook ends with a short evidence table built on
+    these five steps.
+
+    '
+- type: discussion
+  title: Case discussion
+  icon: fa:FaUserGraduate
+  prompt: A student submits five AI-suggested references. Two do not exist.
+  points:
+  - Why did this happen?
+  - Who checks submitted claims?
+  - Which verification step was missing?
+  - Can source grounding still fail?
+  notes: 'Give three minutes in groups, then discuss. Mechanism: the model generated plausible author names, titles
+    and venues because they are likely text, not because it looked them up. Responsibility: the student, who submitted
+    unverified work; tools are not authors. The failed step is verify: every reference should be opened and checked,
+    for example on Google Scholar or the publisher''s site. The last question tests nuance: grounding in uploaded
+    sources greatly reduces invented references, but the model can still misquote or misattribute a source, so checking
+    remains necessary. This case links directly to retrieval-augmented generation in week 12.
+
+    '
+- type: lab
+  title: 'Lab 1: probability, sampling and a first look at an LLM'
+  steps:
+  - Build name probabilities.
+  - Score and sample names.
+  - Compare two classifiers.
+  - Inspect tokens and generation.
+  - Verify a fictional-paper answer.
+  - Record evidence.
+  runtime: Colab or local CPU; GPU optional. About 1 min on a laptop CPU after downloads
+  deliverable: Five code TODOs, four answers, evidence table
+  notes: 'Preview the lab so students arrive ready. Part one builds a tiny generative model from counts, which makes
+    likelihood and temperature concrete. Part two contrasts generative and discriminative classifiers on the same
+    data. Part three loads a small open-weight language model from Hugging Face; it runs even on a laptop CPU. The
+    last part asks students to probe hallucination and compare the small model with a large hosted assistant. The
+    optional API cell uses a free Google AI Studio key; students without a key simply use the chat interface instead.
+    Remind them never to paste keys into shared notebooks.
+
+    '
+- type: summary
+  points:
+  - Models learn; applications add tools.
+  - Training updates; inference uses fixed weights.
+  - Tokens give repeated next-item choices.
+  - Likelihood scores; temperature changes sampling.
+  - Generators create; classifiers label.
+  - Verify, protect data and disclose.
+  notes: 'Recap each point in one sentence and ask the class to complete the sentence before you reveal it, if you have time.
+    These six points are the minimum students should retain. Next week we build the first of our model families, the variational
+    autoencoder, which uses latent variables and a bound on the likelihood that builds on today''s probability ideas. Ask students
+    to review the probability section of the teaching notes, especially likelihood and the chain rule, and to watch the three-minute
+    and eight-minute videos on the next slide before the lab.
+
+    '
+- type: resources
+  items:
+  - kind: book
+    label: Foster (2023) Generative Deep Learning, 2nd ed., ch. 1 'Generative Modeling'
+    note: Core module text (descriptor 7.9)
+    url: https://www.oreilly.com/library/view/generative-deep-learning/9781098134174/
+  - kind: video
+    label: '3Blue1Brown: Large Language Models explained briefly'
+    note: 8-minute visual overview
+    url: https://www.youtube.com/watch?v=LPZh9BOjkQs
+  - kind: video
+    label: 'Google Cloud Tech: Introduction to Generative AI'
+    note: Short introduction from Google
+    url: https://www.youtube.com/watch?v=G2fqAlgmoPo
+  - kind: video
+    label: 'Andrej Karpathy: Intro to Large Language Models'
+    note: '1-hour talk: pre-training, post-training, risks'
+    url: https://www.youtube.com/watch?v=zjkBMFhNj_g
+  - kind: course
+    label: 'Microsoft Learn: Introduction to generative AI and agents'
+    note: Free module with a knowledge check
+    url: https://learn.microsoft.com/en-us/training/modules/fundamentals-generative-ai/
+  - kind: course
+    label: 'Microsoft: Generative AI for Beginners, lessons 1–3'
+    note: Includes 'Using generative AI responsibly'
+    url: https://github.com/microsoft/generative-ai-for-beginners
+  - kind: doc
+    label: 'EU AI Act, Article 50: transparency obligations'
+    note: In force since 2 August 2026
+    url: https://artificialintelligenceact.eu/article/50/
+  - kind: doc
+    label: 'NIST AI 600-1: Generative AI risk profile'
+    note: Risk categories and ways to reduce the risk
+    url: https://nvlpubs.nist.gov/nistpubs/ai/NIST.AI.600-1.pdf
+  notes: 'These resources are chosen to be short, reliable and free, apart from the core textbook, which the library
+    provides. The 3Blue1Brown video is the best visual introduction to next-token prediction. The Google video is
+    an accessible overview for students new to the area. Karpathy''s talk is longer and excellent on pre-training
+    and post-training. The Microsoft materials include a responsible-AI lesson with practical guidance. The EU AI
+    Act article and the NIST profile are primary sources for the risk discussion. All links were checked in September
+    2026; product-specific pages change, so recheck before teaching.
+
+    '

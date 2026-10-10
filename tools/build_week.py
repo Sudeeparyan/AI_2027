@@ -46,6 +46,7 @@ SLIDE_TYPES = {
     "equation": ["title", "eq"], "code": ["title", "code"], "quiz": ["question", "options", "answer"],
     "callout": ["statement"], "stat": ["title", "stats"], "lab": ["steps"], "summary": ["points"],
     "resources": ["items"], "discussion": ["prompt"], "technical": ["title", "diagram"],
+    "course_map": ["title", "figure"], "infographic": ["title", "figure", "recap"],
 }
 REQUIRED_NOTE_SECTIONS = [
     "Lecture plan", "Lecture notes", "Common misconceptions", "Responsible AI", "Lab guide",
@@ -55,7 +56,7 @@ MIN_NOTE_WORDS = 45
 
 
 # ---------------------------------------------------------------- loading
-PLACEHOLDER_RE = re.compile(r"\{\{([A-Z0-9_]+)\}\}")
+PLACEHOLDER_RE = re.compile(r"\{\{([A-Za-z0-9_]+)\}\}")
 
 
 def fill_placeholders(obj, values: dict):
@@ -98,6 +99,9 @@ def validate(wk: dict) -> list[str]:
         for f in SLIDE_TYPES[t]:
             if f not in s:
                 errs.append(f"slide {i} ({t}): missing field {f!r}")
+        for f in ("bullets", "points"):
+            if f in s and (not isinstance(s[f], list) or any(not isinstance(item, str) for item in s[f])):
+                errs.append(f"slide {i} ({t}): {f} must be a list of strings; quote YAML text containing ': '")
         words = len(str(s.get("notes", "")).split())
         if words < MIN_NOTE_WORDS:
             errs.append(f"slide {i} ({t}: {s.get('title', '')[:40]}): speaker notes only {words} words")
@@ -123,6 +127,7 @@ def run_figures(n: int) -> dict:
         return {}
     style = CUR / "figures" / "_style.py"
     h = hashlib.sha1(src.read_bytes() + style.read_bytes())
+    h.update((ROOT / "tools" / "technical_diagrams.js").read_bytes())
     assets_dir = CUR / "assets" / f"week_{n:02d}"
     if assets_dir.exists():  # real results produced by curriculum/assets/make_week_XX.py
         for f in sorted(assets_dir.iterdir()):
@@ -150,7 +155,9 @@ def render_equation(latex: str, fontsize: int = 22) -> Path:
     import matplotlib.pyplot as plt
 
     latex = re.sub(r"(?<![A-Za-z])\\frac", r"\\dfrac", latex)  # display-size fractions: \frac renders tiny on a slide
-    key = hashlib.sha1(f"{fontsize}|{latex}".encode()).hexdigest()[:16]
+    # Mathtext lets the integral sign's slanted tail run into the next symbol; a space plus a thin space clears it.
+    latex = re.sub(r"\\int(?![A-Za-z])((?:\s*[_^](?:\{[^{}]*\}|\\[A-Za-z]+|[A-Za-z0-9]))*)\s*", r"\\int\1\\ \\, ", latex)
+    key =hashlib.sha1(f"{fontsize}|{latex}".encode()).hexdigest()[:16]
     path = BUILD / "eq" / f"{key}.png"
     if path.exists():
         return path
@@ -171,16 +178,20 @@ def img_size(path: Path) -> tuple[int, int]:
 
 def asset(path: Path) -> dict:
     w, h = img_size(path)
-    return {"path": str(path), "w": w, "h": h}
+    result = {"path": str(path), "w": w, "h": h}
+    scene_path = path.with_suffix(".scene.json")
+    if scene_path.exists():
+        result["scene"] = json.loads(scene_path.read_text(encoding="utf-8"))
+    return result
 
 
 # Whole LaTeX command names -> Unicode (matched as complete words, so \le never eats \left or \leq).
 SYMBOLS = {
     "alpha": "α", "beta": "β", "gamma": "γ", "delta": "δ", "epsilon": "ε", "varepsilon": "ε", "theta": "θ",
-    "lambda": "λ", "mu": "μ", "sigma": "σ", "phi": "φ", "pi": "π", "tau": "τ", "Sigma": "Σ", "Delta": "Δ",
-    "nabla": "∇", "partial": "∂", "sum": "Σ", "prod": "Π", "int": "∫", "in": "∈", "sim": "~", "approx": "≈",
+    "lambda": "λ", "mu": "μ", "sigma": "σ", "phi": "φ", "pi": "π", "tau": "τ", "eta": "η", "Sigma": "Σ", "Delta": "Δ",
+    "nabla": "∇", "partial": "∂", "sum": "Σ", "prod": "Π", "int": "∫", "in": "∈", "sim": "∼", "approx": "≈",
     "le": "≤", "leq": "≤", "ge": "≥", "geq": "≥", "neq": "≠", "times": "×", "cdot": "·", "pm": "±", "to": "→",
-    "infty": "∞", "mid": "|", "top": "ᵀ", "ldots": "…", "dots": "…", "varnothing": "∅", "emptyset": "∅",
+    "infty": "∞", "mid": "|", "vert": "|", "Vert": "‖", "top": "ᵀ", "ldots": "…", "dots": "…", "varnothing": "∅", "emptyset": "∅",
     "log": "log", "ln": "ln", "exp": "exp", "sin": "sin", "cos": "cos", "sup": "sup", "max": "max", "min": "min",
     "arg": "arg", "left": "", "right": "", "quad": " ", "qquad": "  ",
 }
@@ -188,8 +199,19 @@ STRUCTURAL = {"mathrm", "text", "mathbf", "mathcal", "operatorname", "mathbb", "
 GREEK = {"\\" + k: v for k, v in SYMBOLS.items()}  # kept for tools that list the supported commands
 BLACKBOARD = {"E": "𝔼", "R": "ℝ", "N": "ℕ", "Z": "ℤ", "P": "ℙ"}
 ACCENT = {"hat": "\u0302", "bar": "\u0304", "tilde": "\u0303"}
-SUB = str.maketrans("0123456789aehijklmnoprstuvx+-", "₀₁₂₃₄₅₆₇₈₉ₐₑₕᵢⱼₖₗₘₙₒₚᵣₛₜᵤᵥₓ₊₋")
-SUP = str.maketrans("0123456789+-nTi", "⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻ⁿᵀⁱ")
+SUB_CHARS, SUP_CHARS = "0123456789aehijklmnoprstuvx+-=()", "0123456789+-=()nTi"
+SUB = str.maketrans(SUB_CHARS, "₀₁₂₃₄₅₆₇₈₉ₐₑₕᵢⱼₖₗₘₙₒₚᵣₛₜᵤᵥₓ₊₋₌₍₎")
+SUP = str.maketrans(SUP_CHARS, "⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻⁼⁽⁾ⁿᵀⁱ")
+
+
+def script(content: str, tag: str) -> str:
+    """Unicode sub/superscript when every character has one; otherwise <sub>/<sup>,
+    which tools/notes.js renders as real Word subscript or superscript text."""
+    chars, table = (SUB_CHARS, SUB) if tag == "sub" else (SUP_CHARS, SUP)
+    content = content.strip()
+    if content and all(c in chars for c in content):
+        return content.translate(table)
+    return f"<{tag}>{content}</{tag}>"
 ARG = r"(?:\{([^{}]*)\}|(\\[A-Za-z]+)|([A-Za-z0-9]))"  # {group}, \command or a single character
 
 
@@ -199,7 +221,7 @@ def _arg(m, i):
 
 def inline_math(expr: str) -> str:
     """Small LaTeX→Unicode conversion for inline $...$ in teaching notes (display math is rendered as images)."""
-    s = expr
+    s = expr.replace(r"\{", "\x01").replace(r"\}", "\x02")  # literal braces, as in U\{1, \dots, T\}
     s = re.sub(r"\\mathbb\{([A-Z])\}", lambda m: BLACKBOARD.get(m.group(1), m.group(1)), s)
     s = re.sub(r"\\(?:mathrm|text|mathbf|mathcal|operatorname)\{([^{}]*)\}", r"\1", s)
     s = re.sub(r"\\[td]?frac(?:12|\{1\}\{2\})", "½", s)
@@ -213,12 +235,38 @@ def inline_math(expr: str) -> str:
         glued = out[:1].isalpha() and m.start() > 0 and s[m.start() - 1].isalnum()
         return " " + out if glued else out  # a\log y -> "a log y", not "alog y"
     s = re.sub(r"\\([A-Za-z]+)", symbol, s).replace("^ᵀ", "ᵀ")
-    s = re.sub(r"_\{([^}]*)\}", lambda m: m.group(1).translate(SUB) if all(c in "0123456789aehijklmnoprstuvx+-" for c in m.group(1)) else "_" + m.group(1), s)
-    s = re.sub(r"_([0-9a-z])", lambda m: m.group(1).translate(SUB), s)
-    s = re.sub(r"\^\{([^}]*)\}", lambda m: m.group(1).translate(SUP) if all(c in "0123456789+-nTi" for c in m.group(1))
-               else "^" + (m.group(1) if len(m.group(1)) == 1 else f"({m.group(1)})"), s)
-    s = re.sub(r"\^([0-9nTi])", lambda m: m.group(1).translate(SUP), s)
-    return s.replace("{", "").replace("}", "").replace("\\", "")
+    # Single characters first (p_g inside E_{p_g}), then braced groups.
+    s = re.sub(r"_([^\s{}\\_^<])", lambda m: script(m.group(1), "sub"), s)
+    s = re.sub(r"\^([^\s{}\\_^<])", lambda m: script(m.group(1), "sup"), s)
+    while True:  # innermost groups first, so E_{p_{data}} also converts its outer group
+        before = s
+        s = re.sub(r"_\{([^{}]*)\}", lambda m: script(m.group(1), "sub"), s)
+        s = re.sub(r"\^\{([^{}]*)\}", lambda m: script(m.group(1), "sup"), s)
+        if s == before:
+            break
+    s = s.replace("{", "").replace("}", "").replace("\\", "").replace("\x01", "{").replace("\x02", "}")
+    # A hyphen between two letters is a word hyphen (as in \text{x-axis}); any other "-" is a minus sign.
+    return re.sub(r"(?<![A-Za-z])-|-(?![A-Za-z])", "−", s)
+
+
+# Inline maths follows Pandoc's rule, so prices such as $0.10 / $0.40 stay text: the opening $ has a
+# non-space on its right, the closing $ a non-space on its left and no digit after it.
+INLINE_MATH = re.compile(r"(?<![\\$])\$(?=\S)([^$\n]+?)(?<=\S)\$(?!\d)")
+# Projected text only: speaker notes, code, LaTeX equations and identifiers are left alone.
+SLIDE_TEXT_SKIP = {"notes", "code", "eq", "figure", "icon", "url", "id", "image"}
+
+
+def slide_math(node, key: str = ""):
+    """Convert $...$ in projected slide text to Unicode; <sub>/<sup> where Unicode has no script letter."""
+    if key in SLIDE_TEXT_SKIP:
+        return node
+    if isinstance(node, str):
+        return INLINE_MATH.sub(lambda m: inline_math(m.group(1)), node)
+    if isinstance(node, dict):
+        return {k: slide_math(v, k) for k, v in node.items()}
+    if isinstance(node, list):
+        return [slide_math(v, key) for v in node]
+    return node
 
 
 def prepare_notes(md: str, eqs: dict) -> str:
@@ -231,7 +279,9 @@ def prepare_notes(md: str, eqs: dict) -> str:
 
     md = re.sub(r"\$\$(.+?)\$\$", block, md, flags=re.S)
     # Conditional-probability bars must not become Markdown table separators.
-    md = re.sub(r"(?<![\\$])\$([^$\n]+?)\$", lambda m: "*" + inline_math(m.group(1)).replace("|", r"\|" ) + "*", md)
+    # The converted maths is wrapped in <var>...</var>; tools/notes.js sets single-letter variables in italics and
+    # keeps digits, operators and words such as log upright. Its own | and * (as in D*) are escaped for Markdown.
+    md = INLINE_MATH.sub(lambda m: "<var>" + inline_math(m.group(1)).replace("|", r"\|").replace("*", r"\*") + "</var>", md)
     return md
 
 
@@ -328,10 +378,11 @@ def solution_md(lines: list[str]) -> list[str]:
 
 
 RUN_BANNER = """> **How to run this notebook**
-> - **Google Colab (recommended):** File ▸ Upload notebook, then Runtime ▸ Change runtime type ▸ **T4 GPU**. Run cells top to bottom with Shift+Enter.
-> - **Local Jupyter / VS Code:** Python 3.10+; run the install cell once. A GPU is optional: every cell has a CPU-friendly setting.
+> - **Google Colab (recommended):** File ▸ Upload notebook, then Runtime ▸ Change runtime type ▸ **GPU** if available. A T4 is sufficient for the GPU examples. Free GPU access varies. Run cells top to bottom with Shift+Enter.
+> - **Local Jupyter / VS Code:** Python 3.10+; run the install cell once. Read this week's runtime note. Model downloads and training can take longer on CPU, and some full experiments need a GPU.
 > - **API keys (optional cells only):** store keys in Colab ▸ 🔑 Secrets or an environment variable. Never paste a key into a notebook you share.
-> - Cells marked **TODO** are yours to complete. Questions marked ✍️ need a short written answer."""
+> - Cells marked **TODO** are yours to complete before running dependent cells. Questions marked ✍️ need a short written answer.
+> - Read each diagram by following its numbered blocks. The solid arrows carry data to the next block. A dashed arrow shows a step that repeats."""
 
 
 def build_notebooks(n: int, wk: dict, outdir: Path) -> tuple[Path, Path]:
@@ -339,6 +390,8 @@ def build_notebooks(n: int, wk: dict, outdir: Path) -> tuple[Path, Path]:
     from nbformat.v4 import new_code_cell, new_markdown_cell, new_notebook
 
     src = CUR / "labs" / f"week_{n:02d}_lab.py"
+    if not wk.get("beginner"):
+        wk["beginner"] = beginner.load(n) or {}
     cells = parse_percent(src.read_text(encoding="utf-8"))
     figures = {k: Path(v["path"]) for k, v in wk.get("assets", {}).get("figures", {}).items() if k.startswith("beginner_")}
     if not figures and beginner.load(n):
@@ -367,6 +420,20 @@ def build_notebooks(n: int, wk: dict, outdir: Path) -> tuple[Path, Path]:
                 cell = new_markdown_cell("\n".join(lines), metadata=meta)
                 beginner.attach_figures(cell, figures)
                 nb.cells.append(cell)
+                explicitly_placed = "fig:beginner_mechanism" in src.read_text(encoding="utf-8")
+                if "attachment:beginner_overview.png" in cell.source and not explicitly_placed:
+                    for diagram in wk.get("beginner", {}).get("diagrams", []):
+                        if diagram["id"] in ("overview", "lab"):
+                            continue
+                        guide = new_markdown_cell(
+                            f"### {diagram['title']}\n\n{diagram['subtitle']}\n\n"
+                            f"![{diagram['title']}](fig:beginner_{diagram['id']})\n\n"
+                            + "\n".join(f"{j}. {step}" for j, step in enumerate(diagram["trace"], 1))
+                            + f"\n\n**Think before running:** {diagram['check_question']}"
+                            + (f"\n\n**Instructor explanation:** {diagram['check_answer']}" if variant == "solution" else "")
+                        )
+                        beginner.attach_figures(guide, figures)
+                        nb.cells.append(guide)
                 if i == 0:
                     banner = RUN_BANNER
                     if variant == "solution":
@@ -382,6 +449,22 @@ def build_notebooks(n: int, wk: dict, outdir: Path) -> tuple[Path, Path]:
                 if variant == "student" and "### STUB" in code:
                     raise RuntimeError(f"week {n} student notebook, cell {i}: unconverted ### STUB line")
                 nb.cells.append(new_code_cell(code, metadata=meta))
+        # Recaps travel with the notebook and finish the lab as well as class.
+        if "beginner_course_map" in figures:
+            map_cell = new_markdown_cell("## This week's place in the course\n\n![Course map](fig:beginner_course_map)")
+            beginner.attach_figures(map_cell, figures)
+            nb.cells.insert(2, map_cell)
+        recap = wk["beginner"].get("recap")
+        if recap and "beginner_recap" in figures:
+            recap_cell = new_markdown_cell(f"## {recap['title']}\n\n![Class recap](fig:beginner_recap)\n\n"
+                + recap["example"] + "\n\n**Explain without looking:** " + recap["question"]
+                + ("\n\n**Instructor answer:** " + recap["answer"] if variant == "solution" else ""))
+            beginner.attach_figures(recap_cell, figures)
+            nb.cells.append(recap_cell)
+        # nbformat gives each cell a random id, so every rebuild changed every notebook's bytes. Numbered ids keep
+        # an unchanged lab byte-identical, which keeps git diffs and test_labs.py notebook hashes meaningful.
+        for k, cell in enumerate(nb.cells):
+            cell["id"] = f"cell-{k:03d}"
         nbformat.validate(nb)
         name = f"Week_{n:02d}_Lab.ipynb" if variant == "student" else f"Week_{n:02d}_Lab_Solutions.ipynb"
         path = outdir / name
@@ -398,6 +481,7 @@ def build_notebooks(n: int, wk: dict, outdir: Path) -> tuple[Path, Path]:
 def build(n: int) -> dict:
     wk = load_week(n)
     errs = validate(wk)
+    wk["slides"] = [slide_math(s) for s in wk["slides"]]
     bdir = BUILD / f"week_{n:02d}"
     bdir.mkdir(parents=True, exist_ok=True)
     outdir = DELIV / f"Week_{n:02d}_{wk['slug']}"

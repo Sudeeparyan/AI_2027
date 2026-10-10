@@ -14,8 +14,8 @@ This document explains the proposed revision of **Section 7.3, Indicative Module
 3. **How to use AI tools.** The module brief includes using AI tools well. This is now explicit in week 1 (the tool landscape and responsible use), week 7 (prompting with evaluation), weeks 11–12 (APIs, deployment, RAG and agents).
 4. **Evaluation and responsible AI in every week.** MIMLO 4 (critical evaluation, fairness, bias, hallucination) is practised throughout rather than in a single week: each Detail cell names the relevant evaluation methods, and risks such as deepfakes, prompt injection and data protection appear where they arise.
 5. **Model families, not versions.** Names such as GPT, Gemini, Claude, Llama, Qwen, Mistral and DeepSeek are used without version numbers, so the text stays valid as versions change every few months.
-6. **Practical tutorials on free infrastructure.** Every tutorial can be completed on Google Colab's free GPU with open models, in line with Section 7.5 (Python, Jupyter, Colab, PyTorch, Hugging Face Transformers and Diffusers, Git and Docker).
-7. **Current regulation.** Transparency duties in Article 50 of the EU AI Act (applicable from 2 August 2026) are reflected in weeks 1, 10 and 11.
+6. **Practical tutorials on free infrastructure.** Tutorials target Google Colab with open models and CPU alternatives, in line with Section 7.5 (Python, Jupyter, Colab, PyTorch, Hugging Face Transformers and Diffusers, Git and Docker). Free GPU availability and memory vary; the instructor guide gives preparation options. Local checks do not verify a live Colab session.
+7. **Current regulation.** Article 50 transparency duties are reflected in weeks 1, 10 and 11, with provider/deployer roles and exceptions. They apply from 2 August 2026; Article 111(4) gives providers of systems placed on the market before that date until 2 December 2026 to meet Article 50(2)'s marking duty.
 
 # Alignment with MIMLOs and assessment
 

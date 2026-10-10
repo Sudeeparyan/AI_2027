@@ -9,7 +9,7 @@ weeks:
   - week: 2
     added: "Probabilistic encoder and the reparameterisation trick; KL term and the evidence lower bound (ELBO); β-VAE and VQ-VAE; evaluation by reconstruction, sample quality and latent traversals; VAEs as the image autoencoder inside latent diffusion."
     tutorials: "Names a concrete dataset (MNIST / Fashion-MNIST) and adds a β (KL-weight) experiment."
-    why: "The ELBO and reparameterisation are the core ideas examiners expect. Today VAEs matter mostly as the compression stage of latent diffusion and as discrete tokenisers (VQ) for multimodal models, which links week 2 to weeks 4 and 9."
+    why: "The ELBO and reparameterisation explain how a VAE learns a distribution. Image compression in latent diffusion and discrete VQ tokenisers for multimodal models give concrete applications, linking week 2 to weeks 4 and 9."
     sources: [p_vae, p_vqvae]
   - week: 3
     added: "Minimax and non-saturating losses; named training failures (mode collapse, instability, vanishing gradients) and stabilisation (Wasserstein loss, spectral normalisation); Pix2Pix / CycleGAN; FID, Inception Score, precision/recall; GANs in super-resolution and adversarial distillation of fast diffusion models; deepfake misuse."
@@ -24,7 +24,7 @@ weeks:
   - week: 5
     added: "Tokenisation and embeddings; queries, keys and values; causal masking; sinusoidal and rotary positional encoding; residual connections and normalisation; encoder-only, decoder-only and encoder-decoder; masked vs. next-token objectives; perplexity; KV cache, efficient attention, mixture-of-experts and long context; vision and speech transformers."
     tutorials: "Original wording kept; adds implementing attention, training a small character-level transformer and visualising attention in a pre-trained model."
-    why: "These are the components every current LLM uses (rotary positions, KV cache, mixture-of-experts) and the vocabulary of model documentation. The added tutorial makes the original lab description concrete."
+    why: "These concepts help students read model documentation. Rotary positions, KV caches and mixture-of-experts are useful examples; implementations differ across models. The added tutorial makes the original lab description concrete."
     sources: [p_transformer, v_3b1b_attention, v_karpathy_gpt]
   - week: 6
     added: "Evolution of NLP from n-grams to LLMs; pre-training, scaling laws, context windows and decoding strategies; current families (GPT, LLaMA, Gemini, Claude, Mistral, Qwen, DeepSeek); proprietary vs. open-weight; small language models, mixture-of-experts and reasoning models; model cards, licences and benchmarks."
@@ -49,8 +49,8 @@ weeks:
   - week: 10
     added: "Vision-language and natively multimodal models; alignment pre-training, visual instruction tuning and parameter-efficient adaptation; generation across modalities (image editing, speech, music, video); multimodal hallucination; deepfakes, consent, watermarking and content provenance (C2PA)."
     tutorials: "Specifies captioning, visual question answering, speech and cross-modal reasoning over charts and documents."
-    why: "Multimodal assistants and realistic synthetic media are now mainstream, and the EU AI Act requires machine-readable marking of AI-generated content from August 2026. Evaluation and responsible use of generated media therefore belong in this week."
-    sources: [hf_vlm_blog, p_llava, c2pa, eu_ai_act_art50]
+    why: "Generated media needs evaluation and responsible use. Article 50(2) assigns marking duties to providers within scope, with exceptions; Article 111(4) gives older systems a transition to 2 December 2026. Students distinguish these duties from deployer disclosure."
+    sources: [hf_vlm_blog, p_llava, c2pa, eu_ai_act_art50, eu_ai_act_transition]
   - week: 11
     added: "Gemini API and LlamaIndex / LangGraph alongside the original frameworks; API platform details (authentication, tokens, pricing, rate limits, streaming); cloud vs. self-hosted vs. local deployment; quantisation, batching and caching; Gradio, FastAPI and Docker; logging, tracing, latency and cost monitoring, guardrails and versioning."
     tutorials: "Adds building and deploying a small application with a web interface, measuring latency and cost, and adding logging and guardrails."

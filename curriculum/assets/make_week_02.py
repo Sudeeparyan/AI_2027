@@ -113,7 +113,7 @@ with torch.no_grad():
     z_ae, _ = ae2.encode(xs)
     z_vae, _ = vae2.encode(xs)
 fig, ax = plt.subplots(1, 2, figsize=(12, 5.2))
-for a, z, t in ((ax[0], z_ae, "Plain autoencoder: codes are points,\nscattered with gaps"), (ax[1], z_vae, "VAE: codes pulled towards N(0, I),\none continuous space")):
+for a, z, t in ((ax[0], z_ae, "Plain autoencoder: codes are points,\nscattered with gaps"), (ax[1], z_vae, "VAE: codes regularised towards N(0, I),\ninspect coverage and decoding")):
     sc = a.scatter(z[:, 0], z[:, 1], c=ys, cmap="tab10", s=4)
     a.set_title(t, loc="left")
     a.set_xlabel("z₁")

@@ -1,9 +1,24 @@
 {
   "week": 4,
   "prerequisites": [
-    {"term": "Gaussian noise", "meaning": "Random numerical values drawn from a bell-shaped distribution.", "check": "Does standard Gaussian noise already contain a requested digit?"},
-    {"term": "Regression", "meaning": "Learning to predict numerical values rather than selecting a class label.", "check": "Is predicting a noise value of -0.5 regression or classification?"},
-    {"term": "Tensor shape", "meaning": "The number of entries along each dimension of an array.", "check": "Why should a pixel-noise predictor output the same shape as its noisy image input?"}
+    {
+      "term": "Gaussian noise",
+      "meaning": "Random numerical values drawn from a bell-shaped distribution.",
+      "check": "Does standard Gaussian noise already contain a requested digit?",
+      "answer": "No. Pure noise contains no digit; the trained network removes noise step by step."
+    },
+    {
+      "term": "Regression",
+      "meaning": "Learning to predict numerical values rather than selecting a class label.",
+      "check": "Is predicting a noise value of −0.5 regression or classification?",
+      "answer": "Regression: the target is a number, not a class."
+    },
+    {
+      "term": "Tensor shape",
+      "meaning": "The number of entries along each dimension of an array.",
+      "check": "Why should a pixel-noise predictor output the same shape as its noisy image input?",
+      "answer": "The prediction is compared with the true noise pixel by pixel, so the shapes must match."
+    }
   ],
   "diagrams": [
     {
@@ -11,25 +26,65 @@
       "title": "Train a network to predict noise",
       "subtitle": "The forward process is fixed; the denoiser is the part that learns.",
       "steps": [
-        {"title": "Draw a training example", "detail": "Choose clean data, a random timestep, and known Gaussian noise.", "code": "diffusion_loss"},
-        {"title": "Make noisy data", "detail": "Mix signal and noise using the timestep's fixed schedule.", "code": "q_sample"},
-        {"title": "Predict the noise", "detail": "Give noisy data and timestep to the shared denoiser.", "code": "EpsMLP / TinyUNet"},
-        {"title": "Compare noise values", "detail": "Use the known noise as the numerical training target.", "code": "diffusion_loss"},
-        {"title": "Update the denoiser", "detail": "Backpropagate mean squared error and step Adam.", "code": "opt"}
+        {
+          "title": "Draw training data",
+          "detail": "Clean image, step t, known noise.",
+          "code": "diffusion_loss",
+          "role": "data"
+        },
+        {
+          "title": "Make noisy data",
+          "detail": "Mix signal and noise.",
+          "code": "q_sample",
+          "role": "model"
+        },
+        {
+          "title": "Predict noise",
+          "detail": "Network receives noisy x and t.",
+          "code": "EpsMLP / TinyUNet",
+          "role": "model"
+        },
+        {
+          "title": "Compare noise",
+          "detail": "Known noise is the target.",
+          "code": "diffusion_loss",
+          "role": "loss"
+        },
+        {
+          "title": "Update weights",
+          "detail": "Backpropagate MSE; step Adam.",
+          "code": "opt",
+          "role": "model"
+        }
       ],
-      "arrows": ["x0, timestep t, noise epsilon", "noisy data xt + t", "predicted noise", "mean squared error"],
-      "feedback": "Repeat with fresh examples, timesteps, and noise using the updated denoiser weights.",
+      "arrows": [
+        "clean x, t and noise",
+        "noisy x and t",
+        "predicted noise",
+        "mean squared error"
+      ],
+      "feedback": "Repeat with fresh data, timesteps and known noise.",
       "feedback_to": 0,
       "trace": [
-        "Take a clean pixel value x0 = 0.8 and a timestep where abar = 0.36.",
-        "For noise epsilon = -0.5, q_sample gives 0.6 × 0.8 + 0.8 × (-0.5) = 0.08.",
-        "The denoiser sees the noisy input and timestep; it does not receive the true epsilon as input.",
-        "Compare its predicted noise with -0.5; the loss is aggregated across all entries.",
+        "Take a clean pixel value x₀ = 0.8 and a timestep where ᾱₜ = 0.36.",
+        "For noise ε = −0.5, q_sample gives √0.36 × 0.8 + √0.64 × (−0.5) = 0.6 × 0.8 + 0.8 × (−0.5) = 0.08.",
+        "The denoiser sees the noisy input and timestep; it does not receive the true noise ε as input.",
+        "Compare its predicted noise with −0.5; the loss is aggregated across all entries.",
         "Generation later starts from fresh noise and repeatedly calls the trained network through reverse_step."
       ],
-      "explanation": "A diffusion model learns from examples whose corruption is known. The forward process uses a fixed noise schedule to mix clean data with Gaussian noise. q_sample can produce the noisy example for a selected timestep directly, without running every earlier noising step. The timestep tells the network how much corruption to expect. In this lab, the network predicts the noise that was added, rather than directly predicting a class or the clean image. Because the training code drew that noise, it has an exact numerical target for mean squared error. The target follows a separate path to the loss; it is not given to the denoiser. Backpropagation updates the denoiser weights, while the schedule remains fixed. Training samples many noise levels in random order. Generation is a different loop: start from new Gaussian noise and use the learned predictions to move through decreasing noise levels.",
-      "check_question": "Which quantity is the target in diffusion_loss: the clean input x0 or the sampled noise eps?",
-      "check_answer": "The sampled noise eps is the target. The clean input helps construct the noisy training example."
+      "explanation": "A diffusion model learns from examples whose corruption is known. The forward process uses a fixed noise schedule to mix clean data with Gaussian noise. The q_sample function can produce the noisy example for a selected timestep directly, without running every earlier noising step. The timestep tells the network how much corruption to expect. In this lab, the network predicts the noise that was added, rather than directly predicting a class or the clean image. Because the training code drew that noise, it has an exact numerical target for mean squared error. The target follows a separate path to the loss; it is not given to the denoiser. Backpropagation updates the denoiser weights, while the schedule remains fixed. Training samples many noise levels in random order. Generation is a different loop: start from new Gaussian noise and use the learned predictions to move through decreasing noise levels.",
+      "check_question": "Which quantity is the target in diffusion_loss: the clean input x₀ or the sampled noise ε?",
+      "check_answer": "The sampled noise ε is the target. The clean input helps construct the noisy training example.",
+      "layout": "linear",
+      "feedback_from": 4,
+      "branches": [
+        {
+          "from": 0,
+          "to": 3,
+          "label": "known noise (the target)",
+          "lane": "bottom"
+        }
+      ]
     },
     {
       "id": "mechanism",
@@ -37,14 +92,37 @@
       "title": "Generate by repeating reverse steps",
       "subtitle": "One denoiser is reused at every timestep; the sampler decides each update.",
       "steps": [
-        {"title": "Start from noise", "detail": "Draw a new image-shaped Gaussian tensor.", "code": "sample_ddpm"},
-        {"title": "Provide the timestep", "detail": "Describe the current noise level to the network.", "code": "timestep_embedding"},
-        {"title": "Predict current noise", "detail": "Use the current image and timestep to estimate noise.", "code": "TinyUNet.forward"},
-        {"title": "Take a reverse step", "detail": "Use schedule coefficients, predicted noise, and optional fresh noise.", "code": "reverse_step"},
-        {"title": "Repeat or finish", "detail": "Decrease t; after the final update, display the image.", "code": "sample_ddpm / show_row"}
+        {
+          "title": "Start from noise",
+          "detail": "Random image-shaped x at the last step T.",
+          "code": "torch.randn",
+          "role": "data"
+        },
+        {
+          "title": "Predict noise",
+          "detail": "Network reads current x and timestep t.",
+          "code": "TinyUNet.forward",
+          "role": "model"
+        },
+        {
+          "title": "Take reverse step",
+          "detail": "Remove predicted noise; add fresh noise if t > 0.",
+          "code": "reverse_step",
+          "role": "model"
+        },
+        {
+          "title": "Repeat or finish",
+          "detail": "Next lower t; stop after t = 0.",
+          "code": "sample_ddpm",
+          "role": "output"
+        }
       ],
-      "arrows": ["current tensor x + timestep t", "current x + embedded t", "predicted noise + current x", "updated image tensor"],
-      "feedback": "Send the updated image and the next lower timestep back through the same trained denoiser.",
+      "arrows": [
+        "current x and t",
+        "predicted noise + current x",
+        "updated x"
+      ],
+      "feedback": "The updated x goes back in with the next lower t.",
       "feedback_to": 1,
       "trace": [
         "sample_ddpm starts with shape [n, 1, 28, 28] and begins at index 999 for the full schedule.",
@@ -55,21 +133,59 @@
       ],
       "explanation": "Generation uses the trained denoiser repeatedly, but it does not train the network again. At the start, the image tensor contains random Gaussian values. A timestep embedding turns the timestep number into features the denoiser can use. TinyUNet processes the image at several resolutions and combines saved features through skip connections, returning a noise prediction with the same shape as the image. The reverse-step formula uses that prediction and the fixed schedule to compute the next state. This lab's DDPM sampler also adds fresh noise except at the final step. Each new state goes back through the same denoiser at a lower timestep until an image is produced. DDIM uses a different update to jump between selected noise levels. Reducing sample_ddpm's steps simply starts at a lower index and truncates its chain; use sample_ddim to study proper timestep skipping across the full schedule.",
       "check_question": "Does taking 50 DDIM steps mean training 50 separate denoisers?",
-      "check_answer": "No. The same trained network is called at 50 selected timestep values; only the sampling procedure changes."
+      "check_answer": "No. The same trained network is called at 50 selected timestep values; only the sampling procedure changes.",
+      "layout": "linear",
+      "feedback_from": 3
     },
     {
       "id": "lab",
       "title": "Build diffusion, then inspect a pipeline",
       "subtitle": "Connect the small model's mechanics with a pretrained text-to-image system.",
       "steps": [
-        {"title": "Visualise noising", "detail": "Corrupt a real digit at chosen timesteps.", "code": "q_sample / abar"},
-        {"title": "Learn on points", "detail": "Train a small noise predictor and reverse a two-dimensional cloud.", "code": "EpsMLP / diffusion_loss"},
-        {"title": "Learn on digits", "detail": "Use image-shaped noise targets and a timestep-aware U-Net.", "code": "TinyUNet"},
-        {"title": "Compare samplers", "detail": "Generate with full DDPM and schedule-spanning DDIM updates.", "code": "sample_ddpm / sample_ddim"},
-        {"title": "Generate from text", "detail": "A pretrained pipeline encodes text, denoises latents, and decodes images.", "code": "pipe / generate"},
-        {"title": "Evaluate controlled runs", "detail": "Compare settings, timings, CLIP similarity, and visible failure cases.", "code": "grid / clip_score"}
+        {
+          "title": "Visualise noising",
+          "detail": "View chosen corruption levels.",
+          "code": "q_sample / abar",
+          "role": "output"
+        },
+        {
+          "title": "Learn on points",
+          "detail": "Train a 2-D noise predictor.",
+          "code": "EpsMLP",
+          "role": "model"
+        },
+        {
+          "title": "Learn on digits",
+          "detail": "Train image-shaped prediction.",
+          "code": "TinyUNet",
+          "role": "model"
+        },
+        {
+          "title": "Compare samplers",
+          "detail": "Full DDPM; 50-step DDIM.",
+          "code": "sample_ddim",
+          "role": "output"
+        },
+        {
+          "title": "Generate from text",
+          "detail": "Encode; update latent; decode.",
+          "code": "pipe / generate",
+          "role": "model"
+        },
+        {
+          "title": "Evaluate runs",
+          "detail": "Check time, fit and failures.",
+          "code": "grid / clip_score",
+          "role": "output"
+        }
       ],
-      "arrows": ["visible signal/noise relation", "trained 2-D mechanism", "trained image denoiser", "sampler comparison", "generated images + prompts + settings"],
+      "arrows": [
+        "signal/noise intuition",
+        "trained point predictor",
+        "trained image denoiser",
+        "sampler evidence",
+        "images + prompt + settings"
+      ],
       "trace": [
         "Inspect q_sample at t = 0 and t = 999; index 0 already adds a small amount of noise.",
         "On the 2-D swiss roll, compare reverse snapshots with the real point cloud.",
@@ -79,19 +195,184 @@
       ],
       "explanation": "The lab begins with a system small enough to inspect. Noising a digit exposes the meaning of the schedule. A two-dimensional point model then makes the reverse trajectory visible before you train an image network. Both networks use the same noise-prediction loss. Comparing DDPM and DDIM separates the denoiser from the sampler: fixed learned weights can support different generation procedures. The pretrained text-to-image pipeline adds components. A text encoder represents the prompt, a denoiser updates a compact image latent, a scheduler controls the updates, and a VAE decoder turns the result into pixels. The generate wrapper calls these components through pipe; it does not train them. Keep one setting change per comparison and record the active model path, because the CPU fallback uses SD-Turbo with guidance disabled. Finally, CLIP similarity measures prompt-image agreement in one embedding space; combine it with timing and careful visual inspection.",
       "check_question": "Why might changing guidance have no effect in the CPU fallback?",
-      "check_answer": "The generate wrapper forces guidance to 0.0 for the SD-Turbo fallback, so the requested guidance value is not used."
+      "check_answer": "The generate wrapper forces guidance to 0.0 for the SD-Turbo fallback, so the requested guidance value is not used.",
+      "layout": "linear"
+    },
+    {
+      "id": "training",
+      "title": "Create one noise-prediction training example",
+      "insert_before_title": "Training objective: predict the noise",
+      "subtitle": "Choose a noise level directly. The known added noise is the target.",
+      "steps": [
+        {
+          "title": "Choose clean data",
+          "detail": "Real point or image.",
+          "code": "diffusion_loss",
+          "role": "data"
+        },
+        {
+          "title": "Draw t and noise",
+          "detail": "Choose noise level and noise ε.",
+          "code": "diffusion_loss",
+          "role": "data"
+        },
+        {
+          "title": "Mix signal and noise",
+          "detail": "Make noisy x directly.",
+          "code": "q_sample",
+          "role": "model"
+        },
+        {
+          "title": "Predict added noise",
+          "detail": "The network receives noisy x and t.",
+          "code": "EpsMLP / TinyUNet",
+          "role": "model"
+        },
+        {
+          "title": "Compare and update",
+          "detail": "Known noise is the MSE target.",
+          "code": "diffusion_loss / opt",
+          "role": "loss"
+        }
+      ],
+      "arrows": [
+        "clean x",
+        "clean x, t and noise",
+        "noisy x and t",
+        "predicted noise"
+      ],
+      "explanation": "Diffusion training creates its own known targets. For each real example, draw a timestep and Gaussian noise. The q_sample function combines the clean data and noise using the schedule at that timestep. It can jump straight to the selected level. The network sees the noisy data and timestep, and predicts the noise that was added. Squared error compares the prediction with the known noise. Repeated examples at many timesteps train one shared denoiser. The network learns its weights; the chosen noising schedule remains fixed.",
+      "trace": [
+        "For one scalar illustration, let x₀ = 1, ε = −0.5 and ᾱₜ = 0.64.",
+        "Then xₜ = √0.64 × 1 + √0.36 × (−0.5) = 0.50.",
+        "The denoiser input is xₜ and t. Its target is ε = −0.5.",
+        "If it predicts −0.3, this scalar squared error is (−0.5 + 0.3)² = 0.04."
+      ],
+      "check_question": "Does training need to run every earlier noising step to create xₜ?",
+      "check_answer": "No. q_sample uses the closed form and the selected schedule coefficient.",
+      "feedback": "Repeat with fresh data, timesteps and noise.",
+      "feedback_to": 0,
+      "layout": "linear",
+      "feedback_from": 4,
+      "branches": [
+        {
+          "from": 1,
+          "to": 4,
+          "label": "known noise (the target)",
+          "lane": "bottom"
+        }
+      ]
+    },
+    {
+      "id": "inference",
+      "title": "From a text prompt to image pixels",
+      "insert_before_title": "Latent diffusion: the Stable Diffusion pipeline",
+      "subtitle": "Text conditions guide repeated latent updates. The VAE decoder produces the final image.",
+      "steps": [
+        {
+          "title": "Encode prompt",
+          "detail": "Text tokens become vectors.",
+          "code": "pipe",
+          "role": "model"
+        },
+        {
+          "title": "Draw starting noise",
+          "detail": "Create a seeded latent tensor.",
+          "code": "generate",
+          "role": "data"
+        },
+        {
+          "title": "Predict latent noise",
+          "detail": "Read latent, timestep and text.",
+          "code": "pipe",
+          "role": "model"
+        },
+        {
+          "title": "Update latent",
+          "detail": "Use compatible sampler rules.",
+          "code": "pipe.scheduler",
+          "role": "model"
+        },
+        {
+          "title": "Decode final state",
+          "detail": "VAE returns pixels once at end.",
+          "code": "pipe.vae",
+          "role": "model"
+        },
+        {
+          "title": "Inspect and record",
+          "detail": "Prompt fit, failures and time.",
+          "code": "grid / clip_score",
+          "role": "output"
+        }
+      ],
+      "arrows": [
+        null,
+        "seeded noisy latent",
+        "noise prediction",
+        "final latent",
+        "generated image"
+      ],
+      "explanation": "A text-to-image pipeline connects several trained components. The text encoder represents the prompt as vectors. Generation draws starting noise in the VAE's smaller latent space. At each step the denoiser reads the current latent, timestep and text information. A sampler updates the latent using its noise prediction. Guidance may combine prompted and unprompted predictions. After the final update, the VAE decoder turns the latent into pixels. The weights stay fixed during this request. Inspect prompt fit directly because a high similarity score can still miss object counts or positions.",
+      "trace": [
+        "Use a prompt such as \"two red cubes on a blue table\".",
+        "Hold prompt, seed, model and sampler fixed while changing the number of steps.",
+        "The final latent is decoded once after the repeated denoising updates.",
+        "Check the two cubes and their colours by viewing the image. Record time and CLIP score alongside that check."
+      ],
+      "check_question": "Does the VAE encoder need a real image for ordinary text-to-image generation?",
+      "check_answer": "No. Generation starts with a noisy latent and finishes with the VAE decoder. Editing an existing image may also use the encoder.",
+      "feedback": "Repeat prediction and update at the next selected timestep.",
+      "feedback_to": 2,
+      "layout": "linear",
+      "feedback_from": 3,
+      "branches": [
+        {
+          "from": 0,
+          "to": 2,
+          "label": "text vectors",
+          "lane": "bottom"
+        }
+      ]
     }
   ],
   "glossary": [
-    {"term": "Forward process", "meaning": "A fixed procedure that progressively corrupts clean data with noise."},
-    {"term": "Noise schedule", "meaning": "Numbers specifying how much signal and noise appear at each timestep."},
-    {"term": "Denoiser", "meaning": "The learned network; here it predicts added noise from noisy data and a timestep."},
-    {"term": "Mean squared error", "meaning": "The average squared difference between predicted and target numbers."},
-    {"term": "Sampler", "meaning": "The procedure that uses model predictions to turn starting noise into an output."},
-    {"term": "U-Net", "meaning": "An image network with shrinking and expanding spatial stages joined by skip connections."},
-    {"term": "Latent diffusion", "meaning": "Generating in a compact image representation before a decoder converts it to pixels."},
-    {"term": "Guidance", "meaning": "Combining conditional and reference predictions to influence prompt-following during sampling."},
-    {"term": "CLIP score", "meaning": "A similarity between image and text representations; it is not a complete quality measure."}
+    {
+      "term": "Forward process",
+      "meaning": "A fixed procedure that progressively corrupts clean data with noise."
+    },
+    {
+      "term": "Noise schedule",
+      "meaning": "Numbers specifying how much signal and noise appear at each timestep."
+    },
+    {
+      "term": "Denoiser",
+      "meaning": "The learned network; here it predicts added noise from noisy data and a timestep."
+    },
+    {
+      "term": "Mean squared error",
+      "meaning": "The average squared difference between predicted and target numbers."
+    },
+    {
+      "term": "Sampler",
+      "meaning": "The procedure that uses model predictions to turn starting noise into an output."
+    },
+    {
+      "term": "U-Net",
+      "meaning": "An image network with shrinking and expanding spatial stages joined by skip connections."
+    },
+    {
+      "term": "Latent diffusion",
+      "meaning": "Generating in a compact image representation before a decoder converts it to pixels."
+    },
+    {
+      "term": "Guidance",
+      "meaning": "Combining conditional and reference predictions to influence prompt-following during sampling."
+    },
+    {
+      "term": "CLIP score",
+      "meaning": "A similarity between image and text representations; it is not a complete quality measure."
+    }
   ],
   "pitfalls": [
     "The known noise target enters the training loss, not the denoiser's input.",
@@ -99,11 +380,75 @@
     "Fewer DDPM iterations by truncating steps differ from DDIM's valid jumps across selected schedule timesteps."
   ],
   "code_walkthrough": [
-    {"symbol": "q_sample", "role": "Constructs noisy training inputs at a selected timestep.", "inspect": "Check the schedule coefficient reshape for 2-D points versus image tensors."},
-    {"symbol": "diffusion_loss", "role": "Draws timesteps and noise, then compares predicted and known noise.", "inspect": "Track which tensors enter the model and which enter the loss as targets."},
-    {"symbol": "TinyUNet.forward", "role": "Predicts image-shaped noise using multiscale features and timestep information.", "inspect": "Follow 28×28 to 14×14 to 7×7 and the two saved-feature joins."},
-    {"symbol": "reverse_step", "role": "Moves a generated state to a lower-noise level.", "inspect": "Identify the model prediction and the final-step exception for added noise."},
-    {"symbol": "sample_ddim", "role": "Uses selected timesteps spanning the full schedule for faster sampling.", "inspect": "Follow seq, t_next, and the final clean-state coefficient."},
-    {"symbol": "generate", "role": "Calls a pretrained text-to-image pipeline with recorded controls.", "inspect": "Check the active pipeline, seed, number of steps, and fallback guidance handling."}
-  ]
+    {
+      "symbol": "q_sample",
+      "role": "Constructs noisy training inputs at a selected timestep.",
+      "inspect": "Check the schedule coefficient reshape for 2-D points versus image tensors."
+    },
+    {
+      "symbol": "diffusion_loss",
+      "role": "Draws timesteps and noise, then compares predicted and known noise.",
+      "inspect": "Track which tensors enter the model and which enter the loss as targets."
+    },
+    {
+      "symbol": "TinyUNet.forward",
+      "role": "Predicts image-shaped noise using multiscale features and timestep information.",
+      "inspect": "Follow 28×28 to 14×14 to 7×7 and the two saved-feature joins."
+    },
+    {
+      "symbol": "reverse_step",
+      "role": "Moves a generated state to a lower-noise level.",
+      "inspect": "Identify the model prediction and the final-step exception for added noise."
+    },
+    {
+      "symbol": "sample_ddim",
+      "role": "Uses selected timesteps spanning the full schedule for faster sampling.",
+      "inspect": "Follow `seq`, `t_next` and the final clean-state coefficient."
+    },
+    {
+      "symbol": "generate",
+      "role": "Calls a pretrained text-to-image pipeline with recorded controls.",
+      "inspect": "Check the active pipeline, seed, number of steps, and fallback guidance handling."
+    }
+  ],
+  "recap": {
+    "title": "Week 4: what we learned",
+    "cards": [
+      {
+        "title": "Fixed forward process",
+        "text": "Create noisy examples directly from clean data, a timestep and known noise.",
+        "role": "data"
+      },
+      {
+        "title": "Learned noise predictor",
+        "text": "Train one denoiser using squared error against the noise you added.",
+        "role": "model"
+      },
+      {
+        "title": "Repeated generation",
+        "text": "Start from fresh noise; reuse fixed weights at decreasing noise levels.",
+        "role": "model"
+      },
+      {
+        "title": "Latent image pipeline",
+        "text": "Text encoder, denoiser, sampler and VAE decoder have separate jobs.",
+        "role": "model"
+      },
+      {
+        "title": "Controls and speed",
+        "text": "Use compatible samplers; test guidance, seeds and distilled step counts.",
+        "role": "tool"
+      },
+      {
+        "title": "Evaluate and record",
+        "text": "Check prompt fit, realism, variety, time, rights and visible failures.",
+        "role": "output"
+      }
+    ],
+    "example": "Illustrative noising: x₀ = 1, ᾱₜ = 0.64, ε = −0.5 gives xₜ = 0.8 − 0.3 = 0.5.",
+    "question": "Does 50-step DDIM require 50 separately trained denoisers?",
+    "answer": "No. One denoiser is reused at 50 selected noise levels; the sampling rule changes.",
+    "next": "In Week 5 we see how attention lets transformers combine information from tokens.",
+    "notes": "Use the arithmetic strip to ask students to separate clean data, noisy input and known target noise. The denoiser sees the noisy value and timestep, not the target. Then ask for the generation path, where there is no known original image. Point to the separate pipeline jobs and ask when pixels appear: after the VAE decoder. Ask the exit question before revealing its answer. Revisit the difference between valid DDIM schedule jumps and truncating the DDPM loop. Close by asking what CLIP similarity can miss, such as object counts, and which settings must accompany an experiment for useful comparison."
+  }
 }

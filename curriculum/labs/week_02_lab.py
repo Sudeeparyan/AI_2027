@@ -51,9 +51,30 @@
 
 # %% [markdown]
 # ## Part 0 · Setup and data
+#
+# **Read:** a VAE learns a short code for an image, then rebuilds the image
+# from that code. A **batch** is a group of examples processed together; `B`
+# is its size. An **epoch** is one pass through the training dataset.
+# **Run:** complete the model and loss TODOs, then run the untrained check
+# before the training loop. That check catches wiring errors early.
+# **Change:** compare `zdim=2` with `zdim=16`, then compare the beta settings.
+# **Check:** record reconstruction and KL separately; a smaller total loss
+# with a different beta is not a fair comparison by itself.
+
+# %% [markdown]
+# **Purpose:** Install image and model libraries.
+# **Why now:** The notebook needs torchvision and PyTorch.
+# **Expected observation:** Package installation completes or reports an environment error.
+#
 
 # %% tags=["colab-install"]
 %pip install -q torch torchvision scikit-learn matplotlib
+
+# %% [markdown]
+# **Purpose:** Load and inspect MNIST.
+# **Why now:** Pixels and batch shape give the model’s input contract.
+# **Expected observation:** Images have one channel and 784 intensities.
+#
 
 # %%
 import os
@@ -100,6 +121,20 @@ plt.show()
 # two encoder outputs both have shape `[B, zdim]`. `logvar` is a log-variance,
 # not a standard deviation. `forward` returns `[B, 784]` pixel logits plus both
 # encoder outputs, allowing the two loss terms to take different input paths.
+#
+# Read the sampling formula as "centre + spread × fresh random noise".
+# `mu` is the centre, `std` is the spread, and `eps` supplies random variation.
+# `N(0, I)` means independent bell-shaped noise values with mean 0 and
+# variance 1. The symbol `⊙` means multiply matching entries, not a matrix product.
+# A **logit** is a raw pixel score; sigmoid turns it into a value from 0 to 1.
+
+# %% [markdown]
+# **Purpose:** Implement the VAE’s two paths.
+# **Why now:** Encoding an image differs from drawing a prior code.
+# **Expected observation:** mu/logvar have latent-size shape; decoder logits have 784 entries.
+#
+# ![Sample a latent code while training](fig:beginner_mechanism)
+#
 
 # %%
 class VAE(nn.Module):
@@ -143,9 +178,24 @@ class VAE(nn.Module):
 # * reconstruction: binary cross-entropy **summed over pixels** (use `F.binary_cross_entropy_with_logits`),
 # * KL: $\tfrac12\sum_j(\mu_j^2 + \sigma_j^2 - \log\sigma_j^2 - 1)$,
 # * total = reconstruction + β · KL, all divided by the batch size.
-# At β = 1 this is the negative ELBO. Other β values reweight its KL term.
+# At β = 1 this is the standard VAE objective. For binary targets it is the literal negative ELBO; greyscale targets use a soft-target BCE surrogate. Other β values reweight KL.
 # Summing over pixels answers "how costly is one whole image?"; averaging
 # over the batch lets batches of different sizes use a comparable scale.
+#
+# **In plain language:** the reconstruction term asks "did we rebuild the
+# input pixels?" The KL term asks "how far is this image's code distribution
+# from the standard random-code distribution?" Beta controls the weight of
+# that second question. **ELBO** is the training bound these terms come from.
+# The subscript `j` selects one latent coordinate; the sum adds its cost across
+# all coordinates. We optimise the negative bound, so lower is better.
+
+# %% [markdown]
+# **Purpose:** Implement and check both costs.
+# **Why now:** Training requires gradients from reconstruction and KL.
+# **Expected observation:** An untrained pixel cost near 784 × ln 2; finite KL.
+#
+# ![How the two VAE costs train the model](fig:beginner_training)
+#
 
 # %%
 def vae_loss(logits, x, mu, logvar, beta=1.0):
@@ -179,6 +229,12 @@ assert rec.item() > 400, "An untrained decoder should reconstruct badly (BCE aro
 # Each batch follows the full training diagram. `zero_grad` clears old
 # gradients, `backward` computes the current ones, and `step` changes weights.
 # Plotting or calling `decode` does not train the model.
+
+# %% [markdown]
+# **Purpose:** Train the two-dimensional model.
+# **Why now:** Optimiser steps learn both networks.
+# **Expected observation:** Recorded reconstruction and KL change over epochs.
+#
 
 # %%
 def train(model, epochs=EPOCHS, beta=1.0, verbose=True):
@@ -218,6 +274,12 @@ plt.show()
 #
 # ### 3.1 Where does each digit live?
 
+# %% [markdown]
+# **Purpose:** Plot test-image encoder means.
+# **Why now:** A two-dimensional code can be viewed as a map.
+# **Expected observation:** Digit labels colour the plot; they did not train this VAE.
+#
+
 # %%
 vae2.eval()
 with torch.no_grad():
@@ -232,6 +294,12 @@ plt.show()
 # %% [markdown]
 # ### 3.2 Decode a grid of latent points
 # We space the grid using the Gaussian's quantiles so that it covers the prior evenly.
+
+# %% [markdown]
+# **Purpose:** Decode a grid of prior codes.
+# **Why now:** Generation needs codes and the decoder.
+# **Expected observation:** A grid of images; inspect recognisable digits and failures.
+#
 
 # %%
 from scipy.stats import norm
@@ -251,9 +319,19 @@ plt.show()
 
 # %% [markdown]
 # ### 3.3 Interpolation (in a 16-dimensional latent space)
-# Two dimensions give blurry digits. Train a 16-D model, then **interpolate** between two test digits.
+# A two-number code is easy to plot but has limited capacity. Train a 16-D
+# model, then **interpolate** between two test digits. Extra code dimensions
+# may preserve more detail; judge this from your own reconstructions.
+# Here `t=0` gives the first code, `t=1` gives the second, and values between
+# them blend the codes before decoding. The decoder is the same at every step.
 #
 # **TODO 4:** complete `interpolate(z1, z2, steps)` to return `steps` codes on the straight line from `z1` to `z2`: $z_t = (1-t)\,z_1 + t\,z_2$.
+
+# %% [markdown]
+# **Purpose:** Train and interpolate a larger code.
+# **Why now:** Extra latent capacity can preserve more detail.
+# **Expected observation:** Decoded latent path versus direct pixel blending.
+#
 
 # %%
 vae16 = VAE(zdim=16).to(DEVICE)
@@ -293,6 +371,14 @@ plt.show()
 # Sample codes from the prior and decode them into displayed pixel probabilities.
 # This generation path bypasses the encoder; it does not reconstruct `x_test`.
 
+# %% [markdown]
+# **Purpose:** Generate without an input image.
+# **Why now:** Fresh prior codes bypass the encoder.
+# **Expected observation:** Displayed pixel probabilities from the decoder.
+#
+# ![Generate a digit without an input image](fig:beginner_inference)
+#
+
 # %%
 z = torch.randn(24, 16, device=DEVICE)
 plt.figure(figsize=(10, 1.4))
@@ -305,13 +391,22 @@ plt.show()
 # ✍️ **Question 2.** Compare latent interpolation with pixel blending. What does the difference tell you about the latent space?
 #
 # <!-- BEGIN ANSWER -->
-# Pixel blending produces a ghostly overlay of two digits: the middle images are not valid digits. Latent interpolation produces a sequence where every step looks like a plausible handwritten digit that gradually changes shape. This shows that the VAE has learned a continuous latent space that follows the structure of the data (the "digit manifold"): straight lines in latent space map to realistic paths in image space, while straight lines in pixel space leave the data manifold.
+# Pixel blending often overlays the strokes of both digits. Latent interpolation blends their codes, then lets the decoder build each image, so transitions may look more like changing handwriting. Compare the actual middle images; they may still be blurry or malformed. A smooth decoder allows smooth changes, but does not guarantee that every point between two codes is a valid digit. The result is evidence about this trained model's representation, not proof that every straight latent path follows realistic digits.
 # <!-- END ANSWER -->
 
 # %% [markdown]
 # ## Part 4 · The β trade-off
 #
 # Train three 16-D VAEs with β = 0.1, 1 and 4 (5 epochs each) and compare losses and samples.
+# **Check a fair comparison:** all three models decode `z_fixed`, the same
+# random codes. They have different random initial weights, so one run per
+# beta is illustrative; repeat with several seeds before making a firm claim.
+
+# %% [markdown]
+# **Purpose:** Compare beta using fixed codes.
+# **Why now:** Hold code inputs fixed across separately trained models.
+# **Expected observation:** Costs and sample grids; one run per beta is illustrative.
+#
 
 # %%
 results = {}
@@ -334,16 +429,24 @@ plt.show()
 # ✍️ **Question 3.** Describe the trade-off you observe. Which β would you choose for (a) generating realistic samples, (b) anomaly detection, (c) finding interpretable latent factors? Justify each.
 #
 # <!-- BEGIN ANSWER -->
-# As β increases the KL falls (codes stay closer to the prior) and the reconstruction error rises (less detail). With β = 0.1 reconstructions are sharp but the codes do not match the prior, so samples from N(0, I) are often malformed; with β = 4 samples are well-formed but blurry and generic.
-# (a) Samples: β ≈ 1 (the true ELBO) balances sharpness and a prior-matching latent space. (b) Anomaly detection relies on reconstruction quality for normal data and poor reconstruction for anomalies: a smaller β (e.g. 0.1–1) keeps detail so errors are informative, but validate on held-out anomalies. (c) Interpretable factors: β > 1 (β-VAE) encourages independent latent dimensions, accepting blur. The choice must be justified with metrics and pictures, not one number.
+# Higher beta puts more pressure on code distributions to match the prior, often lowering KL while losing reconstruction detail. Lower beta often preserves more detail but may make fresh prior samples less useful. Report the numbers and pictures you observed; a high beta does not guarantee well-formed samples. (a) For generation, beta = 1 is a useful starting point, then compare sample quality and diversity. (b) For anomaly detection, choose a setting using held-out normal and unusual examples, since reconstruction quality alone is insufficient. (c) For interpretable factors, beta > 1 can encourage simpler codes, but independence or meaning of each coordinate must be tested. There is no single best beta for every purpose.
 # <!-- END ANSWER -->
 
 # %% [markdown]
 # ## Part 5 · Application: anomaly detection with reconstruction error
 #
-# The VAE has only seen digits. Clothing images (Fashion-MNIST) should reconstruct badly.
+# The VAE has only seen digits. Test whether clothing images (Fashion-MNIST)
+# receive larger reconstruction errors; an unfamiliar image is not guaranteed
+# to receive a high score. **AUC** measures how well scores rank unusual
+# images above normal ones across thresholds: 0.5 is chance ranking, 1 is perfect.
 #
 # **TODO 5:** complete `recon_error` to return the **per-image** binary cross-entropy (sum over pixels, no averaging over images).
+
+# %% [markdown]
+# **Purpose:** Evaluate reconstruction as an anomaly score.
+# **Why now:** Use one score for each held-out image.
+# **Expected observation:** A ROC AUC and two histograms; clothing is an artificial anomaly.
+#
 
 # %%
 from sklearn.metrics import roc_auc_score
@@ -371,7 +474,7 @@ plt.figure(figsize=(8, 3.8))
 bins = np.linspace(0, np.percentile(np.r_[e_digits, e_fashion], 99), 60)
 plt.hist(e_digits, bins=bins, alpha=0.7, label="digits (normal)")
 plt.hist(e_fashion, bins=bins, alpha=0.7, label="clothing (anomaly)")
-plt.xlabel("reconstruction error"); plt.legend(); plt.title(f"ROC AUC = {auc:.3f}")
+plt.xlabel("reconstruction error"); plt.legend(); plt.title(f"ROC AUC = {auc:.4f}")  # four decimals: 0.9995 is not a perfect 1.000
 plt.show()
 
 # %% [markdown]
@@ -385,6 +488,12 @@ plt.show()
 # ## Part 6 · Extension: a conditional VAE (optional)
 #
 # Feed the one-hot digit label into both the encoder and the decoder. Then you can **ask** for a digit: sample z and decode it with the label you want.
+
+# %% [markdown]
+# **Purpose:** Optionally add the digit label.
+# **Why now:** Conditioning lets generation request a class.
+# **Expected observation:** Rows asking for different digit labels; success varies with training.
+#
 
 # %%
 class CVAE(VAE):

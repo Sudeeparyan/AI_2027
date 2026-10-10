@@ -10,6 +10,7 @@ Run: .venv/Scripts/python.exe tools/build_course.py
 """
 from __future__ import annotations
 
+import argparse
 import json
 import re
 import subprocess
@@ -28,12 +29,20 @@ CUR = ROOT / "curriculum"
 OUT = ROOT / "deliverables" / "00_Course"
 BUILD = ROOT / "build" / "course"
 
-LAB_INFO = {  # week: (hardware, approximate Colab T4 time)
-    1: ("CPU is enough", "≈ 10 min"), 2: ("GPU recommended; CPU works", "≈ 10 min"), 3: ("GPU recommended; CPU works", "≈ 15 min"),
-    4: ("GPU for Stable Diffusion; Part A on CPU", "≈ 25 min"), 5: ("GPU recommended; CPU works", "≈ 15 min"),
-    6: ("CPU works; GPU faster", "≈ 10 min"), 7: ("GPU recommended", "≈ 20 min"), 8: ("GPU needed for training", "≈ 15 min"),
-    9: ("GPU recommended; CPU works", "≈ 10 min"), 10: ("GPU recommended; CPU uses smaller models", "≈ 15 min"),
-    11: ("GPU recommended; CPU works", "≈ 20 min"), 12: ("GPU recommended; CPU uses a smaller model", "≈ 15 min"),
+# week: (hardware, measured full run). Each complete solution notebook was run with tools/test_labs.py --full on
+# 9 October 2026 with models and data already downloaded: laptop CPU (.venv-labs) or GTX 1650 (.venv-gpu).
+# The run records are in research/lab_runs_2026-10.json; update both together.
+LAB_INFO = {
+    1: ("CPU is enough", "≈ 1 min, laptop CPU"), 2: ("GPU recommended; CPU works", "≈ 9 min, laptop CPU"),
+    3: ("GPU recommended; CPU works", "≈ 19 min, laptop CPU"),
+    4: ("GPU for Stable Diffusion; Part A on CPU", "≈ 17 min, laptop CPU (SD-Turbo path)"),
+    5: ("GPU recommended; CPU works", "≈ 10 min, GTX 1650"), 6: ("CPU works; GPU faster", "≈ 8 min, laptop CPU"),
+    7: ("GPU recommended", "≈ 58 min, GTX 1650"),
+    8: ("GPU recommended; full CPU run is slow", "≈ 84 min, laptop CPU (training 53 min)"),
+    9: ("GPU recommended; CPU works", "≈ 1 min, GTX 1650"),
+    10: ("GPU recommended; CPU uses smaller models", "≈ 7 min, laptop CPU (Qwen3-VL-2B)"),
+    11: ("GPU recommended; CPU works", "≈ 3 min, GTX 1650"),
+    12: ("GPU recommended; CPU uses a smaller model", "≈ 5 min, GTX 1650"),
 }
 MODELS = [  # (model or dataset, weeks, licence as stated on the card, September 2026)
     ("SmolLM2 135M / 360M Instruct (Hugging Face)", "1, 11", "Apache-2.0"),
@@ -41,7 +50,7 @@ MODELS = [  # (model or dataset, weeks, licence as stated on the card, September
     ("Flan-T5 small / base (Google)", "6", "Apache-2.0"),
     ("Qwen2.5 0.5B / 1.5B Instruct, Qwen2.5 0.5B base, Qwen3 0.6B (Alibaba)", "6, 7, 8, 11, 12", "Apache-2.0"),
     ("Stable Diffusion 1.5", "4", "CreativeML OpenRAIL-M (use restrictions)"),
-    ("SD-Turbo (Stability AI)", "4, 10", "Research release; commercial use needs Stability AI's licence"),
+    ("SD-Turbo (Stability AI)", "4, 10", "Stability AI Community License; conditional commercial use, registration and revenue limits"),
     ("CLIP ViT-B/32 (OpenAI)", "4, 9, 10", "MIT (OpenAI CLIP repository)"),
     ("Whisper tiny / base (OpenAI)", "9, 10", "Apache-2.0 (model card)"),
     ("Qwen3-VL-2B Instruct; SmolVLM-256M Instruct", "10", "Apache-2.0"),
@@ -91,7 +100,7 @@ def instructor_guide(weeks: list[dict]) -> str:
                      [[w["week"], w["topic"].rstrip("."), w["lab_title"], ", ".join(map(str, w["mimlos"]))] for w in weeks])
     matrix = table(["MIMLO"] + [str(w["week"]) for w in weeks],
                    [[f"MIMLO {m}"] + ["✓" if m in w["mimlos"] else "" for w in weeks] for m in range(1, 6)])
-    labs = table(["Week", "Lab", "Hardware", "Time on a Colab T4"],
+    labs = table(["Week", "Lab", "Hardware", "Measured full run (models already downloaded)"],
                  [[w["week"], w["lab_title"], *LAB_INFO[w["week"]]] for w in weeks])
     models = table(["Model or dataset", "Weeks", "Licence (see the card)"], [list(m) for m in MODELS])
     for k, v in {"WEEK_MAP": week_map, "MIMLO_MATRIX": matrix, "LAB_TABLE": labs, "MODEL_TABLE": models}.items():
@@ -137,12 +146,27 @@ def render(name: str, meta: dict, md: str) -> Path:
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--guide-only", action="store_true", help="rebuild the instructor guide without rewriting the descriptor rationale")
+    args = parser.parse_args()
     weeks = weeks_spec()
     render("Instructor_Guide", {"kicker": "COURSE GUIDE", "title": "Instructor Guide",
+                                "compact_tables": True,
                                 "subtitle": "Generative AI: how to teach the 12-week module with this pack",
                                 "meta": "MSc in Artificial Intelligence  ·  12 weeks  ·  2-hour lecture + 2-hour lab per week"},
            instructor_guide(weeks))
+    glossary = json.loads((CUR / "glossary.json").read_text(encoding="utf-8"))
+    glossary_md = "# One vocabulary across the twelve weeks\n\nThese definitions also supply the starting vocabulary and quick glossaries in the weekly materials. Specific examples show how each term is used in that week's model.\n\n"
+    glossary_md += table(["Term", "Plain meaning", "Weeks"],
+                         [[p["term"], p["meaning"], ", ".join(map(str, p["weeks"]))] for p in glossary["terms"]])
+    render("Course_Glossary", {"kicker": "COURSE REFERENCE", "title": glossary["title"],
+                              "compact_tables": True,
+                              "subtitle": "Plain-language definitions used throughout Weeks 1–12",
+                              "meta": "MSc in Artificial Intelligence · October 2026"}, glossary_md)
+    if args.guide_only:
+        return 0
     render("Section_7.3_Rationale", {"kicker": "MODULE DESCRIPTOR", "title": "Section 7.3: proposed revision and rationale",
+                                     "compact_tables": True,
                                      "subtitle": "Generative AI: what changes in the weekly content, what stays the same, and why",
                                      "meta": "For the module leader and programme team  ·  September 2026"},
            rationale(weeks))

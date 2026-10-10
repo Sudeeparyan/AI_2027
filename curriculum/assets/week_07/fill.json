@@ -1,12 +1,13 @@
 {
   "MODEL": "Qwen2.5-1.5B-Instruct",
-  "FEWSHOT_SUMMARY": "Accuracy on 40 messages: zero-shot 70%, one-shot 60%, few-shot 72%, role + few-shot 68%.",
-  "FEWSHOT_NOTES": "**Measured (Qwen2.5-1.5B-Instruct, 40 messages, temperature 0):** accuracy zero-shot 70%, one-shot 60%, few-shot 72%, role + few-shot 68%; invalid labels zero-shot 0, one-shot 0, few-shot 0, role + few-shot 0.",
-  "COT_SUMMARY": "direct 50% (3 tokens); chain-of-thought 81% (189 tokens); self-consistency (k=5) 88% (914 tokens).",
-  "COT_NOTES": "**Measured (Qwen2.5-1.5B-Instruct):** direct 50% (3 tokens); chain-of-thought 81% (189 tokens); self-consistency (k=5) 88% (914 tokens). Report accuracy together with token cost.",
-  "EXTRACTION_NOTES": "50% of outputs were valid JSON after at most one retry, but only 33% had every field correct.",
-  "INJECTION_SUMMARY": "Measured attack success on 3 injected documents: naive prompt 100% (3 of 3), defended prompt 67% (2 of 3).",
-  "INJECTION_NOTES": "the hidden instruction succeeded in 3 of 3 injected documents with the naive prompt and 2 of 3 injected documents with the defended prompt.",
-  "JUDGE_NOTES": "In the lab, the small judge gave the same verdict in both orders for 75% of pairs and was correct in both orders for 75%.",
-  "RESULTS_TABLE": "| Prompt | n | Accuracy | Invalid | Avg output tokens |\n|---|---|---|---|---|\n| zero-shot | 40 | 70% | 0 | 5 |\n| one-shot | 40 | 60% | 0 | 5 |\n| few-shot | 40 | 72% | 0 | 5 |\n| role + few-shot | 40 | 68% | 0 | 5 |\n| direct | 16 | 50% | – | 3 |\n| chain-of-thought | 16 | 81% | – | 189 |\n| self-consistency (k=5) | 16 | 88% | – | 914 |\n\nStructured extraction: 50% valid JSON, 33% with all fields correct. Prompt injection success rate: naive prompt 100%, defended prompt 67%. LLM-as-judge: consistent across both orders 75%, correct in both orders 75%."
+  "FEWSHOT_SUMMARY": "Accuracy on 40 messages: zero-shot 70.0%, one-shot 60.0%, few-shot 72.5%, role + few-shot 67.5%.",
+  "FEWSHOT_NOTES": "**Measured (Qwen2.5-1.5B-Instruct, 40 messages, temperature 0):** accuracy zero-shot 70.0%, one-shot 60.0%, few-shot 72.5%, role + few-shot 67.5%; invalid labels zero-shot 0, one-shot 0, few-shot 0, role + few-shot 0.",
+  "FEWSHOT_INVALID": "Every reply in this run contained a recognised label, so the chart shows only accuracy and the differences come from wrong labels, not from format errors.",
+  "COT_SUMMARY": "Direct 50.0% (3 tokens); chain-of-thought 81.2% (189 tokens); self-consistency (k=5) 87.5% (914 tokens).",
+  "COT_NOTES": "**Measured (Qwen2.5-1.5B-Instruct):** direct 50.0% (3 tokens); chain-of-thought 81.2% (189 tokens); self-consistency (k=5) 87.5% (914 tokens). Report accuracy together with token cost.",
+  "EXTRACTION_NOTES": "50.0% of outputs were valid JSON after at most one retry, but only 33.3% had every field correct.",
+  "INJECTION_SUMMARY": "Measured keyword flags on 3 injected-document replies: naive prompt 100% (3 of 3), defended prompt 67% (2 of 3).",
+  "INJECTION_NOTES": "the keyword heuristic flagged 3 of 3 injected-document replies with the naive prompt and 2 of 3 injected-document replies with the defended prompt. Inspect the actual replies before claiming instruction-following.",
+  "JUDGE_NOTES": "In the lab, the small judge gave valid A/B verdicts selecting the same underlying answer in both orders for 75% of pairs and was correct in both orders for 75%.",
+  "RESULTS_TABLE": "| Prompt | n | Accuracy | Invalid | Avg output tokens |\n|---|---|---|---|---|\n| zero-shot | 40 | 70.0% | 0 | 5 |\n| one-shot | 40 | 60.0% | 0 | 5 |\n| few-shot | 40 | 72.5% | 0 | 5 |\n| role + few-shot | 40 | 67.5% | 0 | 5 |\n| direct | 16 | 50.0% | – | 3 |\n| chain-of-thought | 16 | 81.2% | – | 189 |\n| self-consistency (k=5) | 16 | 87.5% | – | 914 |\n\nStructured extraction: 50.0% valid JSON, 33.3% with all fields correct. Keyword-flag rate in injected replies: naive prompt 100%, defended prompt 67%. LLM-as-judge: consistent across both orders 75%, correct in both orders 75%."
 }

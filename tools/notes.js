@@ -43,16 +43,37 @@ function decode(s) {
     .replace(/&quot;/g, '"').replace(/&#39;/g, "'");
 }
 
-function inline(tokens, style = {}) {
+// Calibri's italic Greek letters use cursive forms (italic θ looks like ϑ), so inside italic runs such as
+// inline maths the Greek letters stay upright and match the upright θ, φ and μ used elsewhere.
+function plainRuns(rawText, rawStyle) {
+  const { math, ...style } = rawStyle;
+  // A number stays on the line of its unit ("14 GB", "7 B", "3 min"); code spans and blocks are not changed.
+  const text = rawText.replace(/(\d) (?=(?:GB|MB|KB|TB|ms|min|s|B|M|K|T)\b)/g, "$1 ");
+  if (math) {
+    // Inline maths (<var>): a single Latin letter is an italic variable; digits, operators, Greek letters and
+    // words such as log, KL or data stay upright, as in typeset maths.
+    return text.split(/((?<![A-Za-z])[A-Za-z][\u0300-\u036F]*(?![A-Za-z]))/).filter((part) => part).map((part) =>
+      new TextRun({ text: part, ...style, italics: /^[A-Za-z]/.test(part) && !/^[A-Za-z]{2}/.test(part) }));
+  }
+  if (!style.italics) return [new TextRun({ text, ...style })];
+  return text.split(/([\u0370-\u03FF\u1F00-\u1FFF]+)/).filter((part) => part).map((part) =>
+    new TextRun({ text: part, ...style, italics: !/^[\u0370-\u03FF\u1F00-\u1FFF]+$/.test(part) }));
+}
+
+function inline(tokens, base = {}) {
   const out = [];
+  // <sub>/<sup> from the inline-maths converter become real Word sub/superscript runs; <var> marks inline maths.
+  let sub = 0, sup = 0, math = 0;
   for (const t of tokens || []) {
+    const style = { ...base, ...(sub ? { subScript: true } : {}), ...(sup ? { superScript: true } : {}),
+      ...(math ? { math: true } : {}) };
     switch (t.type) {
       case "text":
         if (t.tokens && t.tokens.length) out.push(...inline(t.tokens, style));
-        else out.push(new TextRun({ text: decode(t.text), ...style }));
+        else out.push(...plainRuns(decode(t.text), style));
         break;
       case "escape":
-        out.push(new TextRun({ text: decode(t.text), ...style }));
+        out.push(...plainRuns(decode(t.text), style));
         break;
       case "strong":
         out.push(...inline(t.tokens, { ...style, bold: true }));
@@ -78,10 +99,18 @@ function inline(tokens, style = {}) {
       case "image":
         out.push(new TextRun({ text: `[${t.text}]`, ...style }));
         break;
-      case "html":
+      case "html": {
+        const tag = String(t.text).trim().toLowerCase();
+        if (tag === "<sub>") sub++;
+        else if (tag === "</sub>") sub = Math.max(0, sub - 1);
+        else if (tag === "<sup>") sup++;
+        else if (tag === "</sup>") sup = Math.max(0, sup - 1);
+        else if (tag === "<var>") math++;
+        else if (tag === "</var>") math = Math.max(0, math - 1);
         break;
+      }
       default:
-        if (t.text) out.push(new TextRun({ text: decode(t.text), ...style }));
+        if (t.text) out.push(...plainRuns(decode(t.text), style));
     }
   }
   return out;
@@ -97,7 +126,7 @@ function imageBlock(tok) {
     const k = Math.min(1, (MAX_IMG_PX - 20) / w);
     return [new Paragraph({
       alignment: AlignmentType.CENTER, spacing: { before: 120, after: 160 },
-      children: [new ImageRun({ type: "png", data: fs.readFileSync(a.path), transformation: { width: Math.round(w * k), height: Math.round(h * k) } })],
+      children: [new ImageRun({ type: "png", data: fs.readFileSync(a.path), altText: { name: "Equation", title: "Equation", description: tok.text || "Display equation" }, transformation: { width: Math.round(w * k), height: Math.round(h * k) } })],
     })];
   }
   if (href.startsWith("fig:")) {
@@ -108,7 +137,7 @@ function imageBlock(tok) {
     const k = Math.min(1, 520 / h);
     const out = [new Paragraph({
       alignment: AlignmentType.CENTER, spacing: { before: 160, after: 60 }, keepNext: true,
-      children: [new ImageRun({ type: "png", data: fs.readFileSync(a.path), transformation: { width: Math.round(w * k), height: Math.round(h * k) } })],
+      children: [new ImageRun({ type: "png", data: fs.readFileSync(a.path), altText: { name: tok.text || "Figure", title: tok.text || "Technical diagram", description: tok.text || "Technical diagram" }, transformation: { width: Math.round(w * k), height: Math.round(h * k) } })],
     })];
     if (tok.text) out.push(new Paragraph({
       alignment: AlignmentType.CENTER, spacing: { after: 200 },
@@ -123,7 +152,10 @@ function paragraphBlock(tok) {
   const toks = tok.tokens || [];
   const meaningful = toks.filter((t) => !(t.type === "text" && !t.text.trim()));
   if (meaningful.length === 1 && meaningful[0].type === "image") return imageBlock(meaningful[0]);
-  return [new Paragraph({ spacing: { after: 140, line: 288 }, children: inline(toks) })];
+  const label = meaningful.length === 1 && meaningful[0].type === "strong";
+  // The exit question stays on the page of its answer (Weeks 2 and 10 had ended with a lone "Answer." line).
+  const exitQuestion = meaningful[0] && meaningful[0].type === "strong" && /^Exit question\.?$/.test(meaningful[0].text);
+  return [new Paragraph({ spacing: { after: 140, line: 288 }, keepLines: true, keepNext: !!tok._keepNext || label || exitQuestion, children: inline(toks) })];
 }
 
 function listBlock(tok, level = 0, inst = null) {
@@ -138,6 +170,7 @@ function listBlock(tok, level = 0, inst = null) {
       } else if (child.type === "text" || child.type === "paragraph") {
         const runs = inline(child.tokens || [{ type: "text", text: child.text }]);
         out.push(new Paragraph({
+          keepLines: true,
           numbering: first ? { reference: ordered ? "numbers" : "bullets", level, instance: inst } : undefined,
           indent: first ? undefined : { left: 720 * (level + 1) },
           spacing: { after: 80, line: 276 },
@@ -157,7 +190,7 @@ function cell(children, opts = {}) {
     children,
     width: { size: opts.width, type: WidthType.DXA },
     shading: opts.fill ? { fill: opts.fill, type: ShadingType.CLEAR, color: "auto" } : undefined,
-    margins: { top: 80, bottom: 80, left: 120, right: 120 },
+    margins: { top: spec?.compact_tables ? 40 : 80, bottom: spec?.compact_tables ? 40 : 80, left: 120, right: 120 },
     verticalAlign: opts.valign || VerticalAlign.TOP,
     borders: opts.borders,
   });
@@ -173,7 +206,7 @@ function boxTable(children, fill) {
     width: { size: CONTENT_W, type: WidthType.DXA },
     columnWidths: [CONTENT_W],
     layout: TableLayoutType.FIXED,
-    rows: [new TableRow({ children: [cell(children, { width: CONTENT_W, fill, borders: noBorders })] })],
+    rows: [new TableRow({ cantSplit: true, children: [cell(children, { width: CONTENT_W, fill, borders: noBorders })] })],
   });
 }
 
@@ -198,10 +231,12 @@ function tableBlock(tok) {
   const border = { style: BorderStyle.SINGLE, size: 4, color: C.border };
   const borders = { top: border, bottom: border, left: border, right: border };
   const header = new TableRow({
+    cantSplit: true,
     tableHeader: true,
     children: tok.header.map((h, j) => cell([new Paragraph({ children: inline(h.tokens, { bold: true, color: "FFFFFF", size: 20 }) })], { width: widths[j], fill: C.ink, borders })),
   });
   const rows = tok.rows.map((r, i) => new TableRow({
+    cantSplit: true,
     children: r.map((c, j) => cell([new Paragraph({ children: inline(c.tokens, { size: 20, bold: j === 0 ? true : undefined }) })], { width: widths[j], fill: i % 2 ? "FFFFFF" : C.tint, borders })),
   }));
   return [
@@ -273,7 +308,7 @@ function courseCover() {
   const k = (t) => new TextRun({ text: t, bold: true, color: C.accent, size: 24, characterSpacing: 40 });
   return [
     new Paragraph({ spacing: { before: 600, after: 120 }, children: [k(spec.kicker)] }),
-    new Paragraph({ spacing: { after: 160 }, children: [new TextRun({ text: spec.title, bold: true, size: 56, color: C.ink })] }),
+    new Paragraph({ style: "Title", spacing: { after: 160 }, children: [new TextRun({ text: spec.title, bold: true, size: 56, color: "000000" })] }),
     new Paragraph({ spacing: { after: 360 }, children: [new TextRun({ text: spec.subtitle || "", size: 28, color: C.muted })] }),
     new Paragraph({ spacing: { after: 120 }, children: [new TextRun({ text: spec.meta || "", size: 22, color: C.text })] }),
   ];
@@ -284,7 +319,7 @@ function cover() {
   const k = (t) => new TextRun({ text: t, bold: true, color: C.accent, size: 24, characterSpacing: 40 });
   const out = [
     new Paragraph({ spacing: { before: 600, after: 120 }, children: [k(`WEEK ${String(spec.week).padStart(2, "0")}  ·  TEACHING NOTES`)] }),
-    new Paragraph({ spacing: { after: 160 }, children: [new TextRun({ text: spec.topic, bold: true, size: 56, color: C.ink })] }),
+    new Paragraph({ style: "Title", spacing: { after: 160 }, children: [new TextRun({ text: spec.topic, bold: true, size: 56, color: "000000" })] }),
     new Paragraph({ spacing: { after: 360 }, children: [new TextRun({ text: spec.subtitle || "", size: 28, color: C.muted })] }),
     new Paragraph({ spacing: { after: 120 }, children: [new TextRun({ text: "Generative AI  ·  MSc in Artificial Intelligence  ·  2-hour lecture + 2-hour lab", size: 22, color: C.text })] }),
   ];
@@ -328,10 +363,19 @@ function cover() {
 async function main() {
   const [specPath, outPath] = process.argv.slice(2);
   spec = JSON.parse(fs.readFileSync(specPath, "utf8"));
-  const tokens = marked.lexer(spec.notes_md);
+  // A non-breaking space keeps each practice-question label "(a)"–"(d)" on the same line as its option;
+  // Word otherwise ended lines with a bare "(c)".
+  const tokens = marked.lexer(spec.notes_md.replace(/(\*\*\([a-d]\)\*\*) /g, "$1 "));
   pendingBreak = true; // first H1 starts after the cover page
   const body = [];
-  for (const t of tokens) body.push(...block(t));
+  for (let i = 0; i < tokens.length; i++) {
+    const t = tokens[i];
+    const next = tokens.slice(i + 1).find(candidate => candidate.type !== "space");
+    const isFigure = next && next.type === "paragraph" && (next.tokens || []).some(token => token.type === "image");
+    // Keep a short diagram lead-in with its picture. The heading already
+    // keeps with this paragraph, so the whole introduction travels together.
+    body.push(...block(t.type === "paragraph" && isFigure && t.text.length <= 220 ? { ...t, _keepNext: true } : t));
+  }
 
   const doc = new Document({
     creator: "Generative AI module team",
@@ -340,12 +384,14 @@ async function main() {
     styles: {
       default: { document: { run: { font: "Calibri", size: 22, color: C.text } } },
       paragraphStyles: [
+        { id: "Title", name: "Title", basedOn: "Normal", next: "Normal", quickFormat: true,
+          run: { size: 56, bold: true, color: "000000", font: "Calibri" }, paragraph: { spacing: { after: 160 } } },
         { id: "Heading1", name: "Heading 1", basedOn: "Normal", next: "Normal", quickFormat: true,
-          run: { size: 36, bold: true, color: C.ink, font: "Calibri" }, paragraph: { spacing: { before: 360, after: 160 }, outlineLevel: 0 } },
+          run: { size: 36, bold: true, color: "000000", font: "Calibri" }, paragraph: { spacing: { before: 360, after: 160 }, outlineLevel: 0 } },
         { id: "Heading2", name: "Heading 2", basedOn: "Normal", next: "Normal", quickFormat: true,
-          run: { size: 28, bold: true, color: C.primary, font: "Calibri" }, paragraph: { spacing: { before: 280, after: 120 }, outlineLevel: 1 } },
+          run: { size: 28, bold: true, color: "000000", font: "Calibri" }, paragraph: { spacing: { before: 280, after: 120 }, outlineLevel: 1 } },
         { id: "Heading3", name: "Heading 3", basedOn: "Normal", next: "Normal", quickFormat: true,
-          run: { size: 24, bold: true, color: C.ink, font: "Calibri" }, paragraph: { spacing: { before: 200, after: 100 }, outlineLevel: 2 } },
+          run: { size: 24, bold: true, color: "000000", font: "Calibri" }, paragraph: { spacing: { before: 200, after: 100 }, outlineLevel: 2 } },
       ],
     },
     numbering: {

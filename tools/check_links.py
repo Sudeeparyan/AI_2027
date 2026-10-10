@@ -39,9 +39,10 @@ def check(src: dict) -> dict:
         r = requests.get(url, headers=UA, timeout=25, allow_redirects=True)
         out["status"] = r.status_code
         out["final_url"] = r.url
-        # Some publishers block bots (403) although the page exists for people; flag, don't fail.
-        out["ok"] = r.status_code < 400 or r.status_code in (403, 429)
+        # A blocked request is unverified, not evidence of a reachable page.
+        out["ok"] = r.status_code < 400
         if r.status_code in (403, 429):
+            out["blocked"] = True
             out["note"] = "blocked automated check; open manually"
     except Exception as e:  # noqa: BLE001
         out["error"] = str(e)[:200]
@@ -52,13 +53,31 @@ URL_RE = re.compile(r"https?://[^\s\"'<>)\]|`]+")
 SKIP = ("localhost", "127.0.0.1", "generativelanguage.googleapis.com", "<server>", "<resource>", "example.net", "example.com", "northbridge.example")
 
 
+def source_text(path: Path) -> str:
+    """Read authored text after YAML has resolved quoted line continuations."""
+    if path.suffix not in (".yaml", ".yml"):
+        return path.read_text(encoding="utf-8")
+
+    def strings(value):
+        if isinstance(value, str):
+            yield value
+        elif isinstance(value, dict):
+            for child in value.values():
+                yield from strings(child)
+        elif isinstance(value, list):
+            for child in value:
+                yield from strings(child)
+
+    return "\n".join(strings(yaml.safe_load(path.read_text(encoding="utf-8"))))
+
+
 def content_urls(known: set[str]) -> list[dict]:
     """Every URL used in slides, notes, labs and course documents that is not already in the ledger."""
     files = [*(ROOT / "curriculum").glob("weeks/*.yaml"), *(ROOT / "curriculum").glob("notes/*.md"),
              *(ROOT / "curriculum").glob("labs/*.py"), *(ROOT / "curriculum").glob("course/*")]
     found: dict[str, str] = {}
     for f in sorted(files):
-        for u in URL_RE.findall(f.read_text(encoding="utf-8")):
+        for u in URL_RE.findall(source_text(f)):
             u = u.rstrip(".,;:*")
             if u not in known and not any(s in u for s in SKIP) and not u.endswith("/v1"):
                 found.setdefault(u, f.name)
@@ -74,7 +93,8 @@ def main() -> int:
     out = ROOT / "build" / "link_check.json"
     out.parent.mkdir(exist_ok=True)
     out.write_text(json.dumps(report, indent=2, ensure_ascii=False), encoding="utf-8")
-    bad = [r for r in results if not r["ok"]]
+    bad = [r for r in results if not r["ok"] and not r.get("blocked")]
+    blocked = [r for r in results if r.get("blocked")]
     for r in results:
         if r.get("title"):
             print(f"video  {r['id']}: {r['title']} ({r.get('author')})")
@@ -82,7 +102,7 @@ def main() -> int:
             print(f"check  {r['id']}: {r['status']} {r['note']}")
     for r in bad:
         print(f"FAIL   {r['id']}: {r.get('status')} {r.get('error', '')} {r['url']}")
-    print(f"{len(results) - len(bad)}/{len(results)} links OK")
+    print(f"{sum(r['ok'] for r in results)}/{len(results)} URLs reachable; {len(blocked)} blocked automated checks; {len(bad)} failures")
     return 1 if bad else 0
 
 

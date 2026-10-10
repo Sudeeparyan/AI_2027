@@ -6,7 +6,7 @@
       "n": 40,
       "accuracy": 0.7,
       "avg_tokens": 4.6,
-      "seconds": 75.3,
+      "seconds": 59.7,
       "invalid": 0
     },
     {
@@ -14,7 +14,7 @@
       "n": 40,
       "accuracy": 0.6,
       "avg_tokens": 4.9,
-      "seconds": 77.6,
+      "seconds": 71.7,
       "invalid": 0
     },
     {
@@ -22,7 +22,7 @@
       "n": 40,
       "accuracy": 0.725,
       "avg_tokens": 4.8,
-      "seconds": 102.1,
+      "seconds": 100.6,
       "invalid": 0
     },
     {
@@ -30,7 +30,7 @@
       "n": 40,
       "accuracy": 0.675,
       "avg_tokens": 5.0,
-      "seconds": 117.8,
+      "seconds": 117.7,
       "invalid": 0
     }
   ],
@@ -40,14 +40,14 @@
       "n": 16,
       "accuracy": 0.5,
       "avg_tokens": 3.4,
-      "seconds": 18.1
+      "seconds": 18.6
     },
     {
       "prompt": "chain-of-thought",
       "n": 16,
       "accuracy": 0.812,
       "avg_tokens": 189.4,
-      "seconds": 653.5
+      "seconds": 535.3
     },
     {
       "prompt": "self-consistency (k=5)",
@@ -67,6 +67,37 @@
   },
   "judge": {
     "consistent_rate": 0.75,
-    "correct_both_rate": 0.75
+    "correct_both_rate": 0.75,
+    "verdicts": [
+      {
+        "question": "What is a token?",
+        "good_in_A": "A",
+        "good_in_B": "B",
+        "correct_both": true,
+        "consistent": true
+      },
+      {
+        "question": "Why divide attention scores by sqrt(d_k)?",
+        "good_in_A": "A",
+        "good_in_B": "B",
+        "correct_both": true,
+        "consistent": true
+      },
+      {
+        "question": "What does temperature do?",
+        "good_in_A": "B",
+        "good_in_B": "B",
+        "correct_both": false,
+        "consistent": false
+      },
+      {
+        "question": "What is RAG?",
+        "good_in_A": "A",
+        "good_in_B": "B",
+        "correct_both": true,
+        "consistent": true
+      }
+    ],
+    "consistency_requires_valid_verdicts": true
   }
 }

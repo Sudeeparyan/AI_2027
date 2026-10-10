@@ -4,17 +4,17 @@
 
 # %% [markdown]
 # # Week 3 Lab: Train, diagnose and evaluate a GAN
-# 
+#
 # **Module:** Generative AI (MSc in Artificial Intelligence) · **Time:** 2 hours · **Learning outcomes:** MIMLO 1, 3, 4
-# 
+#
 # You will implement a **DCGAN** in PyTorch, train it on MNIST, and then act like a researcher:
-# 
+#
 # 1. implement the **discriminator** and **non-saturating generator** losses;
 # 2. watch samples evolve across epochs and read the training diagnostics;
 # 3. explore the latent space with linear and **spherical** interpolation;
 # 4. **evaluate** the generator: mode coverage with a digit classifier and a Fréchet distance you implement;
-# 5. see **mode collapse** on a 2-D toy problem and fix it with **WGAN-GP**.
-# 
+# 5. inspect **mode collapse** on a 2-D toy problem and compare a **WGAN-GP** configuration.
+#
 # | Part | Topic | Suggested time |
 # |---|---|---|
 # | 0–1 | Setup, data, models | 15 min |
@@ -26,28 +26,34 @@
 
 # %% [markdown]
 # > **INSTRUCTOR VERSION — contains solutions. Do not distribute before the lab.**
-# 
+#
 # > **How to run this notebook**
-# > - **Google Colab (recommended):** File ▸ Upload notebook, then Runtime ▸ Change runtime type ▸ **T4 GPU**. Run cells top to bottom with Shift+Enter.
-# > - **Local Jupyter / VS Code:** Python 3.10+; run the install cell once. A GPU is optional: every cell has a CPU-friendly setting.
+# > - **Google Colab (recommended):** File ▸ Upload notebook, then Runtime ▸ Change runtime type ▸ **GPU** if available. A T4 is sufficient for the GPU examples. Free GPU access varies. Run cells top to bottom with Shift+Enter.
+# > - **Local Jupyter / VS Code:** Python 3.10+; run the install cell once. Read this week's runtime note. Model downloads and training can take longer on CPU, and some full experiments need a GPU.
 # > - **API keys (optional cells only):** store keys in Colab ▸ 🔑 Secrets or an environment variable. Never paste a key into a notebook you share.
-# > - Cells marked **TODO** are yours to complete. Questions marked ✍️ need a short written answer.
+# > - Cells marked **TODO** are yours to complete before running dependent cells. Questions marked ✍️ need a short written answer.
+# > - Read each diagram by following its numbered blocks. The solid arrows carry data to the next block. A dashed arrow shows a step that repeats.
+
+# %% [markdown]
+# ## This week's place in the course
+#
+# ![Course map](Diagrams/beginner_course_map.png)
 
 # %% [markdown]
 # ## Before coding: two networks, two training roles
-# 
+#
 # A **generator** turns random codes into images. A **discriminator** learns to
 # distinguish those images from real data. They improve through alternating
 # updates; an individual code has no corresponding target training digit.
-# 
+#
 # ![A GAN learns from a discriminator](Diagrams/beginner_overview.png)
-# 
+#
 # Follow the noise path into `G` and the real-image path directly into `D`.
 # `d_loss_fn` trains `D` to distinguish sources. `g_loss_fn` sends feedback
 # through `D` to `G`. After training, generation uses `G` alone.
-# 
+#
 # ![Train, inspect, and evaluate a GAN](Diagrams/beginner_lab.png)
-# 
+#
 # | Diagram block | Code to find | First observation |
 # |---|---|---|
 # | Prepare and build | `Generator`, `Discriminator` | Noise has 64 values; each image is 28 by 28 pixels. |
@@ -56,14 +62,24 @@
 # | Check class coverage | `DigitCNN`, `counts` | Classifier errors affect the estimated histogram. |
 # | Compare features | `feats`, `frechet_distance` | This score uses the lab's classifier features. |
 # | Test collapse | `train_toy`, `modes_covered` | Count coverage as well as inspecting the scatter plots. |
-# 
+#
 # **Pause and predict:** should the generator receive gradients when the
 # discriminator learns to reject its fakes? Trace each update separately.
+
+# %% [markdown]
+# **Purpose:** Install GAN and matrix libraries.
+# **Why now:** The lab uses PyTorch and SciPy.
+# **Expected observation:** Installation or an explicit environment error.
 
 # %%
 import subprocess as _install_process
 import sys as _install_sys
 _install_process.check_call([_install_sys.executable, '-m', 'pip'] + ['install', '-q', 'torch', 'torchvision', 'scipy', 'matplotlib'])
+
+# %% [markdown]
+# **Purpose:** Set device and random state.
+# **Why now:** All later tensors and sampling share this setup.
+# **Expected observation:** Printed CPU/CUDA and training epoch count.
 
 # %%
 import copy
@@ -88,6 +104,19 @@ print("device:", DEVICE, "| epochs:", EPOCHS)
 # %% [markdown]
 # ## Part 1 · Data and models
 # GAN generators usually end with `tanh`, so we scale pixels to **[−1, 1]**.
+#
+# **Read:** the generator creates images and the discriminator scores them.
+# A **parameter** is a stored number changed during training; a **gradient**
+# tells the optimiser how changing it affects the current loss.
+# **Run:** implement the two losses before starting the training loop.
+# **Change:** inspect snapshots made from the same `z_fixed` after each epoch.
+# **Check:** compare sample quality and class coverage together. Lower GAN
+# loss alone does not mean better pictures.
+
+# %% [markdown]
+# **Purpose:** Inspect the real training images.
+# **Why now:** G’s tanh output uses the same pixel range.
+# **Expected observation:** Normalised digits lie in [−1, 1].
 
 # %%
 tf = transforms.Compose([transforms.ToTensor(), transforms.Normalize([0.5], [0.5])])
@@ -112,10 +141,15 @@ show(next(iter(train_dl))[0], title="Real MNIST digits")
 
 # %% [markdown]
 # The DCGAN generator upsamples a noise vector with **transposed convolutions**; the discriminator is a small CNN that outputs one **logit** (real vs. fake).
-# 
+#
 # **Read the shapes:** G maps `[B, 64]` codes to `[B, 1, 28, 28]` images.
 # D maps those images to `[B]` scores. A logit is a score, not a probability;
 # the diagnostics apply sigmoid when showing D(real) and D(fake).
+
+# %% [markdown]
+# **Purpose:** Build G and D.
+# **Why now:** Their inputs and outputs define the two roles.
+# **Expected observation:** Parameter counts and matching image/logit batch shapes.
 
 # %%
 class Generator(nn.Module):
@@ -157,16 +191,29 @@ print(f"G: {sum(p.numel() for p in G.parameters()):,} parameters | D: {sum(p.num
 
 # %% [markdown]
 # ## Part 2 · Losses and training
-# 
+#
 # `bce = nn.BCEWithLogitsLoss()` expects logits and targets (1 = real, 0 = fake).
-# 
+#
 # **TODO 1 (discriminator loss):** real images should be classified as 1 and generated images as 0. Remember to **detach** the fakes so this step does not update G.
-# 
+#
 # **TODO 2 (generator loss, non-saturating):** the generator wants D to call its fakes **real**.
-# 
+#
 # `detach` keeps image values while disconnecting their gradient path to G
 # for the discriminator update. The generator update needs the original
 # connected fakes so its own weights can receive feedback through D.
+#
+# **Trace one batch:** first score real and detached fake images, then update
+# D. Next score the connected fakes with the updated D, then update G.
+# The generator uses target 1 because it wants its images to pass as real.
+# `zero_grad` clears old gradients, `backward` computes new ones, and `step`
+# changes only the parameters owned by that optimiser.
+
+# %% [markdown]
+# **Purpose:** Implement the two losses.
+# **Why now:** The same fake has different targets in each update.
+# **Expected observation:** D loss separates sources; G loss keeps its gradient connection.
+#
+# ![One alternating GAN update](Diagrams/beginner_mechanism.png)
 
 # %%
 bce = nn.BCEWithLogitsLoss()
@@ -181,6 +228,13 @@ def d_loss_fn(D, x_real, x_fake):
 def g_loss_fn(D, x_fake):
     ones = torch.ones(x_fake.size(0), device=DEVICE)
     return bce(D(x_fake), ones)
+
+# %% [markdown]
+# **Purpose:** Alternate network updates.
+# **Why now:** Fixed codes separate training progress from new noise.
+# **Expected observation:** Epoch snapshots and recorded losses; assess actual images.
+#
+# ![Where the GAN training feedback comes from](Diagrams/beginner_training.png)
 
 # %%
 opt_G = torch.optim.Adam(G.parameters(), lr=2e-4, betas=(0.5, 0.999))
@@ -218,6 +272,11 @@ for epoch in range(1, EPOCHS + 1):
 for e, imgs in snapshots.items():
     show(imgs, title=f"after epoch {e}")
 
+# %% [markdown]
+# **Purpose:** Read diagnostic curves.
+# **Why now:** The opponent changes each objective.
+# **Expected observation:** Fluctuating losses and source scores; no single curve proves quality.
+
 # %%
 fig, ax = plt.subplots(1, 2, figsize=(12, 3.5))
 ax[0].plot(log["loss_D"], label="D loss"); ax[0].plot(log["loss_G"], label="G loss"); ax[0].legend(); ax[0].set_title("losses")
@@ -227,18 +286,31 @@ plt.show()
 
 # %% [markdown]
 # ✍️ **Question 1.** Describe your loss and D-output curves. Why do GAN losses not decrease steadily like a classifier's? What pattern would indicate that the discriminator has "won"?
-# 
+#
 # **✅ Model answer:**
-# The losses fluctuate around roughly constant levels instead of falling, because each network's objective depends on the other: whenever G improves, D's task becomes harder and its loss rises, and vice versa. D(real) typically stays around 0.6–0.8 and D(fake) around 0.2–0.4, meaning D keeps a moderate edge. If the discriminator "won", D(real) → 1 and D(fake) → 0, the discriminator loss → 0 and the generator loss grows large; the generator then receives weak or uninformative gradients and samples stop improving. Progress must therefore be judged from samples (fixed-noise snapshots) and metrics such as FID, not from the loss values.
+# The networks keep changing each other's task, so their losses may fluctuate. State what your curves show; there is no required range for D(real) or D(fake). If D(real) stays near 1 and D(fake) near 0, D is separating the two sets easily. Its loss is then low and the generator's non-saturating loss can be large. This alone does not prove that G's gradients vanish: the non-saturating loss was chosen to avoid that simple failure. Inspect whether the generated images actually improve and whether they cover several digit classes. Use the fixed-noise snapshots and evaluation metrics alongside the losses.
 
 # %% [markdown]
 # ## Part 3 · Exploring the latent space
-# 
+#
 # In high dimensions, samples from $\mathcal{N}(0, I)$ lie close to a sphere of radius about $\sqrt{d}$. A straight line between two samples cuts through the lower-norm interior; **spherical linear interpolation (slerp)** follows the sphere instead:
-# 
+#
 # $$\mathrm{slerp}(a, b; t) = \frac{\sin((1-t)\Omega)}{\sin\Omega}\,a + \frac{\sin(t\Omega)}{\sin\Omega}\,b, \qquad \Omega = \arccos\left(\frac{a \cdot b}{\|a\|\,\|b\|}\right)$$
-# 
+#
 # **TODO 3:** implement `slerp`.
+#
+# `a` and `b` are two noise codes; `t` is how far we move between them.
+# `||a||` is the code's length, `a·b` compares its direction with `b`, and
+# `Omega` is the angle between directions. Sine supplies curved-path weights.
+# This demonstration draws fresh random, nonzero codes. The formula needs
+# extra handling for zero-length or almost parallel codes in a general utility.
+
+# %% [markdown]
+# **Purpose:** Compare interpolation paths.
+# **Why now:** Latent geometry can affect intermediate codes.
+# **Expected observation:** Images and midpoint norms; no memorisation guarantee.
+#
+# ![Use the trained generator on new noise](Diagrams/beginner_inference.png)
 
 # %%
 def lerp(a, b, t):
@@ -262,15 +334,25 @@ print("norm of midpoint  lerp: %.2f   slerp: %.2f   (typical sample: %.2f)" % (
 
 # %% [markdown]
 # ## Part 4 · Evaluation
-# 
+#
 # This GAN does not provide a tractable likelihood calculation, so we evaluate **samples**. Standard FID uses Inception features from ImageNet photos; here we train a **small digit classifier** and use it in two ways:
-# 
+#
 # * **mode coverage:** the class histogram of generated digits (a collapsed GAN draws only a few classes);
 # * **custom feature Fréchet distance** between the classifier's features for real and generated digits.
-# 
+#
 # This uses the FID formula with a different feature network. Its values are
 # not directly comparable with standard Inception FID. Keep the classifier,
 # preprocessing, and sample count fixed within this lab's comparisons.
+# A **feature vector** is a list of numbers describing an image. The mean
+# describes the centre of many such vectors; the covariance describes their
+# spread. The distance compares these two summaries, so it can miss individual
+# bad images. Also check the classifier's test accuracy before trusting its
+# class histogram: a weak classifier can make generator coverage look misleading.
+
+# %% [markdown]
+# **Purpose:** Train an independent digit classifier.
+# **Why now:** Its predictions and features support later evaluation.
+# **Expected observation:** Held-out accuracy; inspect reliability before scoring G.
 
 # %%
 class DigitCNN(nn.Module):
@@ -303,6 +385,11 @@ print(f"digit classifier test accuracy: {acc:.3f}")
 # %% [markdown]
 # **TODO 4:** generate 2,000 digits with `G`, classify them, and plot the class histogram. Report how many classes receive at least 5% of the samples.
 
+# %% [markdown]
+# **Purpose:** Count generated classes.
+# **Why now:** Coverage differs from sharpness.
+# **Expected observation:** Histogram and classes above the stated 5% threshold.
+
 # %%
 with torch.no_grad():
     gen = G(torch.randn(2000, Z_DIM, device=DEVICE))
@@ -316,10 +403,18 @@ print("classes with at least 5% of samples:", int((counts / counts.sum() >= 0.05
 
 # %% [markdown]
 # **TODO 5:** implement the Fréchet distance between two sets of feature vectors:
-# 
+#
 # $$d^2 = \|\mu_1 - \mu_2\|^2 + \mathrm{Tr}\left(\Sigma_1 + \Sigma_2 - 2(\Sigma_1\Sigma_2)^{1/2}\right)$$
-# 
-# Use `np.cov(feats, rowvar=False)` and `scipy.linalg.sqrtm`; keep only the real part of the matrix square root.
+#
+# Use np.cov(feats, rowvar=False) and scipy.linalg.sqrtm. The teaching implementation drops imaginary round-off; inspect large imaginary values or nonfinite results before interpreting a distance.
+# Here `mu` is a mean vector, `Sigma` is a covariance matrix, `Tr` adds a
+# matrix's diagonal entries, and the square-root term compares the spreads.
+# Each input has shape `[number of images, 128 features]`, not `[images, 10 labels]`.
+
+# %% [markdown]
+# **Purpose:** Compare feature statistics.
+# **Why now:** A custom metric makes the network and sample choices explicit.
+# **Expected observation:** Four distances; rankings are empirical, not guaranteed.
 
 # %%
 from scipy import linalg
@@ -352,16 +447,28 @@ for name, f in [("real test vs real train (floor)", real_b), ("GAN after epoch 1
 
 # %% [markdown]
 # ✍️ **Question 2.** Interpret the four Fréchet distances. Why is the "real vs real" value not zero? Why might this classifier-based score disagree with the standard Inception-based FID, and why must you use the same feature network and sample size when comparing models?
-# 
+#
 # **✅ Model answer:**
 # The real-vs-real distance is small but not zero because two finite random samples of real digits have slightly different means and covariances; it is the practical floor. The generator after one epoch is much further from the real data than after full training, and uniform noise is furthest of all, so the score ranks the models sensibly. FID values are only comparable with the same feature extractor, preprocessing and number of samples: the features define what "similar" means (our digit classifier cares about digit identity and stroke shape; Inception-v3 was trained on ImageNet photos and may ignore properties that matter for digits), and the estimate is biased at small sample sizes. So a report should state the feature network, sample size and seeds, and complement FID with coverage (histogram), precision/recall or human evaluation.
 
 # %% [markdown]
 # ## Part 5 · Mode collapse on a 2-D toy problem
-# 
+#
 # The target distribution is 8 small Gaussian clusters arranged on a ring. We compare a standard GAN with a **Wasserstein GAN with gradient penalty (WGAN-GP)**.
-# 
+#
 # **TODO 6:** implement the gradient penalty: for random interpolates $\hat{x} = \epsilon x + (1-\epsilon)\tilde{x}$, penalise $(\|\nabla_{\hat{x}} D(\hat{x})\|_2 - 1)^2$.
+#
+# The two configurations also differ in learning rates and one versus five critic updates. Compare the whole configurations; a single run cannot isolate the effect of the loss.
+# On this toy problem, each example is only two coordinates. WGAN's **critic**
+# gives an unrestricted score rather than a real/fake probability. The penalty
+# measures how strongly that score changes as an input point moves, and favours
+# a gradient length near 1 at the sampled points. It is a training aid, not a
+# promise that every cluster will be covered.
+
+# %% [markdown]
+# **Purpose:** Compare two toy GAN configurations.
+# **Why now:** Eight visible clusters make missing modes easier to inspect.
+# **Expected observation:** Scatter plots and mode counts; WGAN-GP also costs extra critic updates.
 
 # %%
 def ring(n, k=8, r=2.0, s=0.05):
@@ -423,22 +530,33 @@ plt.show()
 
 # %% [markdown]
 # ✍️ **Question 3.** Explain what you observe using the ideas from the lecture: why can a standard GAN collapse onto a few modes, and why does the Wasserstein critic with gradient penalty help? Name one cost of WGAN-GP.
-# 
+#
 # **✅ Model answer:**
 # A standard generator is rewarded for samples the current discriminator accepts; concentrating on a few clusters can be an easy local strategy. As D adapts, G can jump between clusters instead of spreading out (mode hopping/collapse). A Wasserstein critic can provide more useful directional feedback when real and generated distributions are separated. The gradient penalty encourages an input-gradient norm near 1 on sampled interpolates; it does not guarantee a globally 1-Lipschitz critic or complete mode coverage. Judge improvement from the observed plots and counts. Costs: 5 critic updates per generator update and differentiating through the penalty make each step slower; hyper-parameters (λ, learning rates) still matter. Results on a toy problem do not guarantee the same gain on images.
 
 # %% [markdown]
 # ## Part 6 · Reflection: responsible use
-# 
+#
 # ✍️ **Question 4.** GAN-based face generators made realistic fake profile photos trivial to produce. Propose two technical and one organisational measure a social-media platform could use, and one limitation of each.
-# 
+#
 # **✅ Model answer:**
 # Technical: (1) detectors for synthetic images, with the limitation that they often fail on new generators (arms race) and produce false positives; (2) provenance: require or display C2PA content credentials and check invisible watermarks from cooperating generators, with the limitation that credentials can be stripped and open models may not watermark. Organisational: a policy requiring disclosure of AI-generated profile images, backed by reporting and review (in the EU, Article 50 AI Act requires deployers to disclose deepfakes), with the limitation that enforcement depends on detection and human review capacity. Good answers also mention user education and rate limits on account creation.
-# 
+#
 # | Experiment | Setting | Metric | Result | Interpretation |
 # |---|---|---|---|---|
 # | DCGAN | 8 epochs | coverage (classes ≥ 5%) | | |
 # | DCGAN | epoch 1 vs final | Fréchet distance | | |
 # | Ring | standard vs WGAN-GP | modes covered | | |
-# 
+#
 # **Before next week:** read Foster (2023) chapter 8 (diffusion models) and watch the 3Blue1Brown / Welch Labs video on how AI images work.
+
+# %% [markdown]
+# ## Week 3: what we learned
+#
+# ![Class recap](Diagrams/beginner_recap.png)
+#
+# Illustrative G loss: if D(fake) = 0.1, −ln(0.1) ≈ 2.30; at 0.8 it is ≈ 0.22.
+#
+# **Explain without looking:** Why must fake stay linked to G during the generator update?
+#
+# **Instructor answer:** Gradients must travel from its loss through D and the fake image to G’s weights.

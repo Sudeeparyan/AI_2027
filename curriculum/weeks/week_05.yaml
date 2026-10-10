@@ -1,509 +1,508 @@
-subtitle: "Attention is how modern AI reads: queries, keys and values, multi-head attention, and the transformer block behind every LLM"
-mimlos: [1, 3]
+subtitle: Follow text through a transformer, calculate attention, then build a small character model
+mimlos:
+- 1
+- 3
 objectives:
-  - "Explain the **limitations of recurrent networks** (long-range dependencies, sequential computation) that transformers address."
-  - "Describe **tokenisation, embeddings** and why transformers need **positional encoding** (sinusoidal, rotary)."
-  - "Compute **scaled dot-product self-attention** with queries, keys and values, and explain the √d_k scaling."
-  - "Explain **multi-head**, **cross-attention** and **causal masking**, and interpret attention maps critically."
-  - "Describe the transformer block and the **encoder-only, decoder-only and encoder–decoder** families."
-  - "Explain training objectives, **perplexity**, efficiency variants (**KV cache, efficient attention, mixture-of-experts, long context**) and applications beyond text; implement attention in PyTorch."
+- Explain why attention helps with distant words.
+- Turn text into numbered tokens and vectors.
+- Calculate one attention mixture.
+- Explain heads, masks and positions.
+- Compare three transformer architectures.
+- Build, train and evaluate a small model.
 coverage:
-  - recurrent
-  - long-range
-  - parallel
-  - tokenisation
-  - embedding
-  - positional encoding
-  - rotary
-  - self-attention
-  - query
-  - key
-  - value
-  - multi-head
-  - cross-attention
-  - causal mask
-  - residual
-  - layer norm
-  - feed-forward
-  - encoder-only
-  - decoder-only
-  - encoder–decoder
-  - masked
-  - next-token
-  - perplexity
-  - KV cache
-  - FlashAttention
-  - mixture-of-experts
-  - long context
-  - vision transformer
-  - speech
-
+- recurrent
+- long-range
+- parallel
+- tokenisation
+- embedding
+- positional encoding
+- rotary
+- self-attention
+- query
+- key
+- value
+- multi-head
+- cross-attention
+- causal mask
+- residual
+- layer norm
+- feed-forward
+- encoder-only
+- decoder-only
+- encoder–decoder
+- masked
+- next-token
+- perplexity
+- KV cache
+- FlashAttention
+- mixture-of-experts
+- long context
+- vision transformer
+- speech
 slides:
-  - type: title
-    figure: cover
-    notes: |
-      Welcome to week 5. Every system we will study for the rest of the module, large language models, the text encoders inside image generators, diffusion transformers, multimodal models and agents, is built from one component: the transformer and its attention mechanism. The image on the title slide is an attention matrix, a table of how strongly each word looks at every other word. Today we will build that table by hand, understand every part of a transformer block, and in the lab implement attention and train a small transformer that writes Shakespeare-like text.
-
-  - type: outcomes
-    notes: |
-      Six outcomes. The first motivates transformers by the problems of recurrent networks. The second covers the input side: tokens, embeddings and positional encodings. The third and fourth are the heart of the week: the attention equation, which students must be able to compute by hand in the exam, and its variants, multi-head, cross-attention and causal masking. The fifth assembles the full block and the three architecture families. The sixth covers training, evaluation with perplexity and the efficiency techniques that make modern models possible. This week practises MIMLO 1 on concepts and maths, and MIMLO 3 through implementation.
-
-  - type: agenda
-    icon: "fa:FaRoute"
-    items:
-      - {title: "Warm-up: what does 'it' refer to?", minutes: 5}
-      - {title: "1 · Why transformers?", minutes: 10}
-      - {title: "2 · Tokens, embeddings and position", minutes: 12}
-      - {title: "3 · Attention", minutes: 38}
-      - {title: "4 · The transformer architecture", minutes: 22}
-      - {title: "5 · Training, efficiency and applications", minutes: 25}
-      - {title: "Lab preview and wrap-up", minutes: 8}
-    notes: |
-      The structure follows the descriptor: motivation and the limitations of recurrent architectures, attention in its variants, the transformer architecture and components, training, evaluation, variants and applications. The attention section is the longest; take the break after it. Section five includes a real small transformer trained for this lecture and real attention maps from BERT and GPT-2, so students see both the mechanism and what trained models do with it. If short of time, compress the efficiency slides, since week 6 and week 11 return to them.
-
-  - type: discussion
-    title: "Warm-up"
-    icon: "fa:FaComments"
-    prompt: "'The animal didn't cross the street because it was too tired.' What does 'it' refer to? What if 'tired' becomes 'wide'?"
+- type: title
+  figure: cover
+  notes: 'Say: Imagine typing a message and seeing a suggested next word. Today we trace how a transformer makes that suggestion.
+    Our lab predicts characters. The cover is an illustrative attention table, not a measured experiment. Analogy: A writing
+    assistant consults the existing sentence. Ask: What helps predict a character after ROMEO and a colon? Answer: The earlier
+    characters. In the play''s layout a speaker name and colon are followed by a new line and that speaker''s words. Common
+    mistake: Treating a plausible continuation as knowledge of facts or understanding of the story.'
+- type: outcomes
+  notes: 'Say: Follow one piece of text through the model and explain each operation. We calculate attention before writing
+    its equation, then implement the same operation in Python. Analogy: Learning an engine begins with following fuel through
+    its parts. Ask: Which outcome is least familiar: vectors, attention or training? Answer: Any choice is useful; note the
+    most common one and spend extra time on it. Common mistake: Thinking that knowing a model''s name means knowing what its
+    inputs and outputs contain. We build understanding one operation at a time.'
+- type: course_map
+  title: Where we are in the course
+  figure: beginner_course_map
+  notes: 'Say: We have met VAEs, GANs and diffusion. This week''s transformer connects many later topics: language models, prompting,
+    adaptation, multimodal systems, deployment, retrieval and agents. Analogy: Today''s station connects several routes on a
+    railway map. Ask: Where have we already seen a model reading a prompt? Answer: Week 1''s SmolLM2 chat lab, and Week 4, where
+    Stable Diffusion''s text encoder read the prompt. Common mistake: Treating a transformer as a chatbot or a complete application.
+    It is an architecture; later weeks combine it with data, tools and software.'
+- type: discussion
+  title: Warm-up
+  icon: fa:FaComments
+  prompt: The animal avoided the street because it was tired. What does "it" refer to? Change "tired" to "wide".
+  points:
+  - Which words changed your answer?
+  notes: 'Say: With tired, most readers choose the animal. With wide, they choose the street. Our later model inspection uses
+    a closely related sentence. Analogy: A detective gathers clues from several sentence positions. Ask: Could the representation
+    at it use an adjective that appears later? Answer: In a bidirectional encoder such as BERT, yes. In a causal decoder such
+    as GPT-2, not at the position of it. Common mistake: Reading one attention plot as proof of a coreference decision.'
+- type: section
+  number: 1
+  title: Why transformers?
+  question: How can distant words share information?
+  icon: fa:FaQuestionCircle
+  notes: 'Say: An early name may matter near the end of a long sentence. Recurrent networks pass a memory state through successive
+    steps. Attention connects allowed positions directly. Analogy: Compare passing a message along a queue with consulting the
+    original speaker. Ask: Which route needs more intermediate steps when the sentence grows? Answer: The recurrent route. Information
+    passes through every state in between, while attention links any two positions directly. Common mistake: Assuming direct
+    access guarantees correct reasoning. The model must still learn useful comparisons and useful information mixtures.'
+- type: figure
+  title: Recurrence vs. attention
+  figure: rnn_vs_attention
+  notes: 'Say: Follow the recurrent arrows. Each hidden memory depends on the previous step, limiting parallelisation across
+    time. Information and learning signals can weaken over many steps. LSTMs help with long-term dependencies. Analogy: A recurrent
+    route is a relay; attention gives allowed destinations direct information routes. Ask: Why can transformer training process
+    many known positions together? Answer: The whole training text is known, so with a causal mask every position can be predicted
+    in one pass. Common mistake: Assuming generation is parallel too. Each new token still depends on the tokens generated before
+    it.'
+- type: compare
+  title: RNN / LSTM vs. transformer
+  columns:
+  - head: Recurrent network
+    icon: fa:FaLink
     points:
-      - "How did you decide? Which words did you look at?"
-      - "How far back in the sentence did you need to look?"
-      - "Could a model that reads one word at a time, keeping only a short memory, do the same?"
-    notes: |
-      This is a classic Winograd-style example. With tired, it refers to the animal; with wide, it refers to the street. People use the candidate nouns and the later adjective to decide. Bidirectional attention in BERT allows the representation of it to use both earlier nouns and the later adjective. In a causal decoder, the representation at it cannot yet use that adjective; a later position can use the whole sentence. Keep the sentence on the board: we will inspect a real BERT attention head later today, while keeping information routing separate from proof of coreference reasoning.
-
-  # ------------------------------------------------ section 1
-  - type: section
-    number: 1
-    title: "Why transformers?"
-    question: "What was wrong with reading one word at a time?"
-    icon: "fa:FaQuestionCircle"
-    notes: |
-      Section one explains the motivation. Before 2017 the standard sequence models were recurrent neural networks, especially LSTMs, often with an attention layer added on top for translation. Vaswani and colleagues' paper, Attention Is All You Need, showed that attention alone, without recurrence, gave better translation and trained far faster. We look at why, in two slides.
-
-  - type: figure
-    title: "Recurrence vs. attention"
-    figure: rnn_vs_attention
-    notes: |
-      The top row is a recurrent network. It reads one token at a time and passes a hidden state forward, so information about the animal must survive many steps to reach it; in practice early information fades, the long-range dependency problem. It also cannot be parallelised across the sequence during training, since step t needs step t minus one. The bottom row is self-attention: the representation of it is computed by looking at all tokens directly, with weights, and all positions are computed at once. Thick arrows show high attention to animal.
-
-  - type: compare
-    title: "RNN / LSTM vs. transformer"
-    columns:
-      - head: "Recurrent (RNN, LSTM)"
-        icon: "fa:FaLink"
-        points:
-          - "Processes tokens **sequentially**"
-          - "Path between distant tokens grows with distance: **long-term dependencies** are hard"
-          - "Vanishing / exploding gradients over long sequences"
-          - "Cannot parallelise over time: slow to train on GPUs"
-          - "Memory per step is constant"
-      - head: "Transformer"
-        icon: "fa:FaNetworkWired"
-        points:
-          - "Processes all tokens **in parallel**"
-          - "Any token can attend to any other in **one step**"
-          - "Stable training with residuals and normalisation"
-          - "Scales to billions of parameters and trillions of tokens"
-          - "Cost grows as **n²** with sequence length (section 5)"
-    callout: "Parallel training on GPUs, not just accuracy, is why transformers took over: they turned more compute and data directly into better models."
-    notes: |
-      Summarise the comparison. The decisive practical advantage is parallelism: during training, a transformer processes all positions of a sequence at once, which uses GPUs efficiently, whereas an RNN has to loop. That is what allowed scaling to the enormous datasets of week 6. Transformers also connect distant tokens directly, easing long-range dependencies. The cost, which we return to later, is that attention compares every token with every other, so memory and compute grow with the square of the sequence length. Recent recurrent-style models, such as state-space models, try to recover linear cost; they are an active research area.
-
-  # ------------------------------------------------ section 2
-  - type: section
-    number: 2
-    title: "Tokens, embeddings and position"
-    question: "How does text become numbers that attention can work with?"
-    icon: "fa:FaFont"
-    notes: |
-      Section two covers the input to a transformer. We recap tokenisation from week 1, introduce the embedding table that turns token IDs into vectors, and explain why the model needs to be told the position of each token, with the two main solutions: the original sinusoidal encoding and the rotary encoding used by most current language models.
-
-  - type: bullets
-    title: "From text to vectors"
-    icon: "fa:FaTable"
-    bullets:
-      - "**Tokenise**: split text into sub-word tokens (byte-pair encoding and similar); each gets an integer ID (week 1)."
-      - "**Embed**: look up each ID in a learned table of size vocabulary × d (e.g. 50,000 × 768). Similar tokens end up with similar vectors."
-      - "**Attention ignores order**: shuffle the tokens and self-attention produces the same outputs, shuffled (permutation-equivariant)."
-      - "So we must **add positional information**: 'dog bites man' ≠ 'man bites dog'."
-    callout: "Everything a transformer knows about a token at the input is its embedding plus its position."
-    notes: |
-      The embedding layer is simply a learned lookup table: one vector per token in the vocabulary, typically of dimension 512 to a few thousand. These vectors are learned during training, and tokens used in similar contexts end up close together, which students will explore in week 12 for retrieval. The key point for today is that the attention operation itself has no notion of order: it compares every token with every other using dot products, so permuting the input simply permutes the output. Without positional information, dog bites man and man bites dog would look identical. In the lab students verify this permutation property numerically.
-
-  - type: figure
-    title: "Positional encoding: sinusoidal and rotary"
-    figure: positional
-    bullets:
-      - "**Sinusoidal** (2017): add sine/cosine waves of different frequencies; each position gets a unique pattern."
-      - "**Learned** absolute positions (BERT, GPT-2): a trainable vector per position, up to a fixed maximum."
-      - "**Rotary (RoPE)** (Su et al., 2021): rotate query and key vectors by position-dependent angles; attention then depends on **relative** distance. Used by most current open LLMs and extendable to long context."
-    stack: true
-    notes: |
-      The original transformer adds a fixed pattern of sine and cosine waves to each embedding; the heatmap shows it, with position along the horizontal axis. Low dimensions change quickly, high dimensions slowly, so each position gets a unique signature, like the hands of a clock. BERT and GPT-2 instead learned one vector per position, which limits the context to the trained maximum. Rotary position embedding, used by the LLaMA, Qwen and Mistral families among others, rotates each query and key by an angle proportional to its position, so the dot product between two tokens depends on how far apart they are. Rescaling these rotations is one of the main tricks for extending context length.
-
-  # ------------------------------------------------ section 3
-  - type: section
-    number: 3
-    title: "Attention"
-    question: "How does a token decide which other tokens matter?"
-    icon: "fa:FaEye"
-    notes: |
-      Section three is the core of the week. We define queries, keys and values, write the scaled dot-product attention equation, compute a small example by hand, explain why we divide by the square root of the key dimension, extend to multiple heads, add the causal mask used by generative models, contrast self-attention with cross-attention, and finally look at attention maps from real pretrained models, with a warning about how to interpret them. Allow about thirty-five minutes, then take the break.
-
-  - type: figure
-    title: "Queries, keys and values"
-    figure: qkv
-    notes: |
-      Each token vector is projected three times with learned matrices. The query represents what this token is looking for, the key represents what it offers for matching, and the value is the information it passes on if selected. An analogy is a library search: your query is compared with the keys, such as titles and keywords, of every book, and you take home a weighted mixture of the contents, the values, of the best matches. Scores are dot products of queries with keys, scaled; softmax turns each row of scores into weights; and the output for each token is the weighted average of the values.
-
-  - type: equation
-    title: "Scaled dot-product attention"
-    eq: "\\mathrm{Attention}(Q, K, V) = \\mathrm{softmax}\\left(\\frac{Q K^{\\top}}{\\sqrt{d_k}}\\right) V"
-    read_as:
-      - "QKᵀ: every query dotted with every key gives an n × n table of **compatibility scores**."
-      - "Divide by √d_k, apply **softmax** to each row: each token's weights over all tokens sum to 1."
-      - "Multiply by V: each output is a **weighted average** of value vectors."
-    terms:
-      - ["Q, K", "queries and keys, n × d_k"]
-      - ["V", "values, n × d_v"]
-      - ["n", "number of tokens"]
-      - ["d_k", "key dimension, e.g. 64"]
-    notes: |
-      This equation is the single most important formula of the second half of the module. Read it from the inside out. The product of Q and K transposed is a table: row i, column j holds the dot product between token i's query and token j's key, a measure of how relevant token j is to token i. Dividing by the square root of the key dimension keeps the numbers in a sensible range. The softmax is applied to each row, turning scores into positive weights that sum to one. Finally, multiplying by V mixes the value vectors according to those weights, giving a new, context-aware vector for every token.
-
-  - type: figure
-    title: "Worked example: three tokens, d_k = 2"
-    figure: attn_worked
-    bullets:
-      - "Q = K = [[1,0],[0,1],[1,1]] for 'cat', 'sat', 'mat'. Score cat·mat = (1·1 + 0·1)/√2 = 0.71."
-      - "Row 'mat': softmax([0.71, 0.71, 1.41]) = [0.25, 0.25, 0.50]: 'mat' attends most to itself."
-      - "With V = [[1,0],[0,1],[0.5,0.5]], output for 'cat' = 0.40·[1,0] + 0.20·[0,1] + 0.40·[0.5,0.5] = [0.60, 0.40]."
-    stack: true
-    notes: |
-      Work through this on the board. The dot product of cat's query with mat's key is one, divided by root two gives 0.71. The dot product of cat with sat is zero. For the mat row, exponentiate 0.71, 0.71 and 1.41, giving about 2.03, 2.03 and 4.11, which sum to 8.17, so the weights are 0.25, 0.25 and 0.50. For the cat row the weights are 0.40, 0.20, 0.40. Multiplying by the value vectors gives cat's new representation, 0.60 and 0.40. Exam questions often give small matrices like this; students should practise until it is routine.
-
-  - type: bullets
-    title: "Why divide by √d_k?"
-    icon: "fa:FaCalculator"
-    bullets:
-      - "If query and key entries have mean 0 and variance 1, their dot product has variance **d_k**."
-      - "With d_k = 64 the scores have standard deviation 8: softmax becomes almost one-hot."
-      - "Saturated softmax has near-zero gradients, so learning stalls."
-      - "Dividing by √d_k restores variance 1: soft, trainable attention."
-    callout: "The scaling is not cosmetic: without it, large models train poorly. It is the 'scaled' in scaled dot-product attention."
-    notes: |
-      This is a favourite exam question. A dot product sums d k products of random numbers, so its variance grows linearly with d k, and its standard deviation with the square root. For a typical head dimension of sixty-four, raw scores have a standard deviation of about eight, and a softmax over numbers that far apart puts nearly all weight on the largest, like temperature close to zero in week 1. A saturated softmax has tiny gradients. Dividing by the square root of d k brings the variance back to about one. Link to week 1: this is exactly the temperature idea, applied inside the network.
-
-  - type: figure
-    title: "Multi-head attention: several views at once"
-    figure: multihead
-    notes: |
-      A single attention head produces one weighted average per token, which can only capture one kind of relationship at a time. Multi-head attention runs several heads in parallel, each with its own smaller projection matrices, so one head can track syntactic relations, another coreference, another the previous token. The head outputs are concatenated and mixed by an output matrix. Because each head works in dimension d divided by h, the total cost is the same as one full-size head. The original transformer used eight heads; large models use dozens. The head labels here are illustrative: real heads often have mixed or unclear roles.
-
-  - type: equation
-    title: "Multi-head attention, formally"
-    eq:
-      - "\\mathrm{head}_i = \\mathrm{Attention}\\left(X W_Q^{(i)},\\; X W_K^{(i)},\\; X W_V^{(i)}\\right)"
-      - "\\mathrm{MultiHead}(X) = \\mathrm{Concat}\\left(\\mathrm{head}_1, \\ldots, \\mathrm{head}_h\\right) W_O"
-    read_as:
-      - "Each head has its own projections of size d × (d/h)."
-      - "Heads are computed in parallel as one batched tensor operation (reshape to [batch, heads, n, d/h])."
-      - "W_O (d × d) mixes the heads back into the model dimension."
-    terms:
-      - ["h", "number of heads, e.g. 8–128"]
-      - ["d", "model dimension, e.g. 512–8192"]
-      - ["W_O", "output projection"]
-    notes: |
-      The formal definition is compact. Each head applies attention to its own projections of the same input. In code, we do not loop over heads: we compute one big projection, reshape the result so that heads become a separate tensor dimension, run attention once in batch, and reshape back before the output projection. Students implement exactly this reshape in the lab, and it is the most common source of bugs, so encourage them to print tensor shapes at every step. Modern large models also use grouped-query attention, where several query heads share one key-value head to save memory.
-
-  - type: figure
-    title: "Causal masking: no peeking at the future"
-    figure: causal_mask
-    bullets:
-      - "Generative (decoder) models must predict token t using only tokens before t."
-      - "Set scores for future positions to −∞ before the softmax, so their weight is exactly 0."
-      - "One forward pass then trains **every** position's next-token prediction at once."
-    stack: true
-    notes: |
-      In an encoder such as BERT every token may attend to every other, left and right. In a decoder such as GPT, which generates text left to right, a token must not see the tokens it is trying to predict. The causal mask enforces this by adding minus infinity to all scores above the diagonal before the softmax, so those weights become zero. A beautiful side effect is training efficiency: in a single forward pass over a sequence of n tokens, the model makes n next-token predictions, each using only the correct past, so every token in the training data provides a learning signal.
-
-  - type: compare
-    title: "Self-attention vs. cross-attention"
-    columns:
-      - head: "Self-attention"
-        icon: "fa:FaSyncAlt"
-        points:
-          - "Q, K and V all come from the **same** sequence"
-          - "Tokens exchange information with each other"
-          - "Used in every encoder and decoder layer"
-      - head: "Cross-attention"
-        icon: "fa:FaExchangeAlt"
-        points:
-          - "Q from one sequence; K and V from **another**"
-          - "Translation: decoder words attend to the source sentence"
-          - "Stable Diffusion: image latents attend to prompt tokens (week 4)"
-          - "Multimodal models: text attends to image features (weeks 9–10)"
-    callout: "Cross-attention is the standard way to condition one modality on another."
-    notes: |
-      Cross-attention uses exactly the same equation; only the sources differ. The queries come from the sequence being generated, and the keys and values from a second sequence. In the original encoder-decoder transformer for translation, each decoder layer has a cross-attention sublayer in which the partially generated translation attends to the encoded source sentence. Last week we saw the same mechanism in Stable Diffusion, where image latents attend to the prompt tokens. In weeks 9 and 10, cross-attention is one of the main ways to fuse images, audio and text. Ask students to name the queries, keys and values in the Stable Diffusion case.
-
-  - type: figure
-    title: "A real attention head: BERT resolving 'it'"
-    figure: bert_attention
-    caption: "Pretrained BERT-base on the warm-up sentence. The head shown is the one (layers 5–10) where 'it' attends most strongly to 'animal'."
-    notes: |
-      Here is a real pretrained model. We fed the warm-up sentence to BERT base and looked for a head in its middle layers where the token it attends strongly to animal; the chosen layer and head, and the weight, are recorded in the teaching notes. On the left is that head's full attention matrix; on the right, the row for it. Several heads in BERT's middle layers track coreference like this. Be careful, though: we selected this head because it shows the pattern, which is a form of cherry-picking, and other heads attend to punctuation or the separator token. That leads to the caution on the next slide.
-
-  - type: figure
-    title: "Real GPT-2 heads: causal patterns"
-    figure: gpt2_attention
-    bullets:
-      - "All weights lie on or below the diagonal: the causal mask at work."
-      - "Common patterns: attend to the previous token, to the first token (an 'attention sink'), or to related earlier words."
-      - "**Caution:** attention weights show where information flows, not **why** the model decided something. Attention is not a complete explanation."
-    stack: true
-    notes: |
-      Three heads from GPT-2 on the same sentence. Every matrix is lower triangular because of the causal mask. Different heads have recognisable habits: one attends to the previous token, another places much of its weight on the first token, and another links related earlier words. In the lab, replacing tired with wide should not change attention at it, because both adjectives are later tokens hidden from that position by the causal mask. This is expected causality, not evidence of failed full-sentence reasoning; a later position can use the adjective. The caution matters for responsible AI and for the exam: attention weights alone do not establish why a prediction was made. Interpretability research uses controlled interventions and other evidence.
-
-  - type: quiz
-    question: "For one query, the scaled scores against three keys are [2, 0, 0]. What are the attention weights (to two decimals)?"
-    options:
-      - "[1.00, 0.00, 0.00]"
-      - "[0.79, 0.11, 0.11]"
-      - "[0.50, 0.25, 0.25]"
-      - "[0.67, 0.17, 0.17]"
-    answer: 1
-    notes: |
-      Answer: B. Exponentiate: e squared is 7.39, e to the zero is one, and one again; the sum is 9.39; so the weights are 0.79, 0.11 and 0.11. A is what a hard maximum would give; softmax is soft. C is what you get by dividing the raw scores naively. D corresponds to scores of about 1.39. If students got it wrong, redo it on the board and connect it to the softmax slide of week 1. This is exactly the kind of calculation that appears in the exam.
-
-  # ------------------------------------------------ section 4
-  - type: section
-    number: 4
-    title: "The transformer architecture"
-    question: "How are attention layers assembled into a model?"
-    icon: "fa:FaCubes"
-    notes: |
-      Welcome back. Section four assembles attention into complete models. We look at one transformer block, with its residual connections, normalisation and feed-forward network; the three architecture families, encoder-only, decoder-only and encoder-decoder, which week 6 builds on; how big real models are; and the whole attention computation in a few lines of PyTorch.
-
-  - type: figure
-    title: "Inside one transformer block"
-    figure: block
-    bullets:
-      - "**Attention** lets tokens exchange information; the **feed-forward MLP** (applied to each token separately) processes it and stores much of the model's knowledge."
-      - "**Residual connections** add each sublayer's output to its input: gradients flow through very deep stacks."
-      - "**Layer normalisation** keeps activations well scaled; modern models normalise **before** each sublayer (pre-norm), often with RMSNorm."
-      - "Stack N identical blocks (12 in BERT-base, 32 in an 8B-parameter LLM, 96 in GPT-3)."
-    figure_width: 4.6
-    notes: |
-      A transformer is a stack of identical blocks. Each block has two sublayers. The attention sublayer mixes information across tokens. The feed-forward sublayer is a two-layer MLP, usually four times wider than the model dimension, applied to each token independently; interpretability studies suggest that much factual knowledge is stored in these MLP weights. Each sublayer is wrapped in a residual connection, so the block learns a correction to its input, which is what allows stacks of dozens of blocks to train. Normalisation keeps activation scales stable; modern models use pre-norm and often RMSNorm, and activations such as GELU or SwiGLU.
-
-  - type: figure
-    title: "Three families of transformers"
-    figure: three_archs
-    bullets:
-      - "**Encoder-only**: bidirectional attention; best for understanding tasks and embeddings."
-      - "**Decoder-only**: causal attention; generates text; the design of almost all current LLMs."
-      - "**Encoder–decoder**: encoder reads the input, decoder generates with cross-attention; translation, summarisation, speech recognition."
-    stack: true
-    notes: |
-      These three families organise everything in week 6. Encoder-only models such as BERT see the whole input at once, which makes them excellent for classification, tagging and producing embeddings for search, but they do not generate text left to right. Decoder-only models such as GPT, LLaMA, Claude, Gemini and Qwen use the causal mask and generate text; nearly all modern chat models are decoder-only. Encoder-decoder models such as T5, BART and Whisper encode an input and generate an output conditioned on it through cross-attention. A common misconception is that BERT is a chatbot; it is not a text generator in this sense.
-
-  - type: table
-    title: "How big are real transformers?"
-    header: ["Model (year)", "Type", "Layers", "d_model", "Heads", "Parameters", "Context"]
-    rows:
-      - ["Transformer base (2017)", "Enc–dec", "6 + 6", "512", "8", "65 M", "~512"]
-      - ["BERT-base (2018)", "Encoder", "12", "768", "12", "110 M", "512"]
-      - ["GPT-2 small (2019)", "Decoder", "12", "768", "12", "124 M", "1,024"]
-      - ["GPT-3 (2020)", "Decoder", "96", "12,288", "96", "175 B", "2,048"]
-      - ["Llama 3 8B (2024)", "Decoder", "32", "4,096", "32 (8 KV)", "8 B", "8K (128K in 3.1)"]
-    notes: |
-      These published figures show how the same architecture scales. The original transformer had sixty-five million parameters; GPT-3 had one hundred and seventy-five billion, with ninety-six layers and a model dimension over twelve thousand, but the block is recognisably the same. The Llama 3 row shows modern details: eight key-value heads shared by thirty-two query heads, which is grouped-query attention, and a context extended to one hundred and twenty-eight thousand tokens in version 3.1 using rotary scaling. Proprietary frontier models do not publish these numbers, so do not quote guesses about them.
-
-  - type: quiz
-    question: "You need (a) vectors for semantic search over course documents and (b) a chatbot that writes answers. Which architectures fit best?"
-    options:
-      - "(a) decoder-only, (b) encoder-only"
-      - "(a) encoder-only (embedding model), (b) decoder-only LLM"
-      - "Both encoder-only, because BERT can chat"
-      - "Both encoder–decoder, because only they use attention"
-    answer: 1
-    notes: |
-      Answer: B. Encoder-only models see the whole text bidirectionally and are the basis of most embedding models used for search and retrieval, which we build in week 12. Chatbots are decoder-only LLMs that generate text token by token with a causal mask. A reverses the roles. C repeats the common misconception that BERT is a chat model; it is not designed to generate free text. D is wrong because all three families use attention; encoder-decoders are good for input-to-output tasks such as translation or speech recognition. In practice, retrieval-augmented systems combine an encoder for search with a decoder for answering.
-
-  - type: code
-    title: "Attention in PyTorch (what you write in the lab)"
-    code: |
-      def attention(q, k, v, causal=False):
-          # q, k, v: [batch, heads, n, d_k]
-          d_k = q.size(-1)
-          scores = q @ k.transpose(-2, -1) / d_k**0.5
-          if causal:
-              n = q.size(-2)
-              mask = torch.triu(torch.ones(n, n, dtype=torch.bool), 1)
-              scores = scores.masked_fill(mask, float("-inf"))
-          weights = scores.softmax(dim=-1)
-          return weights @ v, weights
-
-      # multi-head: project, split heads, attend, merge
-      q = (x @ W_q).view(b, n, h, d // h).transpose(1, 2)
-    bullets:
-      - "Matrix products compute all n × n scores at once."
-      - "`masked_fill` with −∞ implements the causal mask."
-      - "PyTorch's `F.scaled_dot_product_attention` does the same, using fast kernels (FlashAttention) when available."
-    notes: |
-      The whole attention mechanism is about ten lines. Point out the transpose of the last two dimensions of k, the division by the square root of d k, the mask created with torch dot triu and applied with masked fill, and the softmax over the last dimension, the keys. For multi-head attention the input is projected, reshaped to separate heads and transposed so that heads act like a batch dimension. In the lab students check their implementation against PyTorch's built-in scaled dot product attention, which dispatches to optimised kernels such as FlashAttention on GPUs.
-
-  # ------------------------------------------------ section 5
-  - type: section
-    number: 5
-    title: "Training, efficiency and applications"
-    question: "How are transformers trained and evaluated, and how are they made fast?"
-    icon: "fa:FaTachometerAlt"
-    notes: |
-      The final section covers how transformers are trained, with the main objectives; how language models are evaluated with perplexity, using a real small transformer trained for this lecture; the quadratic cost of attention and the techniques that reduce it, including the KV cache and mixture-of-experts; and applications beyond text, ending with a responsible-AI note on interpretation and cost.
-
-  - type: compare
-    title: "Training objectives"
-    columns:
-      - head: "Masked LM (BERT)"
-        icon: "fa:FaMask"
-        points:
-          - "Hide ~15% of tokens; predict them from both sides"
-          - "Encoder-only; bidirectional context"
-          - "Good representations, not free-running generation"
-      - head: "Next-token / causal LM (GPT)"
-        icon: "fa:FaArrowRight"
-        points:
-          - "Predict every next token (causal mask)"
-          - "Decoder-only; the objective of LLM pre-training"
-          - "Loss = cross-entropy = negative log-likelihood (week 1)"
-      - head: "Sequence-to-sequence (T5)"
-        icon: "fa:FaExchangeAlt"
-        points:
-          - "Corrupt spans of the input; generate the missing text"
-          - "Encoder–decoder"
-          - "Every task framed as text-to-text"
-    notes: |
-      Three training objectives match the three families. BERT's masked language modelling hides about fifteen percent of the tokens and predicts them using context on both sides, which yields strong representations. GPT-style next-token prediction trains a decoder to predict every token from its past, exactly the chain-rule likelihood from week 1. T5's span corruption removes spans of text and trains the decoder to generate them, which suits a text-to-text framing of every task. All three are self-supervised: the labels come from the text itself, which is why transformers can be trained on trillions of tokens without human annotation.
-
-  - type: equation
-    title: "Evaluating language models: perplexity"
-    eq: "\\mathrm{PPL} = \\exp\\left(-\\frac{1}{N}\\sum_{t=1}^{N} \\log p_\\theta(x_t \\mid x_{<t})\\right)"
-    read_as:
-      - "Exponentiated average negative log-likelihood on **held-out** text (week 1)."
-      - "Interpretation: the model is as uncertain as choosing among PPL equally likely tokens."
-      - "Only comparable between models with the **same tokeniser** and test text; low perplexity ≠ helpful, truthful or safe."
-    terms:
-      - ["N", "number of tokens in the test text"]
-      - ["x_{<t}", "the tokens before position t"]
-    notes: |
-      Perplexity is the standard intrinsic metric for language models and was introduced numerically in week 1. It is the exponential of the average negative log-likelihood per token on held-out text. A perplexity of ten means the model is, on average, as uncertain as if it were choosing uniformly among ten tokens. Two important caveats: perplexities depend on the tokeniser, so a model with a character vocabulary and one with a sub-word vocabulary cannot be compared directly; and perplexity measures fit to text, not usefulness, truthfulness or safety, which need the task-based and human evaluations of week 7.
-
-  - type: figure
-    title: "A real small transformer, trained for this lecture"
-    figure: chargpt_loss
-    bullets:
-      - "1.8 M-parameter model, 3000 steps (9 min on a laptop GPU): validation loss 4.37 → 1.51 nats/char, perplexity 4.5 (uniform: 65)."
-      - "Step 0: *dJU;gf:MizAhT,lXeibxua: J$:H;xdyStqR!jCtHxhKTRMCNogCWu&FXYbX…*"
-      - "Step 300: *I thy and whe, the hum fousing fore the hen. / MENRONTIO: / You wese and bestay sor? om then…*"
-      - "End: *I think my heart is uncle. / MENENIUS: / My lord, I would leave you me for grace. / CORIO…*"
-    stack: true
-    notes: |
-      This is a small character-level transformer trained on the complete works of Shakespeare collected in the Tiny Shakespeare dataset, the same model students build in the lab. The dashed line is the loss of uniform guessing over the character vocabulary. The validation loss falls quickly, and the samples show the progression: random characters at the start, word-like chunks and line structure after a few hundred steps, and plausible if meaningless Shakespearean dialogue at the end, with speaker names, line breaks and archaic words. It knows spelling and style, not meaning. The exact numbers are in the teaching notes.
-
-  - type: figure
-    title: "The cost of attention grows as n²"
-    figure: complexity
-    bullets:
-      - "Every token attends to every token: n² scores per head per layer."
-      - "**FlashAttention** computes exact attention without storing the n × n matrix (memory-aware GPU kernels)."
-      - "**Sparse / sliding-window** attention, **grouped-query attention** and alternatives (state-space models) cut cost further."
-    figure_width: 6.8
-    notes: |
-      The quadratic cost is the main weakness of attention. A single score matrix for one head at one hundred and thirty-one thousand tokens would need tens of gigabytes if stored naively. FlashAttention, by Dao and colleagues in 2022, reorganises the computation into tiles that fit in fast on-chip GPU memory, computing exact attention without ever storing the full matrix; it is now standard. Other approaches restrict which tokens attend to which, such as sliding windows, reduce the number of key-value heads, or replace attention with recurrent state-space layers in some hybrid models. Long context remains expensive, which matters for retrieval design in week 12.
-
-  - type: figure
-    title: "Faster generation: the KV cache"
-    figure: kv_cache
-    bullets:
-      - "Generating token t needs keys and values of all earlier tokens; store them instead of recomputing."
-      - "Turns generation from quadratic recomputation into one new token's work per step."
-      - "Cache memory grows with context length × layers × KV heads: the main memory cost when serving LLMs (week 11)."
-    stack: true
-    notes: |
-      During generation, the model produces one token at a time. Without a cache, generating token t would recompute the keys and values of all previous tokens at every layer, wasting enormous work. The KV cache stores them, so each new step only computes the new token's query, key and value and attends to the cache. Every production LLM server uses it. The trade-off is memory: the cache grows with context length, number of layers and number of key-value heads, which is exactly why grouped-query attention reduces key-value heads. In week 11 we will see that serving systems such as vLLM are largely about managing this cache efficiently.
-
-  - type: figure
-    title: "Mixture-of-experts: more parameters, same compute"
-    figure: moe
-    bullets:
-      - "Replace the feed-forward MLP with many **expert** MLPs and a learned **router**."
-      - "Each token uses only the top-k experts (e.g. 2 of 8), so compute per token stays low."
-      - "Used in several large open and proprietary model families (e.g. Mixtral, DeepSeek-V3); memory still holds all experts."
-    stack: true
-    notes: |
-      Mixture-of-experts replaces the single feed-forward network in some or all blocks with many expert networks and a small router that sends each token to the top few experts. The model can therefore have a very large number of parameters, and hence capacity, while each token uses only a fraction of them. Mixtral 8x7B, released in December 2023, has about forty-seven billion parameters in total but about thirteen billion active per token; DeepSeek-V3 has six hundred and seventy-one billion total and thirty-seven billion active. The catch is memory: all experts must be loaded, and training needs care to balance the load across experts.
-
-  - type: figure
-    title: "Beyond text: transformers for images, audio and more"
-    figure: vit_patches
-    bullets:
-      - "**Vision Transformer (ViT)**: image patches as tokens; basis of CLIP's image encoder (week 9)."
-      - "**Speech**: Whisper is an encoder–decoder transformer from audio spectrograms to text."
-      - "**Generation**: diffusion transformers (week 4); protein structure, time series, robotics, code."
-    stack: true
-    notes: |
-      Once text is a sequence of token vectors, any data that can be cut into pieces can be processed the same way. The Vision Transformer, from Dosovitskiy and colleagues in 2020, splits an image into sixteen by sixteen pixel patches, embeds each patch like a word and adds positional information; it now underpins CLIP and most multimodal models. Whisper encodes audio spectrogram frames and decodes text. Diffusion transformers treat latent patches as tokens. Attention also appears in protein structure prediction, weather models and robotics. This universality is why the transformer is the common language of the rest of the module.
-
-  - type: bullets
-    title: "Responsible AI lens: attention, interpretability and cost"
-    icon: "fa:FaBalanceScale"
-    bullets:
-      - "**Attention ≠ explanation**: weights show information flow, not reasons; do not present attention maps as proof of why a model decided something."
-      - "**Interpretability** research (probing, mechanistic analysis) aims for faithful explanations; it is still maturing."
-      - "**Compute and energy**: quadratic attention and scale make training and long-context use costly; report compute and prefer efficient models when they suffice."
-      - "**Tokenisation fairness**: some languages need 3–5× more tokens (week 1 lab), raising cost and reducing quality for their speakers."
-    notes: |
-      Three points for this week's responsible-AI lens. First, attention maps are attractive visualisations, and students will be tempted to use them as explanations in reports and projects; research such as Jain and Wallace's has shown that different attention patterns can give the same prediction, so they must be presented as evidence of information flow at most. Second, compute and energy: the scale of transformer training has real environmental and financial costs, so choose the smallest model that meets the requirement. Third, the tokenisation inequality measured in the week 1 lab is a fairness issue for multilingual applications.
-
-  - type: lab
-    title: "Lab 5: build attention and a small GPT"
-    steps:
-      - "Implement **scaled dot-product attention**; check it against the worked example and PyTorch's built-in function."
-      - "Add the **causal mask**; verify future tokens get zero weight; show attention without positions is order-blind."
-      - "Implement **multi-head attention** (split heads, attend, merge) and a pre-norm **transformer block**."
-      - "Train a **character-level GPT** on Tiny Shakespeare; plot validation loss and **perplexity**; sample at different temperatures."
-      - "Interrogate pretrained **BERT and GPT-2**: plot attention for the 'it' sentence; discuss whether it explains the model."
-      - "Optional: time GPT-2 generation with and without the **KV cache**."
-    runtime: "Google Colab T4 GPU (training ≈ 3–5 min) or CPU (fewer steps)"
-    deliverable: "Notebook with passing checks, loss curve, perplexity, samples, attention plots and written answers"
-    notes: |
-      The lab builds the transformer from the bottom up, following the descriptor's intention that students both build simple transformer models and interrogate how transformers use attention in practice. Automated checks tell students immediately whether their attention and multi-head implementations match PyTorch's. The small GPT trains in a few minutes on a Colab GPU. The interrogation part asks students to plot attention for the warm-up sentence in BERT and GPT-2 and to argue critically about what the plots show. The optional KV-cache timing connects to deployment in week 11.
-
-  - type: summary
+    - Reads one token at a time and passes a memory vector on
+    - 'Example: by "it", "animal" is five steps back and may have faded'
+    - Each step waits for the one before, even in training
+    - Generates one token at a time
+  - head: Transformer
+    icon: fa:FaNetworkWired
     points:
-      - "Transformers replaced RNNs because they **parallelise** and connect distant tokens directly."
-      - "Tokens → **embeddings** + **positional encoding** (sinusoidal, learned or rotary)."
-      - "**Attention = softmax(QKᵀ/√d_k)V**: each token takes a weighted average of values."
-      - "√d_k keeps scores in range; **multi-head** gives several views; **causal masks** block the future; **cross-attention** links sequences."
-      - "A block = attention + feed-forward MLP, each with residual + normalisation; stack N blocks."
-      - "Encoder-only (BERT), **decoder-only (GPT, LLaMA)**, encoder–decoder (T5, Whisper)."
-      - "Train with masked, next-token or span objectives; evaluate with **perplexity** (same tokeniser only)."
-      - "Efficiency: KV cache, FlashAttention, grouped-query attention, mixture-of-experts, long context."
-    notes: |
-      Recap the eight points, and make sure students can write the attention equation from memory. Next week we scale this architecture up: large language models, their training on trillions of tokens, scaling laws, decoding strategies, the model families and how to choose among them, including reasoning models. Ask students to finish the lab and to watch the two 3Blue1Brown videos on transformers and attention, which visualise exactly what we did today.
-
-  - type: resources
-    items:
-      - {kind: video, label: "3Blue1Brown: Transformers, the tech behind LLMs (Deep Learning ch. 5)", note: "Visual overview", url: "https://www.youtube.com/watch?v=wjZofJX0v4M"}
-      - {kind: video, label: "3Blue1Brown: Attention in transformers, step-by-step (ch. 6)", note: "Queries, keys, values visualised", url: "https://www.youtube.com/watch?v=eMlx5fFNoYc"}
-      - {kind: video, label: "Andrej Karpathy: Let's build GPT from scratch, in code", note: "2-hour build of the lab model", url: "https://www.youtube.com/watch?v=kCc8FmEb1nY"}
-      - {kind: doc, label: "Jay Alammar: The Illustrated Transformer", note: "Classic visual explanation", url: "https://jalammar.github.io/illustrated-transformer/"}
-      - {kind: paper, label: "Vaswani et al. (2017) Attention Is All You Need", note: "The original paper", url: "https://arxiv.org/abs/1706.03762"}
-      - {kind: book, label: "Tunstall et al. (2022) NLP with Transformers, ch. 3 'Transformer Anatomy'", note: "Descriptor 7.9 reading", url: "https://www.oreilly.com/library/view/natural-language-processing/9781098136789/"}
-      - {kind: book, label: "Foster (2023) Generative Deep Learning, ch. 9 'Transformers'", note: "Core module text", url: "https://www.oreilly.com/library/view/generative-deep-learning/9781098134174/"}
-      - {kind: course, label: "Hugging Face LLM Course, chapter 1", note: "How transformers work, with code", url: "https://huggingface.co/learn/llm-course/chapter1/1"}
-    notes: |
-      The two 3Blue1Brown videos are the best visual reinforcement of today's lecture. Karpathy's two-hour video builds essentially the lab model, step by step, and is ideal for students who want to go deeper. Jay Alammar's illustrated transformer is a classic. The original paper is readable after today. Tunstall and colleagues' chapter 3 and Foster's chapter 9 are the descriptor's reading-list chapters for this topic. All links were checked in September 2026.
+    - Each token looks directly at every allowed earlier token
+    - 'Example: "it" can weight "animal" highly in one step'
+    - Training scores all known positions of a text at once
+    - Still generates one token at a time
+  notes: 'Say: RNN means recurrent neural network. An LSTM learns how to keep and forget information. A transformer removes
+    recurrence from this sequence-processing path. Basic attention compares each query with each allowed key. Analogy: Replace
+    a relay with a meeting where participants exchange information. Ask: If token count doubles, how many token pairs are there?
+    Answer: Four times as many, because pairs grow with the square of the count. Common mistake: Answering twice as many. Direct
+    routes bring computational costs as well as benefits.'
+- type: section
+  number: 2
+  title: Tokens, embeddings and position
+  question: How does text become a list of vectors?
+  icon: fa:FaFont
+  notes: 'Say: Python strings do not enter attention directly. A tokenizer assigns vocabulary IDs. An embedding table converts
+    each ID into a vector, an ordered list of numbers. Position information tells the model where each item occurs. Analogy:
+    A catalogue number selects a record from a table. Ask: Does vocabulary ID seven mean sentence position seven? Answer: No.
+    Token identity and token position are different information, represented separately in our lab. Common mistake: Reading
+    a token''s ID as its place in the sentence.'
+- type: bullets
+  title: From text to vectors
+  icon: fa:FaTable
+  bullets:
+  - '**Token:** one unit of text; one character in our lab.'
+  - '**ID:** its vocabulary number.'
+  - '**Embedding:** its learned vector.'
+  - 'Three IDs become three vectors: shape [3, 8] for width 8.'
+  notes: 'Say: Use an illustrative three-character prefix, cat. Three positions remain three positions whatever IDs the tokenizer
+    assigns. Looking up width-eight embeddings gives a three-by-eight table. The lab prints its actual vocabulary and uses a
+    wider model. Analogy: Three catalogue numbers select three table rows. Ask: Which axis counts characters, and which counts
+    features? Answer: In shape [3, 8], the first axis counts the three characters and the second counts the eight features.
+    Common mistake: Treating an ID''s numerical size as its meaning. Token lookup vectors are also not automatically good document-search
+    embeddings.'
+- type: figure
+  title: 'Positional encoding: sinusoidal and rotary'
+  figure: positional
+  notes: 'Say: Plain unrestricted self-attention has no built-in coordinates. Shuffling input rows shuffles output rows in the
+    same way. Sinusoidal encoding adds fixed patterns. Our lab learns a vector per position. Rotary encoding rotates query and
+    key feature pairs. Analogy: Give playing cards numbered places on a table. Ask: Is RoPE added to input embeddings like learned
+    absolute positions? Answer: No. It rotates queries and keys inside attention. Common mistake: Assuming a longer context
+    setting works without suitable training and testing.'
+- type: section
+  number: 3
+  title: Attention
+  question: How does one token combine information from others?
+  icon: fa:FaEye
+  notes: 'Say: Attention makes a new vector at each query position by mixing information from allowed source positions. We compute
+    a small example before introducing notation. Analogy: A librarian matches your request against catalogue entries, then brings
+    relevant contents. Ask: Which part should find sources, and which should carry their information? Answer: Queries and keys
+    find sources, because their match makes the scores. Values carry the information mixed into the output. Common mistake:
+    Treating matching and transferring as one operation.'
+- type: figure
+  title: Queries, keys and values
+  figure: qkv
+  notes: 'Say: Three learned projections turn an input vector into a query, a key and a value. Queries and keys make scores.
+    The value branch bypasses score calculation and supplies the final mixture. Analogy: A request matches catalogue descriptions;
+    book contents are what you take away. Ask: Do the weights multiply keys or values to form the output? Answer: Values. Common
+    mistake: Reading queries, keys and values as literal questions, keywords or human meanings. They are learned numerical features.'
+- type: figure
+  title: 'Worked example: three tokens, $d_k = 2$'
+  figure: attn_worked
+  notes: 'Say: These are chosen classroom vectors, not trained-model measurements. Follow cat''s row first. Its query is [1,
+    0]. Scaled scores are approximately [0.71, 0, 0.71], producing weights [0.40, 0.20, 0.40]. Analogy: Weights are shares in
+    a recipe. Mixing the shown values gives approximately [0.60, 0.40]. Ask: Why does a zero score get positive weight? Answer:
+    Softmax exponentiates scores, and exp of zero is one. Common mistake: Treating a zero score as blocked. Only a masked score
+    of minus infinity gets zero weight.'
+- type: equation
+  title: Scaled dot-product attention
+  eq: \mathrm{Attention}(Q,K,V)=\mathrm{softmax}\left(\frac{QK^{\top}}{\sqrt{d_k}}\right)V
+  read_as:
+  - Compare; scale; make row weights; mix values.
+  terms:
+  - - Q / K / V
+    - query / key / value tables
+  - - T
+    - 'transpose: swap axes'
+  - - $d_k$
+    - numbers per query/key
+  notes: 'Say: Read inside outward, following the worked example. Q times K transposed compares every query with every key.
+    Divide by the square root of query/key width. Softmax makes row weights; those weights multiply V. Analogy: The equation
+    compresses our four-step recipe. Ask: For three queries and three keys, what is the score-table shape? Answer: Three by
+    three: one score for each query and key pair. Common mistake: Using the feature width as a table dimension. The output width
+    comes from the values.'
+- type: quiz
+  title: Why scale the scores?
+  question: Why divide a dot product by $\sqrt{d_k}$?
+  options:
+  - To make every attention weight equal
+  - To remove scores for future tokens
+  - To prevent overly extreme softmax weights
+  - To reduce the size of the vocabulary
+  answer: 2
+  notes: 'Say: Answer C. With independent, mean-zero, unit-variance entries, dot-product variance grows with d_k, the query/key
+    width. Width sixty-four gives standard deviation eight. Dividing by eight controls score scale and can prevent weak softmax
+    gradients. Analogy: Reduce volume before a sensitive amplifier. Ask: Which separate operation removes future positions?
+    Answer: The causal mask. Common mistake: Thinking scaling masks the future or forces uniform weights. Learned comparisons
+    can still produce strong preferences.'
+- type: figure
+  title: 'Multi-head attention: several views at once'
+  figure: multihead
+  notes: 'Say: Each head learns its own query, key and value projections in a smaller feature space. Join the head outputs,
+    then mix them with an output projection. Width thirty-two with four heads means eight features per head. Analogy: Readers
+    examine a passage through different lenses. Ask: What width returns after joining four eight-feature outputs? Answer: Thirty-two.
+    Common mistake: Answering one hundred and twenty-eight, or giving each head a tidy human job. Real heads can have mixed
+    roles.'
+- type: equation
+  title: Multi-head attention, formally
+  eq:
+  - \mathrm{head}_i=\mathrm{Attention}(XW_Q^{(i)},XW_K^{(i)},XW_V^{(i)})
+  - \mathrm{MultiHead}(X)=\mathrm{Concat}(\mathrm{head}_1,\ldots,\mathrm{head}_h)W_O
+  read_as:
+  - Run smaller heads; join outputs; mix features.
+  terms:
+  - - X
+    - input vectors
+  - - i / h
+    - head index / count
+  - - W
+    - learned projection; subscript names its role
+  notes: 'Say: X is the input table. Superscript i identifies a head. W with Q, K or V names its learned projection. Concat
+    joins features; W_O mixes joined outputs. Analogy: Join specialists'' short reports, then edit one report of the original
+    width. Ask: Does a head index identify a layer? Answer: No. Heads and layers are different axes; every layer has its own
+    set of heads. Common mistake: Assuming more heads means much more matrix work. At a fixed model width the main matrix-product
+    work stays similar, while stored score-table memory grows with head count.'
+- type: figure
+  title: 'Causal masking: no peeking at the future'
+  figure: causal_mask
+  notes: 'Say: At position t, the model reads that input and earlier inputs. Its training target is position t plus one. Later-position
+    scores become negative infinity before softmax, giving zero future weights. Analogy: Cover tomorrow''s answers while practising
+    today''s prediction. Ask: For input cat and target ats, what may c see? Answer: Only c, not a or t. Common mistake: Blocking
+    the diagonal. The current input stays allowed because it helps predict the following token.'
+- type: compare
+  title: Self-attention vs. cross-attention
+  columns:
+  - head: Self-attention
+    icon: fa:FaSyncAlt
+    points:
+    - Queries, keys and values come from the same sequence
+    - Each word gathers context from its own sentence
+    - 'Example: "it" reads "animal" in the same sentence'
+    - Used in every encoder and decoder block
+  - head: Cross-attention
+    icon: fa:FaExchangeAlt
+    points:
+    - Queries come from one sequence; keys and values from another
+    - The output side reads the input side
+    - 'Example: while writing French, the decoder reads the English source'
+    - Stable Diffusion's image features read the prompt this way (week 4)
+  notes: 'Say: Self-attention compares positions within one sequence. Cross-attention reads another sequence through the same
+    calculation. Three translated-token queries and five source-token keys produce a three-by-five score table. Analogy: One
+    group consults a second group''s notes. Ask: Where do translation-decoder queries come from? Answer: From decoder states.
+    The encoded source states supply keys and values. Common mistake: Expecting a square score table. Cross-attention compares
+    target positions with source positions, so the lengths can differ. Diffusion image features can similarly read prompt vectors.'
+- type: figure
+  title: 'A real BERT head: inspecting ''it'''
+  figure: bert_summary
+  notes: 'Say: This summary uses measured attention from pretrained BERT, separate from our character model. The selected head,
+    layer {{w05_bert_layer}}, head {{w05_bert_head}}, gives animal weight {{w05_attention_weight}} from the query at it. It
+    is the strongest of all 144 heads, chosen with the same rule as lab TODO 5. Analogy: A highlighted route shows a connection,
+    not the whole journey''s purpose. Ask: Would the strongest head represent every head fairly? Answer: No. Inspect the full
+    matrices and the distribution across heads. Common mistake: Treating a bright cell as proof of a coreference decision.'
+- type: figure
+  title: 'Measured GPT-2 heads: no weight on later tokens'
+  figure: gpt2_causal_summary
+  notes: 'Say: These are measured weights from pretrained GPT-2 for our sentence. Each row is one current token; each column
+    is a token it may read. Everything above the diagonal is a later token, and its measured weight is exactly zero in all 144
+    heads. The two heads still behave differently: the left head spreads weight over several earlier tokens, while the right
+    head reads the previous token. At it, later tired or wide is blocked, so changing that adjective leaves the earlier it row
+    unchanged. Analogy: A reader stopped halfway has not seen the final clue. Ask: Where could we test use of that adjective?
+    Answer: At a later position, or in the prediction after the complete sentence. Common mistake: Reading unchanged earlier
+    attention as proof that full-sentence reasoning failed.'
+- type: quiz
+  question: 'Scaled scores [2, 0, 0]: which weights does softmax produce?'
+  options:
+  - '[1.00, 0.00, 0.00]'
+  - '[0.67, 0.17, 0.17]'
+  - '[0.50, 0.25, 0.25]'
+  - '[0.79, 0.11, 0.11]'
+  answer: 3
+  notes: 'Say: Answer D. Exponentiating gives approximately 7.39, one and one. Divide by their sum, approximately 9.39. The
+    weights are approximately 0.79, 0.11 and 0.11. Rounded entries can total 1.01 although unrounded weights total one. Analogy:
+    Convert positive amounts into shares of their total. Ask: Why is answer A too extreme? Answer: A puts all the weight on
+    the largest score, like a hard maximum. Softmax turns each zero score into exp of zero, which is one, so each keeps about
+    0.11. Common mistake: Dividing the original scores by their sum, which skips the exponentiation and also gives answer A.'
+- type: section
+  number: 4
+  title: The transformer architecture
+  question: What happens around the attention operation?
+  icon: fa:FaCubes
+  notes: 'Say: Attention is one operation inside a block. A complete block also transforms features at each position and preserves
+    an input route. We follow these operations before comparing complete architectures. Analogy: A workshop combines group discussion
+    with individual revision. Ask: Which stage exchanges information between positions? Answer: Attention. Common mistake: Thinking
+    the feed-forward network mixes positions. It acts on each position separately, and within one layer the same feed-forward
+    weights are used at every position.'
+- type: figure
+  title: Inside one transformer block
+  figure: block
+  notes: 'Say: This is our lab''s pre-norm block. Normalise features, apply attention, then add the unchanged
+    input. Next normalise, apply a per-position feed-forward network and add its input. Shapes return to the original
+    width. Analogy: Each stage proposes a correction while preserving the earlier draft. Ask: Add correction [0.3,
+    −0.1] to input [1, 2]. Answer: [1.3, 1.9]. Common mistake: thinking a residual concatenates
+    vectors or updates weights; it adds them.'
+- type: figure
+  title: Three families of transformers
+  figure: three_archs
+  notes: 'Say: Read each row from left to right. Encoder-only BERT reads both sides of the supplied input. Decoder-only GPT-2
+    uses causal self-attention, and the dashed loop shows generation repeating with the longer prefix. Encoder-decoder T5 encodes
+    a source, then generates an output using cross-attention. Analogy: An encoder annotates a document; a decoder continues
+    it; an encoder-decoder transforms a source into a new document. Ask: Which standard family predicts a missing token from
+    both neighbours? Answer: The encoder family, such as BERT. Common mistake: Using a standard BERT encoder as a chat generator.
+    Family names describe information access, not guaranteed task quality.'
+- type: figure
+  title: Choose an architecture for the job
+  figure: architecture_comparison
+  notes: 'Say: Choose using required inputs and outputs. Complete-sentence classification suits an encoder. Extending a prefix
+    suits a decoder. Mapping a source into a generated sequence suits an encoder-decoder. Modern decoders also perform many
+    source-to-output tasks through prompting. Analogy: Choose a tool by the job before its brand. Ask: Can search and answer
+    generation use different models? Answer: Yes. Applications can combine an embedding model for search with a decoder for
+    answers. Common mistake: Treating architecture guidance as an exclusive task rule.'
+- type: quiz
+  question: Which combination fits document search plus generated answers?
+  options:
+  - Trained text embeddings; generating decoder
+  - Decoder search; BERT chat
+  - BERT alone for everything
+  - Only encoder-decoders use attention
+  answer: 0
+  notes: 'Say: Answer A. A trained text-embedding model makes queries and documents comparable for search. A generating decoder
+    then writes using the retrieved material. We build this combination in week twelve. Analogy: A librarian finds books before
+    a writer composes an answer. Ask: Why does trained matter for the search component? Answer: Search needs vectors trained
+    so that related queries and documents land close together. Arbitrary token lookup vectors do not do this. Common mistake:
+    Answer D. All three transformer families use attention.'
+- type: code
+  title: Attention in PyTorch (what you write in the lab)
+  code: "def attention(q, k, v, causal=False):\n    scores = q @ k.transpose(-2, -1) / q.size(-1)**0.5\n    if\
+    \ causal:\n        n = q.size(-2)\n        blocked = torch.ones(n, n, dtype=torch.bool,\n                \
+    \             device=q.device).triu(1)\n        scores = scores.masked_fill(blocked, float(\"-inf\"))\n  \
+    \  weights = scores.softmax(dim=-1)\n    return weights @ v, weights"
+  notes: 'Say: This compact example matches the calculation in the lab, which passes an explicit blocked-position mask. Keep
+    the mask on q''s device for GPU tensors. Row softmax runs over source positions. Analogy: Each line implements a step in
+    our recipe. Ask: Does True mean blocked in PyTorch''s built-in scaled_dot_product_attention? Answer: No. Our custom mask
+    uses True for blocked; SDPA uses True for allowed. Common mistake: Passing the custom mask to SDPA unchanged. Use is_causal=True
+    or invert the boolean mask.'
+- type: section
+  number: 5
+  title: Training, efficiency and applications
+  question: How does the model learn, and what costs time or memory?
+  icon: fa:FaTachometerAlt
+  notes: 'Say: Training compares model scores with known targets, then changes learned parameters to reduce prediction error.
+    Inference uses learned parameters without that update. We then consider uncertainty, memory costs and non-text inputs. Analogy:
+    Practice changes a musician''s skill; a performance uses the skill already learned. Ask: Does generating a new character
+    update our model''s weights? Answer: No. Sampling extends the prefix; only the optimizer updates parameters. Common mistake:
+    Mixing up the sampling loop and the training loop. They have different purposes.'
+- type: compare
+  title: Training objectives
+  columns:
+  - head: 'Masked: BERT'
+    icon: fa:FaMask
+    points:
+    - Hide about 15% of tokens; predict them from both sides
+    - 'Input: The [MASK] sat on the mat'
+    - 'Target: cat'
+    - Suits search and labelling
+  - head: 'Next token: GPT'
+    icon: fa:FaArrowRight
+    points:
+    - Predict each token from the ones before it
+    - 'Text: "cats"'
+    - 'Inputs: c, a, t'
+    - 'Targets: a, t, s'
+    - Suits generation, as in our lab
+  - head: 'Missing spans: T5'
+    icon: fa:FaExchangeAlt
+    points:
+    - Replace word spans with a marker
+    - 'Input: The <X> on the mat'
+    - 'Target: <X> cat sat'
+    - The decoder writes the hidden words
+  notes: 'Say: Targets come from text itself, called self-supervised learning. BERT predicts selected tokens using both sides.
+    Our character decoder predicts the next character at every allowed position. T5 reconstructs missing spans. Analogy: Make
+    exercises from a finished worksheet by hiding different parts. Ask: In cats, what target belongs to input c? Answer: a.
+    Common mistake: Thinking shifted targets make the mask unnecessary. The causal mask must still block later inputs.'
+- type: bullets
+  title: 'Perplexity: read the model''s uncertainty'
+  icon: fa:FaCalculator
+  bullets:
+  - Test on text kept separate from training.
+  - 'Illustration: average loss = ln(4); perplexity = 4.'
+  - Think of four equally likely choices.
+  - Compare the same text and tokenizer.
+  - Lower perplexity does not prove truthfulness.
+  notes: 'Say: Perplexity is exp of average negative log-probability on separate test text. Ln of four is a classroom illustration,
+    not our measured loss. Its uncertainty equals four equally likely choices, rather than exactly four candidates everywhere.
+    Analogy: Summarise how surprising actual text was to a predictor. Ask: Can character and subword perplexities be compared
+    directly? Answer: No. Tokenization changes the prediction task. Common mistake: Applying ordinary causal perplexity to masked
+    BERT, or reading low perplexity as proof that answers are correct.'
+- type: figure
+  title: A real small transformer, trained for this lecture
+  figure: chargpt_loss
+  notes: 'Say: These values come from the stored measured experiment. Tiny Shakespeare is a small collection of Shakespeare
+    text. The curve scores separate-text character predictions, not factual understanding. Your run may differ. Analogy: A learner
+    recognises spelling and dialogue patterns while practising a narrow writing exercise. Ask: What would show whether generated
+    dialogue maintains a coherent story? Answer: Reading actual samples and noting where they succeed and fail. Lower loss alone
+    cannot show this. Common mistake: Assuming fluent samples mean understanding.'
+- type: figure
+  title: The cost of attention grows as n squared
+  figure: complexity
+  notes: 'Say: Full attention makes n squared comparisons for n positions. This plot shows theoretical one-head score-table
+    memory, not a runtime benchmark. FlashAttention avoids storing the entire table. Restricted attention changes which positions
+    interact. Analogy: Doubling a square''s side quadruples its area. Ask: Does avoiding storage remove all quadratic arithmetic?
+    Answer: No. FlashAttention still computes every score; it only avoids storing the whole table. Common mistake: Assuming
+    more available context guarantees reliable use. Grouped-query attention reduces KV storage and sliding windows restrict
+    comparisons, but long context also needs suitable positions, training and evaluation.'
+- type: figure
+  title: 'Faster generation: the KV cache'
+  figure: kv_cache
+  notes: 'Say: Each layer stores keys and values for processed tokens. The newest known token supplies a query and new keys
+    and values. Its query reads cached and current information to predict the next token. Analogy: Keep earlier calculations
+    on a scratchpad. Ask: Does caching change the model''s learned task? Answer: No. It saves repeated work and consumes memory.
+    Common mistake: Expecting our CharGPT to use a cache. It recomputes its context; the optional GPT-2 experiment measures
+    caching separately, and timing depends on hardware.'
+- type: figure
+  title: 'Mixture-of-experts: run a few networks per token'
+  figure: moe
+  notes: 'Say: A mixture-of-experts layer offers several feed-forward networks. A learned router selects a few for each token
+    vector. Routing weights combine their outputs. More total parameters need not all run for one token. Analogy: Send a case
+    to selected specialists. Ask: Do expert names guarantee recognisable human specialties? Answer: No. Roles are learned during
+    training. Common mistake: Assuming more parameters come with free computation. Every expert''s weights need storage, and
+    routing and moving them can add cost.'
+- type: figure
+  title: 'Beyond text: images and speech'
+  figure: vit_patches
+  notes: 'Say: A Vision Transformer embeds image patches into vectors with position information. Whisper encodes audio spectrogram
+    features, then generates transcript text with a decoder. Analogy: Cut a picture into numbered tiles, then exchange information
+    between tile representations. Ask: Are patches words, or do they share a useful vector-sequence interface? Answer: They
+    are not words, but like tokens they become a sequence of vectors that the same transformer operations can process. Common
+    mistake: Assuming each modality needs a different architecture. Diffusion transformers likewise process image-latent patches,
+    and transformers also handle code and time series.'
+- type: quiz
+  title: What does an attention picture show?
+  question: A bright attention cell supports which claim?
+  options:
+  - This head assigns that source high weight
+  - The model's answer to the question is true
+  - Every head in the model resolved the pronoun
+  - We proved how the model reasoned to its answer
+  answer: 0
+  notes: 'Say: Answer A. One cell shows a mixing weight in one head for one input. Values, residual routes and feed-forward
+    layers also affect outputs. Removing or changing a component can test its effect. Analogy: Traffic counts show a busy route,
+    not why a traveller chose a destination. Ask: What makes a displayed head a biased example? Answer: Selecting the strongest-looking
+    head without saying so. Common mistake: Reporting attention pictures but not the compute used. Also consider that token
+    costs differ between languages.'
+- type: lab
+  title: 'Lab 5: build attention and a small GPT'
+  steps:
+  - Check attention and masks.
+  - Assemble heads and blocks.
+  - Train next-character predictions.
+  - Measure loss; sample text.
+  - Inspect pretrained attention.
+  runtime: Colab T4 GPU; CPU uses fewer steps. About 10 min on a 4 GB laptop GPU after downloads
+  deliverable: Checks, loss curve, samples and explanations
+  notes: 'Say: Read, predict, run, change and check. Complete attention checks before training. Your character model is separate
+    from pretrained BERT and GPT-2 used for inspection. Record measured results from your run. Analogy: Assemble a small engine
+    before inspecting larger engines built by others. Ask: Which function creates next-character targets? Answer: get_batch,
+    by shifting the text one position. Common mistake: Copying the lecture''s measurements instead of reporting your own results,
+    or expecting smoke-run samples to show full-training quality.'
+- type: summary
+  points:
+  - IDs become vectors with positions.
+  - Queries match keys; weights mix values.
+  - Heads offer learned views.
+  - Masks block future information.
+  - Blocks add corrections.
+  - Training updates weights; inference extends prefixes.
+  - Evaluate predictions and inspect limitations.
+  notes: 'Say: Rebuild the route aloud. IDs select vectors; positions supply order; blocks exchange and transform information.
+    A vocabulary head scores next tokens. Training checks known targets; generation samples with fixed learned weights. Analogy:
+    Reassemble an engine from input route to output route. Ask: Which operation would you explain first to someone new to transformers?
+    Answer: Any operation works if it is explained with its inputs and outputs. Common mistake: Replacing mechanisms with model
+    names. Next week connects these architectures to large language models and their training stages.'
+- type: resources
+  items:
+  - kind: video
+    label: '3Blue1Brown: transformer overview'
+    url: https://www.youtube.com/watch?v=wjZofJX0v4M
+  - kind: video
+    label: '3Blue1Brown: attention step by step'
+    url: https://www.youtube.com/watch?v=eMlx5fFNoYc
+  - kind: video
+    label: 'Karpathy: build GPT in Python'
+    url: https://www.youtube.com/watch?v=kCc8FmEb1nY
+  - kind: paper
+    label: 'Vaswani: Attention Is All You Need'
+    url: https://arxiv.org/abs/1706.03762
+  - kind: course
+    label: 'Hugging Face: transformer architectures'
+    url: https://huggingface.co/learn/llm-course/chapter1/6
+  notes: 'Say: Revisit the visual videos at your own pace. Use the coding lecture to practise lab shape changes. Read the original
+    paper after explaining the numerical example. Word notes include books and official API references. Analogy: Choose a suitable
+    trail through the course map. Ask: Would a visual recap or coding walkthrough help most tonight? Answer: Let the class choose,
+    then point to the matching resource. Common mistake: Watching code run instead of predicting its shapes and checks. Explain
+    one cell yourself before copying its implementation.'

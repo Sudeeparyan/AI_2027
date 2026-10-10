@@ -56,7 +56,7 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--weeks", default="1")
     ap.add_argument("--what", default="slides,notes")
-    ap.add_argument("--dpi", type=int, default=60)
+    ap.add_argument("--dpi", type=int, default=100)
     a = ap.parse_args()
     for w in sorted({w for part in a.weeks.split(",") for w in (range(1, 13) if part == "all" else range(int(part.split("-")[0]), int(part.split("-")[-1]) + 1))}):
         render(w, a.what.split(","), a.dpi)

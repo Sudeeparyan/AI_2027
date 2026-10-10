@@ -6,7 +6,7 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 
-from _style import ACCENT, INK, MUTED, PRIMARY, SERIES, TEAL, TEXT, TINT, arrow, box, save
+from _style import role_box, role_legend, routed_arrow, save_editable_scene, ACCENT, INK, MUTED, PRIMARY, SERIES, TEAL, TEXT, TINT, arrow, box, save
 
 ASSETS = Path(__file__).resolve().parents[1] / "assets" / "week_12"
 ORANGE = "#FFF1E6"
@@ -35,106 +35,85 @@ def cover(path):
 
 
 def rag_pipeline(path):
-    fig, ax = plt.subplots(figsize=(13, 5.2))
-    ax.axis("off")
-    ax.set_xlim(0, 13)
-    ax.set_ylim(0, 5.2)
-    ax.text(0.1, 4.85, "Indexing (offline)", fontsize=14, color=TEAL, fontweight="bold")
-    idx = [("documents", 0.1), ("chunk", 2.3), ("embed", 4.5), ("vector store\n+ keyword index", 6.7)]
-    for i, (t, x) in enumerate(idx):
-        box(ax, x, 3.7, 1.9, 0.9, t, fc=GREEN, ec=TEAL, size=12)
-        if i < len(idx) - 1:
-            arrow(ax, x + 1.9, 4.15, x + 2.3, 4.15)
-    ax.text(0.1, 2.75, "Answering (online)", fontsize=14, color=PRIMARY, fontweight="bold")
-    q = [("question", 0.1, 1.5), ("retrieve\n(dense + BM25)", 1.95, 1.75), ("re-rank\ntop k", 4.05, 1.5), ("prompt with\nnumbered sources", 5.9, 1.9),
-         ("LLM", 8.15, 1.1), ("answer with\ncitations", 9.6, 1.7)]
-    for i, (t, x, w) in enumerate(q):
-        box(ax, x, 1.2, w, 1.0, t, fc=TINT if t != "LLM" else ORANGE, ec=PRIMARY if t != "LLM" else ACCENT, size=12)
-        if i < len(q) - 1:
-            arrow(ax, x + w, 1.7, q[i + 1][1], 1.7)
-    arrow(ax, 7.65, 3.7, 2.9, 2.2)
-    ax.text(11.5, 1.7, "or 'I don't know'", fontsize=11.5, color=MUTED, va="center")
-    ax.text(0.1, 0.35, "The model answers from retrieved evidence instead of memory: current, private and checkable.", fontsize=12.5, color=TEXT)
-    save(fig, path)
+    fig, ax = _diagram_canvas(4.7)
+    ax.text(0.15, 4.28, "Offline: build the searchable index", fontsize=20, color=TEAL, fontweight="bold")
+    _sequence(ax, [("Documents", "data"), ("Chunks + IDs", "data"), ("Embeddings", "model"),
+                   ("Search index", "output")], 3.05, width=9.9, height=0.85, size=18)
+    ax.text(0.15, 2.5, "Online answer", fontsize=20, color=PRIMARY, fontweight="bold")
+    _sequence(ax, [("Question", "data"), ("Retrieve", "tool"), ("Re-rank", "model"),
+                   ("Sources\nin prompt", "data"), ("Generate", "model"),
+                   ("Cited answer\nor abstain", "output")], 1.25, height=0.9, size=18)
+    routed_arrow(ax, [(9.02, 3.05), (9.02, 2.86), (3.37, 2.86), (3.37, 2.15)], color=TEAL)
+    ax.text(0.15, 0.75, "Retrieved evidence can help; verify support and source access.", fontsize=18, color=TEXT)
+    role_legend(ax, 0.08, size=16)
+    _diagram_finish(fig, path)
+
 
 
 def chunking(path):
-    fig, ax = plt.subplots(figsize=(13, 3.6))
-    ax.axis("off")
-    ax.set_xlim(0, 13)
-    ax.set_ylim(0, 3.6)
-    ax.add_patch(plt.Rectangle((0.2, 2.5), 12.6, 0.6, color="#E5E7EB"))
-    ax.text(6.5, 2.8, "document text …………………………………………………………………………………………", ha="center", va="center", fontsize=12, color=MUTED)
+    fig, ax = _diagram_canvas(2.9)
+    role_box(ax, 0.15, 2.12, 12.55, 0.52, "Document with headings, paragraphs and source metadata", "data", size=20)
     for i in range(4):
-        x = 0.2 + i * 3.0
-        c = SERIES[i % len(SERIES)]
-        ax.add_patch(plt.Rectangle((x, 1.35 - (i % 2) * 0.55), 3.6, 0.45, facecolor="white", edgecolor=c, lw=2.5))
-        ax.text(x + 1.8, 1.575 - (i % 2) * 0.55, f"chunk {i + 1}", ha="center", va="center", fontsize=11.5, color=c, fontweight="bold")
-    ax.annotate("", xy=(3.8, 0.55), xytext=(3.2, 0.55), arrowprops=dict(arrowstyle="<->", color=ACCENT, lw=1.5))
-    ax.text(3.5, 0.2, "overlap", ha="center", fontsize=11.5, color=ACCENT)
-    ax.text(12.8, 0.35, "size: 200–1,000 tokens · overlap 10–20% · respect headings and paragraphs", ha="right", fontsize=12, color=TEXT)
-    save(fig, path)
+        x = 0.15 + i * 3.0
+        y = 1.2 - (i % 2) * 0.4
+        role_box(ax, x, y, 3.5, 0.45, f"Chunk {i + 1}", "data", size=18)
+    arrow(ax, 3.4, 0.57, 3.15, 0.57, color=ACCENT)
+    arrow(ax, 3.4, 0.57, 3.65, 0.57, color=ACCENT)
+    ax.text(3.4, 0.29, "Overlap", fontsize=17, color=ACCENT, ha="center")
+    ax.text(5.5, 0.47, "Test size, boundaries and overlap on real questions.", fontsize=17, color=TEXT)
+    _diagram_finish(fig, path)
+
 
 
 def agent_loop(path):
-    fig, ax = plt.subplots(figsize=(13, 5))
-    ax.axis("off")
-    ax.set_xlim(0, 13)
-    ax.set_ylim(0, 5)
-    box(ax, 0.2, 2.0, 1.9, 1.0, "user task", fc=TINT, size=12.5)
-    arrow(ax, 2.1, 2.5, 3.2, 2.5)
-    box(ax, 3.2, 1.7, 2.6, 1.6, "LLM\nreason: what next?", fc=ORANGE, ec=ACCENT, size=12.5)
-    box(ax, 7.4, 3.3, 2.5, 1.0, "act: call a tool\n(JSON arguments)", fc=TINT, size=11.5)
-    box(ax, 7.4, 0.7, 2.5, 1.0, "observe: tool\nresult", fc=TINT, size=11.5)
-    arrow(ax, 5.8, 2.9, 7.4, 3.8)
-    arrow(ax, 8.65, 3.3, 8.65, 1.7)
-    arrow(ax, 7.4, 1.2, 5.8, 2.1)
-    tools = ["search (RAG)", "calculator", "code / APIs", "e-mail (needs approval)"]
-    for i, t in enumerate(tools):
-        box(ax, 10.6, 3.9 - i * 0.95, 2.2, 0.7, t, fc="white", ec=SERIES[i % len(SERIES)], color=SERIES[i % len(SERIES)], size=10.5)
-    arrow(ax, 9.9, 3.8, 10.6, 3.6)
-    box(ax, 3.9, 0.2, 2.6, 0.8, "memory: messages,\nnotes, state", fc="white", ec=MUTED, size=10.5)
-    ax.text(3.2, 4.4, "repeat until done or a step limit is reached", fontsize=12, color=ACCENT, fontweight="bold")
-    box(ax, 0.2, 0.2, 1.9, 0.9, "final answer", fc="white", ec=ACCENT, color=ACCENT, size=11.5)
-    arrow(ax, 3.2, 1.9, 2.1, 0.8)
-    ax.text(1.0, 1.35, "no tool needed", fontsize=10.5, color=MUTED)
-    save(fig, path)
+    fig, ax = _diagram_canvas(4.9)
+    ax.text(0.15, 4.48, "Propose, check, act, observe; stop at the limit", fontsize=20, color=INK, fontweight="bold")
+    entries = [("Task + history", 0.15, "data"), ("Model proposes\none tool call", 3.4, "model"),
+               ("Code checks\nname + arguments", 6.65, "tool"), ("Allowed tool\nsearch / calculate", 9.9, "tool")]
+    for i, (label, x, role) in enumerate(entries):
+        role_box(ax, x, 3.0, 2.8, 1.0, label, role, size=18)
+        if i < 3:
+            arrow(ax, x + 2.8, 3.5, x + 3.25, 3.5)
+    role_box(ax, 9.9, 1.2, 2.8, 1.0, "Observation\nresult or error", "output", size=18)
+    arrow(ax, 11.3, 3.0, 11.3, 2.2, color=TEAL)
+    routed_arrow(ax, [(8.05, 3.0), (8.05, 2.45), (10.25, 2.45), (10.25, 2.2)], color=ACCENT)
+    ax.text(8.2, 2.65, "Blocked", fontsize=17, color=ACCENT)
+    routed_arrow(ax, [(9.9, 1.7), (1.55, 1.7), (1.55, 3.0)], color=TEAL, dashed=True)
+    ax.text(0.15, 0.9, "Repeat: append observation; next model call reads it", fontsize=17, color=TEAL)
+    role_box(ax, 3.4, 2.05, 2.8, 0.75, "Final answer\n(no tool call)", "output", size=16)
+    arrow(ax, 4.8, 3.0, 4.8, 2.8, color=ACCENT)
+    ax.text(0.15, 0.55, "Email and approval are simulated in the lab; no real message is sent.", fontsize=17, color=MUTED)
+    role_legend(ax, 0.08, size=16)
+    _diagram_finish(fig, path)
+
 
 
 def workflows(path):
-    fig, axes = plt.subplots(1, 5, figsize=(13, 2.7))
-    names = [("Prompt chaining", "step → step → step"), ("Routing", "classify, then send to\nthe right handler"),
-             ("Parallelisation", "split or vote,\nthen aggregate"), ("Orchestrator–workers", "LLM plans sub-tasks\nfor worker LLMs"),
-             ("Evaluator–optimiser", "generate, critique,\nrevise")]
-    for a, (t, d), c in zip(axes, names, SERIES):
-        a.axis("off")
-        a.set_xlim(0, 1)
-        a.set_ylim(0, 1)
-        a.add_patch(plt.Rectangle((0.03, 0.08), 0.94, 0.84, facecolor="white", edgecolor=c, lw=2.5))
-        a.text(0.5, 0.68, t, ha="center", va="center", fontsize=12, color=c, fontweight="bold")
-        a.text(0.5, 0.35, d, ha="center", va="center", fontsize=10.5, color=TEXT)
-    fig.suptitle("Workflows: fixed code paths (predictable, cheaper)   vs   agents: the LLM decides the steps (flexible, riskier)",
-                 fontsize=12.5, color=INK, y=0.02)
-    save(fig, path)
+    fig, ax = _diagram_canvas(2.55)
+    cards = [("Chaining", "Fixed sequence"), ("Routing", "Choose handler"), ("Parallel", "Split then merge"),
+             ("Workers", "Delegate tasks"), ("Evaluate", "Critique, revise")]
+    width = 2.27
+    for i, (title, detail) in enumerate(cards):
+        x = 0.15 + i * 2.6
+        role_box(ax, x, 1.16, width, 0.82, title, "tool", size=20)
+        ax.text(x + width / 2, 0.88, detail, fontsize=17, color=TEXT, ha="center")
+    ax.text(0.15, 0.25, "Workflow: code defines paths. Agent: model chooses the next step.", fontsize=19, color=INK)
+    _diagram_finish(fig, path)
+
 
 
 def mcp(path):
-    fig, ax = plt.subplots(figsize=(13, 4.6))
-    ax.axis("off")
-    ax.set_xlim(0, 13)
-    ax.set_ylim(0, 4.6)
-    box(ax, 0.2, 1.4, 3.2, 1.8, "Host application\n(assistant, IDE, agent)\nwith MCP client", fc=TINT, size=12)
-    servers = [("Files server", "read project files"), ("Database server", "query tables"), ("Search server", "our handbook RAG"),
-               ("Calendar / e-mail server", "actions: need approval")]
-    for i, (s, d) in enumerate(servers):
-        y = 3.7 - i * 0.95
-        c = SERIES[i % len(SERIES)]
-        box(ax, 6.2, y, 3.0, 0.75, s, fc="white", ec=c, color=c, size=11.5)
-        ax.text(9.45, y + 0.37, d, fontsize=11, color=MUTED, va="center")
-        arrow(ax, 3.4, 2.3, 6.2, y + 0.37)
-    ax.text(4.1, 4.15, "MCP (JSON-RPC)", fontsize=12, color=ACCENT, fontweight="bold")
-    ax.text(0.2, 0.2, "Servers expose tools, resources and prompts; any MCP client can discover and use them.", fontsize=12, color=TEXT)
-    save(fig, path)
+    fig, ax = _diagram_canvas(3.0)
+    role_box(ax, 0.15, 1.12, 3.5, 1.05, "Host application\nmanages clients", "tool", size=19)
+    for i, (label, detail) in enumerate([("Files server", "Read files"), ("Database server", "Query tables"),
+                                       ("Search server", "Retrieve evidence"), ("Action server", "Check permissions")]):
+        y = 2.44 - i * 0.57
+        role_box(ax, 6.2, y, 3.1, 0.44, label, "tool", size=18)
+        ax.text(9.7, y + 0.22, detail, fontsize=18, color=TEXT, va="center")
+        arrow(ax, 3.65, 1.645, 6.2, y + 0.22)
+    ax.text(0.15, 0.25, "One client per server; expose tools, resources and prompts with access controls.", fontsize=18, color=INK)
+    _diagram_finish(fig, path)
+
 
 
 def agent_trace(path):
@@ -168,5 +147,74 @@ def agent_trace(path):
     save(fig, path)
 
 
+
+def _diagram_canvas(height):
+    fig, ax = plt.subplots(figsize=(13, height))
+    fig.subplots_adjust(left=0.025, right=0.99, bottom=0.04, top=0.97)
+    ax.axis("off")
+    ax.set_xlim(0, 13)
+    ax.set_ylim(0, height)
+    return fig, ax
+
+
+def _sequence(ax, labels, y, width=12.6, height=0.95, size=18):
+    gap = 0.28
+    block = (width - gap * (len(labels) - 1)) / len(labels)
+    for i, (label, role) in enumerate(labels):
+        x = 0.15 + i * (block + gap)
+        role_box(ax, x, y, block, height, label, role, size=size)
+        if i < len(labels) - 1:
+            arrow(ax, x + block, y + height / 2, x + block + gap, y + height / 2)
+
+
+def _diagram_finish(fig, path):
+    save_editable_scene(fig, path)
+
+
+def retrieval_results(path):
+    r = json.loads((ASSETS / "results.json").read_text(encoding="utf-8"))
+    methods = list(r["retrieval"])
+    import numpy as np
+    fig, ax = plt.subplots(figsize=(13, 3.9))
+    x = np.arange(len(methods))
+    for index, (field, label, colour) in enumerate([
+        ("recall@1", "Gold-document hit@1", PRIMARY),
+        ("recall@3", "Gold-document hit@3", TEAL),
+        ("MRR", "Mean reciprocal rank", ACCENT),
+    ]):
+        values = [r["retrieval"][name][field] for name in methods]
+        bars = ax.bar(x + (index - 1) * 0.26, values, 0.26, label=label, color=colour)
+        ax.bar_label(bars, labels=[f"{value:.2f}" for value in values], fontsize=18, padding=3)  # as in the slide text
+    ax.set_xticks(x, ["BM25\nkeywords", "Dense\nembeddings", "Hybrid\nRRF", "Hybrid +\nre-rank"], fontsize=18)
+    ax.tick_params(axis="y", labelsize=18)
+    ax.set_ylim(0, 1.22)
+    ax.legend(ncol=3, loc="upper center", bbox_to_anchor=(0.5, 1.24), fontsize=18)
+    ax.grid(axis="x", visible=False)
+    fig.tight_layout()
+    save(fig, path)
+
+
+def rag_results(path):
+    r = json.loads((ASSETS / "results.json").read_text(encoding="utf-8"))
+    rows = r["summary"]
+    names = list(rows)
+    values = [rows[name]["accuracy (answerable)"] for name in names]
+    fig, ax = plt.subplots(figsize=(13, 3.4))
+    bars = ax.barh(range(len(values)), values, color=[MUTED, PRIMARY])
+    ax.bar_label(bars, labels=[f"{value:.0%}" for value in values], fontsize=22, padding=7)
+    ax.set_yticks(range(len(values)), ["Without retrieval", "RAG"], fontsize=22)
+    ax.invert_yaxis()
+    ax.set_xlim(0, 1.12)
+    from matplotlib.ticker import PercentFormatter
+    ax.xaxis.set_major_formatter(PercentFormatter(1))
+    ax.tick_params(axis="x", labelsize=18)
+    ax.set_xlabel("Accuracy on answerable handbook questions", fontsize=20)
+    where = r.get("gpu") or "GPU" if str(r["device"]).startswith("cuda") else "CPU"
+    ax.set_title(f"Stored run: {r['llm'].split('/')[-1]} on {where.replace('NVIDIA GeForce ', '')}", fontsize=18, pad=14)
+    ax.grid(axis="y", visible=False)
+    fig.tight_layout()
+    save(fig, path)
+
+
 FIGURES = {"cover": cover, "rag_pipeline": rag_pipeline, "chunking": chunking, "agent_loop": agent_loop, "workflows": workflows, "mcp": mcp,
-           "agent_trace": agent_trace, **{n: asset(n) for n in ["lab_retrieval", "lab_rag"]}}
+           "agent_trace": agent_trace, "lab_retrieval": retrieval_results, "lab_rag": rag_results}

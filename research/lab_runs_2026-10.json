@@ -1,0 +1,130 @@
+{
+  "description": "Full runs of every built solution notebook (tools/test_labs.py --full) on the laptop used to check the pack, 9 October 2026, with HF_HUB_OFFLINE=1 (models and data already downloaded). Copied from build/week_NN/lab_test_full.json, which is not kept in git. Markdown, comments and header lines (including these measured times) were edited after the runs, so notebook_sha256 differs from the final build. A comparison of code cells on 10 October found no other code change, except that the Week 1 results-export cell gained two metadata fields (measured_utc, run_mode); those two values in the stored Week 1 results.json were copied from this run record. The runner skips the %pip install cells and the Week 11 demo.launch cell. The smoke runs after the final build execute every other code cell of the current notebooks.",
+  "runs": [
+    {
+      "week": 1,
+      "seconds": 55.6,
+      "minutes": 0.9,
+      "hardware": "laptop CPU",
+      "environment": ".venv-labs (CPU PyTorch)",
+      "started_at_utc": "2026-10-09T12:05:27.446172+00:00",
+      "notebook_sha256": "5a185033d202be3f58d0c8d9842868868a5be152aae3360f2d1ca8ebd9fcde17",
+      "timeout_per_cell": 1800
+    },
+    {
+      "week": 2,
+      "seconds": 555.9,
+      "minutes": 9.3,
+      "hardware": "laptop CPU",
+      "environment": ".venv-labs (CPU PyTorch)",
+      "started_at_utc": "2026-10-09T13:09:03.395063+00:00",
+      "notebook_sha256": "e88f18fbf8c0a35b087abc37b1d1068474762752bc30aa22c63ca1693bab0d90",
+      "timeout_per_cell": 1800
+    },
+    {
+      "week": 3,
+      "seconds": 1150.3,
+      "minutes": 19.2,
+      "hardware": "laptop CPU",
+      "environment": ".venv-labs (CPU PyTorch)",
+      "started_at_utc": "2026-10-09T13:50:41.323867+00:00",
+      "notebook_sha256": "55f98b1b089a7003f36f3b6ffb6eb099e52bed5d5c642af3b5b8d1a9414c17c6",
+      "timeout_per_cell": 1800
+    },
+    {
+      "week": 4,
+      "seconds": 993.9,
+      "minutes": 16.6,
+      "hardware": "laptop CPU",
+      "environment": ".venv-labs (CPU PyTorch)",
+      "started_at_utc": "2026-10-09T14:11:26.594526+00:00",
+      "notebook_sha256": "4832187958451d755329f6fc54c869a7ea0eb5d07aaa9f0f4dcdc2c6b05dbb1c",
+      "timeout_per_cell": 1800,
+      "note": "CPU path: two MNIST epochs and SD-Turbo for Part B."
+    },
+    {
+      "week": 5,
+      "seconds": 605.6,
+      "minutes": 10.1,
+      "hardware": "NVIDIA GTX 1650 laptop GPU (4 GB)",
+      "environment": ".venv-gpu (CUDA PyTorch)",
+      "started_at_utc": "2026-10-09T19:43:30.953597+00:00",
+      "notebook_sha256": "bfb05f34a3ecb6642ac815eed76420a2cf63d05487ab05694289ca5218b22cfd",
+      "timeout_per_cell": 7200
+    },
+    {
+      "week": 6,
+      "seconds": 504.0,
+      "minutes": 8.4,
+      "hardware": "laptop CPU",
+      "environment": ".venv-labs (CPU PyTorch)",
+      "started_at_utc": "2026-10-09T18:30:22.679031+00:00",
+      "notebook_sha256": "d47296436a354dd393ba17bc350bfa0d7e4d39b8024f8db52f813515f047e424",
+      "timeout_per_cell": 1800,
+      "note": "CPU quick path: Flan-T5-small, one reasoning run per mode, short token budgets."
+    },
+    {
+      "week": 7,
+      "seconds": 3498.8,
+      "minutes": 58.3,
+      "hardware": "NVIDIA GTX 1650 laptop GPU (4 GB)",
+      "environment": ".venv-gpu (CUDA PyTorch)",
+      "started_at_utc": "2026-10-09T18:45:07.105449+00:00",
+      "notebook_sha256": "f4dcf595fd8425204bdd182515d9b31fdfbba6f957f62d87173acf49fe772fb2",
+      "timeout_per_cell": 7200,
+      "note": "Qwen2.5-1.5B-Instruct on the GPU."
+    },
+    {
+      "week": 8,
+      "seconds": 5048.0,
+      "minutes": 84.1,
+      "hardware": "laptop CPU",
+      "environment": ".venv-labs (CPU PyTorch)",
+      "started_at_utc": "2026-10-09T20:02:22.710926+00:00",
+      "notebook_sha256": "69a2768d7f50928aa6b4d3bd6d07a48ce862e3392ccc641bacaebf9da6288d34",
+      "timeout_per_cell": 14400,
+      "note": "LoRA training ran on the CPU (GPU hidden with CUDA_VISIBLE_DEVICES); training took 52.5 min, the recorded run in curriculum/assets/week_08/results.json took 75.9 min with the same losses."
+    },
+    {
+      "week": 9,
+      "seconds": 48.2,
+      "minutes": 0.8,
+      "hardware": "NVIDIA GTX 1650 laptop GPU (4 GB)",
+      "environment": ".venv-gpu (CUDA PyTorch)",
+      "started_at_utc": "2026-10-09T19:53:37.711657+00:00",
+      "notebook_sha256": "35aea6120124562094e3d0d15a76972ec41d1a2fc30170cbc2ca04cc64caf8f8",
+      "timeout_per_cell": 7200
+    },
+    {
+      "week": 10,
+      "seconds": 416.0,
+      "minutes": 6.9,
+      "hardware": "laptop CPU",
+      "environment": ".venv-labs (CPU PyTorch)",
+      "started_at_utc": "2026-10-09T21:26:31.589689+00:00",
+      "notebook_sha256": "4c77bd1c6d11624eead9ea4470f222fc51119be28cdaebe25c28d1ef1ad57d5e",
+      "timeout_per_cell": 14400,
+      "note": "Qwen3-VL-2B-Instruct on the CPU, chosen with GENAI_VLM (the notebook's automatic CPU choice is SmolVLM-256M); GENAI_FORCE_CPU=1."
+    },
+    {
+      "week": 11,
+      "seconds": 198.5,
+      "minutes": 3.3,
+      "hardware": "NVIDIA GTX 1650 laptop GPU (4 GB)",
+      "environment": ".venv-gpu (CUDA PyTorch)",
+      "started_at_utc": "2026-10-09T19:54:26.893126+00:00",
+      "notebook_sha256": "366096d33a505fae420a1a4ba29ca8d359f302300dee5cebb4c26966be45cc80",
+      "timeout_per_cell": 7200
+    },
+    {
+      "week": 12,
+      "seconds": 274.8,
+      "minutes": 4.6,
+      "hardware": "NVIDIA GTX 1650 laptop GPU (4 GB)",
+      "environment": ".venv-gpu (CUDA PyTorch)",
+      "started_at_utc": "2026-10-09T19:57:46.341393+00:00",
+      "notebook_sha256": "52a0a608d88f108a864d53cfa4260c40f5f4b099373a0da54cddfa490b2bdb15",
+      "timeout_per_cell": 7200
+    }
+  ]
+}

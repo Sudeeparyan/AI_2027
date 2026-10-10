@@ -6,7 +6,20 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 
-from _style import ACCENT, INK, MUTED, PRIMARY, SERIES, TEAL, TEXT, TINT, arrow, box, save
+from _style import ACCENT, INK, MUTED, PRIMARY, SERIES, TEAL, TEXT, TINT, arrow, box, save as save_raster, role_box, role_legend, routed_arrow, save_editable_scene
+
+
+def save(fig, path, transparent=False):
+    if not transparent and all(not ax.axison and not ax.images for ax in fig.axes):
+        save_editable_scene(fig, path)
+    else:
+        save_raster(fig, path, transparent=transparent)
+
+
+def canvas(height=5):
+    fig, ax = plt.subplots(figsize=(13, height))
+    ax.axis("off"); ax.set_xlim(0,13); ax.set_ylim(0,height)
+    return fig, ax
 
 ASSETS = Path(__file__).resolve().parents[1] / "assets" / "week_07"
 ORANGE = "#FFF1E6"
@@ -26,73 +39,78 @@ def cover(path):
 
 
 def anatomy(path):
-    fig, ax = plt.subplots(figsize=(13, 5.2))
-    ax.axis("off")
-    ax.set_xlim(0, 13)
-    ax.set_ylim(0, 5.2)
-    parts = [("System / developer message", "Role, rules, tone, safety, output policy", PRIMARY, 4.2),
-             ("Context", "Documents, data, conversation history, tool results (clearly delimited)", TEAL, 3.35),
-             ("Examples (optional)", "1–5 input → output pairs showing the exact format", ACCENT, 2.5),
-             ("Task / question", "What to do, for whom, with which constraints", INK, 1.65),
-             ("Output format", "Length, structure, JSON schema, what to do if unsure", "#A21CAF", 0.8)]
-    for title, sub, c, y in parts:
-        box(ax, 0.2, y, 3.6, 0.7, title, fc="white", ec=c, color=c, size=12.5)
-        ax.text(4.1, y + 0.35, sub, fontsize=13, color=TEXT, va="center")
-    ax.text(0.2, 5.0, "A well-structured prompt (order is a design choice; long documents often go before the question)", fontsize=13.5, fontweight="bold", color=INK)
-    save(fig, path)
+    fig, ax = canvas(5.8)
+    parts=[("Application rules","Task boundaries and uncertainty behaviour","tool"),
+           ("Source context","Facts and documents; label untrusted content","data"),
+           ("Worked examples","Varied input-answer pairs in the desired format","data"),
+           ("Task + audience","A clear job, constraints and intended reader","tool"),
+           ("Output contract","Shape, fields, length and application checks","output")]
+    for i,(title,detail,role) in enumerate(parts):
+        y=4.55-i*.82
+        role_box(ax,.2,y,3.4,.65,title,role,size=18)
+        ax.text(4,y+.325,detail,fontsize=17,color=TEXT,va="center")
+    ax.text(.2,5.5,"A prompt is a task brief; order is something to test",fontsize=19,fontweight="bold",color=INK)
+    role_legend(ax,.15,size=16)
+    save(fig,path)
 
 
 def context_eng(path):
-    fig, ax = plt.subplots(figsize=(13, 4.6))
-    ax.axis("off")
-    ax.set_xlim(0, 13)
-    ax.set_ylim(0, 4.6)
-    srcs = [("instructions", 3.8), ("user query", 3.1), ("retrieved docs", 2.4), ("memory / history", 1.7), ("tool outputs", 1.0)]
-    for t, y in srcs:
-        box(ax, 0.2, y, 2.4, 0.55, t, fc=TINT, size=11.5)
-        arrow(ax, 2.6, y + 0.27, 4.0, 2.4)
-    box(ax, 4.0, 1.6, 2.6, 1.6, "select\ncompress\norder", fc=ORANGE, ec=ACCENT, size=13)
-    ax.add_patch(plt.Rectangle((7.3, 0.7), 2.6, 3.4, fc="white", ec=PRIMARY, lw=2))
-    for i, (t, c) in enumerate([("system", PRIMARY), ("docs", TEAL), ("history", MUTED), ("question", INK), ("", "white")]):
-        ax.add_patch(plt.Rectangle((7.45, 3.55 - i * 0.62), 2.3, 0.5, fc=c, alpha=0.18 if c != "white" else 0))
-        ax.text(8.6, 3.8 - i * 0.62, t, ha="center", va="center", fontsize=11.5, color=INK)
-    ax.text(8.6, 4.3, "context window (limited)", ha="center", fontsize=12, color=PRIMARY)
-    arrow(ax, 6.6, 2.4, 7.3, 2.4)
-    box(ax, 10.6, 1.8, 2.2, 1.2, "LLM", fc="white", size=15)
-    arrow(ax, 9.9, 2.4, 10.6, 2.4)
-    save(fig, path)
+    fig, ax = canvas(5.5)
+    sources=[("App instructions","tool"),("User question","data"),("Source documents","data"),("Selected history","data"),("Tool results","tool")]
+    for i,(name,role) in enumerate(sources):
+        y=4.35-i*.7
+        role_box(ax,.2,y,3,.5,name,role,size=17)
+        # Separate source lanes join only at the collection bus.
+        routed_arrow(ax,[(3.2,y+.25),(3.55,y+.25),(3.55,2.8),(4,2.8)])
+    role_box(ax,4,2.1,2.3,1.4,"Select\ncompress\norder","tool",size=20)
+    role_box(ax,7.15,1.2,2.8,3.3,"","data")
+    ax.text(8.55,4.8,"Token budget",fontsize=18,ha="center",color=INK,fontweight="bold")
+    for i,(name,role) in enumerate([("Rules","tool"),("Useful sources","data"),("Recent history","data"),("Question","data"),("Output reserve","output")]):
+        role_box(ax,7.3,3.8-i*.58,2.5,.45,name,role,size=16)
+    routed_arrow(ax,[(6.3,2.8),(7.15,2.8)])
+    role_box(ax,10.6,2.1,2.2,1.4,"Fixed\nmodel","model",size=21)
+    routed_arrow(ax,[(9.95,2.8),(10.6,2.8)])
+    ax.text(.2,.75,"Select relevant evidence; extra context can distract. Validate the final reply.",fontsize=16,color=TEXT)
+    role_legend(ax,.15,size=16)
+    save(fig,path)
 
 
-def _bar(ax, names, vals, title, color, fmt="{:.0%}", ylim=(0, 1.05), err=None):
+def _bar(ax, names, vals, title, color, fmt="{:.1%}", ylim=(0, 1.05), err=None):
+    # Horizontal, readable labels, e.g. "self-consistency\n(k=5)" and "chain-of-\nthought".
+    names = [n.replace(" (", "\n(").replace("chain-of-thought", "chain-of-\nthought") for n in names]
     ax.bar(names, vals, color=color, yerr=err, capsize=6, error_kw={"ecolor": "#475569", "elinewidth": 1.2})
     top = ylim[1] if ylim else max(vals)
     for i, v in enumerate(vals):
-        ax.text(i, v + (err[i] if err else 0) + 0.02 * top, fmt.format(v), ha="center", fontsize=12)
-    ax.set_title(title, loc="left")
+        ax.text(i, v + (err[1,i] if err is not None else 0) + 0.02 * top, fmt.format(v), ha="center", fontsize=19)
+    ax.set_title(title, loc="left", fontsize=20)
     if ylim:
         ax.set_ylim(*ylim)
     ax.grid(axis="x", visible=False)
-    ax.tick_params(axis="x", rotation=12)
+    ax.tick_params(axis="x", labelsize=19)
+    ax.tick_params(axis="y", labelsize=19)
 
 
-def _margin(p, n):
-    """Normal-approximation 95% margin of error for an accuracy p measured on n items."""
-    return 1.96 * (p * (1 - p) / n) ** 0.5
+def _margin(p,n):
+    """Asymmetric Wilson 95% distances from the observed accuracy."""
+    z=1.96; denominator=1+z*z/n
+    centre=(p+z*z/(2*n))/denominator
+    half=z*np.sqrt(p*(1-p)/n+z*z/(4*n*n))/denominator
+    return p-max(0,centre-half), min(1,centre+half)-p
 
 
 def fewshot_results(path):
     r = results()["classification"]
     names = [x["prompt"] for x in r]
     acc = [x["accuracy"] for x in r]
-    err = [_margin(a, x["n"]) for a, x in zip(acc, r)]
+    err = np.asarray([_margin(a,x["n"]) for a,x in zip(acc,r)]).T
     invalid = [x.get("invalid", 0) for x in r]
     if any(invalid):  # only worth a panel when some answers were not valid labels
         fig, ax = plt.subplots(1, 2, figsize=(13, 4.2))
-        _bar(ax[1], names, invalid, "Invalid answers (not one of the 5 labels)", ACCENT, fmt="{:.0f}", ylim=(0, max(invalid) * 1.25))
+        _bar(ax[1], names, invalid, "Unparsed or ambiguous replies", ACCENT, fmt="{:.0f}", ylim=(0, max(invalid) * 1.25))
         ax = ax[0]
     else:
         fig, ax = plt.subplots(figsize=(10, 4.2))
-    _bar(ax, names, acc, f"Accuracy on {r[0]['n']} student-services messages (bars: 95% margin of error)", PRIMARY, ylim=(0, 1.15), err=err)
+    _bar(ax, names, acc, f"Accuracy: {r[0]['n']} messages; Wilson 95% intervals", PRIMARY, ylim=(0, 1.15), err=err)
     save(fig, path)
 
 
@@ -110,8 +128,8 @@ def injection_results(path):
     r = results()["injection"]
     names = sorted(r, key=lambda k: k != "naive")  # naive prompt first, then the defended one
     fig, ax = plt.subplots(figsize=(7.5, 4))
-    _bar(ax, [f"{k} prompt" for k in names], [r[k] for k in names], "Attack success rate on injected documents", "#B91C1C", ylim=(0, 1.15))
-    ax.tick_params(axis="x", rotation=0, labelsize=13)
+    _bar(ax, [f"{k} prompt" for k in names], [r[k] for k in names], "Replies flagged by keyword heuristic", "#B91C1C", ylim=(0, 1.15))
+    ax.tick_params(axis="x", rotation=0, labelsize=18)
     save(fig, path)
 
 

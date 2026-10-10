@@ -1,4 +1,12 @@
 {
+  "W04_T2": "45",
+  "W04_T5": "88",
+  "W04_T10": "163",
+  "W04_T25": "419",
+  "W04_G1": "164",
+  "W04_G75": "471",
+  "W04_TURBO1": "25",
+  "W04_TURBO4": "46",
   "UNET_PARAMS": "254,337",
   "MNIST_EPOCHS": "8",
   "MNIST_DEVICE": "an NVIDIA GTX 1650 laptop GPU",

@@ -13,7 +13,7 @@
 # 5. compare with the distilled **SD-Turbo** (1–4 steps) and measure time;
 # 6. evaluate prompt alignment with a **CLIP score** you implement.
 #
-# **Runtime:** Colab → Runtime ▸ Change runtime type ▸ **T4 GPU**. Part A also runs on a CPU (slower); Part B needs a GPU for Stable Diffusion (on CPU the notebook falls back to SD-Turbo).
+# **Runtime:** Colab → Runtime ▸ Change runtime type ▸ **T4 GPU**. Part A also runs on a CPU (slower); Part B needs a GPU for Stable Diffusion (on CPU the notebook falls back to SD-Turbo). On a laptop CPU the complete notebook took about 17 minutes.
 #
 # **Licence note:** Stable Diffusion 1.5 is released under the CreativeML OpenRAIL-M licence, which forbids certain uses (e.g. generating content to harass or deceive). Do not generate images of real, identifiable people. Keep the built-in safety checker on.
 
@@ -44,8 +44,36 @@
 # **Pause and predict:** does a training target contain the clean image or the
 # noise that was drawn? Trace the target path before implementing the loss.
 
+# %% [markdown]
+# ## Read, run, change, check
+#
+# **Read:** begin with one clean digit and the pictures made by adding noise.
+# **Run:** complete `q_sample`, then the loss and reverse-step TODOs before
+# training. The same loss is used for points and for digit images.
+# **Change:** compare DDPM and DDIM using the same trained denoiser. In the
+# pretrained pipeline, vary one control while keeping the prompt and seed fixed.
+# **Check:** name the active model and sampler in your evidence table; the
+# CPU fallback and short test configuration use different pretrained models.
+#
+# A **denoiser** predicts the noise in an input. A **noise schedule** records
+# how noisy each step is. A **sampler** uses these predictions and schedule
+# values to move towards an image. **MSE** is mean squared error: square each
+# prediction error, then average. Smaller MSE means closer noise predictions.
+
+# %% [markdown]
+# **Purpose:** Install pretrained-pipeline libraries.
+# **Why now:** Later cells use Diffusers and Transformers.
+# **Expected observation:** Installation completes or reports a dependency error.
+#
+
 # %% tags=["colab-install"]
 %pip install -q diffusers transformers accelerate scikit-learn matplotlib
+
+# %% [markdown]
+# **Purpose:** Set the device and random state.
+# **Why now:** Different devices select different full lab paths.
+# **Expected observation:** CPU/CUDA and smoke mode are printed.
+#
 
 # %%
 import math
@@ -63,7 +91,14 @@ from torchvision import datasets, transforms
 SMOKE = os.environ.get("GENAI_LAB_SMOKE") == "1"
 torch.manual_seed(0)
 np.random.seed(0)
-DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+def image_lab_device(force_cpu=False):
+    """Keep full image pipelines on GPUs with at least 8 GB, or use CPU."""
+    if force_cpu or not torch.cuda.is_available():
+        return "cpu"
+    return "cuda" if torch.cuda.get_device_properties(0).total_memory >= 8 * 1024**3 else "cpu"
+
+
+DEVICE = image_lab_device(os.environ.get("GENAI_FORCE_CPU") == "1")
 print("device:", DEVICE, "| smoke test:", SMOKE)
 
 # %% [markdown]
@@ -79,6 +114,19 @@ print("device:", DEVICE, "| smoke test:", SMOKE)
 # `[B, 1, 28, 28]`. There is one timestep coefficient per batch item. The
 # extra singleton dimensions let that coefficient apply to all its entries.
 # Index 0 already adds a small amount of noise: the clean input is `x0`.
+#
+# Read the formula as "scaled clean data + scaled random noise". `x0` is clean
+# data, `xt` is its noisy version, and `eps` has independent standard Gaussian
+# values. `beta` sets a noise increment; `alpha` is `1 - beta`; `abar` multiplies
+# the alpha values up to a step. Larger `abar` keeps more of the clean signal.
+# This lab indexes the first noisy step as 0, whereas the written schedule
+# starts at 1. `T` is the number of diffusion steps, not a decoding temperature.
+
+# %% [markdown]
+# **Purpose:** Implement direct noising.
+# **Why now:** A chosen timestep can be reached without earlier steps.
+# **Expected observation:** Digit images with increasing corruption and final signal coefficient.
+#
 
 # %%
 T = 1000
@@ -114,6 +162,21 @@ print("fraction of signal variance left at t=999:", float(abar[-1]))
 # **TODO 3 (reverse step):** implement one DDPM ancestral step:
 #
 # $$x_{t-1} = \frac{1}{\sqrt{\alpha_t}}\left(x_t - \frac{\beta_t}{\sqrt{1-\bar\alpha_t}}\,\hat\epsilon\right) + \sqrt{\beta_t}\,z, \qquad z \sim \mathcal{N}(0, I) \text{ (no noise when } t = 0)$$
+#
+# **Trace training:** keep the sampled `eps` as the known answer, give the
+# network only `xt` and `t`, then compare its prediction with `eps`.
+# **Trace generation:** there is no known clean target; predict noise from
+# the current state, take one reverse step, and repeat. A hat, as in
+# `eps_hat`, means "the model's estimate". This teaching DDPM uses `beta_t`
+# as the reverse variance; other DDPM implementations can use a different one.
+
+# %% [markdown]
+# **Purpose:** Train a point noise predictor.
+# **Why now:** Two coordinates make the reverse trajectory visible.
+# **Expected observation:** Loss and three reverse snapshots; coverage must be inspected.
+#
+# ![Create one noise-prediction training example](fig:beginner_training)
+#
 
 # %%
 from sklearn.datasets import make_swiss_roll
@@ -183,6 +246,14 @@ plt.show()
 # The embedding turns a timestep number into features. Skip connections pass
 # saved spatial information from the shrinking path to the expanding path.
 # They join features; they do not supply the clean training image to the model.
+
+# %% [markdown]
+# **Purpose:** Train and sample the tiny image U-Net.
+# **Why now:** One model receives all timestep values.
+# **Expected observation:** Recorded losses and a full DDPM sample row; poor samples are possible.
+#
+# ![Generate by repeating reverse steps](fig:beginner_mechanism)
+#
 
 # %%
 def timestep_embedding(t, dim=64):
@@ -271,6 +342,15 @@ show_row(ddpm_imgs, f"DDPM, 1000 steps ({ddpm_time:.1f} s)")
 # where $t' < t$ is the next timestep in the sub-sequence. **TODO 4:** implement the DDIM update.
 # Unlike shortening the DDPM loop, `seq` spans index `T - 1` down to 0.
 # Each DDIM update explicitly uses both the current and next schedule values.
+# Read the two equations in order: first estimate the clean image, then mix
+# that estimate with the predicted noise at a lower noise level. The last step
+# uses `a_next=1`, so its remaining-noise coefficient is zero.
+
+# %% [markdown]
+# **Purpose:** Implement schedule-spanning DDIM.
+# **Why now:** Compatible larger jumps reduce calls without retraining.
+# **Expected observation:** 50 selected levels and measured time; quality may change.
+#
 
 # %%
 @torch.no_grad()
@@ -305,6 +385,22 @@ show_row(ddim_imgs, f"DDIM, 50 steps ({time.time() - t0:.1f} s)")
 # ## Part B · Stable Diffusion with Hugging Face Diffusers
 #
 # A `DiffusionPipeline` bundles the **text encoder**, the **denoiser** (U-Net), the **VAE** and a **scheduler** (sampler). On a T4 GPU we load it in half precision (float16).
+# This lab selects the CPU fallback when the GPU has less than 8 GB memory.
+# That also avoids the half-precision image failures reported on older GTX 16-series cards.
+# To request CPU explicitly, set `os.environ["GENAI_FORCE_CPU"] = "1"` before the setup cell.
+# CPU uses float32 and SD-Turbo; its controls differ from the SD 1.5 GPU experiment below.
+# The text encoder supplies prompt features. The denoiser operates on a
+# compressed image representation, and the VAE decoder turns the final
+# representation into pixels. **Float16** stores each floating-point value
+# with 16 bits; it can reduce memory use on supported hardware.
+
+# %% [markdown]
+# **Purpose:** Load and inspect the active image pipeline.
+# **Why now:** The pretrained system adds text encoding and latent decoding.
+# **Expected observation:** Actual model path, scheduler and component sizes.
+#
+# ![From a text prompt to image pixels](fig:beginner_inference)
+#
 
 # %%
 from diffusers import AutoPipelineForText2Image, DPMSolverMultistepScheduler, EulerAncestralDiscreteScheduler, StableDiffusionPipeline
@@ -355,6 +451,12 @@ plt.imshow(img); plt.axis("off"); plt.show()
 # ### B1 · Sweep the controls
 # Change **one thing at a time** and keep the seed fixed. (On the SD-Turbo fallback, guidance is ignored.)
 
+# %% [markdown]
+# **Purpose:** Sweep one setting at a time.
+# **Why now:** Control comparisons require a fixed seed and prompt.
+# **Expected observation:** Step/guidance/seed grids; Turbo guidance is disabled.
+#
+
 # %%
 step_values = [2, 5, 10, 25] if USE_SD15 else [1, 2, 3, 4]
 grid([generate(PROMPT, steps=s) for s in step_values], [f"{s} steps" for s in step_values])
@@ -368,6 +470,16 @@ grid([generate(PROMPT, seed=s) for s in (1, 2, 3, 4)], [f"seed {s}" for s in (1,
 # ### B2 · Negative prompts and schedulers
 #
 # **TODO 5:** generate the reading-corner prompt twice with the same seed: once normally, once with a negative prompt of your choice (e.g. remove an object or "blurry, low quality"). Then swap the scheduler to `EulerAncestralDiscreteScheduler` and regenerate.
+# **Check the active model first:** this negative-prompt experiment is useful
+# with SD 1.5's guidance. The SD-Turbo fallback sets guidance to zero, so a
+# negative prompt is not an effective control there. Record that limitation
+# instead of interpreting unchanged output as evidence about negative prompts.
+
+# %% [markdown]
+# **Purpose:** Test guidance references and samplers.
+# **Why now:** A negative prompt depends on active guidance.
+# **Expected observation:** Two prompt variants and two schedulers; unchanged Turbo negatives are expected.
+#
 
 # %%
 P2 = "a cosy reading corner with a green armchair and a lamp, photograph"
@@ -390,6 +502,12 @@ grid([c, d], ["Euler ancestral scheduler", "DPM-Solver++ scheduler"], size=4)
 # ### B3 · A distilled few-step model: SD-Turbo
 # Compare generation time with the 25-step, guided Stable Diffusion run above.
 
+# %% [markdown]
+# **Purpose:** Optionally compare a distilled model.
+# **Why now:** A shorter trained student can reduce denoiser calls.
+# **Expected observation:** Turbo times and images when a full SD 1.5 run is active.
+#
+
 # %%
 if USE_SD15:
     turbo = AutoPipelineForText2Image.from_pretrained("stabilityai/sd-turbo", torch_dtype=dtype).to(DEVICE)
@@ -408,6 +526,12 @@ else:
 # ## Part C · Evaluating prompt alignment with a CLIP score
 #
 # CLIP (week 9) embeds images and texts in the same space. The **CLIP score** is the cosine similarity between an image embedding and its prompt's embedding (often ×100). **TODO 6:** compute the cosine similarity from the two embedding tensors.
+
+# %% [markdown]
+# **Purpose:** Evaluate prompt-image embeddings.
+# **Why now:** CLIP similarity tests one aspect of alignment.
+# **Expected observation:** Scores and unrelated-prompt control; inspect counts and layout yourself.
+#
 
 # %%
 from transformers import CLIPModel, CLIPProcessor
@@ -440,7 +564,7 @@ for name, s in rows:
 # ✍️ **Question 2.** How does the CLIP score change with guidance? Does the highest score correspond to the image you find best? Give two limitations of CLIP score as an evaluation metric.
 #
 # <!-- BEGIN ANSWER -->
-# CLIP score usually rises from guidance 1 to around 7.5 (the image follows the prompt more closely) and then plateaus or even drops slightly at very high guidance, while the unrelated-prompt control is clearly lower. The highest score is not always the image a person prefers: very high guidance can score well while looking over-saturated. Limitations: (1) CLIP measures semantic similarity in its own embedding space and can be fooled by images containing the right keywords or text, while ignoring counting, spatial relations or attribute binding (e.g. "red cube on a blue sphere"); (2) it says nothing about realism, artefacts, diversity or safety, and it inherits CLIP's biases and English-centric training. Evaluation should combine it with FID/realism metrics and human judgement using a rubric.
+# Describe your actual scores and pictures. Guidance can affect alignment and artefacts, but no ordering is guaranteed; the unrelated-prompt control is a check of this experiment. The highest score is not always the image a person prefers: very high guidance can score well while looking over-saturated. Limitations: (1) CLIP measures semantic similarity in its own embedding space and can be fooled by images containing the right keywords or text, while ignoring counting, spatial relations or attribute binding (e.g. "red cube on a blue sphere"); (2) it says nothing about realism, artefacts, diversity or safety, and it inherits CLIP's biases and English-centric training. Evaluation should combine it with FID/realism metrics and human judgement using a rubric.
 # <!-- END ANSWER -->
 #
 # ✍️ **Question 3.** Your project team wants to generate marketing images with Stable Diffusion. List three settings you would record for reproducibility and two responsible-use checks.
@@ -452,12 +576,13 @@ for name, s in rows:
 # %% [markdown]
 # ## Optional extension · From DDPM to flow matching
 #
+# Adapt both the training target and the time input: the 2-D EpsMLP divides integer t by T2, so either pass continuous t × T2 into it or change its time normalisation to accept t in [0, 1].
 # Replace the training target: with $x_t = (1-t)\,x_0 + t\,\epsilon$ for $t \in [0,1]$, train the network to predict the velocity $v = \epsilon - x_0$, then sample by Euler integration from $t=1$ to $t=0$: $x \leftarrow x - \Delta t \cdot v_\theta(x, t)$. Try it on the 2-D swiss roll with 20 Euler steps.
 #
 # | Experiment | Setting | Measure | Result | Interpretation |
 # |---|---|---|---|---|
 # | MNIST DDPM | 1000 vs 50 DDIM steps | time, visual quality | | |
-# | Stable Diffusion | guidance 1 → 15 | CLIP score, visual | | |
+# | Active image model | guidance sweep if supported; otherwise seed sweep | CLIP similarity, visual | | |
 # | SD-Turbo vs SD 1.5 | 1–4 vs 25 steps | seconds per image | | |
 #
 # **Before next week:** watch 3Blue1Brown's *Transformers* and *Attention in transformers* (chapters 5–6).

@@ -70,27 +70,44 @@ async function icon(name, color = C.white, size = 256) {
 }
 
 // Parse **bold** and `code` inline markup into pptxgenjs text runs.
+// <sub>…</sub> and <sup>…</sup> come from $…$ inline maths converted at build time (build_week.slide_math);
+// they become real subscript and superscript runs.
+function scriptRuns(text, base = {}) {
+  const out = [];
+  const re = /<(sub|sup)>(.*?)<\/\1>/g;
+  let last = 0, m;
+  const s = String(text);
+  while ((m = re.exec(s))) {
+    if (m.index > last) out.push({ text: s.slice(last, m.index), options: { ...base } });
+    out.push({ text: m[2], options: { ...base, [m[1] === "sub" ? "subscript" : "superscript"]: true } });
+    last = m.index + m[0].length;
+  }
+  if (last < s.length || !out.length) out.push({ text: s.slice(last), options: { ...base } });
+  return out;
+}
+
 function runs(text, base = {}) {
   const out = [];
   const re = /(\*\*[^*]+\*\*|\*[^*\s][^*]*\*|`[^`]+`)/g;
   let last = 0, m;
   const s = String(text);
   while ((m = re.exec(s))) {
-    if (m.index > last) out.push({ text: s.slice(last, m.index), options: { ...base } });
+    if (m.index > last) out.push(...scriptRuns(s.slice(last, m.index), base));
     const tok = m[0];
-    if (tok.startsWith("**")) out.push({ text: tok.slice(2, -2), options: { ...base, bold: true } });
-    else if (tok.startsWith("*")) out.push({ text: tok.slice(1, -1), options: { ...base, italic: true } });
+    if (tok.startsWith("**")) out.push(...scriptRuns(tok.slice(2, -2), { ...base, bold: true }));
+    else if (tok.startsWith("*")) out.push(...scriptRuns(tok.slice(1, -1), { ...base, italic: true }));
     else out.push({ text: tok.slice(1, -1), options: { ...base, fontFace: MONO, color: base.codeColor || C.primary } });
     last = m.index + tok.length;
   }
-  if (last < s.length) out.push({ text: s.slice(last), options: { ...base } });
+  if (last < s.length) out.push(...scriptRuns(s.slice(last), base));
   if (!out.length) out.push({ text: "", options: { ...base } });
   return out;
 }
-const plain = (t) => String(t).replace(/\*\*|`|\*/g, "");
+const plain = (t) => String(t).replace(/<\/?su[bp]>/g, "").replace(/\*\*|`|\*/g, "");
 
 // Estimate whether paragraphs fit in a box; return the largest font size that fits.
 function fitSize(paras, w, h, maxPt, minPt, opts = {}) {
+  minPt = Math.max(14, minPt);
   // Average Calibri glyph width is ~0.47 em (bold ~0.5 em); Consolas is 0.55 em.
   const charW = opts.mono ? 0.56 : opts.bold ? 0.5 : 0.47;
   const lineH = opts.lineH || 1.22;
@@ -119,7 +136,7 @@ function bulletParas(items, pt, color = C.text) {
   }
   const arr = [];
   paras.forEach((p, i) => {
-    const rs = runs(p.text, { fontSize: p.level ? pt - 2 : pt, color: p.level ? C.muted : color, fontFace: FONT });
+    const rs = runs(p.text, { fontSize: p.level ? Math.max(14, pt - 2) : pt, color: p.level ? C.muted : color, fontFace: FONT });
     rs[0].options = {
       ...rs[0].options,
       bullet: p.level ? { indent: 18 } : { code: "25CF", indent: 20 },
@@ -134,7 +151,8 @@ function bulletParas(items, pt, color = C.text) {
 }
 
 function addText(slide, content, o) {
-  slide.addText(content, { isTextBox: true, fontFace: FONT, color: C.text, valign: "top", margin: 4, ...o });
+  const body = typeof content === "string" && /<su[bp]>/.test(content) ? scriptRuns(content) : content;
+  slide.addText(body, { isTextBox: true, fontFace: FONT, color: C.text, valign: "top", margin: 4, ...o });
 }
 
 function chrome(slide, spec, idx) {
@@ -163,9 +181,16 @@ function imgFit(asset, x, y, w, h, align = "center") {
   return { path: asset.path, x: ix, y: y + (h - ih) / 2, w: iw, h: ih };
 }
 
+function addFigure(slide, asset, x, y, w, h, align = "center") {
+  const placement = imgFit(asset, x, y, w, h, align);
+  if (asset.scene) technicalDiagrams.nativeScene(slide, asset.scene, addText, placement);
+  else slide.addImage(placement);
+  return placement;
+}
+
 function callout(slide, text, y, h = 0.85, label = "Key idea") {
   slide.addShape("roundRect", { x: MX, y, w: CW, h, fill: { color: C.accentTint }, line: { color: C.accentTint }, rectRadius: 0.12 });
-  const pt = fitSize([label + ": " + text], CW - 0.5, h, 18, 13);
+  const pt = fitSize([label + ": " + text], CW - 0.5, h, 20, 13);
   addText(slide, [
     { text: label + ":  ", options: { bold: true, color: C.accent, fontSize: pt } },
     ...runs(text, { color: C.text, fontSize: pt }),
@@ -180,17 +205,32 @@ async function iconCircle(slide, name, x, y, d, fill = C.primary, color = C.whit
 
 function numberCircle(slide, n, x, y, d, fill = C.primary) {
   slide.addShape("ellipse", { x, y, w: d, h: d, fill: { color: fill }, line: { color: fill } });
-  addText(slide, String(n), { x, y, w: d, h: d, fontSize: Math.round(d * 30), bold: true, color: C.white, align: "center", valign: "middle", margin: 0 });
+  addText(slide, String(n), { x, y, w: d, h: d, fontSize: Math.max(14, Math.round(d * 30)), bold: true, color: C.white, align: "center", valign: "middle", margin: 0 });
 }
 
 // ---------- Layouts ----------
 const L = {};
 
+L.course_map = async (slide, s, spec) => {
+  title(slide, s.title);
+  addFigure(slide, spec.assets.figures[s.figure], MX, CONTENT_TOP, CW, CONTENT_BOTTOM-CONTENT_TOP);
+};
+L.infographic = async (slide, s, spec) => {
+  title(slide, s.title);
+  addFigure(slide, spec.assets.figures[s.figure], MX, CONTENT_TOP, CW, 4.98);
+  addText(slide, "Exit question: " + s.recap.question, {x:MX,y:6.61,w:CW,h:.37,fontSize:16,color:C.ink,margin:0});
+};
+
 L.technical = async (slide, s) => {
   title(slide, s.title);
-  addText(slide, s.diagram.subtitle, { x: MX, y: CONTENT_TOP, w: CW, h: 0.4, fontSize: 18, color: C.muted, margin: 0 });
-  technicalDiagrams.native(slide, s.diagram, addText, { x: MX, y: 2.06, w: CW, h: 4.48 });
-  if (!s.diagram.feedback) addText(slide, "Check: " + s.diagram.check_question, { x: MX, y: 6.25, w: CW, h: 0.6, fontSize: 17, color: C.text, margin: 0 });
+  const subPt = fitSize([s.diagram.subtitle], CW, 0.42, 18, 14, { paraGap: 0, padH: 0.05, padW: 0.05 });
+  addText(slide, s.diagram.subtitle, { x: MX, y: CONTENT_TOP - 0.02, w: CW, h: 0.42, fontSize: subPt, color: C.muted, margin: 0 });
+  // Keep the scene's own aspect ratio: native text sizes follow its width.
+  const g = technicalDiagrams.geometry(s.diagram);
+  const box = imgFit({ w: g.width || technicalDiagrams.WIDTH, h: g.height || technicalDiagrams.HEIGHT }, MX, 2.03, CW, 4.42);
+  technicalDiagrams.native(slide, s.diagram, addText, box);
+  const check = "Check: " + s.diagram.check_question;
+  addText(slide, check, { x: MX, y: 6.48, w: CW, h: 0.52, fontSize: fitSize([check], CW, 0.52, 17, 14), color: C.text, margin: 0, valign: "middle" });
 };
 
 L.title = async (slide, s, spec) => {
@@ -199,12 +239,12 @@ L.title = async (slide, s, spec) => {
   addText(slide, `WEEK ${String(spec.week).padStart(2, "0")}`, { x: 0.8, y: 1.15, w: 1.9, h: 0.5, fontSize: 16, bold: true, color: C.white, align: "center", valign: "middle", margin: 0, charSpacing: 2 });
   const hasCover = s.figure && spec.assets.figures[s.figure];
   const tw = hasCover ? 7.4 : 11.5;
-  const tpt = fitSize([spec.topic], tw, 2.3, 46, 32, { bold: true, lineH: 1.1 });
+  const tpt = fitSize([spec.topic], tw, 2.3, 45, 32, { bold: true, lineH: 1.1 });
   addText(slide, spec.topic, { x: 0.8, y: 1.9, w: tw, h: 2.3, fontSize: tpt, bold: true, color: C.white, valign: "bottom", margin: 0, lineSpacingMultiple: 0.95 });
   addText(slide, s.subtitle || spec.subtitle || "", { x: 0.8, y: 4.35, w: tw, h: 1.2, fontSize: 20, color: C.lav, margin: 0 });
-  addText(slide, "MSc in Artificial Intelligence  ·  Generative AI  ·  2-hour lecture", { x: 0.8, y: 6.45, w: 9, h: 0.4, fontSize: 13, color: C.lav, margin: 0 });
+  addText(slide, "MSc in Artificial Intelligence  ·  Generative AI  ·  2-hour lecture", { x: 0.8, y: 6.45, w: 9, h: 0.4, fontSize: 14, color: C.lav, margin: 0 });
   if (hasCover) {
-    slide.addImage(imgFit(spec.assets.figures[s.figure], 8.55, 0.9, 4.2, 5.7));
+    addFigure(slide, spec.assets.figures[s.figure], 8.55, 0.9, 4.2, 5.7);
   }
 };
 
@@ -216,12 +256,18 @@ L.outcomes = async (slide, s, spec) => {
   const tw = lw - 0.75;
   // Rows get height in proportion to their wrapped line count, at the largest size that fits.
   const linesAt = (t, pt) => Math.max(1, Math.ceil(plain(t).length / Math.floor((tw - 0.15) / ((0.47 * pt) / 72))));
-  let pt = 20;
-  for (; pt > 12; pt--) {
-    const need = items.reduce((a, t) => a + (linesAt(t, pt) * 1.2 * pt) / 72 + 0.22, 0);
-    if (need <= avail) break;
+  const rowsAt = (pt) => items.map((t) => (linesAt(t, pt) * 1.2 * pt) / 72 + 0.22);
+  // Prefer equal rows (evenly spaced numbers) at a readable size; otherwise
+  // give each outcome height in proportion to its wrapped lines.
+  let pt = 20, heights = null;
+  for (let size = 20; size >= 16 && !heights; size--) {
+    const tallest = Math.max(...rowsAt(size));
+    if (tallest * items.length <= avail) { pt = size; heights = items.map(() => tallest); }
   }
-  const heights = items.map((t) => (linesAt(t, pt) * 1.2 * pt) / 72 + 0.22);
+  if (!heights) {
+    for (pt = 20; pt > 12; pt--) if (rowsAt(pt).reduce((a, b) => a + b, 0) <= avail) break;
+    heights = rowsAt(pt);
+  }
   const spare = (avail - heights.reduce((a, b) => a + b, 0)) / items.length;
   let y = top;
   items.forEach((t, i) => {
@@ -238,7 +284,7 @@ L.outcomes = async (slide, s, spec) => {
   ms.forEach((m, i) => {
     const y = top + 0.95 + i * mRow;
     slide.addShape("roundRect", { x: cx + 0.25, y, w: 1.25, h: 0.4, fill: { color: C.primary }, line: { color: C.primary }, rectRadius: 0.08 });
-    addText(slide, `MIMLO ${m}`, { x: cx + 0.25, y, w: 1.25, h: 0.4, fontSize: 13, bold: true, color: C.white, align: "center", valign: "middle", margin: 0 });
+    addText(slide, `MIMLO ${m}`, { x: cx + 0.25, y, w: 1.25, h: 0.4, fontSize: 14, bold: true, color: C.white, align: "center", valign: "middle", margin: 0 });
     addText(slide, MIMLO_SHORT[m], { x: cx + 0.2, y: y + 0.42, w: cw - 0.4, h: mRow - 0.45, fontSize: 14, color: C.text });
   });
 };
@@ -279,13 +325,13 @@ L.bullets = async (slide, s, spec) => {
   if (fig) bw = s.figure_wide ? 5.2 : 6.3;
   else if (s.icon) bw = 8.9;
   const { arr, paras } = bulletParas(s.bullets, 20);
-  const pt = fitSize(paras, bw, bottom - CONTENT_TOP, 22, 13, { paraGap: 8, indent: 0.3 });
+  const pt = fitSize(paras, bw, bottom - CONTENT_TOP, 26, 13, { paraGap: 8, indent: 0.3 });
   const { arr: arr2 } = bulletParas(s.bullets, pt);
   addText(slide, arr2, { x: MX, y: CONTENT_TOP, w: bw, h: bottom - CONTENT_TOP });
   if (fig) {
     const fx = MX + bw + 0.3;
-    slide.addImage(imgFit(fig, fx, CONTENT_TOP, W - MX - fx, bottom - CONTENT_TOP - (s.caption ? 0.4 : 0)));
-    if (s.caption) addText(slide, s.caption, { x: fx, y: bottom - 0.4, w: W - MX - fx, h: 0.4, fontSize: 11, italic: true, color: C.muted, align: "center" });
+    addFigure(slide, fig, fx, CONTENT_TOP, W - MX - fx, bottom - CONTENT_TOP - (s.caption ? 0.4 : 0));
+    if (s.caption) addText(slide, s.caption, { x: fx, y: bottom - 0.4, w: W - MX - fx, h: 0.4, fontSize: 14, italic: true, color: C.muted, align: "center" });
   } else if (s.icon) {
     await iconCircle(slide, s.icon, 10.35, CONTENT_TOP + 0.4, 2.3, C.tint, C.primary);
   }
@@ -304,18 +350,18 @@ L.cards = async (slide, s) => {
   const ch = (bottom - CONTENT_TOP - gap * (rowsN - 1)) / rowsN;
   const horizontal = rowsN > 1; // compact: icon left of heading
   const textH = horizontal ? ch - 0.95 : ch - 1.75;
-  const pt = Math.min(...cards.map((c) => fitSize([c.text], cw - 0.4, textH, 19, 11)));
+  const pt = Math.min(...cards.map((c) => fitSize([c.text], cw - 0.4, textH, 22, 11)));
   for (let i = 0; i < n; i++) {
     const c = cards[i];
     const x = MX + (i % cols) * (cw + gap), y = CONTENT_TOP + Math.floor(i / cols) * (ch + gap);
     slide.addShape("roundRect", { x, y, w: cw, h: ch, fill: { color: i % 2 ? C.tint2 : C.tint }, line: { color: C.tint }, rectRadius: 0.12 });
     if (horizontal) {
       await iconCircle(slide, c.icon || "fa:FaLightbulb", x + 0.2, y + 0.2, 0.6);
-      addText(slide, runs(c.head, { fontSize: 19, bold: true, color: C.ink }), { x: x + 0.9, y: y + 0.18, w: cw - 1.05, h: 0.65, valign: "middle" });
+      addText(slide, runs(c.head, { fontSize: 21, bold: true, color: C.ink }), { x: x + 0.9, y: y + 0.18, w: cw - 1.05, h: 0.65, valign: "middle" });
       addText(slide, runs(c.text, { fontSize: pt }), { x: x + 0.2, y: y + 0.9, w: cw - 0.4, h: ch - 0.95 });
     } else {
       await iconCircle(slide, c.icon || "fa:FaLightbulb", x + 0.25, y + 0.25, 0.75);
-      addText(slide, runs(c.head, { fontSize: 20, bold: true, color: C.ink }), { x: x + 0.2, y: y + 1.1, w: cw - 0.4, h: 0.6, valign: "middle" });
+      addText(slide, runs(c.head, { fontSize: 21, bold: true, color: C.ink }), { x: x + 0.2, y: y + 1.1, w: cw - 0.4, h: 0.6, valign: "middle" });
       addText(slide, runs(c.text, { fontSize: pt }), { x: x + 0.2, y: y + 1.7, w: cw - 0.4, h: ch - 1.75 });
     }
   }
@@ -332,7 +378,7 @@ L.compare = async (slide, s) => {
   const fills = [C.primary, C.teal, C.accent];
   const tints = [C.tint, C.tealTint, C.accentTint];
   const bodyH = bottom - CONTENT_TOP - 0.75;
-  const pt = Math.min(...cols.map((c) => fitSize(bulletParas(c.points, 16).paras, cw - 0.3, bodyH - 0.1, 20, 11, { paraGap: 8, indent: 0.3 })));
+  const pt = Math.min(...cols.map((c) => fitSize(bulletParas(c.points, 16).paras, cw - 0.3, bodyH - 0.1, 24, 11, { paraGap: 8, indent: 0.3 })));
   for (let i = 0; i < n; i++) {
     const c = cols[i];
     const x = MX + i * (cw + gap);
@@ -363,14 +409,15 @@ L.table = async (slide, s) => {
     const pool = donors.reduce((a, b) => a + b, 0);
     colW = colW.map((w, j) => (w < minW[j] ? minW[j] : w - (donors[j] / pool) * deficit));
   }
-  // Font fit: estimate each row height with the widest-wrapping cell.
+  // Font fit: estimate each row height with the widest-wrapping cell. Projected
+  // text never goes below 14 pt; a table that cannot fit must be shortened.
   let pt = s.max_font || 20;
-  for (; pt >= 10; pt--) {
-    const cpl = colW.map((w) => Math.max(6, Math.floor((w - 0.2) / ((0.47 * pt) / 72))));
-    const rowsAll = [s.header, ...s.rows];
-    const hsum = rowsAll.reduce((acc, r) => acc + Math.max(...r.map((c, j) => Math.ceil(plain(c ?? "").length / cpl[j]))) * ((1.25 * pt) / 72) + 0.16, 0);
-    if (hsum <= bottom - CONTENT_TOP) break;
-  }
+  const tableHeight = (size) => {
+    const cpl = colW.map((w) => Math.max(6, Math.floor((w - 0.2) / ((0.47 * size) / 72))));
+    return [s.header, ...s.rows].reduce((acc, r) => acc + Math.max(...r.map((c, j) => Math.ceil(plain(c ?? "").length / cpl[j]))) * ((1.25 * size) / 72) + 0.16, 0);
+  };
+  while (pt > 14 && tableHeight(pt) > bottom - CONTENT_TOP) pt--;
+  if (tableHeight(pt) > bottom - CONTENT_TOP) throw new Error("Table does not fit at 14 pt; move rows or detail to the Word notes");
   const rows = [
     s.header.map((h) => ({ text: plain(h), options: { bold: true, color: C.white, fill: { color: C.ink }, fontSize: pt, fontFace: FONT, valign: "middle" } })),
     ...s.rows.map((r, i) =>
@@ -401,8 +448,8 @@ L.flow = async (slide, s) => {
   }
   const boxH = Math.max(2.3, Math.min(3.4, bottom - CONTENT_TOP - 0.2 - bulletsH - (s.bullets ? 0.3 : 0)));
   const y = CONTENT_TOP + 0.15;
-  const subPt = Math.min(...steps.map((st) => fitSize([st.sub || ""], bw - 0.25, boxH - 1.5, 17, 11)));
-  const labPt = Math.min(...steps.map((st) => fitSize([st.label], bw - 0.2, 0.85, 19, 13, { bold: true })));
+  const subPt = Math.min(...steps.map((st) => fitSize([st.sub || ""], bw - 0.25, boxH - 1.5, 20, 11)));
+  const labPt = Math.min(...steps.map((st) => fitSize([st.label], bw - 0.2, 0.85, 21, 13, { bold: true })));
   steps.forEach((st, i) => {
     const x = MX + i * (bw + arrowW);
     const hl = st.highlight;
@@ -435,23 +482,22 @@ L.figure = async (slide, s, spec) => {
     const lines = paras.reduce((a, p) => a + Math.max(1, Math.ceil(plain(p.text).length / cpl)), 0);
     const bh = Math.min(2.6, (lines * 1.25 * 18) / 72 + paras.length * 0.12 + 0.15);
     const fh = bottom - CONTENT_TOP - bh - 0.15;
-    const im = imgFit(fig, MX, CONTENT_TOP, CW, fh);
-    slide.addImage(im);
+    const im = addFigure(slide, fig, MX, CONTENT_TOP, CW, fh);
     const by = im.y + im.h + 0.2;
     const pt = fitSize(paras, CW, bottom - by, 20, 12, { paraGap: 8, indent: 0.3 });
     addText(slide, bulletParas(s.bullets, pt).arr, { x: MX, y: by, w: CW, h: bottom - by });
-    if (s.caption) addText(slide, s.caption, { x: MX, y: bottom + 0.02, w: CW, h: 0.42, fontSize: 12, italic: true, color: C.muted, align: "center" });
+    if (s.caption) addText(slide, s.caption, { x: MX, y: bottom + 0.02, w: CW, h: 0.42, fontSize: 14, italic: true, color: C.muted, align: "center" });
   } else if (s.bullets) {
     const fw = s.figure_width || 7.3;
-    slide.addImage(imgFit(fig, MX, CONTENT_TOP, fw, bottom - CONTENT_TOP));
+    addFigure(slide, fig, MX, CONTENT_TOP, fw, bottom - CONTENT_TOP);
     const bx = MX + fw + 0.3, bw = W - MX - bx;
     const { paras } = bulletParas(s.bullets, 18);
     const pt = fitSize(paras, bw, bottom - CONTENT_TOP, 20, 12, { paraGap: 8, indent: 0.3 });
     addText(slide, bulletParas(s.bullets, pt).arr, { x: bx, y: CONTENT_TOP, w: bw, h: bottom - CONTENT_TOP });
-    if (s.caption) addText(slide, s.caption, { x: MX, y: bottom + 0.02, w: fw, h: 0.42, fontSize: 12, italic: true, color: C.muted, align: "center" });
+    if (s.caption) addText(slide, s.caption, { x: MX, y: bottom + 0.02, w: fw, h: 0.42, fontSize: 14, italic: true, color: C.muted, align: "center" });
   } else {
-    slide.addImage(imgFit(fig, MX, CONTENT_TOP, CW, bottom - CONTENT_TOP));
-    if (s.caption) addText(slide, s.caption, { x: MX, y: bottom + 0.02, w: CW, h: 0.42, fontSize: 12, italic: true, color: C.muted, align: "center" });
+    addFigure(slide, fig, MX, CONTENT_TOP, CW, bottom - CONTENT_TOP);
+    if (s.caption) addText(slide, s.caption, { x: MX, y: bottom + 0.02, w: CW, h: 0.42, fontSize: 14, italic: true, color: C.muted, align: "center" });
   }
   if (s.callout) callout(slide, s.callout, CONTENT_BOTTOM - 0.9, 0.9, s.callout_label || "Key idea");
 };
@@ -511,9 +557,10 @@ L.code = async (slide, s) => {
   const lines = String(s.code).replace(/\s+$/, "").split("\n");
   const maxLen = Math.max(...lines.map((l) => l.length));
   const CH = 0.55; // Consolas glyph width in em
-  const fits = (w, h, pt) => (maxLen * CH * pt) / 72 <= w - 0.45 && (lines.length * 1.2 * pt) / 72 <= h - 0.3;
-  // Side-by-side if code stays >= 12 pt next to the bullets; otherwise full-width code with bullets underneath.
-  let side = hasB && fits(7.6, bottom - CONTENT_TOP, 12);
+  // Width left for code: panel inset 0.15 in each side, text margins 6 pt each side, plus a small safety gap.
+  const fits = (w, h, pt) => (maxLen * CH * pt) / 72 <= w - 0.6 && (lines.length * 1.2 * pt) / 72 <= h - 0.3;
+  // Choose the arrangement that keeps projected code at least 14 pt.
+  let side = hasB && fits(7.6, bottom - CONTENT_TOP, 14);
   let cw = side || !hasB ? (hasB ? 7.6 : CW) : CW;
   let ch = bottom - CONTENT_TOP;
   let bh = 0;
@@ -524,8 +571,10 @@ L.code = async (slide, s) => {
     bh = Math.min(1.9, (nl * 1.25 * 16) / 72 + paras.length * 0.1 + 0.15);
     ch = bottom - CONTENT_TOP - bh - 0.15;
   }
-  let pt = 16;
-  while (pt > 9 && !fits(cw, ch, pt)) pt--;
+  // Largest size that fits, from 20 pt down to the 14 pt floor.
+  let pt = 20;
+  while (pt > 14 && !fits(cw, ch, pt)) pt--;
+  if (!fits(cw, ch, pt)) throw new Error("Code excerpt does not fit at 14 pt; shorten the slide and keep the full example in Word notes");
   // Shrink the dark panel to the code when it is short (no large empty block); bullets move up with it.
   if (side || !hasB) ch = Math.min(ch, (lines.length * 1.22 * pt) / 72 + 0.55);
   slide.addShape("roundRect", { x: MX, y: CONTENT_TOP, w: cw, h: ch, fill: { color: C.code }, line: { color: C.code }, rectRadius: 0.1 });
@@ -538,12 +587,12 @@ L.code = async (slide, s) => {
   if (hasB && side) {
     const bx = MX + cw + 0.3, bw = W - MX - bx;
     const { paras } = bulletParas(s.bullets, 17);
-    const bpt = fitSize(paras, bw, bottom - CONTENT_TOP, 18, 11, { paraGap: 8, indent: 0.3 });
+    const bpt = fitSize(paras, bw, bottom - CONTENT_TOP, 20, 11, { paraGap: 8, indent: 0.3 });
     addText(slide, bulletParas(s.bullets, bpt).arr, { x: bx, y: CONTENT_TOP, w: bw, h: bottom - CONTENT_TOP });
   } else if (hasB) {
     const by = CONTENT_TOP + ch + 0.15;
     const { paras } = bulletParas(s.bullets, 16);
-    const bpt = fitSize(paras, CW, bottom - by, 17, 11, { paraGap: 6, indent: 0.3 });
+    const bpt = fitSize(paras, CW, bottom - by, 20, 11, { paraGap: 6, indent: 0.3 });
     addText(slide, bulletParas(s.bullets, bpt).arr, { x: MX, y: by, w: CW, h: bottom - by });
   }
   if (s.callout) callout(slide, s.callout, CONTENT_BOTTOM - 0.9, 0.9, s.callout_label || "Key idea");
@@ -559,14 +608,14 @@ L.quiz = async (slide, s) => {
   const top = CONTENT_TOP + 1.45;
   const rowsN = Math.ceil(opts.length / cols);
   const ow = (CW - gap) / cols, oh = Math.min(1.45, (CONTENT_BOTTOM - 0.45 - top - gap * (rowsN - 1)) / rowsN);
-  const pt = Math.min(...opts.map((o) => fitSize([o], ow - 1.0, oh - 0.1, 18, 12)));
+  const pt = Math.min(...opts.map((o) => fitSize([o], ow - 1.0, oh - 0.1, 20, 12)));
   opts.forEach((o, i) => {
     const x = MX + (i % cols) * (ow + gap), y = top + Math.floor(i / cols) * (oh + gap);
     slide.addShape("roundRect", { x, y, w: ow, h: oh, fill: { color: C.tint }, line: { color: C.tint }, rectRadius: 0.1 });
     numberCircle(slide, "ABCDEF"[i], x + 0.18, y + (oh - 0.5) / 2, 0.5);
     addText(slide, runs(o, { fontSize: pt }), { x: x + 0.85, y, w: ow - 1.0, h: oh, valign: "middle" });
   });
-  addText(slide, s.prompt || "Vote, then convince your neighbour (1 minute).", { x: MX, y: CONTENT_BOTTOM - 0.4, w: CW, h: 0.4, fontSize: 13, italic: true, color: C.muted });
+  addText(slide, s.prompt || "Vote, then convince your neighbour (1 minute).", { x: MX, y: CONTENT_BOTTOM - 0.4, w: CW, h: 0.4, fontSize: 14, italic: true, color: C.muted });
 };
 
 L.callout = async (slide, s) => {
@@ -585,12 +634,14 @@ L.stat = async (slide, s) => {
   const n = st.length, gap = 0.3;
   const cw = (CW - gap * (n - 1)) / n;
   const bottom = s.caption ? CONTENT_BOTTOM - 0.9 : CONTENT_BOTTOM;
+  // A value must stay on one line, and all cards share one size. fitSize assumes at least 8 characters per line,
+  // so "≈ 140 GB" passed at 60 pt and wrapped onto two lines above its card. 0.52 em per bold character.
+  const vpt = Math.max(30, Math.min(60, ...st.map((x) => Math.floor(((cw - 0.5) * 72) / (0.52 * plain(x.value).length)))));
   st.forEach((x, i) => {
     const X = MX + i * (cw + gap);
     slide.addShape("roundRect", { x: X, y: CONTENT_TOP + 0.2, w: cw, h: bottom - CONTENT_TOP - 0.2, fill: { color: C.tint }, line: { color: C.tint }, rectRadius: 0.12 });
-    const vpt = fitSize([x.value], cw - 0.3, 1.5, 60, 30, { bold: true, lineH: 1.0 });
     addText(slide, x.value, { x: X + 0.15, y: CONTENT_TOP + 0.45, w: cw - 0.3, h: 1.5, fontSize: vpt, bold: true, color: C.primary, align: "center", valign: "middle" });
-    const lpt = fitSize([x.label], cw - 0.4, bottom - CONTENT_TOP - 2.3, 17, 11);
+    const lpt = fitSize([x.label], cw - 0.4, bottom - CONTENT_TOP - 2.3, 19, 11);
     addText(slide, runs(x.label, { fontSize: lpt }), { x: X + 0.2, y: CONTENT_TOP + 2.05, w: cw - 0.4, h: bottom - CONTENT_TOP - 2.3, align: "center" });
   });
   if (s.caption) addText(slide, runs(s.caption, { fontSize: 14, color: C.muted, italic: true }), { x: MX, y: bottom + 0.15, w: CW, h: 0.7 });
@@ -601,7 +652,7 @@ L.lab = async (slide, s) => {
   const lw = 7.9;
   const steps = s.steps;
   const rowH = Math.min(0.95, (CONTENT_BOTTOM - CONTENT_TOP) / steps.length);
-  const pt = Math.min(...steps.map((t) => fitSize([t], lw - 0.8, rowH - 0.05, 17, 12)));
+  const pt = Math.min(...steps.map((t) => fitSize([t], lw - 0.8, rowH - 0.05, 20, 12)));
   steps.forEach((t, i) => {
     const y = CONTENT_TOP + i * rowH;
     numberCircle(slide, i + 1, MX, y + 0.05, 0.45, C.teal);
@@ -656,7 +707,7 @@ L.resources = async (slide, s) => {
     const x = MX + col * (colW + 0.4), y = CONTENT_TOP + row * rowH;
     await iconCircle(slide, kinds[it.kind] || "fa:FaLink", x, y + 0.08, 0.5, it.kind === "video" ? "DC2626" : C.primary);
     const label = [{ text: it.label, options: { fontSize: 15, bold: true, color: C.ink, breakLine: !!it.note } }];
-    if (it.note) label.push({ text: it.note, options: { fontSize: 12, color: C.muted } });
+    if (it.note) label.push({ text: it.note, options: { fontSize: 14, color: C.muted } });
     const o = { x: x + 0.65, y, w: colW - 0.7, h: rowH - 0.05, valign: "middle" };
     if (it.url) label[0].options.hyperlink = { url: it.url };
     addText(slide, label, o);
@@ -670,7 +721,7 @@ L.discussion = async (slide, s) => {
   addText(slide, runs(s.prompt, { fontSize: ppt, bold: true, color: C.ink }), { x: MX + 1.4, y: CONTENT_TOP, w: CW - 1.4, h: 1.6, valign: "middle" });
   if (s.points) {
     const { paras } = bulletParas(s.points, 18);
-    const pt = fitSize(paras, CW - 1.4, CONTENT_BOTTOM - CONTENT_TOP - 2.0, 18, 12, { paraGap: 8, indent: 0.3 });
+    const pt = fitSize(paras, CW - 1.4, CONTENT_BOTTOM - CONTENT_TOP - 2.0, 22, 12, { paraGap: 8, indent: 0.3 });
     addText(slide, bulletParas(s.points, pt).arr, { x: MX + 1.4, y: CONTENT_TOP + 1.85, w: CW - 1.4, h: CONTENT_BOTTOM - CONTENT_TOP - 1.9 });
   }
 };

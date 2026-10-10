@@ -1,514 +1,1017 @@
-subtitle: "From notebook to product: frameworks, API platforms, deployment options, efficient serving, applications, monitoring and guardrails"
-mimlos: [3, 4, 5]
+subtitle: Turn a notebook into an application, measure the cost, and monitor the results
+mimlos:
+- 3
+- 4
+- 5
 objectives:
-  - "Map the generative AI **tool stack** and compare frameworks: Hugging Face, OpenAI / Azure OpenAI, Gemini API, **vLLM**, **Ollama**, **LangChain / LangGraph**, LlamaIndex."
-  - "Use **API platforms** safely and efficiently: authentication and key management, tokens and **pricing**, **rate limits**, **streaming**."
-  - "Compare **cloud APIs, self-hosted and local** deployment, and explain **quantisation**, **batching** and **caching** for serving efficiency."
-  - "Build a small application with **Gradio** and **FastAPI**, packaged with **Docker**."
-  - "**Deploy and monitor** a generative AI system: logging, tracing, latency and cost monitoring, **guardrails**, versioning."
-  - "Justify a deployment choice with measured latency, cost and quality evidence."
+- 'Map the layers of an AI application: model, serving, request coordination and user interface.'
+- Explain an **API** (a way for programs to communicate), protect access keys and handle limits and streaming.
+- Compare provider-hosted, university-hosted and device-local models using quality, privacy, time and cost.
+- Explain **quantisation** (fewer bits), **batching** (several requests together) and **caching** (reusing results).
+- Build interfaces with Gradio and FastAPI; use Docker to package the code and its dependencies.
+- Record model versions, timings and token counts; test quality, safety checks and deployment choices.
 coverage:
-  - Hugging Face
-  - OpenAI
-  - Azure OpenAI
-  - Gemini API
-  - vLLM
-  - Ollama
-  - LangChain
-  - LangGraph
-  - LlamaIndex
-  - authentication
-  - API key
-  - pricing
-  - rate limit
-  - streaming
-  - self-hosted
-  - quantisation
-  - batching
-  - caching
-  - Gradio
-  - FastAPI
-  - Docker
-  - logging
-  - tracing
-  - latency
-  - cost
-  - guardrails
-  - versioning
-  - monitoring
-
+- Hugging Face
+- OpenAI
+- Azure OpenAI
+- Gemini API
+- vLLM
+- Ollama
+- LangChain
+- LangGraph
+- LlamaIndex
+- authentication
+- API key
+- pricing
+- rate limit
+- streaming
+- self-hosted
+- quantisation
+- batching
+- caching
+- Gradio
+- FastAPI
+- Docker
+- logging
+- tracing
+- latency
+- cost
+- guardrails
+- versioning
+- monitoring
 slides:
-  - type: title
-    figure: cover
-    notes: |
-      Welcome to week 11, deployment and frameworks. So far we have used models inside notebooks. This week we turn a model into something other people can use: an application with an interface and an API, running somewhere sensible, at an acceptable cost and speed, with guardrails and monitoring. Every number on the "real" slides was measured by running this week's lab in advance, on a small open model, so students can reproduce them on Colab.
+- type: title
+  figure: cover
+  notes: 'Welcome to week 11, deployment and frameworks. So far we have used models inside notebooks. This week we turn a model
+    into something other people can use: an application with an interface and an API, running somewhere sensible, at an acceptable
+    cost and speed, with guardrails and monitoring. Every number on the "real" slides was measured by running this week''s lab
+    in advance, on a small open model, so students can reproduce them on Colab.
 
-  - type: outcomes
-    notes: |
-      Six outcomes matching the descriptor's week 11: frameworks; API platforms; deployment options; building applications and interfaces; deploying and monitoring with standard tools; and comparison. The final outcome is the one examiners and employers care about: justifying a deployment decision with evidence about latency, cost and quality rather than habit. This week practises MIMLO 5, deploying generative AI with contemporary frameworks, together with MIMLO 3 and 4.
 
-  - type: agenda
-    icon: "fa:FaRoute"
-    items:
-      - {title: "Warm-up: from notebook to 500 users", minutes: 5}
-      - {title: "1 · Frameworks and the tool stack", minutes: 20}
-      - {title: "2 · API platforms: keys, tokens, pricing, limits, streaming", minutes: 22}
-      - {title: "3 · Deployment options and efficient serving", minutes: 25}
-      - {title: "4 · Building applications: Gradio, FastAPI, Docker", minutes: 14}
-      - {title: "5 · Monitoring, guardrails and comparison", minutes: 21}
-      - {title: "Lab preview and wrap-up", minutes: 6}
-    notes: |
-      The plan follows the revised descriptor. Sections two and three contain real measurements from the lab: streaming latency, quantisation and batching. Take the break after section three. Sections four and five show the code students will write in the lab and how to monitor and protect the application.
+    Ask students: What separates a notebook that works from an application other people can use?
 
-  - type: discussion
-    title: "Warm-up"
-    icon: "fa:FaUsers"
-    prompt: "Your notebook chatbot works well for you. Tomorrow 500 students will use it. What could go wrong?"
+    Expected answer: An interface or API, a place to run, controlled cost and speed, guardrails and monitoring.
+
+
+    Common mistake: Treating deployment as copying the notebook to a server.'
+- type: outcomes
+  notes: 'Six outcomes matching the descriptor''s week 11: frameworks; API platforms; deployment options; building applications
+    and interfaces; deploying and monitoring with standard tools; and comparison. The final outcome is the one examiners and
+    employers care about: justifying a deployment decision with evidence about latency, cost and quality rather than habit.
+    This week practises MIMLO 5, deploying generative AI with contemporary frameworks, together with MIMLO 3 and 4.
+
+
+    Ask students: Which outcome matters most to employers?
+
+    Expected answer: Justifying a deployment decision with evidence about latency, cost and quality.
+
+
+    Common mistake: Choosing a framework out of habit rather than for a specific need.'
+- type: agenda
+  icon: fa:FaRoute
+  items:
+  - title: 'Warm-up: from notebook to 500 users'
+    minutes: 5
+  - title: 1 · Frameworks and the tool stack
+    minutes: 20
+  - title: '2 · API platforms: keys, tokens, pricing, limits, streaming'
+    minutes: 22
+  - title: 3 · Deployment options and efficient serving
+    minutes: 25
+  - title: '4 · Building applications: Gradio, FastAPI, Docker'
+    minutes: 14
+  - title: 5 · Monitoring, guardrails and comparison
+    minutes: 21
+  - title: Lab preview and wrap-up
+    minutes: 6
+  notes: 'The plan follows the revised descriptor. Sections two and three contain real measurements from the lab: streaming
+    latency, quantisation and batching. Take the break after section three. Sections four and five show the code students will
+    write in the lab and how to monitor and protect the application.
+
+
+    Ask students: Which sections contain real measurements?
+
+    Expected answer: Sections two and three: streaming latency, quantisation and batching.
+
+
+    Common mistake: Reading measurements from one laptop GPU as typical of every deployment.'
+- type: discussion
+  title: Warm-up
+  icon: fa:FaUsers
+  prompt: Your notebook works. Tomorrow 500 students use it. What could fail?
+  points:
+  - Waiting time and capacity.
+  - Cost and privacy.
+  - Failures and operating responsibility.
+  notes: 'Two minutes in pairs. Collect answers under the four headings on the slide; together they are the agenda
+    for today. Students often mention speed first. Push them on cost: a public link to a paid API with no limits
+    can produce a large bill overnight. Push them on keys: API keys pasted into notebooks or GitHub are routinely
+    stolen by automated scanners. And on operations: without logs you do not know that the app is failing until
+    users complain.
+
+
+    Analogy: A classroom tap works for one cup; serving 500 people needs measured flow, capacity and someone watching
+    for leaks.
+
+
+    Ask students: What changes when one notebook serves 500 students?
+
+    Expected answer: Concurrent requests, waiting time, cost, failure handling and operating responsibilities all
+    need testing.
+
+
+    Common mistake: A successful single request does not demonstrate capacity for many simultaneous users.'
+- type: section
+  number: 1
+  title: Frameworks and the tool stack
+  question: Which tools exist, and which do you need?
+  icon: fa:FaLayerGroup
+  notes: 'Section one maps the tool landscape into layers, compares the main frameworks named in the descriptor,
+    introduces the OpenAI-compatible API pattern that connects them, and discusses when an orchestration framework
+    helps and when plain code is better. Ask students which of these tools they have already used: most know a chat
+    assistant, few have called an API directly. About twenty minutes.
+
+
+    Analogy: A restaurant separates the menu, kitchen and waiter. Model libraries, servers and application code
+    likewise do different jobs.
+
+
+    Ask students: Does using a workflow framework automatically host the model?
+
+    Expected answer: No. Coordination, model execution and hosting are separate choices.
+
+
+    Common mistake: An OpenAI-compatible endpoint may implement only a subset of the client features.'
+- type: figure
+  title: The generative AI stack
+  figure: stack
+  notes: 'Think in layers. At the bottom is hardware: cloud GPUs and TPUs, servers, laptops and phones with neural processing
+    units. Models are proprietary, reached only through APIs, or open-weight, downloaded from the Hugging Face Hub. The access
+    and serving layer is how you run a model: cloud APIs, self-hosted serving engines such as vLLM, or local runners such as
+    Ollama. Orchestration frameworks compose prompts, tools, retrieval and agents. At the top are applications and interfaces.
+
+
+    Ask students: In which layer do vLLM and Ollama sit?
+
+    Expected answer: Access and serving: they run models; they are neither models nor orchestration frameworks.
+
+
+    Common mistake: Confusing orchestration, such as LangChain, with model hosting.'
+- type: table
+  title: Frameworks and platforms at a glance
+  header:
+  - Tool
+  - Layer
+  - Use it for (example)
+  rows:
+  - - Hugging Face
+    - Models / hosting
+    - Download Qwen2.5-0.5B; host a demo
+  - - OpenAI / Azure
+    - Provider API
+    - Call a GPT model with a key
+  - - Gemini / Vertex
+    - Provider API
+    - Call Gemini; free tier in AI Studio
+  - - vLLM / SGLang / TGI
+    - Server
+    - Serve 50 users from one GPU
+  - - Ollama / llama.cpp / LM Studio
+    - Local
+    - Run a small model on a laptop
+  - - LangChain / LangGraph
+    - Coordination
+    - Chain retrieval, a model and tools
+  - - LlamaIndex
+    - Retrieval
+    - Index a handbook for search
+  notes: 'Walk through the table by layer. Hugging Face is the hub for open models and also offers hosted inference through
+    partner providers. OpenAI''s API and Microsoft''s Azure OpenAI serve GPT models; Azure adds enterprise features such as
+    private networking, regional data residency and compliance certifications, which matter to universities and companies. Google''s
+    Gemini API has a free tier through AI Studio, and Gemini Enterprise Agent Platform (formerly Vertex AI) is its enterprise route. vLLM is the most widely used open-source
+    serving engine for GPUs. Ollama makes local models easy.
+
+
+    Ask students: Which tool would you use to run a small model on a laptop without a GPU?
+
+    Expected answer: A local runner such as Ollama or llama.cpp.
+
+
+    Common mistake: Choosing a GPU serving engine such as vLLM for one user on a laptop.'
+- type: figure
+  title: 'One client, many back ends: the OpenAI-compatible API'
+  figure: openai_compat
+  notes: 'Several providers and serving tools accept the basic OpenAI chat-completions format. Examples include compatible endpoints
+    from Gemini, Hugging Face, vLLM and Ollama. The lab builds a small compatible endpoint with FastAPI. Reuse the basic client
+    pattern by changing its base URL, key and model name. Then check supported fields, streaming behaviour and model features:
+    compatibility does not mean every endpoint has identical capabilities. Provider-specific features may need a native SDK.
+
+
+    Ask students: Which three settings change when the client switches to another compatible back end?
+
+    Expected answer: The base URL, the key and the model name.
+
+
+    Common mistake: Assuming every compatible endpoint supports every field, such as tools or streaming options.'
+- type: compare
+  title: Plain SDK or orchestration framework?
+  columns:
+  - head: Plain SDK + code
+    icon: fa:FaCode
     points:
-      - "Speed: many requests at once, long answers, slow first token."
-      - "Cost: who pays for the tokens or the GPU? Is there a budget cap?"
-      - "Safety and privacy: prompt injection, personal data, harmful answers, leaked API keys."
-      - "Operations: crashes, model updates, knowing when something breaks."
-    notes: |
-      Two minutes in pairs. Collect answers under the four headings on the slide; together they are the agenda for today. Students often mention speed first. Push them on cost: a public link to a paid API with no limits can produce a large bill overnight. Push them on keys: API keys pasted into notebooks or GitHub are routinely stolen by automated scanners. And on operations: without logs you do not know that the app is failing until users complain.
-
-  # ------------------------------------------------ section 1
-  - type: section
-    number: 1
-    title: "Frameworks and the tool stack"
-    question: "Which tools exist, and which do you need?"
-    icon: "fa:FaLayerGroup"
-    notes: |
-      Section one maps the tool landscape into layers, compares the main frameworks named in the descriptor, introduces the OpenAI-compatible API pattern that connects them, and discusses when an orchestration framework helps and when plain code is better. Ask students which of these tools they have already used: most know a chat assistant, few have called an API directly. About twenty minutes.
-
-  - type: figure
-    title: "The generative AI stack"
-    figure: stack
-    notes: |
-      Think in layers. At the bottom is hardware: cloud GPUs and TPUs, servers, laptops and phones with neural processing units. Models are proprietary, reached only through APIs, or open-weight, downloaded from the Hugging Face Hub. The access and serving layer is how you run a model: cloud APIs, self-hosted serving engines such as vLLM, or local runners such as Ollama. Orchestration frameworks compose prompts, tools, retrieval and agents. At the top are applications and interfaces. Running alongside every layer is LLMOps: logging, tracing, evaluation, guardrails and versioning.
-
-  - type: table
-    title: "Frameworks and platforms at a glance"
-    header: ["Tool", "Layer", "Use it for"]
-    rows:
-      - ["Hugging Face (Hub, Transformers, Inference Providers)", "Models, serving", "Open models, datasets; run locally or via hosted providers"]
-      - ["OpenAI / Azure OpenAI", "Cloud API", "GPT models; Azure adds enterprise security, regions, compliance"]
-      - ["Google Gemini API / Vertex AI", "Cloud API", "Gemini models; free tier in AI Studio; long context, multimodal"]
-      - ["vLLM (also SGLang, TGI)", "Self-hosted serving", "High-throughput GPU serving with an OpenAI-compatible API"]
-      - ["Ollama (also llama.cpp, LM Studio)", "Local", "Quantised open models on a laptop; offline and private"]
-      - ["LangChain / LangGraph", "Orchestration", "Chains, tool use and stateful agent graphs (week 12)"]
-      - ["LlamaIndex", "Orchestration", "Data connectors, indexing and retrieval for RAG (week 12)"]
-    notes: |
-      Walk through the table by layer. Hugging Face is the hub for open models and also offers hosted inference through partner providers. OpenAI's API and Microsoft's Azure OpenAI serve GPT models; Azure adds enterprise features such as private networking, regional data residency and compliance certifications, which matter to universities and companies. Google's Gemini API has a free tier through AI Studio, and Vertex AI is its enterprise route. vLLM is the most widely used open-source serving engine for GPUs. Ollama makes local models easy. LangChain, LangGraph and LlamaIndex are orchestration frameworks, used heavily next week.
-
-  - type: figure
-    title: "One client, many back ends: the OpenAI-compatible API"
-    figure: openai_compat
-    notes: |
-      A practical fact that simplifies everything: most providers and serving tools accept the OpenAI chat-completions format. Gemini offers an OpenAI-compatible endpoint, Hugging Face's router does, vLLM and Ollama do, and in the lab students build their own with FastAPI. The same client code therefore works everywhere; only the base URL, the key and the model name change. This reduces lock-in and makes comparisons easy: you can evaluate a cloud model and a local model with identical code. Provider-specific features, such as Gemini's native SDK features, still need their own SDKs.
-
-  - type: compare
-    title: "Plain SDK or orchestration framework?"
-    columns:
-      - head: "Plain SDK + your own code"
-        icon: "fa:FaCode"
-        points:
-          - "Few moving parts; easy to debug and test"
-          - "Full control over prompts and retries"
-          - "Best for simple apps, classification, extraction"
-          - "Anthropic and OpenAI guides recommend starting simple"
-      - head: "Framework (LangChain, LangGraph, LlamaIndex)"
-        icon: "fa:FaProjectDiagram"
-        points:
-          - "Ready-made connectors, retrievers, memory, tools"
-          - "Stateful graphs, retries, human-in-the-loop for agents"
-          - "Tracing integrations (e.g. LangSmith)"
-          - "Extra abstraction; APIs change quickly"
-    callout: "Start with the SDK; adopt a framework when you need its connectors, state management or tracing."
-    notes: |
-      Students often assume they must use LangChain. Frameworks are useful when you need their connectors to data sources, retrievers, state management for multi-step agents, or tracing integrations, and LangGraph in particular is designed for controllable agent workflows. But they add abstraction layers, and their APIs change quickly, which makes debugging harder. Guides from Anthropic and OpenAI on building agents recommend starting with direct API calls and simple code, and adding frameworks only when they solve a real problem. In the lab, students write the plain version first, then see LangChain drive the same model.
-
-  - type: quiz
-    question: "Your team built a prototype with a cloud API. Legal now requires that student data never leaves the university's servers. What is the least disruptive change?"
-    options:
-      - "Rewrite the application with a different framework"
-      - "Serve an open-weight model on university GPUs with vLLM's OpenAI-compatible server and change the base URL"
-      - "Ask the cloud provider to delete the data afterwards"
-      - "Switch to a larger cloud model"
-    answer: 1
-    notes: |
-      Answer: B. Because vLLM exposes an OpenAI-compatible API, the application code stays the same; only the base URL, key and model name change. You must then re-evaluate quality, because the open model will behave differently, and plan capacity for the GPUs. A is unnecessary work. C does not satisfy a requirement that data never leaves. D changes nothing about where data goes. Note that enterprise cloud offerings with regional data residency, such as Azure OpenAI in an EU region, may satisfy some policies, but that is a legal decision.
-
-  # ------------------------------------------------ section 2
-  - type: section
-    number: 2
-    title: "API platforms"
-    question: "Keys, tokens, pricing, rate limits and streaming"
-    icon: "fa:FaPlug"
-    notes: |
-      Section two covers what every developer must know about API platforms: authentication and key management, how tokens determine cost, rate limits and error handling, and streaming. We look at real latency measurements and a cost calculation. The same skills apply to OpenAI, Azure, Google and Hugging Face. About twenty-two minutes.
-
-  - type: cards
-    title: "What an API platform gives you, and what it expects"
-    cards:
-      - {icon: "fa:FaKey", head: "Authentication", text: "API keys or cloud identities (e.g. Microsoft Entra ID for Azure); one key per app and environment."}
-      - {icon: "fa:FaCoins", head: "Tokens and pricing", text: "Billed per million input and output tokens; output usually costs more; images and audio are tokens too."}
-      - {icon: "fa:FaTachometerAlt", head: "Rate limits", text: "Requests and tokens per minute; HTTP 429 when exceeded; tiers rise with usage and spend."}
-      - {icon: "fa:FaStream", head: "Streaming", text: "Tokens sent as they are generated (server-sent events): lower perceived latency."}
-      - {icon: "fa:FaBoxes", head: "Batch and caching", text: "Batch APIs for offline jobs at a discount; prompt caching discounts repeated prefixes."}
-      - {icon: "fa:FaTools", head: "Structured output and tools", text: "JSON schemas and function calling (weeks 7 and 12)."}
-    notes: |
-      Six concepts cover most API platforms. Authentication uses API keys, or for enterprise clouds, identities such as Microsoft Entra ID, which avoid long-lived secrets. Pricing is per million tokens, with output tokens usually several times more expensive than input, so long answers cost more than long prompts. Rate limits cap requests and tokens per minute. Streaming sends tokens as they are generated. Batch APIs process large offline jobs asynchronously at a discount, and prompt caching discounts repeated prefixes such as long system prompts. Structured outputs and tool calling were covered in week 7 and return in week 12.
-
-  - type: bullets
-    title: "Keeping API keys safe"
-    icon: "fa:FaUserShield"
-    bullets:
-      - "**Never** put keys in notebooks, code or Git: automated scanners find leaked keys within minutes."
-      - "Use **Colab Secrets**, environment variables or a secrets manager (Azure Key Vault, Google Secret Manager)."
-      - "Keys stay on the **server**: a browser or mobile app must call your back end, never the provider directly."
-      - "Least privilege: separate keys per project, spending limits and alerts, rotate regularly."
-      - "If a key leaks: **revoke it immediately**, then check usage and billing."
-    notes: |
-      Key security is a practical skill every student needs. Keys committed to public repositories are found by automated scanners very quickly and used to run up bills. Store keys in Colab Secrets, environment variables or a cloud secrets manager. Never embed a key in front-end code, because anyone can read it in the browser; the front end must call your own back end, which holds the key. Use separate keys per project with spending limits and alerts. If a key leaks, revoke it first and investigate afterwards. The lab reads keys only from Colab Secrets.
-
-  - type: figure
-    title: "Anatomy of a request: where the time goes"
-    figure: request_anatomy
-    bullets:
-      - "**TTFT** (time to first token) is what users feel; streaming makes the wait visible and shorter-seeming."
-      - "Decoding is sequential: long answers cost time as well as money."
-    stack: true
-    notes: |
-      Break latency into parts. Network and authentication add tens of milliseconds. Under load, requests wait in a queue. Prefill processes the whole prompt in parallel, so it grows with prompt length, which matters for RAG with long contexts. Then decoding generates one token at a time, which is why output length dominates total time. Time to first token is network plus queue plus prefill; total latency is roughly time to first token plus the number of output tokens divided by the decoding speed. Streaming shows the first words early, which greatly improves perceived speed.
-
-  - type: figure
-    title: "Measured: streaming latency of a small open model"
-    figure: lab_latency
-    bullets:
-      - "{{LAT_NOTES}}"
-      - "Users see text after the first token; without streaming they wait for the whole bar."
-    stack: true
-    notes: |
-      This is the lab's measurement for Qwen2.5-0.5B-Instruct. The dark part of each bar is time to first token, the light part the rest of the answer. The numbers are quoted in the bullet. Time to first token is a small fraction of the total, which is why streaming is standard in chat interfaces. On a CPU the same model is several times slower. Hosted frontier models run on far larger hardware, but they are also much larger, so the same pattern holds.
-
-  - type: table
-    title: "Estimating cost: 500 students, 20 requests a day, one month"
-    header: ["Option (illustrative prices)", "Price per 1M tokens (in / out)", "USD per month"]
-    rows:
-      - ["Small hosted model", "$0.10 / $0.40", "$60"]
-      - ["Mid-size hosted model", "$0.50 / $2.00", "$300"]
-      - ["Frontier hosted model", "$2.00 / $10.00", "$1,380"]
-      - ["Self-hosted small GPU, always on", "$0.60 per hour", "$432 + staff time"]
-    callout: "300,000 requests × (800 input + 300 output tokens). Prices are illustrative: always check the providers' current pricing pages."
-    callout_label: "Method"
-    notes: |
-      Walk through the arithmetic. Five hundred students times twenty requests a day times thirty days is three hundred thousand requests. Each has eight hundred input and three hundred output tokens. For the small model, that is three hundred thousand times eight hundred tokens at ten cents per million, plus three hundred thousand times three hundred tokens at forty cents per million: twenty-four plus thirty-six, sixty dollars. The same formula gives three hundred and thirteen hundred and eighty dollars for the larger models. A GPU running all month costs about four hundred and thirty dollars before staff time. The prices are illustrative; the method is what students must learn.
-
-  - type: code
-    title: "Streaming and retries in code"
-    code: |
-      from openai import OpenAI
-      client = OpenAI(base_url=BASE_URL, api_key=get_secret("API_KEY"))
-
-      stream = client.chat.completions.create(
-          model=MODEL, messages=messages, stream=True, max_tokens=300)
-      for chunk in stream:
-          print(chunk.choices[0].delta.content or "", end="")
-
-      def call_with_retry(fn, max_retries=5, base=0.5):
-          for attempt in range(max_retries + 1):
-              try:
-                  return fn()
-              except RateLimitError:                  # HTTP 429
-                  if attempt == max_retries:
-                      raise
-                  time.sleep(base * 2**attempt * (1 + random.random() / 2))
-    bullets:
-      - "Set `max_tokens` and a timeout on every call."
-      - "Exponential back-off with jitter avoids retry storms."
-    notes: |
-      Two patterns every application needs. Streaming: set stream to true and print each chunk's delta as it arrives. Retries: when the provider returns HTTP 429, too many requests, wait and retry, doubling the wait each time and adding random jitter so that many clients do not retry at the same moment. Always set a maximum number of output tokens, which caps both cost and latency, and a timeout. The official SDKs have built-in retries for some errors, but you should understand and configure them.
-
-  # ------------------------------------------------ section 3
-  - type: section
-    number: 3
-    title: "Deployment options and efficient serving"
-    question: "Cloud, self-hosted or local, and how to make it cheaper and faster"
-    icon: "fa:FaServer"
-    notes: |
-      Section three compares the three deployment options, then covers the three main efficiency techniques named in the descriptor: quantisation, batching and caching, with real measurements. The key message: cost and speed are design choices that can be measured, and every efficiency gain must be checked against quality. About twenty-five minutes; take the break afterwards.
-
-  - type: table
-    title: "Cloud API vs. self-hosted vs. local"
-    header: ["", "Cloud API", "Self-hosted (e.g. vLLM on GPUs)", "Local (e.g. Ollama)"]
-    rows:
-      - ["Models", "Frontier proprietary and hosted open models", "Open-weight, including your fine-tunes", "Small, quantised open models"]
-      - ["Cost profile", "Pay per token; no fixed cost", "Fixed GPU cost; cheap per token at high, steady load", "Free after hardware"]
-      - ["Data", "Leaves your network (check terms, region)", "Stays in your infrastructure", "Stays on the device"]
-      - ["Operations", "Provider scales and updates", "You run, scale, patch and monitor", "Per-device setup"]
-      - ["Risks", "Price and model changes, rate limits, lock-in", "Capacity planning, staff skills", "Limited quality and speed"]
-    notes: |
-      There is no universally best option. Cloud APIs give the strongest models with no infrastructure and pay-per-use pricing, but data leaves your network, and providers change prices and retire models. Self-hosting on GPUs keeps data in-house and becomes cheaper per token at high, steady volume, and lets you serve your own fine-tuned models, but you must operate it. Local models are private and free to run but limited to small quantised models. Many real systems are hybrids: a small local or self-hosted model for routine requests, a cloud model for hard ones.
-
-  - type: equation
-    title: "Quantisation: fewer bits per weight"
-    eq:
-      - "\\text{memory} \\approx N_{\\text{params}} \\times \\frac{\\text{bits}}{8}\\ \\text{bytes}"
-      - "s = \\frac{\\max |w|}{2^{b-1} - 1}, \\qquad q = \\mathrm{round}\\left(\\frac{w}{s}\\right), \\qquad \\hat{w} = q \\cdot s"
-    read_as:
-      - "A 7 B model needs ≈ 14 GB in 16-bit, ≈ 7 GB in 8-bit and ≈ 3.5–4 GB in 4-bit (plus the KV cache)."
-      - "Absmax: scale each group so its largest weight maps to the largest integer, round, store integers and one scale."
-      - "Smaller groups (e.g. 64 weights per scale) keep more precision: the basis of GPTQ, AWQ and GGUF formats."
-    terms:
-      - ["b", "bits per weight (8 or 4)"]
-      - ["s", "scale for a group of weights"]
-      - ["q", "stored integer"]
-      - ["ŵ", "de-quantised weight used in computation"]
-    notes: |
-      Quantisation stores weights with fewer bits. Memory is roughly the number of parameters times bits divided by eight: a seven-billion-parameter model needs fourteen gigabytes in sixteen-bit, seven in eight-bit and under four in four-bit, which is the difference between needing a data-centre GPU and running on a laptop. The absmax method scales each group of weights so the largest maps to the largest integer, rounds, and stores the integers plus one scale per group. Smaller groups keep more precision. Formats such as GPTQ, AWQ and GGUF, used by vLLM and Ollama, refine this idea.
-
-  - type: figure
-    title: "Measured: size and quality after quantisation"
-    figure: lab_quant
-    bullets:
-      - "{{QUANT_NOTES}}"
-      - "Always re-evaluate on your own task after quantising."
-    stack: true
-    notes: |
-      The lab quantises every linear layer of the model and measures perplexity on a paragraph of text. The measured values are in the bullet. The typical pattern: eight-bit is almost lossless; naive four-bit with one scale per row damages quality badly; four-bit with small groups recovers most of it at almost the same size. This is exactly why practical four-bit formats use groups. The perplexity check on one paragraph is only a quick sanity test; before deployment, rerun your task evaluation from weeks 7 and 8.
-
-  - type: figure
-    title: "Measured: batching raises throughput"
-    figure: lab_batch
-    bullets:
-      - "{{BATCH_NOTES}}"
-      - "Serving engines batch **continuously**: new requests join as others finish."
-    stack: true
-    notes: |
-      Generating for one request at a time leaves most of a GPU idle, because decoding is limited by memory bandwidth, not arithmetic. Processing several requests together reuses each weight read for many sequences. The lab measures throughput for batch sizes one to eight; the numbers are in the bullet. Production engines go further with continuous batching, adding and removing requests at every step rather than waiting for a whole batch to finish. The trade-off: larger batches increase throughput but can increase each user's latency.
-
-  - type: bullets
-    title: "Serving engines and caching"
-    icon: "fa:FaBolt"
-    bullets:
-      - "**vLLM**: continuous batching and **PagedAttention**, which stores the KV cache in pages like virtual memory (Kwon et al., 2023)."
-      - "**KV cache** (week 5) and **prefix caching**: reuse computation for shared prompt prefixes; providers discount cached tokens."
-      - "**Response caching**: identical questions answered from a cache (the lab: milliseconds instead of seconds)."
-      - "**Speculative decoding**: a small draft model proposes tokens, the large model verifies several at once."
-      - "**Right-size the model**: a distilled or fine-tuned small model is often the biggest saving (week 8)."
-    notes: |
-      vLLM's key idea, PagedAttention, manages the key-value cache in fixed-size pages, like an operating system's virtual memory, which reduces wasted memory and allows larger batches. Prefix caching reuses the KV cache for shared prompt beginnings, such as a long system prompt, and API providers pass on the saving as discounted cached input tokens. Response caching answers repeated questions instantly. Speculative decoding speeds up generation by letting a small model draft tokens that the large model verifies in parallel. Often the largest saving is simply using a smaller, fine-tuned model.
-
-  - type: stat
-    title: "What fits where? (weights only)"
-    stats:
-      - {value: "≈ 1 GB", label: "0.5 B model in 16-bit: runs on any laptop (the lab model)"}
-      - {value: "≈ 4 GB", label: "7–8 B model in 4-bit: a laptop with Ollama, or a free Colab T4"}
-      - {value: "16 GB", label: "memory of a Colab T4 GPU: up to ≈ 7 B in 16-bit, ≈ 20–30 B in 4-bit"}
-      - {value: "≈ 140 GB", label: "70 B model in 16-bit: several data-centre GPUs"}
-    caption: "Add memory for the KV cache, which grows with context length and batch size."
-    notes: |
-      These rules of thumb help students choose. Half a billion parameters in sixteen-bit is about one gigabyte and runs anywhere. A seven-to-eight-billion-parameter model in four-bit is about four gigabytes and runs on a laptop with Ollama or on a free Colab GPU. A T4 has sixteen gigabytes, enough for about seven billion parameters in sixteen-bit or twenty to thirty billion in four-bit. A seventy-billion-parameter model in sixteen-bit needs about one hundred and forty gigabytes, several data-centre GPUs. Always leave room for the KV cache, which grows with context length and the number of concurrent requests.
-
-  - type: quiz
-    question: "Your self-hosted model is accurate but too slow when 50 users are online at once. Which change is most likely to help first?"
-    options:
-      - "Increase the temperature"
-      - "Serve with an engine that uses continuous batching (e.g. vLLM) and quantise the model, then re-check quality"
-      - "Add a longer system prompt"
-      - "Switch off streaming"
-    answer: 1
-    notes: |
-      Answer: B. With many concurrent users, a naive server processes requests one at a time, so queues grow. A serving engine with continuous batching raises throughput dramatically, and quantisation reduces memory so more requests fit in a batch. Quality must be rechecked after quantising. A changes randomness, not speed. C makes prefill slower. D does not change total time and makes perceived latency worse.
-
-  # ------------------------------------------------ section 4
-  - type: section
-    number: 4
-    title: "Building applications and interfaces"
-    question: "Gradio, FastAPI and Docker"
-    icon: "fa:FaWindowRestore"
-    notes: |
-      Welcome back. Section four shows how the pieces fit together into an application: an interface for people, an API for other programs, guardrails and logging around the model, and a container for deployment. The code on these slides is what students write in the lab. About fourteen minutes.
-
-  - type: figure
-    title: "Proposed integrated application architecture"
-    figure: app_architecture
-    notes: |
-      This is a proposed integrated design. A user interface or other client calls a back-end API, with input checks, model generation, output checks and logs inside that request path. In the lab the routes are separate: Gradio calls respond and generate directly, while the SDK and LangChain call the FastAPI endpoint. That endpoint does not inherit respond's guardrails or logs. The exported app.py is a smaller packaging scaffold without all notebook checks and logging. Students should identify the features that must be connected before deploying the integrated design.
-
-  - type: code
-    title: "An OpenAI-compatible endpoint with FastAPI"
-    code: |
-      from fastapi import FastAPI
-      from pydantic import BaseModel
-
-      class ChatRequest(BaseModel):
-          messages: list[dict]
-          max_tokens: int = 128
-
-      api = FastAPI()
-
-      @api.post("/v1/chat/completions")
-      def chat(req: ChatRequest):
-          text, n_in, n_out = generate(req.messages, req.max_tokens)
-          return {"object": "chat.completion",
-                  "choices": [{"index": 0, "finish_reason": "stop",
-                               "message": {"role": "assistant", "content": text}}],
-                  "usage": {"prompt_tokens": n_in, "completion_tokens": n_out,
-                            "total_tokens": n_in + n_out}}
-    bullets:
-      - "Pydantic validates requests; FastAPI generates interactive docs at `/docs`."
-      - "OpenAI-compatible, so the `openai` SDK and LangChain can call it."
-    notes: |
-      FastAPI turns a Python function into a web API. Pydantic models validate the request body automatically, rejecting malformed requests, and FastAPI generates interactive documentation. By returning the OpenAI response format, including the usage block with token counts, our server works with the OpenAI SDK and LangChain unchanged, as students verify in the lab. In production you would add authentication, request size limits, timeouts and streaming, and run the server behind a process manager.
-
-  - type: code
-    title: "A chat interface with Gradio"
-    code: |
-      import gradio as gr
-
-      def respond(message, history):
-          allowed, cleaned, reason = check_input(message)   # guardrail
-          if not allowed:
-              return f"Sorry, I can't help with that ({reason})."
-          answer, n_in, n_out = generate(build_messages(cleaned, history))
-          log_request(n_in, n_out, reason)                   # metadata only
-          return check_output(answer)
-
-      demo = gr.ChatInterface(respond, title="Course assistant")
-      demo.launch(share=True)     # temporary public link from Colab
-    bullets:
-      - "Hugging Face **Spaces** hosts Gradio apps for free (CPU) with secrets support."
-      - "A public link means anyone can use your quota: add limits or authentication."
-    notes: |
-      Gradio builds a web interface from a Python function; ChatInterface provides a complete chat UI in one line. The respond function wraps the model with an input check, logging and an output check. In Colab, share equals true prints a temporary public link, useful for demonstrations but anyone with the link can use it. For longer-lived demos, Hugging Face Spaces hosts Gradio apps, with secrets for API keys. Streamlit is a popular alternative for data-oriented apps.
-
-  - type: bullets
-    title: "Packaging and releasing: Docker, versions, CI"
-    icon: "fa:FaDocker"
-    bullets:
-      - "**Docker** image: code + pinned dependencies + start command; runs the same on a laptop, Hugging Face Spaces, Google Cloud Run or Azure Container Apps."
-      - "Secrets are passed as **environment variables at run time**, never baked into the image."
-      - "**Version everything**: model name and version, prompt templates, decoding settings, data and index versions."
-      - "**Evaluate before release**: run your fixed evaluation set in CI; compare with the current version (weeks 7–8)."
-      - "Roll out gradually (canary or A/B) and keep the previous version ready for rollback."
-    notes: |
-      A Docker image packages code, pinned dependencies and the start command, so the application runs identically everywhere, including serverless container platforms such as Google Cloud Run and Azure Container Apps, or Hugging Face Spaces. Pass secrets at run time. Version not only the code but also the model, prompts, decoding settings and retrieval index, because any of them changes behaviour. Treat prompt changes like code changes: run the evaluation set automatically and compare with the current version before release. Roll out gradually and keep a rollback path.
-
-  # ------------------------------------------------ section 5
-  - type: section
-    number: 5
-    title: "Monitoring, guardrails and comparison"
-    question: "How do you know it is working, and safe?"
-    icon: "fa:FaChartLine"
-    notes: |
-      The final section covers what to monitor, a real monitoring summary from the lab, layered guardrails, the LLMOps tooling for tracing and evaluation, a comparison of deployment choices, and a responsible deployment checklist. It answers the question every client asks after launch: how do we know it is still working? About twenty-one minutes.
-
-  - type: cards
-    title: "What to monitor"
-    cards:
-      - {icon: "fa:FaStopwatch", head: "Performance", text: "TTFT, p50 / p95 / p99 latency, throughput, timeouts."}
-      - {icon: "fa:FaDollarSign", head: "Cost", text: "Tokens per request, per user and per day; budget alerts."}
-      - {icon: "fa:FaExclamationTriangle", head: "Reliability", text: "Error rates, HTTP 429s, provider outages, fallbacks used."}
-      - {icon: "fa:FaCheckDouble", head: "Quality", text: "User feedback, sampled human or LLM-judge review, regression tests, drift."}
-      - {icon: "fa:FaShieldAlt", head: "Safety", text: "Guardrail blocks, redactions, flagged outputs, injection attempts."}
-      - {icon: "fa:FaCodeBranch", head: "Versions", text: "Which model, prompt and index produced each answer."}
-    notes: |
-      Monitoring for generative AI extends normal web monitoring. Performance uses percentiles because averages hide slow requests: p95 means ninety-five percent of requests are faster. Cost must be tracked per user and per day, with alerts. Reliability includes rate-limit errors and provider outages. Quality needs signals such as user feedback, sampled reviews and regression tests, because model and data drift can silently degrade answers. Safety metrics track guardrail activity. Versions link every answer to the model and prompt that produced it, which is essential for debugging and accountability.
-
-  - type: figure
-    title: "Measured: a monitoring summary from the lab app's logs"
-    figure: lab_monitor
-    bullets:
-      - "{{MONITOR_NOTES}}"
-      - "Logs record metadata (latency, tokens, blocks, version), not raw personal data."
-    stack: true
-    notes: |
-      The lab sends simulated traffic through the app, including a prompt-injection attempt and messages containing an e-mail address and a phone number. Each bar is one request: blue answered, orange answered after redacting personal data, red blocked. The dashed line marks the ninety-fifth percentile latency. The summary in the bullet is computed from the log file. Point out the design choice: logs store metadata, not message text, following GDPR data minimisation; if you need text for quality review, redact it and limit retention and access.
-
-  - type: flow
-    title: "Guardrails in layers"
-    steps:
-      - {label: "Input checks", sub: "Length, rate limits, PII redaction, injection and topic filters"}
-      - {label: "Model setup", sub: "System prompt, least-privilege tools, safe decoding settings"}
-      - {label: "Output checks", sub: "Moderation classifier, schema validation, leak and policy checks", highlight: true}
-      - {label: "Human oversight", sub: "Escalation for sensitive or uncertain cases"}
-      - {label: "Monitor & red-team", sub: "Track blocks, test attacks, update rules"}
-    callout: "Regex rules are a start; production systems add trained classifiers (e.g. Llama Guard-style models) and least privilege."
-    notes: |
-      Guardrails work in layers because each layer can be bypassed. Input checks enforce length and rate limits, redact personal data and filter known injection patterns. The model setup limits damage: least-privilege tools mean an injected instruction cannot do much. Output checks run moderation classifiers, validate structured outputs and check for leaked secrets or policy violations. Humans handle sensitive or uncertain cases. Monitoring and red-teaming find new attacks. The lab's regex guardrails are deliberately simple; students discuss how to bypass them in question two.
-
-  - type: bullets
-    title: "LLMOps tooling: tracing and evaluation"
-    icon: "fa:FaSearch"
-    bullets:
-      - "**Tracing** records each step of a request (retrieval, prompts, tool calls, model calls) with timings and tokens."
-      - "Tools: **OpenTelemetry** (open standard), **Langfuse** (open source), **LangSmith**, **MLflow**, cloud consoles (Azure AI Foundry, Vertex AI)."
-      - "**Evaluation in production**: sampled LLM-as-judge and human review, user feedback, regression suites (week 7)."
-      - "**Guardrail libraries**: moderation APIs, Llama Guard-style classifiers, NeMo Guardrails, Guardrails AI."
-    notes: |
-      Tracing is essential once an application has several steps, as RAG and agent systems do next week: a trace shows which retrieval, prompt, tool call or model call caused a bad answer or a slow response. OpenTelemetry is the open standard; Langfuse is an open-source LLM observability platform; LangSmith integrates with LangChain; MLflow tracks experiments and traces; and cloud platforms such as Azure AI Foundry and Vertex AI include monitoring and evaluation dashboards. Guardrail libraries and safety classifiers provide more robust checks than hand-written rules. Mention these as options, not requirements, for projects.
-
-  - type: table
-    title: "Comparison: choosing a deployment for a student project"
-    header: ["Need", "Good choice", "Why"]
-    rows:
-      - ["Best quality, quick prototype", "Cloud API (free tier) + Gradio", "No infrastructure; strongest models"]
-      - ["Private data, no budget", "Ollama or Transformers locally", "Data stays on the machine"]
-      - ["Fine-tuned model for a demo", "Hugging Face Spaces or Colab + Gradio", "Free hosting of your own model"]
-      - ["Many users, steady load", "vLLM on a cloud GPU", "Batching gives low cost per token"]
-      - ["Reproducible hand-in", "Docker image + pinned versions", "Examiners can run it"]
-    notes: |
-      The descriptor asks for a comparison, so end with a practical decision table for projects. For the best quality in a quick prototype, use a cloud API on its free tier with a Gradio interface. For private data without a budget, run a local model. To demo your own fine-tuned model, use Hugging Face Spaces or Colab. For many users with steady load, a serving engine on a GPU. For a reproducible hand-in, a Docker image with pinned versions. Remind students to justify their choice in the project report with measured latency, cost and quality.
-
-  - type: bullets
-    title: "Responsible deployment checklist"
-    icon: "fa:FaClipboardList"
-    bullets:
-      - "**Transparency**: tell users they are talking to an AI and label generated content (EU AI Act Art. 50)."
-      - "**Data protection**: know where data goes; minimise, redact and set retention; check provider terms (GDPR)."
-      - "**Security**: keys in secrets managers; authentication and rate limits; OWASP Top 10 for LLM applications."
-      - "**Oversight and evaluation**: test before release, monitor after, clear escalation path to a human."
-      - "**Cost and environment**: budgets and alerts; right-size models to reduce energy use."
-    notes: |
-      This checklist connects the week to responsible AI. Transparency is now a legal duty in the EU: users must be told they are interacting with an AI system. Data protection requires knowing where prompts go and how long they are kept. Security follows the OWASP Top 10 for LLM applications, which lists prompt injection, sensitive information disclosure and unbounded consumption among the main risks. Oversight and evaluation continue after launch. Finally, cost and energy: smaller, well-chosen models reduce both.
-
-  - type: lab
-    title: "Lab 11: deploy, measure and monitor a generative AI app"
-    steps:
-      - "Stream from a local model and measure **TTFT** and **tokens/s**."
-      - "Serve it as an **OpenAI-compatible API** with **FastAPI**; call it with the `openai` SDK and **LangChain**; optionally a cloud API."
-      - "Estimate **monthly cost**; implement **retry with back-off**."
-      - "Quantise (int8, int4, groups) and measure **perplexity**; measure **batching** and **caching**."
-      - "Build a **Gradio** app with **guardrails** and **logging**; summarise the logs as a **monitoring** report; write a **Dockerfile**."
-    runtime: "Google Colab T4 GPU (≈ 20 min); CPU works, more slowly"
-    deliverable: "Notebook with latency, cost, quantisation, batching and monitoring tables, the app link or screenshot, and three answers"
-    notes: |
-      The lab covers both descriptor tutorials: exploring tools with local and cloud models, and building and deploying a small application with a web interface, measuring latency and cost and adding logging and guardrails. Cloud API keys are optional; everything else runs without accounts. Remind students to stop the public Gradio link at the end of the session and never to paste keys into the notebook.
-
-  - type: summary
+    - Call and debug directly
+    - Own prompts, checks and retries
+    - 'Example: 30 lines that call the API and validate the JSON'
+  - head: Framework
+    icon: fa:FaProjectDiagram
     points:
-      - "Think in layers: models, serving, orchestration, applications, plus LLMOps."
-      - "The **OpenAI-compatible API** lets one client use cloud, self-hosted and local models."
-      - "Protect **API keys**; plan for **tokens, pricing and rate limits**; **stream** answers."
-      - "Latency ≈ **TTFT** + output tokens ÷ tokens per second."
-      - "Cloud vs self-hosted vs local: trade quality, cost, data control and operations."
-      - "**Quantisation**, **batching** and **caching** cut cost; re-check quality."
-      - "Apps: **Gradio** + **FastAPI** + **Docker**; version models and prompts."
-      - "Monitor performance, cost, quality and safety; layer **guardrails**."
-    notes: |
-      Recap the eight points. Students should be able to draw the architecture of a small application, estimate its cost, explain where latency comes from, choose and justify a deployment option, and list what to monitor. Next week, the final technical week, we connect models to knowledge and tools: retrieval-augmented generation and agents, which use everything from today.
+    - Connectors and tracked workflows
+    - Useful abstraction; more dependencies
+    - 'Example: a LangGraph agent with checkpoints and approval steps'
+  callout: Start simple; add a framework for a specific need.
+  notes: 'Students often assume they must use LangChain. Frameworks are useful when you need their connectors to data sources,
+    retrievers, state management for multi-step agents, or tracing integrations, and LangGraph in particular is designed for
+    controllable agent workflows. But they add abstraction layers, and their APIs change quickly, which makes debugging harder.
+    Guides from Anthropic and OpenAI on building agents recommend starting with direct API calls and simple code, and adding
+    frameworks only when they solve a real problem.
 
-  - type: resources
-    items:
-      - {kind: course, label: "Microsoft: Generative AI for Beginners", note: "Lessons on building and securing apps", url: "https://github.com/microsoft/generative-ai-for-beginners"}
-      - {kind: doc, label: "Hugging Face Inference Providers", note: "OpenAI-compatible router to open models", url: "https://huggingface.co/docs/inference-providers/index"}
-      - {kind: doc, label: "Gemini API: OpenAI compatibility", note: "Use Gemini with the OpenAI SDK", url: "https://ai.google.dev/gemini-api/docs/openai"}
-      - {kind: doc, label: "vLLM documentation", note: "High-throughput serving", url: "https://docs.vllm.ai/en/latest/"}
-      - {kind: tool, label: "Ollama", note: "Run open models locally", url: "https://ollama.com/"}
-      - {kind: doc, label: "Gradio quickstart", note: "Interfaces in Python", url: "https://gradio.app/guides/quickstart"}
-      - {kind: doc, label: "FastAPI tutorial", note: "Build APIs with Python", url: "https://fastapi.tiangolo.com/tutorial/"}
-      - {kind: doc, label: "OWASP Top 10 for LLM Applications", note: "Security risks and mitigations", url: "https://genai.owasp.org/llm-top-10/"}
-    notes: |
-      Microsoft's Generative AI for Beginners has lessons on building and securing applications. The Hugging Face Inference Providers and Gemini compatibility pages show the OpenAI-compatible pattern with free tiers. The vLLM documentation and Ollama cover self-hosted and local serving. Gradio and FastAPI tutorials cover the application layer. The OWASP Top 10 for LLM applications is the standard security reference. The textbook reading is Tunstall and colleagues, chapter 8, on making transformers efficient in production. All links were checked in September 2026.
+
+    Ask students: When does an orchestration framework earn its extra dependencies?
+
+    Expected answer: When you need its connectors, multi-step state or tracing; otherwise direct API calls are easier to debug.
+
+
+    Common mistake: Starting with a framework before the basic calls work.'
+- type: quiz
+  question: Student data must stay on university servers. What fits the existing compatible client?
+  options:
+  - Self-host a suitable compatible model; change URL and re-test
+  - Rewrite every component for a new local framework
+  - Send data to the external API, then request deletion
+  - Switch to a larger external model with better accuracy
+  answer: 0
+  notes: 'Answer: A. Because vLLM exposes an OpenAI-compatible API, the application code stays the same; only the base URL,
+    key and model name change. You must then re-evaluate quality, because the open model will behave differently, and plan capacity
+    for the GPUs. B is unnecessary work. C does not satisfy a requirement that data never leaves. D changes nothing about where
+    data goes.
+
+
+    Ask students: After switching to a self-hosted model, what must you re-test?
+
+    Expected answer: Answer quality on your test set, and capacity under realistic load.
+
+
+    Common mistake: Choosing C. Asking for deletion after sending data does not meet a rule that data never leaves.'
+- type: section
+  number: 2
+  title: API platforms
+  question: Keys, tokens, pricing, rate limits and streaming
+  icon: fa:FaPlug
+  notes: 'Section two covers what every developer must know about API platforms: authentication and key management,
+    how tokens determine cost, rate limits and error handling, and streaming. We look at real latency measurements
+    and a cost calculation. The same skills apply to OpenAI, Azure, Google and Hugging Face. About twenty-two minutes.
+
+
+    Analogy: A taxi bill records distance and waiting separately. API bills can price input and output tokens separately.
+
+
+    Ask students: With 300,000 requests, how many input tokens arise at 800 per request?
+
+    Expected answer: 240 million input tokens; 300 output tokens per request adds 90 million output tokens.
+
+
+    Common mistake: Streaming changes when users can read output; it does not guarantee less model computation.'
+- type: cards
+  title: What an API platform gives you, and what it expects
+  cards:
+  - icon: fa:FaKey
+    head: Authentication
+    text: A secret key or cloud identity says who is calling and who pays.
+  - icon: fa:FaCoins
+    head: Tokens / prices
+    text: Priced per million tokens; output usually costs more than input.
+  - icon: fa:FaTachometerAlt
+    head: Rate limits
+    text: Caps on requests and tokens per minute; HTTP 429 means wait and retry.
+  - icon: fa:FaStream
+    head: Streaming
+    text: Text arrives chunk by chunk, so users start reading sooner.
+  - icon: fa:FaBoxes
+    head: Batch / cache
+    text: Offline batches and repeated prompt prefixes can cost less.
+  - icon: fa:FaTools
+    head: Schemas / tools
+    text: Ask for JSON fields or tool calls in a declared format.
+  notes: 'Six concepts cover most API platforms. Authentication uses API keys, or for enterprise clouds, identities such as
+    Microsoft Entra ID, which avoid long-lived secrets. Pricing is per million tokens, with output tokens usually several times
+    more expensive than input, so long answers cost more than long prompts. Rate limits cap requests and tokens per minute.
+    Streaming sends tokens as they are generated. Batch APIs process large offline jobs asynchronously at a discount, and prompt
+    caching discounts repeated prefixes such as long system prompts.
+
+
+    Ask students: Why can long answers cost more than long prompts?
+
+    Expected answer: Output tokens are usually priced several times higher than input tokens.
+
+
+    Common mistake: Retrying a 429 error immediately and repeatedly.'
+- type: bullets
+  title: Keeping API keys safe
+  icon: fa:FaUserShield
+  bullets:
+  - Keep keys out of notebooks and Git.
+  - Load server-side secrets; the browser calls your server.
+  - Use restricted credentials and spending controls.
+  - Revoke leaked keys; review usage.
+  notes: 'Key security is a practical skill every student needs. Keys committed to public repositories are found by automated
+    scanners very quickly and used to run up bills. Store keys in Colab Secrets, environment variables or a cloud secrets manager.
+    Never embed a key in front-end code, because anyone can read it in the browser; the front end must call your own back end,
+    which holds the key. Use separate keys per project with spending limits and alerts.
+
+
+    Ask students: Where should a web app''s API key live?
+
+    Expected answer: On your server, loaded from a secrets store; the browser calls your server, never the provider directly.
+
+
+    Common mistake: Putting a key in front-end code or a shared notebook.'
+- type: figure
+  title: 'Anatomy of a request: where the time goes'
+  figure: request_anatomy
+  bullets:
+  - '**TTFT:** wait before the first token.'
+  - '**Decoding:** generate remaining tokens.'
+  - Streaming exposes output sooner; computation can be unchanged.
+  stack: true
+  notes: 'Break latency into parts. Network and authentication add tens of milliseconds. Under load, requests wait in a queue.
+    Prefill processes the whole prompt in parallel, so it grows with prompt length, which matters for RAG with long contexts.
+    Then decoding generates one token at a time, which is why output length dominates total time. Time to first token is network
+    plus queue plus prefill; total latency is roughly time to first token plus the number of output tokens divided by the decoding
+    speed.
+
+
+    Ask students: Why does a long RAG prompt increase the time to first token?
+
+    Expected answer: Prefill must process every prompt token before the first output token appears.
+
+
+    Common mistake: Thinking streaming reduces total computation. It only shows text sooner.'
+- type: figure
+  title: 'Measured: streaming latency of a small open model'
+  figure: lab_latency
+  bullets:
+  - '{{LAT_NOTES}}'
+  - 'This lab times first non-empty decoded text: an approximate TTFT.'
+  stack: true
+  notes: 'This is the lab''s measurement for Qwen2.5-0.5B-Instruct. The dark part of each bar is time to first token, the light
+    part the rest of the answer. The numbers are quoted in the bullet. Time to first token is a small fraction of the total,
+    which is why streaming is standard in chat interfaces. Hosted frontier models run on far larger hardware, but they are also
+    much larger, so the same pattern holds.
+
+
+    Ask students: In the measured bars, how large is the first-token wait compared with the whole answer?
+
+    Expected answer: A small fraction; most of the time is spent decoding the rest of the answer.
+
+
+    Common mistake: Reporting average latency without the slow cases.'
+- type: table
+  title: 'Estimating cost: 500 students, 20 requests a day, one month'
+  header:
+  - Option (illustrative prices)
+  - Price per 1M tokens (in / out)
+  - USD per month
+  rows:
+  - - Small hosted model
+    - $0.10 / $0.40
+    - $60
+  - - Mid-size hosted model
+    - $0.50 / $2.00
+    - $300
+  - - Frontier hosted model
+    - $2.00 / $10.00
+    - $1,380
+  - - Self-hosted small GPU, always on
+    - $0.60 per hour
+    - $432 + staff time
+  callout: 300,000 requests × (800 input + 300 output tokens). Illustrative prices; check current provider rates.
+  callout_label: Method
+  notes: 'Walk through the arithmetic. Five hundred students times twenty requests a day times thirty days is three hundred
+    thousand requests. Each has eight hundred input and three hundred output tokens. For the small model, that is three hundred
+    thousand times eight hundred tokens at ten cents per million, plus three hundred thousand times three hundred tokens at
+    forty cents per million: twenty-four plus thirty-six, sixty dollars. The same formula gives three hundred dollars for the
+    mid-size model and one thousand three hundred and eighty dollars for the frontier model.
+
+
+    Ask students: What would the small-model bill be if answers were 600 tokens instead of 300?
+
+    Expected answer: $24 for input plus $72 for output: $96 a month.
+
+
+    Common mistake: Comparing an API bill with GPU rental and forgetting staff time.'
+- type: code
+  title: Streaming and retries in code
+  code: "from openai import OpenAI\nclient = OpenAI(base_url=BASE_URL, api_key=API_KEY)\n# Read API_KEY from a secrets\
+    \ store.\nstream = client.chat.completions.create(\n    model=MODEL, messages=messages,\n    stream=True, max_tokens=300)\n\
+    for chunk in stream:\n    text = chunk.choices[0].delta.content or \"\"\n    print(text, end=\"\")\n# Retry\
+    \ 429 with capped backoff and jitter."
+  bullets:
+  - Cap output and request time.
+  - '**Backoff:** longer waits; **jitter:** random variation.'
+  - Limit retries and report failure.
+  notes: 'Two patterns every application needs. Streaming: set stream to true and print each chunk''s delta as it arrives. Retries:
+    when the provider returns HTTP 429, too many requests, wait and retry, doubling the wait each time and adding random jitter
+    so that many clients do not retry at the same moment. Always set a maximum number of output tokens, which caps both cost
+    and latency, and a timeout. The official SDKs have built-in retries for some errors, but you should understand and configure
+    them.
+
+
+    Ask students: Why add random jitter to retry waits?
+
+    Expected answer: So that many clients that failed together do not all retry at the same moment.
+
+
+    Common mistake: Retrying forever. Cap the retries and report the failure.'
+- type: section
+  number: 3
+  title: Deployment options and efficient serving
+  question: Cloud, self-hosted or local, and how to make it cheaper and faster
+  icon: fa:FaServer
+  notes: 'Section three compares the three deployment options, then covers the three main efficiency techniques
+    named in the descriptor: quantisation, batching and caching, with real measurements. The key message: cost and
+    speed are design choices that can be measured, and every efficiency gain must be checked against quality. About
+    twenty-five minutes; take the break afterwards.
+
+
+    Analogy: Sharing a bus trip can move more passengers per hour while making one passenger wait. Batching has
+    the same tradeoff.
+
+
+    Ask students: Does fake_quantize store four-bit tensors in this lab?
+
+    Expected answer: No. It rounds then reconstructs floating-point tensors; the displayed storage estimate is hypothetical.
+
+
+    Common mistake: The weight-size estimate omits cache, activations, scales and runtime overhead.'
+- type: table
+  title: Cloud API vs. self-hosted vs. local
+  header:
+  - ''
+  - Cloud API
+  - Self-hosted
+  - Local
+  rows:
+  - - Models
+    - Provider's list
+    - Open models you can run
+    - What fits the device
+  - - Cost
+    - Pay per token
+    - GPU hire + staff time
+    - Device + electricity
+  - - Data
+    - Leaves to the provider
+    - Stays on your servers
+    - Stays on the device
+  - - Operations
+    - Provider runs the model
+    - Your team runs it
+    - The device owner
+  - - Example
+    - Gemini for a prototype
+    - vLLM for a university
+    - Ollama on a laptop
+  notes: 'There is no universally best option. A cloud API provides hosted models and shifts model-server operation to the provider.
+    Check its quality, charges, region and data terms. Self-hosting gives your team control over compatible open models, but
+    you pay for hardware, electricity and staff. High steady use can improve its economics. Local processing can keep data on
+    a configured device; check network features, licences and resource costs. Some applications combine these routes, after
+    testing quality and access requirements.
+
+
+    Ask students: Which option keeps data on a device you configure?
+
+    Expected answer: Local, after checking network features and licences.
+
+
+    Common mistake: Assuming self-hosting is always cheaper. Staff time and idle GPUs cost money.'
+- type: equation
+  title: 'Quantisation: fewer bits per weight'
+  eq:
+  - \text{memory} \approx N_{\text{params}} \times \frac{\text{bits}}{8}\ \text{bytes}
+  - s = \frac{\max |w|}{2^{b-1} - 1}, \qquad q = \mathrm{round}\left(\frac{w}{s}\right), \qquad \hat{w} = q \cdot
+    s
+  read_as:
+  - 'Weights: parameters × bits/8 bytes, before overhead.'
+  - 'Absmax: scale, round, then reconstruct with q × s.'
+  - Group scales trade storage for lower error.
+  terms:
+  - - b
+    - Bits per weight
+  - - s
+    - Group scale
+  - - q
+    - Rounded integer
+  - - $\hat{w}$
+    - Reconstructed value
+  notes: 'Quantisation stores weights with fewer bits. Memory is roughly the number of parameters times bits divided by eight:
+    a seven-billion-parameter model needs fourteen gigabytes in sixteen-bit, seven in eight-bit and under four in four-bit,
+    which is the difference between needing a data-centre GPU and running on a laptop. The absmax method scales each group of
+    weights so the largest maps to the largest integer, rounds, and stores the integers plus one scale per group. Smaller groups
+    keep more precision.
+
+
+    Ask students: How much memory do the weights of a 7 B model need at 8-bit?
+
+    Expected answer: About 7 GB, before scales and runtime memory.
+
+
+    Common mistake: Forgetting the per-group scales, which add storage.'
+- type: figure
+  title: 'Measured: size and quality after quantisation'
+  figure: lab_quant
+  bullets:
+  - '{{QUANT_NOTES}}'
+  - The lab simulates rounding in floating-point tensors. Re-check task quality.
+  stack: true
+  notes: 'The lab rounds weights in linear layers, excluding the output language-model head, then reconstructs floating-point
+    values for inference. It measures perplexity on one paragraph. The displayed storage sizes are estimates of hypothetical
+    packed weights; this demonstration does not store four-bit tensors. Compare the measured quality for eight-bit, row-scaled
+    four-bit and grouped four-bit rounding. Separate group scales can preserve detail at additional storage cost. One paragraph
+    is only a quick check; rerun the actual task evaluation before deployment.
+
+
+    Ask students: Which 4-bit scheme lost less quality in the lab, and why?
+
+    Expected answer: Groups of 64: each group has its own scale, so small weights keep more precision.
+
+
+    Common mistake: Judging quality from one paragraph''s perplexity. Rerun the task evaluation.'
+- type: figure
+  title: 'Measured: batching raises throughput'
+  figure: lab_batch
+  bullets:
+  - '{{BATCH_NOTES}}'
+  - Batching raises aggregate throughput; an individual request may wait longer.
+  - Continuous batching admits work as capacity frees.
+  stack: true
+  notes: 'Generating for one request at a time leaves most of a GPU idle, because decoding is limited by memory bandwidth, not
+    arithmetic. Processing several requests together reuses each weight read for many sequences. The lab measures throughput
+    for batch sizes one to eight; the numbers are in the bullet. Production engines go further with continuous batching, adding
+    and removing requests at every step rather than waiting for a whole batch to finish. The trade-off: larger batches increase
+    throughput but can increase each user''s latency.
+
+
+    Ask students: Why does batching raise throughput on a GPU?
+
+    Expected answer: Decoding is limited by memory bandwidth, and batching reuses each weight read for several sequences.
+
+
+    Common mistake: Assuming every user gets a faster answer. A request may wait for its batch.'
+- type: bullets
+  title: Serving engines and caching
+  icon: fa:FaBolt
+  bullets:
+  - '**KV cache:** reuse earlier attention keys/values.'
+  - '**PagedAttention:** organise cache pages; batch requests.'
+  - '**Prefix / response cache:** reuse input computation / answers.'
+  - '**Speculation:** propose then verify tokens.'
+  - Test smaller adapted models.
+  notes: 'vLLM''s key idea, PagedAttention, manages the key-value cache in fixed-size pages, like an operating system''s virtual
+    memory, which reduces wasted memory and allows larger batches. Prefix caching reuses the KV cache for shared prompt beginnings,
+    such as a long system prompt, and API providers pass on the saving as discounted cached input tokens. Response caching answers
+    repeated questions instantly. Speculative decoding speeds up generation by letting a small model draft tokens that the large
+    model verifies in parallel.
+
+
+    Ask students: Which technique saves work when every request starts with the same long system prompt?
+
+    Expected answer: Prefix caching.
+
+
+    Common mistake: Thinking speculative decoding changes the output. The large model checks every proposed token.'
+- type: stat
+  title: What fits where? (weights only)
+  stats:
+  - value: ≈ 1 GB
+    label: 0.5 B weights, 16-bit
+  - value: ≈ 4 GB
+    label: 7–8 B weights, 4-bit
+  - value: 16 GB
+    label: T4 GPU capacity
+  - value: ≈ 140 GB
+    label: 70 B weights, 16-bit
+  caption: Weights only. Add scales, KV caches, activations and runtime memory.
+  notes: 'The figures estimate weight storage, not total runtime memory or a guaranteed model fit. A 0.5 B model at 16-bit needs
+    about 1 GB for weights; 7–8 B at 4-bit about 4 GB before scales; 70 B at 16-bit about 140 GB. A T4 has 16 GB total, shared
+    with attention caches, activations and framework overhead. Context length and batch size change the required runtime memory.
+    Measure the actual configuration before recommending hardware.
+
+
+    Ask students: Can a 7 B model at 16-bit run on a T4?
+
+    Expected answer: Its weights alone need about 14 GB of the T4''s 16 GB, leaving little for caches and activations; 8-bit
+    or 4-bit is safer.
+
+
+    Common mistake: Treating weight size as total memory.'
+- type: quiz
+  question: An accurate self-hosted model struggles with 50 concurrent users. What should you test?
+  options:
+  - A higher temperature so replies finish sooner
+  - Continuous batching and quantisation; re-check quality
+  - A longer prompt with more detailed instructions
+  - Disable streaming so each reply is sent whole
+  answer: 1
+  notes: 'Answer: B. With many concurrent users, a naive server processes requests one at a time, so queues grow. A serving
+    engine with continuous batching raises throughput dramatically, and quantisation reduces memory so more requests fit in
+    a batch. Quality must be rechecked after quantising. A changes randomness, not speed. C makes prefill slower. D does not
+    change total time and makes perceived latency worse.
+
+
+    Ask students: Why is option D wrong?
+
+    Expected answer: Streaming does not change total time; turning it off only makes the wait feel longer.
+
+
+    Common mistake: Quantising without re-checking quality.'
+- type: section
+  number: 4
+  title: Building applications and interfaces
+  question: Gradio, FastAPI and Docker
+  icon: fa:FaWindowRestore
+  notes: 'Welcome back. Section four shows how the pieces fit together into an application: an interface for people,
+    an API for other programs, guardrails and logging around the model, and a container for deployment. The code
+    on these slides is what students write in the lab. About fourteen minutes.
+
+
+    Analogy: An interface is a front door; an API is another entrance. Controls on one door do not automatically
+    protect the other.
+
+
+    Ask students: Does the lab FastAPI route inherit respond input checks?
+
+    Expected answer: No. FastAPI calls generate directly, while Gradio calls respond; each route needs its own controls.
+
+
+    Common mistake: The exported Docker files are a smaller scaffold, not the full checked notebook application.'
+- type: figure
+  title: Proposed integrated application architecture
+  figure: app_architecture
+  notes: 'This is a proposed integrated design. A user interface or other client calls a back-end API, with input checks, model
+    generation, output checks and logs inside that request path. In the lab the routes are separate: Gradio calls respond and
+    generate directly, while the SDK and LangChain call the FastAPI endpoint. That endpoint does not inherit respond''s guardrails
+    or logs. The exported app.py is a smaller packaging scaffold without all notebook checks and logging.
+
+
+    Ask students: In the proposed design, where should input checks and logs sit?
+
+    Expected answer: Inside the back-end request path, so every client passes through them.
+
+
+    Common mistake: Putting checks only in the user interface, where other clients bypass them.'
+- type: code
+  title: An OpenAI-compatible endpoint with FastAPI
+  code: "@api.post(\"/v1/chat/completions\")\ndef chat(req: ChatRequest):\n    text, n_in, n_out = generate(\n \
+    \       req.messages, req.max_tokens)\n    return {\n        \"object\": \"chat.completion\",\n        \"choices\"\
+    : [{\"index\": 0, \"finish_reason\": \"stop\",\n                     \"message\": {\"role\": \"assistant\",\n\
+    \                                 \"content\": text}}],\n        \"usage\": {\"prompt_tokens\": n_in,\n    \
+    \              \"completion_tokens\": n_out,\n                  \"total_tokens\": n_in + n_out}}"
+  bullets:
+  - FastAPI exposes a Python handler.
+  - Basic compatible JSON; test required features.
+  - This route calls generate directly, separately from checked Gradio.
+  notes: 'FastAPI turns a Python function into a web API. Pydantic models validate the request body automatically, rejecting
+    malformed requests, and FastAPI generates interactive documentation. By returning the OpenAI response format, including
+    the usage block with token counts, our server works with the OpenAI SDK and LangChain unchanged, as students verify in the
+    lab. In production you would add authentication, request size limits, timeouts and streaming, and run the server behind
+    a process manager.
+
+
+    Ask students: Why return a usage block with token counts?
+
+    Expected answer: Clients such as the OpenAI SDK read it to log usage and estimate cost.
+
+
+    Common mistake: Exposing the endpoint publicly without authentication, size limits and timeouts.'
+- type: code
+  title: A chat interface with Gradio
+  code: "import gradio as gr\n\ndef respond(message, history):\n    allowed, cleaned, reason = check_input(message)\
+    \   # guardrail\n    if not allowed:\n        return f\"Sorry, I can't help with that ({reason}).\"\n    answer,\
+    \ n_in, n_out = generate(build_messages(cleaned, history))\n    log_request(n_in, n_out, reason)           \
+    \        # metadata only\n    return check_output(answer)\n\ndemo = gr.ChatInterface(respond, title=\"Course\
+    \ assistant\")\ndemo.launch(share=True)     # temporary public link from Colab\n"
+  bullets:
+  - Gradio connects a browser to respond.
+  - Spaces hardware, quotas and costs vary.
+  - Public links need appropriate access and request controls.
+  notes: 'Gradio builds a web interface from a Python function; ChatInterface provides a complete chat UI in one line. The respond
+    function wraps the model with an input check, logging and an output check. In Colab, share equals true prints a temporary
+    public link, useful for demonstrations but anyone with the link can use it. For longer-lived demos, Hugging Face Spaces
+    hosts Gradio apps, with secrets for API keys. Streamlit is a popular alternative for data-oriented apps.
+
+
+    Ask students: Who can use a share=True link?
+
+    Expected answer: Anyone who has the link, until it expires or the session stops.
+
+
+    Common mistake: Leaving the public link running after the demonstration.'
+- type: bullets
+  title: 'Packaging and releasing: Docker, versions, CI'
+  icon: fa:FaDocker
+  bullets:
+  - Docker records app, dependencies and start command.
+  - Provide secrets at runtime.
+  - Record model, prompt, settings and data versions.
+  - Run CI evaluations before release.
+  - Trial gradually; retain a rollback version.
+  notes: 'A Docker image packages code, dependencies and a start command. Record tested exact versions for repeatable deployment;
+    the lab export supplies version ranges as a starting scaffold. A container reduces environment differences but still depends
+    on compatible hardware, platform settings, network access and resources. Pass secrets at run time. Version the model, prompts,
+    decoding settings and retrieval index as well as the code. Re-run evaluations after changes, release gradually and keep
+    a rollback path.
+
+
+    Ask students: Why version prompts and decoding settings as well as code?
+
+    Expected answer: Any of them can change answers, so a release must record them all to reproduce a result.
+
+
+    Common mistake: Releasing to everyone at once with no rollback version.'
+- type: section
+  number: 5
+  title: Monitoring, guardrails and comparison
+  question: How do you know it is working, and safe?
+  icon: fa:FaChartLine
+  notes: 'The final section covers what to monitor, a real monitoring summary from the lab, layered guardrails,
+    the LLMOps tooling for tracing and evaluation, a comparison of deployment choices, and a responsible deployment
+    checklist. It answers the question every client asks after launch: how do we know it is still working? About
+    twenty-one minutes.
+
+
+    Analogy: A dashboard records several dials because one average can hide a queue. Tail latency, quality and cost
+    need different measurements.
+
+
+    Ask students: If p95 is two seconds, what does that describe?
+
+    Expected answer: Approximately 95% of measured allowed requests took at most two seconds; blocked requests are
+    counted separately.
+
+
+    Common mistake: Simple pattern checks can miss attacks and personal-data formats; logs are not a full evaluation.'
+- type: cards
+  title: What to monitor
+  cards:
+  - icon: fa:FaStopwatch
+    head: Performance
+    text: Time to first text, full answer time, p95 and requests per second.
+  - icon: fa:FaDollarSign
+    head: Cost
+    text: Tokens and spend per user and per day, with a budget alert.
+  - icon: fa:FaExclamationTriangle
+    head: Reliability
+    text: Errors, timeouts, 429s and provider outages.
+  - icon: fa:FaCheckDouble
+    head: Quality
+    text: A fixed test set re-run weekly, plus sampled human reviews.
+  - icon: fa:FaShieldAlt
+    head: Safety
+    text: Blocked inputs, redactions and attacks that got through.
+  - icon: fa:FaCodeBranch
+    head: Versions
+    text: Which model, prompt and index answered each request.
+  notes: 'Monitoring for generative AI extends normal web monitoring. Performance uses percentiles because averages hide slow
+    requests: p95 means ninety-five percent of requests are faster. Cost must be tracked per user and per day, with alerts.
+    Reliability includes rate-limit errors and provider outages. Quality needs signals such as user feedback, sampled reviews
+    and regression tests, because model and data drift can silently degrade answers. Safety metrics track guardrail activity.
+
+
+    Ask students: Which signals would reveal that answer quality is drifting?
+
+    Expected answer: Regression tests on a fixed set, sampled human reviews and user feedback.
+
+
+    Common mistake: Monitoring only speed and errors, not answer quality.'
+- type: figure
+  title: 'Measured: a monitoring summary from the lab app''s logs'
+  figure: lab_monitor
+  bullets:
+  - '{{MONITOR_NOTES}}'
+  - Handler logs timing, tokens, blocks and versions; no raw prompts.
+  stack: true
+  notes: 'The lab sends simulated traffic through the app, including a prompt-injection attempt and messages containing an e-mail
+    address and a phone number. Each bar is one request: blue answered, orange answered after redacting personal data, red blocked.
+    The dashed line marks the ninety-fifth percentile latency. The summary in the bullet is computed from the log file. Point
+    out the design choice: logs store metadata, not message text, following GDPR data minimisation; if you need text for quality
+    review, redact it and limit retention and access.
+
+
+    Ask students: Why does the log store metadata rather than message text?
+
+    Expected answer: Data minimisation: timings and token counts are enough for monitoring and avoid storing personal data.
+
+
+    Common mistake: Reading ten simulated requests as evidence of production performance.'
+- type: flow
+  title: Guardrails in layers
+  steps:
+  - label: Input
+    sub: Check size, identity, content
+  - label: Model / tools
+    sub: Restrict permissions
+  - label: Output
+    sub: Check schema and policy
+    highlight: true
+  - label: Oversight
+    sub: Escalate uncertain cases
+  - label: Monitor
+    sub: Test misses and false alarms
+  callout: Apply controls to every reachable route; pattern rules catch only some cases.
+  notes: 'Guardrails work in layers because each layer can be bypassed. Input checks enforce length and rate limits, redact
+    personal data and filter known injection patterns. The model setup limits damage: least-privilege tools mean an injected
+    instruction cannot do much. Output checks run moderation classifiers, validate structured outputs and check for leaked secrets
+    or policy violations. Humans handle sensitive or uncertain cases. Monitoring and red-teaming find new attacks. The lab''s
+    regex guardrails are deliberately simple; students discuss how to bypass them in question two.
+
+
+    Ask students: An injected instruction slips past the input filter. Which layer limits the damage?
+
+    Expected answer: The model and tools layer: least-privilege tools cannot perform harmful actions.
+
+
+    Common mistake: Relying on regular expressions alone.'
+- type: bullets
+  title: 'LLMOps tooling: tracing and evaluation'
+  icon: fa:FaSearch
+  bullets:
+  - '**Tracing:** record steps, timing and token use.'
+  - 'Examples: OpenTelemetry, Langfuse, LangSmith, MLflow.'
+  - '**LLMOps:** versions, tests, deployment and monitoring.'
+  - Repeat evaluations and review sampled answers.
+  notes: 'Tracing is essential once an application has several steps, as RAG and agent systems do next week: a trace shows which
+    retrieval, prompt, tool call or model call caused a bad answer or a slow response. OpenTelemetry is the open standard; Langfuse
+    is an open-source LLM observability platform; LangSmith integrates with LangChain; MLflow tracks experiments and traces;
+    and cloud platforms such as Microsoft Foundry (formerly Azure AI Foundry) and Google''s Gemini Enterprise Agent Platform (formerly Vertex AI) include monitoring and evaluation dashboards. Guardrail libraries
+    and safety classifiers provide more robust checks than hand-written rules.
+
+
+    Ask students: What does a trace show that a single log line does not?
+
+    Expected answer: The chain of steps (retrieval, prompts, tool and model calls) with timings, so you can find the step that
+    caused a slow or bad answer.
+
+
+    Common mistake: Treating tracing as a replacement for evaluation.'
+- type: table
+  title: 'Comparison: choosing a deployment for a student project'
+  header:
+  - Need
+  - Good choice
+  - Why
+  - Check
+  rows:
+  - - Quick prototype
+    - Hosted API + Gradio
+    - Working demo in an hour
+    - Data terms and cost
+  - - Private data, no budget
+    - Local model
+    - Data stays on the device
+    - Memory and quality
+  - - Demo a fine-tuned model
+    - Hugging Face Spaces / Colab
+    - Free hosted GPU or CPU
+    - Hardware and time limits
+  - - Many users
+    - Serving engine (vLLM)
+    - Batches concurrent requests
+    - Load-test waits
+  - - Repeatable hand-in
+    - Docker + pinned versions
+    - Same environment for markers
+    - Rebuild from scratch
+  notes: 'The descriptor asks for a comparison, so end with a practical decision table for projects. For a quick prototype,
+    compare hosted model quality, permitted data, quotas and cost, then use a Gradio interface where it fits. For private data
+    without a budget, run a local model. To demo your own fine-tuned model, use Hugging Face Spaces or Colab. For many users
+    with steady load, a serving engine on a GPU. For a reproducible hand-in, a Docker image with pinned versions.
+
+
+    Ask students: Which option fits a group demo of its own fine-tuned model?
+
+    Expected answer: Hugging Face Spaces or Colab, after checking hardware and session limits.
+
+
+    Common mistake: Choosing a serving engine for a prototype with five users.'
+- type: bullets
+  title: Responsible deployment checklist
+  icon: fa:FaClipboardList
+  bullets:
+  - Disclose AI interaction as required.
+  - Minimise data; control access and retention.
+  - Protect keys and cap requests.
+  - Test, monitor and provide human escalation.
+  - Budget for the measured task.
+  notes: 'This checklist connects the week to responsible AI. Transparency is now a legal duty in the EU: users must be told
+    they are interacting with an AI system. Data protection requires knowing where prompts go and how long they are kept. Security
+    follows the OWASP Top 10 for LLM applications, which lists prompt injection, sensitive information disclosure and unbounded
+    consumption among the main risks. Oversight and evaluation continue after launch. Finally, cost and energy: smaller, well-chosen
+    models reduce both.
+
+
+    Ask students: Which OWASP risk covers a public app that runs up a large bill?
+
+    Expected answer: Unbounded consumption.
+
+
+    Common mistake: Forgetting to tell users they are interacting with an AI system.'
+- type: lab
+  title: 'Lab 11: deploy, measure and monitor a generative AI app'
+  steps:
+  - Measure first text and full response time.
+  - Serve locally; call SDK and framework.
+  - Estimate costs; simulate bounded retries.
+  - Compare rounding, batching and cache effects.
+  - Inspect checked Gradio logs and Docker scaffold.
+  runtime: Colab T4 GPU or CPU (slower). About 3 min on a 4 GB laptop GPU after downloads
+  deliverable: Notebook with latency, cost, quantisation, batching and monitoring tables, the app link or screenshot,
+    and three answers
+  notes: 'The lab covers both descriptor tutorials: exploring tools with local and cloud models, and building and deploying
+    a small application with a web interface, measuring latency and cost and adding logging and guardrails. Cloud API keys are
+    optional; everything else runs without accounts. Remind students to stop the public Gradio link at the end of the session
+    and never to paste keys into the notebook.
+
+
+    Ask students: Which lab parts work without any API key?
+
+    Expected answer: All of them except the optional cloud API calls.
+
+
+    Common mistake: Pasting keys into the notebook instead of Colab Secrets.'
+- type: summary
+  points:
+  - Choose model, server and application layers.
+  - Protect keys; estimate tokens and cost.
+  - Measure first text and full wait.
+  - Compare deployment and efficiency tradeoffs.
+  - Package tested versions.
+  - Check every route; monitor quality, cost and failures.
+  notes: 'Recap the six points. Students should be able to draw the architecture of a small application, estimate its cost,
+    explain where latency comes from, choose and justify a deployment option, and list what to monitor. Next week, the final
+    technical week, we connect models to knowledge and tools: retrieval-augmented generation and agents, which use everything
+    from today.
+
+
+    Ask students: Estimate a monthly bill: 100 users, 10 requests a day, 1,000 input and 200 output tokens, small-model prices.
+
+    Expected answer: 30,000 requests: 30 M input tokens cost $3 and 6 M output tokens cost $2.40, about $5.40 in total.
+
+
+    Common mistake: Forgetting that output tokens cost more per token.'
+- type: resources
+  items:
+  - kind: course
+    label: 'Microsoft: Generative AI for Beginners'
+    note: Lessons on building and securing apps
+    url: https://github.com/microsoft/generative-ai-for-beginners
+  - kind: doc
+    label: Hugging Face Inference Providers
+    note: OpenAI-compatible router to open models
+    url: https://huggingface.co/docs/inference-providers/index
+  - kind: doc
+    label: 'Gemini API: OpenAI compatibility'
+    note: Use Gemini with the OpenAI SDK
+    url: https://ai.google.dev/gemini-api/docs/openai
+  - kind: doc
+    label: vLLM documentation
+    note: High-throughput serving
+    url: https://docs.vllm.ai/en/latest/
+  - kind: tool
+    label: Ollama
+    note: Run open models locally
+    url: https://ollama.com/
+  - kind: doc
+    label: Gradio quickstart
+    note: Interfaces in Python
+    url: https://gradio.app/guides/quickstart
+  - kind: doc
+    label: FastAPI tutorial
+    note: Build APIs with Python
+    url: https://fastapi.tiangolo.com/tutorial/
+  - kind: doc
+    label: OWASP Top 10 for LLM Applications
+    note: Security risks and mitigations
+    url: https://genai.owasp.org/llm-top-10/
+  notes: 'Microsoft''s Generative AI for Beginners has lessons on building and securing applications. The Hugging Face Inference
+    Providers and Gemini compatibility pages show the OpenAI-compatible pattern with free tiers. The vLLM documentation and
+    Ollama cover self-hosted and local serving. Gradio and FastAPI tutorials cover the application layer. The OWASP Top 10 for
+    LLM applications is the standard security reference. The textbook reading is Tunstall and colleagues, chapter 8, on making
+    transformers efficient in production. All links were last checked on 9 October 2026.
+
+
+    Ask students: Which resource is the standard security reference?
+
+    Expected answer: The OWASP Top 10 for LLM applications.
+
+
+    Common mistake: Copying deployment code from tutorials without pinning versions.'

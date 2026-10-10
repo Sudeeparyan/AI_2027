@@ -1,9 +1,36 @@
 {
   "week": 7,
   "prerequisites": [
-    {"term": "Prompt", "meaning": "Instructions and context supplied to a model for one request.", "check": "Does rewriting a prompt change the model's stored weights?"},
-    {"term": "Ground truth", "meaning": "A reference answer used to check a prediction.", "check": "For a labelled ticket, which field supplies the expected team?"},
-    {"term": "Accuracy", "meaning": "The fraction of evaluated examples counted as correct.", "check": "If 32 of 40 predictions are correct, what is the accuracy?"}
+    {
+      "term": "Prompt",
+      "meaning": "Instructions and context supplied to a model for one request.",
+      "check": "Does rewriting a prompt change the model's stored weights?",
+      "answer": "No. A prompt changes the input for one request, not the stored weights."
+    },
+    {
+      "term": "Ground truth",
+      "meaning": "A reference answer used to check a prediction.",
+      "check": "For a labelled ticket, which field supplies the expected team?",
+      "answer": "The label stored with each ticket, such as IT_ACCESS."
+    },
+    {
+      "term": "Accuracy",
+      "meaning": "The fraction of evaluated examples counted as correct.",
+      "check": "If 32 of 40 predictions are correct, what is the accuracy?",
+      "answer": "0.8, or 80%, because 32 ÷ 40 = 0.8."
+    },
+    {
+      "term": "Token",
+      "meaning": "A small piece of text counted by a model.",
+      "check": "Does a long reply usually use more output tokens?",
+      "answer": "Yes. More output text usually means more tokens, time and cost."
+    },
+    {
+      "term": "JSON",
+      "meaning": "A text format with named fields and values, read by code.",
+      "check": "Is valid JSON automatically factually correct?",
+      "answer": "No. Valid JSON only means the format can be read; the values can still be wrong."
+    }
   ],
   "diagrams": [
     {
@@ -11,15 +38,51 @@
       "title": "The prompt evaluation loop",
       "subtitle": "Follow one labelled student-services ticket through the harness",
       "steps": [
-        {"title": "Labelled item", "detail": "A message and its known correct team", "code": "ticket_ds"},
-        {"title": "Build prompt", "detail": "Add the task, permitted labels and optional examples", "code": "zero_shot / few_shot"},
-        {"title": "Generate text", "detail": "Run the same model with declared decoding settings", "code": "llm"},
-        {"title": "Parse and score", "detail": "Find a label; compare it with ground truth", "code": "label_scorer"},
-        {"title": "Collect measures", "detail": "Store scores, output-token counts and elapsed time", "code": "evaluate"},
-        {"title": "Review errors", "detail": "Inspect invalid outputs and mistaken category decisions", "code": "errors"}
+        {
+          "title": "Labelled message",
+          "detail": "Input and known correct team",
+          "code": "ticket_ds",
+          "role": "data"
+        },
+        {
+          "title": "Build prompt",
+          "detail": "Rules, labels and examples",
+          "code": "few_shot",
+          "role": "tool"
+        },
+        {
+          "title": "Generate reply",
+          "detail": "Keep model settings fixed",
+          "code": "llm",
+          "role": "model"
+        },
+        {
+          "title": "Parse + score",
+          "detail": "Find label; compare reference",
+          "code": "label_scorer",
+          "role": "loss"
+        },
+        {
+          "title": "Collect measures",
+          "detail": "Scores, tokens and seconds",
+          "code": "evaluate",
+          "role": "tool"
+        },
+        {
+          "title": "Review errors",
+          "detail": "Read wrong and unparsed replies",
+          "code": "errors",
+          "role": "output"
+        }
       ],
-      "arrows": ["input text", "chat messages", "raw response", "score + note", "results table"],
-      "feedback": "Use development errors to revise prompts; keep a final test set separate",
+      "arrows": [
+        "message + reference",
+        "chat messages",
+        "raw reply",
+        "score + note",
+        "results table"
+      ],
+      "feedback": "Revise from development errors; keep a fresh final test separate.",
       "feedback_to": 1,
       "trace": [
         "The ticket about an expired Moodle password has the reference label IT_ACCESS.",
@@ -28,9 +91,10 @@
         "One wrong answer among 40 changes accuracy by 2.5 percentage points.",
         "Inspect both invalid outputs and valid-but-wrong labels before changing the prompt."
       ],
-      "explanation": "The harness turns prompt design into a measurable experiment. Each item contains input text and a reference answer. A prompt function converts that item into messages, and llm returns generated text plus its output-token count. The scorer then interprets the reply and compares its label with the reference. evaluate stores one row per item and computes summary measures. An invalid reply and a recognised but wrong label are different failure types. Compare prompts on the same items with declared settings so that observed differences have meaning. This is a small development dataset, so repeatedly improving a prompt on these examples can overfit them. Reserve new examples for a final check. The harness stores shortened previews of text and output, so those table cells are useful summaries rather than complete records of every response.",
+      "explanation": "The harness turns prompt design into a measurable experiment. Each item contains input text and a reference answer. A prompt function converts that item into messages, and llm returns generated text plus its output-token count. The scorer then interprets the reply and compares its label with the reference. The evaluate function stores one row per item and computes summary measures. An invalid reply and a recognised but wrong label are different failure types. Compare prompts on the same items with declared settings so that observed differences have meaning. This is a small development dataset, so repeatedly improving a prompt on these examples can overfit them. Reserve new examples for a final check. The harness stores shortened previews of text and output, so those table cells are useful summaries rather than complete records of every response.",
       "check_question": "If a prompt improves from 32 to 34 correct answers out of 40, how many examples account for the gain?",
-      "check_answer": "Two examples. That is a five-percentage-point gain, which a small dataset alone may not establish reliably."
+      "check_answer": "Two examples. That is a five-percentage-point gain, which a small dataset alone may not establish reliably.",
+      "layout": "linear"
     },
     {
       "id": "mechanism",
@@ -38,16 +102,52 @@
       "title": "JSON extraction with a check",
       "subtitle": "Validate structure, then check whether the values match the email",
       "steps": [
-        {"title": "Source email", "detail": "The original text contains the facts to extract", "code": "EMAILS"},
-        {"title": "Schema prompt", "detail": "Request named fields and permitted request categories", "code": "extract_prompt / SCHEMA_HINT"},
-        {"title": "Model response", "detail": "The model proposes a JSON object", "code": "llm"},
-        {"title": "Parse JSON", "detail": "Find the object and decode its syntax", "code": "try_parse"},
-        {"title": "Validate fields", "detail": "Check required types, labels, ID and date patterns", "code": "Request"},
-        {"title": "Decide + compare", "detail": "Accept valid data, check references, or attempt one repair", "code": "parse_with_retry / rows_extract"}
+        {
+          "title": "Source email",
+          "detail": "Known facts to extract",
+          "code": "EMAILS",
+          "role": "data"
+        },
+        {
+          "title": "Schema prompt",
+          "detail": "Fields and allowed categories",
+          "code": "extract_prompt",
+          "role": "tool"
+        },
+        {
+          "title": "Model response",
+          "detail": "Propose a JSON object",
+          "code": "llm",
+          "role": "model"
+        },
+        {
+          "title": "Parse JSON",
+          "detail": "Decode the response text",
+          "code": "try_parse",
+          "role": "model"
+        },
+        {
+          "title": "Validate fields",
+          "detail": "Check types and patterns",
+          "code": "Request",
+          "role": "loss"
+        },
+        {
+          "title": "Accept or repair",
+          "detail": "Compare facts; retry once",
+          "code": "parse_with_retry",
+          "role": "output"
+        }
       ],
-      "arrows": ["email text", "schema + source messages", "raw text", "decoded field values", "valid object or error"],
-      "feedback": "On a validation error, append the error and retry once",
-      "feedback_to": 2,
+      "arrows": [
+        "email",
+        "prompt",
+        "raw JSON text",
+        "field values",
+        "object or error"
+      ],
+      "feedback": "Append a validation error and retry once; validate the retry too.",
+      "feedback_to": 1,
       "trace": [
         "Aoife's email supplies a name, an eight-digit ID, an extension request and a date.",
         "The prompt asks for those four fields, with null when no date is present.",
@@ -55,23 +155,60 @@
         "A corrected response is checked once more; a second failure returns None.",
         "A valid object is separately compared with gold values to measure correctness."
       ],
-      "explanation": "A schema is a contract about output structure. Here the Request model specifies fields, allowed request labels and checks for the ID and date spelling. try_parse first finds a JSON object and decodes it, then constructs Request to run those checks. parse_with_retry returns immediately when validation succeeds. If parsing or validation fails, it sends the response and error back to the model and tries once more; a second failure returns None. This is a controlled repair path rather than an unlimited loop. Validation is weaker than factual checking: a different eight-digit ID can pass while referring to the wrong student. The date validator checks a YYYY-MM-DD pattern, rather than whether that date exists in the calendar. The lab therefore also compares extracted fields with the labelled reference values.",
+      "explanation": "A schema is a contract about output structure. Here the Request model specifies fields, allowed request labels and checks for the ID and date spelling. The try_parse function first finds a JSON object and decodes it, then constructs Request to run those checks. The parse_with_retry function returns immediately when validation succeeds. If parsing or validation fails, it sends the response and error back to the model and tries once more; a second failure returns None. This is a controlled repair path rather than an unlimited loop. Validation is weaker than factual checking: a different eight-digit ID can pass while referring to the wrong student. The date validator checks a YYYY-MM-DD pattern, rather than whether that date exists in the calendar. The lab therefore also compares extracted fields with the labelled reference values.",
       "check_question": "Would the wrong student ID pass validation if it still contained eight digits?",
-      "check_answer": "Yes. The format check would pass; comparison with the source and reference is needed to detect the wrong value."
+      "check_answer": "Yes. The format check would pass; comparison with the source and reference is needed to detect the wrong value.",
+      "layout": "linear"
     },
     {
       "id": "lab",
       "title": "Five prompt experiments",
       "subtitle": "Use a different success check for each task",
       "steps": [
-        {"title": "Route tickets", "detail": "Compare prompt strategies with the same labelled messages", "code": "evaluate / label_scorer"},
-        {"title": "Score numbers", "detail": "Compare direct answers, written steps and sampled votes", "code": "num_scorer / majority_vote"},
-        {"title": "Extract fields", "detail": "Separate schema validity from field correctness", "code": "parse_with_retry"},
-        {"title": "Test injection", "detail": "Compare summary prompts on documents containing hostile instructions", "code": "defended_prompt / hijacked"},
-        {"title": "Swap judge order", "detail": "Check whether answer position changes the verdict", "code": "judge"},
-        {"title": "Summarise evidence", "detail": "Report correctness, costs, failures and measurement limits", "code": "summaries / res / inj"}
+        {
+          "title": "Route messages",
+          "detail": "Same tickets; varied prompts",
+          "code": "evaluate",
+          "role": "model"
+        },
+        {
+          "title": "Score numbers",
+          "detail": "Answers, steps and most votes",
+          "code": "num_scorer",
+          "role": "loss"
+        },
+        {
+          "title": "Extract fields",
+          "detail": "Check format and source facts",
+          "code": "parse_with_retry",
+          "role": "model"
+        },
+        {
+          "title": "Inspect injection",
+          "detail": "Read heuristic flags and replies",
+          "code": "hijacked",
+          "role": "tool"
+        },
+        {
+          "title": "Swap judge order",
+          "detail": "Require valid A/B choices",
+          "code": "judge",
+          "role": "tool"
+        },
+        {
+          "title": "Report evidence",
+          "detail": "Scores, costs and limitations",
+          "code": "summaries",
+          "role": "output"
+        }
       ],
-      "arrows": ["classification table", "number-task measures", "extraction measures", "attack-test table", "judge verdicts"],
+      "arrows": [
+        "routing results",
+        "number scores",
+        "extraction checks",
+        "flagged reply table",
+        "judge verdicts"
+      ],
       "trace": [
         "For ticket routing, score the permitted label rather than the confidence of the prose.",
         "For arithmetic, extract the final number and compare it with the known answer.",
@@ -79,18 +216,148 @@
         "For hostile documents, inspect the output as well as the keyword detector.",
         "For judging, swap A and B and inspect invalid verdicts before reporting consistency."
       ],
-      "explanation": "The lab reuses model calls but changes the success criterion for each task. Classification checks a team label; arithmetic checks the final numerical answer; extraction checks structure and values separately. Self-consistency samples several responses and selects the most common parsed answer, increasing output-token cost without guaranteeing truth. The injection experiment compares a simple summary prompt with one that explicitly treats document text as data. Its hijacked detector is a keyword heuristic, so a flagged word may appear in a harmless quotation and an attack may succeed without those words. The judge experiment swaps answer order to reveal position effects. Inspect the actual A/B verdicts: the current consistency expression can count two invalid replies as consistent. These are separate experiments, and each metric should be read together with concrete output examples and its limitations.",
+      "explanation": "The lab reuses model calls but changes the success criterion for each task. Classification checks a team label; arithmetic checks the final numerical answer; extraction checks structure and values separately. Self-consistency samples several responses and selects the most common parsed answer, increasing output-token cost without guaranteeing truth. The injection experiment compares a simple summary prompt with one that explicitly treats document text as data. Its hijacked detector is a keyword heuristic, so a flagged word may appear in a harmless quotation and an attack may succeed without those words. The judge experiment swaps answer order to reveal position effects. Inspect the actual A/B verdicts and report invalid replies separately from agreement. These are separate experiments, and each metric should be read together with concrete output examples and its limitations.",
       "check_question": "Why inspect examples even after an automatic metric has been calculated?",
-      "check_answer": "Parsers and detectors can miss failures or flag harmless outputs; examples show what the measurement actually counted."
+      "check_answer": "Parsers and detectors can miss failures or flag harmless outputs; examples show what the measurement actually counted.",
+      "layout": "linear"
+    },
+    {
+      "id": "training",
+      "title": "Improve a prompt using evidence",
+      "subtitle": "This is prompt development: model weights stay fixed",
+      "insert_before_title": "The evaluation loop (eval-driven development)",
+      "steps": [
+        {
+          "title": "Choose development set",
+          "detail": "Inputs with known answers",
+          "code": "ticket_ds",
+          "role": "data"
+        },
+        {
+          "title": "Write two prompts",
+          "detail": "Hold model and settings fixed",
+          "code": "few_shot",
+          "role": "tool"
+        },
+        {
+          "title": "Run both versions",
+          "detail": "Record answers and costs",
+          "code": "evaluate",
+          "role": "model"
+        },
+        {
+          "title": "Inspect differences",
+          "detail": "Wrong labels and parse failures",
+          "code": "errors",
+          "role": "loss"
+        },
+        {
+          "title": "Use fresh final set",
+          "detail": "No further prompt revisions",
+          "code": "label_scorer",
+          "role": "output"
+        }
+      ],
+      "arrows": [
+        "labelled examples",
+        "prompt versions",
+        "result tables",
+        "chosen prompt"
+      ],
+      "explanation": "Prompt development changes the instructions, rather than the model weights. Begin with examples whose correct answers are known. Write a short prompt and a version with examples, then run both on the same items using the same settings. Accuracy compares the predicted labels with the reference labels; token counts measure part of the cost. Read the cases where the prompts disagree, including replies the parser cannot recognise. Use development examples to revise the prompt. A final check needs fresh examples that were not used for choosing wording. The lab supplies a small development set; adding a separate final set is a project design step, not an extra training stage.",
+      "trace": [
+        "Suppose prompt A gets 32 of 40 labels right and prompt B gets 34.",
+        "Accuracy changes from 80% to 85%; two examples produce the gain.",
+        "Read those two and any newly wrong examples before choosing B.",
+        "Run the selected version on fresh tickets before claiming a reliable improvement."
+      ],
+      "check_question": "Did the 80% to 85% improvement change any stored model weights?",
+      "check_answer": "No. Only the prompt changed; two additional examples were correct.",
+      "feedback": "Revise prompts from development errors; model weights stay fixed.",
+      "feedback_to": 1,
+      "layout": "linear",
+      "feedback_from": 3
+    },
+    {
+      "id": "inference",
+      "title": "Route one new message",
+      "subtitle": "Inference uses the selected prompt to make a prediction",
+      "insert_before_title": "Prompting for different tasks",
+      "steps": [
+        {
+          "title": "New message",
+          "detail": "Read one student request",
+          "code": "ticket_ds",
+          "role": "data"
+        },
+        {
+          "title": "Add routing rules",
+          "detail": "Allowed teams and examples",
+          "code": "few_shot",
+          "role": "tool"
+        },
+        {
+          "title": "Call fixed model",
+          "detail": "Generate a candidate reply",
+          "code": "llm",
+          "role": "model"
+        },
+        {
+          "title": "Parse candidate",
+          "detail": "Find one recognised team",
+          "code": "label_scorer",
+          "role": "model"
+        },
+        {
+          "title": "Check decision",
+          "detail": "Review ambiguity and failure",
+          "code": "errors",
+          "role": "output"
+        }
+      ],
+      "arrows": [
+        "request text",
+        "chat messages",
+        "raw reply",
+        "label or parse failure"
+      ],
+      "explanation": "Inference means using a trained model to make a prediction. A new message is placed into the chosen routing prompt, along with the allowed team labels and any worked examples. The model returns text, so the application must interpret it before using it. In the lab, label_scorer looks for a recognised label and compares it with a reference during evaluation. A real new request does not usually have a reference answer available. The application therefore needs a policy for unrecognised or ambiguous replies, such as asking for review. The diagram shows the code path used in the evaluation harness; operational routing and review would be added by an application.",
+      "trace": [
+        "New message: \"I cannot sign in to Moodle.\"",
+        "The prompt lists IT_ACCESS and the other permitted teams.",
+        "The model replies \"IT_ACCESS\".",
+        "The parser recognises the label; a sentence naming several teams needs inspection."
+      ],
+      "check_question": "Can a recognised label still be wrong?",
+      "check_answer": "Yes. A parser checks the form of the reply; it does not establish the correct team.",
+      "layout": "linear"
     }
   ],
   "glossary": [
-    {"term": "Zero-shot", "meaning": "A prompt describing the task without including worked input/output examples."},
-    {"term": "Few-shot", "meaning": "A prompt containing several examples of the desired input/output behaviour."},
-    {"term": "Evaluation harness", "meaning": "Code that runs examples, scores outputs and collects comparable measures."},
-    {"term": "Schema", "meaning": "A specification of output fields, types and allowed values."},
-    {"term": "Prompt injection", "meaning": "Instructions inside supplied content that attempt to redirect the model's task."},
-    {"term": "Position bias", "meaning": "A judge's preference for an answer's placement rather than its quality."}
+    {
+      "term": "Zero-shot",
+      "meaning": "A prompt describing the task without including worked input/output examples."
+    },
+    {
+      "term": "Few-shot",
+      "meaning": "A prompt containing several examples of the desired input/output behaviour."
+    },
+    {
+      "term": "Evaluation harness",
+      "meaning": "Code that runs examples, scores outputs and collects comparable measures."
+    },
+    {
+      "term": "Schema",
+      "meaning": "A specification of output fields, types and allowed values."
+    },
+    {
+      "term": "Prompt injection",
+      "meaning": "Instructions inside supplied content that attempt to redirect the model's task."
+    },
+    {
+      "term": "Position bias",
+      "meaning": "A judge's preference for an answer's placement rather than its quality."
+    }
   ],
   "pitfalls": [
     "A valid JSON object can contain incorrect facts or a calendar-impossible date that matches the current pattern check.",
@@ -98,11 +365,75 @@
     "A tiny accuracy gain, a keyword attack detector or invalid judge replies can create misleading conclusions."
   ],
   "code_walkthrough": [
-    {"symbol": "evaluate", "role": "Runs a prompt against every selected example and collects scores.", "inspect": "Check the number of items, fixed settings, score definition and preview truncation."},
-    {"symbol": "label_scorer", "role": "Recognises labels and distinguishes invalid from wrong replies.", "inspect": "Read outputs that mention zero, one or multiple permitted labels."},
-    {"symbol": "majority_vote", "role": "Chooses the most frequent parsed answer among samples.", "inspect": "Observe missing parses and ties before interpreting the vote."},
-    {"symbol": "Request", "role": "Defines the extracted-data structure and format checks.", "inspect": "Distinguish pattern validity from agreement with the email's facts."},
-    {"symbol": "hijacked", "role": "Flags selected keywords as a simple attack-outcome heuristic.", "inspect": "Inspect flagged text and unflagged attacks to assess measurement errors."},
-    {"symbol": "judge", "role": "Requests and parses an A/B comparison.", "inspect": "Check raw verdicts in both orders; treat '?' as invalid evidence."}
-  ]
+    {
+      "symbol": "evaluate",
+      "role": "Runs a prompt against every selected example and collects scores.",
+      "inspect": "Check the number of items, fixed settings, score definition and preview truncation."
+    },
+    {
+      "symbol": "label_scorer",
+      "role": "Recognises labels and distinguishes invalid from wrong replies.",
+      "inspect": "Read outputs that mention zero, one or multiple permitted labels."
+    },
+    {
+      "symbol": "majority_vote",
+      "role": "Chooses the most frequent parsed answer among samples.",
+      "inspect": "Observe missing parses and ties before interpreting the vote."
+    },
+    {
+      "symbol": "Request",
+      "role": "Defines the extracted-data structure and format checks.",
+      "inspect": "Distinguish pattern validity from agreement with the email's facts."
+    },
+    {
+      "symbol": "hijacked",
+      "role": "Flags selected keywords as a simple attack-outcome heuristic.",
+      "inspect": "Inspect flagged text and unflagged attacks to assess measurement errors."
+    },
+    {
+      "symbol": "judge",
+      "role": "Requests and parses an A/B comparison.",
+      "inspect": "Check raw verdicts in both orders; treat '?' as invalid evidence."
+    }
+  ],
+  "recap": {
+    "title": "What we learned: prompts and evidence",
+    "cards": [
+      {
+        "title": "Change the request",
+        "text": "Prompts guide replies while the learned model weights stay fixed.",
+        "role": "data"
+      },
+      {
+        "title": "Write a clear brief",
+        "text": "Rules, sources, examples, task and format make expectations explicit.",
+        "role": "tool"
+      },
+      {
+        "title": "Reason and chain",
+        "text": "Check intermediate outputs; extra calls and tokens must earn their cost.",
+        "role": "model"
+      },
+      {
+        "title": "Validate the result",
+        "text": "Check JSON fields and constraints, then compare values with sources.",
+        "role": "loss"
+      },
+      {
+        "title": "Evaluate fairly",
+        "text": "Use realistic cases, references, rubrics, fresh tests and error review.",
+        "role": "output"
+      },
+      {
+        "title": "Protect the application",
+        "text": "Treat source commands as untrusted; enforce tool permissions in code.",
+        "role": "tool"
+      }
+    ],
+    "example": "40 messages: one changed answer moves accuracy by 2.5 points; a valid ID can still be the wrong ID.",
+    "question": "What proves that a prompt revision helped?",
+    "answer": "A fair comparison on the same development cases, followed by a fresh final check; report costs and errors.",
+    "next": "In Week 8 we train small adapters when the best prompt leaves persistent gaps.",
+    "notes": "Say: Rebuild the loop: define success, write the brief, run the fixed model, validate, score and inspect errors. Analogy: a task brief and marking guide work together. Ask students to distinguish a wrong label from an unparsed reply, and a valid JSON object from correct extracted facts. Common mistake: generated steps or judge agreement are not independent proof. Explain why order-swapped judge choices must both be valid, and why keyword injection flags need inspection. Keep a fresh final set. Small score changes are uncertain; extra calls cost time and tokens. Enforce permissions in application code and document the tested model and settings."
+  }
 }

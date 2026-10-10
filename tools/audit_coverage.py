@@ -48,7 +48,7 @@ def main() -> int:
         missing_total += len(missing)
         print(f"week {n:2d}: {len(items) - len(missing)}/{len(items)} Detail items found" + (f"; check: {missing}" if missing else ""))
     print("items to review:", missing_total)
-    return 0
+    return 1 if missing_total else 0
 
 
 if __name__ == "__main__":

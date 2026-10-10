@@ -12,7 +12,7 @@
 # 5. **A web app** with **Gradio**, with **guardrails** and **logging**.
 # 6. **Monitoring:** latency percentiles, blocked requests and cost from the logs; packaging with Docker.
 #
-# **Runtime:** Colab → **T4 GPU** recommended (≈ 20 min). CPU also works (slower). API keys are **optional** and must be stored as Colab 🔑 Secrets, never in the notebook.
+# **Runtime:** Colab → **T4 GPU** recommended. CPU also works (slower). On a 4 GB laptop GPU the full notebook took about 3 minutes after the downloads. API keys are **optional** and must be stored as Colab 🔑 Secrets, never in the notebook.
 
 # %% [markdown]
 # ## Before running: a model is one part of the application
@@ -21,14 +21,12 @@
 # records measurements. Follow the actual Gradio path below: `demo` calls
 # `respond`, which calls `generate` directly in Python.
 #
-# ![The monitored Gradio application and its request data](fig:beginner_overview)
 #
 # The FastAPI exercise is a separate route to the shared model. Its endpoint
 # is called by the SDK and LangChain; it does not use `respond`'s guardrails.
 #
 # ## Lab route and code map
 #
-# ![Measure model operation before building and monitoring the app](fig:beginner_lab)
 #
 # | Diagram block | Code to find | Inspect before continuing |
 # |---|---|---|
@@ -41,9 +39,35 @@
 #
 # **Latency** is the time for a request. **Throughput** is the total work per
 # second. Faster throughput does not promise shorter waits for every user.
+#
+# **Read:** an **API endpoint** is an address a program calls to request work.
+# An **SDK** is a library for making those calls. A **log** stores measurements
+# of what happened. A **guardrail** is a check applied around a model call.
+# **Run:** test local generation, then the API, then the interface; they are
+# separate routes in this notebook. Keep the notebook kernel running while
+# its client cells call the background server.
+# **Change:** compare batch sizes with the same requests and output length.
+# **Check:** measure time, quality and cost separately. Stop the test API in
+# the final cell and close the public Gradio link after the lab.
+
+# %% [markdown]
+# **What/why:** Install libraries for model serving, interfaces and measurements.
+#
+# **Predict:** Does installation start an API server?
+#
+# **Expected output:** Installed packages; restart only if requested.
 
 # %% tags=["colab-install"]
 %pip install -q transformers accelerate openai fastapi uvicorn gradio langchain-core langchain-openai bitsandbytes pandas matplotlib
+
+# %% [markdown]
+# **What/why:** Select hardware, load the model and create a shared generation lock.
+#
+# **Predict:** Why should concurrent notebook/API calls share a lock?
+#
+# **Expected output:** Device and model identity; tokenizer, model and lock are ready.
+#
+# ![Lab walkthrough](fig:beginner_lab)
 
 # %%
 import hashlib
@@ -87,6 +111,13 @@ print(f"device: {DEVICE} | model: {MODEL_ID} | {N_PARAMS / 1e6:.0f} M parameters
 # When no non-empty chunk arrives, TTFT is unavailable (`None`) and the
 # observed decoding throughput is reported as zero.
 
+# %% [markdown]
+# **What/why:** Complete timing of decoded text; background failures now end the stream and report their cause.
+#
+# **Predict:** Will a decoded chunk always contain exactly one token?
+#
+# **Expected output:** A latency table; first text approximates TTFT. A failed worker raises a diagnostic error.
+
 # %%
 def stream_chat(messages, max_new_tokens=128):
     """Yield text chunks as the model generates them."""
@@ -94,11 +125,25 @@ def stream_chat(messages, max_new_tokens=128):
     inputs = tok.apply_chat_template(messages, add_generation_prompt=True, return_tensors="pt", return_dict=True).to(DEVICE)
     streamer = TextIteratorStreamer(tok, skip_prompt=True, skip_special_tokens=True)
     kwargs = dict(**inputs, max_new_tokens=max_new_tokens, do_sample=False, streamer=streamer, pad_token_id=tok.pad_token_id)
+    errors = []
+
+    def generate_in_background():
+        try:
+            model.generate(**kwargs)
+        except Exception as exc:
+            errors.append(exc)
+            # Unblock the reader even if generation failed before its first chunk.
+            streamer.on_finalized_text("", stream_end=True)
+
     with MODEL_LOCK:
-        thread = threading.Thread(target=model.generate, kwargs=kwargs)
+        thread = threading.Thread(target=generate_in_background)
         thread.start()
-        yield from streamer
-        thread.join()
+        try:
+            yield from streamer
+        finally:
+            thread.join()  # keep the shared model locked until this worker exits
+        if errors:
+            raise RuntimeError("Streaming generation failed; inspect the original error below.") from errors[0]
 
 
 def measure(messages, max_new_tokens=128):
@@ -128,6 +173,13 @@ lat_df = pd.DataFrame([measure([{"role": "user", "content": q}], 32 if SMOKE els
 lat_df.insert(0, "question", [q[:40] for q in questions])
 lat_df
 
+# %% [markdown]
+# **What/why:** Plot the measured latency components.
+#
+# **Predict:** Which bar portion is visible before the entire answer finishes?
+#
+# **Expected output:** A latency chart from this run; compare first text with remaining wait.
+
 # %%
 fig, ax = plt.subplots(figsize=(8, 3.2))
 y = np.arange(len(lat_df))
@@ -144,6 +196,20 @@ plt.tight_layout(); plt.show()  # LAT_FIGURE
 # Most tools speak the **OpenAI chat-completions format**: OpenAI, Azure OpenAI, the Gemini API's compatibility endpoint, Hugging Face Inference Providers, **Ollama** and **vLLM**. If our server speaks it too, any client or framework can use our model by changing only `base_url`, `api_key` and `model`.
 #
 # **TODO 2:** complete the endpoint: generate the answer from `req.messages` and return a response in OpenAI's format, including a `usage` block with prompt, completion and total tokens.
+# **Trace one request:** the client sends JSON to the endpoint, FastAPI makes
+# a `ChatRequest`, `generate` calls the shared model, then the endpoint returns
+# a JSON answer with token counts. This minimal server supports the fields
+# used here; it does not implement the full API. It always uses greedy
+# decoding even though the request schema includes a temperature field.
+
+# %% [markdown]
+# **What/why:** Complete a local FastAPI handler and wait for bounded background startup.
+#
+# **Predict:** Does this route call the checked respond handler?
+#
+# **Expected output:** A local /v1 endpoint, or an explicit startup/dead-thread error; this route calls generate directly.
+#
+# ![Mechanism walkthrough](fig:beginner_mechanism)
 
 # %%
 import uvicorn
@@ -187,12 +253,42 @@ def chat_completions(req: ChatRequest):
     ### STUB return {}  # TODO 2
 
 
-PORT = 8011
+PORT = 0  # the operating system selects a free port for this demo
 server = uvicorn.Server(uvicorn.Config(api, host="127.0.0.1", port=PORT, log_level="warning"))
-threading.Thread(target=server.run, daemon=True).start()
-while not server.started:
-    time.sleep(0.1)
+def wait_for_server(server, worker, timeout=10.0):
+    """Stop waiting if the server thread fails or startup exceeds its deadline."""
+    deadline = time.monotonic() + timeout
+    while not server.started:
+        if not worker.is_alive():
+            raise RuntimeError("Local API failed to start; check the server error and whether PORT is available.")
+        if time.monotonic() >= deadline:
+            server.should_exit = True
+            raise TimeoutError(f"Local API did not start within {timeout:g} seconds.")
+        time.sleep(0.1)
+
+
+def local_server_port(server):
+    """Read this started server's bound port, rather than probing another app."""
+    if not server.started:
+        raise RuntimeError("Local API has not started.")
+    sockets = [sock for listener in server.servers for sock in (listener.sockets or ())]
+    if not sockets:
+        raise RuntimeError("Local API has no bound socket.")
+    return sockets[0].getsockname()[1]
+
+
+server_thread = threading.Thread(target=server.run, daemon=True)
+server_thread.start()
+wait_for_server(server, server_thread)
+PORT = local_server_port(server)
 print(f"API running at http://127.0.0.1:{PORT}  (docs at /docs)")
+
+# %% [markdown]
+# **What/why:** Call the local endpoint through a compatible client.
+#
+# **Predict:** What should prompt_tokens count separately from completion_tokens?
+#
+# **Expected output:** An answer plus structured token usage; compatibility is limited.
 
 # %%
 from openai import OpenAI
@@ -206,6 +302,13 @@ print("usage:", resp.usage.model_dump(), "| round trip:", round(time.perf_counte
 # %% [markdown]
 # ### A framework on top: LangChain
 # Frameworks such as LangChain (and LangGraph for agents, week 12) compose prompts, models and parsers. Because our server is OpenAI-compatible, LangChain's `ChatOpenAI` works with it unchanged.
+
+# %% [markdown]
+# **What/why:** Wrap the same endpoint in a short framework chain.
+#
+# **Predict:** Does a chain change where model weights are hosted?
+#
+# **Expected output:** A formatted three-bullet response from the local model.
 
 # %%
 from langchain_core.output_parsers import StrOutputParser
@@ -223,6 +326,13 @@ for term in ["quantisation", "rate limiting"]:
 # Add a key as a Colab 🔑 Secret (`GEMINI_API_KEY` from Google AI Studio, or `HF_TOKEN` with "Make calls to Inference Providers" permission). Both have free tiers with rate limits. Model names change often: if a call fails, list the models with `client.models.list()`.
 #
 # **Ollama at home:** install Ollama, run `ollama pull qwen2.5:0.5b`, then use `base_url="http://localhost:11434/v1"` with the same code.
+
+# %% [markdown]
+# **What/why:** Optionally test a hosted provider using a server-side secret.
+#
+# **Predict:** Which data would leave the notebook in a real cloud call?
+#
+# **Expected output:** No network call when CLOUD is unset; a provider response if configured.
 
 # %%
 def get_secret(name):
@@ -258,6 +368,18 @@ pd.DataFrame(cloud_rows)
 # Cloud APIs charge **per million tokens**, usually more for output than input. The prices below are **illustrative**: always check the provider's current pricing page.
 #
 # **TODO 3:** complete `monthly_cost` for a scenario of `requests_per_month` requests with average input and output token counts.
+# Read the units before calculating: requests × tokens per request gives
+# tokens per month. Divide by 1,000,000 before applying a price per million.
+# Charge input and output separately, then add them. The GPU row counts an
+# always-on machine; it does not include staff time or demonstrate enough
+# capacity to serve this scenario's peak traffic.
+
+# %% [markdown]
+# **What/why:** Complete an illustrative monthly usage-cost estimate.
+#
+# **Predict:** How many requests are 500 × 20 × 30?
+#
+# **Expected output:** 300,000 requests and a cost comparison using classroom prices.
 
 # %%
 PRICES = {  # USD per 1M tokens (input, output): illustrative values for classroom calculation only
@@ -285,6 +407,13 @@ cost_df
 
 # %% [markdown]
 # **Rate limits.** Providers cap requests and tokens per minute and return HTTP **429** when you exceed them. Retry with **exponential back-off and jitter**, and set timeouts. The function below simulates a flaky API.
+
+# %% [markdown]
+# **What/why:** Simulate rate limiting and a bounded retry policy.
+#
+# **Predict:** Why add random jitter to exponential waiting?
+#
+# **Expected output:** A recovered simulated response after delayed retries, or final failure.
 
 # %%
 class RateLimited(Exception):
@@ -319,7 +448,7 @@ print(call_with_retry(flaky_api))
 # ## Part 4 · Efficiency: quantisation, batching and caching
 #
 # ### Quantisation
-# Store weights with fewer bits. **Absmax** quantisation scales a group of weights so the largest magnitude maps to the largest integer: $q = \mathrm{round}(w / s)$, $s = \max|w| / (2^{b-1} - 1)$, and $\hat w = q \cdot s$. Smaller **groups** (e.g. 64 weights share one scale) reduce error: this is what GPTQ, AWQ and GGUF formats use.
+# Store weights with fewer bits. **Absmax** quantisation scales a group of weights so the largest magnitude maps to the largest integer: $q = \mathrm{round}(w / s)$, $s = \max|w| / (2^{b-1} - 1)$, and $\hat w = q \cdot s$. Smaller **groups** (e.g. 64 weights share one scale) reduce error: separate scales illustrate a related idea, but this helper is not GPTQ, AWQ or GGUF.
 #
 # **TODO 4:** complete `fake_quantize(W, bits, group)`: reshape to groups of `group` weights, compute the scale per group, round, clamp to $[-(2^{b-1}-1), 2^{b-1}-1]$ and de-quantise.
 #
@@ -327,6 +456,18 @@ print(call_with_retry(flaky_api))
 # returned weights are floating-point tensors, so it does not pack integers
 # or reduce actual model storage. The later size table is an estimate for
 # hypothetical packed weights, rather than a memory measurement of this model.
+# In the formula, `b` is the number of bits, `s` is the group's scale, `q` is
+# the rounded integer, and `w_hat` is the recovered approximate weight.
+# The approximation changes numerical precision, not the model's task.
+# Smaller groups allow different scales for different weight ranges, at the
+# cost of storing more scales. Compare the measured error and perplexity.
+
+# %% [markdown]
+# **What/why:** Complete simple weight rounding and reconstruction.
+#
+# **Predict:** Are reconstructed tensors stored in four-bit form?
+#
+# **Expected output:** Weight approximation errors; tensors remain floating-point.
 
 # %%
 def fake_quantize(W, bits=8, group=None):
@@ -351,6 +492,13 @@ print({k: f"{v:.2%}" for k, v in q_err.items()})
 # Now apply each scheme to **every** linear layer and measure **perplexity** on a paragraph of text (lower is better; week 1). The weights are restored afterwards.
 # The saved originals provide a baseline for each scheme and are restored at
 # the end. This one paragraph is a small quality probe, not a task benchmark.
+
+# %% [markdown]
+# **What/why:** Temporarily round linear weights, measure perplexity, then restore them.
+#
+# **Predict:** Could lower estimated storage still worsen task quality?
+#
+# **Expected output:** A comparison table and restored original weights; sizes are theoretical.
 
 # %%
 text = ("Generative AI systems are now deployed in customer service, education and software development. "
@@ -382,6 +530,13 @@ del originals
 quant_df = pd.DataFrame(q_rows)
 quant_df
 
+# %% [markdown]
+# **What/why:** Plot hypothetical weight size alongside the measured quality proxy.
+#
+# **Predict:** Which values came from actual packed allocations?
+#
+# **Expected output:** A size/perplexity chart; no packed tensor allocation is measured here.
+
 # %%
 fig, ax = plt.subplots(1, 2, figsize=(11, 3.4))
 ax[0].bar(quant_df.scheme, quant_df["approx. size (MB)"], color=["#94A3B8", "#4F46E5", "#EA580C", "#0F766E"])
@@ -395,6 +550,13 @@ plt.tight_layout(); plt.show()  # QUANT_FIGURE
 # %% [markdown]
 # On a GPU, libraries store the packed integers for real. `bitsandbytes` loads a model in 4-bit (NF4) in one line; this is also how QLoRA works (week 8).
 
+# %% [markdown]
+# **What/why:** Optionally try packed bitsandbytes loading on this lab CUDA route.
+#
+# **Predict:** Does this lab hardware condition describe every supported backend?
+#
+# **Expected output:** CUDA packed-weight comparison, or a skipped cell; current library supports other backends too.
+
 # %%
 if DEVICE == "cuda" and not SMOKE:
     from transformers import BitsAndBytesConfig
@@ -404,11 +566,18 @@ if DEVICE == "cuda" and not SMOKE:
     del m4
     torch.cuda.empty_cache()
 else:
-    print("4-bit loading with bitsandbytes needs a CUDA GPU: skipped")
+    print("This lab runs its optional packed-loading comparison on CUDA: skipped here")
 
 # %% [markdown]
 # ### Batching
 # A GPU is under-used when it generates for one user at a time. **Batching** processes several requests together; serving engines such as **vLLM** do this continuously (continuous batching) and manage the KV cache in pages (PagedAttention).
+
+# %% [markdown]
+# **What/why:** Measure several prompt batch sizes.
+#
+# **Predict:** Can aggregate tokens/second rise while one request waits longer?
+#
+# **Expected output:** Batch timings and throughput plot; compare against single-request waits.
 
 # %%
 tok.padding_side = "left"  # decoder-only models pad on the left for generation
@@ -444,6 +613,18 @@ batch_df
 # %% [markdown]
 # ### Caching
 # Identical requests (FAQ-style questions) can be answered from a **cache**. Providers also offer **prompt (prefix) caching**: a long, repeated system prompt is processed once and billed at a discount.
+# This helper caches a completed answer for the same model, messages and
+# output limit. Prefix caching reuses work on repeated input tokens; it can
+# still generate a new answer. In either case, caching does not verify facts.
+# The opening-hours prompt below has no handbook attached, so a quickly cached
+# answer may still be an unsupported guess.
+
+# %% [markdown]
+# **What/why:** Cache an answer by its complete message list.
+#
+# **Predict:** Which changed messages would need a new result?
+#
+# **Expected output:** First-call and repeated-call times; the repeated call reuses stored text.
 
 # %%
 CACHE = {}
@@ -474,6 +655,17 @@ for attempt in ("first call (model)", "second call (cache)"):
 # These pattern checks illustrate control points, not comprehensive detection.
 # `respond` checks the current message; its history handling is separate.
 # Follow both branches: blocked requests skip generation but still get logged.
+
+# %% [markdown]
+# **What/why:** Complete simple checks, then generate and log allowed/blocked requests.
+#
+# **Predict:** Does checking current input also clean all earlier history?
+#
+# **Expected output:** A response and metadata log row; examine the limited rule coverage.
+#
+# ![Overview walkthrough](fig:beginner_overview)
+#
+# ![Inference walkthrough](fig:beginner_inference)
 
 # %%
 EMAIL = re.compile(r"[\w.+-]+@[\w-]+\.[\w.-]+")
@@ -522,12 +714,26 @@ print(respond("What is LoRA, in one sentence?", []))
 # %% [markdown]
 # Build the interface. In Colab, `share=True` prints a temporary public link. Anyone with the link can use your app while the notebook runs, so stop it afterwards.
 
+# %% [markdown]
+# **What/why:** Create a browser interface that calls respond directly.
+#
+# **Predict:** Which checks are on this Gradio route?
+#
+# **Expected output:** A ChatInterface object; no public server is launched in this cell.
+
 # %%
 import gradio as gr
 
 demo = gr.ChatInterface(respond, title="Course assistant (week 11 lab)",
                         description=f"Model: {MODEL_VERSION}. Inputs are checked and logged; do not enter personal data.",
                         examples=["What is quantisation?", "How do I store an API key safely?"])
+
+# %% [markdown]
+# **What/why:** Optionally launch the classroom interface.
+#
+# **Predict:** Can other people use a share=True link?
+#
+# **Expected output:** A temporary public link in an interactive run; automated tests skip it.
 
 # %% tags=["skip-test"]
 demo.launch(share=True)
@@ -536,6 +742,17 @@ demo.launch(share=True)
 # ## Part 6 · Monitoring
 #
 # Simulate traffic (including a prompt-injection attempt and personal data), then summarise the log as a monitoring dashboard would.
+# **p50** is the median wait, and **p95** is the estimated 95th percentile:
+# about 95% of observed waits are at or below it. The summary uses only
+# unblocked requests for these percentiles. With this tiny traffic sample,
+# p95 is illustrative and should not be treated as a stable service guarantee.
+
+# %% [markdown]
+# **What/why:** Generate synthetic requests and aggregate their logs.
+#
+# **Predict:** Do latency percentiles include blocked requests here?
+#
+# **Expected output:** p50/p95 for allowed requests and separate block/redaction counts.
 
 # %%
 if os.path.exists(LOG_PATH):
@@ -570,6 +787,15 @@ summary
 # The exported `app.py` below is a smaller packaging scaffold. It omits the
 # notebook's personal-data redaction, output check and metadata logging. Bring
 # those behaviours across before treating it as the same monitored application.
+
+# %% [markdown]
+# **What/why:** Write a smaller app, requirements and Docker packaging scaffold.
+#
+# **Predict:** Are transformers==5.* and bare torch exact dependency pins?
+#
+# **Expected output:** Three files; replace version ranges with tested exact versions for reproducibility.
+#
+# ![Training walkthrough](fig:beginner_training)
 
 # %%
 app_py = '''import os
@@ -628,9 +854,23 @@ print(dockerfile)
 # Metrics: request volume; latency percentiles (p50/p95/p99) and TTFT; error and timeout rates, including HTTP 429s from providers; tokens and cost per request, per user and per day; guardrail block and redaction rates; model and prompt version per request; quality signals such as user feedback (thumbs up/down), periodic LLM-as-judge or human review of a sample, and regression tests on a fixed evaluation set after every change (drift detection). Alerts: p95 latency above target for 5 minutes; error rate above a threshold; daily cost above budget; sudden rise in blocked requests (possible attack) or drop in feedback scores. Do not log raw personal data, secrets or full conversations by default: log metadata, redact PII, restrict access, set retention limits and document it in the privacy notice (GDPR data minimisation). Tracing tools (OpenTelemetry, Langfuse, LangSmith) link each request's steps for debugging.
 # <!-- END ANSWER -->
 
+# %% [markdown]
+# **What/why:** Stop the background API exercise cleanly.
+#
+# **Predict:** Which previously created server receives this signal?
+#
+# **Expected output:** server.should_exit becomes true; the background API shuts down.
+
 # %%
 server.should_exit = True  # stop the API server
 print("API server stopped")
+
+# %% [markdown]
+# **What/why:** Save instructor measurements when a results path is supplied.
+#
+# **Predict:** Will the cell write a file without GENAI_RESULTS_PATH?
+#
+# **Expected output:** A results JSON file when configured, or no file otherwise.
 
 # %% tags=["solution-only"]
 # Instructor tooling: save measured results for the lecture slides (only when requested).

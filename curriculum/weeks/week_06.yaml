@@ -1,522 +1,1042 @@
-subtitle: "From n-grams to frontier models: how LLMs are built and scaled, how they decode, and how to choose among model families"
-mimlos: [1, 3, 5]
+subtitle: How language models learn, choose tokens and differ, and how to compare them for a task
+mimlos:
+- 1
+- 3
+- 5
 objectives:
-  - "Trace the **evolution of NLP** from n-grams and word embeddings through RNNs to transformer LLMs."
-  - "Explain how transformers become LLMs: **pre-training** data, **scaling laws**, compute, and **context windows**."
-  - "Compare **decoding strategies** (greedy, beam, temperature, top-k, top-p) and choose settings for a task."
-  - "Distinguish **LLM families**: encoder (BERT), encoder–decoder (T5), decoder-only (GPT, LLaMA, Gemini, Claude, Mistral, Qwen, DeepSeek); proprietary vs **open-weight**; small, mixture-of-experts and **reasoning** models."
-  - "Read **model cards**, licences and **benchmarks** critically, and choose a model for an application."
-  - "Use pretrained models with **Hugging Face** pipelines and query an LLM through an API or local runtime."
+- Explain how language modelling progressed.
+- Trace pre-training and post-training.
+- Choose and explain token-selection settings.
+- Compare model architectures and access.
+- Read model cards, licences and test results.
+- Run a local model or hosted request.
 coverage:
-  - n-gram
-  - word embeddings
-  - RNN
-  - pre-training
-  - scaling law
-  - context window
-  - greedy
-  - beam search
-  - temperature
-  - top-k
-  - top-p
-  - BERT
-  - T5
-  - GPT
-  - LLaMA
-  - Gemini
-  - Claude
-  - Mistral
-  - Qwen
-  - DeepSeek
-  - open-weight
-  - small language model
-  - mixture-of-experts
-  - reasoning model
-  - test-time compute
-  - model card
-  - licence
-  - benchmark
-  - Hugging Face
-  - pipeline
-
+- n-gram
+- word embeddings
+- RNN
+- pre-training
+- scaling law
+- context window
+- greedy
+- beam search
+- temperature
+- top-k
+- top-p
+- BERT
+- T5
+- GPT
+- LLaMA
+- Gemini
+- Claude
+- Mistral
+- Qwen
+- DeepSeek
+- open-weight
+- small language model
+- mixture-of-experts
+- reasoning model
+- test-time compute
+- model card
+- licence
+- benchmark
+- Hugging Face
+- pipeline
 slides:
-  - type: title
-    figure: cover
-    notes: |
-      Welcome to week 6. Last week we built the transformer. This week we scale it up: large language models, the technology behind chat assistants, coding assistants and most of the tools students use daily. We will see how NLP evolved to this point, what pre-training on trillions of tokens involves and why scaling laws guided the industry, how the choice of decoding strategy changes the output, and how to navigate the crowded landscape of model families, open and closed, small and large, standard and reasoning. The lab puts BERT, T5 and a decoder LLM side by side and queries a model through an API.
+- type: title
+  figure: cover
+  notes: 'Say: Two assistants can give different answers to the same question. We will trace the causes:
+    their training, inputs, token-selection rules and surrounding application. Analogy: two cooks can
+    use different recipes and ingredients. Ask: could the same assistant also answer differently twice?
+    Common mistake: the visible question is only part of a request; hidden instructions, sources, settings
+    and model versions matter.'
+- type: outcomes
+  notes: 'Say: By the end, explain one model request from text preparation to answer checking. Compare
+    architectures, access and settings without relying on a brand name. Analogy: learn to read a tool’s
+    datasheet before choosing it. Ask: what would you measure when choosing a student-support classifier?
+    Common mistake: the biggest or best-known model need not meet your task, privacy, time and cost requirements.'
+- type: agenda
+  icon: fa:FaRoute
+  items:
+  - title: 'Warm-up: two assistants, two answers'
+    minutes: 5
+  - title: 1 · The evolution of NLP
+    minutes: 12
+  - title: '2 · From transformer to LLM: data, scale, context'
+    minutes: 25
+  - title: 3 · Decoding strategies
+    minutes: 13
+  - title: 4 · LLM families
+    minutes: 27
+  - title: 5 · Choosing and using models
+    minutes: 30
+  - title: Lab preview and wrap-up
+    minutes: 8
+  notes: 'Say: Start with the history of the operation, then how training learns it, then how generation
+    chooses outputs. Compare families only after understanding those differences. Finish with model cards,
+    licences and actual task tests. Analogy: understand a vehicle’s engine before comparing models at
+    a showroom. Ask: which part changes a weight: training or decoding? Common mistake: changing temperature
+    changes selection, not stored knowledge.'
+- type: discussion
+  title: Warm-up
+  icon: fa:FaComments
+  prompt: You ask two chat assistants the same question and get different answers. List every reason you
+    can think of.
+  points:
+  - Differences in the **model**? In the **training data**? In the **date** of training?
+  - Differences in hidden **instructions**, **tools** (web search) or **decoding settings**?
+  - Would asking the **same** assistant twice give the same answer? Why or why not?
+  notes: 'Say: Collect answers for three minutes. Good answers: different model families and sizes; different pre-training data
+    and cut-off dates; different post-training and safety policies; different system prompts; whether web search or other tools
+    are used; and sampling randomness, which students met in week 1. Asking the same assistant twice can give different answers
+    because of sampling, and even with the same settings because of server-side changes. Today''s lecture explains each of these
+    factors. Keep the list: it becomes a checklist for comparing models in the lab.
 
-  - type: outcomes
-    notes: |
-      Six outcomes. The first gives historical context, which examiners like because it explains why the current design won. The second explains what makes a transformer a large language model: data, scale and context. The third is practical decoding. The fourth, the families, maps directly onto the descriptor's list: GPT, BERT, LLaMA and T5, extended with the families that matter in 2026. The fifth is critical literacy: model cards, licences and benchmarks. The sixth is hands-on with Hugging Face and APIs. This week practises MIMLO 1 on model families, MIMLO 3 on frameworks, and MIMLO 5 on using models in real applications.
 
-  - type: agenda
-    icon: "fa:FaRoute"
-    items:
-      - {title: "Warm-up: two assistants, two answers", minutes: 5}
-      - {title: "1 · The evolution of NLP", minutes: 12}
-      - {title: "2 · From transformer to LLM: data, scale, context", minutes: 25}
-      - {title: "3 · Decoding strategies", minutes: 13}
-      - {title: "4 · LLM families", minutes: 27}
-      - {title: "5 · Choosing and using models", minutes: 30}
-      - {title: "Lab preview and wrap-up", minutes: 8}
-    notes: |
-      The plan follows the descriptor's week 6: evolution of NLP; how transformers are used in LLMs; architecture overview; LLM families; applications. I have added decoding strategies and model selection because students need them for the lab and the project. The families section and the choosing section are the longest, since that is where students most need guidance in 2026: there are hundreds of models and the names change monthly. Take the break after section 2.
+    Analogy: Two weather services can forecast differently because they use different models, data and update times.
 
-  - type: discussion
-    title: "Warm-up"
-    icon: "fa:FaComments"
-    prompt: "You ask two chat assistants the same question and get different answers. List every reason you can think of."
+    Ask: Which of your reasons still apply if the same assistant answers twice?
+
+    Answer: Sampling randomness and server-side changes. The model family, training data and cut-off date stay the same.
+
+    Common mistake: Blaming every difference on the model''s knowledge. Decoding settings, hidden instructions and tools change
+    answers too.'
+- type: section
+  number: 1
+  title: The evolution of NLP
+  question: How did we get from counting word pairs to chat assistants?
+  icon: fa:FaHistory
+  notes: 'Say: Section one is a short history of natural language processing, told as a sequence of ideas, each fixing a weakness
+    of the previous one: counting word sequences, representing words as vectors, reading sequences with recurrent networks,
+    attention, pre-training and scale. Students who understand this sequence can explain why today''s LLMs are designed as they
+    are. About twelve minutes.
+
+
+    Analogy: Counts are a phrasebook; word vectors are a thesaurus; attention reads the whole sentence before choosing a meaning.
+
+    Ask: Which came first: sharing knowledge between similar words, or using the surrounding sentence?
+
+    Answer: Sharing between similar words, with neural word vectors (2003 to 2013). Context-dependent vectors came with RNNs
+    and then attention.
+
+    Common mistake: Reading the history as a list of products. Each step fixed a specific limitation of the one before.'
+- type: figure
+  title: Forty years of NLP in one line
+  figure: nlp_timeline
+  notes: 'Say: Walk along the timeline. Early systems used hand-written rules and statistics such as n-gram language models,
+    which count how often word sequences occur. Word2vec in 2013 represented words as dense vectors learned from context, so
+    similar words got similar vectors. Sequence-to-sequence RNNs in 2014, with attention added in 2015, made neural translation
+    work. The transformer in 2017 removed recurrence. In 2018, BERT and GPT showed that pre-training on unlabelled text and
+    then fine-tuning beats task-specific models. GPT-3 in 2020 showed that scale enables few-shot prompting. ChatGPT in 2022
+    added instruction and preference tuning. Since then: open weights, multimodality, reasoning models and agents.
+
+
+    Analogy: A family album shows each generation; the resemblance is clear, but each face is new.
+
+    Ask: In which year did pre-training on unlabelled text and then fine-tuning become the standard recipe?
+
+    Answer: 2018, with BERT and GPT.
+
+    Common mistake: Treating ChatGPT (2022) as the start of language modelling. It built on decades of earlier ideas.'
+- type: equation
+  title: 'Where it started: n-gram language models'
+  eq: p(w_t \mid w_{t-n+1}, \ldots, w_{t-1}) \approx \frac{\mathrm{count}(w_{t-n+1}, \ldots, w_{t-1}, w_t)}{\mathrm{count}(w_{t-n+1},
+    \ldots, w_{t-1})}
+  read_as:
+  - Use n−1 previous words to predict the next from counts.
+  - 'Trigram: count continuations after “the cat”.'
+  - Unseen phrases need smoothing; embeddings share clues.
+  terms:
+  - - n
+    - 'context size: n = 3 (a trigram) uses the two previous words'
+  - - count(...)
+    - how often a word sequence occurs in the training text
+  notes: 'Say: The n-gram model is exactly the bigram name model from the week 1 lab, applied to words. It works surprisingly
+    well for short contexts and powered speech recognition and machine translation for decades. Its two fatal weaknesses motivate
+    everything after it. First, sparsity: the number of possible word sequences explodes with n, so most are never observed
+    and get zero probability. Second, words are atomic symbols, so knowledge about cat does not transfer to dog. Neural language
+    models, starting with Bengio and colleagues in 2003, fixed both by representing words as learned vectors and predicting
+    with a network that generalises.
+
+
+    Analogy: A phrasebook only helps with phrases it already contains.
+
+    Ask: The training text contains purple cat but never purple cat sat. What does the trigram estimate give sat after purple
+    cat?
+
+    Answer: Zero, unless the model uses smoothing or falls back to shorter contexts.
+
+    Common mistake: Thinking more training text removes sparsity. The number of possible phrases grows much faster than any
+    corpus.'
+- type: table
+  title: Each generation fixed a limitation of the last
+  header:
+  - Approach
+  - What it uses
+  - Weak spot (example)
+  rows:
+  - - n-gram
+    - Counts of the previous n − 1 words
+    - 'An unseen phrase gets probability 0: “the purple cat sat”'
+  - - Word vectors (word2vec)
+    - One fixed vector per word
+    - “bank” is the same in “river bank” and “bank loan”
+  - - RNN / LSTM
+    - A memory vector passed word by word
+    - Early words fade; training runs one step at a time
+  - - Transformer
+    - Context-dependent vectors from attention
+    - Cost grows with context; fluent text can still be false
+  notes: 'Say: This table is a compact exam answer to ''describe the evolution of NLP''. Each row fixes the previous row''s
+    main limitation. Word embeddings gave similarity but one vector per word regardless of context, so bank by a river and bank
+    with money were identical. RNNs gave context-dependent representations but were sequential and forgetful. Transformer LLMs
+    give contextual representations over very long contexts with parallel training. The last column reminds students that LLMs
+    have their own limitations, which we address in weeks 7, 8 and 12.
+
+
+    Analogy: A dictionary gives one entry per word; a reader uses the sentence to choose the right meaning.
+
+    Ask: What changes when bank appears beside river instead of money?
+
+    Answer: For word2vec, nothing: bank has one fixed vector. For a transformer, the vector for bank changes with its neighbours.
+
+    Common mistake: Treating a static word vector as a contextual representation.'
+- type: section
+  number: 2
+  title: 'From transformer to LLM: data, scale, context'
+  question: What turns a transformer into a large language model?
+  icon: fa:FaDatabase
+  notes: 'Say: Section two explains what makes an LLM large and capable: the pre-training pipeline and its data, the compute
+    budget, the empirical scaling laws that guided how big models and datasets should be, the phenomenon of in-context learning
+    and the debate about emergent abilities, and the context window. About twenty-five minutes.
+
+
+    Analogy: Training is repeated practice; the context is the worksheet available during one attempt.
+
+    Ask: Does adding a document to this request increase the number of stored model parameters?
+
+    Answer: No. The document fills part of the context for this request only; the weights stay the same.
+
+    Common mistake: Treating context as memory. The model keeps nothing from a request once it ends.'
+- type: flow
+  title: The LLM pipeline, in more detail
+  steps:
+  - label: Collect
+    sub: Authorised text and code
+  - label: Clean
+    sub: Remove duplicates and test overlap
+  - label: Tokenise
+    sub: Assign vocabulary IDs
+  - label: Pre-train
+    sub: Predict known next tokens
+    highlight: true
+  - label: Post-train
+    sub: Instructions and feedback
+  bullets:
+  - Data quality and mix affect the learned model.
+  notes: 'Say: This expands the week 1 pipeline. Data collection draws on web crawls such as Common Crawl, books, code repositories,
+    scientific papers and multilingual text. Cleaning is a major engineering effort: removing duplicates, which otherwise get
+    memorised; filtering low-quality or unsafe pages, often with classifier models; and removing benchmark test sets to avoid
+    contamination. A tokenizer is trained on the data. Pre-training runs next-token prediction on thousands of GPUs for weeks.
+    Post-training, week 8, turns the base model into an assistant. Emphasise that the architecture is the one from last week,
+    simply scaled up.
+
+
+    Analogy: A kitchen sorts and washes ingredients before cooking; one bad batch spoils every dish.
+
+    Ask: Why remove benchmark test questions from the training data?
+
+    Answer: Otherwise the model may have seen the answers, so its test score overstates its ability. This is called contamination.
+
+    Common mistake: Thinking an LLM needs a new architecture. It is last week''s transformer, scaled up and trained on far more
+    data.'
+- type: equation
+  title: How much compute does pre-training need?
+  eq: C \approx 6\, N\, D
+  read_as:
+  - 'Rough dense-model estimate: six × parameters × training tokens.'
+  - 7 B × 2 T × 6 ≈ 8.4 × 10²² operations.
+  - Real time depends on throughput and utilisation.
+  terms:
+  - - C
+    - training compute (floating-point operations)
+  - - N
+    - number of parameters
+  - - D
+    - number of training tokens
+  notes: 'Say: This approximation from the scaling-law literature is worth memorising. Each parameter participates in about
+    two floating-point operations per token in the forward pass and about four in the backward pass. Work through the example:
+    seven billion parameters times two trillion tokens times six is about eight point four times ten to the twenty-two operations.
+    Divide by an effective throughput of four hundred teraflops per second per GPU, allowing for real-world efficiency, and
+    you get roughly fifty-eight thousand GPU-hours, or a thousand GPUs for about two and a half days. Frontier models use orders
+    of magnitude more. This is why most organisations adapt existing models rather than pre-training.
+
+
+    Analogy: Estimating a building job: workers times days times work per worker per day.
+
+    Ask: Estimate the training compute for a 1 B-parameter model trained on 20 B tokens.
+
+    Answer: 6 × 10⁹ × 2 × 10¹⁰ = 1.2 × 10²⁰ operations.
+
+    Common mistake: Reading 6ND as a time. It counts operations; time depends on hardware throughput and utilisation.'
+- type: figure
+  title: 'Scaling laws: loss is predictable from size and data'
+  figure: scaling
+  bullets:
+  - Loss often changes smoothly with size and data.
+  - 'Chinchilla: about 20 tokens per parameter in its setup.'
+  - Training and later serving costs change the best balance.
+  stack: true
+  notes: 'Say: Scaling laws fit how average language-model loss changes with size and training data in particular experimental
+    setups. The Chinchilla result is a useful compute-planning guide, not a universal ratio. Later small models often train
+    on more tokens because cheaper inference matters across many requests. Ask students to compute 20 tokens per parameter for
+    a one-billion-parameter model: twenty billion training tokens. Then explain why deployment cost can justify a different
+    choice.
+
+
+    Analogy: Scaling a recipe needs every ingredient in proportion; extra flour alone does not make a better cake.
+
+    Ask: Why do small modern models train on far more than 20 tokens per parameter?
+
+    Answer: A smaller model is cheaper to run, so extra training is worth it when the model will answer many requests.
+
+    Common mistake: Treating 20 tokens per parameter as a law. It is the compute-optimal result of one experimental setup.'
+- type: stat
+  title: The scale of pre-training data
+  stats:
+  - value: 300 B
+    label: tokens used to train GPT-3 (2020)
+  - value: 1.4 T
+    label: tokens for Chinchilla (2022), a 70 B model
+  - value: 15 T
+    label: tokens in FineWeb (2024), an open, filtered web dataset from Hugging Face
+  - value: 15 T+
+    label: tokens used to pre-train Llama 3 (Meta, 2024)
+  caption: One trillion tokens is roughly 750 billion English words, well over 100 times the text of English Wikipedia. Figures
+    as reported by the developers.
+  notes: 'Say: These figures give a sense of the data scale. GPT-3 trained on about three hundred billion tokens. Chinchilla
+    used one point four trillion for a seventy-billion-parameter model. Hugging Face''s FineWeb, released openly in 2024, contains
+    about fifteen trillion tokens of filtered web text, showing that open datasets now reach frontier scale. Meta reported more
+    than fifteen trillion tokens for Llama 3. A trillion tokens is roughly seven hundred and fifty billion words, well over
+    a hundred times the text of English Wikipedia. At this scale data quality, filtering and deduplication, not just quantity,
+    determine model quality.
+
+
+    Analogy: A library far larger than anyone could read in many lifetimes.
+
+    Ask: Roughly how many English words are in 15 trillion tokens?
+
+    Answer: About 11 trillion, using about 0.75 English words per token.
+
+    Common mistake: Assuming more data always helps. Filtering and removing duplicates matter as much as quantity.'
+- type: bullets
+  title: In-context learning and 'emergent' abilities
+  icon: fa:FaSeedling
+  bullets:
+  - Examples in the prompt guide the task; weights stay fixed.
+  - good → positive; awful → negative; great → ?
+  - Scoring rules can make gradual gains look sudden.
+  - Test the capability you need.
+  notes: 'Say: GPT-3''s paper was titled Language Models are Few-Shot Learners: given a handful of input-output examples in
+    the prompt, a large model continues the pattern for new inputs. This in-context learning is the foundation of prompt engineering
+    next week. Researchers also reported emergent abilities that seemed to appear suddenly above some size. Schaeffer and colleagues
+    showed that many such jumps are artefacts of all-or-nothing metrics such as exact match; measured with a continuous metric,
+    performance often improves smoothly. The practical message is not to assume a capability from model size, but to test it.
+
+
+    Analogy: Showing a new colleague two completed forms before handing over a blank one.
+
+    Ask: In good → positive; awful → negative; great → ?, what does the model do, and does any weight change?
+
+    Answer: It continues the pattern with positive. No weight changes: the examples are only part of the input.
+
+    Common mistake: Calling in-context learning training. The examples are gone once the request ends.'
+- type: bullets
+  title: 'Context windows: how much the model can see at once'
+  icon: fa:FaWindowMaximize
+  bullets:
+  - Context is a token budget.
+  - Instructions, history, sources and output may share it.
+  - Long inputs can hide useful details.
+  - Select relevant sources; check model-specific limits.
+  notes: 'Say: The context window is the maximum number of tokens the model can attend to in one call, including the prompt,
+    the conversation history, any documents or tool outputs, and the generated answer. It grew from a few thousand to over a
+    million tokens thanks to rotary scaling and efficient attention from last week. Two caveats. Longer context costs more money
+    and time, since attention and the KV cache scale with length. And models do not use long contexts uniformly: Liu and colleagues
+    found in 2023 that information in the middle of a long input is used less reliably than information at the start or end.
+    Selecting relevant context remains important.
+
+
+    Analogy: The context is a desk of fixed size: everything for this task must fit on it at once.
+
+    Ask: A model has an 8,000-token context. Instructions use 500 tokens and a document 7,000. How many tokens are left for
+    the answer?
+
+    Answer: 500, so a long answer would be cut off.
+
+    Common mistake: Assuming the model uses a long context evenly. Details in the middle are used less reliably.'
+- type: figure
+  title: Tokenisers differ between model families
+  figure: tokenizers
+  bullets:
+  - Same source text; different token pieces.
+  - Count actual pieces for language and code.
+  - Counts affect context, cost and speed.
+  stack: true
+  notes: 'Say: These are real counts computed for the lecture. The same English sentence, an Irish translation and a short Python
+    function were tokenised with the tokenisers of GPT-2, BERT, Flan-T5, Qwen 2.5 and SmolLM2. English is cheap for all of them;
+    Irish and code vary much more. Larger vocabularies trained on multilingual and code data, such as Qwen''s, usually need
+    fewer tokens for such text. Because pricing, speed and context limits are all measured in tokens, the tokeniser is a practical
+    factor in model choice, not just a technical detail. Students repeat this comparison in the first part of the lab.
+
+
+    Analogy: The same journey can cost different fares on different transport systems.
+
+    Ask: Why might an Irish-language request cost more than the same request in English?
+
+    Answer: Irish text splits into more tokens with most of these tokenisers, and price, speed and context limits are counted
+    in tokens.
+
+    Common mistake: Comparing token counts as if a token were the same unit in every tokeniser.'
+- type: section
+  number: 3
+  title: Decoding strategies
+  question: The model gives probabilities. How do we turn them into text?
+  icon: fa:FaSlidersH
+  notes: 'Say: Section three returns to the decoding ideas from week 1 in more depth, now that we understand the model producing
+    the probabilities. We compare the main strategies, look at real next-token distributions from a small open LLM, and check
+    understanding with a quiz. About thirteen minutes.
+
+
+    Analogy: The model provides a menu of scores; decoding chooses from that menu.
+
+    Ask: With probabilities 0.56, 0.21, 0.12, 0.08, 0.03, how many candidates does top-p keep for p = 0.8?
+
+    Answer: Three. 0.56 + 0.21 = 0.77 is still below 0.8; adding 0.12 gives 0.89.
+
+    Common mistake: Thinking top-p keeps a percentage of vocabulary entries. It keeps a share of probability mass.'
+- type: table
+  title: Decoding strategies compared
+  header:
+  - Rule
+  - How it picks the next token
+  - Watch for
+  rows:
+  - - Greedy
+    - Always the highest-scoring token
+    - Same output every time; can loop (“I think I think …”)
+  - - Beam search
+    - Keeps several best partial sequences
+    - Safe but generic text; common in translation
+  - - Temperature T
+    - Divides scores by T before softmax
+    - T < 1 sharper, T > 1 more varied; T must be positive
+  - - Top-k
+    - Samples from the k highest-scoring tokens
+    - A fixed k can be too many or too few
+  - - Top-p (nucleus)
+    - Samples from the smallest set whose probabilities reach p
+    - Keeps more candidates when the model is unsure
+  - - Repetition penalty
+    - Lowers scores of tokens already used
+    - Can block needed repeats, such as names or code
+  notes: 'Say: Separate model prediction from token choice. Greedy picks the highest score. Beam keeps
+    candidate sequences. Sampling can rescale scores with positive temperature, keep top-k candidates,
+    or keep enough probability mass for top-p. Repetition penalties can harm necessary repeated names
+    or code. Analogy: choose from a menu whose scores change after each choice. Ask: does top-p of 0.8
+    keep eighty percent of vocabulary entries? Common mistake: it keeps a leading group reaching eighty
+    percent probability mass. Greedy selection can still be wrong, and hosted services may change even
+    with fixed settings.'
+- type: figure
+  title: Real next-token distributions from a small open LLM
+  figure: next_token
+  bullets:
+  - Scores describe possible continuations.
+  - A high-probability blank marker reflects a completion pattern.
+  - Post-training shapes replies; verify every factual answer.
+  stack: true
+  notes: 'Say: The figure shows next-token probabilities from a base model. A high score for a blank marker means that continuation
+    is likely under this prefix. It does not establish the exact training examples responsible. Base training and assistant
+    post-training optimise different behaviour. An instruction model may answer the factual question more directly, but its
+    claim still needs verification. Ask students to distinguish a probability estimate from evidence that a fact is true.
+
+
+    Analogy: A weather forecast gives a chance of rain, not a promise.
+
+    Ask: The base model gives Dublin a probability of about 0.05 after The capital of Ireland is. Does that make Dublin unlikely
+    to be the capital?
+
+    Answer: No. The score describes likely continuations of the text, such as a quiz blank, not whether a fact is true.
+
+    Common mistake: Reading a next-token probability as the model''s confidence in a fact.'
+- type: quiz
+  question: You build a tool that extracts invoice numbers and totals into JSON. Which decoding setting
+    is most appropriate?
+  options:
+  - Temperature 1.5 with top-p 0.95, for variety
+  - High top-k so rare tokens can appear
+  - Beam search with a large repetition penalty
+  - Greedy decoding (temperature 0) plus output validation
+  answer: 3
+  notes: 'Say: Answer: D. Extraction has one correct answer, so we want the most likely tokens, deterministically, and we should
+    validate the output format, for example with a JSON schema, which is covered next week. A adds randomness and errors to
+    a task that needs none. C is unnecessary, and a strong repetition penalty could corrupt numbers that legitimately repeat
+    digits. B increases the chance of rare, wrong tokens. A good follow-up: for brainstorming marketing slogans, which setting
+    would you pick instead? Higher temperature with top-p.
+
+
+    Analogy: Copying figures from an invoice needs accuracy, not creativity.
+
+    Ask: Why is output validation still needed with greedy decoding?
+
+    Answer: The most likely token can still be wrong, and the output can still break the JSON format.
+
+    Common mistake: Thinking greedy decoding guarantees a correct total.'
+- type: section
+  number: 4
+  title: LLM families
+  question: 'GPT, BERT, LLaMA, T5, Claude, Gemini, Qwen…: how do they relate?'
+  icon: fa:FaSitemap
+  notes: 'Say: Welcome back. Section four is the map of the model landscape. We organise models by architecture family, then
+    by access, proprietary or open-weight, and then by the newer categories that matter for choosing a model: small language
+    models, mixture-of-experts models and reasoning models. The goal is not to memorise product names, which change every month,
+    but to be able to place any new model on this map.
+
+
+    Analogy: Sort tools by their job (reading, translating or continuing) before choosing a brand.
+
+    Ask: Which branch do GPT, BERT, LLaMA and T5 each belong to?
+
+    Answer: BERT is encoder-only; T5 is encoder–decoder; GPT and LLaMA are decoder-only.
+
+    Common mistake: Treating open weights as an architecture. Access and architecture are separate questions.'
+- type: figure
+  title: A family tree of transformer language models
+  figure: family_tree
+  notes: 'Say: All modern language models descend from the 2017 transformer. The encoder-only branch, starting with BERT, produces
+    representations: classification and embeddings for search; ModernBERT in 2024 showed this branch is still active. The encoder-decoder
+    branch, T5 and BART, maps inputs to outputs; Whisper for speech is also here. The decoder-only branch is where almost all
+    chat models sit: OpenAI''s GPT family, Anthropic''s Claude, Google''s Gemini, Meta''s Llama, Alibaba''s Qwen, DeepSeek,
+    Mistral, Microsoft''s Phi, Ai2''s OLMo, which releases its data too, and OpenAI''s open-weight gpt-oss models released in
+    2025. Stress that the descriptor''s GPT, BERT, LLaMA and T5 fall into three different branches.
+
+
+    Analogy: A family tree groups relatives by descent, not by fame.
+
+    Ask: Where does Whisper, the speech recogniser, sit on this tree?
+
+    Answer: In the encoder–decoder branch: the encoder reads audio features and the decoder writes the transcript.
+
+    Common mistake: Assuming every famous model is a chat model. BERT cannot write free text.'
+- type: compare
+  title: 'BERT vs. T5 vs. GPT-style: same input, different jobs'
+  columns:
+  - head: BERT (encoder)
+    icon: fa:FaSearch
     points:
-      - "Differences in the **model**? In the **training data**? In the **date** of training?"
-      - "Differences in hidden **instructions**, **tools** (web search) or **decoding settings**?"
-      - "Would asking the **same** assistant twice give the same answer? Why or why not?"
-    notes: |
-      Collect answers for three minutes. Good answers: different model families and sizes; different pre-training data and cut-off dates; different post-training and safety policies; different system prompts; whether web search or other tools are used; and sampling randomness, which students met in week 1. Asking the same assistant twice can give different answers because of sampling, and even with the same settings because of server-side changes. Today's lecture explains each of these factors. Keep the list: it becomes a checklist for comparing models in the lab.
-
-  # ------------------------------------------------ section 1
-  - type: section
-    number: 1
-    title: "The evolution of NLP"
-    question: "How did we get from counting word pairs to chat assistants?"
-    icon: "fa:FaHistory"
-    notes: |
-      Section one is a short history of natural language processing, told as a sequence of ideas, each fixing a weakness of the previous one: counting word sequences, representing words as vectors, reading sequences with recurrent networks, attention, pre-training and scale. Students who understand this sequence can explain why today's LLMs are designed as they are. About twelve minutes.
-
-  - type: figure
-    title: "Forty years of NLP in one line"
-    figure: nlp_timeline
-    notes: |
-      Walk along the timeline. Early systems used hand-written rules and statistics such as n-gram language models, which count how often word sequences occur. Word2vec in 2013 represented words as dense vectors learned from context, so similar words got similar vectors. Sequence-to-sequence RNNs in 2014, with attention added in 2015, made neural translation work. The transformer in 2017 removed recurrence. In 2018, BERT and GPT showed that pre-training on unlabelled text and then fine-tuning beats task-specific models. GPT-3 in 2020 showed that scale enables few-shot prompting. ChatGPT in 2022 added instruction and preference tuning. Since then: open weights, multimodality, reasoning models and agents.
-
-  - type: equation
-    title: "Where it started: n-gram language models"
-    eq: "p(w_t \\mid w_{t-n+1}, \\ldots, w_{t-1}) \\approx \\frac{\\mathrm{count}(w_{t-n+1}, \\ldots, w_{t-1}, w_t)}{\\mathrm{count}(w_{t-n+1}, \\ldots, w_{t-1})}"
-    read_as:
-      - "Predict the next word from the previous n − 1 words by **counting** (maximum likelihood, as in the week 1 lab)."
-      - "**Sparsity**: most long word sequences never appear in any corpus, so counts are zero; smoothing only partly helps."
-      - "No notion of similarity: 'cat sat' tells you nothing about 'dog sat'. Neural models fix both with **embeddings**."
-    terms:
-      - ["n", "context length (e.g. 3 = trigram)"]
-      - ["count(·)", "occurrences in the corpus"]
-    notes: |
-      The n-gram model is exactly the bigram name model from the week 1 lab, applied to words. It works surprisingly well for short contexts and powered speech recognition and machine translation for decades. Its two fatal weaknesses motivate everything after it. First, sparsity: the number of possible word sequences explodes with n, so most are never observed and get zero probability. Second, words are atomic symbols, so knowledge about cat does not transfer to dog. Neural language models, starting with Bengio and colleagues in 2003, fixed both by representing words as learned vectors and predicting with a network that generalises.
-
-  - type: table
-    title: "Each generation fixed a limitation of the last"
-    header: ["Approach", "Representation", "Context", "Main limitation"]
-    rows:
-      - ["n-gram LM", "Words as symbols", "n − 1 words", "Sparsity; no similarity between words"]
-      - ["Word embeddings (word2vec, GloVe)", "One vector per word", "None at use time", "Same vector for 'bank' (river) and 'bank' (money)"]
-      - ["RNN / LSTM", "Contextual hidden states", "Whole sequence, in theory", "Sequential; long-range information fades"]
-      - ["Transformer LLM", "Contextual vectors via attention", "Thousands to millions of tokens", "Cost grows with context; hallucination; data hunger"]
-    notes: |
-      This table is a compact exam answer to 'describe the evolution of NLP'. Each row fixes the previous row's main limitation. Word embeddings gave similarity but one vector per word regardless of context, so bank by a river and bank with money were identical. RNNs gave context-dependent representations but were sequential and forgetful. Transformer LLMs give contextual representations over very long contexts with parallel training. The last column reminds students that LLMs have their own limitations, which we address in weeks 7, 8 and 12.
-
-  # ------------------------------------------------ section 2
-  - type: section
-    number: 2
-    title: "From transformer to LLM: data, scale, context"
-    question: "What turns a transformer into a large language model?"
-    icon: "fa:FaDatabase"
-    notes: |
-      Section two explains what makes an LLM large and capable: the pre-training pipeline and its data, the compute budget, the empirical scaling laws that guided how big models and datasets should be, the phenomenon of in-context learning and the debate about emergent abilities, and the context window. About twenty-five minutes.
-
-  - type: flow
-    title: "The LLM pipeline, in more detail"
-    steps:
-      - {label: "Collect data", sub: "Web crawl, books, code, maths, papers, multilingual text"}
-      - {label: "Clean & filter", sub: "De-duplicate, remove low quality and unsafe text, decontaminate test sets"}
-      - {label: "Tokenise", sub: "Train a BPE tokenizer; trillions of tokens"}
-      - {label: "Pre-train", sub: "Next-token prediction on thousands of GPUs for weeks", highlight: true}
-      - {label: "Post-train", sub: "Instruction tuning, preference tuning, RL for reasoning (week 8)"}
-    bullets:
-      - "Data quality and mix matter as much as size: code and maths data improve reasoning; synthetic data is increasingly used."
-      - "The same decoder transformer from week 5, just much bigger and trained on far more data."
-    notes: |
-      This expands the week 1 pipeline. Data collection draws on web crawls such as Common Crawl, books, code repositories, scientific papers and multilingual text. Cleaning is a major engineering effort: removing duplicates, which otherwise get memorised; filtering low-quality or unsafe pages, often with classifier models; and removing benchmark test sets to avoid contamination. A tokenizer is trained on the data. Pre-training runs next-token prediction on thousands of GPUs for weeks. Post-training, week 8, turns the base model into an assistant. Emphasise that the architecture is the one from last week, simply scaled up.
-
-  - type: equation
-    title: "How much compute does pre-training need?"
-    eq: "C \\approx 6\\, N\\, D"
-    read_as:
-      - "Training FLOPs ≈ 6 × parameters × training tokens (2 for the forward pass, 4 for the backward pass, per parameter per token)."
-      - "Example: a 7 B-parameter model on 2 T tokens: 6 × 7×10⁹ × 2×10¹² ≈ 8.4 × 10²² FLOPs."
-      - "At an effective 400 TFLOP/s per GPU that is ≈ 58,000 GPU-hours, which is why pre-training is done by few organisations."
-    terms:
-      - ["C", "training compute (floating-point operations)"]
-      - ["N", "number of parameters"]
-      - ["D", "number of training tokens"]
-    notes: |
-      This approximation from the scaling-law literature is worth memorising. Each parameter participates in about two floating-point operations per token in the forward pass and about four in the backward pass. Work through the example: seven billion parameters times two trillion tokens times six is about eight point four times ten to the twenty-two operations. Divide by an effective throughput of four hundred teraflops per second per GPU, allowing for real-world efficiency, and you get roughly fifty-eight thousand GPU-hours, or a thousand GPUs for about two and a half days. Frontier models use orders of magnitude more. This is why most organisations adapt existing models rather than pre-training.
-
-  - type: figure
-    title: "Scaling laws: loss is predictable from size and data"
-    figure: scaling
-    bullets:
-      - "Loss falls smoothly as a power law in parameters N and tokens D (Kaplan et al., 2020; Hoffmann et al., 2022)."
-      - "**Chinchilla**: for a fixed compute budget, train with roughly **20 tokens per parameter**; GPT-3 was under-trained."
-      - "Modern models train far beyond 20 tokens/parameter (e.g. Llama 3 8B on 15 T tokens) because smaller models are cheaper to **serve**."
-    stack: true
-    notes: |
-      The left plot uses the published Chinchilla fit, where loss equals a constant plus a term that shrinks with parameters plus a term that shrinks with data. For each model size, more compute means more data and lower loss, but each size eventually flattens, and the dashed line shows the best size for each budget. The right plot shows the Chinchilla rule of about twenty tokens per parameter. GPT-3 used only about 1.7 tokens per parameter; Chinchilla used twenty; Llama 3 8B used almost two thousand, deliberately over-training a small model because inference cost, not training cost, dominates when millions of people use it.
-
-  - type: stat
-    title: "The scale of pre-training data"
-    stats:
-      - {value: "300 B", label: "tokens used to train GPT-3 (2020)"}
-      - {value: "1.4 T", label: "tokens for Chinchilla (2022), a 70 B model"}
-      - {value: "15 T", label: "tokens in FineWeb (2024), an open, filtered web dataset from Hugging Face"}
-      - {value: "15 T+", label: "tokens used to pre-train Llama 3 (Meta, 2024)"}
-    caption: "One trillion tokens is roughly 750 billion English words, thousands of times all of Wikipedia. Figures as reported by the developers."
-    notes: |
-      These figures give a sense of the data scale. GPT-3 trained on about three hundred billion tokens. Chinchilla used one point four trillion for a seventy-billion-parameter model. Hugging Face's FineWeb, released openly in 2024, contains about fifteen trillion tokens of filtered web text, showing that open datasets now reach frontier scale. Meta reported more than fifteen trillion tokens for Llama 3. A trillion tokens is roughly seven hundred and fifty billion words, thousands of times the size of English Wikipedia. At this scale data quality, filtering and deduplication, not just quantity, determine model quality.
-
-  - type: bullets
-    title: "In-context learning and 'emergent' abilities"
-    icon: "fa:FaSeedling"
-    bullets:
-      - "**In-context learning** (GPT-3, 2020): large models can learn a task from a few examples in the prompt, without weight updates (week 7)."
-      - "Some abilities appear to 'switch on' at scale, such as multi-step arithmetic."
-      - "**Debate**: much apparent emergence depends on the metric; with smooth metrics many abilities improve gradually (Schaeffer et al., 2023)."
-      - "Practical lesson: test the capability you need on **your** task, at the size you can afford."
-    notes: |
-      GPT-3's paper was titled Language Models are Few-Shot Learners: given a handful of input-output examples in the prompt, a large model continues the pattern for new inputs. This in-context learning is the foundation of prompt engineering next week. Researchers also reported emergent abilities that seemed to appear suddenly above some size. Schaeffer and colleagues showed that many such jumps are artefacts of all-or-nothing metrics such as exact match; measured with a continuous metric, performance often improves smoothly. The practical message is not to assume a capability from model size, but to test it.
-
-  - type: bullets
-    title: "Context windows: how much the model can see at once"
-    icon: "fa:FaWindowMaximize"
-    bullets:
-      - "Grew from 512–2,048 tokens (2018–2020) to 128 K–2 M tokens in current models."
-      - "Everything counts: system prompt, conversation history, retrieved documents, tool outputs and the answer."
-      - "Cost and latency grow with context; long inputs can be **lost in the middle** (models use the start and end best)."
-      - "Long context does not remove the need for **retrieval** (week 12): selecting the right information still matters."
-    notes: |
-      The context window is the maximum number of tokens the model can attend to in one call, including the prompt, the conversation history, any documents or tool outputs, and the generated answer. It grew from a few thousand to over a million tokens thanks to rotary scaling and efficient attention from last week. Two caveats. Longer context costs more money and time, since attention and the KV cache scale with length. And models do not use long contexts uniformly: Liu and colleagues found in 2023 that information in the middle of a long input is used less reliably than information at the start or end. Selecting relevant context remains important.
-
-  - type: figure
-    title: "Tokenisers differ between model families"
-    figure: tokenizers
-    bullets:
-      - "Real token counts for the same texts with five tokenisers (vocabulary size in the legend)."
-      - "Larger, more multilingual vocabularies usually need fewer tokens, especially for non-English text and code."
-      - "Token counts drive **cost, speed and context use**, so compare them when choosing a model."
-    stack: true
-    notes: |
-      These are real counts computed for the lecture. The same English sentence, an Irish translation and a short Python function were tokenised with the tokenisers of GPT-2, BERT, Flan-T5, Qwen 2.5 and SmolLM2. English is cheap for all of them; Irish and code vary much more. Larger vocabularies trained on multilingual and code data, such as Qwen's, usually need fewer tokens for such text. Because pricing, speed and context limits are all measured in tokens, the tokeniser is a practical factor in model choice, not just a technical detail. Students repeat this comparison in the first part of the lab.
-
-  # ------------------------------------------------ section 3
-  - type: section
-    number: 3
-    title: "Decoding strategies"
-    question: "The model gives probabilities. How do we turn them into text?"
-    icon: "fa:FaSlidersH"
-    notes: |
-      Section three returns to the decoding ideas from week 1 in more depth, now that we understand the model producing the probabilities. We compare the main strategies, look at real next-token distributions from a small open LLM, and check understanding with a quiz. About thirteen minutes.
-
-  - type: table
-    title: "Decoding strategies compared"
-    header: ["Strategy", "How it works", "Good for", "Watch out for"]
-    rows:
-      - ["Greedy", "Always take the most likely token", "Short factual answers, extraction", "Repetition loops; dull text"]
-      - ["Beam search", "Keep the k most likely partial sequences", "Translation, summarisation (encoder–decoder)", "Generic, short outputs in open-ended chat"]
-      - ["Temperature", "Rescale logits by 1/T, then sample", "Controlling creativity", "High T: errors; T → 0 = greedy"]
-      - ["Top-k", "Sample among the k most likely tokens", "Removing the unlikely tail", "Fixed k ignores model confidence"]
-      - ["Top-p (nucleus)", "Sample among the smallest set with total probability p", "General chat and writing", "Combine carefully with temperature"]
-      - ["Repetition penalty", "Down-weight tokens already used", "Long generations", "Can distort facts, names, code"]
-    notes: |
-      Go through the table row by row. Greedy decoding is deterministic and good for short, factual outputs, but in long generations it tends to loop. Beam search keeps several candidate sequences and was the standard for translation with encoder-decoder models; in open-ended chat it produces bland text. Temperature, top-k and top-p, from week 1, shape the sampling distribution; top-p adapts to the model's confidence and is the common default. Repetition penalties reduce loops but can harm tasks where repetition is correct, such as code. Settings must be reported in evaluations, and some reasoning-model APIs fix them.
-
-  - type: figure
-    title: "Real next-token distributions from a small open LLM"
-    figure: next_token
-    bullets:
-      - "Even a factual prefix continues in many ways (' located', ' the', ' Dublin'); the top token ' ______' comes from fill-in-the-blank worksheets in web text."
-      - "An open prompt spreads probability even more thinly: sampling gives variety, and top-p adapts to the spread."
-      - "A base model **continues text**; it does not answer. Post-training (week 8) makes it answer 'Dublin'."
-    stack: true
-    notes: |
-      These are real distributions from the Qwen 2.5 half-billion-parameter base model, the pre-trained model before instruction tuning, computed for these slides. A base model is a pure next-token predictor, and the result is instructive. Even for the capital of Ireland the probability is spread: located, the and Dublin are all plausible continuations of the text, and the single most likely token is a blank line, because the web contains many fill-in-the-blank worksheets with exactly this sentence. Dublin gets only about five per cent. The model has not decided anything; it continues text the way its training data does. For my favourite food is, the probability is spread even more thinly. Two lessons follow. Decoding settings shape what comes out, and top-p adapts to how spread the distribution is. And turning a text continuer into an assistant that answers Dublin is the job of post-training, week 8. It also connects to hallucination: sampling from a flat distribution still produces fluent text.
-
-  - type: quiz
-    question: "You build a tool that extracts invoice numbers and totals into JSON. Which decoding setting is most appropriate?"
-    options:
-      - "Temperature 1.5 with top-p 0.95, for variety"
-      - "Greedy decoding (temperature 0) plus output validation"
-      - "Beam search with a large repetition penalty"
-      - "High top-k so rare tokens can appear"
-    answer: 1
-    notes: |
-      Answer: B. Extraction has one correct answer, so we want the most likely tokens, deterministically, and we should validate the output format, for example with a JSON schema, which is covered next week. A adds randomness and errors to a task that needs none. C is unnecessary, and a strong repetition penalty could corrupt numbers that legitimately repeat digits. D increases the chance of rare, wrong tokens. A good follow-up: for brainstorming marketing slogans, which setting would you pick instead? Higher temperature with top-p.
-
-  # ------------------------------------------------ section 4
-  - type: section
-    number: 4
-    title: "LLM families"
-    question: "GPT, BERT, LLaMA, T5, Claude, Gemini, Qwen…: how do they relate?"
-    icon: "fa:FaSitemap"
-    notes: |
-      Welcome back. Section four is the map of the model landscape. We organise models by architecture family, then by access, proprietary or open-weight, and then by the newer categories that matter for choosing a model: small language models, mixture-of-experts models and reasoning models. The goal is not to memorise product names, which change every month, but to be able to place any new model on this map.
-
-  - type: figure
-    title: "A family tree of transformer language models"
-    figure: family_tree
-    notes: |
-      All modern language models descend from the 2017 transformer. The encoder-only branch, starting with BERT, produces representations: classification and embeddings for search; ModernBERT in 2024 showed this branch is still active. The encoder-decoder branch, T5 and BART, maps inputs to outputs; Whisper for speech is also here. The decoder-only branch is where almost all chat models sit: OpenAI's GPT family, Anthropic's Claude, Google's Gemini, Meta's Llama, Alibaba's Qwen, DeepSeek, Mistral, Microsoft's Phi, AI2's OLMo, which releases its data too, and OpenAI's open-weight gpt-oss models released in 2025. Stress that the descriptor's GPT, BERT, LLaMA and T5 fall into three different branches.
-
-  - type: compare
-    title: "BERT vs. T5 vs. GPT-style: same input, different jobs"
-    columns:
-      - head: "BERT (encoder)"
-        icon: "fa:FaSearch"
-        points:
-          - "Fills in a **[MASK]** using both sides"
-          - "Output: probabilities for the masked word, or a vector"
-          - "Use: classification, entity tagging, embeddings"
-          - "Not a free-text generator"
-      - head: "T5 / Flan-T5 (enc–dec)"
-        icon: "fa:FaExchangeAlt"
-        points:
-          - "Every task as **text-to-text**: 'translate…', 'summarize…'"
-          - "Output: a new text conditioned on the input"
-          - "Use: translation, summarisation, QA"
-          - "Instruction-tuned Flan versions follow prompts"
-      - head: "GPT-style (decoder)"
-        icon: "fa:FaCommentDots"
-        points:
-          - "**Continues** text; chat models continue a conversation"
-          - "Output: open-ended generation"
-          - "Use: chat, writing, code, reasoning, agents"
-          - "The family behind almost all assistants"
-    notes: |
-      This slide corresponds directly to the descriptor's tutorial activity, comparing outputs across families. In the lab students give the same inputs to all three. BERT, given the capital of Ireland is mask, ranks candidate words for the blank. Flan-T5, an instruction-tuned T5, answers questions, translates or summarises when the task is stated in the input. A decoder chat model answers in open-ended text. The teaching notes list the actual outputs we obtained when preparing the lecture. The key conceptual point is that these are different tools, not better or worse versions of the same thing.
-
-  - type: table
-    title: "Proprietary and open-weight families (examples, 2026)"
-    header: ["Family", "Developer", "Access", "Notes"]
-    rows:
-      - ["GPT", "OpenAI", "Proprietary API/app", "Also open-weight gpt-oss models (2025)"]
-      - ["Claude", "Anthropic", "Proprietary API/app", "Strong at long documents and code"]
-      - ["Gemini", "Google", "Proprietary API/app", "Natively multimodal; Gemma = open-weight sibling"]
-      - ["Llama", "Meta", "Open-weight (community licence)", "Gated download; licence conditions"]
-      - ["Qwen", "Alibaba", "Open-weight (mostly Apache 2.0)", "Many sizes; strong multilingual and code"]
-      - ["DeepSeek", "DeepSeek", "Open-weight (MIT for R1)", "MoE; open reasoning model R1 (2025)"]
-      - ["Mistral", "Mistral AI", "Open-weight and proprietary", "European; MoE (Mixtral)"]
-      - ["Phi / OLMo", "Microsoft / AI2", "Open-weight (MIT / Apache)", "Small models; OLMo also releases data and code"]
-    notes: |
-      This table maps the main families to their developers and access models; version numbers are deliberately omitted. Proprietary families are used through the developer's app or API. Open-weight families can be downloaded, but licences differ: Qwen and OLMo mostly use the permissive Apache 2.0 licence; DeepSeek's R1 used MIT; Llama uses a community licence with conditions and requires accepting it on Hugging Face; Gemma has its own terms. The line between the two worlds is blurred: Google has both Gemini and Gemma, OpenAI released gpt-oss, and Mistral offers both. Students must check the licence before using a model in a project or product.
-
-  - type: cards
-    title: "Newer categories that matter when choosing"
-    cards:
-      - {icon: "fa:FaMobileAlt", head: "Small language models", text: "0.1–8 B parameters (e.g. Phi, Gemma, Qwen small, SmolLM): run on laptops and phones; good for narrow tasks; cheaper and private."}
-      - {icon: "fa:FaNetworkWired", head: "Mixture-of-experts", text: "Huge total size, few active parameters per token (week 5): strong quality per unit of compute; need lots of memory."}
-      - {icon: "fa:FaBrain", head: "Reasoning models", text: "Trained to 'think' step by step before answering; better at maths and code; slower and costlier."}
-      - {icon: "fa:FaImages", head: "Multimodal LLMs", text: "Read images, audio and video as well as text (weeks 9–10)."}
-    notes: |
-      Beyond architecture and access, four categories guide real choices. Small language models have improved dramatically through better data and distillation; a well-trained few-billion-parameter model now matches much larger models of a few years ago on many tasks and can run locally, which helps privacy and cost. Mixture-of-experts models trade memory for speed, as we saw last week. Reasoning models spend extra compute at inference time. Multimodal LLMs are covered in weeks 9 and 10. A single product may combine several: a small model for routing, a reasoning model for hard cases.
-
-  - type: figure
-    title: "Reasoning models and test-time compute"
-    figure: reasoning
-    bullets:
-      - "Examples: OpenAI's o-series (2024), DeepSeek-R1 (2025, open), 'thinking' modes in Claude, Gemini and Qwen3."
-      - "{{REASONING_RESULT}}"
-      - "Visible reasoning text is **not** guaranteed to reflect the model's internal computation; evaluate the answer, not the story."
-    stack: true
-    notes: |
-      Reasoning models are trained, typically with reinforcement learning on problems whose answers can be checked automatically, to generate a long chain of intermediate reasoning before the final answer. Spending more tokens thinking, called test-time compute, often improves results on maths, science and coding. DeepSeek-R1, released openly in January 2025, showed how to do this with reinforcement learning. The bullet reports what happened when we ran the small open Qwen3 model, three times per mode, on an easy word problem and on a scheduling puzzle with a hidden constraint: only one two-GPU run fits on three GPUs at a time, so five runs take twenty hours. Read it as a cost-benefit table: on the easy problem thinking cannot improve a correct answer and costs several times the tokens; on the puzzle, ask whether the extra tokens bought correct answers. One lesson from preparing it: Qwen3's thinking mode needs sampling, as its model card says; with greedy decoding it repeated itself until the token budget ran out. Two cautions: thinking costs time and money, and the displayed reasoning is not a faithful window into the model's computation.
-
-  - type: quiz
-    question: "Which statement about model families is correct?"
-    options:
-      - "BERT and GPT are both decoder-only chat models"
-      - "Open-weight models always come with their training data and code"
-      - "T5 frames every task as text-to-text with an encoder–decoder"
-      - "Reasoning models are faster because they skip the thinking step"
-    answer: 2
-    notes: |
-      Answer: C. T5, the Text-to-Text Transfer Transformer, is an encoder-decoder model that casts every task, from translation to classification, as generating an output text from an input text. A is wrong: BERT is an encoder. B is wrong: most open-weight releases publish weights only; fully open models such as OLMo that also release data and code are the exception. D is the opposite of the truth: reasoning models spend more computation at inference time, so they are usually slower and more expensive per answer.
-
-  # ------------------------------------------------ section 5
-  - type: section
-    number: 5
-    title: "Choosing and using models"
-    question: "How do you pick the right model and use it responsibly?"
-    icon: "fa:FaTasks"
-    notes: |
-      The last section is practical. We look at what a model card should tell you, what licences allow, how to read benchmark tables critically, the trade-offs between calling an API and running a model locally, the code for both, typical applications, a process for choosing a model, and the responsible-AI issues specific to LLMs. This section feeds directly into the project, where groups must justify their model choice.
-
-  - type: table
-    title: "What a model card should tell you"
-    header: ["Section", "Questions to ask"]
-    rows:
-      - ["Intended use", "What was it built for? What uses are out of scope?"]
-      - ["Training data", "Which sources, languages and dates? Any personal or copyrighted data?"]
-      - ["Evaluation", "Which benchmarks, with what settings? Any safety evaluations?"]
-      - ["Limitations & biases", "Known failure modes, languages or groups where it performs worse"]
-      - ["Licence & access", "Commercial use? Attribution? Usage restrictions? Gating?"]
-      - ["Technical details", "Size, context length, tokenizer, chat template, hardware needs"]
-    notes: |
-      Model cards, proposed by Mitchell and colleagues in 2019, are the standard documentation for models on Hugging Face and elsewhere. Teach students to read them like a datasheet before using a model. Quality varies widely: some cards are detailed, others are a few lines. Missing information, such as undisclosed training data, is itself important information for a risk assessment. In the lab, students fill in this table for two models they use, and the project requires it for every model the group relies on.
-
-  - type: table
-    title: "Licences at a glance (always read the actual text)"
-    header: ["Licence type", "Examples", "What it usually means"]
-    rows:
-      - ["Permissive (Apache 2.0, MIT)", "Qwen (most), OLMo, Phi, DeepSeek-R1, gpt-oss", "Use, modify, commercialise; keep notices"]
-      - ["Community / custom", "Llama, Gemma", "Free use with conditions: acceptable-use policy, attribution, limits for very large services"]
-      - ["Responsible AI licences (OpenRAIL)", "Stable Diffusion 1.5, BLOOM", "Open use with listed prohibited uses"]
-      - ["Non-commercial / research", "Some research releases (e.g. SD-Turbo)", "No commercial use without a separate agreement"]
-      - ["Proprietary API terms", "GPT, Claude, Gemini", "Pay per use; data handling and output terms set by the provider"]
-    notes: |
-      Licences decide what students and their future employers may legally do with a model. Permissive licences such as Apache 2.0 and MIT allow commercial use and modification with attribution. Community licences such as Llama's and Gemma's allow broad free use but impose acceptable-use policies and, for Llama, require a separate licence for services with more than seven hundred million monthly users. OpenRAIL licences, used by Stable Diffusion 1.5, list prohibited uses. Research licences forbid commercial use. API terms govern data retention and outputs. The table simplifies; the project requires groups to quote the actual licence of each model they use.
-
-  - type: table
-    title: "Benchmarks: useful, but read them critically"
-    header: ["Benchmark", "Measures", "Caveat"]
-    rows:
-      - ["MMLU / MMLU-Pro", "Multiple-choice knowledge across 57+ subjects", "Saturated at the top; possible contamination"]
-      - ["GSM8K, MATH", "Maths word problems and competition maths", "Answer format sensitivity; memorisation"]
-      - ["HumanEval, SWE-bench", "Writing code; fixing real repository issues", "Narrow languages and tasks"]
-      - ["GPQA", "Very hard graduate-level science questions", "Small; experts disagree on some items"]
-      - ["Human preference arenas", "Pairwise votes on real prompts (Elo-style)", "Style and length bias; not your users"]
-    callout: "Benchmarks are not your task. Build a small test set from your own use case (week 7) and evaluate candidates on it."
-    notes: |
-      Benchmark tables appear in every model release. Explain what the common ones measure and why caution is needed. Contamination: benchmark questions leak into web-scraped training data, inflating scores. Saturation: when all top models score above ninety percent, differences are noise. Prompt sensitivity: scores change with formatting and the number of examples. Arena-style human preference rankings capture real prompts but favour longer, more confident answers. The practical rule, developed next week, is to build a small evaluation set for your own task and test shortlisted models on it with fixed settings.
-
-  - type: compare
-    title: "Calling an API vs. running an open model yourself"
-    columns:
-      - head: "Hosted API"
-        icon: "fa:FaCloud"
-        points:
-          - "Strongest models; no hardware to manage"
-          - "Pay per token; costs grow with usage"
-          - "Data leaves your organisation (check terms)"
-          - "Rate limits; the provider may change or retire models"
-          - "Examples: OpenAI, Anthropic, Google, Hugging Face Inference Providers"
-      - head: "Local / self-hosted"
-        icon: "fa:FaServer"
-        points:
-          - "Full control, privacy, fixed versions"
-          - "Needs GPU/CPU memory; you handle updates and safety"
-          - "Cheaper at high volume; free for experiments"
-          - "Can fine-tune (week 8)"
-          - "Examples: Hugging Face Transformers, Ollama, vLLM (week 11)"
-    notes: |
-      This choice appears in every project. Hosted APIs give the best capability without hardware, but send data to a provider and cost money per token; models may be updated or retired, which harms reproducibility. Running an open model locally gives privacy, control and a fixed version, and makes fine-tuning possible, but requires hardware and operational effort, and small local models are less capable. Many organisations use both. Week 11 covers deployment in detail; this week students try both routes in the lab, using free options.
-
-  - type: code
-    title: "Using pretrained models with Hugging Face pipelines"
-    code: |
-      from transformers import pipeline
-
-      fill = pipeline("fill-mask", model="bert-base-uncased")
-      fill("The capital of Ireland is [MASK].")
-
-      chat = pipeline("text-generation",
-                      model="Qwen/Qwen2.5-0.5B-Instruct")
-      messages = [{"role": "user",
-                   "content": "Explain tokens in one sentence."}]
-      out = chat(messages, max_new_tokens=60, do_sample=False)
-      print(out[0]["generated_text"][-1]["content"])
-    bullets:
-      - "`pipeline` bundles the tokenizer, model and pre/post-processing."
-      - "Chat models expect **messages**; the pipeline applies the model's chat template."
-      - "Models download from the Hugging Face Hub on first use."
-    notes: |
-      The Hugging Face Transformers library is the standard way to use open models in Python. The pipeline function hides the tokenizer, model and processing behind one call per task. For chat models we pass a list of messages with roles; the pipeline formats them with the model's chat template, the special tokens it was trained with, which we meet again in fine-tuning in week 8. Use deterministic decoding when comparing models, as here. In the lab students run these exact cells, and the notebook explains how to control device placement and generation settings.
-
-  - type: code
-    title: "Querying a hosted model through an API"
-    code: |
-      import os
-      from huggingface_hub import InferenceClient
-
-      client = InferenceClient(api_key=os.environ["HF_TOKEN"])
-      resp = client.chat.completions.create(
-          model="Qwen/Qwen2.5-7B-Instruct",
-          messages=[{"role": "user",
-                     "content": "Name three LLM families."}],
-          max_tokens=100, temperature=0.2)
-      print(resp.choices[0].message.content)
-      print(resp.usage)   # prompt and completion tokens
-    bullets:
-      - "Most providers use this **OpenAI-compatible** chat format: messages in, message out."
-      - "Keys belong in environment variables or secrets, never in notebooks."
-      - "Log **usage** (tokens) to estimate cost; record model and date."
-    notes: |
-      This is the pattern for hosted models, shown with Hugging Face's Inference Providers, which offer free monthly credits and route to many open models; the same message format works with OpenAI, Google's Gemini OpenAI-compatible endpoint, and local servers such as Ollama and vLLM. The key habits: read keys from environment variables or Colab secrets, set temperature explicitly, record the model name and date, and log token usage for cost estimation. Provider model names and free tiers change, so the lab notebook checks for a key and falls back to a local model if none is available.
-
-  - type: cards
-    title: "What LLMs are used for, and where they struggle"
-    cards:
-      - {icon: "fa:FaFileAlt", head: "Strong", text: "Drafting and rewriting, summarisation, translation, extraction into structured formats, coding help, tutoring, brainstorming."}
-      - {icon: "fa:FaTools", head: "Strong with tools", text: "Question answering over documents (RAG, week 12), calculations with code, workflows and agents."}
-      - {icon: "fa:FaExclamationTriangle", head: "Weak or risky", text: "Up-to-date or rare facts, exact citations, arithmetic without tools, high-stakes advice without review, counting characters."}
-    notes: |
-      Summarise the applications. LLMs are excellent at transforming text: drafting, rewriting, summarising, translating, extracting information into structured formats, explaining and writing code. With tools, such as retrieval, code execution and search, they can answer questions over private documents and perform calculations reliably. They are weak at recalling rare or recent facts, producing exact citations, arithmetic without tools, and anything that depends on character-level details, because they see tokens rather than letters. High-stakes uses need human review. This framing prepares for weeks 7, 11 and 12.
-
-  - type: flow
-    title: "A practical process for choosing a model"
-    steps:
-      - {label: "Define the task", sub: "Inputs, outputs, quality bar, languages, examples"}
-      - {label: "Constraints", sub: "Privacy, budget, latency, hardware, licence"}
-      - {label: "Shortlist", sub: "2–4 candidates: sizes and families that fit"}
-      - {label: "Evaluate on your data", sub: "Fixed prompts and settings; quality, cost, speed", highlight: true}
-      - {label: "Decide & monitor", sub: "Document choice; re-test when models change"}
-    callout: "The best model is the smallest, cheapest one that meets your quality bar on your own test set, within your privacy and licence constraints."
-    notes: |
-      This five-step process is what the project expects. Define the task precisely, including examples of good outputs. List constraints: data that cannot leave the organisation rules out some APIs; a mobile app needs a small model. Shortlist a few candidates across families and sizes. Evaluate them on your own test set with fixed prompts and settings, measuring quality, cost per request and latency. Decide, document the reasoning, and plan to re-test, because hosted models change and new models appear every month. Week 7 teaches how to build the evaluation set.
-
-  - type: bullets
-    title: "Responsible AI lens: large language models"
-    icon: "fa:FaBalanceScale"
-    bullets:
-      - "**Data provenance and copyright**: most developers disclose little about training data; lawsuits over training on copyrighted text continue."
-      - "**Bias**: models reproduce stereotypes and perform worse for some languages and dialects; test across the groups you serve."
-      - "**Hallucination and overconfidence**: fluent answers without guarantees (weeks 7 and 12)."
-      - "**Privacy**: models can memorise and regurgitate training data; do not send personal data to tools without approval."
-      - "**Openness and accountability**: open weights enable scrutiny and local control but also misuse; licences and model cards set obligations."
-    notes: |
-      The responsible-AI issues for LLMs combine what we have seen before with some specific points. Training-data transparency is poor across most of the industry, and legal cases about using copyrighted books and news continue. Bias shows up both as stereotyped content and as unequal quality across languages, connecting to tokenisation. Hallucination remains the central reliability risk. Memorisation can expose personal data from training sets. Open weights are a trade-off: they enable independent research, privacy-preserving local use and auditing, but also make safety measures easier to remove. The EU AI Act adds obligations for providers of general-purpose AI models.
-
-  - type: lab
-    title: "Lab 6: compare LLM families and query a model"
-    steps:
-      - "Compare **tokenisers** of GPT-2, BERT, T5 and Qwen on English, another language and code."
-      - "Give the same inputs to **BERT** (fill-mask), **Flan-T5** (text-to-text) and a **decoder LLM**; fill in a comparison table."
-      - "Implement **top-k** and **top-p** filtering; compare greedy, beam and sampled outputs."
-      - "Compute **perplexity** of normal, shuffled and foreign-language text."
-      - "Query a hosted model through an **API** (free tier) or a local runtime; log tokens and latency."
-      - "Run a small **reasoning model** with thinking on and off; compare answers, tokens and time."
-    runtime: "Google Colab (T4 GPU recommended) or CPU; API key optional"
-    deliverable: "Notebook with comparison tables, decoding implementation, perplexity results, API log and written answers"
-    notes: |
-      The lab implements the descriptor's tutorial for this week: use pretrained models, compare outputs across GPT, BERT and T5 style families, and query a GPT or LLaMA-family model through the Hugging Face API. We use Qwen, an openly licensed decoder family, because Llama downloads are gated behind a licence acceptance; students can optionally request Llama access. The decoding part asks them to implement top-k and top-p themselves. The API part works with a free Hugging Face token or falls back to a local model. The reasoning part makes test-time compute concrete.
-
-  - type: summary
+    - Reads the whole input in both directions
+    - 'Fills a mask: “The capital of Ireland is [MASK].”'
+    - Gives labels or embeddings, not free text
+    - 'Use: search and classification'
+  - head: T5 / Flan-T5 (enc–dec)
+    icon: fa:FaExchangeAlt
     points:
-      - "NLP evolved from **n-grams** → **embeddings** → **RNNs** → **transformer LLMs**, each fixing the last one's limits."
-      - "LLMs = transformers + huge curated data + compute (C ≈ 6ND) + post-training."
-      - "**Scaling laws** make loss predictable; Chinchilla: ~20 tokens/parameter; today's small models are trained far longer."
-      - "Context windows are large but not free; information can get lost in the middle."
-      - "Decoding: greedy/beam for exact tasks, temperature/top-p for open-ended ones; always report settings."
-      - "Families: **BERT** (encoder), **T5** (enc–dec), **GPT, LLaMA, Gemini, Claude, Qwen, DeepSeek, Mistral** (decoder)."
-      - "Proprietary vs **open-weight**; small, MoE, **reasoning** and multimodal models."
-      - "Choose with model cards, licences and **your own test set**, not leaderboards alone."
-    notes: |
-      Recap the eight points. Students should now be able to place any new model announcement on the map: which family, open or closed, how big, whether it reasons or is multimodal, and under what licence. Next week we move from choosing a model to using it well: prompt engineering, context engineering, structured outputs, and above all how to evaluate prompts and outputs systematically, which is also the core of MIMLO 4. Ask students to complete the lab and bring one prompt they use regularly.
+    - The encoder reads the source; the decoder writes new text
+    - Every task is text to text
+    - 'Example: “Translate English to German: How old are you?”'
+    - 'Use: translation and summaries'
+  - head: GPT-style (decoder)
+    icon: fa:FaCommentDots
+    points:
+    - Continues the prefix one token at a time
+    - Writes replies, stories or code
+    - Chat needs its template and post-training
+    - 'Example: Qwen2.5-Instruct in our lab'
+  notes: 'Say: This slide corresponds directly to the descriptor''s tutorial activity, comparing outputs across families. In
+    the lab students give the same inputs to all three. BERT, given the capital of Ireland is mask, ranks candidate words for
+    the blank. Flan-T5, an instruction-tuned T5, answers questions, translates or summarises when the task is stated in the
+    input. A decoder chat model answers in open-ended text. The teaching notes list the actual outputs we obtained when preparing
+    the lecture. The key conceptual point is that these are different tools, not better or worse versions of the same thing.
 
-  - type: resources
-    items:
-      - {kind: video, label: "Andrej Karpathy: Intro to Large Language Models", note: "1 h overview: pre-training, post-training, risks", url: "https://www.youtube.com/watch?v=zjkBMFhNj_g"}
-      - {kind: video, label: "Andrej Karpathy: Deep Dive into LLMs like ChatGPT", note: "3.5 h deep dive incl. reasoning models", url: "https://www.youtube.com/watch?v=7xTGNNLPyMI"}
-      - {kind: video, label: "Google Cloud Tech: Introduction to large language models", note: "Short overview", url: "https://www.youtube.com/watch?v=zizonToFXDs"}
-      - {kind: course, label: "Hugging Face LLM Course, chapters 1–2", note: "Pipelines, models and tokenizers", url: "https://huggingface.co/learn/llm-course/chapter1/1"}
-      - {kind: course, label: "Google ML Crash Course: Introduction to LLMs", note: "Concise official module", url: "https://developers.google.com/machine-learning/crash-course/llm"}
-      - {kind: book, label: "Tunstall et al. (2022) NLP with Transformers, ch. 1 and 5", note: "Descriptor 7.9 reading", url: "https://www.oreilly.com/library/view/natural-language-processing/9781098136789/"}
-      - {kind: book, label: "Ozdemir (2023) Quick Start Guide to LLMs, part I", note: "Descriptor 7.9 supplementary", url: "https://www.informit.com/store/quick-start-guide-to-large-language-models-strategies-9780138199197"}
-      - {kind: paper, label: "Hoffmann et al. (2022) Training Compute-Optimal LLMs (Chinchilla)", note: "Scaling laws", url: "https://arxiv.org/abs/2203.15556"}
-    notes: |
-      Karpathy's one-hour introduction is the best single overview; his longer deep dive covers reasoning models well. Google's short video is a gentle alternative. Chapters 1 and 2 of the Hugging Face LLM Course cover pipelines, models and tokenizers with runnable code. Tunstall and colleagues' chapters 1 and 5, and part one of Ozdemir's book, are the descriptor's readings. The Chinchilla paper is readable and important for the scaling discussion. All links were checked in September 2026.
+
+    Analogy: A highlighter, a translator and a writer can work on the same page but do different jobs.
+
+    Ask: In the lab, which model fills one blank, and which models write a new sequence?
+
+    Answer: BERT fills the blank; Flan-T5 and Qwen write new text.
+
+    Common mistake: Calling one family better than another. They are built for different jobs.'
+- type: table
+  title: Proprietary and open-weight families (examples, 2026)
+  header:
+  - Family
+  - Developer
+  - How you can use it
+  rows:
+  - - GPT / Claude / Gemini
+    - OpenAI / Anthropic / Google
+    - Through an API or app; weights not released (OpenAI’s separate gpt-oss models are open-weight)
+  - - Llama / Qwen
+    - Meta / Alibaba
+    - Download the weights under each release’s licence; many providers also host them
+  - - DeepSeek / Mistral
+    - DeepSeek / Mistral AI
+    - Many weights downloadable; the developers also run hosted APIs
+  - - Phi / OLMo
+    - Microsoft / Ai2
+    - Download the weights; OLMo also publishes its training data and code
+  callout: Read each release’s model card, licence and access terms.
+  notes: 'Say: This table maps the main families to their developers and access models; version numbers are deliberately omitted.
+    Proprietary families are used through the developer''s app or API. Open-weight families can be downloaded, but licences
+    differ: Qwen and OLMo mostly use the permissive Apache 2.0 licence; DeepSeek''s R1 used MIT; Llama uses a community licence
+    with conditions and requires accepting it on Hugging Face; Gemma has its own terms. The line between the two worlds is blurred:
+    Google has both Gemini and Gemma, OpenAI released gpt-oss, and Mistral offers both. Students must check the licence before
+    using a model in a project or product.
+
+
+    Analogy: A published recipe versus a restaurant meal: you can cook the recipe yourself, but only under the author''s terms.
+
+    Ask: Can you download GPT or Claude weights and run them locally?
+
+    Answer: No. Those are used through an API or app. OpenAI''s separate gpt-oss models are open-weight.
+
+    Common mistake: Assuming open weights mean unrestricted use. Each release has its own licence.'
+  callout: Read each release’s model card, licence and access terms.
+- type: cards
+  title: Newer categories that matter when choosing
+  cards:
+  - icon: fa:FaMobileAlt
+    head: Small language models
+    text: 'Up to a few billion parameters; can run on a laptop for narrow tasks. Example: Qwen2.5-0.5B in our lab.'
+  - icon: fa:FaNetworkWired
+    head: Mixture-of-experts
+    text: A router runs a few expert networks per token. Mixtral 8×7B uses about 13 B of its 47 B parameters per token, but
+      all must be stored.
+  - icon: fa:FaBrain
+    head: Reasoning models
+    text: Spend extra tokens thinking before the answer. Measure the accuracy gain against tokens and seconds.
+  - icon: fa:FaImages
+    head: Multimodal LLMs
+    text: 'Read images, audio or video as well as text. Example: ask about a chart in a photo, then check the answer.'
+  notes: 'Say: Beyond architecture and access, four categories guide real choices. Small language models have improved dramatically
+    through better data and distillation; a well-trained few-billion-parameter model now matches much larger models of a few
+    years ago on many tasks and can run locally, which helps privacy and cost. Mixture-of-experts models trade memory for speed,
+    as we saw last week. Reasoning models spend extra compute at inference time. Multimodal LLMs are covered in weeks 9 and
+    10. A single product may combine several: a small model for routing, a reasoning model for hard cases.
+
+
+    Analogy: A toolbox holds a pocket knife, a drill and a tape measure; you pick by the job.
+
+    Ask: Mixtral 8×7B uses about 13 B parameters per token. How many must be held in memory?
+
+    Answer: All of them, about 47 B.
+
+    Common mistake: Thinking a mixture-of-experts model needs only the memory of its active parameters.'
+- type: figure
+  title: Reasoning models and test-time compute
+  figure: reasoning
+  stack: true
+  notes: 'Say: {{REASONING_RESULT}} Extra thinking spends inference computation. Check final answers, completion, tokens and time. The stored Qwen3 experiment compares complete settings, including different sampling rules
+    and output budgets. Read correctness, finished replies, tokens and time together; do not infer a universal
+    gain from two problems. Its model card recommends sampling in thinking mode. Analogy: extra scratch-paper
+    work can help a capable solver, but can also run out of time. Ask: did extra tokens buy a correct
+    final answer in this recorded case? Common mistake: longer generated reasoning is neither guaranteed
+    correctness nor a faithful account of internal computation.'
+- type: quiz
+  question: Which statement about model families is correct?
+  options:
+  - BERT and GPT are both decoder-only chat models
+  - Open-weight models always come with their training data and code
+  - T5 frames every task as text-to-text with an encoder–decoder
+  - Reasoning models are faster because they skip the thinking step
+  answer: 2
+  notes: 'Say: Answer: C. T5, the Text-to-Text Transfer Transformer, is an encoder-decoder model that casts every task, from
+    translation to classification, as generating an output text from an input text. A is wrong: BERT is an encoder. B is wrong:
+    most open-weight releases publish weights only; fully open models such as OLMo that also release data and code are the exception.
+    D is the opposite of the truth: reasoning models spend more computation at inference time, so they are usually slower and
+    more expensive per answer.
+
+
+    Ask: How would you correct option A?
+
+    Answer: BERT is an encoder that reads the whole input; GPT is a decoder that generates text.
+
+    Common mistake: Choosing B. Most open-weight releases share weights only; OLMo, which also releases data and code, is the
+    exception.'
+- type: section
+  number: 5
+  title: Choosing and using models
+  question: How do you pick the right model and use it responsibly?
+  icon: fa:FaTasks
+  notes: 'Say: The last section is practical. We look at what a model card should tell you, what licences allow, how to read
+    benchmark tables critically, the trade-offs between calling an API and running a model locally, the code for both, typical
+    applications, a process for choosing a model, and the responsible-AI issues specific to LLMs. This section feeds directly
+    into the project, where groups must justify their model choice.
+
+
+    Analogy: A model card is a datasheet; your test set is the inspection before purchase.
+
+    Ask: What evidence would justify choosing a model for this particular task?
+
+    Answer: Results on your own test examples with fixed settings, plus checks of licence, cost and privacy.
+
+    Common mistake: Treating a leaderboard, a fluent answer or a longer reasoning trace as enough evidence of task quality.'
+- type: table
+  title: What a model card should tell you
+  header:
+  - Section
+  - Questions to ask
+  - Why it matters
+  rows:
+  - - Intended use
+    - What task and which users is it for?
+    - Uses outside this scope are untested
+  - - Training data
+    - Which sources, languages and cut-off date?
+    - Shows what the model may not know
+  - - Evaluation
+    - Which tests, settings and prompt format?
+    - Scores compare only under the same setup
+  - - Limitations
+    - Which failures and biases are known?
+    - Plan checks for them in your task
+  - - Licence
+    - Which uses are allowed?
+    - Commercial use or user limits may apply
+  - - Technical
+    - Size, memory, context length, chat template?
+    - Decides whether it runs on your hardware
+  notes: 'Say: Model cards, proposed by Mitchell and colleagues in 2019, are the standard documentation for models on Hugging
+    Face and elsewhere. Teach students to read them like a datasheet before using a model. Quality varies widely: some cards
+    are detailed, others are a few lines. Missing information, such as undisclosed training data, is itself important information
+    for a risk assessment. In the lab, students fill in this table for two models they use, and the project requires it for
+    every model the group relies on.
+
+
+    Analogy: A medicine leaflet lists intended use, side effects and who should not take it.
+
+    Ask: A model card says nothing about training data. What should you do?
+
+    Answer: Record the gap as a risk, and test for problems unknown data could cause, such as weak languages or missing recent
+    facts.
+
+    Common mistake: Treating a missing section as a sign that nothing is wrong.'
+- type: table
+  title: Licences at a glance (always read the actual text)
+  header:
+  - Type
+  - What it usually allows
+  - Check
+  rows:
+  - - MIT / Apache 2.0
+    - Broad use, including commercial
+    - Keep the licence text and notices
+  - - Community or custom (e.g. Llama)
+    - Use with conditions
+    - User limits, attribution and an acceptable-use policy
+  - - OpenRAIL (e.g. Stable Diffusion 1.5)
+    - Use except a listed set of harmful uses
+    - The use restrictions pass on to your users
+  - - Research-only
+    - Study and experiments
+    - No commercial use
+  - - Hosted API terms
+    - Access to a model, not its weights
+    - Prices, rate limits, data retention and training use
+  notes: 'Say: Licences decide what students and their future employers may legally do with a model. Permissive licences such
+    as Apache 2.0 and MIT allow commercial use and modification with attribution. Community licences such as Llama''s and Gemma''s
+    allow broad free use but impose acceptable-use policies and, for Llama, require a separate licence for services with more
+    than seven hundred million monthly users. OpenRAIL licences, used by Stable Diffusion 1.5, list prohibited uses. Research
+    licences forbid commercial use. API terms govern data retention and outputs. The table simplifies; the project requires
+    groups to quote the actual licence of each model they use.
+
+
+    Analogy: A tenancy agreement says what you may do in a flat; having the key does not permit everything.
+
+    Ask: May a start-up use a Llama model in a product with one million monthly users?
+
+    Answer: Usually yes, under the Llama community licence and its acceptable-use policy; the extra licence applies above 700
+    million monthly users. Read the exact release''s licence.
+
+    Common mistake: Treating downloadable as free for any use.'
+- type: table
+  title: 'Benchmarks: useful, but read them critically'
+  header:
+  - Test
+  - Measures
+  - Read with care
+  rows:
+  - - MMLU / MMLU-Pro
+    - Multiple-choice subject knowledge
+    - Questions may have leaked into training data
+  - - GSM8K / MATH
+    - School word problems; competition maths
+    - Top models score near the ceiling on GSM8K
+  - - HumanEval / SWE-bench
+    - Writing code; fixing real GitHub issues
+    - Scores depend on the test harness and tools
+  - - GPQA
+    - Graduate-level science questions
+    - 'Small test set: a few questions move the score'
+  - - Preference arenas
+    - Which answer people prefer
+    - Style and length can win votes
+  callout: Shortlist with benchmarks; decide using your own task.
+  notes: 'Say: Benchmark tables appear in every model release. Explain what the common ones measure and why caution is needed.
+    Contamination: benchmark questions leak into web-scraped training data, inflating scores. Saturation: when all top models
+    score above ninety percent, differences are noise. Prompt sensitivity: scores change with formatting and the number of examples.
+    Arena-style human preference rankings capture real prompts but favour longer, more confident answers. The practical rule,
+    developed next week, is to build a small evaluation set for your own task and test shortlisted models on it with fixed settings.
+
+
+    Analogy: A driving test checks some skills on one day; it does not show how someone drives in snow.
+
+    Ask: Two models score 92% and 93% on GSM8K. Is the second better for your task?
+
+    Answer: Not shown. GSM8K is near its ceiling, the gap may be noise, and your task may differ. Test both on your own examples.
+
+    Common mistake: Treating leaderboard rank as evidence of quality on your task.'
+- type: compare
+  title: Calling an API vs. running an open model yourself
+  columns:
+  - head: Hosted API
+    icon: fa:FaCloud
+    points:
+    - The provider runs the model on its hardware
+    - You pay per token; rate limits apply
+    - Check whether your text is stored or used for training
+    - 'Record the model version: hosted models change'
+  - head: Local / self-hosted
+    icon: fa:FaServer
+    points:
+    - You download the weights and run them
+    - 'You need the memory: a 7 B model at 16-bit needs about 14 GB'
+    - Data stays on your machine
+    - You decide when to update
+  notes: 'Say: This choice appears in every project. Hosted APIs give the best capability without hardware, but send data to
+    a provider and cost money per token; models may be updated or retired, which harms reproducibility. Running an open model
+    locally gives privacy, control and a fixed version, and makes fine-tuning possible, but requires hardware and operational
+    effort, and small local models are less capable. Many organisations use both. Week 11 covers deployment in detail; this
+    week students try both routes in the lab, using free options.
+
+
+    Analogy: Renting a car versus owning one: renting needs no garage; owning gives control, but you do the maintenance.
+
+    Ask: A hospital cannot send patient notes outside its network. Which route fits?
+
+    Answer: A self-hosted open model, or a provider contract that keeps the data inside an approved environment.
+
+    Common mistake: Assuming a hosted model never changes. Record the model version and re-test after updates.'
+- type: code
+  title: Using pretrained models with Hugging Face pipelines
+  code: "from transformers import pipeline\n\nfill = pipeline(\"fill-mask\", model=\"bert-base-uncased\"\
+    )\nfill(\"The capital of Ireland is [MASK].\")\n\nchat = pipeline(\"text-generation\",\n         \
+    \       model=\"Qwen/Qwen2.5-0.5B-Instruct\")\nmessages = [{\"role\": \"user\",\n             \"content\"\
+    : \"Explain tokens in one sentence.\"}]\nout = chat(messages, max_new_tokens=60, do_sample=False)\n\
+    print(out[0][\"generated_text\"][-1][\"content\"])\n"
+  bullets:
+  - A pipeline prepares input, runs a model and reads output.
+  - Chat messages use the model’s template.
+  - First use downloads the files.
+  notes: 'Say: The Hugging Face Transformers library is the standard way to use open models in Python. The pipeline function
+    hides the tokenizer, model and processing behind one call per task. For chat models we pass a list of messages with roles;
+    the pipeline formats them with the model''s chat template, the special tokens it was trained with, which we meet again in
+    fine-tuning in week 8. Use deterministic decoding when comparing models, as here. In the lab students run these exact cells,
+    and the notebook explains how to control device placement and generation settings.
+
+
+    Analogy: A pipeline is a vending machine: one button hides several steps.
+
+    Ask: Why does the chat example pass a list of messages rather than a plain string?
+
+    Answer: The pipeline applies the model''s chat template, which marks each role with the special tokens the model was trained
+    with.
+
+    Common mistake: Comparing models with sampling turned on. Use do_sample=False so that differences come from the models.'
+- type: code
+  title: Querying a hosted model through an API
+  code: "import os\nfrom huggingface_hub import InferenceClient\n\nclient = InferenceClient(api_key=os.environ[\"\
+    HF_TOKEN\"])\nresp = client.chat.completions.create(\n    model=\"Qwen/Qwen2.5-7B-Instruct\",\n  \
+    \  messages=[{\"role\": \"user\",\n               \"content\": \"Name three LLM families.\"}],\n \
+    \   max_tokens=100, temperature=0.2)\nprint(resp.choices[0].message.content)\nprint(resp.usage)  \
+    \ # prompt and completion tokens\n"
+  bullets:
+  - Send role/content messages and settings.
+  - Read keys from secrets.
+  - Log model, settings, date, tokens and time.
+  notes: 'Say: A hosted request sends messages and settings to a provider. The documented InferenceClient
+    chat-completion pattern is supported, but availability of a particular hosted model changes. Select
+    a currently supported model and handle missing usage or provider errors. The local route remains available.
+    Analogy: the API is a service counter with an agreed request form. Ask: which metadata would let someone
+    repeat this comparison later? Common mistake: a token does not guarantee free access to every model,
+    and an API-compatible shape does not guarantee identical provider features.'
+- type: cards
+  title: What LLMs are used for, and where they struggle
+  cards:
+  - icon: fa:FaFileAlt
+    head: Strong
+    text: 'Drafting, summarising, translating, extracting fields and writing code. Example: turn meeting notes into a summary,
+      then check it against the notes.'
+  - icon: fa:FaTools
+    head: Strong with tools
+    text: 'With search or a calculator the model can cite sources and compute exactly. Example: fetch today’s exchange rate,
+      then check what the tool returned.'
+  - icon: fa:FaExclamationTriangle
+    head: Weak or risky
+    text: 'Recent facts, exact citations, arithmetic without tools and high-stakes decisions. Example: a reference that looks
+      real but does not exist.'
+  notes: 'Say: Summarise the applications. LLMs are excellent at transforming text: drafting, rewriting, summarising, translating,
+    extracting information into structured formats, explaining and writing code. With tools, such as retrieval, code execution
+    and search, they can answer questions over private documents and perform calculations reliably. They are weak at recalling
+    rare or recent facts, producing exact citations, arithmetic without tools, and anything that depends on character-level
+    details, because they see tokens rather than letters. High-stakes uses need human review. This framing prepares for weeks
+    7, 11 and 12.
+
+
+    Analogy: A writer with a calculator and a library card produces more reliable work than one without.
+
+    Ask: Why might an LLM miscount the letter r in strawberry?
+
+    Answer: It reads tokens, not letters, so character-level details are hidden from it.
+
+    Common mistake: Trusting a citation because it looks real. Check every reference.'
+- type: flow
+  title: A practical process for choosing a model
+  steps:
+  - label: Task
+    sub: Define inputs and outputs
+  - label: Constraints
+    sub: Privacy, licence, cost, time
+  - label: Shortlist
+    sub: Two to four candidates
+  - label: Evaluate
+    sub: Same examples and settings
+    highlight: true
+  - label: Monitor
+    sub: Record changes and re-test
+  callout: Choose a model that meets measured requirements.
+  notes: 'Say: This five-step process is what the project expects. Define the task precisely, including examples of good outputs.
+    List constraints: data that cannot leave the organisation rules out some APIs; a mobile app needs a small model. Shortlist
+    a few candidates across families and sizes. Evaluate them on your own test set with fixed prompts and settings, measuring
+    quality, cost per request and latency. Decide, document the reasoning, and plan to re-test, because hosted models change
+    and new models appear every month. Week 7 teaches how to build the evaluation set.
+
+
+    Analogy: Hiring: define the job, shortlist candidates, give them the same tasks, then keep reviewing.
+
+    Ask: Why must every shortlisted model use the same examples and settings?
+
+    Answer: Otherwise a difference could come from the test rather than the model.
+
+    Common mistake: Choosing a model once and never re-testing. Hosted models change and new ones appear.'
+- type: bullets
+  title: 'Responsible AI lens: large language models'
+  icon: fa:FaBalanceScale
+  bullets:
+  - Check data rights and licences.
+  - Test languages, groups and factual claims.
+  - Protect confidential inputs.
+  - Record versions, errors and review responsibility.
+  notes: 'Say: The responsible-AI issues for LLMs combine what we have seen before with some specific points. Training-data
+    transparency is poor across most of the industry, and legal cases about using copyrighted books and news continue. Bias
+    shows up both as stereotyped content and as unequal quality across languages, connecting to tokenisation. Hallucination
+    remains the central reliability risk. Memorisation can expose personal data from training sets. Open weights are a trade-off:
+    they enable independent research, privacy-preserving local use and auditing, but also make safety measures easier to remove.
+    The EU AI Act adds obligations for providers of general-purpose AI models.
+
+
+    Ask: Name one risk that open weights reduce and one they increase.
+
+    Answer: They allow independent audits and private local use; they also make safety measures easier to remove.
+
+    Common mistake: Assuming quality is the same in every language. Test the languages your users speak.'
+- type: lab
+  title: 'Lab 6: compare LLM families and query a model'
+  steps:
+  - Count token pieces.
+  - Compare BERT, T5 and decoder tasks.
+  - Implement decoding filters.
+  - Measure predictability within each model.
+  - Log local or hosted calls.
+  - Check thinking-mode answers and costs.
+  runtime: Colab T4 GPU or CPU; API key optional. About 8 min on a laptop CPU after downloads
+  deliverable: Notebook with comparison tables, decoding implementation, perplexity results, API log and
+    written answers
+  notes: 'Say: The lab implements the descriptor''s tutorial for this week: use pretrained models, compare outputs across GPT,
+    BERT and T5 style families, and query a GPT or LLaMA-family model through the Hugging Face API. We use Qwen, an openly licensed
+    decoder family, because Llama downloads are gated behind a licence acceptance; students can optionally request Llama access.
+    The decoding part asks them to implement top-k and top-p themselves. The API part works with a free Hugging Face token or
+    falls back to a local model. The reasoning part makes test-time compute concrete.
+
+
+    Ask: Which part of the lab needs a key, and what happens without one?
+
+    Answer: The hosted API calls in Part 5. Without a key only the local row appears.
+
+    Common mistake: Comparing CPU results with the lecture''s GPU numbers. The CPU path uses Flan-T5-small and shorter token
+    budgets.'
+- type: summary
+  points:
+  - Counts became learned contextual vectors.
+  - Pre-training learns; post-training shapes behaviour.
+  - Context is limited; select useful material.
+  - Decoding changes token choice, not weights.
+  - Architecture and access are separate choices.
+  - Cards, licences and task tests support model selection.
+  notes: 'Say: Recap the six points. Students should now be able to place any new model announcement on the map: which family,
+    open or closed, how big, whether it reasons or is multimodal, and under what licence. Next week we move from choosing a
+    model to using it well: prompt engineering, context engineering, structured outputs, and above all how to evaluate prompts
+    and outputs systematically, which is also the core of MIMLO 4. Ask students to complete the lab and bring one prompt they
+    use regularly.
+
+
+    Ask: A new model is announced tomorrow. Which questions place it on the map?
+
+    Answer: Which family, open or closed, how big, whether it reasons or is multimodal, and under what licence.
+
+    Common mistake: Choosing by brand name instead of measured task results.'
+- type: resources
+  items:
+  - kind: video
+    label: 'Andrej Karpathy: Intro to Large Language Models'
+    note: '1 h overview: pre-training, post-training, risks'
+    url: https://www.youtube.com/watch?v=zjkBMFhNj_g
+  - kind: video
+    label: 'Andrej Karpathy: Deep Dive into LLMs like ChatGPT'
+    note: 3.5 h deep dive including reasoning models
+    url: https://www.youtube.com/watch?v=7xTGNNLPyMI
+  - kind: video
+    label: 'Google Cloud Tech: Introduction to large language models'
+    note: Short overview
+    url: https://www.youtube.com/watch?v=zizonToFXDs
+  - kind: course
+    label: Hugging Face LLM Course, chapters 1–2
+    note: Pipelines, models and tokenizers
+    url: https://huggingface.co/learn/llm-course/chapter1/1
+  - kind: course
+    label: 'Google ML Crash Course: Introduction to LLMs'
+    note: Concise official module
+    url: https://developers.google.com/machine-learning/crash-course/llm
+  - kind: book
+    label: Tunstall et al. (2022) NLP with Transformers, ch. 1 and 5
+    note: Descriptor 7.9 reading
+    url: https://www.oreilly.com/library/view/natural-language-processing/9781098136789/
+  - kind: book
+    label: Ozdemir (2023) Quick Start Guide to LLMs, part I
+    note: Descriptor 7.9 supplementary
+    url: https://www.informit.com/store/quick-start-guide-to-large-language-models-strategies-9780138199197
+  - kind: paper
+    label: Hoffmann et al. (2022) Training Compute-Optimal LLMs (Chinchilla)
+    note: Scaling laws
+    url: https://arxiv.org/abs/2203.15556
+  notes: 'Say: Karpathy''s one-hour introduction is the best single overview; his longer deep dive covers reasoning models well.
+    Google''s short video is a gentle alternative. Chapters 1 and 2 of the Hugging Face LLM Course cover pipelines, models and
+    tokenizers with runnable code. Tunstall and colleagues'' chapters 1 and 5, and part one of Ozdemir''s book, are the descriptor''s
+    readings. The Chinchilla paper is readable and important for the scaling discussion. All links were checked in September
+    2026.
+
+
+    Ask: Which resource would you start with if you have one hour?
+
+    Answer: Karpathy''s one-hour introduction.
+
+    Common mistake: Watching videos without running code. The Hugging Face course chapters pair best with the lab.'

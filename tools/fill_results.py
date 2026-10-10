@@ -4,11 +4,12 @@ Reads curriculum/assets/week_XX/metrics.json (asset scripts) and results.json (i
 GENAI_RESULTS_PATH) and writes curriculum/assets/week_XX/fill.json. tools/build_week.py substitutes the
 values at build time and refuses to build while any placeholder is unfilled.
 
-Usage: .venv/Scripts/python.exe tools/fill_results.py --weeks 4,6,7,8,9,10,11,12
+Usage: .venv/Scripts/python.exe tools/fill_results.py --weeks 1-12
 """
 from __future__ import annotations
 
 import argparse
+import datetime as dt
 import json
 import math
 import re
@@ -69,6 +70,47 @@ def last_number(text: str):
     return float(nums[-1]) if nums else None
 
 
+# ---------------------------------------------------------------- week 1
+def week1() -> dict:
+    """Format the recorded full lab run (results.json written with GENAI_RESULTS_PATH)."""
+    r = load(1, "results.json")
+    if r.get("run_mode") != "full":
+        raise ValueError("week 1 notes quote a full run; a smoke run must not replace it")
+    when = dt.datetime.fromisoformat(r["measured_utc"])
+    mat = {T: next(p for t, p in rows if t.strip() == "mat") for T, rows in r["top_tokens"].items()}
+    others = [t.strip() for t, _ in r["top_tokens"]["1.0"] if t.strip() != "mat"]
+    nll = {w: f"{v:.2f} nats (perplexity {math.exp(v):.1f})" for w, v in r["name_nll"].items()}
+    return {
+        "W01_RUN": (f"a full run on {when.day} {when:%B %Y} on {hardware(r['device'])} "
+                    f"with {short(r['model_id'])} ({r['model_params'] / 1e6:.0f} million parameters)"),
+        "W01_NAMES": f"{r['names']:,}",
+        "W01_NLL_ANNA": nll["anna"], "W01_NLL_EMMA": nll["emma"], "W01_NLL_XQZZ": nll["xqzz"],
+        "W01_UNIFORM": f"{r['dataset_nll']['uniform']:.2f}", "W01_UNIGRAM": f"{r['dataset_nll']['unigram']:.2f}",
+        "W01_BIGRAM": f"{r['dataset_nll']['bigram']:.2f}",
+        "W01_ACC_LR": f"{r['accuracy']['logistic_regression']:.3f}", "W01_ACC_QDA": f"{r['accuracy']['qda']:.3f}",
+        "W01_TOKENS": (f"{r['token_counts']['English']} tokens in English, {r['token_counts']['Irish']} in Irish "
+                       f"and {r['token_counts']['Hindi']} in Hindi"),
+        "W01_MAT": f"{mat['0.5']:.2f} at T = 0.5, {mat['1.0']:.2f} at T = 1.0 and {mat['1.5']:.2f} at T = 1.5",
+        "W01_RUNNERS_UP": ", ".join(f"*{t}*" for t in others[:-1]) + f" and *{others[-1]}*",
+        # Quoted inside double quotes in the notes, so inner quotes become single quotes.
+        "W01_FICTION_PLAIN": clean(r["fictional_paper"]["plain"], 150).replace('"', "'"),
+        "W01_FICTION_HONEST": clean(r["fictional_paper"]["honesty_instruction"], 150).replace('"', "'"),
+    }
+
+
+# ---------------------------------------------------------------- week 2
+def week2() -> dict:
+    """Format the archived asset run (make_week_02.py): 2-D model, β models and the anomaly test."""
+    m = load(2, "metrics.json")
+    b = m["beta"]
+    out = {"W02_AUC": f"{m['anomaly_auc']:.4f}", "W02_AUC_PCT": pct(m["anomaly_auc"], 2),
+           "W02_REC2": f"{m['vae2_final']['rec']:.0f}", "W02_KL2": f"{m['vae2_final']['kl']:.1f}"}
+    for key, name in [("0.1", "B01"), ("1.0", "B1"), ("4.0", "B4")]:
+        out[f"W02_REC_{name}"] = f"{b[key]['rec']:.1f}"
+        out[f"W02_KL_{name}"] = f"{b[key]['kl']:.1f}"
+    return out
+
+
 # ---------------------------------------------------------------- week 4
 def week4() -> dict:
     m = load(4, "metrics.json")
@@ -79,10 +121,55 @@ def week4() -> dict:
                        ("sdturbo_1steps", "SD-Turbo, 1 step"), ("sdturbo_4steps", "SD-Turbo, 4 steps")]:
         if key in t:
             parts.append(f"{label}: {t[key]:.0f} s")
-    return {"UNET_PARAMS": f"{d['unet_params']:,}", "MNIST_EPOCHS": str(d["epochs"]), "MNIST_DEVICE": hardware(d["device"]),
+    secs = {f"W04_{name}": f"{t[key]:.0f}" for name, key in
+            [("T2", "sd15_2steps"), ("T5", "sd15_5steps"), ("T10", "sd15_10steps"), ("T25", "sd15_25steps"),
+             ("G1", "sd15_25steps_g1.0"), ("G75", "sd15_25steps_g7.5"), ("TURBO1", "sdturbo_1steps"),
+             ("TURBO4", "sdturbo_4steps")]}
+    return {**secs, "UNET_PARAMS": f"{d['unet_params']:,}", "MNIST_EPOCHS": str(d["epochs"]), "MNIST_DEVICE": hardware(d["device"]),
             "MNIST_MIN": f"{d['train_minutes']:.0f}",
             "SD_DEVICE": ("a laptop CPU, float32" if str(m.get("sd_device", "cpu")).startswith("cpu") else hardware(m["sd_device"])),
             "SD_TIMES": "; ".join(parts) + " per 512 × 512 image"}
+
+
+# ---------------------------------------------------------------- week 5
+def week5() -> dict:
+    """Format the archived full experiment; a smoke run must never replace it."""
+    m = load(5, "metrics.json")
+    bert = load(5, "bert_attention.json")
+    gpt2 = load(5, "gpt2_attention.json")
+    c = m["chargpt"]
+    samples = m["chargpt_samples"]
+    # A later full run of the lab notebook itself (GENAI_RESULTS_PATH export), shown beside the archived experiment.
+    lab = load(5, "results.json")
+    assert lab["mode"] == "full", "only a full lab run may be quoted"
+    lc = lab["chargpt"]
+    run_day = dt.datetime.fromisoformat(lab["recorded_at_utc"])
+    return {
+        "w05_lab_device": hardware(lab["device"], lab.get("device_name")),
+        "w05_lab_date": f"{run_day.day} {run_day:%B %Y}",
+        "w05_lab_val": f"{lc['final_validation_loss']:.2f}",
+        "w05_lab_ppl": f"{lc['perplexity']:.2f}",
+        "w05_lab_minutes": f"{lc['seconds_including_validation'] / 60:.1f}",
+        "w05_lab_batches": str(lc["validation_batches_per_check"]),
+        "w05_val_start": f"{c['val_loss_start']:.2f}",
+        "w05_val_end": f"{c['val_loss_end']:.2f}",
+        "w05_ppl_end": f"{c['val_ppl_end']:.2f}",
+        "w05_steps": f"{c['steps']:,}",
+        "w05_minutes": f"{c['minutes']:.1f}",
+        "w05_params": f"{m['chargpt_params']:,}",
+        "w05_vocab": str(c["vocab"]),
+        "w05_device": hardware(c["device"]),
+        # The BERT head is chosen with the lab's TODO 5 rule over all 144 heads (make_week_05_bert.py).
+        "w05_attention_weight": f"{bert['it_to_animal']:.3f}",
+        "w05_bert_layer": str(bert["layer"]),
+        "w05_bert_head": str(bert["head"]),
+        "w05_bert_median": f"{bert['median_it_to_animal']:.2f}",
+        "w05_bert_above_half": str(bert["heads_above_half"]),
+        # Smallest weight that the third GPT-2 head (layer 10, head 7) puts on the first token, rows 2 onwards.
+        "w05_gpt2_first_min": f"{min(row[0] for row in gpt2['heads'][2]['weights'][1:]):.2f}",
+        "w05_sample_start": clean(samples["0"], 180),
+        "w05_sample_end": clean(samples[str(c["steps"])], 240),
+    }
 
 
 # ---------------------------------------------------------------- week 6
@@ -123,7 +210,8 @@ def week6() -> dict:
     notes = (f"Qwen3-0.6B on {dev}, three sampled runs per mode (the model card's settings; greedy decoding makes thinking mode loop). "
              + "; ".join(long_parts) + ".\n\n"
              + table(["Problem", "Thinking", "Correct", "Mean tokens", "Mean seconds", "Out of budget"], rows))
-    return {"TOKENIZER_NOTES": tok_table, "NEXT_TOKEN_NOTES": "; ".join(nt_parts) + ".", "FAMILY_OUTPUTS": fam_md,
+    nt_text = "; ".join(nt_parts) + "."
+    return {"TOKENIZER_NOTES": tok_table, "NEXT_TOKEN_NOTES": nt_text[0].upper() + nt_text[1:], "FAMILY_OUTPUTS": fam_md,
             "REASONING_NOTES": notes,
             "REASONING_RESULT": "Measured (Qwen3-0.6B, 3 runs per mode, thinking off vs on): " + "; ".join(short_parts) + "."}
 
@@ -132,30 +220,38 @@ def week6() -> dict:
 def week7() -> dict:
     r = load(7, "results.json")
     cl = {s["prompt"]: s for s in r["classification"]}
-    few = ", ".join(f"{k} {pct(v['accuracy'])}" for k, v in cl.items())
+    few = ", ".join(f"{k} {pct(v['accuracy'], 1)}" for k, v in cl.items())
     inv = ", ".join(f"{k} {v.get('invalid', 0)}" for k, v in cl.items())
     n = next(iter(cl.values()))["n"]
+    # figures/week_07.py draws the invalid-reply panel only when some reply was not a recognised label.
+    invalid_note = ("Every reply in this run contained a recognised label, so the chart shows only accuracy and the "
+                    "differences come from wrong labels, not from format errors."
+                    if not any(v.get("invalid", 0) for v in cl.values()) else
+                    f"The right-hand chart counts unparsed or ambiguous replies ({inv}); examples often fix this "
+                    "format problem.")
     rs = {s["prompt"]: s for s in r["reasoning"]}
-    cot = "; ".join(f"{k} {pct(v['accuracy'])} ({v['avg_tokens']:.0f} tokens)" for k, v in rs.items())
+    cot = "; ".join(f"{k} {pct(v['accuracy'], 1)} ({v['avg_tokens']:.0f} tokens)" for k, v in rs.items())
     ex = r["extraction"]
     inj = {k: r["injection"][k] for k in sorted(r["injection"], key=lambda k: k != "naive")}  # naive first, then defended
     n_inj = 3  # injected documents in the lab's DOCS list
     j = r["judge"]
-    rows = [[k, v["n"], pct(v["accuracy"]), v.get("invalid", "–"), f"{v['avg_tokens']:.0f}"] for k, v in cl.items()]
-    rows += [[k, v["n"], pct(v["accuracy"]), "–", f"{v['avg_tokens']:.0f}"] for k, v in rs.items()]
+    # One decimal, as on the slides: 29/40 is 72.5%, which a whole-number table would print as 72% (and 35/40 as 88%).
+    rows = [[k, v["n"], pct(v["accuracy"], 1), v.get("invalid", "–"), f"{v['avg_tokens']:.0f}"] for k, v in cl.items()]
+    rows += [[k, v["n"], pct(v["accuracy"], 1), "–", f"{v['avg_tokens']:.0f}"] for k, v in rs.items()]
     res_table = (table(["Prompt", "n", "Accuracy", "Invalid", "Avg output tokens"], rows) + "\n\n"
-                 + f"Structured extraction: {pct(ex['valid_rate'])} valid JSON, {pct(ex['correct_rate'])} with all fields correct. "
-                 + "Prompt injection success rate: " + ", ".join(f"{k} prompt {pct(v)}" for k, v in inj.items()) + ". "
+                 + f"Structured extraction: {pct(ex['valid_rate'], 1)} valid JSON, {pct(ex['correct_rate'], 1)} with all fields correct. "
+                 + "Keyword-flag rate in injected replies: " + ", ".join(f"{k} prompt {pct(v)}" for k, v in inj.items()) + ". "
                  + f"LLM-as-judge: consistent across both orders {pct(j['consistent_rate'])}, correct in both orders {pct(j['correct_both_rate'])}.")
     return {"MODEL": short(r["model"]),
             "FEWSHOT_SUMMARY": f"Accuracy on {n} messages: {few}.",
             "FEWSHOT_NOTES": f"**Measured ({short(r['model'])}, {n} messages, temperature 0):** accuracy {few}; invalid labels {inv}.",
-            "COT_SUMMARY": cot + ".",
+            "FEWSHOT_INVALID": invalid_note,
+            "COT_SUMMARY": cot[:1].upper() + cot[1:] + ".",  # a bullet: "Direct 50.0% (3 tokens); ..."
             "COT_NOTES": f"**Measured ({short(r['model'])}):** {cot}. Report accuracy together with token cost.",
-            "EXTRACTION_NOTES": f"{pct(ex['valid_rate'])} of outputs were valid JSON after at most one retry, but only {pct(ex['correct_rate'])} had every field correct.",
-            "INJECTION_SUMMARY": f"Measured attack success on {n_inj} injected documents: " + ", ".join(f"{k} prompt {pct(v)} ({round(v * n_inj)} of {n_inj})" for k, v in inj.items()) + ".",
-            "INJECTION_NOTES": "the hidden instruction succeeded in " + " and ".join(f"{round(v * n_inj)} of {n_inj} injected documents with the {k} prompt" for k, v in inj.items()) + ".",
-            "JUDGE_NOTES": f"In the lab, the small judge gave the same verdict in both orders for {pct(j['consistent_rate'])} of pairs and was correct in both orders for {pct(j['correct_both_rate'])}.",
+            "EXTRACTION_NOTES": f"{pct(ex['valid_rate'], 1)} of outputs were valid JSON after at most one retry, but only {pct(ex['correct_rate'], 1)} had every field correct.",
+            "INJECTION_SUMMARY": f"Measured keyword flags on {n_inj} injected-document replies: " + ", ".join(f"{k} prompt {pct(v)} ({round(v * n_inj)} of {n_inj})" for k, v in inj.items()) + ".",
+            "INJECTION_NOTES": "the keyword heuristic flagged " + " and ".join(f"{round(v * n_inj)} of {n_inj} injected-document replies with the {k} prompt" for k, v in inj.items()) + ". Inspect the actual replies before claiming instruction-following.",
+            "JUDGE_NOTES": f"In the lab, the small judge gave valid A/B verdicts selecting the same underlying answer in both orders for {pct(j['consistent_rate'])} of pairs and was correct in both orders for {pct(j['correct_both_rate'])}.",
             "RESULTS_TABLE": res_table}
 
 
@@ -163,24 +259,40 @@ def week7() -> dict:
 def week8() -> dict:
     r = load(8, "results.json")
     comp = {c["model"]: c for c in r["comparison"]}
-    acc = ", ".join(f"{k} {pct(v['accuracy'])}" for k, v in comp.items())
+    acc = ", ".join(f"{k} {pct(v['accuracy'], 1)}" for k, v in comp.items())
     lora = f"LoRA (r = 16, attention projections) trains {r['trainable']:,} of {r['total']:,} parameters ({100 * r['trainable'] / r['total']:.2f}%)."
-    train = f"{r['n_train']} training examples, 1 epoch, {r['train_minutes']:.0f} min on {hardware(r['device'], r.get('gpu'))}"
-    rows = [[k, pct(v["accuracy"]), f"{v['invalid']:.1%} ({round(v['invalid'] * r['n_test'])} of {r['n_test']})"] for k, v in comp.items()]
+    train = f"{r['n_train']:,} training examples, 1 epoch, {r['train_minutes']:.0f} min on {hardware(r['device'], r.get('gpu'))}"
+    rows = [[k, pct(v["accuracy"], 1), f"{v['invalid']:.1%} ({round(v['invalid'] * r['n_test'])} of {r['n_test']})"] for k, v in comp.items()]
+    ft = comp["LoRA fine-tuned"]
+    n_bad = round(ft["invalid"] * r["n_test"])
+    run = (f"The recorded run fine-tuned {short(r['model'])} on {r['n_train']:,} examples for one epoch in about "
+           f"{r['train_minutes']:.0f} minutes on {hardware(r['device'], r.get('gpu'))}. "
+           + (f"The LoRA model still gave {n_bad} unparsed {'reply' if n_bad == 1 else 'replies'} ({pct(ft['invalid'], 1)})."
+              if n_bad else "Every LoRA reply contained a recognised intent label."))
     return {"LORA_PARAMS": lora,
+            "RUN_NOTE": run,
             "RESULTS_SUMMARY": f"Accuracy on {r['n_test']} held-out messages: {acc}.",
-            "ADAPTER_SIZE": f"measured {r['adapter_mb']:.1f} MB vs {r['model_mb']:,.0f} MB.",
+            "ADAPTER_SIZE": f"Saved adapter: {r['adapter_mb']:.1f} MB; base weights: {r['model_mb']:,.0f} MB.",
             "RESULTS_NOTES": table(["Model", "Accuracy", "Invalid answers"], rows)
             + f"\n\nTest set: {r['n_test']} held-out Banking77 messages (10 intents). Training: {train}. Adapter: {r['adapter_mb']:.1f} MB."}
 
 
 # ---------------------------------------------------------------- week 9
+def template_name(key: str) -> str:
+    """Readable name for a stored CLIP prompt template: "label only: '{}'" becomes the class name alone, "cat"."""
+    if "{}" not in key:
+        return key
+    shown = key.split(":", 1)[1].strip() if key.startswith("label only") else key
+    text = shown.strip("'").format("cat")
+    return f"class name only (“{text}”)" if key.startswith("label only") else f"“{text}”"
+
+
 def week9() -> dict:
     r = load(9, "results.json")
     n_batch = round(math.exp(r["loss_random"]))
     loss = (f"batch of N = {n_batch} image–caption pairs: correct pairs {r['loss_correct']:.2f}; captions shuffled {r['loss_shuffled']:.2f}; "
-            f"random model ln N = {r['loss_random']:.2f}.")
-    zs = "; ".join(f"{k} {pct(v, 1)}" for k, v in r["zero_shot"].items())
+            f"uniform-choice baseline ln N = {r['loss_random']:.2f}.")
+    zs = "; ".join(f"{template_name(k)} {pct(v, 1)}" for k, v in r["zero_shot"].items())
     prec = ", ".join(f"@{k} {v:.2f}" for k, v in r["precision_at_k"].items())
     ex = r["asr_examples"][0] if r.get("asr_examples") else None
     wer = f"Whisper on LibriSpeech sample clips: mean WER {pct(r['mean_wer'], 1)}."
@@ -188,8 +300,8 @@ def week9() -> dict:
         hyp = ex.get("whisper", ex.get("hypothesis", ""))
         wer += f" Example: “{clean(ex['reference'], 48)}” → “{clean(hyp, 48)}”"
         wer += " (“mister” vs “Mr.” counts as an error unless text is normalised)." if "mister" in ex["reference"] and "Mr." in hyp else "."
-    rows = [[k, pct(v, 1)] for k, v in r["zero_shot"].items()]
-    return {"LOSS_NOTES": loss[0].upper() + loss[1:], "ZS_NOTES": f"Zero-shot accuracy on {r['n_images']} CIFAR-10 test images: {zs}.",
+    rows = [[template_name(k), pct(v, 1)] for k, v in r["zero_shot"].items()]
+    return {"LOSS_NOTES": loss[0].upper() + loss[1:], "ZS_NOTES": f"Zero-shot accuracy on {r['n_images']:,} CIFAR-10 test images: {zs}.",
             "PREC_NOTES": f"Text→image retrieval precision {prec} (fraction of top-k images of the queried class).", "WER_NOTES": wer,
             "RESULTS_NOTES": table(["Prompt template", "Zero-shot accuracy"], rows)
             + f"\n\nRetrieval precision {prec}. Contrastive loss: {loss} {wer}"}
@@ -210,7 +322,7 @@ def week10() -> dict:
     t2i = r["t2i"]
     own = [x["CLIP score (own prompt)"] for x in t2i]
     other = [x["CLIP score (other prompts, mean)"] for x in t2i]
-    t2i_note = f"CLIP score against its own prompt {min(own):.1f}–{max(own):.1f} vs other prompts {min(other):.1f}–{max(other):.1f}: every image matches its own prompt best." \
+    t2i_note = f"CLIP score against its own prompt {min(own):.1f}–{max(own):.1f} vs other prompts {min(other):.1f}–{max(other):.1f}: each own-prompt score exceeded the mean score for the other prompts in this run." \
         if all(a > b for a, b in zip(own, other)) else f"CLIP score own prompt {min(own):.1f}–{max(own):.1f} vs other prompts {min(other):.1f}–{max(other):.1f}."
     sp = r["speech"]
     mean_wer = sum(s["WER"] for s in sp) / len(sp)
@@ -242,7 +354,8 @@ def week11() -> dict:
     base = next(iter(q))
     quant_note = "Perplexity: " + "; ".join(f"{k.replace(',', '')} {v['perplexity']:.1f} (≈ {v['approx. size (MB)']:,} MB)" for k, v in q.items()) + "."
     b = r["batch"]
-    batch_note = (f"{b[0]['tokens/s']:.0f} tokens/s at batch 1 → {b[-1]['tokens/s']:.0f} tokens/s at batch {b[-1]['batch size']} "
+    # One decimal, as on the chart's bar labels, so the printed values give the printed ratio (86.2 / 13.2 = 6.5).
+    batch_note = (f"{b[0]['tokens/s']:.1f} tokens/s at batch 1 → {b[-1]['tokens/s']:.1f} tokens/s at batch {b[-1]['batch size']} "
                   f"({b[-1]['tokens/s'] / b[0]['tokens/s']:.1f}× on {hw}).")
     mon = r["monitor"]
     mon_note = (f"{mon['requests']} requests: {mon['blocked']} blocked (injection), {mon['redacted']} with personal data redacted; "
@@ -263,7 +376,7 @@ def week12() -> dict:
     ret = r["retrieval"]
     r1 = ", ".join(f"{k.split(' (')[0]} {v['recall@1']:.2f}" for k, v in ret.items())
     mrr = ", ".join(f"{k.split(' (')[0]} {v['MRR']:.2f}" for k, v in ret.items())
-    ret_note = f"recall@1: {r1}. MRR: {mrr}."
+    ret_note = f"Gold-document hit@1 (the lab's recall@1): {r1}. MRR: {mrr}."  # the chart's name for the metric
     s = r["summary"]
     no, rag = s["no retrieval"], s["RAG (hybrid + re-rank, top 3)"]
     abst = rag.get("abstains when answer missing")
@@ -291,7 +404,7 @@ def week12() -> dict:
             "RESULTS_NOTES": notes}
 
 
-WEEKS = {4: week4, 6: week6, 7: week7, 8: week8, 9: week9, 10: week10, 11: week11, 12: week12}
+WEEKS = {1: week1, 2: week2, 4: week4, 5: week5, 6: week6, 7: week7, 8: week8, 9: week9, 10: week10, 11: week11, 12: week12}
 
 
 def main() -> int:
@@ -301,7 +414,7 @@ def main() -> int:
     status = 0
     for w in sorted({w for part in args.weeks.split(",") for w in (range(1, 13) if part == "all" else range(int(part.split("-")[0]), int(part.split("-")[-1]) + 1))}):
         if w not in WEEKS:
-            continue  # weeks 1, 2, 3 and 5 have no result placeholders
+            continue  # week 3 has no result placeholders
         try:
             values = WEEKS[w]()
         except FileNotFoundError as e:

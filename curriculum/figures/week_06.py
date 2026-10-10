@@ -1,11 +1,26 @@
 """Week 6 figures: NLP evolution, scaling laws, LLM family tree, reasoning models, plus REAL results."""
+import json
 import shutil
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
 
-from _style import ACCENT, INK, MUTED, PRIMARY, SERIES, TEAL, TEXT, TINT, arrow, box, save
+from _style import ACCENT, INK, MUTED, PRIMARY, SERIES, TEAL, TEXT, TINT, arrow, box, save as save_raster, role_box, role_legend, routed_arrow, save_editable_scene
+
+
+def save(fig, path, transparent=False):
+    if not transparent and all(not ax.axison and not ax.images for ax in fig.axes):
+        save_editable_scene(fig, path)
+    else:
+        save_raster(fig, path, transparent=transparent)
+
+
+def canvas(height=5):
+    fig, ax = plt.subplots(figsize=(13, height))
+    fig.subplots_adjust(left=.02, right=.98, bottom=.03, top=.97)  # no empty side margins on slides
+    ax.axis("off"); ax.set_xlim(0,13); ax.set_ylim(0,height)
+    return fig, ax
 
 ASSETS = Path(__file__).resolve().parents[1] / "assets" / "week_06"
 ORANGE = "#FFF1E6"
@@ -28,105 +43,139 @@ def cover(path):
 
 
 def nlp_timeline(path):
-    ev = [(1990, "Rules &\nstatistics", "grammars, n-gram\nlanguage models"),
-          (2013, "word2vec", "words as\nvectors"),
-          (2014, "Seq2seq\nRNN/LSTM", "+ attention (2015)\nfor translation"),
-          (2017, "Transformer", "attention only;\nparallel training"),
-          (2018, "BERT / GPT", "pre-train, then\nfine-tune"),
-          (2020, "GPT-3", "scale → few-shot\nprompting"),
-          (2022, "ChatGPT", "instruction +\npreference tuning"),
-          (2024, "Open, multimodal,\nreasoning", "open weights; test-\ntime compute; agents")]
-    fig, ax = plt.subplots(figsize=(13, 4.6))
-    ax.axis("off")
-    xs = np.arange(len(ev))
-    ax.set_xlim(-0.6, len(ev) - 0.4)
-    ax.set_ylim(-2.6, 2.6)
-    ax.plot([-0.4, len(ev) - 0.6], [0, 0], color=MUTED, lw=2.5)
-    for i, (yr, h, sub) in enumerate(ev):
-        up = i % 2 == 0
-        s = 1 if up else -1
-        c = SERIES[i % len(SERIES)]
-        ax.scatter([i], [0], s=150, color=c, zorder=3)
-        ax.plot([i, i], [0, s * 0.5], color=c, lw=2)
-        ax.text(i, s * 0.58, h, ha="center", va="bottom" if up else "top", fontsize=13.5, fontweight="bold", color=INK)
-        ax.text(i, s * 1.55, sub, ha="center", va="bottom" if up else "top", fontsize=11.5, color=MUTED)
-        ax.text(i, -s * 0.15, "1990s–2000s" if yr == 1990 else str(yr), ha="center", va="top" if up else "bottom", fontsize=11, color=TEXT)
-    save(fig, path)
+    fig, ax = canvas(5.4)
+    events=[("1990s", "Count phrases", "n-grams"), ("2013", "Word vectors", "word2vec"),
+            ("2014–15", "Sequence memory", "RNN + attention"), ("2017", "Context attention", "Transformer"),
+            ("2018", "Pre-train", "BERT / GPT"), ("2020", "Prompt examples", "GPT-3"),
+            ("2022", "Assistant tuning", "ChatGPT"), ("2024+", "More input types", "Reasoning; tools")]
+    for i,(year,title,example) in enumerate(events):
+        row=i//4; col=i%4; x=.2+col*3.25; y=3.2-row*1.9
+        role_box(ax,x,y,2.85,1.15,title+"\n"+example,"model",size=17)
+        ax.text(x+1.425,y+1.28,year,ha="center",fontsize=17,color=INK,fontweight="bold")
+        if col<3:routed_arrow(ax,[(x+2.85,y+.575),(x+3.25,y+.575)])
+    routed_arrow(ax,[(11.95,3.2),(11.95,3.05),(.1,3.05),(.1,1.875),(.2,1.875)])
+    ax.text(.2,5.15,"A sequence of ideas; earlier methods still have useful jobs",fontsize=19,color=INK,fontweight="bold")
+    role_legend(ax,.12,size=16)
+    save(fig,path)
 
 
 def scaling(path):
     # Chinchilla parametric fit (Hoffmann et al., 2022, approach 3)
     E, A, B, a, b = 1.69, 406.4, 410.7, 0.34, 0.28
     C = np.logspace(19, 25, 200)
-    fig, axes = plt.subplots(1, 2, figsize=(10.5, 4.2))
+    fig, axes = plt.subplots(1, 2, figsize=(13, 4.1))
     for N, c in zip([1e8, 1e9, 1e10, 7e10], SERIES):
         D = C / (6 * N)
         L = E + A / N ** a + B / D ** b
-        axes[0].semilogx(C, L, color=c, lw=2.2, label=f"{N / 1e9:g} B parameters" if N >= 1e9 else f"{N / 1e6:g} M parameters")
+        axes[0].semilogx(C, L, color=c, lw=2.2, label=f"{N / 1e9:g} B params" if N >= 1e9 else f"{N / 1e6:g} M params")
     Nopt = np.logspace(8, 12, 200)
     Lopt = [min(E + A / n ** a + B / (c_ / (6 * n)) ** b for n in Nopt) for c_ in C]
-    axes[0].semilogx(C, Lopt, color=INK, lw=3, ls="--", label="best size for each budget")
+    axes[0].semilogx(C, Lopt, color=INK, lw=3, ls="--", label="best size per budget")
     axes[0].set_ylim(1.8, 4.2)
-    axes[0].set_xlabel("training compute C (FLOPs) ≈ 6 N D")
-    axes[0].set_ylabel("predicted loss")
-    axes[0].set_title("Loss falls smoothly with compute", loc="left")
-    axes[0].legend(fontsize=11.5)
+    axes[0].set_xlabel("training compute C (FLOPs) ≈ 6 N D", fontsize=18)
+    axes[0].set_ylabel("predicted loss", fontsize=18)
+    axes[0].set_title("Loss falls smoothly with compute", loc="left", fontsize=20)
+    # The upper right is empty once each curve has flattened, so the legend sits there.
+    axes[0].legend(fontsize=18, loc="upper right", handlelength=1.4, labelspacing=0.3)
     b_ = axes[1]
     Ns = np.logspace(8, 12, 50)
-    b_.loglog(Ns, 20 * Ns, color=TEAL, lw=2.5, label="≈ 20 tokens per parameter (Chinchilla)")
+    b_.loglog(Ns, 20 * Ns, color=TEAL, lw=2.5, label="≈20 tokens/parameter (fit)")
     pts = [("GPT-3 (2020)", 175e9, 300e9), ("Chinchilla (2022)", 70e9, 1.4e12), ("Llama 3 8B (2024)", 8e9, 15e12)]
     for (n_, x, y), c in zip(pts, (ACCENT, PRIMARY, "#A21CAF")):
         b_.scatter([x], [y], s=90, color=c, zorder=3)
-        b_.text(x * 1.3, y * 0.75, n_, fontsize=12.5, color=c)
-    b_.set_xlabel("parameters N")
-    b_.set_ylabel("training tokens D")
-    b_.set_title("How much data per parameter?", loc="left")
-    b_.legend(fontsize=11.5, loc="lower right")
+        b_.annotate(n_,(x,y),xytext={"GPT-3 (2020)": (0, -30), "Chinchilla (2022)": (-12, 10)}.get(n_, (-12, 0)),textcoords="offset points",fontsize=18,color=c,ha={"GPT-3 (2020)": "center", "Chinchilla (2022)": "right"}.get(n_, "right"),va="center" if "Llama" in n_ else "baseline")
+    b_.set_xlabel("parameters N", fontsize=18)
+    b_.set_ylabel("training tokens D", fontsize=18)
+    b_.set_title("How much data per parameter?", loc="left", fontsize=20)
+    b_.legend(fontsize=18, loc="lower right", handlelength=1.4)
     for ax_ in axes:
-        ax_.tick_params(labelsize=11.5)
+        ax_.tick_params(labelsize=18)
+    save(fig, path)
+
+
+def tokenizers(path):
+    """Measured token counts (make_week_06.py) for the same three texts, redrawn at slide size."""
+    tk = json.loads((ASSETS / "metrics.json").read_text(encoding="utf-8"))["tokenizers"]
+    names = list(tk["counts"])
+    texts = list(tk["counts"][names[0]])
+    fig, ax = plt.subplots(figsize=(13, 3.9))
+    fig.subplots_adjust(left=.07, right=.7, bottom=.15, top=.87)
+    width = .8 / len(names)
+    for i, (name, c) in enumerate(zip(names, SERIES)):
+        xs = np.arange(len(texts)) + (i - (len(names) - 1) / 2) * width
+        values = [tk["counts"][name][t] for t in texts]
+        ax.bar(xs, values, width * .92, color=c, label=f"{name} (vocabulary {tk['vocab'][name]:,})")
+        for x, v in zip(xs, values):
+            ax.text(x, v + .8, str(v), ha="center", va="bottom", fontsize=17, color=INK)
+    ax.set_xticks(range(len(texts)), texts, fontsize=19)
+    ax.set_ylabel("tokens", fontsize=19)
+    ax.tick_params(axis="y", labelsize=17)
+    ax.set_ylim(0, max(max(v.values()) for v in tk["counts"].values()) * 1.18)
+    ax.grid(axis="x", visible=False)
+    ax.set_title("Measured tokens for the same three texts", loc="left", fontsize=20)
+    ax.legend(fontsize=17, loc="upper left", bbox_to_anchor=(1.01, 1.0), frameon=False, title="Tokeniser",
+              title_fontsize=17, alignment="left")
+    save(fig, path)
+
+
+def next_token(path):
+    """Measured top-8 next tokens from the base model (make_week_06.py), with readable labels."""
+    m = json.loads((ASSETS / "metrics.json").read_text(encoding="utf-8"))
+
+    def label(token):
+        text = token[1:-1] if token[:1] == token[-1:] == "'" else token
+        if text == "\\n":
+            return "(new line)"
+        return "·" + text[1:] if text.startswith(" ") else text
+
+    fig, axes = plt.subplots(1, 2, figsize=(13, 4.0))
+    fig.subplots_adjust(left=.13, right=.98, bottom=.26, top=.88, wspace=.42)
+    for ax, (prompt, top) in zip(axes, m["next_token"].items()):
+        names = [label(t) for t, _ in top][::-1]
+        probs = [v for _, v in top][::-1]
+        ax.barh(names, probs, color=[ACCENT if n.strip("·_") == "" else PRIMARY for n in names], height=.7)
+        ax.set_title(f"“{prompt} …”", loc="left", fontsize=19)
+        ax.tick_params(axis="y", labelsize=17)
+        ax.tick_params(axis="x", labelsize=17)
+        ax.set_xlabel("probability", fontsize=17)
+        ax.grid(axis="y", visible=False)
+    fig.text(.02, .03, f"{m['next_token_model']}. · marks a leading space; orange bars are blank markers such as “____”.",
+             fontsize=17, color=TEXT)
     save(fig, path)
 
 
 def family_tree(path):
-    fig, ax = plt.subplots(figsize=(13, 5.6))
-    ax.axis("off")
-    ax.set_xlim(0, 13)
-    ax.set_ylim(0, 5.6)
-    box(ax, 5.5, 4.8, 2.0, 0.6, "Transformer (2017)", fc=TINT, size=12)
-    cols = [(0.3, "Encoder-only", PRIMARY, ["BERT (2018)", "RoBERTa, DeBERTa", "ModernBERT (2024)", "embedding models"]),
-            (4.6, "Encoder–decoder", TEAL, ["T5 / Flan-T5", "BART, mT5", "Whisper (speech)"]),
-            (8.6, "Decoder-only", ACCENT, ["GPT family (OpenAI)", "Claude (Anthropic), Gemini (Google)", "Llama (Meta), Gemma (Google)",
-                                           "Qwen (Alibaba), DeepSeek, Mistral", "Phi (Microsoft), OLMo (AI2, fully open)", "gpt-oss (OpenAI, open-weight)"])]
-    for x, name, c, items in cols:
-        box(ax, x, 3.7, 3.9 if x > 8 else 3.6, 0.6, name, fc="white", ec=c, color=c, size=13)
-        ax.annotate("", xy=(x + 1.8, 4.3), xytext=(6.5, 4.8), arrowprops=dict(arrowstyle="-|>", color=MUTED))
-        for k, it in enumerate(items):
-            ax.text(x + 0.1, 3.35 - k * 0.5, "• " + it, fontsize=11.5, color=TEXT, va="top")
-    ax.text(0.3, 0.2, "Families shown with typical examples; versions change monthly. Proprietary and open-weight members exist in several families.", fontsize=11, color=MUTED)
-    save(fig, path)
+    fig, ax = canvas(5.4)
+    role_box(ax,5.1,4.35,2.8,.7,"Transformer","model",size=20)
+    columns=[(.2,"Encoder-only",["Read all supplied text","BERT / ModernBERT","Masks; labels; embeddings"]),
+             (4.5,"Encoder–decoder",["Read source; generate output","T5 / Flan-T5: text → text","Whisper: audio → transcript"]),
+             (8.8,"Decoder-only",["Continue a token prefix","Qwen / Llama / Gemma","GPT-style text generation"])]
+    for x,title,items in columns:
+        role_box(ax,x,3.1,4,.8,title,"model",size=20)
+        routed_arrow(ax,[(6.5,4.35),(6.5,4.15),(x+2,4.15),(x+2,3.9)])
+        for j,item in enumerate(items):ax.text(x+.1,2.7-j*.52,item,fontsize=16,color=TEXT)
+    ax.text(.2,.8,"Architecture and access are separate. Proprietary internals may be undisclosed.",fontsize=16,color=MUTED)
+    role_legend(ax,.15,size=16)
+    save(fig,path)
 
 
 def reasoning(path):
-    fig, ax = plt.subplots(figsize=(10.5, 3.6))
-    ax.axis("off")
-    ax.set_xlim(0, 10.5)
-    ax.set_ylim(0, 3.6)
-    ax.text(0.1, 3.35, "Standard chat model", fontsize=14, fontweight="bold", color=INK, va="center")
-    box(ax, 0.1, 2.2, 1.8, 0.75, "prompt", fc=TINT, size=13)
-    box(ax, 2.5, 2.2, 1.8, 0.75, "answer", fc="white", size=13)
-    arrow(ax, 1.9, 2.575, 2.5, 2.575)
-    ax.text(5.0, 2.6, "Trained with reinforcement learning on problems\nwith checkable answers (week 8). More thinking\n"
-            "tokens → often better on maths and code,\nbut slower and costlier.", fontsize=12.5, color=TEXT, va="center")
-    ax.text(0.1, 1.45, "Reasoning model (test-time compute)", fontsize=14, fontweight="bold", color=INK, va="center")
-    box(ax, 0.1, 0.35, 1.8, 0.75, "prompt", fc=TINT, size=13)
-    box(ax, 2.5, 0.35, 5.0, 0.75, "long hidden reasoning: plan, try, check, revise …", fc=ORANGE, ec=ACCENT, size=13)
-    box(ax, 8.1, 0.35, 1.8, 0.75, "answer", fc="white", size=13)
-    arrow(ax, 1.9, 0.725, 2.5, 0.725)
-    arrow(ax, 7.5, 0.725, 8.1, 0.725)
-    save(fig, path)
+    fig, ax = canvas(4.8)
+    ax.text(.2,4.45,"Extra inference computation is a budget to evaluate",fontsize=19,color=INK,fontweight="bold")
+    role_box(ax,.2,3.0,2.3,.85,"Prompt","data",size=21)
+    role_box(ax,4.0,3.0,4.2,.85,"Generate answer","model",size=21)
+    role_box(ax,9.7,3.0,2.8,.85,"Check answer","output",size=21)
+    routed_arrow(ax,[(2.5,3.425),(4,3.425)]); routed_arrow(ax,[(8.2,3.425),(9.7,3.425)])
+    role_box(ax,.2,1.45,2.3,1.1,"Prompt","data",size=21)
+    role_box(ax,4,1.45,4.2,1.1,"Extra computation\n(budgeted thinking)","model",size=20)
+    role_box(ax,9.7,1.45,2.8,1.1,"Check final\nanswer","output",size=20)
+    routed_arrow(ax,[(2.5,2.0),(4,2.0)]); routed_arrow(ax,[(8.2,2.0),(9.7,2.0)])
+    ax.text(.2,.8,"Check correctness, completion, tokens and seconds; more thinking can still fail.",fontsize=16,color=TEXT)
+    role_legend(ax,.15,size=16)
+    save(fig,path)
 
 
 FIGURES = {
     "cover": cover, "nlp_timeline": nlp_timeline, "scaling": scaling, "family_tree": family_tree, "reasoning": reasoning,
-    **{n: asset(n) for n in ["tokenizers", "next_token"]},
+    "tokenizers": tokenizers, "next_token": next_token,
 }

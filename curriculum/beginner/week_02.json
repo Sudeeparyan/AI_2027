@@ -1,9 +1,24 @@
 {
   "week": 2,
   "prerequisites": [
-    {"term": "Image tensor", "meaning": "A numerical array holding a batch of images, their channels, rows, and columns.", "check": "How many pixels are in one 28 by 28 grayscale digit?"},
-    {"term": "Mean and standard deviation", "meaning": "The centre of a distribution and a measure of its spread.", "check": "Does a larger standard deviation make samples more concentrated or more spread out?"},
-    {"term": "Training loss", "meaning": "A number used to measure mistakes and guide weight updates.", "check": "Which changes model weights: an optimiser step or displaying an image?"}
+    {
+      "term": "Image tensor",
+      "meaning": "A numerical array holding a batch of images, their channels, rows, and columns.",
+      "check": "How many pixels are in one 28 by 28 grayscale digit?",
+      "answer": "784, because 28 × 28 = 784."
+    },
+    {
+      "term": "Mean and standard deviation",
+      "meaning": "The centre of a distribution and a measure of its spread.",
+      "check": "Does a larger standard deviation make samples more concentrated or more spread out?",
+      "answer": "More spread out. A larger standard deviation means a wider spread."
+    },
+    {
+      "term": "Training loss",
+      "meaning": "A number used to measure mistakes and guide weight updates.",
+      "check": "Which changes model weights: an optimiser step or displaying an image?",
+      "answer": "The optimiser step. Displaying an image changes nothing."
+    }
   ],
   "diagrams": [
     {
@@ -11,15 +26,51 @@
       "title": "Train a VAE to rebuild digits",
       "subtitle": "Learn a distribution of short codes and a decoder that turns codes into pixels.",
       "steps": [
-        {"title": "Read digit images", "detail": "Use 28 by 28 grayscale pixels in [0, 1].", "code": "train_dl"},
-        {"title": "Encode distribution", "detail": "Predict a mean and log-variance for each latent dimension.", "code": "VAE.encode"},
-        {"title": "Sample a code", "detail": "Combine predicted distribution parameters with fresh random noise.", "code": "VAE.reparameterise"},
-        {"title": "Decode pixels", "detail": "Turn the sampled code into 784 pixel logits.", "code": "VAE.dec"},
-        {"title": "Measure two costs", "detail": "Compare pixels and penalise deviation from the Gaussian prior.", "code": "vae_loss"},
-        {"title": "Update weights", "detail": "Backpropagation and Adam adjust the encoder and decoder.", "code": "train"}
+        {
+          "title": "Read digits",
+          "detail": "28 × 28 pixels, values 0–1.",
+          "code": "train_dl",
+          "role": "data"
+        },
+        {
+          "title": "Encode distribution",
+          "detail": "Predict mean and log variance.",
+          "code": "VAE.encode",
+          "role": "model"
+        },
+        {
+          "title": "Sample a code",
+          "detail": "Centre + spread × noise.",
+          "code": "reparameterise",
+          "role": "model"
+        },
+        {
+          "title": "Decode pixels",
+          "detail": "Predict 784 pixel logits.",
+          "code": "VAE.dec",
+          "role": "model"
+        },
+        {
+          "title": "Measure two costs",
+          "detail": "Reconstruction + β × KL.",
+          "code": "vae_loss",
+          "role": "loss"
+        },
+        {
+          "title": "Update weights",
+          "detail": "Adam changes both networks.",
+          "code": "train",
+          "role": "model"
+        }
       ],
-      "arrows": ["image batch x", "mu and logvar", "latent code z", "logits + x + mu + logvar", "reconstruction + beta × KL"],
-      "feedback": "Updated encoder and decoder weights are used on the next training batch.",
+      "arrows": [
+        "image batch x",
+        "mu and logvar",
+        "latent code z",
+        "784 pixel logits",
+        "batch loss"
+      ],
+      "feedback": "Use updated encoder and decoder on the next batch.",
       "feedback_to": 1,
       "trace": [
         "A batch of 128 digits has shape [128, 1, 28, 28]; flattening gives 784 values per image.",
@@ -28,81 +79,387 @@
         "vae_loss adds reconstruction cost and a KL cost that compares the encoder distribution with N(0, I).",
         "After training, torch.randn draws codes from the prior and VAE.decode displays new pixel probabilities."
       ],
-      "explanation": "A variational autoencoder, or VAE, learns an encoder and a decoder. The encoder compresses an image into parameters of a distribution over a shorter hidden representation called a latent code. It produces two branches, mu and logvar, which describe the centre and spread; both branches meet at the sampling step. The decoder receives a sampled code and predicts pixel logits. Training compares those predictions with the original pixels using a reconstruction cost. A second cost, KL divergence, encourages each encoder distribution to stay close to the chosen prior, here a standard Gaussian. The beta setting controls that pressure. Backpropagation computes how both costs depend on the weights, and Adam updates the encoder and decoder. To generate a new digit after training, bypass the encoder: draw a code from the prior and decode it. The lab displays sigmoid pixel probabilities rather than sampling individual binary pixels.",
+      "explanation": "A variational autoencoder, or VAE, learns an encoder and a decoder. The encoder compresses an image into parameters of a distribution over a shorter hidden representation called a latent code. It produces two branches, mu and logvar, which describe the centre and spread; both branches meet at the sampling step. The decoder receives a sampled code and predicts pixel logits. Training compares those predictions with the original pixels using a reconstruction cost. A second cost, KL divergence, encourages each encoder distribution to stay close to the chosen prior, here a standard Gaussian. The β setting controls that pressure. Backpropagation computes how both costs depend on the weights, and Adam updates the encoder and decoder. To generate a new digit after training, bypass the encoder: draw a code from the prior and decode it. The lab displays sigmoid pixel probabilities rather than sampling individual binary pixels.",
       "check_question": "Does generating from a fresh prior code require an input digit?",
-      "check_answer": "No. The decoder can receive a code sampled from N(0, I) directly; reconstruction uses an input image and the encoder."
+      "check_answer": "No. The decoder can receive a code sampled from N(0, I) directly; reconstruction uses an input image and the encoder.",
+      "layout": "linear",
+      "feedback_from": 5,
+      "branches": [
+        {
+          "from": 0,
+          "to": 4,
+          "label": "image x: the pixel targets",
+          "lane": "bottom"
+        },
+        {
+          "from": 1,
+          "to": 4,
+          "label": "mu, logvar for the KL cost",
+          "lane": "bottom"
+        }
+      ]
     },
     {
       "id": "mechanism",
       "insert_before_title": "The reparameterisation trick",
       "title": "Sample a latent code while training",
-      "subtitle": "Separate random noise from the quantities the encoder learns.",
+      "subtitle": "Random noise enters from outside; the encoder learns only the centre and spread.",
       "steps": [
-        {"title": "Encode one image", "detail": "A shared hidden vector feeds mean and log-variance branches.", "code": "VAE.encode"},
-        {"title": "Describe the Gaussian", "detail": "Keep mu; convert logvar into a positive standard deviation.", "code": "VAE.reparameterise"},
-        {"title": "Draw noise", "detail": "Use standard-normal noise matching the latent tensor shape.", "code": "VAE.reparameterise"},
-        {"title": "Shift and scale", "detail": "Combine mu, standard deviation, and noise into code z.", "code": "VAE.reparameterise"},
-        {"title": "Decode and compare", "detail": "Reconstruction gradients pass through z to both encoder branches.", "code": "VAE.forward / vae_loss"}
+        {
+          "title": "Encode one image",
+          "detail": "Get mu and logvar.",
+          "code": "VAE.encode",
+          "role": "model"
+        },
+        {
+          "title": "Find the spread",
+          "detail": "std = exp(0.5 × logvar).",
+          "code": "reparameterise",
+          "role": "model"
+        },
+        {
+          "title": "Draw noise",
+          "detail": "ε from N(0, 1); nothing learned.",
+          "code": "torch.randn_like",
+          "role": "data"
+        },
+        {
+          "title": "Shift and scale",
+          "detail": "z = mu + std × ε.",
+          "code": "reparameterise",
+          "role": "model"
+        },
+        {
+          "title": "Decode and compare",
+          "detail": "Pixel cost depends on z.",
+          "code": "VAE.forward",
+          "role": "loss"
+        }
       ],
-      "arrows": ["mu and logvar", "mu and standard deviation", "mu + standard deviation + epsilon", "sampled latent code z"],
-      "feedback": "The reconstruction gradient updates both encoder heads through the shifted and scaled code.",
+      "arrows": [
+        "mu and logvar",
+        null,
+        "noise ε",
+        "sampled code z"
+      ],
+      "feedback": "Gradients flow back through z to mu and std; the noise needs none.",
       "feedback_to": 0,
       "trace": [
         "For one latent coordinate, suppose mu = 1 and logvar = 0, so standard deviation = 1.",
-        "With a drawn noise value epsilon = -0.5, the sampled code coordinate is 0.5.",
-        "With the same encoder output and epsilon = 0.5, that coordinate would instead be 1.5.",
+        "With a drawn noise value ε = −0.5, the sampled code coordinate is 0.5.",
+        "With the same encoder output and ε = 0.5, that coordinate would instead be 1.5.",
         "The decoder uses the sampled code; the KL term uses mu and logvar directly."
       ],
       "explanation": "The encoder predicts a distribution, so repeated passes can produce different latent codes for the same image. Reparameterisation expresses this sampling as three understandable parts: learn a centre, learn a spread, and draw independent noise. In this lab, logvar means the logarithm of the variance, not the variance itself. Converting it to a standard deviation uses exp(0.5 × logvar), which is always positive. Standard-normal noise has centre zero and standard deviation one. Scaling that noise by the predicted standard deviation and adding mu gives a sample from the encoder's Gaussian. The random draw does not depend on learned weights, while the shift and scale do. This allows the reconstruction cost to supply gradients to both encoder branches through the sampled code. The KL cost takes a separate path directly from mu and logvar. Neither path requires the latent dimensions to have predefined digit labels.",
       "check_question": "If logvar is zero, is the standard deviation zero or one?",
-      "check_answer": "One: exp(0.5 × 0) = 1. A zero log-variance still describes a distribution with spread."
+      "check_answer": "One: exp(0.5 × 0) = 1. A zero log-variance still describes a distribution with spread.",
+      "layout": "linear",
+      "feedback_from": 4,
+      "branches": [
+        {
+          "from": 1,
+          "to": 3,
+          "label": "mu and std (learned)",
+          "lane": "bottom"
+        }
+      ]
     },
     {
       "id": "lab",
       "title": "Build, train, then explore the VAE",
       "subtitle": "Use reconstruction, generation, and anomaly tests for different questions.",
       "steps": [
-        {"title": "Prepare digits", "detail": "Load MNIST batches and inspect pixel values and shapes.", "code": "train_dl / x_test"},
-        {"title": "Build and check", "detail": "Inspect encoder outputs, sampled codes, and initial loss terms.", "code": "VAE / vae_loss"},
-        {"title": "Train and monitor", "detail": "Track reconstruction and KL separately across epochs.", "code": "train / hist"},
-        {"title": "Explore codes", "detail": "Plot two-dimensional means; decode grids, paths, and prior samples.", "code": "vae2 / vae16 / interpolate"},
-        {"title": "Compare beta", "detail": "Decode fixed prior codes after different KL-weight training runs.", "code": "results / z_fixed"},
-        {"title": "Check unusual inputs", "detail": "Compare digit and clothing reconstruction-error distributions.", "code": "recon_error / auc"}
+        {
+          "title": "Prepare digits",
+          "detail": "Inspect shapes and intensities.",
+          "code": "train_dl",
+          "role": "data"
+        },
+        {
+          "title": "Build and check",
+          "detail": "Check tensors and initial loss.",
+          "code": "VAE / vae_loss",
+          "role": "model"
+        },
+        {
+          "title": "Train and monitor",
+          "detail": "Record reconstruction and KL.",
+          "code": "train / hist",
+          "role": "model"
+        },
+        {
+          "title": "Explore codes",
+          "detail": "Plot means; decode paths.",
+          "code": "vae2 / vae16",
+          "role": "output"
+        },
+        {
+          "title": "Compare β",
+          "detail": "Keep sample codes fixed.",
+          "code": "results / z_fixed",
+          "role": "output"
+        },
+        {
+          "title": "Test unusual inputs",
+          "detail": "Rank clothing against digits.",
+          "code": "recon_error / auc",
+          "role": "output"
+        }
       ],
-      "arrows": ["normalised images", "checked model and loss", "trained encoder and decoder", "samples and latent paths", "trained model for evaluation"],
+      "arrows": [
+        "normalised image batches",
+        "checked model and loss",
+        "trained VAE",
+        "samples and latent paths",
+        "per-image anomaly scores"
+      ],
       "trace": [
         "Start with the eight-image check: logits has shape [8, 784] and both costs are finite.",
         "Train vae2 to plot latent means; digit labels colour the plot without entering VAE training.",
         "Train vae16, interpolate between encoded means of a 1 and a 7, and compare with pixel blending.",
-        "Decode z_fixed for each beta run to reduce randomness in the sample comparison.",
+        "Decode z_fixed for each β run to reduce randomness in the sample comparison.",
         "Use per-image reconstruction costs for digits and clothing; judge separation without assuming a perfect detector."
       ],
-      "explanation": "The lab separates several uses of the same model. First, a quick forward pass checks that the model produces the expected tensor shapes and sensible initial losses. Training then changes weights while recording reconstruction and KL costs separately. The two-dimensional VAE makes a map possible: each plotted point is an encoder mean for one test image. Labels only colour this map; the ordinary VAE learns without them. A sixteen-dimensional model supports interpolation and new generation. Interpolation joins two encoded means, while prior sampling chooses new codes without an input image. The beta experiment trains separate models and decodes the same fixed codes, allowing a more useful visual comparison. Finally, reconstruction error becomes an anomaly score: clothing may be harder to rebuild than digits. A high score suggests an unusual input relative to this training set; it is not a guarantee of a real-world defect.",
-      "check_question": "Why does the beta experiment reuse z_fixed instead of drawing new codes for each row?",
-      "check_answer": "Keeping the input codes fixed helps distinguish changes in the trained decoder from changes caused by random input codes."
+      "explanation": "The lab separates several uses of the same model. First, a quick forward pass checks that the model produces the expected tensor shapes and sensible initial losses. Training then changes weights while recording reconstruction and KL costs separately. The two-dimensional VAE makes a map possible: each plotted point is an encoder mean for one test image. Labels only colour this map; the ordinary VAE learns without them. A sixteen-dimensional model supports interpolation and new generation. Interpolation joins two encoded means, while prior sampling chooses new codes without an input image. The β experiment trains separate models and decodes the same fixed codes, allowing a more useful visual comparison. Finally, reconstruction error becomes an anomaly score: clothing may be harder to rebuild than digits. A high score suggests an unusual input relative to this training set; it is not a guarantee of a real-world defect.",
+      "check_question": "Why does the β experiment reuse z_fixed instead of drawing new codes for each row?",
+      "check_answer": "Keeping the input codes fixed helps distinguish changes in the trained decoder from changes caused by random input codes.",
+      "layout": "linear"
+    },
+    {
+      "id": "training",
+      "title": "How the two VAE costs train the model",
+      "insert_before_title": "The evidence lower bound (ELBO)",
+      "subtitle": "One image supplies both a reconstruction target and a code-distribution penalty.",
+      "steps": [
+        {
+          "title": "Read image batch",
+          "detail": "Known pixels are targets.",
+          "code": "train_dl",
+          "role": "data"
+        },
+        {
+          "title": "Encode and sample",
+          "detail": "Predict mu/logvar; draw z.",
+          "code": "VAE.forward",
+          "role": "model"
+        },
+        {
+          "title": "Predict pixels",
+          "detail": "Decode to raw scores.",
+          "code": "VAE.dec",
+          "role": "model"
+        },
+        {
+          "title": "Add both costs",
+          "detail": "Pixel cost + β × KL.",
+          "code": "vae_loss",
+          "role": "loss"
+        },
+        {
+          "title": "Update networks",
+          "detail": "Backpropagate; step Adam.",
+          "code": "train",
+          "role": "model"
+        }
+      ],
+      "arrows": [
+        "known x",
+        "sampled code z",
+        "784 pixel logits",
+        "batch-averaged loss"
+      ],
+      "explanation": "The original image is the reconstruction target. The decoder produces raw pixel scores, called logits. Binary cross-entropy compares them with the known pixels. The other cost, KL, compares the encoder's code distribution with the chosen prior N(0, I). The vae_loss function adds reconstruction cost and β times KL, then averages over the batch. Backpropagation calculates how each learned number affected the loss. The optimiser changes both encoder and decoder weights. The code is sampled with the reparameterisation trick so reconstruction feedback can reach the encoder.",
+      "trace": [
+        "Suppose one image has reconstruction cost 120 and KL cost 3.",
+        "At β = 1, its combined cost is 123. At β = 4, it is 132.",
+        "For a batch, sum image costs and divide by the number of images.",
+        "The larger β increases pressure to match the prior, rather than changing the pixel target."
+      ],
+      "check_question": "Does a low total loss by itself show why the model improved?",
+      "check_answer": "No. Track reconstruction and KL separately to see which cost changed.",
+      "feedback": "Repeat with updated weights and the next batch.",
+      "feedback_to": 1,
+      "layout": "linear",
+      "feedback_from": 4,
+      "branches": [
+        {
+          "from": 0,
+          "to": 3,
+          "label": "known pixels x (target)",
+          "lane": "bottom"
+        },
+        {
+          "from": 1,
+          "to": 3,
+          "label": "mu, logvar (KL cost)",
+          "lane": "bottom"
+        }
+      ]
+    },
+    {
+      "id": "inference",
+      "title": "Generate a digit without an input image",
+      "insert_before_title": "Decoding a grid of latent points: a map of the learned space",
+      "subtitle": "Random codes come from the prior. Only the trained decoder is needed.",
+      "steps": [
+        {
+          "title": "Set code size",
+          "detail": "Match the trained latent size.",
+          "code": "vae16",
+          "role": "model"
+        },
+        {
+          "title": "Draw random code",
+          "detail": "Sample the standard prior.",
+          "code": "torch.randn",
+          "role": "data"
+        },
+        {
+          "title": "Run decoder",
+          "detail": "Fixed weights predict logits.",
+          "code": "VAE.dec",
+          "role": "model"
+        },
+        {
+          "title": "Display pixels",
+          "detail": "Sigmoid; reshape to 28 × 28.",
+          "code": "VAE.decode",
+          "role": "output"
+        },
+        {
+          "title": "Inspect samples",
+          "detail": "Check realism and variety.",
+          "code": "z_fixed",
+          "role": "output"
+        }
+      ],
+      "arrows": [
+        "latent size",
+        "code z",
+        "784 logits",
+        "pixel intensities"
+      ],
+      "explanation": "Generation differs from reconstruction. A reconstruction begins with an image and uses the encoder. A new sample starts with a code drawn from the prior, so no image or encoder is needed. The trained decoder turns that code into 784 pixel logits. VAE.decode applies sigmoid to put display intensities between zero and one, then reshapes them into a 28 by 28 image. In this lab we display the predicted pixel probabilities. We do not separately draw every pixel from a Bernoulli distribution. Keep fixed codes when comparing trained models.",
+      "trace": [
+        "For the two-dimensional model, a code might be [0.2, −0.7].",
+        "The decoder maps those two numbers to 784 raw pixel scores.",
+        "Sigmoid maps a score of 0 to intensity 0.5. The grid then displays the digit.",
+        "A different random code can give a different digit. Poor codes may still give poor samples."
+      ],
+      "check_question": "Must the encoder run to generate a fresh prior sample?",
+      "check_answer": "No. Use a prior code and the trained decoder. The encoder is needed when mapping an existing image to a code.",
+      "layout": "linear"
     }
   ],
   "glossary": [
-    {"term": "Encoder", "meaning": "The network that maps an image to the parameters of its latent distribution."},
-    {"term": "Decoder", "meaning": "The network that maps a latent code to pixel predictions."},
-    {"term": "Latent code", "meaning": "A shorter hidden numerical representation used by the model."},
-    {"term": "Prior", "meaning": "The chosen code distribution used for generating new examples, here N(0, I)."},
-    {"term": "Reparameterisation", "meaning": "Writing a random code as learned shift and scale applied to independent noise."},
-    {"term": "KL divergence", "meaning": "A non-negative measure of how one probability distribution differs from another."},
-    {"term": "ELBO", "meaning": "A lower bound on data log-likelihood; its negative balances reconstruction and KL at beta = 1."},
-    {"term": "Epoch", "meaning": "One pass through the training data."}
+    {
+      "term": "Encoder",
+      "meaning": "The network that maps an image to the parameters of its latent distribution."
+    },
+    {
+      "term": "Decoder",
+      "meaning": "The network that maps a latent code to pixel predictions."
+    },
+    {
+      "term": "Latent code",
+      "meaning": "A shorter hidden numerical representation used by the model."
+    },
+    {
+      "term": "Prior",
+      "meaning": "The chosen code distribution used for generating new examples, here N(0, I)."
+    },
+    {
+      "term": "Reparameterisation",
+      "meaning": "Writing a random code as learned shift and scale applied to independent noise."
+    },
+    {
+      "term": "KL divergence",
+      "meaning": "A non-negative measure of how one probability distribution differs from another."
+    },
+    {
+      "term": "ELBO",
+      "meaning": "A lower bound on data log-likelihood; its negative balances reconstruction and KL at β = 1."
+    },
+    {
+      "term": "Epoch",
+      "meaning": "One pass through the training data."
+    }
   ],
   "pitfalls": [
     "mu is the centre of an encoder distribution; it is not the random code used in every forward pass.",
     "Generating from the prior and reconstructing a supplied image follow different input paths.",
-    "Changing beta changes the training objective; it does not guarantee interpretable coordinates or a perfect anomaly detector."
+    "Changing β changes the training objective; it does not guarantee interpretable coordinates or a perfect anomaly detector."
   ],
   "code_walkthrough": [
-    {"symbol": "VAE.encode", "role": "Produces the mean and log-variance branches.", "inspect": "Compare mu and logvar shapes for zdim = 2 and zdim = 16."},
-    {"symbol": "VAE.reparameterise", "role": "Draws a code from the encoder distribution.", "inspect": "Follow where independent noise enters and why repeated codes can differ."},
-    {"symbol": "VAE.forward", "role": "Connects encoding, sampling, and pixel-logit decoding during training.", "inspect": "Track the three returned tensors and their uses in vae_loss."},
-    {"symbol": "vae_loss", "role": "Combines reconstruction cost and beta-weighted KL.", "inspect": "Distinguish summing over pixels from dividing by the batch size."},
-    {"symbol": "VAE.decode", "role": "Turns supplied codes into displayable pixel probabilities.", "inspect": "Observe sigmoid and the reshape to 28 by 28; no encoder is called."},
-    {"symbol": "recon_error", "role": "Returns one reconstruction score for each image.", "inspect": "Compare its per-image output with the batch-averaged training loss."}
-  ]
+    {
+      "symbol": "VAE.encode",
+      "role": "Produces the mean and log-variance branches.",
+      "inspect": "Compare mu and logvar shapes for zdim = 2 and zdim = 16."
+    },
+    {
+      "symbol": "VAE.reparameterise",
+      "role": "Draws a code from the encoder distribution.",
+      "inspect": "Follow where independent noise enters and why repeated codes can differ."
+    },
+    {
+      "symbol": "VAE.forward",
+      "role": "Connects encoding, sampling, and pixel-logit decoding during training.",
+      "inspect": "Track the three returned tensors and their uses in vae_loss."
+    },
+    {
+      "symbol": "vae_loss",
+      "role": "Combines reconstruction cost and β-weighted KL.",
+      "inspect": "Distinguish summing over pixels from dividing by the batch size."
+    },
+    {
+      "symbol": "VAE.decode",
+      "role": "Turns supplied codes into displayable pixel probabilities.",
+      "inspect": "Observe sigmoid and the reshape to 28 by 28; no encoder is called."
+    },
+    {
+      "symbol": "recon_error",
+      "role": "Returns one reconstruction score for each image.",
+      "inspect": "Compare its per-image output with the batch-averaged training loss."
+    }
+  ],
+  "recap": {
+    "title": "Week 2: what we learned",
+    "cards": [
+      {
+        "title": "Encode an image",
+        "text": "The encoder predicts a mean and log variance for each latent coordinate.",
+        "role": "model"
+      },
+      {
+        "title": "Sample during training",
+        "text": "z = centre + spread × fresh Gaussian noise; gradients train the encoder.",
+        "role": "data"
+      },
+      {
+        "title": "Decode a code",
+        "text": "The decoder turns a short code into pixel predictions.",
+        "role": "model"
+      },
+      {
+        "title": "Balance two costs",
+        "text": "Pixel cost preserves detail. KL compares code distributions to the prior.",
+        "role": "loss"
+      },
+      {
+        "title": "Generate a new image",
+        "text": "Draw a prior code and decode. No input image or encoder is needed.",
+        "role": "output"
+      },
+      {
+        "title": "Evaluate the result",
+        "text": "Inspect samples and failures; validate anomaly scores on realistic data.",
+        "role": "output"
+      }
+    ],
+    "example": "Illustrative costs: reconstruction 120 + β × KL 3 gives 123 at β 1 and 132 at β 4.",
+    "question": "If logvar = 0, is the standard deviation 0 or 1?",
+    "answer": "It is 1: exp(0.5 × 0) = 1. Zero log variance still has spread.",
+    "next": "In Week 3 we train a realism checker instead of comparing only pixels.",
+    "notes": "Start with a digit and ask students to trace its reconstruction through encoder, sampling and decoder. Then cover the image card and ask for the new-generation path: prior noise to decoder. Use the illustrative costs to test the meaning of β without claiming a measured result. Pause on the exit question; zero log variance is a frequent implementation mistake. Explain that the prior and the encoder distribution play different roles. Ask one student what a good reconstruction cannot prove: good random samples or reliable real-world anomaly detection. Finish by connecting the need for perceptual realism with the next week’s discriminator."
+  }
 }

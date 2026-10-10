@@ -4,17 +4,17 @@
 
 # %% [markdown]
 # # Week 2 Lab: Implement and explore a Variational Autoencoder (VAE)
-# 
+#
 # **Module:** Generative AI (MSc in Artificial Intelligence) · **Time:** 2 hours · **Learning outcomes:** MIMLO 1, 3, 4
-# 
+#
 # You will implement a VAE in **PyTorch**, train it on handwritten digits (MNIST), and use it to:
-# 
+#
 # 1. visualise its **latent space** and decode a grid of latent points,
 # 2. **interpolate** between two digits,
 # 3. study the effect of the KL weight **β**,
 # 4. detect **unusual inputs** with reconstruction error,
 # 5. (extension) build a **conditional VAE** that draws the digit you ask for.
-# 
+#
 # | Part | Topic | Suggested time |
 # |---|---|---|
 # | 0 | Setup and data | 10 min |
@@ -27,27 +27,33 @@
 
 # %% [markdown]
 # > **How to run this notebook**
-# > - **Google Colab (recommended):** File ▸ Upload notebook, then Runtime ▸ Change runtime type ▸ **T4 GPU**. Run cells top to bottom with Shift+Enter.
-# > - **Local Jupyter / VS Code:** Python 3.10+; run the install cell once. A GPU is optional: every cell has a CPU-friendly setting.
+# > - **Google Colab (recommended):** File ▸ Upload notebook, then Runtime ▸ Change runtime type ▸ **GPU** if available. A T4 is sufficient for the GPU examples. Free GPU access varies. Run cells top to bottom with Shift+Enter.
+# > - **Local Jupyter / VS Code:** Python 3.10+; run the install cell once. Read this week's runtime note. Model downloads and training can take longer on CPU, and some full experiments need a GPU.
 # > - **API keys (optional cells only):** store keys in Colab ▸ 🔑 Secrets or an environment variable. Never paste a key into a notebook you share.
-# > - Cells marked **TODO** are yours to complete. Questions marked ✍️ need a short written answer.
+# > - Cells marked **TODO** are yours to complete before running dependent cells. Questions marked ✍️ need a short written answer.
+# > - Read each diagram by following its numbered blocks. The solid arrows carry data to the next block. A dashed arrow shows a step that repeats.
+
+# %% [markdown]
+# ## This week's place in the course
+#
+# ![Course map](Diagrams/beginner_course_map.png)
 
 # %% [markdown]
 # ## Before coding: two paths through the VAE
-# 
+#
 # **Reconstruction** starts with an image and asks the model to rebuild it.
 # **Generation** starts with a new random latent code and uses the trained
 # decoder. A latent code is a short numerical representation, not a digit label.
-# 
+#
 # ![Train a VAE to rebuild digits](Diagrams/beginner_overview.png)
-# 
+#
 # Follow `train_dl` → `VAE.encode` → `VAE.reparameterise` → `VAE.dec` →
 # `vae_loss` → `train`. The encoder branches into `mu` and `logvar`, and both
 # feed the sampled code. The original image also enters the reconstruction cost;
 # `mu` and `logvar` enter the KL cost directly. Weight updates repeat this path.
-# 
+#
 # ![Build, train, then explore the VAE](Diagrams/beginner_lab.png)
-# 
+#
 # | Diagram block | Code to find | First observation |
 # |---|---|---|
 # | Prepare digits | `train_dl`, `x_test` | Each image is `[1, 28, 28]`; one image contains 784 pixels. |
@@ -56,17 +62,36 @@
 # | Explore codes | `vae2`, `vae16`, `interpolate` | A code can come from an image or from the prior. |
 # | Compare beta | `results`, `z_fixed` | Separate models decode the same fixed codes. |
 # | Check unusual inputs | `recon_error`, `auc` | There is one reconstruction score per test image. |
-# 
+#
 # **Pause and predict:** when generating from a fresh prior code, which blocks
 # can be bypassed? Trace the input path before looking at the sample grid.
 
 # %% [markdown]
 # ## Part 0 · Setup and data
+#
+# **Read:** a VAE learns a short code for an image, then rebuilds the image
+# from that code. A **batch** is a group of examples processed together; `B`
+# is its size. An **epoch** is one pass through the training dataset.
+# **Run:** complete the model and loss TODOs, then run the untrained check
+# before the training loop. That check catches wiring errors early.
+# **Change:** compare `zdim=2` with `zdim=16`, then compare the beta settings.
+# **Check:** record reconstruction and KL separately; a smaller total loss
+# with a different beta is not a fair comparison by itself.
+
+# %% [markdown]
+# **Purpose:** Install image and model libraries.
+# **Why now:** The notebook needs torchvision and PyTorch.
+# **Expected observation:** Package installation completes or reports an environment error.
 
 # %%
 import subprocess as _install_process
 import sys as _install_sys
 _install_process.check_call([_install_sys.executable, '-m', 'pip'] + ['install', '-q', 'torch', 'torchvision', 'scikit-learn', 'matplotlib'])
+
+# %% [markdown]
+# **Purpose:** Load and inspect MNIST.
+# **Why now:** Pixels and batch shape give the model’s input contract.
+# **Expected observation:** Images have one channel and 784 intensities.
 
 # %%
 import os
@@ -103,16 +128,29 @@ plt.show()
 
 # %% [markdown]
 # ## Part 1 · Build the VAE
-# 
+#
 # The encoder outputs the **mean** μ and **log-variance** log σ² of a Gaussian over the code z. The decoder turns z into 784 pixel **logits**.
-# 
+#
 # **TODO 1:** in `encode`, compute `mu` and `logvar` from the hidden layer.
 # **TODO 2:** implement the **reparameterisation trick**: $z = \mu + \sigma \odot \epsilon$ with $\epsilon \sim \mathcal{N}(0, I)$ and $\sigma = \exp(\tfrac12 \log\sigma^2)$.
-# 
+#
 # **Read the shapes:** for a batch of `B` images and latent size `zdim`, the
 # two encoder outputs both have shape `[B, zdim]`. `logvar` is a log-variance,
 # not a standard deviation. `forward` returns `[B, 784]` pixel logits plus both
 # encoder outputs, allowing the two loss terms to take different input paths.
+#
+# Read the sampling formula as "centre + spread × fresh random noise".
+# `mu` is the centre, `std` is the spread, and `eps` supplies random variation.
+# `N(0, I)` means independent bell-shaped noise values with mean 0 and
+# variance 1. The symbol `⊙` means multiply matching entries, not a matrix product.
+# A **logit** is a raw pixel score; sigmoid turns it into a value from 0 to 1.
+
+# %% [markdown]
+# **Purpose:** Implement the VAE’s two paths.
+# **Why now:** Encoding an image differs from drawing a prior code.
+# **Expected observation:** mu/logvar have latent-size shape; decoder logits have 784 entries.
+#
+# ![Sample a latent code while training](Diagrams/beginner_mechanism.png)
 
 # %%
 class VAE(nn.Module):
@@ -144,13 +182,27 @@ class VAE(nn.Module):
 
 # %% [markdown]
 # **TODO 3:** implement the **negative ELBO** (per image):
-# 
+#
 # * reconstruction: binary cross-entropy **summed over pixels** (use `F.binary_cross_entropy_with_logits`),
 # * KL: $\tfrac12\sum_j(\mu_j^2 + \sigma_j^2 - \log\sigma_j^2 - 1)$,
 # * total = reconstruction + β · KL, all divided by the batch size.
-# At β = 1 this is the negative ELBO. Other β values reweight its KL term.
+# At β = 1 this is the standard VAE objective. For binary targets it is the literal negative ELBO; greyscale targets use a soft-target BCE surrogate. Other β values reweight KL.
 # Summing over pixels answers "how costly is one whole image?"; averaging
 # over the batch lets batches of different sizes use a comparable scale.
+#
+# **In plain language:** the reconstruction term asks "did we rebuild the
+# input pixels?" The KL term asks "how far is this image's code distribution
+# from the standard random-code distribution?" Beta controls the weight of
+# that second question. **ELBO** is the training bound these terms come from.
+# The subscript `j` selects one latent coordinate; the sum adds its cost across
+# all coordinates. We optimise the negative bound, so lower is better.
+
+# %% [markdown]
+# **Purpose:** Implement and check both costs.
+# **Why now:** Training requires gradients from reconstruction and KL.
+# **Expected observation:** An untrained pixel cost near 784 × ln 2; finite KL.
+#
+# ![How the two VAE costs train the model](Diagrams/beginner_training.png)
 
 # %%
 def vae_loss(logits, x, mu, logvar, beta=1.0):
@@ -169,15 +221,20 @@ assert rec.item() > 400, "An untrained decoder should reconstruct badly (BCE aro
 
 # %% [markdown]
 # ✍️ **Question 1.** Before training, the reconstruction term is about 540 nats per image and the KL is almost 0. Explain both numbers.
-# 
+#
 # *✍️ Write your answer here.*
 
 # %% [markdown]
 # ## Part 2 · Train and monitor both terms
-# 
+#
 # Each batch follows the full training diagram. `zero_grad` clears old
 # gradients, `backward` computes the current ones, and `step` changes weights.
 # Plotting or calling `decode` does not train the model.
+
+# %% [markdown]
+# **Purpose:** Train the two-dimensional model.
+# **Why now:** Optimiser steps learn both networks.
+# **Expected observation:** Recorded reconstruction and KL change over epochs.
 
 # %%
 def train(model, epochs=EPOCHS, beta=1.0, verbose=True):
@@ -214,8 +271,13 @@ plt.show()
 
 # %% [markdown]
 # ## Part 3 · Explore the latent space
-# 
+#
 # ### 3.1 Where does each digit live?
+
+# %% [markdown]
+# **Purpose:** Plot test-image encoder means.
+# **Why now:** A two-dimensional code can be viewed as a map.
+# **Expected observation:** Digit labels colour the plot; they did not train this VAE.
 
 # %%
 vae2.eval()
@@ -231,6 +293,11 @@ plt.show()
 # %% [markdown]
 # ### 3.2 Decode a grid of latent points
 # We space the grid using the Gaussian's quantiles so that it covers the prior evenly.
+
+# %% [markdown]
+# **Purpose:** Decode a grid of prior codes.
+# **Why now:** Generation needs codes and the decoder.
+# **Expected observation:** A grid of images; inspect recognisable digits and failures.
 
 # %%
 from scipy.stats import norm
@@ -250,9 +317,18 @@ plt.show()
 
 # %% [markdown]
 # ### 3.3 Interpolation (in a 16-dimensional latent space)
-# Two dimensions give blurry digits. Train a 16-D model, then **interpolate** between two test digits.
-# 
+# A two-number code is easy to plot but has limited capacity. Train a 16-D
+# model, then **interpolate** between two test digits. Extra code dimensions
+# may preserve more detail; judge this from your own reconstructions.
+# Here `t=0` gives the first code, `t=1` gives the second, and values between
+# them blend the codes before decoding. The decoder is the same at every step.
+#
 # **TODO 4:** complete `interpolate(z1, z2, steps)` to return `steps` codes on the straight line from `z1` to `z2`: $z_t = (1-t)\,z_1 + t\,z_2$.
+
+# %% [markdown]
+# **Purpose:** Train and interpolate a larger code.
+# **Why now:** Extra latent capacity can preserve more detail.
+# **Expected observation:** Decoded latent path versus direct pixel blending.
 
 # %%
 vae16 = VAE(zdim=16).to(DEVICE)
@@ -289,6 +365,13 @@ plt.show()
 # Sample codes from the prior and decode them into displayed pixel probabilities.
 # This generation path bypasses the encoder; it does not reconstruct `x_test`.
 
+# %% [markdown]
+# **Purpose:** Generate without an input image.
+# **Why now:** Fresh prior codes bypass the encoder.
+# **Expected observation:** Displayed pixel probabilities from the decoder.
+#
+# ![Generate a digit without an input image](Diagrams/beginner_inference.png)
+
 # %%
 z = torch.randn(24, 16, device=DEVICE)
 plt.figure(figsize=(10, 1.4))
@@ -299,13 +382,21 @@ plt.show()
 
 # %% [markdown]
 # ✍️ **Question 2.** Compare latent interpolation with pixel blending. What does the difference tell you about the latent space?
-# 
+#
 # *✍️ Write your answer here.*
 
 # %% [markdown]
 # ## Part 4 · The β trade-off
-# 
+#
 # Train three 16-D VAEs with β = 0.1, 1 and 4 (5 epochs each) and compare losses and samples.
+# **Check a fair comparison:** all three models decode `z_fixed`, the same
+# random codes. They have different random initial weights, so one run per
+# beta is illustrative; repeat with several seeds before making a firm claim.
+
+# %% [markdown]
+# **Purpose:** Compare beta using fixed codes.
+# **Why now:** Hold code inputs fixed across separately trained models.
+# **Expected observation:** Costs and sample grids; one run per beta is illustrative.
 
 # %%
 results = {}
@@ -326,15 +417,23 @@ plt.show()
 
 # %% [markdown]
 # ✍️ **Question 3.** Describe the trade-off you observe. Which β would you choose for (a) generating realistic samples, (b) anomaly detection, (c) finding interpretable latent factors? Justify each.
-# 
+#
 # *✍️ Write your answer here.*
 
 # %% [markdown]
 # ## Part 5 · Application: anomaly detection with reconstruction error
-# 
-# The VAE has only seen digits. Clothing images (Fashion-MNIST) should reconstruct badly.
-# 
+#
+# The VAE has only seen digits. Test whether clothing images (Fashion-MNIST)
+# receive larger reconstruction errors; an unfamiliar image is not guaranteed
+# to receive a high score. **AUC** measures how well scores rank unusual
+# images above normal ones across thresholds: 0.5 is chance ranking, 1 is perfect.
+#
 # **TODO 5:** complete `recon_error` to return the **per-image** binary cross-entropy (sum over pixels, no averaging over images).
+
+# %% [markdown]
+# **Purpose:** Evaluate reconstruction as an anomaly score.
+# **Why now:** Use one score for each held-out image.
+# **Expected observation:** A ROC AUC and two histograms; clothing is an artificial anomaly.
 
 # %%
 from sklearn.metrics import roc_auc_score
@@ -359,18 +458,23 @@ plt.figure(figsize=(8, 3.8))
 bins = np.linspace(0, np.percentile(np.r_[e_digits, e_fashion], 99), 60)
 plt.hist(e_digits, bins=bins, alpha=0.7, label="digits (normal)")
 plt.hist(e_fashion, bins=bins, alpha=0.7, label="clothing (anomaly)")
-plt.xlabel("reconstruction error"); plt.legend(); plt.title(f"ROC AUC = {auc:.3f}")
+plt.xlabel("reconstruction error"); plt.legend(); plt.title(f"ROC AUC = {auc:.4f}")  # four decimals: 0.9995 is not a perfect 1.000
 plt.show()
 
 # %% [markdown]
 # ✍️ **Question 4.** The AUC is very high. Give two reasons why this result may overstate how well the method would work for detecting defects in a real factory.
-# 
+#
 # *✍️ Write your answer here.*
 
 # %% [markdown]
 # ## Part 6 · Extension: a conditional VAE (optional)
-# 
+#
 # Feed the one-hot digit label into both the encoder and the decoder. Then you can **ask** for a digit: sample z and decode it with the label you want.
+
+# %% [markdown]
+# **Purpose:** Optionally add the digit label.
+# **Why now:** Conditioning lets generation request a class.
+# **Expected observation:** Rows asking for different digit labels; success varies with training.
 
 # %%
 class CVAE(VAE):
@@ -408,11 +512,20 @@ plt.show()
 
 # %% [markdown]
 # ## Evidence and reflection
-# 
+#
 # | Experiment | Setting | Metric(s) | Observation | One improvement |
 # |---|---|---|---|---|
 # | Base VAE | z = 2 / 16, 10 epochs | final reconstruction, KL | | |
 # | β study | β = 0.1 / 1 / 4 | reconstruction, KL, samples | | |
 # | Anomaly detection | VAE-16 | ROC AUC | | |
-# 
+#
 # **Before next week:** read Foster (2023) chapter 4 (GANs) and try the PyTorch DCGAN tutorial.
+
+# %% [markdown]
+# ## Week 2: what we learned
+#
+# ![Class recap](Diagrams/beginner_recap.png)
+#
+# Illustrative costs: reconstruction 120 + β × KL 3 gives 123 at β 1 and 132 at β 4.
+#
+# **Explain without looking:** If logvar = 0, is the standard deviation 0 or 1?

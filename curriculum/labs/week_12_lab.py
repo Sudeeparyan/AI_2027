@@ -12,7 +12,7 @@
 # 5. **An agent** that calls tools (handbook search, calculator, simulated e-mail) in a ReAct-style loop, with **guardrails** and a **simulated approval gate**.
 # 6. **Risk:** an indirect prompt injection hidden in a document; and how **MCP** exposes tools to any agent.
 #
-# **Runtime:** Colab → **T4 GPU** recommended (≈ 15 min). CPU works with a smaller model.
+# **Runtime:** Colab → **T4 GPU** recommended. CPU works with a smaller model. On a 4 GB laptop GPU the full notebook took about 5 minutes after the downloads.
 
 # %% [markdown]
 # ## Before running: retrieve evidence, then generate an answer
@@ -21,14 +21,12 @@
 # chunks and indexes documents once; answering retrieves passages for each
 # new question. Reading those passages does not update the model's weights.
 #
-# ![The two phases of retrieval-augmented answering](fig:beginner_overview)
 #
 # An **agent** adds a loop in which the model proposes a tool call, the program
 # executes a permitted operation and the result returns to the model as data.
 #
 # ## Lab route and code map
 #
-# ![Build and diagnose retrieval, generated answers and tool use](fig:beginner_lab)
 #
 # | Diagram block | Code to find | Inspect before continuing |
 # |---|---|---|
@@ -42,9 +40,37 @@
 # This teaching agent sends no real email. `approve` simulates approval with a
 # destination-domain rule; `send_email` returns a string. The MCP export is a
 # scaffold whose retrieval function still needs to be connected.
+#
+# **Read:** a **chunk** is a passage cut from a document; an **index** lets
+# us find stored passages efficiently. **Retrieval** selects passages; the
+# generator uses them to write an answer. **Grounding** means an answer's
+# claims are supported by evidence. **Abstention** means saying the answer
+# cannot be found rather than guessing.
+# **Run:** inspect the handbook, then compare answers without and with retrieval.
+# **Change:** try a new question and inspect the actual returned passages.
+# **Check:** diagnose retrieval and generation separately before changing the
+# prompt. A citation number points to a passage; read it to verify the claim.
+
+# %% [markdown]
+# **What/why:** Install model, retrieval and storage libraries.
+#
+# **Predict:** Does installing FAISS create a handbook index?
+#
+# **Expected output:** Installed packages; index preparation happens in later cells.
 
 # %% tags=["colab-install"]
 %pip install -q transformers accelerate sentence-transformers faiss-cpu rank-bm25 chromadb pandas matplotlib
+
+# %% [markdown]
+# **What/why:** Select hardware and load a fixed model plus the generation helper.
+#
+# **Predict:** Will adding source text change model weights?
+#
+# **Expected output:** Device and LLM identity; llm is ready for inference.
+#
+# ![Overview walkthrough](fig:beginner_overview)
+#
+# ![Lab walkthrough](fig:beginner_lab)
 
 # %%
 import ast
@@ -84,6 +110,13 @@ def llm(messages, max_new_tokens=160, tools=None):
 # ## The knowledge base: a module handbook the model has never seen
 #
 # The documents describe a **fictional** module at a fictional institute, so the LLM cannot have memorised them. One document (a forum post) contains a hidden instruction: we will need it in Part 5.
+
+# %% [markdown]
+# **What/why:** Read the fictional handbook and evaluation questions.
+#
+# **Predict:** Which question has no answer in these documents?
+#
+# **Expected output:** DOCS and EVAL; the external-examiner question is intentionally unanswerable.
 
 # %%
 DOCS = {
@@ -131,6 +164,13 @@ print(len(DOCS), "documents,", len(EVAL), "evaluation questions")
 # %% [markdown]
 # ## Part 1 · The problem: an LLM alone does not know your documents
 
+# %% [markdown]
+# **What/why:** Measure answers without supplying handbook passages.
+#
+# **Predict:** Should a model know an invented private rule?
+#
+# **Expected output:** Baseline answers and correctness table; inspect guesses and abstention.
+
 # %%
 def correct(answer, pattern):
     return int(bool(re.search(pattern, answer.lower()))) if pattern else int("don't know" in answer.lower() or "do not know" in answer.lower())
@@ -152,6 +192,21 @@ no_rag_df.head(6)
 # `size` and `overlap` here count approximate characters, not tokens. Keeping
 # whole words makes boundaries approximate. Track where the next chunk starts
 # and check that it advances; each chunk retains its parent document metadata.
+# **Trace one stored row:** a document becomes overlapping text passages,
+# each passage becomes a vector, and that vector enters the index. Keep its
+# document ID with it so an answer can identify the source. At query time,
+# embed the question with the same model before comparing it to stored vectors.
+# The index is `[number of chunks, embedding dimension]`; its row order must
+# continue to match `CHUNKS`.
+
+# %% [markdown]
+# **What/why:** Complete overlapping chunking, embed passages and build exact vector search.
+#
+# **Predict:** Why preserve the parent document beside every chunk?
+#
+# **Expected output:** CHUNKS, normalised vectors and FAISS index; inspect boundaries and IDs.
+#
+# ![Training walkthrough](fig:beginner_training)
 
 # %%
 def chunk(text, size=220, overlap=50):
@@ -189,6 +244,13 @@ print("FAISS index:", index.ntotal, "vectors of dimension", chunk_emb.shape[1])
 # %% [markdown]
 # A **vector database** adds persistence, metadata and filtering. The same chunks in **Chroma**, with a metadata filter:
 
+# %% [markdown]
+# **What/why:** Store the same vectors and metadata in an ephemeral Chroma collection.
+#
+# **Predict:** Will this collection persist after the notebook process ends?
+#
+# **Expected output:** Nearest passages with source metadata; this client is in-memory.
+
 # %%
 import chromadb
 
@@ -206,6 +268,21 @@ print("filtered to the 'assessment' document:", col.query(query_embeddings=qe, n
 # **Dense** retrieval compares embeddings (meaning); **BM25** matches words (good for codes and names); **hybrid** search combines both rankings with **reciprocal rank fusion (RRF)**: $\mathrm{RRF}(d) = \sum_{r} \frac{1}{k + \mathrm{rank}_r(d)}$ with $k = 60$.
 #
 # **TODO 2:** complete `rrf(rankings, k=60)`: given several ranked lists of chunk indices, return the indices sorted by RRF score (highest first).
+#
+# RRF combines list positions, not raw scores from different search methods.
+# A passage ranked first gets `1/61` from that list; ranked second gets `1/62`.
+# Add its contributions from both lists and sort by the total. Here `k=60`
+# is a smoothing constant in the fusion formula. The `k=3` in `retrieve` later
+# is a separate setting: the number of passages returned to the generator.
+# A **re-ranker** reads each question–passage pair more closely and reorders
+# the shortlist. It cannot recover a useful passage absent from that shortlist.
+
+# %% [markdown]
+# **What/why:** Complete reciprocal-rank fusion and compare four retrieval methods.
+#
+# **Predict:** What does the lab recall@3 denominator count?
+#
+# **Expected output:** Gold-document hit rates and MRR; read actual passages before claiming answer coverage.
 
 # %%
 bm25 = BM25Okapi([re.findall(r"\w+", c["text"].lower()) for c in CHUNKS])
@@ -267,11 +344,26 @@ ret_df
 # %% [markdown]
 # ## Part 4 · Grounded generation with citations
 #
+# **Read the retrieval scores first:** this dataset names one relevant source
+# document per answerable question. `recall@3` records whether any of the first
+# three chunks comes from that document, then averages those hits across questions.
+# It does not measure whether every useful passage was found. **MRR** averages
+# `1/rank` for the first relevant document: first gives 1, second gives 0.5,
+# and a missing document gives 0. This helps separate finding evidence from
+# using the evidence correctly in a generated answer.
+#
 # The prompt gives the model **numbered sources** and asks it to cite them and to say "I don't know" when the answer is missing. We score **correctness**, whether the numbers in the answer are **supported by the sources** (a simple grounding check), whether it **cites the right document**, and **abstention** on the unanswerable question.
 # The automatic checks below are limited: digit presence does not establish
 # claim meaning, and a source citation must be read to confirm actual support.
 #
 # Placement matters for small models: the answer instructions come **after** the sources, right next to the question. With the same instructions only in the system message, the 1.5 B model cited the right document for 1 question in 12 and said "I don't know" more often. Try it: move `ANSWER_RULES` into `RAG_SYSTEM` and compare.
+
+# %% [markdown]
+# **What/why:** Supply numbered sources, generate answers and run limited checks.
+#
+# **Predict:** Can matching digit strings validate a non-numeric claim?
+#
+# **Expected output:** RAG summary/plot; numbers_supported and citation hits are limited proxies.
 
 # %%
 RAG_SYSTEM = ("You answer questions about a university module using ONLY the numbered sources. "
@@ -319,6 +411,13 @@ ax.set_ylim(0, 1.12); ax.set_ylabel("accuracy"); ax.set_title(f"Answer accuracy 
 plt.tight_layout(); plt.show()  # RAG_FIGURE
 summary
 
+# %% [markdown]
+# **What/why:** Display full per-question RAG diagnostic rows.
+#
+# **Predict:** Can aggregate accuracy hide one unsupported answer?
+#
+# **Expected output:** A question-level table; compare each answer with its retrieved evidence.
+
 # %%
 rag_df
 
@@ -326,7 +425,7 @@ rag_df
 # ✍️ **Question 1.** Compare the retrieval methods and RAG vs no RAG. Which questions still fail, and is the cause retrieval (wrong chunks) or generation (wrong use of the right chunks)? How would you evaluate faithfulness more rigorously?
 #
 # <!-- BEGIN ANSWER -->
-# Without retrieval the model cannot know handbook facts, so it guesses (plausible but wrong numbers and days: hallucination) and almost never answers correctly. With RAG, accuracy rises sharply because the answer is in the context. BM25 is strong for exact terms (the module code, "GPU hours") and weak for paraphrases ("hand my report in after the deadline" vs "late submissions"); dense retrieval handles paraphrases; hybrid fusion combines both and re-ranking with a cross-encoder usually puts the best chunk first (higher recall@1 and MRR). To diagnose failures, check whether the gold document was in the top-k (a retrieval failure, fixed by better chunking, hybrid search, query rewriting or more k) or was retrieved but misused (a generation failure: the model misread, mixed chunks, or ignored the "I don't know" instruction; fixed by a stronger model, clearer prompts or fewer, better chunks). More rigorous faithfulness evaluation: decompose answers into claims and check each against the retrieved context with an NLI model or an LLM judge (as in RAGAS faithfulness, or groundedness evaluators in Azure AI Foundry), measure answer relevance and context precision/recall, use a larger labelled question set including unanswerable and multi-hop questions, and spot-check with human reviewers.
+# Without retrieval the model cannot know handbook facts, so it guesses (plausible but wrong numbers and days: hallucination) and almost never answers correctly. With RAG, accuracy rises sharply because the answer is in the context. BM25 is strong for exact terms (the module code, "GPU hours") and weak for paraphrases ("hand my report in after the deadline" vs "late submissions"); dense retrieval handles paraphrases; hybrid fusion combines both and re-ranking with a cross-encoder usually puts the best chunk first (higher recall@1 and MRR). To diagnose failures, check whether the gold document was in the top-k (a retrieval failure, fixed by better chunking, hybrid search, query rewriting or more k) or was retrieved but misused (a generation failure: the model misread, mixed chunks, or ignored the "I don't know" instruction; fixed by a stronger model, clearer prompts or fewer, better chunks). More rigorous faithfulness evaluation: decompose answers into claims and check each against the retrieved context with an NLI model or an LLM judge (as in RAGAS faithfulness, or groundedness evaluators in Microsoft Foundry), measure answer relevance and context precision/recall, use a larger labelled question set including unanswerable and multi-hop questions, and spot-check with human reviewers.
 # <!-- END ANSWER -->
 
 # %% [markdown]
@@ -335,6 +434,15 @@ rag_df
 # An **agent** runs a loop: the LLM decides whether to call a tool, the program executes it and returns the observation, and the LLM continues until it can answer (the **ReAct** pattern: reason, act, observe). The model sees each tool's name, description and argument schema (**function calling**).
 #
 # **TODO 3:** complete `execute(call)`: (a) refuse tools not in `TOOLS` (an **allowlist**), (b) catch errors and return them as text, and (c) for tools with side effects (`send_email`), require the **simulated approval gate** via `approve(call)` and return `"BLOCKED: human approval denied"` if it is not granted. A production action would need an actual human review mechanism.
+
+# %% [markdown]
+# **What/why:** Complete a bounded tool loop: check object shapes, allowlist the name and handle simulated approval/tool errors.
+#
+# **Predict:** Who actually runs calculator after the model proposes it?
+#
+# **Expected output:** A grade-task trace and answer; malformed calls return errors. Check 0.6 × 72 + 0.4 × 64 = 68.8.
+#
+# ![Mechanism walkthrough](fig:beginner_mechanism)
 
 # %%
 def search_handbook(query: str) -> str:
@@ -391,12 +499,17 @@ def approve(call):
 
 def execute(call):
     ### BEGIN SOLUTION
+    if not isinstance(call, dict):
+        return "ERROR: tool call must be an object"
     name, args = call.get("name"), call.get("arguments", {})
-    if name not in TOOLS:
+    if not isinstance(name, str) or name not in TOOLS:
         return f"ERROR: unknown tool '{name}'"
-    if name in SIDE_EFFECTS and not approve(call):
-        return "BLOCKED: human approval denied"
+    if not isinstance(args, dict):
+        return "ERROR: tool arguments must be an object"
     try:
+        checked_call = {"name": name, "arguments": args}
+        if name in SIDE_EFFECTS and not approve(checked_call):
+            return "BLOCKED: human approval denied"
         return TOOLS[name](**args)
     except Exception as e:
         return f"ERROR: {type(e).__name__}: {e}"
@@ -456,6 +569,20 @@ trace_df
 # %% [markdown]
 # ### Indirect prompt injection
 # The forum post contains instructions aimed at AI assistants. What happens when the agent reads it?
+# **Trace the boundary:** a tool result is external data, even when it looks
+# like a command. The model may propose an action, but `execute` decides which
+# tools can run. `AUDIT` shows attempts at simulated side effects; `trace`
+# shows observations returned to the model. Inspect both, rather than judging
+# success from the final answer alone.
+
+# %% [markdown]
+# **What/why:** Read hostile forum content and inspect attempted side-effect calls.
+#
+# **Predict:** Does a domain rule represent a real person approving an action?
+#
+# **Expected output:** Final answer, tool trajectory and AUDIT; email is a stub and nothing is sent.
+#
+# ![Inference walkthrough](fig:beginner_inference)
 
 # %%
 AUDIT.clear()
@@ -476,6 +603,13 @@ inj_df
 # ## Part 6 · Tools for any agent: the Model Context Protocol (MCP)
 #
 # **MCP** is an open protocol for connecting AI applications to tools and data. You write a **server** once; any MCP client (desktop assistants, IDEs, agent frameworks) can discover and call its tools. The file below demonstrates an MCP tool declaration using the official Python SDK (`pip install mcp`). It is an **incomplete scaffold**: replace `retrieve_passages` with a working retrieval implementation and load the index before running it. You do not need to run it for this lab.
+
+# %% [markdown]
+# **What/why:** Write an illustrative MCP server declaration.
+#
+# **Predict:** Can retrieve_passages work before it is implemented?
+#
+# **Expected output:** An incomplete Python scaffold; connect retrieval and load its index before running.
 
 # %%
 server_code = '''from mcp.server.fastmcp import FastMCP
@@ -502,6 +636,13 @@ print(server_code)
 # <!-- BEGIN ANSWER -->
 # Most student questions are single-hop factual questions, so a fixed RAG workflow (retrieve with hybrid search and re-ranking, generate with citations, abstain when unsure) is simpler, cheaper, faster and more predictable than an agent; add a small router or a single tool call (e.g. a calculator or a deadline lookup) where needed. Use an agent only for open-ended multi-step tasks where the steps cannot be fixed in advance, and then limit steps, tools and permissions. Evaluation: a labelled set of real student questions (including paraphrases, multi-hop and unanswerable ones) with retrieval metrics (recall@k, MRR) and answer metrics (correctness, faithfulness/groundedness, citation accuracy, abstention), run automatically after every change to documents, prompts or models; plus sampled human review and user feedback in production. Risk controls: treat retrieved content as untrusted (indirect prompt injection) with least-privilege, read-only tools and human approval for any action; access control so students only retrieve documents they are allowed to see and personal data is excluded from the index; keep the index up to date with versioning and show sources so students can verify; log and monitor, with disclosure that answers are AI-generated and a route to a human.
 # <!-- END ANSWER -->
+
+# %% [markdown]
+# **What/why:** Save measured instructor results when a path is supplied.
+#
+# **Predict:** What happens when GENAI_RESULTS_PATH is unset?
+#
+# **Expected output:** A results JSON file when requested, otherwise no file.
 
 # %% tags=["solution-only"]
 # Instructor tooling: save measured results for the lecture slides (only when requested).

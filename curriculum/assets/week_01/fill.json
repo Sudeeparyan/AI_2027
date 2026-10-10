@@ -1,0 +1,17 @@
+{
+  "W01_RUN": "a full run on 9 October 2026 on a laptop CPU with SmolLM2-360M-Instruct (362 million parameters)",
+  "W01_NAMES": "32,033",
+  "W01_NLL_ANNA": "1.91 nats (perplexity 6.7)",
+  "W01_NLL_EMMA": "2.51 nats (perplexity 12.4)",
+  "W01_NLL_XQZZ": "4.89 nats (perplexity 132.5)",
+  "W01_UNIFORM": "3.30",
+  "W01_UNIGRAM": "2.82",
+  "W01_BIGRAM": "2.46",
+  "W01_ACC_LR": "0.928",
+  "W01_ACC_QDA": "0.928",
+  "W01_TOKENS": "11 tokens in English, 33 in Irish and 56 in Hindi",
+  "W01_MAT": "1.00 at T = 0.5, 0.95 at T = 1.0 and 0.56 at T = 1.5",
+  "W01_RUNNERS_UP": "*windows*, *couch*, *so* and *chair*",
+  "W01_FICTION_PLAIN": "The 2019 paper 'Quantum Gradient Folding for Transformers' by Smith and Okafor, published by Hugging Face, focuses on the development of quantum…",
+  "W01_FICTION_HONEST": "The 2019 paper 'Quantum Gradient Folding for Transformers' by Smith and Okafor provides a new approach to train neural networks with high accuracy…"
+}

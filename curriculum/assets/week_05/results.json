@@ -1,0 +1,107 @@
+{
+  "week": 5,
+  "mode": "full",
+  "recorded_at_utc": "2026-10-09T19:53:33.990789+00:00",
+  "seed": 0,
+  "libraries": {
+    "torch": "2.11.0+cu128",
+    "transformers": "5.17.0"
+  },
+  "device": "cuda",
+  "device_name": "NVIDIA GeForce GTX 1650",
+  "dataset": {
+    "source": "Tiny Shakespeare download",
+    "url": "https://raw.githubusercontent.com/karpathy/char-rnn/master/data/tinyshakespeare/input.txt",
+    "characters": 1115394,
+    "sha256": "86c4e6aa9db7c042ec79f339dcb96d42b0075e16b8fc2e86bf0ca57e2dc565ed",
+    "split": "contiguous first 90% train, final 10% validation"
+  },
+  "chargpt": {
+    "parameters": 1829441,
+    "context": 128,
+    "batch_size": 64,
+    "d_model": 192,
+    "heads": 6,
+    "layers": 4,
+    "updates": 3000,
+    "validation_batches_per_check": 10,
+    "seconds_including_validation": 517.3761297000019,
+    "validation_curve": [
+      [
+        0,
+        4.32515869140625
+      ],
+      [
+        300,
+        2.030762958526611
+      ],
+      [
+        600,
+        1.7762643933296203
+      ],
+      [
+        900,
+        1.6675419449806212
+      ],
+      [
+        1200,
+        1.6047675728797912
+      ],
+      [
+        1500,
+        1.5695729851722717
+      ],
+      [
+        1800,
+        1.5654839038848878
+      ],
+      [
+        2100,
+        1.556054139137268
+      ],
+      [
+        2400,
+        1.5312106132507324
+      ],
+      [
+        2700,
+        1.5170984387397766
+      ],
+      [
+        3000,
+        1.558619225025177
+      ]
+    ],
+    "final_validation_loss": 1.558619225025177,
+    "perplexity": 4.75225491820611,
+    "samples_by_temperature": {
+      "0.5": "ROMEO:\nAy, then hear me so? I say the more than my liege.\n\nNurse:\nI will put it is not a deal of the prince,\nI will marry an encounter and true and the hollow\nFrom where I beseech you, and then your convey\nUnto the secret of the state of the fire,\nAnd towar",
+      "1.0": "ROMEO:\nAy, and therefore! if God be you caith.\n\nNurse:\nAnd let me so.\n\nCLARENCE:\nThat keep you, sir, York, to do make thee of thyself.\n\nPRINCE:\nLook a garlic; I will away.\n\nBUCKINGHAM:\nAh, if you will: buy what they I comfort you;\nand lest her belong too, n",
+      "1.5": "ROMEO:\nPut you? heave Clauis God up, they ithdeer alike;\nNning forsworn much in the fhiald! it ungregracel!\nWithim the sheaves content rancely sake.\nWill I show Cuproach\nNake that Stab that dold\nBent it be won, thus, consolarion,\nBanish'd heal beld-scalowed"
+    }
+  },
+  "bert_selected_head": {
+    "layer_one_based": 4,
+    "head_one_based": 11,
+    "weight_it_to_animal": 0.8469523191452026
+  },
+  "gpt2_cache_benchmark": {
+    "new_tokens": 200,
+    "repeats": 3,
+    "seconds_by_cache_setting": {
+      "True": [
+        3.4494583000050625,
+        3.972620699998515,
+        4.093881200002215
+      ],
+      "False": [
+        5.070244800001092,
+        6.353855299996212,
+        5.138591199996881
+      ]
+    },
+    "uncached_over_cached_median_time": 1.2935015920343973,
+    "cuda_synchronised": true,
+    "warmup_tokens_each_setting": 2
+  }
+}

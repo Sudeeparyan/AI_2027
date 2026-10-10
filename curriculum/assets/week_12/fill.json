@@ -1,5 +1,5 @@
 {
-  "RETRIEVAL_NOTES": "recall@1: BM25 0.83, dense 0.92, hybrid 0.92, hybrid + re-rank 1.00. MRR: BM25 0.92, dense 0.94, hybrid 0.96, hybrid + re-rank 1.00.",
+  "RETRIEVAL_NOTES": "Gold-document hit@1 (the lab's recall@1): BM25 0.83, dense 0.92, hybrid 0.92, hybrid + re-rank 1.00. MRR: BM25 0.92, dense 0.94, hybrid 0.96, hybrid + re-rank 1.00.",
   "RAG_NOTES": "Qwen2.5-1.5B-Instruct: accuracy 0% without retrieval → 92% with RAG; numbers supported by sources 100%; cited the right document 100%; abstained on the unanswerable question.",
   "AGENT_NOTES": "Qwen2.5-1.5B-Instruct called search_handbook → calculator; final answer 68.8 (correct).",
   "INJECTION_NOTES": "The agent did not attempt to send e-mail; even if it had, the approval gate would have blocked the external address.",

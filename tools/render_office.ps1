@@ -22,6 +22,43 @@ try {
             $pres = $ppt.Presentations.Open($full, $true, $false, $false)
             # 32 = ppSaveAsPDF
             $pres.SaveAs($pdf, 32)
+            # PowerPoint's actual text bounds catch clipping that estimating
+            # line counts in the JavaScript builder cannot reliably predict.
+            $layoutIssues = @()
+            foreach ($slide in $pres.Slides) {
+                foreach ($shape in $slide.Shapes) {
+                    # PowerPoint grows table rows to fit their text, so a table
+                    # whose real bottom passes the content area has overflowed.
+                    if ($shape.HasTable -eq -1 -and $shape.Top + $shape.Height -gt 7.0 * 72) {
+                        $layoutIssues += [pscustomobject]@{
+                            slide = $slide.SlideIndex; shape = $shape.Name; text = "table"
+                            height = $shape.Height; width = $shape.Width; top = $shape.Top; left = $shape.Left
+                        }
+                    }
+                    if ($shape.HasTextFrame -eq -1 -and $shape.TextFrame.HasText -eq -1) {
+                        $frame = $shape.TextFrame2
+                        $text = $frame.TextRange
+                        $right = $text.BoundLeft + $text.BoundWidth
+                        $bottom = $text.BoundTop + $text.BoundHeight
+                        # Ink bounds include font bearings (even a right-aligned
+                        # page number overhangs its frame by about 2.25 points).
+                        # Four points avoids those false alarms, while detecting
+                        # an extra wrapped line. Verify flagged boxes visually.
+                        $tolerance = 4
+                        if ($text.BoundLeft -lt $shape.Left - $tolerance -or $right -gt $shape.Left + $shape.Width + $tolerance -or
+                            $text.BoundTop -lt $shape.Top - $tolerance -or $bottom -gt $shape.Top + $shape.Height + $tolerance) {
+                            $layoutIssues += [pscustomobject]@{
+                                slide = $slide.SlideIndex; shape = $shape.Name
+                                text = $text.Text; height = $shape.Height; width = $shape.Width
+                                boundHeight = $text.BoundHeight; boundWidth = $text.BoundWidth
+                                boundLeft = $text.BoundLeft; boundTop = $text.BoundTop
+                                left = $shape.Left; top = $shape.Top
+                            }
+                        }
+                    }
+                }
+            }
+            ConvertTo-Json -InputObject @($layoutIssues) -Depth 4 | Set-Content -LiteralPath ([System.IO.Path]::ChangeExtension($full, '.layout.json')) -Encoding UTF8
             $pres.Close()
         } else {
             Write-Output "skip $full"

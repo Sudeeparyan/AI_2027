@@ -11,6 +11,8 @@ Writes build/week_XX/lab_test.json and the executed notebook build/week_XX/execu
 from __future__ import annotations
 
 import argparse
+import datetime as dt
+import hashlib
 import json
 import os
 import sys
@@ -38,7 +40,11 @@ def run(week: int, full: bool, timeout: int) -> dict:
     workdir.mkdir(parents=True, exist_ok=True)
     client = NotebookClient(nb, timeout=timeout, kernel_name="python3", resources={"metadata": {"path": str(workdir)}})
     t0 = time.time()
-    result = {"week": week, "mode": "full" if full else "smoke", "ok": True, "error": None}
+    mode = "full" if full else "smoke"
+    result = {"week": week, "mode": mode, "ok": True, "error": None,
+              "started_at_utc": dt.datetime.now(dt.timezone.utc).isoformat(),
+              "timeout_per_cell": timeout, "notebook_sha256": hashlib.sha256(src.read_bytes()).hexdigest(),
+              "runner_python": sys.executable}
     try:
         client.execute()
     except CellExecutionError as e:
@@ -50,7 +56,9 @@ def run(week: int, full: bool, timeout: int) -> dict:
     result["seconds"] = round(time.time() - t0, 1)
     out = ROOT / "build" / f"week_{week:02d}"
     nbformat.write(nb, str(out / "executed_solutions.ipynb"))
+    nbformat.write(nb, str(out / f"executed_solutions_{mode}.ipynb"))
     (out / "lab_test.json").write_text(json.dumps(result, indent=2), encoding="utf-8")
+    (out / f"lab_test_{mode}.json").write_text(json.dumps(result, indent=2), encoding="utf-8")
     return result
 
 
