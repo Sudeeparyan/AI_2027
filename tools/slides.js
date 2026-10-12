@@ -10,6 +10,7 @@ const React = require("react");
 const ReactDOMServer = require("react-dom/server");
 const sharp = require("sharp");
 const technicalDiagrams = require("./technical_diagrams");
+const { atomicOutput } = require("./output_files");
 
 // ---------- Design system ----------
 const C = {
@@ -208,6 +209,77 @@ function numberCircle(slide, n, x, y, d, fill = C.primary) {
   addText(slide, String(n), { x, y, w: d, h: d, fontSize: Math.max(14, Math.round(d * 30)), bold: true, color: C.white, align: "center", valign: "middle", margin: 0 });
 }
 
+// Authored informative visuals for a short explanation beside an example.
+// visual: {type:"example_strip", title?, items:[{label,text}, ...], caption?}
+//         {type:"mini_table", title?, header:[...], rows:[[...], ...], caption?}
+// These are editable evidence, not illustrations. Keep 2–3 example rows or
+// 1–4 table rows; at most three bullets and 40 visible body words altogether.
+function visualTexts(visual) {
+  if (!visual || typeof visual !== "object") throw Error("visual must be an authored object");
+  const optional = [visual.title, visual.caption].filter(v => v !== undefined);
+  if (!optional.every(v => typeof v === "string")) throw Error("visual title/caption must be strings");
+  if (visual.type === "example_strip") {
+    if (!Array.isArray(visual.items) || visual.items.length < 2 || visual.items.length > 3 ||
+        !visual.items.every(item => item && [item.label, item.text].every(t => typeof t === "string" && t.trim())))
+      throw Error("example_strip needs 2–3 items with label and text strings");
+    return [...optional, ...visual.items.flatMap(item => [item.label, item.text])];
+  }
+  if (visual.type === "mini_table") {
+    if (!Array.isArray(visual.header) || visual.header.length < 2 || visual.header.length > 3 ||
+        !visual.header.every(t => typeof t === "string" && t.trim()) ||
+        !Array.isArray(visual.rows) || visual.rows.length < 1 || visual.rows.length > 4 ||
+        !visual.rows.every(row => Array.isArray(row) && row.length === visual.header.length && row.every(t => typeof t === "string")))
+      throw Error("mini_table needs 2–3 headers and 1–4 matching string rows");
+    return [...optional, ...visual.header, ...visual.rows.flat()];
+  }
+  throw Error(`Unknown visual type: ${visual.type}`);
+}
+
+function validateVisualSlide(s) {
+  const {paras} = bulletParas(s.bullets, 20), texts = visualTexts(s.visual);
+  if (paras.length > 3) throw Error("visual layout permits at most three bullets, including sub-bullets");
+  if (s.figure) throw Error("Choose an authored visual or a figure for this slide");
+  const body = [...paras.map(p => p.text), ...texts,
+    ...(s.callout ? [s.callout_label || "Key idea", s.callout] : [])];
+  const words = body.reduce((sum, text) => sum + (plain(text).trim().match(/\S+/g) || []).length, 0);
+  if (words > 40) throw Error(`visual layout has ${words} body words; shorten it to 40`);
+}
+
+function informativeVisual(slide, visual, box) {
+  const {x, y, w, h} = box;
+  const top = y + (visual.title ? 0.55 : 0), bottom = y + h - (visual.caption ? 0.55 : 0);
+  if (visual.title) addText(slide, runs(visual.title, {fontSize:18, bold:true, color:C.ink}),
+    {x, y, w, h:0.45, margin:0, valign:"middle"});
+  if (visual.type === "example_strip") {
+    const gap = 0.2, rowH = Math.min(1.25, (bottom - top - gap * (visual.items.length - 1)) / visual.items.length);
+    const labelW = Math.min(1.65, w * 0.28);
+    visual.items.forEach((item, i) => {
+      const rowY = top + i * (rowH + gap);
+      slide.addShape("line", {x, y:rowY + rowH, w, h:0, line:{color:C.lav, width:1}});
+      const labelPt = fitSize([item.label], labelW - 0.15, rowH - 0.12, 18, 14, {bold:true});
+      const textPt = fitSize([item.text], w - labelW - 0.2, rowH - 0.12, 22, 14);
+      addText(slide, runs(item.label, {fontSize:labelPt, bold:true, color:C.teal}),
+        {x, y:rowY, w:labelW - 0.15, h:rowH - 0.12, margin:0, valign:"middle"});
+      addText(slide, runs(item.text, {fontSize:textPt, color:C.text}),
+        {x:x + labelW, y:rowY, w:w - labelW, h:rowH - 0.12, margin:0, valign:"middle"});
+    });
+  } else {
+    const colW = visual.header.map(() => w / visual.header.length), available = bottom - top;
+    let pt = 20;
+    const rows = [visual.header, ...visual.rows];
+    const height = size => rows.reduce((sum, row) => sum + Math.max(...row.map((t,j) =>
+      Math.max(1, Math.ceil(plain(t).length / Math.max(6, Math.floor((colW[j] - 0.2) * 72 / (0.5 * size))))))) * 1.25 * size / 72 + 0.2, 0);
+    while (pt > 14 && height(pt) > available) pt--;
+    if (height(pt) > available) throw Error("mini_table does not fit at 14 pt; move detail to Word notes");
+    const table = rows.map((row, i) => row.map(text => ({text:runs(text, {fontSize:pt, bold:i===0, color:i===0?C.white:C.text}),
+      options:{fill:{color:i===0?C.ink:i%2?C.tint:C.white}, valign:"middle"}})));
+    slide.addTable(table, {x, y:top, w, colW, fontSize:pt, fontFace:FONT, margin:0.08,
+      border:{type:"solid", pt:0.5, color:"D1D5DB"}, autoPage:false});
+  }
+  if (visual.caption) addText(slide, runs(visual.caption, {fontSize:14, italic:true, color:C.muted}),
+    {x, y:bottom + 0.1, w, h:0.45, margin:0});
+}
+
 // ---------- Layouts ----------
 const L = {};
 
@@ -278,7 +350,7 @@ L.outcomes = async (slide, s, spec) => {
   });
   const cx = MX + lw + 0.35, cw = CW - lw - 0.35;
   slide.addShape("roundRect", { x: cx, y: top, w: cw, h: CONTENT_BOTTOM - top, fill: { color: C.tint }, line: { color: C.tint }, rectRadius: 0.12 });
-  addText(slide, "Module learning outcomes (MIMLOs) practised", { x: cx + 0.25, y: top + 0.15, w: cw - 0.5, h: 0.7, fontSize: 15, bold: true, color: C.ink });
+  addText(slide, "Module outcomes", { x: cx + 0.25, y: top + 0.15, w: cw - 0.5, h: 0.7, fontSize: 15, bold: true, color: C.ink });
   const ms = spec.mimlos || [];
   const mRow = Math.min(1.3, (CONTENT_BOTTOM - top - 1.0) / Math.max(1, ms.length));
   ms.forEach((m, i) => {
@@ -318,8 +390,18 @@ L.section = async (slide, s) => {
 };
 
 L.bullets = async (slide, s, spec) => {
+  if (s.visual) validateVisualSlide(s);
   title(slide, s.title);
   const bottom = s.callout ? CONTENT_BOTTOM - 1.05 : CONTENT_BOTTOM;
+  if (s.visual) {
+    const bw = 4.7, gap = 0.45, height = bottom - CONTENT_TOP;
+    const {paras} = bulletParas(s.bullets, 20);
+    const pt = fitSize(paras, bw, height, 26, 14, {paraGap:12, indent:0.3});
+    addText(slide, bulletParas(s.bullets, pt).arr, {x:MX, y:CONTENT_TOP, w:bw, h:height});
+    informativeVisual(slide, s.visual, {x:MX + bw + gap, y:CONTENT_TOP, w:CW - bw - gap, h:height});
+    if (s.callout) callout(slide, s.callout, CONTENT_BOTTOM - 0.9, 0.9, s.callout_label || "Key idea");
+    return;
+  }
   const fig = s.figure && spec.assets.figures[s.figure];
   let bw = CW;
   if (fig) bw = s.figure_wide ? 5.2 : 6.3;
@@ -349,20 +431,22 @@ L.cards = async (slide, s) => {
   const cw = (CW - gap * (cols - 1)) / cols;
   const ch = (bottom - CONTENT_TOP - gap * (rowsN - 1)) / rowsN;
   const horizontal = rowsN > 1; // compact: icon left of heading
-  const textH = horizontal ? ch - 0.95 : ch - 1.75;
-  const pt = Math.min(...cards.map((c) => fitSize([c.text], cw - 0.4, textH, 22, 11)));
+  const pt = Math.min(...cards.map((c) => fitSize([c.text], cw - 0.4,
+    horizontal ? ch - 0.95 : ch - (c.icon ? 1.75 : .95), 22, 14)));
   for (let i = 0; i < n; i++) {
     const c = cards[i];
     const x = MX + (i % cols) * (cw + gap), y = CONTENT_TOP + Math.floor(i / cols) * (ch + gap);
     slide.addShape("roundRect", { x, y, w: cw, h: ch, fill: { color: i % 2 ? C.tint2 : C.tint }, line: { color: C.tint }, rectRadius: 0.12 });
     if (horizontal) {
-      await iconCircle(slide, c.icon || "fa:FaLightbulb", x + 0.2, y + 0.2, 0.6);
-      addText(slide, runs(c.head, { fontSize: 21, bold: true, color: C.ink }), { x: x + 0.9, y: y + 0.18, w: cw - 1.05, h: 0.65, valign: "middle" });
+      if (c.icon) await iconCircle(slide, c.icon, x + 0.2, y + 0.2, 0.6);
+      const inset = c.icon ? .9 : .2;
+      addText(slide, runs(c.head, { fontSize: 21, bold: true, color: C.ink }), { x: x + inset, y: y + 0.18, w: cw - inset - .15, h: 0.65, valign: "middle" });
       addText(slide, runs(c.text, { fontSize: pt }), { x: x + 0.2, y: y + 0.9, w: cw - 0.4, h: ch - 0.95 });
     } else {
-      await iconCircle(slide, c.icon || "fa:FaLightbulb", x + 0.25, y + 0.25, 0.75);
-      addText(slide, runs(c.head, { fontSize: 21, bold: true, color: C.ink }), { x: x + 0.2, y: y + 1.1, w: cw - 0.4, h: 0.6, valign: "middle" });
-      addText(slide, runs(c.text, { fontSize: pt }), { x: x + 0.2, y: y + 1.7, w: cw - 0.4, h: ch - 1.75 });
+      if (c.icon) await iconCircle(slide, c.icon, x + 0.25, y + 0.25, 0.75);
+      const headY = c.icon ? 1.1 : .3, textY = c.icon ? 1.7 : .9;
+      addText(slide, runs(c.head, { fontSize: 21, bold: true, color: C.ink }), { x: x + 0.2, y: y + headY, w: cw - 0.4, h: 0.6, valign: "middle" });
+      addText(slide, runs(c.text, { fontSize: pt }), { x: x + 0.2, y: y + textY, w: cw - 0.4, h: ch - textY - .05 });
     }
   }
   if (s.callout) callout(slide, s.callout, CONTENT_BOTTOM - 0.9, 0.9, s.callout_label || "Key idea");
@@ -431,8 +515,33 @@ L.table = async (slide, s) => {
   if (s.callout) callout(slide, s.callout, CONTENT_BOTTOM - 0.9, 0.9, s.callout_label || "Key idea");
 };
 
-L.flow = async (slide, s) => {
+L.flow = async (slide, s, spec) => {
   title(slide, s.title);
+  if (s.arrows !== undefined || s.steps.some(step => step.role !== undefined)) {
+    // The exported scene is the source of truth for all text, shapes and
+    // routes. A direct layout call can construct the same scene for tests.
+    const g = spec?.assets?.figures?.[s.flow_asset]?.scene
+      || technicalDiagrams.scene(technicalDiagrams.flowDiagram(s, s.flow_asset));
+    const {paras} = bulletParas(s.bullets, 18);
+    const body = [...g.items.filter(i => i.kind === "text").map(i => i.text), ...paras.map(p => p.text),
+      ...(s.callout ? [s.callout_label || "Key idea", s.callout] : [])];
+    const words = body.reduce((sum, t) => sum + (plain(t).trim().match(/\S+/g) || []).length, 0);
+    if (words > 40) throw Error(`flow has ${words} body words; shorten it to 40 including its legend`);
+    if (paras.length > 3) throw Error("annotated flow permits at most three supporting bullets");
+    const bottom = s.callout ? CONTENT_BOTTOM - 1.05 : CONTENT_BOTTOM;
+    const pt = 18, cpl = Math.floor((CW - 0.5) / ((0.47 * pt) / 72));
+    const lines = paras.reduce((n, p) => n + Math.max(1, Math.ceil(plain(p.text).length / cpl)), 0);
+    const bulletsH = paras.length ? lines * 1.22 * pt / 72 + paras.length * 8 / 72 + .12 : 0;
+    const figureH = bottom - CONTENT_TOP - (bulletsH ? bulletsH + .18 : 0);
+    const box = imgFit({w:g.width, h:g.height}, MX, CONTENT_TOP, CW, figureH);
+    const smallest = Math.min(...g.items.filter(i => i.kind === "text").map(i => i.size)) * box.w / g.width * 72;
+    if (smallest < 14 - .001) throw Error("flow cannot fit at 14 pt; move supporting text to Word notes");
+    technicalDiagrams.nativeScene(slide, g, addText, box);
+    if (paras.length) addText(slide, bulletParas(s.bullets, pt).arr,
+      {x:MX,y:bottom-bulletsH,w:CW,h:bulletsH,margin:0});
+    if (s.callout) callout(slide, s.callout, CONTENT_BOTTOM - .9, .9, s.callout_label || "Key idea");
+    return;
+  }
   const steps = s.steps;
   const n = steps.length;
   const bottom = s.callout ? CONTENT_BOTTOM - 1.05 : CONTENT_BOTTOM;
@@ -599,6 +708,8 @@ L.code = async (slide, s) => {
 };
 
 L.quiz = async (slide, s) => {
+  // Prediction first. Correctness, explanations and reveal fields are notes
+  // metadata only; every visible option receives the same treatment.
   title(slide, s.title || "Quick check");
   await iconCircle(slide, "fa:FaQuestion", MX, CONTENT_TOP + 0.05, 0.7, C.accent);
   const qpt = fitSize([s.question], CW - 1.0, 1.2, 24, 16, { bold: true });
@@ -748,11 +859,12 @@ async function main() {
     }
     if (s.notes) slide.addNotes(String(s.notes).trim());
   }
-  await pres.writeFile({ fileName: outPath });
+  await atomicOutput(outPath, temporary => pres.writeFile({ fileName: temporary }));
   console.log(`slides: wrote ${outPath} (${spec.slides.length} slides)`);
 }
 
-main().catch((e) => {
+module.exports = {layouts:L, visualTexts, validateVisualSlide};
+if (require.main === module) main().catch((e) => {
   console.error(e.stack || e.message);
   process.exit(1);
 });

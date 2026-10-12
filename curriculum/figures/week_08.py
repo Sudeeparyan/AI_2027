@@ -1,5 +1,5 @@
-"""Week 8 figures: fine-tuning diagrams, plus REAL results harvested from the executed lab notebook
-(curriculum/assets/week_08/results.json)."""
+"""Week 8 figures: fine-tuning diagrams, plus stored results from a full CPU run of the earlier, larger
+version of the lab (curriculum/assets/week_08/results.json). The CPU core exports results_cpu_core.json."""
 import json
 import textwrap
 from pathlib import Path
@@ -47,62 +47,64 @@ def cover(path):
 
 
 def decision(path):
-    fig, ax = canvas(5.7)
-    blocks=[(.1,2.8,2.3,.95,"Start: prompt +\nevaluation set","data"),
-            (3.1,2.8,2.3,.95,"Meets the\nquality bar?","loss"),
-            (5.9,4.35,3.2,.85,"Done: ship\n+ monitor","output"),
-            (5.9,2.8,3.2,.95,"Missing knowledge?\n(facts, documents)","loss"),
-            (9.8,2.8,3.0,.95,"RAG: retrieve and\nground (week 12)","tool"),
-            (5.9,1.05,3.2,.95,"Behaviour / format /\nstyle / cost gap?","loss"),
-            (9.8,1.05,3.0,.95,"Fine-tune (LoRA) a\nsuitable model","model"),
-            (3.1,1.05,2.3,.95,"Review task,\ndata and model","tool")]
-    for x,y,w,h,label,role in blocks:role_box(ax,x,y,w,h,label,role,size=16)
-    routed_arrow(ax,[(2.4,3.275),(3.1,3.275)])
-    routed_arrow(ax,[(5.4,3.6),(5.6,3.6),(5.6,4.775),(5.9,4.775)],label="yes",label_xy=(5.3,4.1),size=16)
-    routed_arrow(ax,[(5.4,3.275),(5.9,3.275)],label="no",label_xy=(5.65,3.6),size=16)
-    routed_arrow(ax,[(9.1,3.275),(9.8,3.275)],label="yes",label_xy=(9.45,3.6),size=16)
-    routed_arrow(ax,[(7.5,2.8),(7.5,2)],label="no",label_xy=(7.85,2.4),size=16)
-    routed_arrow(ax,[(9.1,1.525),(9.8,1.525)],label="yes",label_xy=(9.45,1.85),size=16)
-    routed_arrow(ax,[(5.9,1.525),(5.4,1.525)],label="no",label_xy=(5.65,1.85),size=16)
-    ax.text(.1,5.45,"Compare alternatives first; combine them when the task needs it",fontsize=19,color=INK,fontweight="bold")
+    fig, ax = canvas(5.0)
+    blocks=[(.1,2.6,2.3,.95,"Prompt +\ntest set","data"),
+            (3.1,2.6,2.3,.95,"Meets\nthe bar?","loss"),
+            (5.9,4.05,3.2,.85,"Ship +\nmonitor","output"),
+            (5.9,2.6,3.2,.95,"Missing\nfacts?","loss"),
+            (9.8,2.6,3.0,.95,"Retrieval\n(week 12)","tool"),
+            (5.9,.95,3.2,.95,"Behaviour or\ncost gap?","loss"),
+            (9.8,.95,3.0,.95,"LoRA\nfine-tune","model"),
+            (3.1,.95,2.3,.95,"Review task\nand data","tool")]
+    for x,y,w,h,label,role in blocks:role_box(ax,x,y,w,h,label,role,size=17)
+    routed_arrow(ax,[(2.4,3.075),(3.1,3.075)],label="score",label_xy=(2.75,3.35),size=16)
+    routed_arrow(ax,[(5.4,3.4),(5.6,3.4),(5.6,4.475),(5.9,4.475)],label="yes",label_xy=(5.3,3.95),size=16)
+    routed_arrow(ax,[(5.4,3.075),(5.9,3.075)],label="no",label_xy=(5.65,2.8),size=16)
+    routed_arrow(ax,[(9.1,3.075),(9.8,3.075)],label="yes",label_xy=(9.45,3.35),size=16)
+    routed_arrow(ax,[(7.5,2.6),(7.5,1.9)],label="no",label_xy=(7.85,2.25),size=16)
+    routed_arrow(ax,[(9.1,1.425),(9.8,1.425)],label="yes",label_xy=(9.45,1.7),size=16)
+    routed_arrow(ax,[(5.9,1.425),(5.4,1.425)],label="no",label_xy=(5.65,1.7),size=16)
     # A role key would call the question boxes "loss / update"; say what the colours mean here instead.
-    ax.text(.1,.3,"Orange boxes are questions: follow yes or no. Grey boxes are actions outside training.",fontsize=16,color=TEXT)
+    ax.text(.1,.3,"Orange boxes are questions; follow yes or no.",fontsize=16,color=TEXT)
     save(fig,path)
 
 
 def rlhf(path):
-    fig, ax = canvas(5.4)
-    steps=[(.1,"1. SFT","Known good answers","model"),(3.4,"2. Compare\nreplies","Human-ranked pairs","data"),
-           (6.7,"3. Reward\nmodel","Learn a preference score","loss"),(10,"4. Policy\nupdate","PPO reward; KL penalty","model")]
+    fig, ax = canvas(4.6)
+    blue = "#0072B2"
+    steps=[(.1,"1. SFT","Demonstrations","model"),(3.5,"2. Compare","Ranked pairs","data"),
+           (6.9,"3. Reward\nmodel","Preference score","loss"),(10.3,"4. PPO\nupdate","Reward − KL","model")]
     for x,title,sub,role in steps:
-        role_box(ax,x,2.75,2.85,1.05,title,role,size=20)
-        ax.text(x+1.425,2.3,sub,ha="center",fontsize=16,color=TEXT)
-    for x in (2.95,6.25,9.55):routed_arrow(ax,[(x,3.275),(x+.45,3.275)])
-    ax.text(.1,5.1,"An InstructGPT-style RLHF pipeline",fontsize=20,color=INK,fontweight="bold")
-    ax.text(.1,1.4,"DPO: train directly from ranked pairs and a fixed reference; no reward-model fit or RL loop.",fontsize=16,color=TEXT)
-    ax.text(.1,.8,"Reward and preference are teaching signals; evaluate factuality and safety separately.",fontsize=16,color=MUTED)
-    role_legend(ax,.15,size=16)
+        role_box(ax,x,2.55,2.6,1.05,title,role,size=20)
+        ax.text(x+1.3,2.1,sub,ha="center",fontsize=16,color=TEXT)
+    for x,label in zip((2.7,6.1,9.5),("replies","pairs","scores")):
+        routed_arrow(ax,[(x,3.075),(x+.8,3.075)])
+        ax.text(x+.4,3.8,label,ha="center",va="bottom",fontsize=16,color=blue)
+    role_legend(ax,.3,size=16)
     save(fig,path)
 
 
 def lora(path):
-    fig, ax = canvas(5.8)
-    role_box(ax,.2,2.65,1.65,.9,"Input x","data",size=21)
-    role_box(ax,3.0,3.75,2.3,1.0,"W x\nW fixed","model",size=20)
-    role_box(ax,3.0,1.6,2.3,1.0,"A x\nA trainable","loss",size=19)
-    role_box(ax,6.0,1.6,2.3,1.0,"B(Ax) × α/r\nB trainable","loss",size=18)
-    role_box(ax,9.0,2.65,1.4,.9,"Add","model",size=21)
-    role_box(ax,11.2,2.65,1.5,.9,"h","output",size=24)
-    routed_arrow(ax,[(1.85,3.1),(2.4,3.1),(2.4,4.25),(3,4.25)])
-    routed_arrow(ax,[(1.85,3.1),(2.4,3.1),(2.4,2.1),(3,2.1)])
-    routed_arrow(ax,[(5.3,4.25),(9.7,4.25),(9.7,3.55)])
-    routed_arrow(ax,[(5.3,2.1),(6,2.1)])
-    routed_arrow(ax,[(8.3,2.1),(9.7,2.1),(9.7,2.65)])
-    routed_arrow(ax,[(10.4,3.1),(11.2,3.1)])
-    ax.text(.2,5.45,"LoRA: a trainable correction runs beside the fixed transformation",fontsize=19,color=INK,fontweight="bold")
-    ax.text(.2,.95,"d = k = 4096; rank 16: W has 16.8 M values; A+B has 131,072 (0.78%).",fontsize=16,color=TEXT)
-    ax.text(.2,.55,"Default LoRA: B starts at zero. Only adapter paths receive parameter updates.",fontsize=16,color=MUTED)
-    role_legend(ax,.05,size=16)
+    fig, ax = canvas(4.8)
+    blue = "#0072B2"
+    role_box(ax,.2,2.15,1.4,.9,"Input x","data",size=21)
+    role_box(ax,3.2,3.2,2.3,1.0,"W\nfrozen","model",size=20)
+    role_box(ax,3.2,1.0,1.8,1.0,"A\ntrainable","loss",size=19)
+    role_box(ax,6.3,1.0,2.3,1.0,"B · α/r\ntrainable","loss",size=18)
+    role_box(ax,9.4,2.15,1.4,.9,"Add","model",size=21)
+    role_box(ax,11.5,2.15,1.2,.9,"h","output",size=24)
+    routed_arrow(ax,[(1.6,2.6),(2.3,2.6),(2.3,3.7),(3.2,3.7)])
+    routed_arrow(ax,[(1.6,2.6),(2.3,2.6),(2.3,1.5),(3.2,1.5)])
+    ax.text(2.75,3.8,"x [k]",ha="center",va="bottom",fontsize=16,color=blue)
+    routed_arrow(ax,[(5.5,3.7),(10.1,3.7),(10.1,3.05)])
+    ax.text(7.8,3.8,"W x [d]",ha="center",va="bottom",fontsize=16,color=blue)
+    routed_arrow(ax,[(5.0,1.5),(6.3,1.5)])
+    ax.text(5.65,1.6,"A x [r]",ha="center",va="bottom",fontsize=16,color=blue)
+    routed_arrow(ax,[(8.6,1.5),(10.1,1.5),(10.1,2.15)])
+    ax.text(9.3,1.6,"B(Ax) [d]",ha="center",va="bottom",fontsize=16,color=blue)
+    routed_arrow(ax,[(10.8,2.6),(11.5,2.6)])
+    ax.text(11.15,2.7,"[d]",ha="center",va="bottom",fontsize=16,color=blue)
+    role_legend(ax,4.45,size=16)
     save(fig,path)
 
 
@@ -117,7 +119,7 @@ def param_compare(path):
     for i,value in enumerate(values[::-1]):
         ax.text(value*1.12,i,f"{value:,} ({100*value/base:.2f}% of base)",va="center",fontsize=18)
     ax.set_xlabel("parameters that would be trained (log scale)",fontsize=18)
-    ax.set_title("Qwen2.5-0.5B: exact counts from the recorded lab",loc="left",fontsize=19)
+    ax.set_title("Qwen2.5-0.5B: exact counts from the stored full run",loc="left",fontsize=19)
     ax.set_xlim(1e6,base*40); ax.tick_params(labelsize=18); ax.grid(axis="y",visible=False)
     save(fig,path)
 

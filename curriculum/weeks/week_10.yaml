@@ -42,32 +42,52 @@ coverage:
 slides:
 - type: title
   figure: cover
-  notes: 'Welcome to week 10, multimodal generative AI applications. Last week we learned how models align modalities in a shared
-    space. This week we look at the systems built on those foundations: multimodal LLMs that read photos, documents, charts
-    and audio and answer in text or speech; generators that turn text into images, speech, music and video; and how to evaluate
-    them and use them responsibly.
+  notes: 'In short: Media applications need both generation and verification.
 
 
-    Ask students: Name one multimodal tool you used this week. What went in, and what came out?
+    Explain: A modality is a kind of data, such as an image or audio. Multimodal models connect supported kinds of data. A vision-language
+    model reads an image with a text question. Other models create pictures, waveforms or video. Their outputs need different
+    checks.
 
-    Expected answer: For example, a phone app that reads a photo of a menu and answers in text: an image in, text out.
+
+    Example: An invoice photograph supplies pixels; the requested answer supplies a text task. Reading EUR 20 and EUR 15 precedes
+    computing EUR 35. For the invoice example, identify which values came from pixels and which were computed, then state how
+    each is checked.
 
 
-    Common mistake: Assuming a model that reads images can also generate them.'
+    Ask: Does reading an image imply the model generates images?
+
+
+    Answer: No. The exact model and endpoint determine accepted inputs and generated outputs.
+
+
+    Watch out: A fluent media description can contain unsupported details.'
 - type: outcomes
-  notes: 'Six outcomes matching the descriptor''s week 10: multimodal LLMs; training and fine-tuning multimodal models; evaluation
-    of multimodal generative AI; and applications, extended with generation across modalities and responsible use, which the
-    revised 7.3 adds explicitly because deepfakes and content provenance are now regulated. The practical outcome is designing
-    an application that combines a multimodal model with verification and labelling, which feeds directly into projects that
-    process images, documents or speech. This week practises MIMLO 2, 3 and 4.
+  notes: 'In short: Explain, use and evaluate multimodal systems responsibly.
 
 
-    Ask students: Which outcome comes from the revised 7.3 descriptor?
+    Explain: The full six objectives remain in the teaching notes. We distinguish model architecture from training and inference.
+    Inference uses learned weights to produce an output. Evaluation checks a stated task using known evidence. Responsible design
+    includes permission, privacy, disclosure and human review.
 
-    Expected answer: Responsible use of synthetic media: deepfakes, labelling and content provenance.
+
+    Example: For a council invoice service, explain the VLM, check extracted amounts, compute sums, and route discrepancies
+    to a person. For the council workflow, ask learners to assign one concrete verification action to each relevant objective
+    before revealing the answer.
 
 
-    Common mistake: Treating output quality as the only outcome. Verification and labelling are part of the design.'
+    Ask: Which objective requires more than attractive outputs?
+
+
+    Answer: Verification and responsible application design require factual checks, consent and provenance decisions.
+
+
+    Watch out: One quality score cannot cover every objective or modality.'
+  items:
+  - Read media.
+  - Trace training.
+  - Generate responsibly.
+  - Evaluate tasks.
 - type: agenda
   icon: fa:FaRoute
   items:
@@ -85,18 +105,25 @@ slides:
     minutes: 22
   - title: Lab preview and wrap-up
     minutes: 6
-  notes: 'The plan follows the revised descriptor. Sections one and three contain the real outputs from the lab run: captions,
-    chart and document question answering, text-to-image, image editing and speech round trips. Take the break after section
-    three. Section five covers deepfakes, provenance and applications, and ends with a design pattern that students can reuse
-    in their projects.
+  notes: 'In short: Follow the route from media inputs to checked applications.
 
 
-    Ask students: Which sections show real outputs from the lab run?
+    Explain: Week 9 supplied shared representations and alignment. Today we inspect models that use those foundations. We separate
+    reading media from generating media. Training explains where capabilities come from; evaluation establishes their limits.
+    The final application pattern combines model inference with code and human review.
 
-    Expected answer: Sections one and three.
+
+    Example: A chart-reading route returns text; a lighthouse prompt follows a diffusion route to pixels. They require different
+    known answers and quality checks.
 
 
-    Common mistake: Reading one run of one model as typical of every model.'
+    Ask: Where should evaluation happen in this sequence?
+
+
+    Answer: After each relevant operation, with evidence appropriate to that task, before trusting or publishing the result.
+
+
+    Watch out: Archived examples demonstrate one configuration, rather than universal capability.'
 - type: discussion
   title: Warm-up
   icon: fa:FaReceipt
@@ -105,373 +132,457 @@ slides:
   - Read amounts accurately.
   - Calculate and cross-check totals.
   - Protect personal details.
-  notes: 'Two minutes in pairs. Students usually identify reading errors first, then arithmetic errors, and
-    some notice privacy: receipts can contain partial card numbers, locations and times. Add a fourth risk:
-    the model may confidently report numbers that are not on the receipt, which is multimodal hallucination.
-    This warm-up maps onto the lecture: section one shows that current models read and reason well but not
-    perfectly; section four measures hallucination; section five covers privacy. The design lesson, extract
-    then verify with code, appears at the end.
+  notes: 'In short: A receipt workflow separates reading, arithmetic and privacy.
 
 
-    Analogy: A receipt reader has two jobs: read the printed amounts, then calculate with those amounts. Each
-    job needs its own check.
+    Explain: Reading turns visible symbols into candidate values. Arithmetic combines those values using explicit operations.
+    Verification checks both the reading and the calculation. Receipts may reveal names, locations or payment details. A synthetic
+    receipt lets us examine errors without exposing a real person.
 
 
-    Ask students: Can a fluent invoice answer contain a wrong total?
-
-    Expected answer: Yes. The model can misread values or calculate incorrectly; verify extracted fields and
-    sums.
+    Example: Four people share EUR 35 equally: code computes EUR 8.75 each. A misread EUR 350 creates a different answer despite
+    correct division.
 
 
-    Common mistake: A valid output format does not establish that its values match the image.'
+    Ask: Can a correctly calculated split still be wrong?
+
+
+    Answer: Yes. The calculation can use misread amounts, an omitted item or an unsuitable splitting rule.
+
+
+    Watch out: Valid numeric output does not show that the value matches the receipt.'
 - type: section
   number: 1
   title: Multimodal LLMs
   question: How do chat models see, read and listen?
   icon: fa:FaEye
-  notes: 'Section one covers multimodal large language models, also called vision-language models or MLLMs. We compare the two
-    main designs, list their capabilities, survey the model families, and look at real outputs from open models on photos, a
-    chart and a document, including errors. About twenty-five minutes.
+  notes: 'In short: A VLM generates text conditioned on visual evidence.
 
 
-    Analogy: A visual bridge acts like an adapter between two devices: it maps vision features into vectors the language model
-    can use.
+    Explain: VLM means vision-language model. An encoder converts pixels into learned features. A bridge makes those features
+    usable by a language component. The language component predicts answer tokens using the image and question. Audio and video
+    support depend on the exact architecture and endpoint.
 
 
-    Ask students: Besides text, what kinds of input can a multimodal LLM take?
+    Example: Ask which bar is tallest in a known chart. Image features provide evidence while question tokens specify the requested
+    property.
 
-    Expected answer: Images (including documents and charts), audio, and video as sampled frames, depending on the model.
+
+    Ask: What is the bridge connecting?
 
 
-    Common mistake: Assuming a multimodal family name guarantees every input and output type.'
+    Answer: Visual feature vectors and the representation accepted by the language component; it is a learned mapping.
+
+
+    Watch out: A family name alone does not specify every supported input or output.'
 - type: figure
   title: 'Two designs: modular bridge vs. natively multimodal'
   figure: mllm_types
   bullets:
-  - '**Modular:** pretrained encoder → bridge → language model.'
-  - '**Native multimodal:** training mixes supported data types.'
-  - Trace the exact model’s inputs and outputs.
+  - Check supported inputs and outputs.
   stack: true
-  notes: 'There are two broad designs. Modular models connect separately pretrained encoders to a language model through a projector,
-    as in LLaVA from last week; they are cheap to build and common among open models, and usually output text. Natively multimodal,
-    sometimes called omni, models are trained from the start on interleaved sequences of text, image and audio tokens, so they
-    can process and often generate several modalities in one model, which enables low-latency voice conversations and reasoning
-    over audio and video.
+  notes: 'In short: Modular bridges and joint multimodal training organise learning differently.
 
 
-    Ask students: Which design is easier to build from existing open models?
+    Explain: Modular systems connect separately pretrained components. A projector maps visual features into the language representation.
+    Joint multimodal training uses mixed supported data in the training recipe. Native is a broad design description, rather
+    than a guarantee of every modality. Check the particular checkpoint and endpoint.
 
-    Expected answer: The modular design: connect a pretrained encoder to a language model through a trained bridge.
+
+    Example: The left route encodes image pixels, projects features and predicts words. The right route represents supported
+    media within jointly trained components.
 
 
-    Common mistake: Assuming a modular model can reply in speech. Most output text only.'
+    Ask: Which approach can reuse an existing image encoder and LLM?
+
+
+    Answer: The modular approach, provided its connecting projector is trained to make the components work together.
+
+
+    Watch out: Do not interpret native multimodal as universal media generation.'
 - type: cards
   title: What multimodal LLMs can do
   cards:
-  - head: Describe / answer
-    icon: fa:FaImage
-    text: Write alt text for a photo. Check that every named object is really there.
-  - head: Documents / OCR
-    icon: fa:FaFileInvoice
-    text: Read an invoice number and total. Validate each field in code.
-  - head: Charts / tables
-    icon: fa:FaChartBar
-    text: Read one bar's value; check the axis and units. Add values in code.
+  - head: Caption
+    text: Name visible objects.
+  - head: Documents
+    text: Extract checked fields.
+  - head: Charts
+    text: Read axes; compute sums.
   - head: Video
-    icon: fa:FaVideo
-    text: Summarise a lecture clip from sampled frames. A brief event can fall between frames.
+    text: Inspect sampled frames.
   - head: Speech
-    icon: fa:FaMicrophone
-    text: Transcribe a spoken question and reply aloud. Check names and numbers.
-  - head: Screens / GUI
-    icon: fa:FaMousePointer
-    text: Find the Submit button and propose a click. Code or a person approves it.
-  notes: 'Multimodal LLMs have a wide range of capabilities. Describing and answering questions about images supports accessibility,
-    for example generating alt text. Document understanding, reading invoices, forms and PDFs, is one of the most valuable business
-    uses. Chart and table reading supports analytics. Video understanding samples frames and sometimes audio. Speech models
-    understand and produce voice. Screen understanding lets agents operate graphical interfaces, previewed in week 12. For every
-    capability, accuracy varies with image quality, resolution and domain, so evaluation is essential.
+    text: Check names and numbers.
+  - head: Screens
+    text: Approve consequential actions.
+  notes: 'In short: Capabilities are tasks with specific inputs and outputs.
 
 
-    Ask students: Why can a video model miss a short event?
+    Explain: Captioning describes an image in text. OCR reads visible characters; document understanding links those fields
+    to a task. Chart reading also needs correct axes and units. Video systems may inspect sampled frames, missing brief events.
+    Speech and screen tasks need their own accuracy and permission checks.
 
-    Expected answer: It samples a few frames per second, so an event between samples may never be seen.
+
+    Example: Alt text names visible objects; an invoice task extracts an identifier. Neither task authorises a screen agent
+    to submit a form.
 
 
-    Common mistake: Trusting chart readings without checking the axes and units.'
+    Ask: Which chart mistake can survive a fluent answer?
+
+
+    Answer: Reading the wrong axis or units, or inventing a value; compare the answer with the chart evidence.
+
+
+    Watch out: A useful description may still require review before accessibility use.'
 - type: table
   title: Multimodal model families (examples, 2026)
   header:
   - Family
   - Access
-  - Inputs
-  - Notes
+  - Route
   rows:
-  - - GPT (OpenAI)
+  - - GPT
     - Hosted
-    - Text and images; audio on some models
-    - Live voice on some endpoints
-  - - Gemini (Google)
+    - Endpoint-specific
+  - - Gemini
     - Hosted
-    - Text, images, audio, video
-    - Long video and document inputs
-  - - Claude (Anthropic)
+    - Endpoint-specific
+  - - Claude
     - Hosted
-    - Text, images, PDF pages
-    - Reads charts, tables and scans
-  - - Qwen-VL / Qwen-Omni
-    - Open weights
-    - Images and video; Omni adds audio
-    - 'Lab GPU route: Qwen3-VL-2B'
+    - Image→text
+  - - Qwen-VL/Omni
+    - Weights
+    - Variant-specific
   - - LLaVA
     - Research
-    - Images + text
-    - Reference modular design
+    - Image→text
   - - SmolVLM
-    - Open weights
-    - Images + text
-    - 'Lab CPU route: 256 M parameters'
-  notes: 'A snapshot of families, without version numbers, which change monthly. The proprietary families from OpenAI, Google
-    and Anthropic all accept images and documents; OpenAI and Google also handle audio natively, and Gemini is notable for very
-    long video and document contexts. Among open-weight models, the Qwen vision-language and omni families are strong on documents
-    and charts; LLaVA is the research reference; small models such as SmolVLM run on laptops. In the lab we use Qwen3-VL-2B
-    on a GPU and SmolVLM on a CPU, both Apache-licensed.
+    - Weights
+    - Image→text
+  notes: 'In short: Compare exact model capabilities rather than treating families as interchangeable.
 
 
-    Ask students: Which model does the lab use on a CPU, and why?
+    Explain: Hosted models run through a provider service. Open weights can be downloaded subject to their licence. A family
+    may include several sizes and endpoints. Their media inputs, generated outputs and context limits can differ. The CPU lab
+    selects a small image-to-text checkpoint, not an image generator.
 
-    Expected answer: SmolVLM-256M, because it is small enough for a laptop; the GPU path uses Qwen3-VL-2B.
+
+    Example: SmolVLM-256M is the proposed local core; the archived results used Qwen3-VL-2B. Different checkpoints can produce
+    different factual answers.
 
 
-    Common mistake: Assuming every member of a family accepts the same inputs. Check the exact endpoint or model card.'
-  callout: 'Family examples: verify exact capabilities and licence.'
+    Ask: Why is a family comparison insufficient for deployment?
+
+
+    Answer: The exact checkpoint, endpoint, licence, task evaluation and hardware requirements must also be checked.
+
+
+    Watch out: Capabilities and provider terms change; the table is an illustrative comparison.'
+  callout: Check exact checkpoint and licence.
 - type: figure
   title: Real captions from an open VLM
   figure: lab_caption
   bullets:
-  - '{{CAPTIONS}}'
-  - Compare every claimed detail with the photographs.
+  - Archived Qwen3-VL-2B captions.
+  - Check every claimed detail.
   stack: true
-  notes: 'These are the two sample photographs from scikit-learn''s standard image set, a temple in China and a flower, captioned
-    by the open vision-language model in the lab run; the captions are quoted in the bullet. Generally such captions are accurate
-    at the level of objects and scenes, but can add details that are not there, such as a time of day or a location.
+  notes: 'In short: Inspect archived captions claim by claim against the photographs.
 
 
-    Analogy: A witness who describes a scene well but adds a confident guess about its surroundings.
+    Explain: A caption is generated answer text about an image. Fluent wording can include locations or objects unsupported
+    by the pixels. The archived captions came from a specific Qwen3-VL-2B run. The new CPU core uses a smaller checkpoint. Its
+    captions must be evaluated independently.
 
 
-    Ask students: Which caption details can you check in the photograph, and which might be invented?
-
-    Expected answer: Objects, colours and the flower type can be checked; surroundings and weather need checking, because models
-    add plausible settings.
+    Example: The archived temple caption describes a lake and a hill. Point to the visible evidence before accepting those phrases.
+    {{CAPTIONS}}
 
 
-    Common mistake: Accepting a fluent caption as a complete and accurate description.'
+    Ask: What should happen to an unsupported caption detail?
+
+
+    Answer: Remove it, mark uncertainty or review the source; attractive prose is insufficient evidence for a factual claim.
+
+
+    Watch out: Stored captions are measured examples, not answers promised by the current core.'
 - type: bullets
   title: How images become tokens, and why resolution matters
-  icon: fa:FaTh
   bullets:
-  - 'Example: (336/14)² = 576 image patches.'
-  - Higher resolution can retain small text, at greater cost.
-  - Tiles and sampled video frames change the token load.
-  - Check the exact model and billing rules.
-  notes: 'Connect to weeks 5 and 9. A vision encoder cuts the image into patches; a three-hundred-and-thirty-six-pixel image
-    with fourteen-pixel patches gives twenty-four by twenty-four, which is 576 visual tokens, each passed to the LLM. Reading
-    small text in documents requires high resolution, so models tile large images or process them at their native resolution,
-    which multiplies the token count. Video is sampled at a few frames per second, so long videos consume enormous numbers of
-    tokens.
+  - Illustrative patch grid; processors differ.
+  - Resolution trades detail for computation.
+  notes: 'In short: Resolution changes visual detail and computation.
 
 
-    Ask students: A 448-pixel square image with 14-pixel patches: how many patches?
+    Explain: A patch is a small image region represented by a feature vector. A simple patch model divides an image into a grid.
+    Tiles may preserve local detail while increasing visual work. Video sampling adds a time dimension and can miss brief events.
+    Processor rules vary across models.
 
-    Expected answer: (448/14)² = 32² = 1,024.
+
+    Example: A 336-by-336 image divided into 14-by-14 patches has 24 patches per side, giving 24 times 24 equals 576.
 
 
-    Common mistake: Assuming higher resolution is free. More patches mean more tokens, time and cost.'
+    Ask: Does doubling resolution guarantee correct OCR?
+
+
+    Answer: No. It may preserve characters, but model training, compression, layout and the task still affect accuracy.
+
+
+    Watch out: This grid calculation illustrates one design; it is not every model''s visual-token count.'
+  visual:
+    type: example_strip
+    items:
+    - label: Per side
+      text: 336 ÷ 14 = 24
+    - label: Grid
+      text: 24 × 24 = 576 patches
+    - label: Small text
+      text: Check readable detail.
 - type: figure
   title: Cross-modal reasoning over a chart and a document (real)
   figure: lab_chart
   bullets:
-  - '{{QA_NOTES}}'
-  - Known chart and invoice values provide reference answers.
+  - Archived Qwen3-VL-2B answers.
+  - Compare field reading with aggregation.
   stack: true
-  notes: 'This is the lab''s evaluation design: we generated a bar chart and an invoice-style document, so the correct answers
-    are known exactly: which day had the most tickets, a single value, a total that requires adding five numbers, the invoice
-    number, the total due and the customer name. The bullet reports the measured accuracy of the open VLM. Typically single
-    values and text fields are read correctly, while aggregation, adding up the bars, is less reliable because the model estimates
-    rather than computes.
+  notes: 'In short: Known chart and invoice data reveal reading and calculation errors.
 
 
-    Ask students: Why can the model read single values but get the total wrong?
+    Explain: Ground truth is a known reference answer. We create the chart and fictional invoice from explicit data. This makes
+    factual checking possible without another model judging the answer. The archived run read several fields correctly but missed
+    the chart sum. The CPU core reports its own results separately.
 
-    Expected answer: Reading a value is perception; adding five values needs exact arithmetic, which the model only estimates.
+
+    Example: The chart total is 12 + 30 + 18 + 25 + 9 = 94; compare the complete archived reply with this known value. {{QA_NOTES}}
 
 
-    Common mistake: Accepting a model''s sum without computing it in code.'
+    Ask: Which check separates arithmetic from reading?
+
+
+    Answer: Extract and verify individual values, then sum them in code and compare the result with the requested total.
+
+
+    Watch out: A correct field format or high self-reported confidence does not establish a correct value.'
 - type: quiz
-  question: How should 200 invoice line items be totalled?
+  question: How should invoice items be totalled?
   options:
-  - Ask the model once for the grand total of all items
-  - Increase the temperature so the model reads more carefully
-  - Extract checked fields, sum in code, compare printed totals
-  - Trust the total if the model states high confidence
+  - Request one grand total
+  - Increase sampling temperature
+  - Check fields; sum in code
+  - Trust stated confidence
   answer: 2
-  notes: 'Answer: C. Separate perception from computation: use the model for what it is good at, reading fields into a schema
-    validated in code, as in week 7, then compute totals with code and cross-check them against the totals printed on the invoices
-    to detect reading errors automatically. A relies on the model''s arithmetic across many images, which is error-prone and
-    unverifiable. B adds randomness. D is unreliable: models'' self-reported confidence is poorly calibrated. Add human review
-    for invoices where the checks disagree.
+  notes: 'In short: Extract checked values and compute totals in code.
 
 
-    Ask students: How would code detect a misread line item?
+    Explain: A VLM supplies candidate fields from an image. Validation checks field types and required structure. Source checking
+    establishes whether those fields match the document. Code then performs arithmetic reproducibly. The printed total remains
+    another value to cross-check, rather than an unquestionable authority.
 
-    Expected answer: The sum of the extracted line items would not match the printed total.
+
+    Example: For two invoice lines, 40 times EUR 0.50 equals EUR 20 and 2 times EUR 7.50 equals EUR 15.
 
 
-    Common mistake: Trusting the model''s stated confidence.'
+    Ask: How should 200 invoice line items be totalled?
+
+
+    Answer: C. Extract checked fields, sum them in code and compare the result with the printed total; review mismatches.
+
+
+    Watch out: Increasing sampling temperature does not make visual reading more reliable.'
 - type: section
   number: 2
   title: Training and fine-tuning multimodal models
   question: How are these models built, and how can you adapt one?
   icon: fa:FaCogs
-  notes: 'Section two briefly explains how multimodal LLMs are trained, which the descriptor lists as training
-    and fine-tuning multimodal models, and how you can adapt one to your own domain with the parameter-efficient
-    methods from week 8. Keep it brief: students need the pipeline and the vocabulary, not the details of
-    each stage. About thirteen minutes.
+  notes: 'In short: Training connects visual representations with useful responses.
 
 
-    Analogy: First connect the reader to the writer; then practise useful image questions. This mirrors alignment
-    followed by visual instruction tuning.
+    Explain: Pretraining learns general representations from many examples. Alignment training connects representations from
+    different components. Visual instruction tuning uses image questions and desired answers. Adaptation targets a narrower
+    domain using representative data. The lab performs inference with existing weights rather than training a VLM.
 
 
-    Ask students: Does loading a pretrained VLM train its bridge?
-
-    Expected answer: No. The lab performs inference. Training the bridge needs examples, loss gradients and
-    updates.
+    Example: An image-caption pair says a blue cup; an instruction pair asks its colour and answers blue. A new photograph tests
+    generalisation.
 
 
-    Common mistake: The illustrated recipe is a common modular setup, not a universal training history.'
+    Ask: What must stay separate from adaptation examples?
+
+
+    Answer: A held-out test set representing the intended users, layouts and tasks, so evaluation can expose generalisation
+    errors.
+
+
+    Watch out: Training on a test image makes later success a weak measure of generalisation.'
 - type: figure
   title: A typical training pipeline for a vision-language model
   figure: vlm_training
   bullets:
-  - Start with pretrained vision and language parts.
-  - Train their bridge with paired examples.
-  - Tune image-question-answer tasks; test new images.
-  - Different recipes train different components.
+  - Conceptual recipe; lab uses pretrained weights.
   stack: true
-  notes: 'Walk through the stages. The vision encoder, typically CLIP or SigLIP, and the LLM are pretrained separately at great
-    cost. Alignment trains the projector on image-caption pairs so that visual features land in the LLM''s input space. Visual
-    instruction tuning, introduced by LLaVA, fine-tunes on conversations about images, now including charts, documents, OCR
-    and grounding tasks, often generated synthetically with the help of stronger models. Preference tuning or reinforcement
-    learning, as in week 8, reduces hallucination and improves helpfulness.
+  notes: 'In short: A typical recipe trains the bridge before visual instruction responses.
 
 
-    Ask students: Which stage teaches the model to answer questions about images?
+    Explain: A pretrained image encoder supplies feature vectors. A pretrained language model supplies text generation. Alignment
+    pre-training updates their connecting projector using paired examples. Visual instruction tuning uses questions and target
+    responses. Preference or domain adaptation may follow, depending on the chosen recipe.
 
-    Expected answer: Visual instruction tuning, on image-question-answer conversations.
+
+    Example: Train a bridge with a cup caption, then teach the question What colour is the cup? Test a different cup image.
 
 
-    Common mistake: Treating this recipe as universal. Other models train different parts or are trained natively from the start.'
+    Ask: Does every training stage update every component?
+
+
+    Answer: No. Recipes can freeze the image encoder, train the projector, or selectively adapt language weights such as LoRA
+    matrices.
+
+
+    Watch out: The diagram is a conceptual training recipe; the lab loads pretrained models.'
 - type: bullets
   title: Data for multimodal training
-  icon: fa:FaDatabase
   bullets:
-  - Image-caption pairs.
-  - Interleaved image/text documents.
-  - Questions, fields, charts and object locations.
-  - Audio with transcripts or descriptions.
   - Review labels, licences and consent.
-  notes: 'Multimodal training data comes in several forms. Web image-caption pairs are plentiful but noisy, so many teams re-caption
-    images with a strong model to get more detailed descriptions. Interleaved documents teach models to handle mixed sequences.
-    Task-specific data, for OCR, charts, screenshots and video, is often generated synthetically, for example by rendering charts
-    with known values, exactly what we do in the lab for evaluation. Audio data pairs speech with transcripts.
+  - Mixed documents preserve context.
+  notes: 'In short: Training data must represent both the media and the task.
 
 
-    Ask students: Why render charts with known values for training or testing?
+    Explain: Paired data connects an image with a caption or audio with a transcript. Interleaved documents contain several
+    kinds of data in context. Task labels can specify chart values, document fields or object positions. Synthetic examples
+    still require correctness checks. Permission and licence review precede training.
 
-    Expected answer: The correct answers are known exactly, so the labels are free and accurate.
+
+    Example: A rendered chart supplies pixels, a question and an exact target of 25. A wrong label teaches the wrong association
+    despite clean pixels.
 
 
-    Common mistake: Using scraped images and captions without checking licences and consent.'
+    Ask: Why remove duplicates across train and test sets?
+
+
+    Answer: Repeated images or near-identical layouts can inflate reported performance without demonstrating useful generalisation.
+
+
+    Watch out: More examples cannot compensate for systematically wrong labels or inappropriate data use.'
+  visual:
+    type: mini_table
+    header:
+    - Input
+    - Target
+    rows:
+    - - Image
+      - Caption
+    - - Chart
+      - Known answer
+    - - Speech
+      - Transcript
+    - - Document
+      - Field
 - type: bullets
   title: Adapting a multimodal model to your domain
-  icon: fa:FaWrench
   bullets:
-  - Define a specific visual task.
-  - Try prompting and checked extraction first.
-  - Adapt with labelled examples and a separate test.
-  - LoRA may train language weights; the bridge may also change.
-  notes: 'The week 8 approach carries over directly. For a domain such as a company''s own forms, industrial inspection images
-    or satellite imagery, you collect image-question-answer examples, freeze the vision encoder and apply LoRA to the language
-    model and possibly the projector, using libraries such as TRL, which supports vision-language fine-tuning. The same decision
-    rule applies: start with prompting and structured extraction; fine-tune when evaluation on your own images shows persistent
-    reading or format errors.
+  - Define the domain task.
+  - Keep a separate test set.
+  notes: 'In short: Adapt a model only after defining and measuring the domain task.
 
 
-    Ask students: Which part would you usually freeze when adapting a VLM to your own forms?
+    Explain: A domain is the intended setting, such as a particular invoice layout. Begin with prompting and checked extraction.
+    A labelled evaluation set identifies persistent reading or formatting failures. LoRA trains small added matrices for parameter-efficient
+    adaptation. Some recipes also update the visual bridge.
 
-    Expected answer: The vision encoder. LoRA then trains the language model and possibly the bridge.
+
+    Example: If a model repeatedly misreads a company''s item codes, compare improved image preparation and prompting before
+    training on permissioned examples.
 
 
-    Common mistake: Fine-tuning before trying prompting and checked extraction on your own images.'
+    Ask: What evidence justifies fine-tuning?
+
+
+    Answer: A repeatable task error on representative held-out images, plus enough correct training examples and a meaningful
+    evaluation plan.
+
+
+    Watch out: A successful demonstration on one familiar document is insufficient justification for adaptation.'
+  visual:
+    type: example_strip
+    items:
+    - label: First
+      text: Prompt; check extraction.
+    - label: Evidence
+      text: Repeated held-out errors.
+    - label: Adapt
+      text: LoRA; evaluate again.
 - type: section
   number: 3
   title: Generation across modalities
   question: From text to images, speech, music and video
   icon: fa:FaMagic
-  notes: 'Section three surveys generation across modalities, the descriptor''s list of text to image, image to image, text
-    to audio, text to video and so on. We look at real text-to-image and image-editing outputs from the lab, a speech round
-    trip, and the state of music and video generation. About twenty-five minutes; take the break afterwards.
+  notes: 'In short: Generation routes create different media and need different checks.
 
 
-    Analogy: Different workshop tools make different outputs: a diffusion pipeline makes pixels, TTS makes audio samples, ASR
-    makes words.
+    Explain: A text-to-image route produces pixels conditioned on words. Image editing also conditions on an existing picture.
+    Text-to-speech produces sound samples or intermediate audio tokens. Music and video add timing and continuity requirements.
+    A VLM that reads images usually produces answer text instead.
 
 
-    Ask students: Which generation tasks does the lab run, and which are only discussed?
+    Example: The prompt a lighthouse at sunset creates an image; asking what is visible in that image requests a text answer
+    from another route.
 
-    Expected answer: Text to image, image to image and text to speech run; text to video is discussed because of its cost.
+
+    Ask: Why should the output modality be named first?
 
 
-    Common mistake: Assuming one model handles every generation task.'
+    Answer: It determines the model, preprocessing, output representation, appropriate evaluation and likely resource requirements.
+
+
+    Watch out: A single multimodal interface can hide several distinct models behind different routes.'
 - type: figure
   title: 'Generation across modalities: a map'
   figure: generation_map
-  notes: 'This map summarises the main generation tasks, how they work and example model families. Images use latent diffusion
-    or flow transformers from week 4. Editing uses partial noising, inpainting and control signals. Speech synthesis uses neural
-    text-to-speech, increasingly language models over audio-codec tokens, which also enable voice cloning from short samples.
-    Speech-to-speech models power real-time voice assistants. Music and sound use diffusion or token language models over audio
-    codecs. Video uses spatio-temporal diffusion transformers.
+  notes: 'In short: Map each requested output to its generating operation.
 
 
-    Ask students: Which method family underlies most image, video and music generators on this map?
+    Explain: Diffusion progressively transforms a noisy representation into an image. Editing begins from a partly noised existing
+    representation. A vocoder converts acoustic features into a waveform. Audio-codec models generate discrete sound segments
+    represented as token IDs. Video models represent both space and time.
 
-    Expected answer: Diffusion or flow models, often transformers; some audio generators are language models over codec tokens.
+
+    Example: Trace words to image pixels, then trace words to sound samples. Both routes are conditional generation, but their
+    data and failures differ.
 
 
-    Common mistake: Thinking voice cloning needs hours of recordings. A few seconds can be enough, which is why consent matters.'
+    Ask: Which route tests whether a chart answer is true?
+
+
+    Answer: The VLM reading route with known-value checking; image or audio generation metrics answer different questions.
+
+
+    Watch out: A model-family example in the notes is not a promise that every variant supports every task.'
 - type: figure
   title: Text → image with a distilled model (real)
   figure: lab_t2i
   bullets:
-  - 'SD-Turbo: 2 denoising steps; guidance_scale = 0.'
-  - '{{T2I_NOTES}}'
-  - Inspect requested details and visual errors too.
+  - 'Archived SD-Turbo: 2 steps; guidance 0.'
+  - Inspect prompt details beside CLIP scores.
   stack: true
-  notes: 'Three prompts rendered by SD-Turbo with two steps in the lab run. Quality is good for a distilled model that needs
-    only two denoising steps. The bullet reports the CLIP scores: each image scores higher against its own prompt than the mean
-    score against the other prompts, a simple sanity check of prompt alignment that the lab automates. Remind students that
-    SD-Turbo uses the Stability AI Community License, with conditional commercial use, registration and revenue limits, which
-    matters for projects.
+  notes: 'In short: Distilled diffusion generates quickly but still needs visual inspection.
 
 
-    Ask students: Why is guidance_scale set to 0 for SD-Turbo?
+    Explain: Distillation trains a smaller-step sampling procedure from a more expensive process. The archived SD-Turbo experiment
+    used two denoising steps. Its guidance scale was zero under that model''s recipe. CLIP compared the generated images with
+    prompt embeddings. The full generator remains an optional extension in the CPU lab.
 
-    Expected answer: SD-Turbo was distilled to work without classifier-free guidance, so one prediction per step is enough.
+
+    Example: The lighthouse, robot and ramen prompts produced stored images. Compare own-prompt scores with other-prompt scores.
+    {{T2I_NOTES}}
 
 
-    Common mistake: Reading a higher CLIP score as proof that every requested detail is present.'
+    Ask: Can a good similarity score prove every requested object is present?
+
+
+    Answer: No. Inspect object count, text, composition and artefacts directly; a global similarity score can miss individual
+    errors.
+
+
+    Watch out: Do not apply another diffusion model''s preferred guidance settings without checking its recipe.'
 - type: figure
   title: 'Image → image: editing with partial noise (real)'
   figure: lab_i2i
@@ -480,230 +591,326 @@ slides:
   - Low strength tends to retain more input structure.
   - High strength permits more change; inspect the actual result.
   stack: true
-  notes: 'Image-to-image editing, from week 4''s SDEdit idea, adds noise to an existing image and denoises it with a new prompt.
-    The strength parameter sets how far into the noise schedule we go: in the recorded run, 0.3 and 0.6 left the lighthouse
-    painting almost unchanged, while 0.9 replaced most of it with a new coastal scene. None of the three looks like a pencil
-    sketch: strength controls how much may change, not whether the style request is followed, so compare each result with what
-    was asked. Inpainting restricts the change to a mask, and control methods such as ControlNet guide the preservation of edges
-    or pose.
+  notes: 'In short: Editing strength controls starting noise rather than overall quality.
 
 
-    Ask students: With strength 0.6 and 4 inference steps, how many denoising steps run?
+    Explain: Image-to-image generation encodes an existing picture. The pipeline adds partial noise before denoising with the
+    new prompt. Higher strength generally permits larger departures from the input. The schedule also depends on step count
+    and rounding. Hold the prompt and seed fixed when comparing settings.
 
-    Expected answer: 4 × 0.6 = 2.4, so 2 steps in practice.
+
+    Example: With four requested steps, strengths 0.3, 0.6 and 0.9 start at approximately one, two and three effective denoising
+    steps.
 
 
-    Common mistake: Thinking higher strength gives sharper images. It permits larger changes.'
+    Ask: What should be compared beside each edit?
+
+
+    Answer: The original image, prompt, seed, strength, effective schedule and visible preservation of the original scene.
+
+
+    Watch out: A higher setting can change more without improving the result or achieving the requested style.'
 - type: bullets
   title: Editing, control and personalisation
-  icon: fa:FaSlidersH
   bullets:
-  - '**Inpainting/outpainting:** edit a region or extend boundaries.'
-  - '**Control guides:** edges, depth or pose.'
-  - '**Instruction editing:** describe a change.'
-  - '**Personalisation:** adapt a subject or style with permission.'
-  notes: 'Beyond simple image-to-image, four editing families matter in practice. Inpainting and outpainting regenerate or extend
-    regions. Control methods follow structural guides such as edges, depth maps or human pose. Instruction-based editing lets
-    users describe changes in words, and natively multimodal models now support conversational editing. Personalisation with
-    LoRA or DreamBooth teaches a model a specific person, product or artistic style from a handful of images, which is powerful
-    for product photography and dangerous for impersonation and style imitation.
+  - Instruction editing describes a change.
+  - Check likeness and style permissions.
+  notes: 'In short: Editing tools constrain different parts of an image-generation task.
 
 
-    Ask students: Which editing method keeps a person''s pose while changing their clothes?
+    Explain: Inpainting changes a masked region. Outpainting extends the canvas beyond its original boundaries. A control guide
+    constrains structure using edges, depth or pose. Instruction editing describes the desired change in words. Personalisation
+    adapts a model toward a subject or style using example images.
 
-    Expected answer: A control method such as ControlNet with a pose guide, or inpainting only the clothing region.
+
+    Example: Replacing a damaged sign inside a mask differs from making the entire scene look like winter. Evaluate what changed
+    outside the intended region.
 
 
-    Common mistake: Personalising a model on someone''s face or voice without their permission.'
+    Ask: Why does personalisation require permission and licence checks?
+
+
+    Answer: Training examples may depict identifiable people or copyrighted work, and generated outputs can imitate likeness
+    or protected material.
+
+
+    Watch out: A technical ability to imitate a subject does not supply authority to do so.'
+  visual:
+    type: mini_table
+    header:
+    - Route
+    - Constraint
+    rows:
+    - - Inpaint
+      - Masked region
+    - - Outpaint
+      - Canvas boundary
+    - - Control
+      - Edges/depth/pose
+    - - Personalise
+      - Permissioned examples
 - type: bullets
   title: 'Speech: text-to-speech, cloning and speech-to-speech'
-  icon: fa:FaVolumeUp
   bullets:
-  - '**TTS:** words → sound features → waveform.'
-  - Other generators predict audio-codec IDs.
-  - Voice imitation needs permission and misuse controls.
-  - 'Lab: MMS-TTS → Whisper → WER.'
-  notes: 'Speech generation has changed quickly. Classic neural text-to-speech converts text into acoustic
-    features and then a waveform with a vocoder; VITS-based models such as Meta''s MMS, used in the lab, do
-    this end to end. Newer systems treat audio as codec tokens and use language models, enabling voice cloning
-    from a few seconds of speech, valuable for accessibility and dubbing, but also used in fraud. Speech-to-speech
-    assistants respond aloud; delay depends on the model and application.
+  - Keep the true sampling rate.
+  - Voice imitation requires permission.
+  notes: 'In short: Speech generation creates sound; recognition checks recovered words.
 
 
-    Analogy: Different workshop tools make different outputs. A diffusion pipeline makes pixels; TTS makes
-    samples; ASR makes words.
+    Explain: TTS means text-to-speech. A waveform is a sequence of sound samples. The sampling rate states how many samples
+    represent one second. ASR means automatic speech recognition and converts sound into text. Voice imitation adds consent
+    and impersonation risks beyond ordinary speech synthesis.
 
 
-    Ask students: Why keep an audio waveform’s sampling rate with its samples?
-
-    Expected answer: The rate tells the recogniser how many samples represent a second and preserves playback
-    speed.
+    Example: A 16,000-sample waveform at 16,000 samples per second lasts one second. Preserve this rate when passing the waveform
+    to a recogniser.
 
 
-    Common mistake: A higher editing strength permits larger changes; it does not guarantee sharper images.'
+    Ask: Does a zero-error transcript prove natural speech?
+
+
+    Answer: No. It establishes recovered words through one recogniser, while naturalness, pronunciation, timing and listener
+    experience need further checks.
+
+
+    Watch out: Changing a sampling-rate label without resampling changes the sound''s interpreted speed.'
+  visual:
+    type: example_strip
+    items:
+    - label: TTS
+      text: Words → waveform
+    - label: ASR
+      text: Waveform + rate → words
+    - label: Round trip
+      text: Recovered words ≠ naturalness
 - type: bullets
   title: Music, sound and video
-  icon: fa:FaFilm
   bullets:
-  - 'Music/sound: diffusion or audio tokens, such as MusicGen.'
-  - 'Video: spatial and temporal patches; sometimes sound.'
-  - Inspect changing identity, motion, drift and compute cost.
-  - Check music/film rights and deceptive uses.
-  notes: 'Music generation uses the same toolkit: Meta''s MusicGen is a language model over audio-codec tokens; Stable Audio
-    is a latent diffusion model. The music industry has sued several music-generation companies over training data, a live copyright
-    issue. Text-to-video models such as OpenAI''s Sora and Google''s Veo families extend diffusion transformers to space and
-    time, and since 2025 some also generate synchronised sound. The open problems are temporal consistency, realistic physics,
-    long durations and cost.
+  - Inspect identity, motion and synchronisation.
+  - Check rights and deceptive uses.
+  notes: 'In short: Music and video need temporal quality and rights checks.
 
 
-    Ask students: What is the hardest open problem in video generation?
+    Explain: Music models may generate audio-codec tokens or denoise sound representations. Video models represent both spatial
+    content and temporal changes. Temporal consistency means details remain coherent across frames. Sound and motion may need
+    synchronisation. These tasks can require substantial compute and careful licence review.
 
-    Expected answer: Keeping identities and motion consistent over time; longer videos also cost far more compute.
+
+    Example: A cup may look correct in each isolated frame yet change colour or disappear across the clip. Watch the sequence
+    rather than one thumbnail.
 
 
-    Common mistake: Assuming generated music is free to use. Rights holders have sued over training data.'
+    Ask: Which video error is invisible in a single frame?
+
+
+    Answer: Identity drift, broken motion, flicker or mismatched sound timing; evaluation must inspect transitions and the complete
+    sequence.
+
+
+    Watch out: Plausible frames and attractive music do not establish rights, physics or faithful prompt execution.'
+  visual:
+    type: mini_table
+    header:
+    - Output
+    - Representation
+    rows:
+    - - Music/sound
+      - Codec tokens or diffusion
+    - - Video
+      - Spatial + temporal patches
 - type: quiz
-  question: In image-to-image editing, what does increasing the 'strength' from 0.3 to 0.9 do?
+  question: Editing strength 0.3 → 0.9 changes what?
   options:
-  - Sharper output with the same composition
-  - Identical output, but more memory is used
-  - A higher guidance scale for the prompt
-  - More starting noise; potentially larger changes
+  - Sharper output, same scene
+  - Memory only
+  - Higher guidance scale
+  - More noise; larger changes
   answer: 3
-  notes: 'Answer: D. Strength controls how far along the noise schedule the original image is pushed before the model denoises
-    it with the new prompt. Low strength keeps structure and colours; high strength keeps little of the original. It is related
-    to the number of effective denoising steps, which is why the lab multiplies steps by strength. A, B and C confuse strength
-    with other settings. This is the same forward process from week 4, applied to an existing image instead of pure noise.
+  notes: 'In short: Increasing editing strength allows a larger departure from the input.
 
 
-    Ask students: What does strength 0.3 do?
+    Explain: Strength controls how much starting noise is used in image-to-image editing. It changes the starting point for
+    denoising. Guidance scale controls the influence of a conditioning signal in applicable recipes. These are different settings.
+    Comparisons should hold the input, prompt and random seed fixed.
 
-    Expected answer: It adds little noise, so the result keeps most of the input''s structure and colours.
+
+    Example: At four requested steps, changing strength from 0.3 to 0.9 changes the effective denoising schedule as well as
+    retained input information.
 
 
-    Common mistake: Confusing strength with guidance scale (option C).'
+    Ask: What does increasing strength from 0.3 to 0.9 do?
+
+
+    Answer: D. It adds more starting noise and can produce larger changes; it does not guarantee sharper output or raise guidance
+    scale.
+
+
+    Watch out: A strength slider is a controlled comparison, rather than a universal quality ranking.'
 - type: section
   number: 4
   title: Evaluating multimodal generative AI
   question: How do you measure quality, alignment and truthfulness across modalities?
   icon: fa:FaClipboardCheck
-  notes: 'Welcome back. Section four is about evaluation, which the descriptor lists explicitly for multimodal
-    models. We summarise metrics by task, focus on multimodal hallucination with a real probe from the lab,
-    and discuss how to design human evaluation for images and audio. About seventeen minutes.
+  notes: 'In short: Evaluation begins with the actual question the system must answer.
 
 
-    Analogy: Use a different ruler for each measurement. A caption score, field accuracy and listening rubric
-    answer different questions.
+    Explain: A metric is a measurement tied to a task. Known answers check factual reading. Image-text similarity checks part
+    of prompt alignment. Speech word error rate checks disagreement with a reference transcript. Human evaluation can examine
+    naturalness, usefulness and unsupported claims omitted by automatic measures.
 
 
-    Ask students: Does zero WER prove generated speech sounds natural?
+    Example: For a generated image of two red cups, count cups directly as well as comparing its CLIP score. The two checks
+    can disagree.
 
-    Expected answer: No. One recogniser recovered the words; naturalness needs listening evaluation.
+
+    Ask: Why is one score insufficient for all media?
 
 
-    Common mistake: An image-text similarity score is not a calibrated probability of factual correctness.'
+    Answer: Different outputs have different errors and user requirements; each metric observes a limited aspect of quality.
+
+
+    Watch out: An impressive number is weak evidence if its task, reference set and limitations are unspecified.'
 - type: table
   title: Metrics by task
   header:
   - Task
-  - Automatic metrics
-  - Human evaluation
+  - Automatic
+  - Human
   rows:
-  - - Image generation
-    - FID / CLIP / GenEval
-    - Prompt match, defects
-  - - Captioning
-    - CIDEr / CLIPScore
-    - Facts, invented detail
+  - - Images
+    - FID/CLIP/GenEval
+    - Defects
+  - - Captions
+    - CIDEr/CLIPScore
+    - Facts
   - - VQA
-    - Known-answer accuracy
-    - Reading / arithmetic
+    - Accuracy
+    - Errors
   - - Speech
-    - ASR WER
-    - Naturalness, clarity
+    - WER
+    - Naturalness
   - - Video
-    - FVD / alignment
-    - Motion, continuity
+    - FVD
+    - Continuity
   - - Hallucination
-    - POPE / CHAIR
-    - Supported claims
-  notes: 'This table maps each task to its usual metrics. Images reuse FID and CLIP score from week 4, plus compositional benchmarks.
-    Captions use CIDEr and CLIPScore. Question answering uses accuracy, which requires ground truth, which is why generating
-    our own chart and invoice was useful. Speech uses word error rate through a recogniser and human Mean Opinion Scores for
-    naturalness. Video uses Fréchet Video Distance and human rating.
+    - POPE/CHAIR
+    - Evidence
+  notes: 'In short: Choose task-specific metrics and a matching human rubric.
 
 
-    Ask students: Which metric in the table needs known correct answers?
+    Explain: FID compares distributions of image features, rather than checking one image''s truth. CLIP measures image-text
+    embedding similarity. VQA accuracy compares answers with known references. WER counts word edits relative to a transcript.
+    POPE-style probes check object claims, while human review examines missed defects.
 
-    Expected answer: Known-answer accuracy for VQA; that is why the lab generates its own chart and invoice.
+
+    Example: For speech, compare reference words with recognised words and listen separately. For invoices, compare each extracted
+    field with a checked source.
 
 
-    Common mistake: Reading a CLIP score as a calibrated probability that an image is correct.'
+    Ask: What additional evaluation does low WER need?
+
+
+    Answer: Human listening for naturalness and pronunciation, plus tests covering names, numbers, accents, timing and the intended
+    users.
+
+
+    Watch out: Benchmark names in a table do not make a small classroom sample a full benchmark.'
 - type: bullets
   title: Multimodal hallucination
-  icon: fa:FaGhost
   bullets:
-  - An unsupported visual claim is a hallucination.
-  - Test present and absent objects; inspect yes/no bias.
-  - '{{POPE_NOTES}}'
-  - Resolution, checked extraction and review support verification.
-  notes: 'Hallucination in multimodal models takes specific forms: naming objects that are absent, reading numbers wrongly,
-    inventing text in documents, and answering yes to leading questions. POPE, from Li and colleagues in 2023, measures object
-    hallucination with balanced yes/no questions and reveals a tendency to say yes. Our lab probe asked about present and absent
-    objects in the photos, chart and invoice; the measured result is in the bullet.
+  - Unsupported claims are hallucinations.
+  - Inspect absent-item errors and yes bias.
+  notes: 'In short: A hallucination is a claim unsupported by the available evidence.
 
 
-    Analogy: A leading question can make a witness agree to something they never saw.
+    Explain: A model may name an absent object or invent document text. Leading questions can encourage a yes response. Present
+    and absent probes help reveal this bias. Inspect the full answer alongside the image and reference. A small classroom probe
+    has narrower scope than a published benchmark.
 
 
-    Ask students: Why does POPE balance yes and no questions?
-
-    Expected answer: Otherwise a model that always answers yes would look accurate.
+    Example: Ask whether the flower photograph contains a flower, then whether it contains a dog. {{POPE_NOTES}}
 
 
-    Common mistake: Treating a perfect score on a small probe as proof that the model never hallucinates.'
+    Ask: Does six correct probes establish freedom from hallucination?
+
+
+    Answer: No. They describe that sample and configuration; varied images, questions and failure analysis are needed for wider
+    claims.
+
+
+    Watch out: Report absent-object performance separately instead of hiding yes bias inside one overall accuracy.'
+  visual:
+    type: example_strip
+    items:
+    - label: Present
+      text: 'Flower photograph: flower.'
+    - label: Absent
+      text: 'Flower photograph: dog.'
+    - label: Invented field
+      text: Invoice contains no VAT.
 - type: bullets
   title: Designing human evaluation for images and audio
-  icon: fa:FaUsers
   bullets:
-  - Randomise side-by-side order.
-  - Use a task-specific scoring rubric.
-  - Vary content, accents, languages and raters.
-  - Report agreement; combine human and automatic checks.
-  notes: 'Automated metrics for images and audio are only partial, so human evaluation is usually required, and week 7''s principles
-    apply. Pairwise comparisons are more reliable than absolute ratings, and randomising order prevents position bias. Rubrics
-    make criteria explicit. Rater diversity and content diversity matter particularly for multimodal outputs: image generators
-    and speech recognisers have documented disparities across skin tones, accents and languages. Report inter-rater agreement.
-    The project''s evaluation of any multimodal component must include such a small human study.
+  - Combine human and automatic checks.
+  notes: 'In short: Human evaluation needs a controlled comparison and explicit criteria.
 
 
-    Ask students: Why compare two outputs side by side rather than rate one alone?
+    Explain: A rubric states what raters should judge. Randomising display order reduces position bias. Blind comparisons can
+    hide system identities from raters. Include representative content, languages and user groups. Rater agreement measures
+    consistency, rather than proving that their judgements are correct.
 
-    Expected answer: Pairwise judgements are more reliable than absolute scores, and randomised order prevents position bias.
+
+    Example: Two raters compare generated invoice summaries for field correctness, omitted details and unsupported claims, using
+    the same scoring instructions.
 
 
-    Common mistake: Using raters from one group only. Quality can differ across accents, languages and skin tones.'
+    Ask: Why record disagreement instead of averaging it away?
+
+
+    Answer: Disagreement may reveal unclear criteria, ambiguous evidence or different user needs; it informs the evaluation
+    and review process.
+
+
+    Watch out: An attractive image can win preference while failing a critical factual or safety requirement.'
+  visual:
+    type: mini_table
+    header:
+    - Step
+    - Purpose
+    rows:
+    - - Randomise
+      - Reduce order bias
+    - - Rubric
+      - Score the task
+    - - Vary
+      - Content/accents/languages
+    - - Agreement
+      - Inspect disputed cases
 - type: section
   number: 5
   title: Responsible use, applications and trends
   question: What can go wrong, how do we label synthetic media, and where is this useful?
   icon: fa:FaBalanceScale
-  notes: 'The final section covers the harms of realistic synthetic media, the layered approach to provenance
-    and labelling, consent and rights, the most valuable applications, emerging trends for 2026 and 2027,
-    a design pattern for multimodal applications, and a responsible-use checklist. Leave time for the labelling
-    discussion. About twenty-two minutes.
+  notes: 'In short: Responsible applications combine useful tasks with safeguards.
 
 
-    Analogy: A signed edit history resembles a tamper-evident record. It helps check origin and edits, but
-    does not prove the depicted scene happened.
+    Explain: Synthetic media can help accessibility, education and design. The same methods can enable impersonation or misleading
+    evidence. Consent concerns permission to depict or imitate a person. Provenance records origin and edits, rather than the
+    truth of a depicted event. Review must match the stakes of the application.
 
 
-    Ask students: What does the PNG-to-JPEG experiment demonstrate?
+    Example: A fictional training invoice permits experimentation; a real customer invoice introduces private details and a
+    consequential workflow requiring stricter handling.
 
-    Expected answer: A simple text metadata label can disappear during ordinary file processing.
+
+    Ask: Which safeguards are needed before publishing generated media?
 
 
-    Common mistake: Unsigned metadata is not C2PA, and missing provenance is not proof of a fake.'
+    Answer: Appropriate permissions, rights checks, visible disclosure, provenance where available, factual review and a clear
+    route for correction.
+
+
+    Watch out: Technical success does not establish that the intended use is appropriate or lawful.'
 - type: cards
   title: Harms of realistic synthetic media
   cards:
@@ -719,40 +926,51 @@ slides:
   - head: Harassment
     icon: fa:FaUserSecret
     text: Synthetic identities can enable targeted abuse.
-  notes: 'These harms are real and current. In early 2024 an employee of the engineering firm Arup in Hong Kong transferred
-    about twenty-five million US dollars after a video call in which the other participants were deepfakes. Non-consensual sexual
-    deepfakes, including of minors, are one of the most damaging uses, and many jurisdictions have criminalised them. Synthetic
-    media spreads disinformation, and the existence of fakes lets people dismiss genuine evidence, the liar''s dividend. Scammers
-    use synthetic personas.
+  notes: 'In short: Realistic synthetic media can harm people even when technically impressive.
 
 
-    Ask students: What is the liar''s dividend?
+    Explain: Impersonation can deceive someone about who is speaking. Non-consensual imagery can damage dignity and safety.
+    Disinformation can misrepresent events or public figures. The liar''s dividend means genuine evidence may be dismissed because
+    convincing fakes exist. Synthetic identities can enable targeted harassment.
 
-    Expected answer: Because fakes exist, people can dismiss genuine evidence as fake.
+
+    Example: A convincing fake voice asking for an urgent bank transfer creates a verification problem: independently contact
+    the person through a known channel.
 
 
-    Common mistake: Assuming only famous people are targets. Fraud and harassment target ordinary people too.'
+    Ask: What separates a creative demo from an impersonation risk?
+
+
+    Answer: Permission, audience expectations, clear labelling, context and the potential for others to mistake it for a real
+    person or event.
+
+
+    Watch out: A disclaimer hidden in metadata may never reach the person who hears or sees the media.'
 - type: figure
   title: 'Provenance and labelling: no single layer is enough'
   figure: provenance
   bullets:
-  - '**Provenance:** origin and edit history; not scene truth.'
-  - Use labels, signed C2PA credentials and other appropriate checks.
-  - Article 50 separates provider marking from deployer disclosure; see official scope and exceptions.
+  - Origin history does not prove scene truth.
   stack: true
-  notes: 'Provenance works in layers, each with weaknesses. Visible labels are simple but easy to remove. C2PA content credentials,
-    backed by major technology and media companies, cryptographically sign the history of an asset; some cameras and platforms
-    support them, but credentials can be stripped. Invisible watermarks, such as Google DeepMind''s SynthID for images, audio,
-    video and text, survive common edits but exist only if the generator adds them. Detectors predict whether media is synthetic
-    but are in an arms race.
+  notes: 'In short: Provenance tools describe origin with different limitations.
 
 
-    Ask students: Which layer is most likely to survive a screenshot?
+    Explain: Visible labels inform viewers directly. C2PA credentials cryptographically sign provenance assertions about an
+    asset. Invisible watermarks embed a detectable signal when supported by the generator. Detection classifiers estimate origin
+    and can make mistakes. These layers complement factual review rather than replacing it.
 
-    Expected answer: An invisible watermark such as SynthID may survive; metadata and C2PA credentials are usually lost.
+
+    Example: Re-saving a labelled PNG as JPEG can remove ordinary text fields. This experiment tests unsigned metadata, not
+    the robustness of signed C2PA credentials.
 
 
-    Common mistake: Treating missing provenance as proof that media is fake.'
+    Ask: Does a valid content credential prove the scene occurred?
+
+
+    Answer: No. It can support an origin or editing history claim; the depicted event still needs independent factual evidence.
+
+
+    Watch out: Article 50 has different provider and deployer duties, scope and exceptions; consult the official text.'
 - type: discussion
   title: 'Discuss: where should the label go?'
   icon: fa:FaTag
@@ -760,168 +978,245 @@ slides:
   points:
   - Family album, news report, insurance claim.
   - Consider visible disclosure and edit history.
-  notes: 'Three minutes in pairs, then take two or three views. There is no single right answer, which is the point: labelling
-    rules depend on context and harm. Most students agree that a family photo needs no visible label, but a news photograph
-    or an insurance claim does, because people rely on it as evidence.
+  notes: 'In short: Disclosure decisions depend on how an edited image will be used.
 
 
-    Ask students: Why might the insurance claim need a label when the family album does not?
+    Explain: An edit can change brightness or remove meaningful evidence. Viewers may interpret an image differently in family,
+    news and insurance contexts. A visible label reaches viewers without metadata inspection. An edit history can support review
+    when tools and platforms preserve it. Neither guarantees scene truth.
 
-    Expected answer: People rely on the claim photo as evidence, so an undisclosed edit could deceive and cause harm.
+
+    Example: Removing a stranger from a family portrait has different consequences from removing a witness from a news photograph
+    or damage from an insurance image.
 
 
-    Common mistake: Looking for one labelling rule for every context.'
+    Ask: Where should an AI-edit label appear?
+
+
+    Answer: Where the relevant viewer encounters the media, with a description sufficient to understand the consequential edit
+    and supporting history where available.
+
+
+    Watch out: A generic label can hide an important alteration if its wording does not explain the change.'
 - type: bullets
   title: Consent, likeness and rights
-  icon: fa:FaIdCard
   bullets:
-  - Obtain permission for face or voice imitation.
-  - Check training and output rights and licences.
-  - Use an appropriate lawful basis for personal data.
-  - Collect only what the task needs.
-  notes: 'Rights issues are central to multimodal work. Faces and voices identify people, so using them requires consent, and
-    laws protecting voice and likeness are spreading. Training on and imitating living artists'' work is ethically and legally
-    contested. Music and film rights holders have brought lawsuits against generative audio and video companies. Under GDPR,
-    images of people and scanned documents are personal data, so processing them through third-party APIs needs a lawful basis
-    and data-protection checks. These points go into the project''s responsible-AI section.
+  - Use an appropriate lawful basis.
+  - Collect only necessary personal data.
+  notes: 'In short: Permission and rights checks belong before data collection or imitation.
 
 
-    Ask students: Is a scanned invoice personal data under GDPR?
+    Explain: Faces, voices and document details may identify a person. Data minimisation means collecting only what the task
+    needs. A lawful basis supports applicable personal-data processing. Model and dataset licences can restrict permitted use.
+    Likeness and output rights also depend on context and jurisdiction.
 
-    Expected answer: Yes, if it identifies a person, for example by name or address.
+
+    Example: Use the fictional invoice in this lab. A customer''s real scan may contain addresses, identifiers and bank details
+    unnecessary for teaching totals.
 
 
-    Common mistake: Sending personal images to a third-party API without a lawful basis.'
+    Ask: What should be checked before cloning a classmate''s voice?
+
+
+    Answer: Explicit permission, the intended audience and use, data handling, licence conditions, disclosure and safeguards
+    against impersonation.
+
+
+    Watch out: Access to a photograph or recording does not itself grant permission for every processing or generation task.'
+  visual:
+    type: example_strip
+    items:
+    - label: Collect
+      text: Purpose; minimal fields.
+    - label: Imitate
+      text: Permission; licences.
+    - label: Publish
+      text: Disclosure; review.
 - type: cards
   title: Valuable applications
   cards:
   - head: Accessibility
-    icon: fa:FaUniversalAccess
-    text: Alt text for blind users; live captions for deaf users.
+    text: Review alt text.
   - head: Documents
-    icon: fa:FaFileInvoice
-    text: Read invoices and forms, validate the fields, route each to the right team.
+    text: Validate extracted fields.
   - head: Voice
-    icon: fa:FaHeadset
-    text: Answer phone queries in several languages; hand over to a person when unsure.
+    text: Check words; enable handover.
   - head: Education
-    icon: fa:FaGraduationCap
-    text: Explain a diagram or comment on handwritten work, with teacher review.
+    text: Teacher reviews feedback.
   - head: Design
-    icon: fa:FaPalette
-    text: Draft concept images for a campaign; label them as generated.
+    text: Label concept images.
   - head: Inspection
-    icon: fa:FaRobot
-    text: Flag possible defects in product photos; a person confirms each alert.
-  notes: 'Multimodal AI has many beneficial applications. Accessibility is perhaps the clearest: image descriptions and captions
-    help blind and deaf users. Document processing, reading invoices, forms and contracts, is a major enterprise use. Voice
-    assistants handle customer service in many languages. In education, models explain diagrams and give feedback on handwritten
-    work, with teacher review. Design and marketing use image generation for concepts and localisation. Industrial inspection
-    and robotics use vision-language models, including vision-language-action models that output robot actions.
+    text: Confirm defect alerts.
+  notes: 'In short: Useful applications need verification designed around their users.
 
 
-    Ask students: Which application on the slide most directly helps disabled users?
+    Explain: Accessibility tools provide descriptions or captions people rely on. Document workflows extract fields before code
+    validates and routes them. Voice services need clear pronunciation and a human handover path. Education tools need teacher
+    review. Inspection systems require confirmation of alerts and missed defects.
 
-    Expected answer: Accessibility: alt text for blind users and live captions for deaf users.
+
+    Example: An invoice system routes a candidate amount to code, while an accessibility description must remove unsupported
+    objects before reaching the user.
 
 
-    Common mistake: Deploying automated feedback on student work without teacher review.'
+    Ask: Which application needs a different error tolerance from concept art?
+
+
+    Answer: Invoices, accessibility and inspection can create concrete harms from factual errors, so their evaluation and review
+    thresholds must reflect that use.
+
+
+    Watch out: A generic multimodal accuracy score does not capture every application''s consequences.'
 - type: bullets
   title: Emerging trends (2026–27)
-  icon: fa:FaRocket
   bullets:
-  - Any-to-any supported media routes.
-  - Live speech and video interaction.
-  - Longer video with sound and control.
-  - Screen actions and world-model research.
-  - Small models on user devices.
-  - Treat capability claims as model-specific.
-  notes: 'Looking ahead to the period when students graduate: models are converging on any-to-any designs; voice and video agents
-    are becoming real time; video generation is adding sound, length and control; agents that see and operate computer screens
-    are moving into products, which connects to week 12; world models that simulate environments are being developed for robotics
-    and games; and small multimodal models run on phones. Remind students to verify any product claims when they encounter them:
-    this area changes monthly.
+  - Forecasts; exact systems need evaluation.
+  - Any-to-any support is model-specific.
+  notes: 'In short: Emerging trends are hypotheses to evaluate on exact systems.
 
 
-    Ask students: Why treat trend claims as model-specific?
+    Explain: Any-to-any describes systems connecting several supported media routes. Live interaction adds delay and interruption
+    requirements. Video generation aims for longer coherent motion and sound. World-model research represents changes in an
+    environment. Smaller checkpoints may enable local deployment, with capability and resource trade-offs.
 
-    Expected answer: Capabilities differ between models and change monthly; check the exact model before relying on a claim.
+
+    Example: A small local VLM can read a simple chart while failing a dense invoice. Test the actual task before extrapolating
+    from a demonstration.
 
 
-    Common mistake: Planning a project around a product announcement rather than a tested model.'
+    Ask: How should a 2027 capability forecast be presented?
+
+
+    Answer: As a direction or hypothesis with a date and scope, distinct from measured performance on a named model and evaluation
+    set.
+
+
+    Watch out: Family marketing, impressive demonstrations and research trends are not guarantees for a deployed endpoint.'
+  visual:
+    type: mini_table
+    header:
+    - Direction
+    - Test
+    rows:
+    - - Live interaction
+      - Measure latency
+    - - World models
+      - Check transitions
+    - - On-device
+      - Check resources
+    - - Longer video
+      - Inspect continuity
 - type: flow
   title: A design pattern for multimodal applications
   steps:
-  - label: Input
-    sub: Quality and permission
-  - label: Perceive
-    sub: Extract fields
-  - label: Verify
-    sub: Check values and sums
-    highlight: true
-  - label: Use output
-    sub: Answer or generate
-  - label: Review / label
-    sub: Oversight and provenance
-  callout: Read with the model; calculate and cross-check with code.
-  notes: 'This design pattern summarises the lecture and suits most projects. Check input quality and consent. Use a multimodal
-    model to perceive and extract content into a structured schema. Verify with code: totals, formats, cross-references and
-    business rules. Then act, answer or generate. Finally, route risky or uncertain cases to human review and label any generated
-    media with provenance. The callout is the slogan: models perceive, code computes and checks, people decide when the stakes
-    are high.
+  - label: Review input
+    sub: Quality; permission
+    role: data
+  - label: Extract fields
+    sub: Candidate values
+    role: model
+  - label: Verify values
+    sub: Source; sums
+    role: metric
+  - label: Use result
+    sub: Task response
+    role: output
+  - label: Review; label
+    sub: Human oversight
+    role: tool
+  callout: Correct sums need correct inputs.
+  notes: 'In short: Perceive with a model, verify with code, then review consequential outputs.
 
 
-    Ask students: In the receipt example, which step catches a misread amount?
+    Explain: Input review checks quality and permission before inference. The VLM extracts candidate fields rather than authenticated
+    facts. Code checks values, formats and arithmetic. The application then uses the checked result within its task. Human review
+    and disclosure address consequential uncertainties before an output is shared.
 
-    Expected answer: Verify: code compares the extracted line items with the printed total.
+
+    Example: Read an invoice, compare extracted EUR 20 and EUR 15 with the image, sum EUR 35 in code, and review any discrepancy.
 
 
-    Common mistake: Letting the model do the arithmetic.'
+    Ask: Why keep source checking before calculation?
+
+
+    Answer: A correct calculation can use incorrectly extracted inputs; preserving evidence lets reviewers find the cause and
+    correct the workflow.
+
+
+    Watch out: The arrows carry fields and results, rather than proving that every earlier stage succeeded.'
+  arrows:
+  - pixels
+  - fields
+  - checked values
+  - response
 - type: bullets
   title: Responsible-use checklist for multimodal projects
-  icon: fa:FaClipboardList
   bullets:
   - State purpose and people affected.
-  - Check permission, lawful basis and licences.
-  - Test reading errors and invented detail.
-  - Apply appropriate disclosure and provenance.
-  - Record versions, settings and measured results.
-  notes: 'This adapts the five-step checklist from week 1 to multimodal work. Purpose includes asking whether people shown or
-    heard could be harmed. Consent and data protection are central because faces, voices and documents are personal data. Verification
-    must include hallucination and group-wise checks. Labelling synthetic media is now a legal duty in the EU. Recording licences
-    matters because several popular multimodal models, including two in today''s lab, restrict commercial use.
+  - Keep human review for consequential errors.
+  notes: 'In short: Record evidence and decisions so a multimodal workflow can be reviewed.
 
 
-    Ask students: Which two lab models restrict commercial use?
+    Explain: State the purpose and people affected before selecting a model. Record permission, applicable licences and personal-data
+    handling. Test unsupported claims as well as reading errors. Apply appropriate disclosure and provenance measures. Record
+    exact versions, settings and measured results so later changes can be compared.
 
-    Expected answer: SD-Turbo (Stability AI Community License, with conditions) and MMS-TTS (non-commercial).
+
+    Example: A report lists the VLM checkpoint, processor resolution, questions, references, full replies and mismatches. It
+    also explains who reviewed failures.
 
 
-    Common mistake: Recording results without model versions and settings.'
+    Ask: What should accompany a reported accuracy?
+
+
+    Answer: The evaluation sample, reference answers, configuration, error types and limitations, so another person can assess
+    what the number establishes.
+
+
+    Watch out: A checklist entry needs supporting evidence rather than an unsupported tick or a model''s self-assurance.'
+  visual:
+    type: mini_table
+    header:
+    - Evidence
+    - Record
+    rows:
+    - - Permission
+      - Licences; basis
+    - - Experiment
+      - Versions; settings
+    - - Verification
+      - References; errors
+    - - Disclosure
+      - Visible labels; history
 - type: lab
   title: 'Lab 10: multimodal generative tasks, measured'
   steps:
-  - Caption and answer image questions.
-  - Verify chart/invoice facts; probe absent objects.
-  - Generate/edit images; compare prompt alignment.
-  - Synthesize/transcribe speech; calculate WER.
-  - Resave metadata; distinguish it from signed provenance.
-  runtime: Colab T4 GPU or CPU. About 7 min on a laptop CPU with the 2B model, after downloads
-  deliverable: Notebook with QA accuracy table, hallucination probe, generated images with CLIP scores, speech
-    WER table and three answers
-  notes: 'The lab covers the descriptor''s list of multimodal generative tasks: image to text, cross-modal reasoning, text to
-    image, image to image, text to audio and speech to text, with text to video discussed rather than run because of cost. Every
-    part has a measurement, so students practise evaluation as well as generation. The provenance exercise makes the fragility
-    of metadata concrete. Remind students of the licence restrictions of SD-Turbo (conditional Community License) and MMS-TTS
-    (non-commercial).
+  - 'Core: read images.'
+  - 'Core: verify facts.'
+  - Inspect stored experiments.
+  - 'Stretch: images and speech.'
+  runtime: 'CPU core: {{W10_CORE_TIME}}.'
+  deliverable: Evidence, errors, five self-checks.
+  notes: 'In short: The CPU core runs local reading and verification; heavy generation is optional.
 
 
-    Ask students: Why does the provenance exercise re-save a PNG as a JPEG?
+    Explain: The shared setup defaults to CPU in Colab and local VS Code. A small VLM performs bounded image-to-text inference.
+    Known chart and invoice values supply references. Stored diffusion and speech outputs support inspection without loading
+    those models. Optional extensions retain real generation, editing, CLIP and speech experiments.
 
-    Expected answer: To show that ordinary re-saving drops a simple text metadata label.
+
+    Example: Core inference uses capped image resolution and short deterministic answers. Change one setting, inspect the result,
+    and compare its errors with known data.
 
 
-    Common mistake: Treating unsigned metadata as C2PA credentials.'
+    Ask: Is an external API or GPU needed for the core?
+
+
+    Answer: No. Optional API switches start disabled and preserve a local answer; a GPU and heavy model execution are optional
+    extensions.
+
+
+    Watch out: Keep current CPU core timings separate from archived full experiments, first downloads and optional stretches.'
 - type: summary
   points:
   - Choose a route for each media task.
@@ -930,62 +1225,63 @@ slides:
   - Generate pixels, edits and sound.
   - Measure specific tasks and inspect errors.
   - Protect consent, rights and provenance.
-  notes: 'Recap the six points. Students should be able to explain the two MLLM designs, list generation tasks and their methods,
-    choose evaluation metrics for each, and propose a layered provenance strategy. Next week we move from models to systems:
-    deploying generative AI with frameworks and APIs, local and cloud serving, cost and latency, monitoring and guardrails,
-    which every project will need.
+  notes: 'In short: Connect each media route with its task-specific evidence.
 
 
-    Ask students: What is the one-line rule of the design pattern?
+    Explain: A VLM reads images and generates answer text. Alignment and instruction examples explain how its components learn
+    to cooperate. Diffusion and TTS generate different output representations. Evaluation checks facts, alignment, recovered
+    words and human quality separately. Permission and provenance accompany those technical checks.
 
-    Expected answer: Models perceive, code computes and checks, and people decide when the stakes are high.
+
+    Example: An invoice can have correct arithmetic with a misread line; a generated voice can have zero WER but sound unnatural.
 
 
-    Common mistake: Evaluating only output quality, not reading errors and invented detail.'
+    Ask: What common principle connects these failures?
+
+
+    Answer: A partial check can succeed while another essential property fails; name the property and collect its own evidence.
+
+
+    Watch out: Do not infer complete correctness from fluent text, one metric or a signed origin record.'
 - type: resources
   items:
   - kind: doc
-    label: 'Hugging Face blog: Vision language models explained'
-    note: Architectures, training, evaluation
-    url: https://huggingface.co/blog/vlms
-  - kind: doc
-    label: 'Google Gemini API: Image understanding'
-    note: Official guide to multimodal prompting
-    url: https://ai.google.dev/gemini-api/docs/image-understanding
-  - kind: doc
-    label: Hugging Face Diffusers documentation
-    note: Text-to-image, img2img, inpainting
-    url: https://huggingface.co/docs/diffusers/index
-  - kind: course
-    label: Hugging Face Audio Course
-    note: TTS and speech models
-    url: https://huggingface.co/learn/audio-course/chapter0/introduction
-  - kind: doc
-    label: 'C2PA: Content credentials'
-    note: Provenance standard
-    url: https://c2pa.org/
-  - kind: doc
-    label: 'Google DeepMind: SynthID'
-    note: Watermarking for AI content
-    url: https://deepmind.google/models/synthid/
-  - kind: doc
-    label: EU AI Act, Article 50
-    note: Transparency obligations
-    url: https://artificialintelligenceact.eu/article/50/
+    label: SmolVLM model card
+    note: Local inference
+    url: https://huggingface.co/HuggingFaceTB/SmolVLM-256M-Instruct
   - kind: paper
-    label: Liu et al. (2023) Visual Instruction Tuning (LLaVA)
-    note: The modular MLLM recipe
+    label: CLIP paper
+    note: Alignment limits
+    url: https://arxiv.org/abs/2103.00020
+  - kind: paper
+    label: Visual instruction tuning
+    note: Training recipe
     url: https://arxiv.org/abs/2304.08485
-  notes: 'The Hugging Face blog on vision language models is the best technical overview. Google''s image understanding guide
-    shows how a frontier API handles images and documents. The Diffusers documentation covers the generation pipelines used
-    in the lab. The Hugging Face Audio course covers speech synthesis and recognition. For provenance, the C2PA site, Google
-    DeepMind''s SynthID page and the text of Article 50 are the primary sources. The LLaVA paper is the key reference for multimodal
-    instruction tuning.
+  - kind: doc
+    label: C2PA specification
+    note: Origin assertions
+    url: https://spec.c2pa.org/specifications/specifications/2.3/index.html
+  - kind: video
+    label: 'MIT 6.S191: Generative AI'
+    note: Worked lecture
+    url: https://www.youtube.com/watch?v=R8V8CbuxryI
+  notes: 'In short: Use primary explanations and exact model documentation for further study.
 
 
-    Ask students: Which sources are primary for provenance?
+    Explain: The readings connect architecture, training and task evaluation. The small-model card explains the lab''s proposed
+    VLM route. Original CLIP research explains shared image-text representations. C2PA specifications define provenance assertions
+    and verification. The lecture video offers another worked explanation of generative modelling foundations.
 
-    Expected answer: The C2PA site, Google DeepMind''s SynthID page and the text of Article 50.
+
+    Example: Read the SmolVLM card before changing checkpoints, then compare your actual inputs, output task and hardware with
+    its supported use.
 
 
-    Common mistake: Relying on news summaries of the AI Act instead of its official text.'
+    Ask: Which source should resolve a model-specific preparation question?
+
+
+    Answer: The exact model card and official processor documentation, checked against the installed version and the observed
+    tensors.
+
+
+    Watch out: A family overview or old tutorial may describe a different checkpoint, endpoint or library interface.'

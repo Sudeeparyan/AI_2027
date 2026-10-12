@@ -45,375 +45,416 @@ coverage:
 slides:
 - type: title
   figure: cover
-  notes: 'Welcome to week 12, the last technical week: retrieval-augmented generation and agentic AI. Everything so far comes
-    together here. Embeddings from weeks 6 and 9 power retrieval; prompting and evaluation from week 7 shape grounded answers;
-    deployment from week 11 turns the system into an application. RAG connects a model to knowledge it was never trained on;
-    agents let a model act by calling tools.
+  notes: 'In short: A course assistant needs verifiable evidence and controlled tools to answer questions about an invented
+    handbook.
 
+    Explain: RAG means retrieval-augmented generation: search passages before answering. Embeddings represent text as comparison
+    vectors. An agent proposes intermediate tool calls within a loop. Application code runs permitted tools. These processes
+    reuse prompting, evaluation and deployment from earlier weeks.
 
-    Ask students: Which earlier weeks does today combine?
+    Example: A public model has no reliable basis for an invented late penalty. An open-book assistant first finds the relevant
+    handbook passage, then cites it. The analogy explains access to evidence, but neither a retrieved page nor a fluent answer
+    establishes truth without checking its source and meaning.
 
-    Expected answer: Embeddings (weeks 6 and 9), prompting and evaluation (week 7) and deployment (week 11).
+    Ask: Does reading handbook passages train the language model?
 
+    Answer: No. Retrieval changes the current input context while learned model weights remain fixed.
 
-    Common mistake: Thinking RAG retrains the model on the documents.'
+    Watch out: A useful answer and a permitted action need different checks. Keep source support separate from tool execution
+    permission.'
 - type: outcomes
-  notes: 'Six outcomes matching the revised descriptor''s week 12: motivation and LLM limitations; embeddings, vector databases
-    and RAG architectures; advanced RAG and RAG evaluation; agentic AI concepts and components, including workflows versus agents,
-    multi-agent systems and the Model Context Protocol; risks and guardrails; and choosing a design. This week practises MIMLO
-    5, implementing retrieval-augmented and agentic systems, together with MIMLO 3 and 4.
+  notes: 'In short: Build an evidence route and a controlled action route, then evaluate both against their intended tasks.
 
+    Explain: A chunk is one searchable passage. A vector index helps locate compatible embeddings. Grounding means an answer
+    claim is supported by supplied evidence. A tool is a named operation the application can execute. MIMLO means minimum intended
+    module learning outcome.
 
-    Ask students: Which outcome covers the Model Context Protocol?
+    Example: Trace a penalty question into a cited passage and a grade question into handbook search followed by calculation.
+    The first route tests evidence selection and use. The second also tests whether code validates and records operations. Implementing
+    either route requires more than naming a framework or showing a plausible final sentence.
 
-    Expected answer: Agentic AI concepts and components.
+    Ask: Which outcome requires implementation rather than only describing retrieval?
 
+    Answer: Build and check the retrieval and tool routes, corresponding to this week’s implementation outcomes.
 
-    Common mistake: Treating agents as separate from RAG. Search becomes one of the agent''s tools.'
-- type: agenda
-  icon: fa:FaRoute
+    Watch out: Metrics must match the operation being tested. A document hit, citation marker or successful calculator call
+    each supports a narrower claim than overall reliability.'
   items:
-  - title: 'Warm-up: ask a chatbot about this module'
+  - Explain RAG.
+  - Trace indexing.
+  - Measure evidence.
+  - Implement tools.
+  - Control actions.
+  - Justify design.
+- type: agenda
+  items:
+  - title: Hook
     minutes: 5
-  - title: 1 · Why RAG? LLM limitations and the RAG pipeline
+  - title: Why retrieval
     minutes: 15
-  - title: 2 · Embeddings, chunking and vector databases
+  - title: Prepare indexes
     minutes: 15
-  - title: 3 · Retrieval, advanced RAG and RAG evaluation
+  - title: Find; evaluate evidence
     minutes: 30
-  - title: '4 · Agentic AI: tools, loops, workflows, MCP'
+  - title: Tools; loops; protocols
     minutes: 30
-  - title: 5 · Risks and guardrails
+  - title: Risks; controls
     minutes: 13
-  - title: Lab preview and wrap-up
+  - title: Lab; recap
     minutes: 5
-  notes: 'The plan follows the revised descriptor. Sections one to three build and evaluate a RAG system, with real retrieval
-    and answer-quality results from the lab. Take the break after section three. Section four explains agents with a real agent
-    trajectory from the lab, and section five covers prompt injection, including a real test with a malicious document, and
-    guardrails.
+  notes: 'In short: The lesson moves from evidence preparation to answer checks, then from tool proposals to bounded execution.
 
+    Explain: Indexing prepares passages; retrieval selects evidence; generation writes from the supplied context. A VAE compresses
+    and rebuilds data; a GAN trains a generator against a critic. An LLM predicts text; RAG retrieves evidence before answering.
+    An agent repeats decisions after observations. A guardrail restricts inputs or executable operations.
 
-    Ask students: Which section includes a real test with a malicious document?
+    Example: Prepare the handbook once, then use the same index for a penalty question and a calculator-assisted grade task.
+    Reserve time to inspect failures: a wrong passage needs a different correction from a wrong calculation. The recipe analogy
+    describes a fixed workflow; an agent instead chooses intermediate steps after each result.
 
-    Expected answer: Section five, on prompt injection.
+    Ask: Where should the class inspect the hostile forum instruction?
 
+    Answer: In the risks section, alongside the proposed call, code decision and recorded observation.
 
-    Common mistake: Skipping evaluation because the system looks right on a few questions.'
+    Watch out: An impressive demonstration cannot replace separate retrieval, support and execution tests. Keep the original
+    syllabus order while connecting each stage to an observable result.'
 - type: discussion
   title: Warm-up
-  icon: fa:FaQuestionCircle
-  prompt: A chatbot is asked for this module’s late penalty. What evidence does it need?
+  prompt: A chatbot states an invented late penalty. What would establish evidence?
   points:
-  - Can it access the private handbook?
-  - Will it decline missing evidence?
-  - Can you inspect the supporting passage?
-  notes: 'Two minutes. Students predict, correctly, that the model does not know this module''s handbook, and usually that it
-    will produce a plausible generic answer, such as five percent per working day, rather than saying it does not know. That
-    is hallucination, and it can even be right by coincidence, which is worse because nobody can verify it. The fix they suggest
-    is to give the model the handbook. That is retrieval-augmented generation, and the lab builds exactly this assistant for
-    a fictional handbook.
+  - Find the exact passage.
+  - Check permission and claim support.
+  notes: 'In short: A plausible handbook answer is a guess until the assistant has an authorised supporting passage.
 
+    Explain: Private rules may be absent from training data. A hallucination is a generated claim without an adequate factual
+    basis. Context supplies text for this response. Abstention means declining to answer when evidence is insufficient. Citations
+    identify evidence that a reader can inspect.
 
-    Analogy: A new colleague cannot know a private handbook they have never seen. Give them relevant, dated pages and check
-    their answer.
+    Example: Ask about the fictional late penalty before showing any sources. A coincidentally correct number still has no demonstrated
+    evidence route. A new colleague needs the relevant, dated handbook page rather than confidence alone. The analogy breaks
+    if we assume either the colleague or the model always interprets the page correctly.
 
+    Ask: What evidence would justify a specific late-penalty answer?
 
-    Ask students: Could a public model know a newly invented handbook rule?
+    Answer: The current authorised penalty passage, with the claimed rule actually supported by its text.
 
-    Expected answer: Not from its training. It needs an authorised source or should decline to guess.
-
-
-    Common mistake: A plausible answer about a private rule is not evidence.'
+    Watch out: Do not reward confident guessing about a private rule. Check what was supplied, what was claimed and whether
+    the cited passage entails that claim.'
 - type: section
   number: 1
   title: Why RAG?
   question: What can't an LLM do on its own?
   icon: fa:FaBookOpen
-  notes: 'Section one explains the limitations that motivate retrieval, compares RAG with the alternatives, fine-tuning
-    and long context, and walks through the standard RAG pipeline. Refer back to the warm-up: the chatbot could
-    not know the module''s rules because they were never in its training data, and they may have changed since.
-    About fifteen minutes.
+  notes: 'In short: Retrieval supplies missing evidence without replacing the need to verify source quality and answer use.
 
+    Explain: A language model predicts text from learned patterns and current input. Its learned knowledge can be incomplete
+    or outdated. Retrieval searches an external collection for passages. Fine-tuning changes learned parameters. Long context
+    places more supplied material directly into one request.
 
-    Analogy: A librarian finds pages before you write an answer. Search supplies evidence; it does not write reliable
-    conclusions by itself.
+    Example: The handbook changes its deadline. Re-index the changed source, retrieve the new passage and check the answer’s
+    citation. Searching resembles a librarian locating pages; it does not make those pages authoritative or force the writer
+    to use them correctly. The right choice depends on the measured failure rather than a fashionable architecture.
 
+    Ask: Does adding retrieved text fine-tune the model?
 
-    Ask students: Does adding retrieved text fine-tune the model?
+    Answer: No. It adds evidence to this request without changing stored language-model weights.
 
-    Expected answer: No. It adds context for this answer without changing the language model weights.
-
-
-    Common mistake: Retrieval can supply irrelevant or misleading text, and generation can misuse good evidence.'
+    Watch out: A search can find irrelevant, stale or misleading passages. Generation can misuse correct passages, so evaluate
+    the two stages independently.'
 - type: cards
   title: LLM limitations that retrieval addresses
   cards:
-  - icon: fa:FaCalendarTimes
-    head: Changing facts
-    text: This year's late penalty changed; retrieve the current, dated handbook.
-  - icon: fa:FaGhost
-    head: Hallucinations
-    text: Without the handbook a model guesses a plausible penalty; check each claim against sources.
-  - icon: fa:FaLock
-    head: Private sources
-    text: Internal policies were never in training data; connect authorised documents.
-  - icon: fa:FaQuoteRight
-    head: Citations
-    text: Number the retrieved passages so each claim points to its source.
-  notes: 'Four limitations. Static knowledge: a model knows only what was in its training data up to its cut-off. Hallucination:
-    when it does not know, it often produces a fluent guess. No private data: internal documents were never seen. No citations:
-    answers from parametric memory cannot be traced to a source. Retrieval-augmented generation addresses all four by retrieving
-    relevant passages at question time and asking the model to answer from them, with citations. It reduces hallucination but
-    does not eliminate it, which is why evaluation matters.
+  - head: Changing facts
+    text: Retrieve current versions.
+  - head: Private sources
+    text: Check authorised access.
+  - head: Unsupported claims
+    text: Inspect each claim.
+  - head: Citations
+    text: Read the cited passage.
+  notes: 'In short: RAG addresses evidence access and traceability while leaving interpretation and source verification as separate
+    responsibilities.
 
+    Explain: Changing facts require current sources. Private documents require authorised access. Hallucinations remain possible
+    when evidence is incomplete or misread. A citation is a pointer to a passage. It is not a certificate that every answer
+    claim follows from that passage.
 
-    Ask students: Which limitation does RAG reduce but not remove?
+    Example: A late-policy answer can cite the correct handbook yet invent an extra deadline. The citation helps the reader
+    inspect the error but does not remove it. An open-book exam can still contain a wrong inference. Similarly, retrieval lowers
+    some information gaps while source quality and faithful interpretation still determine the result.
 
-    Expected answer: Hallucination: the model can still misread the passages or go beyond them.
+    Ask: Which limitation does retrieval reduce without eliminating?
 
+    Answer: Unsupported answers: the model can still add or misinterpret information despite receiving useful sources.
 
-    Common mistake: Treating a cited answer as automatically correct. Read the cited passage.'
+    Watch out: Separate the source’s authority, its relevance and the answer’s support. These are three different questions
+    even when one citation number is visible.'
 - type: table
   title: RAG, fine-tuning or long context?
   header:
-  - ''
-  - RAG
-  - Fine-tuning
-  - Long context
+  - Method
+  - Updates
+  - Evidence
   rows:
-  - - Information
-    - Search passages per question
-    - Stored in weights
-    - Whole documents in the prompt
-  - - Evidence
-    - Source IDs
-    - Not guaranteed
-    - Labelled sources
-  - - Update
-    - Re-index the changed file
-    - Retrain
-    - Edit the prompt
-  - - Permissions
-    - Filter what is retrieved
-    - Review training data
-    - Check what is included
-  - - Useful for
-    - Large, changing collections
-    - Behaviour and skills
-    - A few short documents
-  notes: 'Compare the three ways of giving a model knowledge. RAG adds knowledge that can be updated by re-indexing and supports
-    citations and per-document access control, at low cost per query because only the top passages are sent. Fine-tuning, as
-    week 8 showed, is good for behaviour and format but a poor way to add facts that change.
+  - - RAG
+    - Index
+    - Selected passages
+  - - Fine-tuning
+    - Weights
+    - Needs separate sources
+  - - Long context
+    - Prompt
+    - Included documents
+  notes: 'In short: Choose between retrieval, fine-tuning and direct context according to the information gap and measured workload.
 
+    Explain: RAG selects passages for a question. Fine-tuning changes model behaviour through learned weights. Long context
+    includes documents directly in the request. Source permissions must hold for any supplied text. A method can be combined
+    with another when their roles remain clear.
 
-    Ask students: Your documents fit in the context window. Why might you still use RAG?
+    Example: A few short authorised policies may fit directly in a prompt. A changing collection may need search and versioned
+    source IDs. A stable output-format problem may justify training. The filing-cabinet analogy explains selective access, but
+    retrieval overhead can outweigh savings for a tiny collection; measure tokens, latency and quality rather than assuming
+    a winner.
 
-    Expected answer: Lower cost per question, per-document permissions and easy updates; long inputs can also hide details.
+    Ask: Why use retrieval when documents already fit in the context window?
 
+    Answer: It may reduce supplied text and simplify selective permissions or updates; test those benefits.
 
-    Common mistake: Fine-tuning to add facts that change.'
+    Watch out: Knowledge stored in weights is difficult to cite or selectively remove. Larger context also does not guarantee
+    that the relevant detail influences the answer.'
+  callout: Compare quality, tokens and permissions.
 - type: figure
   title: The RAG pipeline
   figure: rag_pipeline
-  notes: 'There are two phases. Indexing, done offline: load documents, split them into chunks, embed each chunk, and store
-    the vectors in a vector store together with a keyword index. Answering, done online: embed the question, retrieve candidate
-    chunks with dense and keyword search, re-rank them, put the best few into a prompt as numbered sources, and ask the LLM
-    to answer only from them with citations, or to say it does not know.
+  notes: 'In short: Indexing prepares reusable search representations; answering retrieves passages and checks the generated
+    evidence use.
 
+    Explain: Splitting creates passages with source IDs. A fixed embedding model maps each passage into a vector. Storage preserves
+    vector-to-passage correspondence. At question time, ranking and selection supply a short evidence list. Generation and support
+    checks operate on that selected text.
 
-    Ask students: Which phase runs when a new document is added: indexing or answering?
+    Example: Thirty passages at embedding width 384 form a [30,384] table. A question vector [1,384] produces thirty similarity
+    scores. The selected IDs recover actual text for the answer prompt. These are illustrative shapes, not a measured collection
+    size. Updating a source requires refreshing its text, vectors and metadata together.
 
-    Expected answer: Indexing: chunk, embed and store the new document.
+    Ask: Which phase runs after a source document changes?
 
+    Answer: Indexing refreshes the affected passages and stored representations before later questions use them.
 
-    Common mistake: Forgetting to re-index after documents change, so answers cite old versions.'
+    Watch out: Search scores are not truth probabilities. Retain source identity and inspect the exact passages rather than
+    treating a high score as verification.'
 - type: quiz
-  question: HR policies change monthly. Staff need exact source links. What should you try?
+  question: Changing policies need exact source links. Try?
   options:
-  - Fine-tune the model every month
-  - Paste every policy into every prompt
-  - Rely on the model's general knowledge
-  - Re-index for RAG and check the citations
+  - Monthly fine-tuning.
+  - All policies every request.
+  - General training knowledge.
+  - Refresh RAG; verify citations.
   answer: 3
-  notes: 'Answer: D. RAG keeps answers current through re-indexing, provides citations to the exact policy, and can respect
-    access permissions. A is expensive, slow to update and gives no citations. C cannot know internal policies. B may work for
-    a small set, but costs grow with the number of documents and every question pays for all of them; it also makes access control
-    per document harder.
+  notes: 'In short: For changing policies with required evidence links, start by refreshing retrieval and checking cited support.
 
+    Explain: Policy updates change source content. Re-indexing updates searchable passages. Retrieved source IDs permit evidence
+    links. Access filters restrict which passages may enter a request. Fine-tuning changes weights rather than attaching a reliable
+    source trail.
 
-    Ask students: Why is option B costly?
+    Example: Monthly HR updates can replace one versioned policy and refresh its index. A fixed final question set then checks
+    both the answer and its cited passage. Pasting every policy may suit a tiny authorised collection, but each request carries
+    that text. The library analogy explains locating current editions, not automatic interpretation or permission enforcement.
 
-    Expected answer: Every question pays for every policy''s tokens, and per-document access control becomes hard.
+    Ask: Why is option B potentially expensive as the collection grows?
 
+    Answer: D. Every request includes every policy’s tokens, and per-document access must still be enforced.
 
-    Common mistake: Choosing A. Monthly fine-tuning is slow to update and gives no citations.'
+    Watch out: D is the intended answer. A cannot guarantee evidence links, and general training knowledge cannot establish
+    the current internal policy.'
 - type: section
   number: 2
   title: Embeddings, chunking and vector databases
   question: How can numbers represent a question and help find an answering passage?
   icon: fa:FaDatabase
-  notes: 'Section two covers the indexing side: text embeddings, how to chunk documents, and where to store and
-    search the vectors. Indexing decisions are made once but affect every answer, and they are the most common cause
-    of poor RAG quality in projects. About fifteen minutes.
+  notes: 'In short: An index must preserve both searchable representations and the metadata needed to verify each returned passage.
 
+    Explain: An embedding is a numerical representation for comparison. Chunking determines the text represented by one vector.
+    Metadata records source, section, version and permissions. An index maps search results back to passage rows. Compatible
+    question and passage vectors use the same learned encoder.
 
-    Analogy: An index card keeps a passage, its location and its permission label together. Losing the labels makes
-    a retrieved passage hard to verify.
+    Example: A returned row can point to the assessment document but omit its pass-mark sentence. The index-card analogy helps
+    connect representation with location; an index card alone does not contain every fact in its parent book. Inspect passage
+    text, encoder truncation and source labels before concluding that useful evidence reached the generator.
 
+    Ask: What happens if the embedding model changes?
 
-    Ask students: What happens when the embedding model changes?
+    Answer: Re-encode stored passages so query and passage vectors occupy the same representation space.
 
-    Expected answer: Re-encode stored passages so question and passage vectors use the same learned representation.
-
-
-    Common mistake: A passage from the correct document may still omit the exact fact needed.'
+    Watch out: Row order and source IDs are part of the contract. Losing either can attach a correct-looking citation to the
+    wrong passage.'
 - type: bullets
   title: Text embeddings for retrieval
-  icon: fa:FaVectorSquare
   bullets:
-  - '**Embeddings:** learned numerical text descriptions.'
-  - A **bi-encoder** separately encodes questions and passages.
-  - Compare compatible vectors; store passage vectors once.
-  - Test language, task and licence; re-encode after changing the model.
-  notes: 'Embeddings connect back to week 9''s contrastive learning. A retrieval embedding model is a bi-encoder: it encodes
-    questions and passages separately into vectors, trained so that a question lands near passages that answer it. Retrieval
-    is then a nearest-neighbour search by cosine similarity. Open models such as BGE, E5 and GTE, and API models from OpenAI,
-    Google and Cohere, are common choices. The Massive Text Embedding Benchmark, MTEB, compares them across tasks and languages.
-    Changing the embedding model means re-embedding every chunk.
+  - Encode questions and passages compatibly.
+  - Similarity ranks text; it does not verify truth.
+  notes: 'In short: Separate question and passage encoding makes reusable vector search possible, provided their representations
+    remain compatible.
 
+    Explain: A bi-encoder processes each text separately. Its embeddings are learned numerical descriptions. Cosine similarity
+    compares vector directions. Normalising vectors gives unit length. Then their dot product equals cosine similarity rather
+    than an answer-correctness probability.
 
-    Ask students: Why must questions and passages use the same embedding model?
+    Example: The local MiniLM example maps thirty short passages to [30,384] and a question to [1,384]. Their matrix product
+    gives [1,30] search scores. These illustrative shapes expose the matching operation. A map analogy explains nearby representations,
+    but two nearby texts can contradict one another or omit the fact needed.
 
-    Expected answer: Vectors from different models live in different spaces, so their similarities are meaningless.
+    Ask: Why encode questions and passages with the same model?
 
+    Answer: Their coordinates must have compatible meanings for a similarity comparison to be useful.
 
-    Common mistake: Choosing an embedding model by leaderboard rank without testing your language and domain.'
+    Watch out: The verified MiniLM encoder truncates long input. Inspect token lengths; a leaderboard score or vector match
+    cannot establish performance on this handbook.'
+  visual:
+    type: example_strip
+    items:
+    - label: Passages
+      text: '[N,384] stored vectors'
+    - label: Question
+      text: '[1,384] → N scores'
 - type: figure
   title: 'Chunking: splitting documents into retrievable pieces'
   figure: chunking
   bullets:
-  - A **chunk** is one searchable passage.
-  - Test boundaries, size and overlap.
-  - Keep source, section, date and access metadata.
+  - Preserve boundaries and source metadata.
+  - Test size and overlap.
   stack: true
-  notes: 'Documents are split into chunks because embeddings of long texts become vague and prompts have limited space. Overlap
-    ensures a sentence cut at a boundary appears in two chunks. There is no universal best size: typical values are a few hundred
-    to a thousand tokens with ten to twenty percent overlap, and structure-aware splitting at headings and paragraphs usually
-    beats fixed windows. Keep metadata with each chunk: source document, section, date and access level, which enable citations
-    and filtering.
+  notes: 'In short: Chunk boundaries decide which pieces of evidence remain together and which facts retrieval can actually
+    return.
 
+    Explain: A chunk is one searchable passage. Overlap repeats some boundary text. Structure-aware splitting follows headings
+    or paragraphs. Metadata retains the source and version. No single chunk size is optimal for every document or question.
 
-    Ask students: Why do chunks overlap?
+    Example: A rule and its exception may sit on opposite sides of a boundary. Overlap helps only if enough text remains together;
+    it cannot guarantee that every split preserves the complete exception. The lab’s size and overlap count approximate characters
+    at whole-word boundaries, while an encoder’s limit counts tokens. Inspect both units.
 
-    Expected answer: A sentence cut at a boundary then appears whole in at least one chunk.
+    Ask: Why overlap adjacent chunks?
 
+    Answer: To reduce the chance that relevant boundary information disappears from every individual returned passage.
 
-    Common mistake: Dropping metadata. Without source and date a chunk cannot be cited or filtered.'
+    Watch out: Larger chunks can add distraction and smaller chunks can lose context. Test actual evidence spans rather than
+    assuming that parent-document identity proves answer coverage.'
 - type: table
   title: Where to store vectors
   header:
-  - Option
-  - Type
-  - Typical use
+  - Store
+  - Use
   rows:
-  - - FAISS
-    - In-process library
-    - Search 10,000 chunks in a notebook
+  - - NumPy / FAISS
+    - Local exact search
   - - Chroma
-    - Vector database
-    - Local app with metadata filters
+    - Collections; metadata
   - - pgvector
-    - PostgreSQL extension
-    - Add search beside existing tables
-  - - Qdrant / Weaviate / Milvus / Pinecone
-    - Vector services
-    - Millions of chunks, many users
-  - - Azure / Vertex search
-    - Managed cloud
-    - Enterprise identity and security
-  notes: 'FAISS, from Meta, is a library: very fast, but you manage persistence yourself. Chroma is a simple vector database
-    with metadata, used in the lab. pgvector adds vector search to PostgreSQL, often the pragmatic choice when data already
-    lives there. Dedicated vector databases such as Qdrant, Weaviate, Milvus and Pinecone add scale, hybrid search and multi-tenancy.
-    Cloud search services from Microsoft and Google integrate with enterprise security and identity. For student projects, FAISS
-    or Chroma are enough.
+    - Existing PostgreSQL
+  - - Vector services
+    - Persistence; scale
+  notes: 'In short: Start with exact local search, then choose storage features according to persistence, filtering and workload
+    needs.
 
+    Explain: NumPy can compare a question against a small vector table. FAISS is a vector-search library. Chroma adds collection
+    and metadata operations. pgvector adds vector search to PostgreSQL. A managed service introduces deployment and access configuration.
 
-    Ask students: Which option fits a notebook with a few hundred chunks?
+    Example: A classroom collection with tens of passages needs no elaborate service to rank vectors. A growing application
+    may need persistent storage, concurrent users, filtering or existing database integration. A filing cabinet explains organisation,
+    but installing one does not define who may read its contents or ensure that stale entries are removed.
 
-    Expected answer: FAISS or Chroma.
+    Ask: Which approach is sufficient to inspect a small notebook collection?
 
+    Answer: Exact NumPy search is enough; optional FAISS or Chroma illustrates additional storage choices.
 
-    Common mistake: Adopting a managed vector service before the collection needs it.'
+    Watch out: An in-memory collection is not persistent merely because it is called a database. Describe its lifecycle, metadata
+    and permission checks explicitly.'
+  callout: Test permissions and lifecycle.
 - type: bullets
   title: Searching millions of vectors quickly
-  icon: fa:FaSearchPlus
   bullets:
-  - Exact search compares all stored vectors.
-  - '**ANN:** faster candidate search; may miss matches.'
-  - 'HNSW: graph; IVF: clusters; PQ: compressed vector parts.'
-  - Enforce permissions before passages enter the prompt.
-  notes: 'Exact nearest-neighbour search compares the question with every stored vector, which is fine for the lab''s handful
-    of chunks and even for a few hundred thousand, but too slow at web scale. Approximate indexes such as HNSW, a navigable
-    graph, IVF, which searches only the nearest clusters, and product quantisation, which compresses vectors, give large speed-ups
-    with a small loss in recall. Metadata filters limit results to allowed documents; enforcing access control at retrieval
-    time is essential, because anything retrieved can appear in the answer.
+  - Approximate search may miss evidence.
+  - Apply access rules before prompting.
+  notes: 'In short: Approximate search can reduce comparisons, while permission filtering must still precede supplying evidence
+    to the model.
 
+    Explain: Exact search compares every stored vector. ANN means approximate nearest-neighbour search. HNSW searches a graph
+    of nearby vectors. IVF restricts comparisons through clusters. Product quantisation compresses vector parts. Approximation
+    can miss relevant passages.
 
-    Ask students: Why filter by permission at retrieval time rather than after generation?
+    Example: If a relevant passage ranks twelfth but only three are supplied, generation never sees it. Faster candidate search
+    is useful only when its evidence loss is acceptable for the task. A shortcut-map analogy explains fewer comparisons, but
+    the route may skip a useful destination; measure retrieval and response quality together.
 
-    Expected answer: Anything retrieved can appear in the answer, so restricted text must never reach the prompt.
+    Ask: Why enforce permissions before passages enter the prompt?
 
+    Answer: Restricted information can influence an answer once supplied, even if a later display filter hides the passage.
 
-    Common mistake: Assuming approximate search finds every match. It trades a little recall for speed.'
+    Watch out: The local handbook has no production access-control system. Do not mistake public invented documents or a metadata
+    label for a tested permission implementation.'
+  visual:
+    type: mini_table
+    header:
+    - Index
+    - Operation
+    rows:
+    - - HNSW
+      - Navigate neighbours
+    - - IVF
+      - Search clusters
+    - - PQ
+      - Compress vector parts
 - type: section
   number: 3
   title: Retrieval, advanced RAG and evaluation
   question: How do we retrieve well, answer faithfully and prove it?
   icon: fa:FaBullseye
-  notes: 'Section three is the core of RAG quality: dense, keyword and hybrid retrieval; re-ranking; real results from the lab;
-    grounded generation with citations; advanced techniques; and how to evaluate RAG systems. Stress the diagnostic mindset:
-    retrieval and generation fail for different reasons and need different fixes. About thirty minutes; take the break afterwards.
+  notes: 'In short: Diagnose evidence selection and evidence use separately before adding another retrieval or generation component.
 
+    Explain: Dense retrieval compares learned vectors. BM25 ranks weighted word matches. Hybrid retrieval combines rankings.
+    A re-ranker scores shortlisted question-passage pairs together. Retrieval metrics describe what was found; answer metrics
+    describe what the response did with it.
 
-    Analogy: One search finds words; another finds related meanings; a second reader compares each candidate with the question
-    before answering.
+    Example: A query containing an exact module code may favour keyword search, while a deadline paraphrase may favour dense
+    search. Compare both against labelled evidence spans. A second reader can reorder candidates, but cannot recover a passage
+    absent from the shortlist. Each extra component adds computation and another setting to validate.
 
+    Ask: Why measure retrieval separately from answer quality?
 
-    Ask students: Why evaluate retrieval separately from generation?
+    Answer: Missing evidence and misuse of supplied evidence require different corrections.
 
-    Expected answer: They fail for different reasons and need different fixes.
-
-
-    Common mistake: Treating the lab''s document-hit rate and digit check as complete measures of evidence and claim support.'
+    Watch out: The archived chart measures document hits. The upgraded core also checks specific relevant passages; a digit-presence
+    proxy remains insufficient for complete claim support.'
 - type: compare
   title: Dense vs. keyword retrieval
   columns:
   - head: Dense
-    icon: fa:FaBrain
     points:
-    - Learns meaning and paraphrase matching
-    - Can struggle with exact rare IDs
-    - Finds the late-work rule for "handing work in after the deadline"
+    - Compare meaning vectors.
+    - Paraphrases; imperfect identifiers.
   - head: BM25
-    icon: fa:FaFont
     points:
-    - Ranks weighted word matches
-    - Paraphrases may lack shared words
-    - Finds the exact phrase "extenuating circumstances form"
-  callout: Test both; hybrid search combines their rankings.
-  notes: 'Dense and keyword retrieval fail in complementary ways. Dense retrieval matches meaning, so a question about handing
-    work in after the deadline finds the late-submission policy even without shared words. BM25, the classic keyword ranking
-    function, weights matching words by rarity and excels at exact identifiers such as module codes or product numbers, which
-    embeddings often blur. Hybrid search runs both and fuses the results, which is why it is the default in production systems
-    and in the lab.
+    - Weight matching words.
+    - Rare codes; imperfect paraphrases.
+  callout: Hybrid combines rankings; test the result.
+  notes: 'In short: Keyword and vector retrieval capture different signals, so compare them rather than assuming either always
+    wins.
 
+    Explain: BM25 weights matching words by their distribution in the collection. Dense retrieval compares semantic representations.
+    Rare identifiers may favour exact word matches. Paraphrases can favour embeddings. RRF, reciprocal rank fusion, combines
+    ranking positions without mixing incompatible score scales.
 
-    Ask students: A question names a product number such as ZX-4471. Which retriever is more likely to find it?
+    Example: ZX-4471 illustrates a rare code, while handing work in after the deadline paraphrases late submission. An index
+    of words and a map of meanings supply complementary routes. The analogy breaks if meaning similarity is treated as logical
+    agreement: a passage about a different deadline can sound very similar.
 
-    Expected answer: BM25: exact rare identifiers match as words, while embeddings can blur them.
+    Ask: Which route is likely useful for an exact rare identifier?
 
+    Answer: Keyword retrieval, though the result still needs a relevance check on the actual collection.
 
-    Common mistake: Assuming dense retrieval always beats keyword search.'
+    Watch out: Hybrid is an option to test, not a guaranteed winner. Freeze settings on development questions before reporting
+    final held-out measurements.'
 - type: equation
   title: Fusing rankings and measuring retrieval
   eq:
@@ -421,585 +462,662 @@ slides:
   - \text{lab hit@}K = \frac{\#\text{questions with a gold-document hit in top }K}{\#\text{answerable questions}},\qquad \mathrm{MRR}=\dfrac{1}{|Q|}\sum_q
     \dfrac{1}{\mathrm{rank}_q}
   read_as:
-  - RRF adds reciprocal smoothed rank positions.
-  - Lab recall@K is a gold-document hit rate.
-  - MRR averages first-hit reciprocal rank; missing hits score zero.
+  - Fuse rank positions, not score scales.
+  - 'Archive: document hit@K and MRR.'
+  - 'Core: labelled-passage recall@K.'
   terms:
   - - c
-    - RRF smoothing
+    - Fusion smoothing
   - - K
-    - Checked result cutoff
-  - - rank_q
-    - First gold-document hit
-  notes: 'Reciprocal rank fusion combines ranked lists: each retriever contributes one over sixty plus the rank. A chunk ranked
-    first by one retriever and fifth by the other scores well. RRF needs only ranks, which is convenient because BM25 scores
-    and cosine similarities are on different scales. To measure retrieval, recall at k asks whether any relevant chunk made
-    it into the top k, and mean reciprocal rank rewards putting it first. In the lab students implement RRF and compute both
-    metrics.
+    - Result cutoff
+  - - $\mathrm{rank}_q$
+    - First relevant rank
+  - - d
+    - Passage
+  - - r
+    - Retriever
+  - - Q
+    - Question set
+  notes: 'In short: Fusion combines rank evidence; distinguish the archived document-hit equation from current passage-level
+    recall.
 
+    Explain: RRF adds one over c plus each rank. Here r identifies a retriever, d a passage, rank its position, and c smooths
+    at sixty. K is the returned-result cutoff. MRR averages reciprocal first-relevant ranks for each question q in Q; |Q| counts
+    questions. Missing relevant results contribute zero. Passage recall divides retrieved relevant passages by all labelled
+    relevant passages.
 
-    Ask students: A chunk ranks first in BM25 and fifth in dense retrieval. What is its RRF score with c = 60?
+    Example: Ranks one and five contribute 1/61 plus 1/65, approximately 0.03178. With two labelled useful passages and one
+    retrieved, passage recall is one-half. The displayed historical hit equation instead gives a question one hit when its target
+    document appears. Neither calculation establishes that a generated answer uses evidence correctly.
 
-    Expected answer: 1/61 + 1/65 ≈ 0.032.
+    Ask: Can we add raw BM25 and cosine scores directly?
 
+    Answer: Their scales differ; rank fusion combines positions instead.
 
-    Common mistake: Adding raw BM25 and cosine scores, which are on different scales.'
+    Watch out: Define relevance and denominators explicitly. Keep the historical document-hit metric labelled, and use exact
+    passage evidence for the new core.'
 - type: bullets
   title: 'Re-ranking: a second, more careful look'
-  icon: fa:FaSortAmountDown
   bullets:
-  - Retrieve a broad candidate list quickly.
-  - A **cross-encoder** reads each question–passage pair.
-  - Keep a small, re-ranked set.
-  - Measure evidence quality and extra latency.
-  notes: 'Retrieval usually has two stages. The first is fast and aims for recall: embeddings or BM25 retrieve many candidates.
-    The second, re-ranking, uses a cross-encoder that reads the question and each candidate passage together through a transformer,
-    so it can judge relevance far more precisely, but it is too slow to run on the whole collection. Keeping only the top few
-    re-ranked passages shortens prompts, reduces cost and gives the LLM fewer distracting passages.
+  - Score shortlisted pairs jointly.
+  - Measure evidence gain and elapsed time.
+  notes: 'In short: Re-ranking spends more attention on a shortlist and must justify its extra latency with better selected
+    evidence.
 
+    Explain: A cross-encoder reads question and passage together. Its scores reorder an existing shortlist. A bi-encoder permits
+    stored passage vectors. Re-ranking cannot recover excluded candidates. Candidate selection and final passage cutoff are
+    separate settings.
 
-    Ask students: Why not run the cross-encoder over the whole collection?
+    Example: First return ten candidate IDs, then compare each question-passage pair and retain three. These are illustrative
+    counts. A careful second reader can reject a superficially similar paragraph, but cannot read a page that was never collected.
+    The CPU core keeps this optional and reports which route actually ran.
 
-    Expected answer: It reads every question-passage pair through a transformer, which is too slow for every passage.
+    Ask: Why avoid running a cross-encoder over the whole large collection?
 
+    Answer: It performs a joint model calculation for each question-passage pair, increasing work as the collection grows.
 
-    Common mistake: Adding a re-ranker without measuring its extra latency.'
+    Watch out: Measure useful evidence and elapsed time together. A better rank score alone does not demonstrate better grounded
+    answers or acceptable waiting time.'
+  visual:
+    type: example_strip
+    items:
+    - label: Fast search
+      text: Ten illustrative candidates
+    - label: Cross-encoder
+      text: Question + passage → rank
 - type: figure
   title: 'Measured: retrieval quality on the handbook questions'
   figure: lab_retrieval
   bullets:
-  - '{{RETRIEVAL_NOTES}}'
-  - 'Inspect actual passages: a gold-document hit need not contain the answer.'
+  - Archived document-hit scores.
+  - Inspect the exact useful passage.
   stack: true
-  notes: 'These are the lab''s measured retrieval results on twelve answerable questions about the handbook. The values are
-    in the bullet. The collection is tiny, so all methods reach the right document within the top three; the differences appear
-    at rank one, which matters because the first passage has the most influence. Hybrid fusion and re-ranking typically lift
-    recall at one and MRR.
+  notes: 'In short: The stored retrieval bars compare source-document hits, while the new core requires labelled passage evidence.
 
+    Explain: Each archived question names a target document. A hit counts any returned chunk from that document. Rank-one results
+    show ordering differences. MRR rewards earlier first hits. Specific passage recall is a different metric and needs explicit
+    relevance labels.
 
-    Ask students: Every method finds the right document within the top three. Why do the rank-one differences still matter?
+    Example: {{RETRIEVAL_NOTES}} A returned assessment chunk can omit the pass-mark sentence while still counting as a document
+    hit. An exam analogy distinguishes finding the correct chapter from finding the paragraph that answers the question. Inspect
+    the retrieved text before using the archive to claim complete evidence coverage.
 
-    Expected answer: Only a few passages reach the prompt, and the first has the most influence.
+    Ask: Why inspect passages even when document hit@3 is high?
 
+    Answer: A passage from the right document may lack the needed fact.
 
-    Common mistake: Assuming a gold-document hit contains the answer. Read the passage.'
+    Watch out: These bars retain the documented archived model and corpus. Do not transfer their scores to the new encoder,
+    chunks or CPU generator.'
 - type: figure
   title: 'Measured: RAG vs. no retrieval'
   figure: lab_rag
   bullets:
-  - '{{RAG_NOTES}}'
-  - Supply numbered sources; require supported answers or abstention.
-  - Prompt placement helped this run; test other settings.
+  - Archived generator; same questions.
+  - Number matches are limited proxies.
   stack: true
-  notes: 'The lab compares the same open model answering handbook questions without retrieval and with RAG. Without retrieval
-    it can only guess, so accuracy is near zero, while RAG answers most questions correctly. The bullet reports the measured
-    accuracy, whether numbers in answers are supported by the sources, whether the model cited the right document, and whether
-    it abstained on the unanswerable question about the external examiner. One prompt-design lesson came from building this
-    lab.
+  notes: 'In short: Compare no-retrieval and retrieved-context answers on identical questions, then separate correctness, support
+    and abstention.
 
+    Explain: The no-retrieval baseline lacks the invented handbook. RAG supplies selected passages. Reference matching checks
+    an expected answer. Citation support checks the cited evidence. Abstention tests missing information. These signals can
+    disagree for one response.
 
-    Ask students: Why include the unanswerable external-examiner question?
+    Example: {{RAG_NOTES}} The external-examiner question has no handbook answer. A guessed name can be fluent but unsupported;
+    a correct abstention can have no citation. The archived digit check is a narrow proxy, while the new core separately checks
+    verbatim quoted claims against their cited passages.
 
-    Expected answer: It tests whether the system declines when evidence is missing instead of guessing.
+    Ask: Why include an unanswerable question?
 
+    Answer: It checks whether the system declines missing evidence instead of inventing a fact.
 
-    Common mistake: Counting only accuracy on answerable questions.'
+    Watch out: Prompt placement affected the recorded run, not every model. Report actual inputs, model and check definitions;
+    neither a citation marker nor matching digits proves complete semantic support.'
 - type: cards
   title: Advanced RAG techniques
   cards:
-  - icon: fa:FaEdit
-    head: Rewrite query
-    text: Turn "and for the exam?" into "late penalty for the exam" before searching.
-  - icon: fa:FaLightbulb
-    head: HyDE
-    text: Draft a hypothetical answer and search with it; answers resemble passages.
-  - icon: fa:FaTags
-    head: Contextualise
-    text: Prefix each chunk with its document and section before embedding.
-  - icon: fa:FaProjectDiagram
-    head: GraphRAG
-    text: Summarise linked entities to answer "What are the main themes?".
-  - icon: fa:FaSitemap
-    head: Parent–child
-    text: Match a small chunk, then give the model its whole section.
-  - icon: fa:FaRobot
-    head: Agentic RAG
-    text: Let the model search again when evidence is missing, with a step limit.
-  notes: 'Advanced techniques fix specific failures. Query rewriting turns follow-up questions such as "and for the exam?" into
-    standalone queries. HyDE embeds a hypothetical answer, which often resembles relevant passages more than the question does.
-    Contextual retrieval, published by Anthropic, adds a short explanation of each chunk''s context before embedding; they reported
-    roughly half as many failed retrievals, and more with re-ranking. GraphRAG, from Microsoft Research, answers global questions
-    such as "what are the main themes?" using a knowledge graph. Parent-child retrieval balances precision and context.
+  - head: Rewrite
+    text: Resolve follow-up context.
+  - head: HyDE
+    text: Search hypothetical answers.
+  - head: Contextualise
+    text: Add section meaning.
+  - head: GraphRAG
+    text: Summarise linked entities.
+  - head: Parent-child
+    text: Return larger sections.
+  - head: Agentic RAG
+    text: Bound repeated search.
+  notes: 'In short: Advanced retrieval techniques should target an observed failure rather than increase complexity without
+    evidence.
 
+    Explain: Query rewriting makes a conversational question self-contained. HyDE searches with a hypothetical answer representation.
+    Contextualisation adds a passage’s surrounding meaning. GraphRAG uses linked entities and summaries. Parent-child retrieval
+    matches small passages but supplies larger sections. Agentic RAG permits bounded repeated search.
 
-    Ask students: Which technique turns and for the exam? into a question that search can use?
+    Example: And for the exam? needs the earlier topic before search can interpret it. If a passage lacks its heading, added
+    context may help. A hypothetical answer can also invent misleading terms. Each technique changes the selected evidence,
+    so compare it with a simple baseline on development questions before using held-out tests.
 
-    Expected answer: Query rewriting, using the conversation so far.
+    Ask: Which technique makes a follow-up question searchable by itself?
 
+    Answer: Query rewriting, using the conversation’s relevant context.
 
-    Common mistake: Adding advanced techniques before measuring which failure you have.'
+    Watch out: Published gains belong to their tested setting. More stages can add errors, tokens and latency; inspect the original
+    failure and measure the proposed correction.'
 - type: table
   title: 'Evaluating RAG: retrieval and generation separately'
   header:
-  - Aspect
-  - Question it answers
-  - Example check
+  - Check
+  - Meaning
   rows:
   - - Retrieval
-    - Did useful evidence reach the prompt?
-    - Penalty section in the top 3?
+    - Useful passages found?
   - - Faithfulness
-    - Is each claim in the sources?
-    - '"10% per day" appears in the passage'
+    - Supported claims?
   - - Relevance
-    - Does it answer this question?
-    - Answers the penalty, not the deadline
+    - Question answered?
   - - Correctness
-    - Does it match known facts?
-    - Compare with the reference answer
-  - - Citations / abstention
-    - Supported, or declines when evidence is missing?
-    - 'External examiner: "I don''t know"'
-  notes: 'Evaluate retrieval and generation separately, so that you know which one to fix. Retrieval quality asks whether the
-    evidence reached the prompt. Faithfulness, also called groundedness, asks whether each claim in the answer is supported
-    by the retrieved context; frameworks such as RAGAS and the RAG evaluators in Microsoft Foundry decompose answers into claims
-    and check each one with a model. Answer relevance asks whether the answer addresses the question. Correctness needs reference
-    answers. Include unanswerable questions to test abstention.
+    - Reference agreement?
+  - - Citations
+    - Cited passage supports?
+  - - Abstention
+    - Missing evidence declined?
+  notes: 'In short: Evaluate whether evidence arrived, whether claims follow from it, and whether the response answers the intended
+    question.
 
+    Explain: Retrieval measures selected evidence. Faithfulness means claims follow from supplied sources. Relevance concerns
+    answering this question. Correctness compares with known reference facts. Citation support checks the actual cited passage.
+    Abstention concerns missing evidence.
 
-    Ask students: An answer cites the right document but adds a deadline that is not in it. Which aspect fails?
+    Example: An answer can quote a real exam duration when asked about office hours: supported, but irrelevant. Another can
+    cite assessment while inventing a deadline: relevant topic, unsupported claim. The core’s conservative quote check accepts
+    only text present in its cited passage. Valid paraphrases need separate semantic or human review rather than automatic rejection
+    as false.
 
-    Expected answer: Faithfulness: the claim is not supported by the source.
+    Ask: Which check fails when a cited document does not contain the added deadline?
 
+    Answer: Faithfulness and citation support fail for that claim.
 
-    Common mistake: Judging RAG by correctness alone, without checking retrieval and faithfulness separately.'
+    Watch out: Do not report a single score as complete reliability. Preserve claim-level errors and evidence text, including
+    zero-claim abstentions, so a reviewer can diagnose the failure.'
 - type: quiz
-  question: Needed evidence is ranked 12th; only three passages reach the prompt. Improve first?
+  question: Evidence ranks twelfth; three passages reach the prompt. Improve?
   options:
-  - Retrieval, chunking or re-ranking
-  - The size of the generator model
-  - The generation temperature
-  - A “be accurate” instruction
+  - Retrieval or chunking.
+  - Generator size.
+  - Temperature.
+  - Accuracy instruction.
   answer: 0
-  notes: 'Answer: A. This is a retrieval failure: the evidence never reached the model, so no generator can answer faithfully.
-    Improve retrieval with hybrid search, a re-ranker, different chunking or query rewriting, then re-measure recall at three.
-    A bigger model may guess better but that is hallucination, not grounding. C and D do not change what the model sees. The
-    general lesson: diagnose whether a failure is in retrieval or generation before fixing it.
+  notes: 'In short: If useful evidence never reaches the prompt, improve evidence selection before changing the generator.
 
+    Explain: The candidate rank describes retrieval order. The prompt cutoff limits supplied passages. Re-ranking changes order
+    within a shortlist. Chunking changes what one result contains. Generation can faithfully answer only from evidence actually
+    supplied.
 
-    Ask students: After improving retrieval, what should you measure again?
+    Example: A relevant passage at rank twelve is excluded when only three reach the model. A larger generator may guess the
+    right fact, but the evidence route still failed. The open-book analogy requires the right page to be open. Compare selected
+    passage IDs and text, not merely whether search somewhere found the correct document.
 
-    Expected answer: Recall at three, the passages that reach the prompt, and then answer correctness.
+    Ask: What should be measured after changing retrieval?
 
+    Answer: A. Passage recall at the supplied cutoff, then correctness and support of the resulting answers.
 
-    Common mistake: Choosing B. A bigger model may guess better, but guessing is not grounding.'
+    Watch out: A is correct. Temperature and an accuracy instruction do not supply the missing passage. Recheck evidence before
+    attributing an answer improvement to better grounding.'
 - type: section
   number: 4
   title: Agentic AI
   question: What changes when the model can act?
   icon: fa:FaRobot
-  notes: 'Welcome back. Section four introduces agentic AI: the components of an agent, the loop that drives it,
-    function calling, a real trajectory from the lab, the difference between workflows and agents, multi-agent systems,
-    the Model Context Protocol and the frameworks. Agents build directly on RAG: search becomes one tool among several.
-    About thirty minutes.
+  notes: 'In short: Tool use changes the application from answering with text to proposing operations that code must control.
 
+    Explain: An agent chooses intermediate steps using a model. A tool call names an operation and its arguments. Application
+    code validates that proposal before execution. An observation is the returned result. A bounded loop stops after an answer
+    or budget limit.
 
-    Analogy: A model suggests using a calculator; a program checks and operates it. The result changes the next
-    decision.
+    Example: A grade task needs assessment weights before calculation. The model proposes handbook search; the program returns
+    evidence, then may execute a calculator proposal. A colleague asking to borrow a calculator does not already operate it.
+    Likewise, a generated call is not an executed action or an authorised permission grant.
 
+    Ask: Who executes a proposed tool call?
 
-    Ask students: Who executes a tool call?
+    Answer: Application code executes only a permitted, validated operation.
 
-    Expected answer: Application code. The model proposes a name and arguments, and code controls execution.
-
-
-    Common mistake: Tool descriptions and a standard protocol do not enforce permission or trust by themselves.'
+    Watch out: Protocol compatibility and clear tool descriptions do not enforce trust. The local fallback uses a disclosed
+    fixed policy; do not label its planned decisions as autonomous model reasoning.'
 - type: cards
   title: Components of an LLM agent
   cards:
-  - icon: fa:FaBrain
-    head: LLM
-    text: 'Proposes the next step: "search the handbook for the weights".'
-  - icon: fa:FaTools
-    head: Tools
-    text: 'Named functions with typed arguments: search_handbook, calculator.'
-  - icon: fa:FaMemory
-    head: Memory
-    text: Earlier messages and tool results kept for this task.
-  - icon: fa:FaListOl
-    head: Planning
-    text: 'Revises the steps after each result: search, then calculate.'
-  - icon: fa:FaRedo
-    head: Loop
-    text: Repeats until it answers or reaches the step limit.
-  - icon: fa:FaUserCheck
-    head: Oversight
-    text: Code checks permissions, asks for approval and logs every call.
-  notes: 'An agent is an LLM that uses tools in a loop to achieve a goal. The LLM reasons and chooses the next step. Tools are
-    functions it can call, from search and calculators to code execution and external APIs. Memory holds the conversation and
-    intermediate results, and sometimes long-term notes. Planning breaks goals into steps and revises them. The loop continues
-    until the task is done or a limit is reached.
+  - head: Model
+    text: Proposes next step.
+  - head: Tools
+    text: Named checked functions.
+  - head: Memory
+    text: Current task history.
+  - head: Planning
+    text: Uses observed results.
+  - head: Budget
+    text: Bounds repetition.
+  - head: Oversight
+    text: Permissions and audit.
+  notes: 'In short: An agent combines a decision model, tools, task history, a loop budget and application oversight.
 
+    Explain: Tools expose named operations. Memory here contains current-task messages and observations. Planning chooses or
+    revises intermediate steps. The loop requests decisions until stopping. Oversight supplies permissions, validation and audit
+    records. These components have distinct responsibilities.
 
-    Ask students: Which component stops an agent from looping forever?
+    Example: For the grade task, task history initially contains two marks. After search it also contains the handbook weights.
+    Only then can a calculator expression use observed values. A notebook margin can hold working notes, but that analogy does
+    not make temporary history permanent knowledge or prove that stored text is trustworthy.
 
-    Expected answer: The loop''s budget: a limit on steps, time or cost.
+    Ask: Which component prevents indefinite repeated calls?
 
+    Answer: The application’s step and resource budget stops the loop.
 
-    Common mistake: Treating memory as permanent knowledge. It holds the messages and observations for this task.'
+    Watch out: More memory is not automatically better. Retain relevant observations, track their sources, and keep external
+    results from acquiring the authority of the user’s actual goal.'
 - type: figure
   title: 'The agent loop (ReAct: reason, act, observe)'
   figure: agent_loop
-  notes: 'The ReAct pattern, from Yao and colleagues in 2022, interleaves reasoning and acting. The LLM reads the task and decides
-    whether it needs a tool. If so, it emits a structured tool call with JSON arguments; the program, not the model, executes
-    it and returns the result as an observation; the LLM reasons again with the new information. When no tool is needed, it
-    gives the final answer. The step limit prevents endless loops.
+  notes: 'In short: The agent loop observes one actual tool result before deciding whether another step is needed.
 
+    Explain: ReAct interleaves reasoning, action and observation. A parser converts proposed text into a structured call. Validation
+    checks names and argument fields. Execution runs permitted code. Recording appends the result or error to history. A final
+    answer or limit ends the loop.
 
-    Ask students: In ReAct, what is an observation?
+    Example: Search returns a 60% project weight and 40% exam weight in the fictional handbook. A later calculator call uses
+    those observed numbers. These supplied values illustrate the task, while the archived trajectory separately records a real
+    model’s behaviour. Executing multiple dependent proposals at once can compute with values invented before search finishes.
 
-    Expected answer: The result a tool returns, added to the context before the model reasons again.
+    Ask: What is an observation?
 
+    Answer: The actual tool result or error supplied to the next decision.
 
-    Common mistake: Thinking the model runs the tool itself.'
+    Watch out: A model may stop incorrectly or propose malformed calls. Keep the final answer, executed trajectory, failed proposals
+    and budget status as separate evidence.'
 - type: code
   title: 'Function calling: tools are described, the model proposes, your code executes'
-  code: "for step in range(MAX_STEPS):\n    reply = llm(messages, tools=list(TOOLS.values()))\n    calls = parse_tool_calls(reply)[:1]\
-    \  # one call per turn\n    if not calls:\n        return reply\n    call = calls[0]\n    result = execute(call)\
-    \              # allowlist and simulated gate\n    messages.append({\"role\": \"tool\", \"name\": call[\"name\"\
-    ],\n                     \"content\": str(result)})\n"
-  bullets:
-  - Describe tool purpose and argument fields.
-  - Model proposes; code controls execution.
-  - Complete argument validation is still needed in a real application.
-  notes: 'Function calling is supported by many endpoints and open-model chat templates; check the exact model and endpoint.
-    You describe each tool with a name, a description and a JSON schema of its arguments; here the schema is generated from
-    the Python type hints and docstring. The model replies either with text or with a structured call.
+  code: "calls = parse_tool_calls(reply)[:1]\nif calls:\n    result = execute(calls[0])\n    messages.append({\"role\": \"tool\"\
+    , \"content\": result})"
+  notes: 'In short: A tool schema describes a request; the executor still checks the proposed name, arguments and permissions.
 
+    Explain: Function calling produces structured operation proposals. A schema names allowed argument fields and types. Parsing
+    does not establish validity. The executor checks the allowlist and required fields. Only then does application code call
+    the function.
 
-    Ask students: Why does the lab allow only one tool call per turn?
+    Example: A calculator proposal containing an expression must be checked as a string and parsed as bounded arithmetic. A
+    proposed unknown shell tool must be rejected. A form analogy explains named fields, but receiving a filled form does not
+    mean its contents are valid or that the action is approved.
 
-    Expected answer: Each call is checked and its result observed before the next decision, which keeps the trajectory easy
-    to audit.
+    Ask: Why execute only one dependent tool call per turn?
 
+    Answer: The next proposal can use the observed result rather than invent its inputs.
 
-    Common mistake: Executing a proposed call without checking the tool allowlist and the arguments.'
+    Watch out: The email operation and domain gate are simulated. Real consequential actions need actual review mechanisms;
+    generated arguments alone never supply that review.'
+  caption: Proposal → checked execution → observation.
 - type: figure
   title: 'Measured: a real agent trajectory from the lab'
   figure: agent_trace
   bullets:
-  - '{{AGENT_NOTES}}'
+  - Archived tool observations; independently check the answer.
   stack: true
-  notes: 'This is the actual trajectory of the lab agent, an open 1.5-billion-parameter model, on the task "what is my final
-    mark?". Walk through each step: which tool it called with which arguments, what came back, and the final answer. The correct
-    answer is 68.8, from sixty percent of 72 plus forty percent of 64. Small models sometimes skip a tool or make arithmetic
-    errors, which is why the lab checks the answer and why the calculator tool exists at all: arithmetic belongs in code.
+  notes: 'In short: The archived trajectory shows what executed, while an independently checked answer establishes task success.
 
+    Explain: A trajectory records tool calls and observations. The final answer is a separate output. Task success requires
+    a predeclared check. Tool use alone does not demonstrate success. Step limits can stop a run before completion.
 
-    Ask students: Why does the agent call a calculator instead of computing 68.8 itself?
+    Example: {{AGENT_NOTES}} Independently calculate 0.6 times 72 plus 0.4 times 64, giving 68.8 for the fictional exercise.
+    This arithmetic is reproducible; it is not a new measurement of agent accuracy. A receipt analogy helps trace operations,
+    but a complete-looking receipt can still contain a wrong input or missing action.
 
-    Expected answer: Arithmetic belongs in code; a small model can make arithmetic mistakes.
+    Ask: Why use calculator output rather than trusting mental arithmetic in generated text?
 
+    Answer: Code can perform and check the defined arithmetic; the model may miscalculate.
 
-    Common mistake: Trusting the final answer without reading the trajectory.'
+    Watch out: Read the original source weights and actual observations. New model runs may differ from this archived trajectory
+    and must not inherit its success claim.'
 - type: figure
   title: Workflows vs. agents
   figure: workflows
   bullets:
-  - '**Workflow:** predefined steps in code.'
-  - '**Agent:** model chooses the next step.'
-  - Use limits on steps, time, cost and permission.
-  - Prefer a tested workflow for a known path.
+  - 'Fixed path: workflow.'
+  - 'Chosen next step: agent.'
   stack: true
-  notes: 'Anthropic''s guide "Building effective agents" distinguishes workflows, where LLM calls follow code paths you define,
-    from agents, where the model decides its own steps. It names five workflow patterns: prompt chaining, routing, parallelisation,
-    orchestrator-workers and evaluator-optimiser. Most successful applications are workflows or simple agents. Autonomous agents
-    are worth their cost and unpredictability only for open-ended tasks where the steps cannot be fixed in advance, such as
-    research or coding tasks. Recommend that students start with the simplest pattern that works.
+  notes: 'In short: Use a workflow for a known route and an agent when choosing intermediate steps provides measured value.
 
+    Explain: A workflow follows paths defined in code. An agent uses model decisions to choose its next step. Chaining, routing
+    and parallel work are workflow patterns. Worker delegation splits tasks. Evaluation and revision form another controlled
+    pattern.
 
-    Ask students: The course assistant always searches, then answers. Is that a workflow or an agent?
+    Example: A course assistant that always retrieves and answers follows a workflow even though it calls a language model.
+    Open-ended investigation may need another search after inspecting a result. A recipe describes a known sequence; a cook
+    adapting the recipe illustrates decisions, but neither analogy removes the need for time, tool and permission limits.
 
-    Expected answer: A workflow: the steps are fixed in code.
+    Ask: Is a fixed search-then-answer assistant an agent?
 
+    Answer: It is a workflow because code predefines its route.
 
-    Common mistake: Building an autonomous agent for a task with a known path.'
+    Watch out: Autonomy adds decision failures and calls. Compare task success, elapsed time and resource use with the simpler
+    design before claiming that flexible planning helps.'
 - type: bullets
   title: Multi-agent systems
-  icon: fa:FaUsers
   bullets:
-  - Roles divide model-driven work.
-  - A coordinator or messages connect them.
-  - Parallelism adds calls and error propagation.
-  - A2A describes agent communication; test whether extra agents help.
-  notes: 'Multi-agent systems split a task among specialised agents, for example a research agent that searches, a writer and
-    a reviewer, coordinated by an orchestrator or by exchanging messages. The benefits are specialisation, parallelism and different
-    permissions per agent. The costs are real: multi-agent systems use many more tokens, are harder to debug, and errors can
-    cascade. Protocols such as the Agent2Agent protocol, started by Google and now under the Linux Foundation, standardise communication
-    between agents. For projects, one agent with good tools is usually enough.
+  - Divide roles and permissions.
+  - Measure calls, failures and task success.
+  notes: 'In short: Multiple agents can divide work and permissions, but their coordination adds observable failure and resource
+    costs.
 
+    Explain: A role assigns one part of a task. A coordinator or message exchange connects roles. Parallelism runs independent
+    work together. Errors can propagate between agents. A2A is a protocol for agent communication rather than an answer-quality
+    guarantee.
 
-    Ask students: What is the main cost of adding more agents?
+    Example: A researcher supplies evidence, a writer drafts and a reviewer checks claims. Independent searches may overlap
+    usefully, while a shared false premise can infect every role. A team analogy explains division of work, but generating three
+    agreeing opinions is not three independent verifications. Compare a single-agent baseline using the same task and evidence.
 
-    Expected answer: More model calls and tokens, harder debugging, and errors that spread between agents.
+    Ask: What should be measured when adding another agent?
 
+    Answer: Task success, extra calls and tokens, elapsed time, and errors that spread between roles.
 
-    Common mistake: Assuming more agents give better results without testing.'
+    Watch out: Report resource cost per successful task and handle zero successes explicitly. Agreement or the number of agents
+    alone is insufficient evidence that the design improved.'
+  visual:
+    type: example_strip
+    items:
+    - label: Researcher
+      text: Collects source evidence
+    - label: Reviewer
+      text: Checks claims against evidence
 - type: figure
   title: The Model Context Protocol (MCP)
   figure: mcp
   bullets:
-  - '**MCP:** connect applications to tools and data.'
-  - The host manages clients; servers expose capabilities.
-  - Introduced in 2024; AAIF donation in 2025.
-  - Connections still need trust and permission controls.
+  - Host clients discover server capabilities.
+  - Compatibility does not grant trust.
   stack: true
-  notes: 'The Model Context Protocol, introduced by Anthropic in November 2024 and donated in December 2025 to the Agentic AI
-    Foundation under the Linux Foundation, standardises how AI applications connect to tools and data. Servers expose tools,
-    resources and prompt templates; clients in assistants, IDEs and agent frameworks discover and call them. This solves the
-    problem of writing a separate integration for every pair of application and tool.
+  notes: 'In short: MCP standardises capability discovery and calls while the host remains responsible for trust and permissions.
 
+    Explain: MCP means Model Context Protocol. A host application manages clients. A server exposes capabilities such as tools
+    or resources. The client discovers and requests them. A standard connection does not make returned content trustworthy or
+    authorise every proposed operation.
 
-    Ask students: In MCP, which side exposes tools and data?
+    Example: A handbook server can expose a search tool with one query field. The host discovers its schema, validates a request
+    and receives passages. A shared socket analogy explains interoperability, but a compatible device can still be faulty or
+    malicious. The dated specification is 2026-07-28; implementation details must match the version used.
 
-    Expected answer: The server; clients inside the host discover and call them.
+    Ask: Which side exposes tools and resources?
 
+    Answer: The server exposes them; the client within the host discovers and requests them.
 
-    Common mistake: Assuming a standard protocol makes a server trustworthy. Permissions still need checking.'
+    Watch out: The notebook writes an incomplete SDK scaffold, not a running server. Connect retrieval and load its index before
+    claiming that the exported file serves searches.'
 - type: table
   title: Frameworks and tools for RAG and agents
   header:
-  - Tool
-  - Strength
-  - Typical use
+  - Toolkit
+  - Focus
   rows:
-  - - LangChain / LangGraph
-    - Components; stateful graphs
-    - Agent with checkpoints and approvals
+  - - LangGraph
+    - Stateful paths
   - - LlamaIndex
-    - Data indexing and retrieval
-    - RAG over many document types
+    - Retrieval
   - - OpenAI Agents SDK
-    - Tools, handoffs, tracing
-    - Agents on OpenAI models
+    - Tools; tracing
   - - Google ADK
-    - Agent coordination
-    - Agents on Gemini and Vertex
+    - Orchestration
   - - Microsoft Agent Framework
-    - Python and .NET integration
-    - Enterprise agents on Azure
+    - Python; .NET
   - - HF smolagents
-    - Small, readable framework
-    - Agents with open models
-  notes: 'A snapshot of frameworks. LangGraph models agents as graphs with state, checkpoints and human-in-the-loop steps. LlamaIndex
-    specialises in data connectors and retrieval. The major providers have their own agent kits: OpenAI''s Agents SDK, Google''s
-    Agent Development Kit and Microsoft''s Agent Framework, which succeeds Semantic Kernel and AutoGen for agent building. Hugging
-    Face''s smolagents is minimal and works well with open models. All implement the same loop students write by hand in the
-    lab; learning the loop first makes any framework easy to pick up.
+    - Open-model tools
+  notes: 'In short: Frameworks package retrieval, state and tool orchestration after the application’s required route has been
+    chosen.
 
+    Explain: A framework supplies reusable components and control structures. LangGraph represents stateful paths. LlamaIndex
+    emphasises data indexing and retrieval. Provider and open-model kits offer tool orchestration. Checkpoints record state
+    for resuming or review. They do not independently establish evidence or permission.
 
-    Ask students: Why learn the loop by hand before using a framework?
+    Example: A fixed handbook search needs indexing, selection, generation and checks before it needs a multi-agent framework.
+    A larger application may need resumable state or handoffs. A toolbox analogy explains reusable parts, but choosing a toolkit
+    does not specify which operations are appropriate or which results should count as success.
 
-    Expected answer: Every framework implements the same loop, so understanding it makes any framework easier to debug.
+    Ask: Why learn the loop before selecting a framework?
 
+    Answer: It makes the decision, validation, execution and observation boundaries easier to inspect and debug.
 
-    Common mistake: Choosing a framework before deciding whether a workflow is enough.'
+    Watch out: Vendor kits and interfaces evolve. Use the verified official documentation, retain a simple baseline, and test
+    the actual route rather than attributing reliability to a framework name.'
 - type: quiz
-  question: A course assistant answers handbook deadlines and rules. Choose the initial design.
+  question: Initial design for handbook deadlines and rules?
   options:
-  - Three cooperating agents
-  - Autonomous web/email agent
-  - RAG workflow with sources and abstention
-  - Fine-tuning without retrieved evidence
+  - Three cooperating agents.
+  - Autonomous web/email agent.
+  - RAG; sources; abstention.
+  - Fine-tuning without evidence.
   answer: 2
-  notes: 'Answer: C. The task is single-step factual question answering over known documents, which a fixed RAG workflow handles
-    predictably, cheaply and verifiably. A adds cost and failure modes without benefit. B adds risk, especially e-mail, and
-    unreliable web sources. D cannot keep deadlines up to date and gives no citations. Agents are for tasks whose steps cannot
-    be fixed in advance.
+  notes: 'In short: A fixed RAG workflow is a sensible first design for factual questions over an authorised handbook.
 
+    Explain: The source collection defines available evidence. Retrieval supplies selected passages. Generation answers or abstains.
+    The workflow’s order is known in advance. Additional autonomous steps need a reason supported by evaluation.
 
-    Ask students: Why is option B risky?
+    Example: A deadline question usually needs one evidence search and a cited response. An autonomous email agent introduces
+    unrelated write capability. Three cooperating agents add calls without necessarily adding useful evidence. A service-desk
+    checklist explains a known route, but it still needs up-to-date sources, error checks and a human escalation path when information
+    is absent.
 
-    Expected answer: Sending e-mail is a side effect, and web pages are unreliable and can carry injected instructions.
+    Ask: Why is option B risky for this initial task?
 
+    Answer: C. Email is an unnecessary side effect, and external pages can contain unreliable or hostile content.
 
-    Common mistake: Choosing A. Three agents add cost and failure modes without benefit.'
+    Watch out: C is correct for the initial design. A new task may justify tools later; test that need instead of expanding
+    authority by default.'
 - type: section
   number: 5
   title: Risks and guardrails
   question: What can go wrong when models read documents and take actions?
   icon: fa:FaShieldAlt
-  notes: 'The final section covers prompt injection, especially indirect injection through retrieved content, with
-    a real test from the lab, layered guardrails for agents, and human oversight. It is short but essential: the
-    design principles apply to every project that uses retrieval or tools. About thirteen minutes.
+  notes: 'In short: Retrieved instructions remain external data, while application code controls access and execution boundaries.
 
+    Explain: Direct injection arrives as a hostile request. Indirect injection is planted in content the system reads. A model
+    can be influenced by either. A permission controls an operation’s authority. A simulated gate illustrates a decision without
+    supplying real human approval.
 
-    Analogy: A hostile instruction written on a library page remains page content. It must not acquire the authority
-    of an approved request.
+    Example: The fictional forum post requests emailing grades to an external address. Reading it should not grant grade access
+    or sending permission. A command written on a library page remains page content, even when phrased confidently. The lab
+    email function is a stub, and the domain policy rejects the hostile destination if proposed.
 
+    Ask: Does this exercise send mail or ask a real approver?
 
-    Ask students: Does the email exercise ask a real person or send real mail?
+    Answer: No. It simulates both the email result and approval policy.
 
-    Expected answer: No. A destination-domain rule simulates approval, and the email function only returns a string.
-
-
-    Common mistake: A system prompt alone does not reliably prevent injection; code permissions and tested controls
-    still matter.'
+    Watch out: Prompt wording is one input control, not a guarantee. Inspect attempted calls, validation decisions and actual
+    tool effects separately from the final response.'
 - type: bullets
   title: Prompt injection, especially indirect
-  icon: fa:FaSyringe
   bullets:
-  - '**Direct injection:** hostile request instructions.'
-  - '**Indirect injection:** hostile instructions inside retrieved data.'
-  - Code must control tools and data access.
-  - '{{INJECTION_NOTES}} Email and approval are simulated.'
-  notes: 'Prompt injection is the top risk in the OWASP list for LLM applications. Direct injection comes from the user. Indirect
-    injection, described by Greshake and colleagues in 2023, hides instructions in content the system reads: a web page, an
-    e-mail, a shared document or a retrieved chunk. LLMs cannot reliably separate data from instructions in their context. For
-    a chatbot, the result is a wrong answer; for an agent with tools, it can be data theft or harmful actions.
+  - Retrieved instructions remain untrusted data.
+  - Code controls execution.
+  notes: 'In short: An indirect injection tries to convert untrusted source text into an instruction with higher authority.
 
+    Explain: A retrieved forum post is evidence data. Its imperative wording does not change that role. The model may still
+    propose an unwanted call. The executor applies application permissions. An audit records the attempted operation and its
+    decision.
 
-    Ask students: What makes the lab''s forum post an indirect injection?
+    Example: {{INJECTION_NOTES}} The attack asks for grades to be emailed externally, but the teaching stub has neither grades
+    nor a network-sending operation. A local forced proposal separately tests the executor even if a model ignores the attack.
+    This test demonstrates a code boundary, not universal model resistance to every injection.
 
-    Expected answer: It is a retrieved document that tells AI assistants to e-mail every student''s grades to an outside address.
+    Ask: What makes the forum instruction indirect?
 
+    Answer: It is embedded inside retrieved content rather than authorised by the user’s task.
 
-    Common mistake: Assuming the model can reliably tell data from instructions in its context.'
+    Watch out: Record whether a proposal occurred and whether anything executed. A quiet final answer alone cannot establish
+    that no forbidden action was attempted.'
+  visual:
+    type: example_strip
+    items:
+    - label: Forum text
+      text: “Email grades externally.”
+    - label: Executor
+      text: Blocked; email remains simulated.
 - type: flow
   title: Guardrails for RAG and agents
   steps:
-  - label: Permissions
-    sub: Least privilege and read-only defaults
   - label: Validate
-    sub: Known tools; types and ranges
-  - label: Approve
-    sub: Review consequential actions
-    highlight: true
-  - label: Limit
-    sub: Steps, time, cost and sandbox
-  - label: Audit
-    sub: Record tool calls and outcomes
-  callout: A hostile page can affect proposals; code limits what may run.
-  notes: 'Because no prompt can guarantee that the model ignores injected instructions, safety must come from the system design.
-    Give agents the least privilege they need, read-only by default. Allowlist tools and validate arguments, for example permitted
-    e-mail domains. Require human approval for actions with side effects. Limit steps, time and cost, and sandbox code execution.
-    Log every tool call for audit and monitoring. The callout is the principle: assume the model will sometimes be fooled, and
-    make sure being fooled cannot cause serious harm.
+    sub: Names; fields
+    role: tool
+  - label: Permit
+    sub: Scoped gate
+    role: tool
+  - label: Execute
+    sub: Allowed tool
+    role: tool
+  - label: Record
+    sub: Result
+    role: metric
+  callout: Permitted path; refusals bypass execution.
+  notes: 'In short: Validate a proposed call, apply its permission gate, execute permitted code and record the resulting observation.
 
+    Explain: Least privilege limits available capabilities. An allowlist restricts tool names. Argument validation checks required
+    fields, types and ranges. Approval is separate from parsing. A resource budget limits repetition. Auditing preserves calls
+    and outcomes for review.
 
-    Ask students: The model proposes send_email to an outside address. Which layer stops it?
+    Example: An email proposal to archive@example.net has a recognised tool name yet fails the simulated destination gate. A
+    calculator proposal with arbitrary Python fails arithmetic validation. A series of checkpoints explains separate controls,
+    but each checkpoint needs executable tests rather than a descriptive box or reassuring system prompt.
 
-    Expected answer: Validation and approval in code: the destination domain is not allowed, so the call never runs.
+    Ask: Which layer stops a recognised but unauthorised email proposal?
 
+    Answer: The application’s permission and approval gate rejects it before the tool runs.
 
-    Common mistake: Relying on the system prompt to stop harmful actions.'
+    Watch out: Rejected calls return observations without executing side effects. A real system needs real approval, scoped
+    credentials and tested controls; this lab supplies only bounded, simulated demonstrations.'
+  arrows:
+  - checked call
+  - permitted call
+  - observation
 - type: bullets
   title: Human oversight and responsible use
-  icon: fa:FaBalanceScale
   bullets:
-  - Show supporting sources and human escalation.
-  - Respect permissions; minimise personal data.
-  - Refresh indexes; test missing evidence and injection.
-  - Disclose AI use; check purpose-specific AI Act scope and dates.
-  notes: 'Human oversight means users can check sources and reach a person, and operators review logs and outcomes. Indexes
-    must respect permissions and data protection: personal data in documents becomes retrievable by anyone who can query the
-    system. Evaluation continues after launch, including red-team tests of injection. Legally, users must be told they are interacting
-    with AI, and systems used for high-risk purposes in education or employment, such as admissions or grading decisions, face
-    strict requirements under the EU AI Act.
+  - Expose evidence and escalation.
+  - Maintain access and source freshness.
+  notes: 'In short: A useful assistant exposes evidence and escalation while operators maintain permissions, source freshness
+    and continuing evaluation.
 
+    Explain: Human oversight lets users inspect sources and reach a person. Access controls restrict retrieved content. Data
+    minimisation excludes unnecessary personal information. Versioning tracks changed sources. Ongoing evaluation tests ordinary
+    failures, missing evidence and hostile content.
 
-    Ask students: Why can indexing a shared drive create a privacy problem?
+    Example: Indexing a shared drive can make sensitive paragraphs searchable through an innocent question. A locked filing
+    cabinet analogy explains permission boundaries, but a metadata field is only a label until code enforces it. A university
+    application’s intended purpose determines legal obligations; a factual handbook assistant differs from automated admissions
+    or grading decisions.
 
-    Expected answer: Personal data in the documents becomes retrievable by anyone who can query the system.
+    Ask: Why can indexing a shared drive create a privacy problem?
 
+    Answer: Documents may become retrievable beyond the people and purposes originally authorised to read them.
 
-    Common mistake: Treating evaluation as finished at launch. Keep testing missing evidence and injection.'
+    Watch out: Legal scope and dates require current authoritative guidance. Do not infer classification from the word education
+    alone, or treat evaluation as complete at launch.'
+  visual:
+    type: mini_table
+    header:
+    - Control
+    - Check
+    rows:
+    - - Access
+      - Authorised passages
+    - - Lifecycle
+      - Refresh; delete
+    - - Oversight
+      - Inspect; escalate
 - type: lab
   title: 'Lab 12: a RAG assistant and a tool-using agent, measured'
   steps:
-  - Establish a no-retrieval baseline.
-  - Chunk, embed and index handbook sources.
-  - Compare keyword, dense, fusion and re-ranking.
-  - Check answer facts, citations and abstention.
-  - Trace controlled tools, simulated approval and MCP scaffold.
-  runtime: Colab T4 GPU; CPU uses a smaller model. About 5 min on a 4 GB laptop GPU after downloads
-  deliverable: Notebook with retrieval and RAG tables, agent trajectories and audit log, and three answers
-  notes: 'The lab covers both descriptor tutorials: building and evaluating a RAG pipeline with and without retrieval, and implementing
-    an agent that calls tools, including a calculator and search over the RAG index. The handbook is fictional, so the model
-    cannot have memorised it. The injection test shows why guardrails belong in code. The final question asks students to design
-    a production version, which prepares them for their projects.
+  - Inspect no-retrieval answers.
+  - Prepare compatible passage vectors.
+  - Measure passage recall and citations.
+  - Trace bounded tools and refusal.
+  - 'Optional: databases, re-ranking, MCP.'
+  runtime: 'CPU core: {{W12_CORE_TIME}}.'
+  deliverable: Evidence tables, traces and explanations
+  notes: 'In short: The CPU core builds genuine retrieval and grounded answering, then checks a bounded loop and simulated hostile
+    proposal.
 
+    Explain: MiniLM supplies learned passage vectors. NumPy performs exact local ranking. BM25 and RRF provide alternative search
+    routes. A small pretrained local generator receives numbered evidence. A bounded executor runs validated tools. Optional
+    APIs compare synthetic explanations while keeping a local route.
 
-    Ask students: Which lab part shows why guardrails belong in code?
+    Example: Inspect one [N,384] passage table, one cited answer and one search-to-calculator trace. The complete CPU time target
+    awaits measurement. Database and re-ranking demonstrations remain optional. Archived GPU figures use their original models
+    and metric definitions, so current outputs must be reported from their own actual run.
 
-    Expected answer: The injection test: the hostile forum post reaches the agent, and only code controls what may run.
+    Ask: What establishes that a claimed answer is supported?
 
+    Answer: Inspect its cited passage and each claim; the core also supplies a conservative verbatim-quote check.
 
-    Common mistake: Comparing your RAG scores with the slides without noting the model and hardware.'
+    Watch out: No API spending is required. Keep semantic claim review distinct from digit matches, label fixed fallback decisions
+    honestly, and record stopped or unsuccessful tasks.'
 - type: summary
   points:
-  - RAG supplies searched context without weight updates.
-  - Keep chunks, source IDs and permissions together.
-  - Test retrieval separately from evidence use.
-  - Check citations; decline missing evidence.
-  - Models propose actions; code executes permitted tools.
-  - Use bounded loops, tested controls and audit records.
-  notes: 'Recap the six points. Students should be able to draw the RAG pipeline, justify each design choice with a metric,
-    explain the agent loop and function calling, distinguish workflows from agents, and design guardrails that do not rely on
-    the model obeying its instructions. This completes the technical content of the module; the remaining sessions focus on
-    the projects, which will combine RAG or agents with the deployment practices from week 11.
+  - Sources remain external evidence.
+  - Preserve passage IDs.
+  - Check claims and citations.
+  - Code controls tools.
+  - Bound and audit loops.
+  - Measure success and resources.
+  notes: 'In short: An evidence route and a tool route are reliable only within the claims supported by their separate checks.
 
+    Explain: Retrieval supplies context without weight updates. Passage IDs preserve evidence identity. Claim checks examine
+    what an answer asserts. An agent proposes operations. Code controls execution and budgets. Audits connect decisions with
+    observed outcomes.
 
-    Ask students: What should a design rely on instead of the model obeying its instructions?
+    Example: A penalty answer needs the correct passage and faithful use. A grade answer also needs observed weights and valid
+    arithmetic. The complete module connects these routes with training, evaluation and deployment. A finished project should
+    explain inputs, outputs, failure cases and measured resource use rather than only showing an attractive application demonstration.
 
-    Expected answer: Code-enforced permissions, validation, approvals, limits and audit logs.
+    Ask: What should protect execution when a model follows a hostile instruction?
 
+    Answer: Code-enforced permissions, validation, approval where needed, bounded loops and audit records.
 
-    Common mistake: Starting with a multi-agent system when a RAG workflow would do.'
+    Watch out: A known path often suits a workflow. More agents, citations or low latency do not remove the need to verify evidence
+    and define task success.'
 - type: resources
   items:
   - kind: paper
-    label: Lewis et al. (2020) Retrieval-Augmented Generation
-    note: The original RAG paper
+    label: RAG foundation
+    note: Retrieved memory
     url: https://arxiv.org/abs/2005.11401
   - kind: paper
-    label: Yao et al. (2022) ReAct
-    note: Reasoning and acting with tools
+    label: ReAct loop
+    note: Actions; observations
     url: https://arxiv.org/abs/2210.03629
   - kind: doc
-    label: 'Anthropic: Building effective agents'
-    note: Workflows vs agents
+    label: Effective agents
+    note: Design choices
     url: https://www.anthropic.com/engineering/building-effective-agents
   - kind: doc
-    label: 'Anthropic: Contextual retrieval'
-    note: Improving RAG retrieval
-    url: https://www.anthropic.com/engineering/contextual-retrieval
-  - kind: doc
-    label: 'OpenAI: Function calling'
-    note: Tool use with the API
-    url: https://developers.openai.com/api/docs/guides/function-calling
-  - kind: course
-    label: Hugging Face AI Agents Course
-    note: Free course on agents
-    url: https://huggingface.co/learn/agents-course/unit0/introduction
-  - kind: course
-    label: 'Microsoft: AI Agents for Beginners'
-    note: Lessons with code
-    url: https://github.com/microsoft/ai-agents-for-beginners
-  - kind: doc
-    label: Model Context Protocol
-    note: Specification and SDKs
-    url: https://modelcontextprotocol.io/
-  notes: 'The RAG and ReAct papers are the foundations. Anthropic''s two engineering posts are practical guides to agent design
-    and retrieval quality. OpenAI''s function-calling guide explains tool schemas; Google''s Gemini function-calling guide is
-    equivalent. The Hugging Face Agents course and Microsoft''s AI Agents for Beginners are free, hands-on courses. The Model
-    Context Protocol site has the specification and SDKs. Ozdemir''s Quick Start Guide to Large Language Models, chapters on
-    semantic search and retrieval, is the textbook reading. All links were last checked on 9 October 2026.
+    label: MCP tools
+    note: Versioned interface
+    url: https://modelcontextprotocol.io/specification/2026-07-28/server/tools
+  - kind: video
+    label: Agents course Q&A
+    note: Visual explanation
+    url: https://www.youtube.com/watch?v=iLVyYDbdSmM
+  notes: 'In short: Combine foundational papers, official interfaces and a worked notebook to understand retrieval and controlled
+    tool use.
 
+    Explain: The RAG paper introduces retrieved external memory. ReAct connects decisions with actions and observations. Official
+    MCP documentation specifies capability exchange. An engineering guide compares workflows and agents. A course video gives
+    another explanation before code practice.
 
-    Ask students: Which resource explains when to use workflows rather than agents?
+    Example: A student confused by fusion should calculate 1/61 plus 1/65, then inspect the ranked IDs. A student confused by
+    tools should trace a parsed calculator proposal through execute and its returned observation. Reading a tutorial or watching
+    an agent run is useful, but neither replaces explaining the boundaries and checking the actual evidence.
 
-    Expected answer: Anthropic''s Building effective agents.
+    Ask: Which reading helps choose between a workflow and an agent?
 
+    Answer: Anthropic’s Building effective agents, alongside a measured comparison for the actual task.
 
-    Common mistake: Reading framework tutorials before the RAG and ReAct papers'' core ideas.'
+    Watch out: Follow official versioned interfaces for implementation. External examples can contain outdated assumptions;
+    preserve a complete local path and verify each claim before reusing it.'

@@ -58,6 +58,9 @@ let count=0,linear=0;
 for(const filename of fs.readdirSync(path.join(__dirname,"../curriculum/beginner"))) {
   if(!filename.endsWith(".json")) continue;
   const data=JSON.parse(fs.readFileSync(path.join(__dirname,"../curriculum/beginner",filename),"utf8"));
+  // These labs inspect fixed pretrained models; measuring an objective is not a weight update.
+  if([6,7,9,10,12].includes(data.week))
+    assert(!data.diagrams.find(d=>d.id==="lab").steps.some(s=>s.role==="loss"),`${filename}: frozen-model lab implies a training loss/update`);
   for(const d of data.diagrams) {
     const g=geometry(d), routes=[...g.segments,...(g.branches||[]),...(g.feedback?[g.feedback]:[])];
     for(const r of routes) {
@@ -83,12 +86,12 @@ for(const filename of fs.readdirSync(path.join(__dirname,"../curriculum/beginner
           assert(!crosses(routes[i].points[a-1],routes[i].points[a],routes[j].points[b-1],routes[j].points[b]),`${d.id}: arrows cross`);
       const layout=scene(d); inspectScene(layout,`${filename}/${d.id}`); pilotScenes.push({layout,label:`${filename}/${d.id}`});
       // The key lists exactly the block roles drawn, so no entry describes a block that is not there.
-      const roleLabels={data:"Input data",model:"Model",loss:"Loss / update",output:"Output",tool:"Human / tool"};
+      const roleLabels={data:"Data",model:"Model",loss:"Loss",metric:"Check",output:"Output",tool:"Tool"};
       const used=new Set(g.nodes.map(n=>n.role));
       for(const [role,legend] of Object.entries(roleLabels))
-        assert.equal(layout.items.some(i=>i.kind==="text"&&i.text===legend),used.has(role),`${d.id}: legend entry ${legend}`);
-      assert(layout.items.some(i=>i.kind==="text"&&i.text==="data flow"),`${d.id}: missing data flow legend`);
-      assert.equal(layout.items.some(i=>i.kind==="text"&&i.text==="feedback / repeat"),Boolean(g.feedback),`${d.id}: repeat legend`);
+        assert.equal(layout.items.some(i=>i.kind==="text"&&i.y===layout.legendY&&i.text===legend),used.has(role),`${d.id}: legend entry ${legend}`);
+      assert(layout.items.some(i=>i.kind==="text"&&i.text==="Flow"),`${d.id}: missing solid-flow legend`);
+      assert.equal(layout.items.some(i=>i.kind==="text"&&i.text==="Repeat"),Boolean(g.feedback),`${d.id}: repeat legend`);
       // No connector passes through any text (routes are horizontal or vertical segments).
       for(const r of layout.items.filter(i=>i.kind==="route"))
         for(let k=1;k<r.points.length;k++)
@@ -109,14 +112,38 @@ for(const filename of fs.readdirSync(path.join(__dirname,"../curriculum/beginner
       }
       if(data.week===5 && d.id==="mechanism") assert(g.branches.some(b=>b.from===1&&b.to===5&&b.label.includes("V")),"Values must bypass scores and reach weighted mixture");
       if(data.week===5 && d.id==="training") assert(g.branches.some(b=>b.from===0&&b.to===4&&b.label.includes("targets")),"Targets must bypass model and reach loss");
-      if(data.week===5 && d.id==="overview") assert(d.steps.some(s=>s.code==="head")&&d.steps.some(s=>s.code==="softmax"),"Output head and softmax must both be visible");
+      if(data.week===5 && d.id==="overview") {
+        const head=d.steps.findIndex(s=>s.code==="head"),normalise=d.steps.findIndex(s=>/softmax/i.test(s.detail));
+        assert(head>=0&&normalise>head,"Output head scores must reach softmax before sampling");
+        assert(d.arrows[normalise].includes("P["),"Softmax must pass probabilities to sampling");
+      }
     } else assert.equal(shapes.filter(s=>s.kind==="rect").length,d.steps.length);
     count++;
   }
   for(const [id,layout] of [["course_map",courseMapScene(data.week)],...(data.recap?[["recap",recapScene(data)]]:[])]) {
     const label=`${filename}/${id}`;
     inspectScene(layout,label);pilotScenes.push({layout,label});
+    if(id==="course_map") {
+      const texts=layout.items.filter(i=>i.kind==="text").map(i=>i.text);
+      assert(texts.join(" ").split(/\s+/).length<=40,`${label}: map exceeds body-word budget`);
+      assert.equal(texts.filter(t=>t.includes("you are here")).length,1,"Map must highlight exactly this week");
+      assert(texts.includes(`${data.week}: you are here`),"Highlighted week is incorrect");
+      for(let week=1;week<=12;week++) assert(texts.includes(week===data.week?`${week}: you are here`:String(week)),"Map lost a week");
+    }
   }
+}
+// Inherited/repeated lab symbols are hidden in both portable and editable
+// renderers. An explicit owner preserves the real operation's own symbol.
+for(const layout of [undefined,"linear"]) {
+  const owned={layout,id:"code_ownership",title:"Owned code",subtitle:"Real operations",arrows:["data","data","data"],
+    steps:Array.from({length:4},(_,i)=>({title:`Operation ${i+1}`,detail:"Transform input",code:i===3?"owned_symbol":"inherited_symbol",
+      role:i===0?"data":i===3?"output":"model",...(i===3?{code_owner:true}:{})}))};
+  const xml=svg(owned), rendered=nativeItems((slide,addText)=>native(slide,owned,addText,{x:0,y:0,w:1440,h:layout?530:820}));
+  assert(!xml.includes("inherited_symbol"),"Unowned symbol leaked into portable diagram");
+  assert(xml.includes("owned_symbol"),"Owned symbol missing from portable diagram");
+  assert(!rendered.texts.some(t=>t.text.includes("inherited_symbol")),"Unowned symbol leaked into editable diagram");
+  assert(rendered.texts.some(t=>t.text==="owned_symbol"),"Owned symbol missing from editable diagram");
+  assert.equal(owned.steps[0].code,"inherited_symbol","Display filtering must preserve the authored code map");
 }
 for(let n=4;n<=6;n++) for(let target=0;target<n;target++) {
   const g=geometry({steps:Array.from({length:n},()=>({})),feedback:"repeat",feedback_to:target});

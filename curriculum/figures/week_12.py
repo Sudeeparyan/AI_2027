@@ -1,5 +1,6 @@
 """Week 12 figures: RAG and agent diagrams plus REAL results harvested from the executed lab notebook."""
 import json
+import re
 import shutil
 import textwrap
 from pathlib import Path
@@ -34,118 +35,88 @@ def cover(path):
     save(fig, path, transparent=True)
 
 
-def rag_pipeline(path):
-    fig, ax = _diagram_canvas(4.7)
-    ax.text(0.15, 4.28, "Offline: build the searchable index", fontsize=20, color=TEAL, fontweight="bold")
-    _sequence(ax, [("Documents", "data"), ("Chunks + IDs", "data"), ("Embeddings", "model"),
-                   ("Search index", "output")], 3.05, width=9.9, height=0.85, size=18)
-    ax.text(0.15, 2.5, "Online answer", fontsize=20, color=PRIMARY, fontweight="bold")
-    _sequence(ax, [("Question", "data"), ("Retrieve", "tool"), ("Re-rank", "model"),
-                   ("Sources\nin prompt", "data"), ("Generate", "model"),
-                   ("Cited answer\nor abstain", "output")], 1.25, height=0.9, size=18)
-    routed_arrow(ax, [(9.02, 3.05), (9.02, 2.86), (3.37, 2.86), (3.37, 2.15)], color=TEAL)
-    ax.text(0.15, 0.75, "Retrieved evidence can help; verify support and source access.", fontsize=18, color=TEXT)
-    role_legend(ax, 0.08, size=16)
-    _diagram_finish(fig, path)
+def _compact_legend(ax, roles, repeat=False, flow=True):
+    labels={"data":"Data","model":"Model","tool":"Tool","check":"Check","output":"Output"}
+    x=.15
+    for role in roles:
+        role_box(ax,x,.12,.22,.22,"",role,size=18)
+        ax.text(x+.34,.23,labels[role],fontsize=18,color=TEXT,va="center")
+        x+=1.45
+    if flow:
+        routed_arrow(ax,[(x,.23),(x+.35,.23)])
+        ax.text(x+.43,.23,"Flow",fontsize=18,color=TEXT,va="center");x+=1.4
+    if repeat:
+        routed_arrow(ax,[(x,.23),(x+.35,.23)],dashed=True)
+        ax.text(x+.43,.23,"Repeat",fontsize=18,color=TEXT,va="center")
 
+
+def rag_pipeline(path):
+    fig,ax=_diagram_canvas(5.1)
+    top=[(.15,"Split\nKeep IDs","data"),(4.5,"Embed\nFixed model","model"),(8.85,"Store\nVectors","tool")]
+    for x,label,role in top:role_box(ax,x,3.55,2.6,.95,label,role,size=19)
+    for left,right,label in [(.15,4.5,"text"),(4.5,8.85,"vectors[N,384]")]:
+        routed_arrow(ax,[(left+2.6,4.02),(right,4.02)],label=label,label_xy=((left+2.6+right)/2,4.28),size=18)
+    low=[(.15,"Read\nQuestion","data"),(3.4,"Retrieve\nTop k","tool"),(6.65,"Generate\nCite; abstain","model"),(9.9,"Check\nQuotes","tool")]
+    for x,label,role in low:role_box(ax,x,1.7,2.6,.95,label,role,size=19)
+    for left,right,label in [(.15,3.4,"query"),(3.4,6.65,"passages"),(6.65,9.9,"answer")]:
+        routed_arrow(ax,[(left+2.6,2.17),(right,2.17)],label=label,label_xy=((left+2.6+right)/2,2.96),size=18)
+    routed_arrow(ax,[(10.15,3.55),(10.15,3.2),(4.7,3.2),(4.7,2.65)],label="index",label_xy=(7.2,3.2),size=18)
+    ax.text(.15,4.77,"Indexing",fontsize=20,color=INK)
+    _compact_legend(ax,("data","model","tool"));_diagram_finish(fig,path)
 
 
 def chunking(path):
-    fig, ax = _diagram_canvas(2.9)
-    role_box(ax, 0.15, 2.12, 12.55, 0.52, "Document with headings, paragraphs and source metadata", "data", size=20)
-    for i in range(4):
-        x = 0.15 + i * 3.0
-        y = 1.2 - (i % 2) * 0.4
-        role_box(ax, x, y, 3.5, 0.45, f"Chunk {i + 1}", "data", size=18)
-    arrow(ax, 3.4, 0.57, 3.15, 0.57, color=ACCENT)
-    arrow(ax, 3.4, 0.57, 3.65, 0.57, color=ACCENT)
-    ax.text(3.4, 0.29, "Overlap", fontsize=17, color=ACCENT, ha="center")
-    ax.text(5.5, 0.47, "Test size, boundaries and overlap on real questions.", fontsize=17, color=TEXT)
-    _diagram_finish(fig, path)
-
+    fig,ax=_diagram_canvas(3.8)
+    for x,label in [(.15,"Split words"),(4.55,"Slide windows"),(8.95,"Attach IDs")]:role_box(ax,x,1.55,3.3,.9,label,"data",size=21)
+    for left,right,label in [(.15,4.55,"words"),(4.55,8.95,"passages")]:routed_arrow(ax,[(left+3.3,2),(right,2)],label=label,label_xy=((left+3.3+right)/2,2.95),size=18)
+    ax.text(.15,3.36,"Illustrative word windows; two-word overlap",fontsize=20,color=INK)
+    ax.text(4.65,1.05,"[0:8]  [6:14]  [12:20]",fontsize=20,color=TEXT)
+    ax.text(8.95,.78,"IDs retain source",fontsize=18,color=TEXT)
+    _compact_legend(ax,("data",));_diagram_finish(fig,path)
 
 
 def agent_loop(path):
-    fig, ax = _diagram_canvas(4.9)
-    ax.text(0.15, 4.48, "Propose, check, act, observe; stop at the limit", fontsize=20, color=INK, fontweight="bold")
-    entries = [("Task + history", 0.15, "data"), ("Model proposes\none tool call", 3.4, "model"),
-               ("Code checks\nname + arguments", 6.65, "tool"), ("Allowed tool\nsearch / calculate", 9.9, "tool")]
-    for i, (label, x, role) in enumerate(entries):
-        role_box(ax, x, 3.0, 2.8, 1.0, label, role, size=18)
-        if i < 3:
-            arrow(ax, x + 2.8, 3.5, x + 3.25, 3.5)
-    role_box(ax, 9.9, 1.2, 2.8, 1.0, "Observation\nresult or error", "output", size=18)
-    arrow(ax, 11.3, 3.0, 11.3, 2.2, color=TEAL)
-    routed_arrow(ax, [(8.05, 3.0), (8.05, 2.45), (10.25, 2.45), (10.25, 2.2)], color=ACCENT)
-    ax.text(8.2, 2.65, "Blocked", fontsize=17, color=ACCENT)
-    routed_arrow(ax, [(9.9, 1.7), (1.55, 1.7), (1.55, 3.0)], color=TEAL, dashed=True)
-    ax.text(0.15, 0.9, "Repeat: append observation; next model call reads it", fontsize=17, color=TEAL)
-    role_box(ax, 3.4, 2.05, 2.8, 0.75, "Final answer\n(no tool call)", "output", size=16)
-    arrow(ax, 4.8, 3.0, 4.8, 2.8, color=ACCENT)
-    ax.text(0.15, 0.55, "Email and approval are simulated in the lab; no real message is sent.", fontsize=17, color=MUTED)
-    role_legend(ax, 0.08, size=16)
-    _diagram_finish(fig, path)
-
+    fig,ax=_diagram_canvas(5.3)
+    xs=[.15,2.3,4.45,6.6,8.75,10.9]
+    labels=[("Read","data"),("Propose","model"),("Parse","tool"),("Decide","tool"),("Execute","tool"),("Record","output")]
+    for x,(label,role) in zip(xs,labels):role_box(ax,x,2.75,1.75,.85,label,role,size=20)
+    for left,right,label in zip(xs,xs[1:],["context","text","parsed calls","call","observation"]):routed_arrow(ax,[(left+1.75,3.17),(right,3.17)],label=label,label_xy=((left+1.75+right)/2,3.86),size=18)
+    role_box(ax,6.6,1.05,2.4,.8,"Return answer","output",size=19)
+    routed_arrow(ax,[(7.47,2.75),(7.47,1.85)],label="Final answer",label_xy=(8.9,2.2),size=18)
+    routed_arrow(ax,[(11.77,3.6),(11.77,4.55),(3.17,4.55),(3.17,3.6)],dashed=True,label="observation",label_xy=(7.3,4.55),size=18)
+    ax.text(.15,.55,"Execute validates; refusals skip the tool.",fontsize=18,color=TEXT)
+    _compact_legend(ax,("data","model","tool","output"),repeat=True);_diagram_finish(fig,path)
 
 
 def workflows(path):
-    fig, ax = _diagram_canvas(2.55)
-    cards = [("Chaining", "Fixed sequence"), ("Routing", "Choose handler"), ("Parallel", "Split then merge"),
-             ("Workers", "Delegate tasks"), ("Evaluate", "Critique, revise")]
-    width = 2.27
-    for i, (title, detail) in enumerate(cards):
-        x = 0.15 + i * 2.6
-        role_box(ax, x, 1.16, width, 0.82, title, "tool", size=20)
-        ax.text(x + width / 2, 0.88, detail, fontsize=17, color=TEXT, ha="center")
-    ax.text(0.15, 0.25, "Workflow: code defines paths. Agent: model chooses the next step.", fontsize=19, color=INK)
-    _diagram_finish(fig, path)
-
+    fig,ax=_diagram_canvas(3.1)
+    for i,(head,sub) in enumerate([("Chain","Calls in order"),("Route","Choose handler"),("Merge","Parallel results"),("Delegate","Worker tasks"),("Review","Critique; revise")]):
+        x=.15+i*2.57;role_box(ax,x,1.25,2.25,.85,head,"tool",size=21);ax.text(x+1.125,.88,sub,ha="center",fontsize=19,color=TEXT)
+    ax.text(.15,2.55,"Workflow: code paths. Agent: chosen steps.",fontsize=20,color=INK)
+    _compact_legend(ax,("tool",),flow=False);_diagram_finish(fig,path)
 
 
 def mcp(path):
-    fig, ax = _diagram_canvas(3.0)
-    role_box(ax, 0.15, 1.12, 3.5, 1.05, "Host application\nmanages clients", "tool", size=19)
-    for i, (label, detail) in enumerate([("Files server", "Read files"), ("Database server", "Query tables"),
-                                       ("Search server", "Retrieve evidence"), ("Action server", "Check permissions")]):
-        y = 2.44 - i * 0.57
-        role_box(ax, 6.2, y, 3.1, 0.44, label, "tool", size=18)
-        ax.text(9.7, y + 0.22, detail, fontsize=18, color=TEXT, va="center")
-        arrow(ax, 3.65, 1.645, 6.2, y + 0.22)
-    ax.text(0.15, 0.25, "One client per server; expose tools, resources and prompts with access controls.", fontsize=18, color=INK)
-    _diagram_finish(fig, path)
-
+    fig,ax=_diagram_canvas(3.5)
+    labels=[("Discover","tool"),("Validate","tool"),("Invoke","tool"),("Read result","output")]
+    for i,(label,role) in enumerate(labels):role_box(ax,.15+i*3.25,1.4,2.65,.9,label,role,size=21)
+    for i,label in enumerate(["schema","checked call","observation"]):routed_arrow(ax,[(2.8+i*3.25,1.85),(3.4+i*3.25,1.85)],label=label,label_xy=(3.1+i*3.25,2.75),size=18)
+    ax.text(.15,3.12,"Client / host",fontsize=20,color=INK);ax.text(6.65,3.12,"Server tool",fontsize=20,color=INK)
+    ax.text(.15,.7,"Compatibility does not grant trust.",fontsize=19,color=TEXT)
+    _compact_legend(ax,("tool","output"));_diagram_finish(fig,path)
 
 
 def agent_trace(path):
-    """Render the real agent trajectory saved by the lab run (curriculum/assets/week_12/results.json)."""
-    res = json.loads((ASSETS / "results.json").read_text(encoding="utf-8"))
-    lines = [("Task: I scored 72 in the group project and 64 in the exam. Using the weights in the handbook, what is my final mark?", INK)]
-    for t in res["agent_trace"]:
-        colour = TEAL if t["type"] == "tool" else (ACCENT if t["type"] == "answer" else MUTED)
-        label = "tool call" if t["type"] == "tool" else t["type"]
-        content = " ".join(t["content"].split())
-        if t["type"] == "tool" and " -> " in content:
-            call, obs = content.split(" -> ", 1)
-            obs = obs.lstrip("- ")
-            if len(obs) >= 85:  # the lab stores the first 90 characters of each observation: end on a whole content word
-                words = obs[:obs.rstrip().rfind(" ")].rstrip(" ,;:").split()
-                while words and words[-1].lower() in {"a", "an", "and", "the", "of", "or", "to", "in", "is"}:
-                    words.pop()
-                obs = " ".join(words) + " …"
-            content = f"{call} -> {obs}"
-        lines.append((f"step {t['step']} · {label}: {content}", colour))
-    width = 78
-    n_lines = sum(len(textwrap.wrap(s.replace("\n", " "), width)) for s, _ in lines)
-    fig, ax = plt.subplots(figsize=(11, 0.6 + 0.42 * n_lines))
-    ax.axis("off")
-    y = 0.97
-    step = 0.94 / max(n_lines, 1)
-    for s, c in lines:
-        for w in textwrap.wrap(s.replace("\n", " "), width):
-            ax.text(0.0, y, w, fontsize=15, color=c, family="monospace" if s.startswith("step") else None, va="top")
-            y -= step
-    save(fig, path)
-
+    res=json.loads((ASSETS/"results.json").read_text(encoding="utf-8"))
+    trace=res["agent_trace"]
+    search=json.loads(re.search(r"search_handbook\((\{.*?\})\)",trace[0]["content"]).group(1))["query"]
+    expression=json.loads(re.search(r"calculator\((\{.*?\})\)",trace[1]["content"]).group(1))["expression"].replace(" ","")
+    value=trace[1]["content"].split(" -> ",1)[1]
+    fig,ax=_diagram_canvas(3.5)
+    for x,label,role in [(.15,"Search\n"+search,"tool"),(4.55,"Calculate\n"+expression,"tool"),(8.95,"Return\n"+value,"output")]:role_box(ax,x,1.45,3.3,1.1,label,role,size=20)
+    for left,right,label in [(.15,4.55,"assessment"),(4.55,8.95,"result")]:routed_arrow(ax,[(left+3.3,2),(right,2)],label=label,label_xy=((left+3.3+right)/2,2.94),size=18)
+    ax.text(.15,.7,"Archived observations; complete trace in notes.",fontsize=19,color=TEXT)
+    _compact_legend(ax,("tool","output"));_diagram_finish(fig,path)
 
 
 def _diagram_canvas(height):
@@ -178,15 +149,15 @@ def retrieval_results(path):
     fig, ax = plt.subplots(figsize=(13, 3.9))
     x = np.arange(len(methods))
     for index, (field, label, colour) in enumerate([
-        ("recall@1", "Gold-document hit@1", PRIMARY),
-        ("recall@3", "Gold-document hit@3", TEAL),
-        ("MRR", "Mean reciprocal rank", ACCENT),
+        ("recall@1", "Doc hit@1", PRIMARY),
+        ("recall@3", "Doc hit@3", TEAL),
+        ("MRR", "Doc MRR", ACCENT),
     ]):
         values = [r["retrieval"][name][field] for name in methods]
         bars = ax.bar(x + (index - 1) * 0.26, values, 0.26, label=label, color=colour)
         ax.bar_label(bars, labels=[f"{value:.2f}" for value in values], fontsize=18, padding=3)  # as in the slide text
-    ax.set_xticks(x, ["BM25\nkeywords", "Dense\nembeddings", "Hybrid\nRRF", "Hybrid +\nre-rank"], fontsize=18)
-    ax.tick_params(axis="y", labelsize=18)
+    ax.set_xticks(x, ["BM25", "Dense", "Hybrid", "Re-ranked"], fontsize=18)
+    ax.set_yticks([0,.5,1]); ax.tick_params(axis="y", labelsize=18)
     ax.set_ylim(0, 1.22)
     ax.legend(ncol=3, loc="upper center", bbox_to_anchor=(0.5, 1.24), fontsize=18)
     ax.grid(axis="x", visible=False)
@@ -207,8 +178,8 @@ def rag_results(path):
     ax.set_xlim(0, 1.12)
     from matplotlib.ticker import PercentFormatter
     ax.xaxis.set_major_formatter(PercentFormatter(1))
-    ax.tick_params(axis="x", labelsize=18)
-    ax.set_xlabel("Accuracy on answerable handbook questions", fontsize=20)
+    ax.set_xticks([0,.5,1]); ax.tick_params(axis="x", labelsize=18)
+    ax.set_xlabel("Archived answer accuracy", fontsize=20)
     where = r.get("gpu") or "GPU" if str(r["device"]).startswith("cuda") else "CPU"
     ax.set_title(f"Stored run: {r['llm'].split('/')[-1]} on {where.replace('NVIDIA GeForce ', '')}", fontsize=18, pad=14)
     ax.grid(axis="y", visible=False)

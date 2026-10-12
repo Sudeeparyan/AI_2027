@@ -5,134 +5,150 @@
       "term": "Token ID",
       "meaning": "An integer identifying a text unit in one particular tokenizer's vocabulary.",
       "check": "Must two different tokenizers assign the same IDs to 'Dublin'?",
-      "answer": "No. Each tokenizer has its own vocabulary and its own IDs."
+      "answer": "No. Each tokenizer has its own vocabulary and its own IDs.",
+      "short_meaning": "Integer for a vocabulary entry"
     },
     {
       "term": "Probability distribution",
       "meaning": "Nonnegative probabilities for possible outcomes, adding to one.",
       "check": "Do [0.6, 0.3, 0.1] form a probability distribution?",
-      "answer": "Yes. All values are non-negative and 0.6 + 0.3 + 0.1 = 1."
+      "answer": "Yes. All values are non-negative and 0.6 + 0.3 + 0.1 = 1.",
+      "short_meaning": "Probabilities adding to one"
     },
     {
       "term": "Causal language model",
       "meaning": "A model predicting the next token from the tokens already present.",
       "check": "What input is available before the next answer token is generated?",
-      "answer": "Only the prompt and any tokens already generated, never later tokens."
+      "answer": "Only the prompt and any tokens already generated, never later tokens.",
+      "short_meaning": "Predicts from preceding tokens"
     }
   ],
   "diagrams": [
     {
       "id": "overview",
       "title": "A decoder chat request",
-      "subtitle": "Trace a user's question through the local model",
+      "subtitle": "Local chat; fixed weights",
       "steps": [
         {
-          "title": "User question",
-          "detail": "Request + answer budget",
-          "code": "chat",
-          "role": "data"
+          "title": "Prepare",
+          "detail": "message",
+          "role": "data",
+          "code": "",
+          "code_owner": false
         },
         {
-          "title": "Chat template",
-          "detail": "Add role and turn markers",
-          "code": "inputs",
-          "role": "model"
+          "title": "Format",
+          "detail": "chat template",
+          "role": "tool",
+          "code": "",
+          "code_owner": false
         },
         {
-          "title": "Input IDs",
-          "detail": "Tokenise the conversation",
-          "code": "inputs",
-          "role": "data"
+          "title": "Tokenise",
+          "detail": "[1,L]",
+          "role": "tool",
+          "code": "",
+          "code_owner": false
         },
         {
           "title": "Generate",
-          "detail": "Choose tokens repeatedly",
+          "detail": "answer IDs",
+          "role": "model",
           "code": "model.generate",
-          "role": "model"
+          "code_owner": true
         },
         {
-          "title": "Slice new IDs",
-          "detail": "Remove the original prefix",
-          "code": "new",
-          "role": "model"
+          "title": "Slice",
+          "detail": "new IDs",
+          "role": "tool",
+          "code": "",
+          "code_owner": false
         },
         {
-          "title": "Check answer",
-          "detail": "Decode; count tokens; time",
-          "code": "chat",
-          "role": "output"
+          "title": "Decode",
+          "detail": "text",
+          "role": "output",
+          "code": "",
+          "code_owner": false
         }
       ],
       "arrows": [
-        "question + settings",
-        "formatted messages",
-        "IDs [1,T]",
-        "prefix + new IDs",
-        "answer IDs"
+        "messages",
+        "text",
+        "IDs",
+        "prefix + answer",
+        "new IDs"
       ],
       "trace": [
         "The question 'What is the capital of Ireland?' is placed in a user message.",
-        "The chat template adds the role and assistant-start formatting expected by Qwen.",
+        "The chat template adds the role and assistant-start formatting expected by the selected checkpoint.",
         "Generation repeatedly predicts another token until stopping or reaching its budget.",
         "The code slices off the input so the returned answer contains new tokens only.",
         "The same helper returns a token count and elapsed seconds for comparison."
       ],
       "explanation": "A chat interface hides several transformations. First, the user's question becomes a message with a role. A chat template adds the model-specific formatting that distinguishes user text from the assistant reply. The tokenizer converts that formatted input into IDs. The decoder then predicts successive tokens; its generation settings determine how each prediction is chosen. The returned tensor includes both the input and generated continuation, so the helper slices away the input before decoding the answer. No training happens during this call: the model's learned weights stay fixed. The lab compares this decoder workflow with BERT's masked-token prediction and Flan-T5's separate input encoder and output decoder. Those families perform different operations even when their demonstrations use similar questions. The token count and elapsed time describe this measured call, rather than guaranteeing answer quality.",
-      "check_question": "Why does chat slice the generated tensor at the original input length?",
+      "check_question": "Why slice?",
       "check_answer": "Because decoder generation returns input IDs followed by the continuation; the helper returns only the new answer.",
-      "layout": "linear"
+      "layout": "linear",
+      "notes": "In short: A local chat call formats a message, generates new IDs and removes the prefix before returning the answer.\n\nExplain: The message contains a role and content. A template adds conversation markers. Tokenisation produces integer IDs. Generation repeatedly appends IDs with fixed weights. Slicing removes the original input before decoding the new answer.\n\nExample: For an illustrative input [1,5] and returned sequence [1,8], slice at position five to keep three generated IDs. The helper counts those three and records its call time. Real requests use the checkpoint's actual template; invented shapes do not predict its wording, speed or quality. Hosted APIs normally return answer text through a different interface.\n\nAsk: Why does the local helper slice at the original input length?\n\nAnswer: Decoder generation includes the input prefix. Removing it avoids counting or displaying that prefix as newly generated answer tokens.\n\nWatch out: A correct slice verifies the output boundary, not whether the generated answer is true."
     },
     {
       "id": "mechanism",
       "insert_before_title": "Decoding strategies compared",
       "title": "Choose one next token",
-      "subtitle": "Separate model scores from the decoding policy",
+      "subtitle": "Choose; reuse fixed weights",
       "steps": [
         {
-          "title": "Current prefix",
-          "detail": "Known token IDs",
-          "code": "ids",
-          "role": "data"
+          "title": "Prefix",
+          "detail": "[1,L]",
+          "role": "data",
+          "code": "",
+          "code_owner": false
         },
         {
-          "title": "Next-token logits",
-          "detail": "Use the final vocabulary row",
-          "code": "dec(ids).logits",
-          "role": "model"
+          "title": "Scores",
+          "detail": "[V]",
+          "role": "model",
+          "code": "",
+          "code_owner": false
         },
         {
-          "title": "Temperature",
-          "detail": "Divide scores by positive T",
-          "code": "sample",
-          "role": "model"
+          "title": "Scale",
+          "detail": "T > 0",
+          "role": "tool",
+          "code": "",
+          "code_owner": false
         },
         {
-          "title": "Filter candidates",
-          "detail": "Top-k or top-p; renormalise",
+          "title": "Filter",
+          "detail": "p/k",
+          "role": "tool",
           "code": "top_p_filter",
-          "role": "model"
+          "code_owner": true
         },
         {
-          "title": "Choose one ID",
-          "detail": "Draw from kept probabilities",
+          "title": "Draw",
+          "detail": "ID",
+          "role": "tool",
           "code": "torch.multinomial",
-          "role": "model"
+          "code_owner": true
         },
         {
-          "title": "Append ID",
-          "detail": "Extend the known prefix",
-          "code": "sample",
-          "role": "output"
+          "title": "Append",
+          "detail": "prefix",
+          "role": "output",
+          "code": "",
+          "code_owner": false
         }
       ],
       "arrows": [
-        "IDs [1,T]",
-        "scores [V]",
-        "rescaled scores",
-        "kept probabilities",
-        "one token ID"
+        "IDs",
+        "scores",
+        "scaled",
+        "probabilities",
+        "ID"
       ],
-      "feedback": "Repeat from the extended prefix; model weights stay fixed.",
+      "feedback": "Repeat",
       "feedback_to": 0,
       "trace": [
         "The lab's five scores [2, 1, 0.5, 0.1, −1] give probabilities about [0.56, 0.21, 0.12, 0.08, 0.03].",
@@ -142,120 +158,146 @@
         "Sampling selects one ID, which is appended before the next model call."
       ],
       "explanation": "The neural model provides logits, unnormalised scores for all vocabulary tokens. Decoding is the policy used to turn those scores into a continuation. Greedy decoding chooses the highest-scoring token; the sample helper instead draws a token from probabilities. Temperature rescales logits: a lower positive value concentrates probability on stronger candidates, while a higher value spreads it. Top-k filtering uses a score threshold based on the kth candidate; ties at that threshold can retain additional tokens. Top-p filtering keeps enough leading candidates to reach a chosen cumulative probability, so its retained count depends on model confidence. The chosen token changes the next prefix and therefore the next prediction. A more diverse output is not necessarily more accurate. The manual loop runs its specified number of steps; it does not contain an explicit end-of-sequence stopping test.",
-      "check_question": "Why can top-p retain different numbers of candidates at successive positions?",
-      "check_answer": "The probability distribution changes with the prefix; a confident distribution needs fewer candidates to reach p.",
-      "layout": "linear"
+      "check_question": "Can retained count vary?",
+      "check_answer": "Yes. The distribution changes with the prefix; a confident distribution needs fewer candidates to reach p.",
+      "layout": "linear",
+      "feedback_from": 5,
+      "notes": "In short: The decoding loop changes the prefix after one token choice while reusing the same trained model weights.\n\nExplain: The decoder returns vocabulary logits. Temperature rescales them using a positive divisor. Filtering excludes some candidates. Sampling draws one ID from retained probabilities. Appending that ID changes the next input sequence.\n\nExample: The worked scores [2,1,0.5,0.1,−1] produce a distribution whose first three candidates exceed cumulative mass 0.8. The retained candidates are renormalised before a draw. At the next position, model scores can differ because the prefix changed. The manual lab loop runs a fixed short number of steps and does not implement an explicit end-token stop.\n\nAsk: Why can the top-p candidate count change on successive calls?\n\nAnswer: The new prefix changes the distribution. A concentrated distribution reaches the threshold with fewer entries than an uncertain one.\n\nWatch out: Temperature and top-p change selection; they neither update the model nor guarantee factual accuracy."
     },
     {
       "id": "lab",
-      "title": "Compare models with evidence",
-      "subtitle": "Different experiments answer different comparison questions",
+      "title": "Core generation and checking",
+      "subtitle": "Fixed weights",
       "steps": [
         {
-          "title": "Count token pieces",
-          "detail": "Same text; different tokenisers",
-          "code": "df_tok",
-          "role": "data"
+          "title": "Text",
+          "detail": "fixed prompt",
+          "role": "data",
+          "code": "",
+          "code_owner": false
         },
         {
-          "title": "Compare families",
-          "detail": "Mask, transform or continue",
-          "code": "t5_generate / chat",
-          "role": "model"
+          "title": "Tokenise",
+          "detail": "[1,L]",
+          "role": "tool",
+          "code": "",
+          "code_owner": false
         },
         {
-          "title": "Change decoding",
-          "detail": "Hold the prefix and model fixed",
-          "code": "sample",
-          "role": "model"
+          "title": "Predict",
+          "detail": "[V]",
+          "role": "model",
+          "code": "dec",
+          "code_owner": true
         },
         {
-          "title": "Score predictability",
-          "detail": "Read loss within each model",
-          "code": "perplexity",
-          "role": "loss"
+          "title": "Select",
+          "detail": "greedy or sample",
+          "role": "tool",
+          "code": "",
+          "code_owner": false
         },
         {
-          "title": "Log requests",
-          "detail": "Record tokens and seconds",
-          "code": "log",
-          "role": "tool"
+          "title": "Append",
+          "detail": "ID",
+          "role": "tool",
+          "code": "",
+          "code_owner": false
         },
         {
-          "title": "Check thinking",
-          "detail": "Score finished final answers",
-          "code": "reason_df",
-          "role": "output"
+          "title": "Decode",
+          "detail": "text",
+          "role": "tool",
+          "code": "",
+          "code_owner": false
+        },
+        {
+          "title": "Check",
+          "detail": "task fit",
+          "role": "metric",
+          "code": "",
+          "code_owner": false
         }
       ],
       "arrows": [
-        "counts",
-        "task replies",
-        "samples",
-        "loss / PPL",
-        "answers + cost"
+        "text",
+        "IDs",
+        "scores",
+        "ID",
+        "prefix",
+        "reply"
       ],
       "trace": [
-        "Count tokens for identical source text before comparing the models' outputs.",
-        "BERT fills [MASK]; T5 and Qwen generate text using different architectures.",
-        "Use the same story prefix for greedy, beam and sampled continuations.",
-        "Treat perplexity under different tokenisers as different prediction measurements.",
-        "For the scheduling puzzle, compare final-answer correctness, tokens and time across runs."
+        "Tokenise the fixed story prefix with the core SmolLM2 tokenizer, producing IDs [1,L].",
+        "The decoder's final vocabulary row supplies scores [V]; temperature and filters define the selection policy.",
+        "Append one selected ID and repeat for the recorded short budget, using unchanged model weights.",
+        "Decode the reply and verify its fit; distinct-2 measures repetition rather than factual accuracy.",
+        "Token counts, perplexity and final-answer scoring are separate experiments; family/reasoning downloads are optional stretches."
       ],
-      "explanation": "This lab is a sequence of comparison experiments, rather than one shared model pipeline. Token counts show how the same text becomes different pieces. The family demonstrations then expose different output interfaces: BERT ranks words for a blank, Flan-T5 transforms input text into output text, and Qwen continues a formatted conversation. Decoding experiments keep a story prefix fixed while changing how tokens are selected. Perplexity measures the predictability of supplied text, but differences in token boundaries prevent a direct per-token ranking across model families. The call log measures output length and elapsed time. Finally, the thinking experiment checks final numerical answers across sampled seeds, rather than trusting persuasive intermediate text. Different mode settings also use different token budgets and sampling parameters, so the comparison reflects the complete settings used, rather than isolating the thinking switch alone.",
-      "check_question": "Can lower perplexity from one tokenizer prove that its model answers questions better?",
-      "check_answer": "No. Tokenisers define different prediction units, and text predictability is not the same measurement as question-answer correctness.",
-      "layout": "linear"
+      "explanation": "This coherent diagram traces generation with the core checkpoint. Text becomes IDs, the fixed decoder predicts vocabulary scores, and a selection rule chooses another ID. Appending changes the prefix for the next call. Decoding yields a reply for task-specific checking. Other lab activities measure tokenizer pieces, known-text predictability or synthetic answer-scoring rules separately. Their outputs are not inputs to this generation path.",
+      "check_question": "Are weights updated?",
+      "check_answer": "No. The prefix changes and the fixed model repeats inference; an optimiser update belongs to training.",
+      "layout": "linear",
+      "feedback": "Repeat",
+      "feedback_from": 4,
+      "feedback_to": 2,
+      "notes": "In short: The core generation path tokenises a fixed prompt, appends selected IDs and verifies the resulting reply.\n\nExplain: Text becomes IDs shaped [1,L]. The fixed decoder predicts vocabulary scores [V]. Greedy selection or sampling chooses another ID. Appending extends the prefix for repetition. Decoding makes text available for a task check.\n\nExample: A 16-step manual continuation uses the same small checkpoint throughout. Record its prefix, temperature and filtering settings before comparing outputs. The diagram traces this coherent generation path only. Token-count tables, perplexity and synthetic final-answer checks are separate experiments, while optional BERT/T5/Qwen reasoning runs create additional workloads with their own evidence.\n\nAsk: Does the repetition arrow imply a model-weight update?\n\nAnswer: It changes the token prefix and repeats inference with fixed weights; an optimiser step would belong to training.\n\nWatch out: Do not connect unrelated measurements as if one experiment's output supplied another's input."
     },
     {
       "id": "training",
       "title": "How pre-training learns a language model",
       "insert_before_title": "The LLM pipeline, in more detail",
-      "subtitle": "This is the developer's training process. This week's lab uses already trained models.",
+      "subtitle": "Developer training; lab scores",
       "steps": [
         {
-          "title": "Prepare text",
-          "detail": "Check sources and duplicates",
+          "title": "Text",
+          "detail": "sources",
+          "role": "data",
           "code": "",
-          "role": "data"
+          "code_owner": false
         },
         {
-          "title": "Input + targets",
-          "detail": "Shift IDs by one token",
+          "title": "Shift",
+          "detail": "targets",
+          "role": "tool",
           "code": "",
-          "role": "data"
+          "code_owner": false
         },
         {
-          "title": "Decoder predicts",
-          "detail": "Block later input positions",
+          "title": "Predict",
+          "detail": "[B,L,V]",
+          "role": "model",
           "code": "",
-          "role": "model"
+          "code_owner": false
         },
         {
-          "title": "Measure error",
-          "detail": "Compare scores with targets",
+          "title": "Loss",
+          "detail": "cross-entropy",
+          "role": "loss",
           "code": "",
-          "role": "loss"
+          "code_owner": false
         },
         {
-          "title": "Update weights",
-          "detail": "Use gradients; check validation",
+          "title": "Update",
+          "detail": "gradients",
+          "role": "tool",
           "code": "",
-          "role": "loss"
+          "code_owner": false
         },
         {
           "title": "Post-train",
-          "detail": "Instructions; then preferences",
+          "detail": "instructions",
+          "role": "model",
           "code": "",
-          "role": "model"
+          "code_owner": false
         }
       ],
       "arrows": [
-        "cleaned text",
-        "input IDs [B,T]",
-        "logits [B,T,V]",
-        "scalar loss",
-        "base weights"
+        "clean text",
+        "IDs",
+        "logits",
+        "loss",
+        "weights"
       ],
       "explanation": "Pre-training learns general language patterns from text. The text supplies both input tokens and known next-token targets. A decoder with a causal mask predicts scores without reading future answers. Cross-entropy measures prediction error, and the optimiser adjusts the learned weights. Developers repeat this across many batches and check held-out text. Post-training then uses instruction examples and feedback to improve assistant behaviour. This is a conceptual process diagram, not a claim that the week 6 lab pre-trains an LLM. The lab loads published weights and compares inference behaviour. The target branch goes directly to the loss. The dashed loop belongs to the weight-update step; post-training happens after pre-training.",
       "trace": [
@@ -264,63 +306,69 @@
         "The training update changes weights. A later chat request uses those learned weights.",
         "Two assistants can differ because of pre-training, post-training or the application around the model."
       ],
-      "check_question": "Does the week 6 pipeline call learn new weights from your question?",
+      "check_question": "Does scoring update weights?",
       "check_answer": "No. It loads pretrained weights and runs inference. The diagram describes how developers trained those weights earlier.",
       "layout": "linear",
-      "feedback": "Repeat pre-training batches; the optimiser changes model weights.",
+      "feedback": "Repeat",
       "feedback_to": 2,
       "feedback_from": 4,
       "branches": [
         {
           "from": 1,
           "to": 3,
-          "label": "known next-token targets [B,T]",
+          "label": "targets",
           "lane": "bottom"
         }
-      ]
+      ],
+      "notes": "In short: Developer pre-training compares causal predictions with known next-token targets and uses gradients to update weights.\n\nExplain: A shifted target is the next token for each input position. The causal mask blocks later answers. Cross-entropy measures error against known targets. An optimiser uses gradients to update weights. Post-training follows with instructions or feedback.\n\nExample: From tokens [A,B,C,D], inputs [A,B,C] pair with targets [B,C,D]. Logits can have shape [B,L,V] and targets [B,L]. The target branch enters the loss directly; it is not leaked into earlier causal inputs. This explains the developer's training process. The current lab only scores published weights and contains no such optimiser update.\n\nAsk: Does passing labels to the lab's no-gradient perplexity call update model weights?\n\nAnswer: No. It returns the prediction loss; learning additionally requires gradient computation and an optimiser step.\n\nWatch out: Keep a metric for checking frozen weights separate from a training loss used for an update."
     },
     {
       "id": "inference",
       "title": "Read a local or hosted chat call end to end",
       "insert_before_title": "Querying a hosted model through an API",
-      "subtitle": "A request contains messages and settings. The result includes text and usage evidence.",
+      "subtitle": "Alternative routes",
       "steps": [
         {
-          "title": "Prepare messages",
-          "detail": "Roles, source text and budget",
-          "code": "messages",
-          "role": "data"
+          "title": "Prepare",
+          "detail": "messages, budget",
+          "role": "data",
+          "code": "",
+          "code_owner": false
         },
         {
-          "title": "Choose route",
-          "detail": "Use local or hosted inference",
-          "code": "chat",
-          "role": "tool"
+          "title": "Choose",
+          "detail": "route",
+          "role": "tool",
+          "code": "ask_model",
+          "code_owner": true
         },
         {
-          "title": "Run fixed model",
-          "detail": "Provider or runtime generates",
-          "code": "model.generate",
-          "role": "model"
+          "title": "Generate",
+          "detail": "fixed weights",
+          "role": "model",
+          "code": "",
+          "code_owner": false
         },
         {
-          "title": "Read answer",
-          "detail": "Local slice or hosted message",
-          "code": "new",
-          "role": "output"
+          "title": "Read",
+          "detail": "answer",
+          "role": "output",
+          "code": "",
+          "code_owner": false
         },
         {
-          "title": "Record + verify",
-          "detail": "Measure usage; check the reply",
-          "code": "log / reason_df",
-          "role": "tool"
+          "title": "Record",
+          "detail": "verify",
+          "role": "metric",
+          "code": "",
+          "code_owner": false
         }
       ],
       "arrows": [
-        "messages + settings",
-        "local IDs or API request",
-        "new IDs or response",
-        "answer + usage"
+        "messages, settings",
+        "IDs or request",
+        "continuation or response",
+        "text"
       ],
       "explanation": "A local request applies the chat template and creates input IDs before generation. A hosted API accepts role/content messages and lets its provider format and run the model. These are alternative routes; the client does not normally send its locally tokenised IDs to a chat API. Local decoder outputs include the input prefix, which must be sliced away. Hosted chat responses already separate the answer message. Record model, settings, date, usage and time, then check correctness. Keep keys in secrets; availability and usage fields depend on the provider.",
       "trace": [
@@ -329,19 +377,20 @@
         "Compare the returned answer with the request. The original question should not appear as generated output.",
         "Log local timing or hosted usage and keep the same prompt when comparing models."
       ],
-      "check_question": "Why can token counts differ for the same question sent to two models?",
-      "check_answer": "The models may use different tokenizers and chat templates. Compare each model's actual formatted input and output counts.",
-      "layout": "linear"
+      "check_question": "Same tokenizer everywhere?",
+      "check_answer": "No. Local and hosted models can format and tokenise differently; this shared wrapper does not expose hosted usage.",
+      "layout": "linear",
+      "notes": "In short: Local and hosted calls are alternative inference routes with different response formats and available usage evidence.\n\nExplain: Local inference templates and tokenises messages. A hosted API receives structured text requests. The provider formats its supported model input. Local decoder output contains prefix and continuation. Hosted responses normally expose a separate answer message.\n\nExample: The local chat helper returns answer text, generated-ID count and elapsed call time. The shared hosted wrapper returns text or None, so provider usage remains missing in the log. The same fictional question keeps task wording comparable, but tokenizers, settings and timing boundaries can still differ. Neither route updates weights during this demonstration.\n\nAsk: Can a locally counted prompt estimate be presented as the provider's actual usage?\n\nAnswer: No. Different templates and tokenizers can change counts; report usage only when the chosen interface supplies it.\n\nWatch out: Do not add another key reader or SDK; the shared provider switch and local fallback handle access."
     }
   ],
   "glossary": [
     {
       "term": "Encoder",
-      "meaning": "A network producing contextual representations of an input sequence."
+      "meaning": "A network that converts input data into numerical representations or distribution parameters."
     },
     {
       "term": "Decoder",
-      "meaning": "A network predicting output tokens using the preceding output tokens and available input context."
+      "meaning": "A network that turns a representation or previous outputs into predictions for the output."
     },
     {
       "term": "Chat template",
@@ -349,7 +398,7 @@
     },
     {
       "term": "Temperature",
-      "meaning": "A positive divisor on logits that changes the concentration of sampling probabilities."
+      "meaning": "A positive divisor on model scores that changes how concentrated sampling probabilities are."
     },
     {
       "term": "Nucleus",
@@ -357,7 +406,15 @@
     },
     {
       "term": "Latency",
-      "meaning": "The elapsed time taken to produce a response."
+      "meaning": "The elapsed time from a request to its result; first-token latency measures the initial wait."
+    },
+    {
+      "term": "Attention mask",
+      "meaning": "Rules marking which token pairs an attention operation may use; Boolean conventions vary by API."
+    },
+    {
+      "term": "Training target",
+      "meaning": "The known answer used to measure a model's prediction error."
     }
   ],
   "pitfalls": [
@@ -369,17 +426,17 @@
     {
       "symbol": "df_tok",
       "role": "Summarises tokens per whitespace-delimited word.",
-      "inspect": "Compare columns for the same source text; inspect actual token pieces as well."
+      "inspect": "Compare pieces for identical text; the core loads only tokenizers for SmolLM2 and BERT."
     },
     {
       "symbol": "t5_generate",
       "role": "Runs an encoder-decoder text-to-text model.",
-      "inspect": "Contrast its input/output interface with masked filling and chat."
+      "inspect": "This original encoder-decoder helper runs only when the family stretch is enabled."
     },
     {
       "symbol": "chat",
       "role": "Formats a chat request and returns generated text plus measures.",
-      "inspect": "Locate the boundary between input tokens and newly generated answer tokens."
+      "inspect": "Locate the prefix/new-ID boundary; thinking opt-in requires explicit sampled settings."
     },
     {
       "symbol": "sample",
@@ -394,47 +451,49 @@
     {
       "symbol": "reason_df",
       "role": "Collects thinking-mode outcomes across repeated runs.",
-      "inspect": "Inspect finished, correct, tokens and seconds together; avoid judging one example."
+      "inspect": "Live thinking rows exist only after stretch opt-in; synthetic checks do not measure Qwen accuracy."
     }
   ],
   "recap": {
     "title": "What we learned: language models",
     "cards": [
       {
-        "title": "From counts to context",
-        "text": "Counts, vectors and recurrent memory led to contextual attention.",
+        "title": "History",
+        "text": "Contextual features",
         "role": "model"
       },
       {
-        "title": "Training stages",
-        "text": "Pre-training learns patterns; instructions and preferences shape replies.",
+        "title": "Training",
+        "text": "Learned weights",
         "role": "loss"
       },
       {
-        "title": "One request has limits",
-        "text": "Tokenisers differ; context and output budgets are finite.",
+        "title": "Context",
+        "text": "Finite tokens",
         "role": "data"
       },
       {
-        "title": "Decode a next token",
-        "text": "Greedy, beam or sampling choose outputs from model scores.",
+        "title": "Decoding",
+        "text": "Fixed weights",
         "role": "model"
       },
       {
-        "title": "Compare model families",
-        "text": "Architecture, access, size and thinking are different choices.",
+        "title": "Families",
+        "text": "Different jobs",
         "role": "output"
       },
       {
-        "title": "Choose using evidence",
-        "text": "Read cards and licences; compare task quality, time, cost and failures.",
+        "title": "Evidence",
+        "text": "Task tests",
         "role": "tool"
       }
     ],
-    "example": "Top-p 0.8 keeps three candidates from [0.56, 0.21, 0.12, 0.08, 0.03].",
-    "question": "Does a longer thinking trace prove a better answer?",
-    "answer": "No. Check final correctness, whether it finished, tokens and time on realistic examples.",
-    "next": "In Week 7 we write prompts and measure whether changes help.",
-    "notes": "Say: Place today’s ideas along one request. Training created the weights earlier. The current message is formatted and tokenised, fits a context budget, and produces scores. Decoding chooses an output; checking establishes whether it met the task. Analogy: a tool’s design, availability and settings are separate entries on its datasheet. Ask students to contrast BERT mask filling, T5 text-to-text and a decoder continuation. Common mistake: an open-weight release is not automatically unrestricted or fully open source. Read the model card and exact licence, then evaluate accuracy, latency, token cost and failure cases. Extra thinking must earn its extra computation."
-  }
+    "example": "Illustration: top-p .8 keeps three.",
+    "question": "Longer thinking proves correctness?",
+    "answer": "No; check final answers.",
+    "next": "Next: evaluate prompt changes.",
+    "notes": "In short: Connect model development, request formatting, token selection and task verification without confusing their measurements.\n\nExplain: Training learns parameters from examples. Inference uses fixed parameters. A tokenizer defines prediction units. Decoding selects output candidates. Evaluation checks whether outputs satisfy the actual task and constraints.\n\nExample: Return to the five illustrative candidate probabilities. Top-p 0.8 retains three candidates, but none of that arithmetic verifies a generated definition. The CPU notebook then supplies actual outputs and measured predictability for its named checkpoint. Stored diagrams and tables expose other architectures and configurations; keep their provenance distinct from the new run.\n\nAsk: Does a longer thinking trace prove that the final answer is better?\n\nAnswer: No. Compare completed final correctness, token use and actual elapsed time across representative repeated examples.\n\nWatch out: Do not combine stored and fresh model results into one table without identifying their checkpoints, settings and dates."
+  },
+  "vocabulary_count": 3,
+  "vocabulary_notes": "In short: Token IDs, probability distributions and causal prediction make this week's local inference experiments readable.\n\nExplain: An ID is an integer for one vocabulary entry. A tokenizer defines the vocabulary and segmentation. A probability distribution has nonnegative entries adding to one. Causal prediction uses only preceding supplied tokens. These ideas determine the shapes in the lab.\n\nExample: A sequence [1,3] has one batch row and three token IDs. A probability vector [0.6,0.3,0.1] has three possible candidates and sums to one. The numbers illustrate shapes and probability rules; the IDs need not correspond to these words in a real tokenizer. A separate vocabulary length V determines the model's score dimension.\n\nAsk: Can token ID 3 be interpreted as the same word in every tokenizer?\n\nAnswer: No. Its meaning depends on the chosen vocabulary. Decode IDs with their own tokenizer and inspect actual pieces.\n\nWatch out: Sequence length counts positions; vocabulary size counts possible token entries. They are different dimensions."
 }

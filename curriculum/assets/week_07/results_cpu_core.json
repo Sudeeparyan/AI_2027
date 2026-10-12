@@ -1,0 +1,128 @@
+{
+  "run": {
+    "model": "Qwen/Qwen2.5-0.5B-Instruct",
+    "device": "cpu",
+    "smoke": false,
+    "stretch": false,
+    "seed": 42,
+    "dev_messages": 20,
+    "held_out_messages": 20,
+    "problems": 6,
+    "cot_tokens": 192,
+    "self_consistency": {
+      "samples": 3,
+      "problems": 1
+    },
+    "elapsed_seconds": 451.033248599997
+  },
+  "classification": [
+    {
+      "prompt": "zero-shot",
+      "n": 20,
+      "accuracy": 0.2,
+      "invalid": 0,
+      "avg_tokens": 6.0,
+      "seconds": 21.0
+    },
+    {
+      "prompt": "one-shot",
+      "n": 20,
+      "accuracy": 0.25,
+      "invalid": 0,
+      "avg_tokens": 5.0,
+      "seconds": 21.6
+    },
+    {
+      "prompt": "few-shot",
+      "n": 20,
+      "accuracy": 0.5,
+      "invalid": 0,
+      "avg_tokens": 4.8,
+      "seconds": 25.6
+    },
+    {
+      "prompt": "role + few-shot",
+      "n": 20,
+      "accuracy": 0.5,
+      "invalid": 0,
+      "avg_tokens": 4.5,
+      "seconds": 27.3
+    }
+  ],
+  "held_out": {
+    "prompt": "role + few-shot (held out)",
+    "n": 20,
+    "accuracy": 0.45,
+    "invalid": 0,
+    "avg_tokens": 4.0,
+    "seconds": 24.0
+  },
+  "reasoning": [
+    {
+      "prompt": "direct",
+      "n": 6,
+      "accuracy": 0.333,
+      "invalid": 0,
+      "avg_tokens": 3.7,
+      "seconds": 4.5
+    },
+    {
+      "prompt": "chain-of-thought",
+      "n": 6,
+      "accuracy": 0.5,
+      "invalid": 0,
+      "avg_tokens": 189.5,
+      "seconds": 151.5
+    },
+    {
+      "prompt": "self-consistency (k=3)",
+      "n": 1,
+      "accuracy": 1.0,
+      "invalid": 0,
+      "avg_tokens": 573.0,
+      "seconds": 80.2
+    }
+  ],
+  "extraction": {
+    "valid_rate": 1.0,
+    "correct_rate": 0.3333333333333333
+  },
+  "injection": {
+    "defended": 0.6666666666666666,
+    "naive": 0.6666666666666666
+  },
+  "judge": {
+    "consistent_rate": 0.0,
+    "correct_both_rate": 0.0,
+    "verdicts": [
+      {
+        "question": "What is a token?",
+        "good_in_A": "A",
+        "good_in_B": "A",
+        "correct_both": false,
+        "consistent": false
+      },
+      {
+        "question": "Why divide attention scores by sqrt(d_k)?",
+        "good_in_A": "A",
+        "good_in_B": "A",
+        "correct_both": false,
+        "consistent": false
+      },
+      {
+        "question": "What does temperature do?",
+        "good_in_A": "A",
+        "good_in_B": "A",
+        "correct_both": false,
+        "consistent": false
+      },
+      {
+        "question": "What is RAG?",
+        "good_in_A": "A",
+        "good_in_B": "A",
+        "correct_both": false,
+        "consistent": false
+      }
+    ]
+  }
+}

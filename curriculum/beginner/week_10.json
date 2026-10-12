@@ -3,142 +3,117 @@
   "prerequisites": [
     {
       "term": "Modality",
-      "meaning": "A type of input or output, such as text, images or audio.",
+      "meaning": "A type of data, such as text, images or audio, with its own structure.",
       "check": "What are the input and output modalities of image captioning?",
-      "answer": "Input: an image. Output: text."
+      "answer": "Input: an image. Output: text.",
+      "short_meaning": "Kind of data."
     },
     {
       "term": "Autoregressive generation",
       "meaning": "Generate a next token from the input and previously generated tokens.",
       "check": "What information is available when generating the third output token?",
-      "answer": "The input plus the first two generated tokens."
+      "answer": "The input plus the first two generated tokens.",
+      "short_meaning": "Predict one token at a time."
     },
     {
       "term": "Ground truth",
-      "meaning": "A known reference used to check a model output.",
+      "meaning": "A reference answer or observation used to check a model output.",
       "check": "How can a chart we create ourselves provide known answers?",
-      "answer": "We know the values we plotted, so every reading can be checked exactly."
+      "answer": "We know the values we plotted, so every reading can be checked exactly.",
+      "short_meaning": "Known reference answer."
     },
     {
       "term": "VLM",
-      "meaning": "A vision-language model that uses images with text.",
+      "meaning": "A vision-language model that processes images together with text.",
       "check": "What two inputs are supplied for an invoice question?",
-      "answer": "The invoice image and the text question."
+      "answer": "The invoice image and the text question.",
+      "short_meaning": "Images and text → answer."
     }
   ],
   "diagrams": [
     {
       "id": "overview",
       "title": "Choose a multimodal task",
-      "subtitle": "The input, desired output and evaluation determine the route",
+      "subtitle": "Task determines route",
       "steps": [
         {
-          "title": "Start with data",
-          "detail": "Input and desired task",
-          "code": "photos",
-          "role": "data"
-        },
-        {
-          "title": "Choose route",
-          "detail": "VLM, diffusion or speech",
-          "code": "",
-          "role": "model"
+          "title": "Choose task",
+          "detail": "Input; output",
+          "role": "tool",
+          "code": ""
         },
         {
           "title": "Prepare input",
-          "detail": "Use expected pixels or tokens",
-          "code": "vlm_proc",
-          "role": "data"
+          "detail": "Expected representation",
+          "role": "data",
+          "code": ""
         },
         {
-          "title": "Generate output",
-          "detail": "Text, image or waveform",
-          "code": "gen",
-          "role": "model"
+          "title": "Generate media",
+          "detail": "Selected model",
+          "role": "model",
+          "code": ""
         },
         {
-          "title": "Check task",
-          "detail": "Use a task-specific measure",
-          "code": "score",
-          "role": "loss"
-        },
-        {
-          "title": "Label media",
-          "detail": "Inspect re-saved metadata",
-          "code": "meta",
-          "role": "output"
+          "title": "Check output",
+          "detail": "Facts; quality",
+          "role": "metric",
+          "code": ""
         }
       ],
       "arrows": [
-        "input + task",
-        "selected route",
-        "model input",
-        "task output",
-        "checked media"
+        "task",
+        "tensors",
+        "media"
       ],
       "trace": [
         "A help-desk chart plus 'Which day had the most tickets?' routes to the VLM.",
-        "A lighthouse description routes to the text-to-image pipeline instead.",
-        "A sentence routes to TTS; Whisper converts its generated waveform back to words.",
+        "A lighthouse description routes to the optional text-to-image pipeline instead.",
+        "A sentence routes to TTS; the optional Whisper route converts its generated waveform back to words.",
         "Check each output with its own metric, then inspect metadata on the generated image."
       ],
-      "explanation": "Multimodal generation covers several different tasks, so one score cannot evaluate every output. The input and desired output define the route. A vision-language model reads an image together with a question and generates answer text. A diffusion pipeline converts a description, or an image plus an editing request, into a new image. Text-to-speech converts a sentence into an audio waveform. Each route uses preprocessing suited to that model. Evaluation then asks a specific question: does the answer match a known chart value, does the image align with its prompt, or can speech recognition recover the words? These checks cover only part of quality. Finally, the lab adds metadata to a generated image and resaves it as JPEG, demonstrating that a provenance label can disappear during ordinary file processing.",
-      "check_question": "Can a good CLIP score demonstrate that generated speech sounds natural?",
+      "explanation": "Multimodal generation covers several different tasks, so one score cannot evaluate every output. The input and desired output define the route. A vision-language model reads an image together with a question and generates answer text. A diffusion pipeline converts a description, or an image plus an editing request, into a new image. Text-to-speech converts a sentence into an audio waveform. Each route uses preprocessing suited to that model. Evaluation then asks a specific question: does the answer match a known chart value, does the image align with its prompt, or can speech recognition recover the words? These checks cover only part of quality. Finally, the lab adds metadata to a generated image and resaves it as JPEG, demonstrating that a provenance label can disappear during ordinary file processing. The current CPU core chooses a small VLM reading route. Diffusion and speech inference are optional routes, with unchanged stored results available for inspection. A later application applies disclosure and provenance as well as task evaluation.",
+      "check_question": "One score for everything?",
       "check_answer": "No. This lab's CLIP score measures image-text alignment; speech naturalness needs a speech-appropriate evaluation.",
-      "layout": "linear"
+      "layout": "linear",
+      "notes": "In short: Choose a route and check its actual output.\n\nExplain: A task names the input and desired output. Preparation converts input into the representation the selected model expects. Generation produces answer text, image pixels or a waveform. Evaluation checks properties specific to that output. Permission and disclosure apply throughout the application.\n\nExample: A chart question needs a VLM and known-answer checking. A lighthouse description needs image generation and visual inspection instead.\n\nAsk: Can the same score evaluate both outputs?\n\nAnswer: No. Answer accuracy checks known facts; image alignment and human inspection address different properties of generated pictures.\n\nWatch out: These are alternative routes, rather than one model that performs every modality."
     },
     {
       "id": "mechanism",
       "insert_before_title": "Real captions from an open VLM",
       "title": "From picture and question to words",
-      "subtitle": "A vision-language model connects visual features to text generation",
+      "subtitle": "VLM inference",
       "steps": [
         {
-          "title": "Image + question",
-          "detail": "Pixels and requested answer",
-          "code": "ask",
-          "role": "data"
+          "title": "Prepare input",
+          "detail": "Pixels; tokens",
+          "role": "data",
+          "code": ""
         },
         {
-          "title": "Prepare inputs",
-          "detail": "Pixels plus question tokens",
-          "code": "vlm_proc",
-          "role": "data"
+          "title": "Encode pixels",
+          "detail": "Visual features",
+          "role": "model",
+          "code": ""
         },
         {
-          "title": "Vision features",
-          "detail": "Encode the visible input",
-          "code": "vlm",
-          "role": "model"
-        },
-        {
-          "title": "Bridge features",
-          "detail": "Map for language component",
-          "code": "vlm",
-          "role": "model"
-        },
-        {
-          "title": "Predict next token",
-          "detail": "Use input and answer prefix",
-          "code": "vlm.generate",
-          "role": "model"
+          "title": "Predict answer",
+          "detail": "Extend prefix",
+          "role": "model",
+          "code": ""
         },
         {
           "title": "Decode answer",
-          "detail": "Read only the continuation",
-          "code": "vlm_proc.decode",
-          "role": "output"
+          "detail": "New words",
+          "role": "output",
+          "code": ""
         }
       ],
       "arrows": [
-        "raw inputs",
-        "pixels + tokens",
-        "visual features",
-        "visual + text input",
-        "new token IDs"
+        "pixels",
+        "features",
+        "IDs"
       ],
-      "feedback": "New tokens extend the answer prefix for the next prediction.",
-      "feedback_to": 4,
       "trace": [
         "Pass the help-desk chart and 'How many tickets were there on Thursday?' to ask.",
         "The processor prepares the chart and formats the question as model inputs.",
@@ -147,114 +122,106 @@
         "Compare the answer with the known value 25; a fluent answer may still be wrong."
       ],
       "explanation": "A vision-language model, or VLM, combines visual understanding with language generation. The lab's processor prepares the image and formats a chat message containing the question. Inside the selected model, a vision component encodes pixels into features; a connection to the language component makes those features usable alongside question tokens. The precise bridge depends on the model architecture, while the lab calls the same high-level generation interface. Generation is autoregressive: every new token is predicted using the input and the answer prefix generated so far. A decoder then converts token IDs into readable words. The ask function slices away the input token prefix before decoding the output. The model can produce confident text even when it misreads a chart, so the known chart values provide evidence for checking rather than trusting fluency.",
-      "check_question": "Why does ask remove the input token prefix before decoding?",
+      "check_question": "Why remove input prefix?",
       "check_answer": "To return the newly generated answer rather than repeat the question and chat prompt.",
       "layout": "linear",
-      "feedback_from": 4
+      "branches": [
+        {
+          "from": 0,
+          "to": 2,
+          "label": "question tokens"
+        }
+      ],
+      "feedback": "prefix",
+      "feedback_from": 2,
+      "feedback_to": 2,
+      "notes": "In short: A VLM generates new answer tokens using visual features and the question.\n\nExplain: The processor prepares image pixels and text token IDs. A vision encoder creates feature vectors. A learned connection makes those features available to language generation. The question tokens also reach the language component. Generation repeats next-token prediction until the answer ends or reaches its cap.\n\nExample: The question asks for Thursday tickets; the chart supplies visual evidence. The decoder reads only tokens generated after the input prefix.\n\nAsk: Why remove the input prefix when decoding?\n\nAnswer: To return the new answer rather than repeat the question and chat formatting; the input remains evidence for generation.\n\nWatch out: The diagram is a conceptual modular path; exact internal components vary across checkpoints."
     },
     {
       "id": "lab",
       "title": "Generate, inspect and evaluate",
-      "subtitle": "Follow three model routes and a provenance experiment",
+      "subtitle": "Core and optional extensions",
       "steps": [
         {
-          "title": "Create test inputs",
-          "detail": "Known chart and invoice values",
-          "code": "QA",
-          "role": "data"
+          "title": "Create fixtures",
+          "detail": "Known references",
+          "role": "data",
+          "code": ""
         },
         {
-          "title": "Ask + verify",
-          "detail": "Inspect facts and hallucination",
+          "title": "Read images",
+          "detail": "Short answers",
+          "role": "model",
           "code": "ask",
-          "role": "model"
+          "code_owner": true
         },
         {
-          "title": "Generate + edit",
-          "detail": "Compare image strength settings",
-          "code": "edits",
-          "role": "model"
+          "title": "Score replies",
+          "detail": "Match references",
+          "role": "metric",
+          "code": "score",
+          "code_owner": true
         },
         {
-          "title": "Measure alignment",
-          "detail": "Own and other-prompt scores",
-          "code": "clip_score",
-          "role": "loss"
-        },
-        {
-          "title": "Speech round trip",
-          "detail": "Synthesise, transcribe, compare",
-          "code": "wer",
-          "role": "loss"
-        },
-        {
-          "title": "Resave image",
-          "detail": "Inspect metadata loss",
-          "code": "meta",
-          "role": "output"
+          "title": "Inspect scores",
+          "detail": "Limited heuristic",
+          "role": "output",
+          "code": ""
         }
       ],
       "arrows": [
-        "inputs + references",
-        "completed visual checks",
-        "generated images",
-        "alignment results",
-        "generated media"
+        "images",
+        "answers",
+        "scores"
       ],
       "trace": [
-        "Inspect the chart values and fictional invoice fields before calling the VLM.",
-        "Compare model answers with known answers and inspect any incorrect result.",
-        "Generate the lighthouse image; compare the original with edits at three strengths.",
-        "Compare original sentences with Whisper's recovered text, then listen to the audio.",
-        "Print the PNG metadata and compare it with the resaved JPEG's metadata."
+        "Inspect the chart source values and fictional invoice fields before calling the VLM.",
+        "Compare three full reading replies and two yes/no probes with their known references.",
+        "Compute source totals in Python; a correct sum still requires correctly read inputs.",
+        "Inspect archived image and speech results; execute the retained generators only as optional extensions.",
+        "Resave an honestly labelled fixture or real generated image and compare PNG/JPEG fields."
       ],
-      "explanation": "This lab contains several experiments rather than one model that performs every task. The first route uses ask for captions, chart questions and a fictional invoice. The score helper is a small heuristic: it checks a text substring or the first parsed number, so inspect full answers as well as its score. A separate diffusion route generates images and performs editing at different strengths. The clip_score function checks whether generated images align with their prompts, without establishing factual accuracy or complete visual quality. The speech route synthesises a waveform, transcribes it with Whisper and compares words using WER. That round trip measures recoverability through one recogniser, rather than human listening quality. The final PNG-to-JPEG experiment inspects how an attached AI-generation label can be lost after resharing.",
-      "check_question": "If WER is zero in the speech round trip, what has been demonstrated?",
-      "check_answer": "Whisper recovered the reference words after normalisation. Naturalness, emotion and human listening quality still require separate checks.",
-      "layout": "linear"
+      "explanation": "The bounded CPU core performs real VLM reading on small images, checks short replies against known references, computes source totals in Python and inspects metadata loss. The score heuristic compares a substring or the first parsed number, so inspect complete replies as well as its score. Named semantic probes test the editing and speech TODO operations without downloading those heavy models. Stored diffusion image strips and speech results support the core discussion; fresh diffusion, CLIP, MMS-TTS and Whisper inference remains available only under RUN_STRETCH. The core fixture receives honest unsigned labels identifying its actual rendering source. If real diffusion runs, its generated image receives the actual pipeline identifier instead. Resaving either labelled PNG as JPEG demonstrates ordinary text-field loss, rather than signed C2PA verification or proof of scene truth.",
+      "check_question": "Does matching imply truth?",
+      "check_answer": "No. A substring or first-number match can occur in a misleading reply; inspect the full answer and known source evidence.",
+      "layout": "linear",
+      "notes": "In short: The CPU core checks real image reading against known evidence.\n\nExplain: The core renders known chart and invoice values. A small VLM generates capped answers and captions. The score helper compares replies with references using a limited heuristic. The last block reviews scores rather than receiving an image. Separate exercises calculate known totals and inspect original-image metadata.\n\nExample: The source chart sums to 94. Compare each reply with its full reference before inspecting archived diffusion and speech examples.\n\nAsk: Does the score helper establish every factual claim?\n\nAnswer: No. A matching substring or first number can occur in a wrong reply; inspect the source and complete answer.\n\nWatch out: Diffusion, CLIP and speech inference are optional extensions, retained separately from the bounded core."
     },
     {
       "id": "training",
       "title": "Teach a visual bridge and useful answers",
-      "subtitle": "A conceptual training recipe; this lab loads existing models",
+      "subtitle": "Conceptual; not lab training",
       "insert_before_title": "A typical training pipeline for a vision-language model",
       "steps": [
         {
-          "title": "Review paired data",
-          "detail": "Images and desired answers",
-          "code": "",
-          "role": "data"
-        },
-        {
-          "title": "Load existing parts",
-          "detail": "Vision and language models",
-          "code": "vlm",
-          "role": "model"
+          "title": "Review pairs",
+          "detail": "Images; answers",
+          "role": "data",
+          "code": ""
         },
         {
           "title": "Train bridge",
-          "detail": "Conceptual feature mapping",
-          "code": "",
-          "role": "model"
+          "detail": "Map features",
+          "role": "loss",
+          "code": ""
         },
         {
-          "title": "Tune visual tasks",
-          "detail": "Conceptual instruction training",
-          "code": "",
-          "role": "model"
+          "title": "Tune instructions",
+          "detail": "Visual tasks",
+          "role": "loss",
+          "code": ""
         },
         {
-          "title": "Test new images",
-          "detail": "Evaluate held-out examples",
-          "code": "QA",
-          "role": "loss"
+          "title": "Test images",
+          "detail": "Held-out examples",
+          "role": "metric",
+          "code": ""
         }
       ],
       "arrows": [
-        "licensed examples",
-        "pretrained components",
-        "aligned features",
-        "adapted model"
+        "pairs",
+        "aligned weights",
+        "tuned weights"
       ],
       "explanation": "A modular vision-language model can start from an existing image encoder and language model. The image encoder produces visual features, but those features are not automatically in the form the language model expects. A learned bridge, often called a projector, maps them into suitable vectors. An alignment stage uses image-caption examples to train that connection. Visual instruction tuning then uses questions and desired answers about images, documents or charts. Different recipes train different components; some keep the image encoder fixed and add LoRA to the language model. Held-out images check whether the system generalises beyond its examples. This is a conceptual recipe: the lab loads pretrained models and measures inference, rather than training a VLM.",
       "trace": [
@@ -263,69 +230,66 @@
         "An instruction example asks \"What colour is the cup?\" with answer \"blue\".",
         "A new cup photo tests reading accuracy without appearing in training."
       ],
-      "check_question": "Does the multimodal lab train the illustrated bridge?",
+      "check_question": "Does the lab train this?",
       "check_answer": "No. It loads existing models; the diagram explains how such a model can be built.",
-      "layout": "linear"
+      "layout": "linear",
+      "notes": "In short: Paired alignment and visual instructions teach different connections.\n\nExplain: A modular recipe begins with pretrained vision and language components. Alignment uses paired images and captions to train their projector. Visual instruction tuning uses image questions with desired responses. Some methods freeze components or add LoRA matrices. Held-out images test performance beyond the training examples.\n\nExample: A cup-caption pair trains alignment; a colour question with target blue trains a visual task. A new cup photograph supplies a test.\n\nAsk: Does the lab train the illustrated bridge?\n\nAnswer: No. It loads existing model weights and measures inference; this scene explains a possible training recipe.\n\nWatch out: The arrows carry examples or resulting weights, not a guarantee that all recipes update the same components."
     },
     {
       "id": "inference",
-      "title": "Read an invoice and verify the numbers",
-      "subtitle": "Separate visual extraction from arithmetic and factual checking",
+      "title": "Read an invoice; compare replies",
+      "subtitle": "Known fixture references",
       "insert_before_title": "Cross-modal reasoning over a chart and a document (real)",
       "steps": [
         {
-          "title": "Known invoice",
-          "detail": "Render fictional fields",
-          "code": "document",
-          "role": "data"
+          "title": "Render invoice",
+          "detail": "Fictional fields",
+          "role": "data",
+          "code": ""
         },
         {
-          "title": "Ask for a field",
-          "detail": "Give image and precise question",
+          "title": "Ask question",
+          "detail": "Short reply",
+          "role": "model",
           "code": "ask",
-          "role": "data"
+          "code_owner": true
         },
         {
-          "title": "Read image",
-          "detail": "Generate candidate values",
-          "code": "vlm.generate",
-          "role": "model"
-        },
-        {
-          "title": "Check source",
-          "detail": "Compare with known answer",
+          "title": "Score reply",
+          "detail": "Known reference",
+          "role": "metric",
           "code": "score",
-          "role": "loss"
+          "code_owner": true
         },
         {
-          "title": "Compute + review",
-          "detail": "Design: validate values and sums",
-          "code": "",
-          "role": "output"
+          "title": "Inspect score",
+          "detail": "Heuristic",
+          "role": "output",
+          "code": ""
         }
       ],
       "arrows": [
-        "invoice pixels",
-        "image + question",
-        "candidate answer",
-        "checked value or error"
+        "pixels",
+        "answer",
+        "score"
       ],
-      "explanation": "The invoice example distinguishes seeing a number from calculating with it. The lab creates a fictional invoice from known strings and values, so there is a reference to check. The ask function supplies the image and question to a vision-language model, which returns a candidate answer. The score function gives a small automatic check, but its substring or first-number rule can miss some errors. Read the full reply alongside the source. For a real invoice application, extract fields into a validated structure and sum them in ordinary code; compare that result with the printed total. The final block describes that application design, rather than a complete invoice-processing service supplied by the notebook.",
+      "explanation": "The invoice example separates reading a value from computing with it. The core creates a fictional invoice from known strings and line items, so the values provide references. The ask function supplies its image and a precise question to a VLM. The score helper checks a substring or first number; inspect the complete reply because the heuristic can accept misleading answers. Independently, Python sums the known fixture line items to EUR 35. This is a worked source-data check, not a complete extraction service. A real application would validate all extracted quantities and prices, compare them with the source and printed total, and route mismatches for review. Correct addition cannot repair an incorrectly extracted amount.",
       "trace": [
-        "Suppose visible lines show EUR 10 and EUR 20, with printed total EUR 30.",
-        "Ask for each amount separately before computing the total.",
-        "If one extracted amount is EUR 200, valid numeric format still hides a reading error.",
-        "Code computes 10 + 20 = 30; review a mismatch with the image."
+        "The source lines are 40 × EUR 0.50 = EUR 20 and 2 × EUR 7.50 = EUR 15.",
+        "Ask a precise field question and compare the full reply with the rendered invoice.",
+        "The known source total is EUR 35; Python computes it independently of model wording.",
+        "A candidate EUR 200 instead of EUR 20 needs source review even if its type and later arithmetic are valid."
       ],
-      "check_question": "Can a correct addition still produce a wrong invoice total?",
+      "check_question": "Correct sum, wrong inputs?",
       "check_answer": "Yes. Code can add incorrectly extracted numbers perfectly; check the input values too.",
-      "layout": "linear"
+      "layout": "linear",
+      "notes": "In short: Invoice reading produces a reply, while a limited scoring rule produces only a match flag.\n\nExplain: A rendered fictional invoice supplies pixels without personal data. The ask function gives its image and a question to the VLM. A reference is a known answer from the fictional source. The score function compares a substring or the first number with that reference. It returns zero or one, without extracting amounts or calculating totals.\n\nExample: The source lines are 40 times EUR 0.50 and 2 times EUR 7.50. Python separately computes EUR 35 from those known line items before image questions run. That calculation is outside the diagram, and never receives the score flag as an amount.\n\nAsk: Does score return validated invoice amounts?\n\nAnswer: No. It returns a limited match flag; inspect the full reply and source.\n\nWatch out: Correct addition cannot repair an incorrectly read quantity or price."
     }
   ],
   "glossary": [
     {
       "term": "VLM",
-      "meaning": "A vision-language model that uses images and text together."
+      "meaning": "A vision-language model that processes images together with text."
     },
     {
       "term": "Projector",
@@ -333,7 +297,7 @@
     },
     {
       "term": "Hallucination",
-      "meaning": "An output claim that is unsupported by the supplied input or evidence."
+      "meaning": "Generated content that presents an unsupported or incorrect claim as if it were reliable."
     },
     {
       "term": "Diffusion",
@@ -378,59 +342,66 @@
       "inspect": "Look for cases where a substring or first number gives a misleading score."
     },
     {
-      "symbol": "edits",
-      "role": "Compare image editing at three strengths.",
-      "inspect": "Observe scene preservation and change across the output strip."
+      "symbol": "make_edits",
+      "role": "Vary strength while preserving source, prompt and seed.",
+      "inspect": "Run the lightweight semantic probe; inspect fresh or archived edits separately."
     },
     {
       "symbol": "clip_score",
       "role": "Compare generated images with descriptions.",
-      "inspect": "Compare own-prompt scores with other-prompt scores without treating them as probabilities."
+      "inspect": "In the optional extension, compare own/other prompts; inspect archived scores in the core without treating them as probabilities."
     },
     {
       "symbol": "wer",
       "role": "Compare original words with recognised words.",
-      "inspect": "Read the speech table and listen to tts_example.wav."
+      "inspect": "Trace substitution, insertion and deletion costs; listen to tts_example.wav only if the optional speech route ran."
+    },
+    {
+      "symbol": "synthesise_and_transcribe",
+      "role": "Preserve the generated waveform and its true sampling rate through ASR.",
+      "inspect": "The semantic probe checks actual samples, non-default rate and stripped transcript; real quality needs optional inference/listening."
     }
   ],
   "recap": {
     "title": "Week 10: media with checks",
     "cards": [
       {
-        "title": "Read images",
-        "text": "Image + question → visual features → language-model answer.",
+        "title": "Read",
+        "text": "Pixels → words.",
         "role": "model"
       },
       {
-        "title": "Understand training",
-        "text": "A bridge and visual instruction examples connect pretrained parts.",
-        "role": "data"
-      },
-      {
-        "title": "Generate and edit",
-        "text": "Text conditions pixels; editing perturbs an existing image.",
-        "role": "model"
-      },
-      {
-        "title": "Generate speech",
-        "text": "TTS makes a waveform; ASR checks recovered words, not naturalness.",
-        "role": "output"
-      },
-      {
-        "title": "Evaluate the task",
-        "text": "Use known facts, task metrics, error analysis and human review.",
+        "title": "Train",
+        "text": "Pairs; instructions.",
         "role": "loss"
       },
       {
-        "title": "Review provenance",
-        "text": "Protect consent and rights; origin records do not prove scene truth.",
+        "title": "Generate",
+        "text": "Pixels; sound.",
+        "role": "model"
+      },
+      {
+        "title": "Evaluate",
+        "text": "Task-specific evidence.",
+        "role": "metric"
+      },
+      {
+        "title": "Verify",
+        "text": "Source; arithmetic.",
+        "role": "tool"
+      },
+      {
+        "title": "Label",
+        "text": "Origin ≠ truth.",
         "role": "output"
       }
     ],
-    "example": "Invoice image → extracted fields → checked amounts → code sum → review any mismatch.",
-    "question": "Code sums extracted amounts correctly. Can the final total still be wrong?",
+    "example": "Invoice → checked fields → code total.",
+    "question": "Correct sum, wrong inputs?",
     "answer": "Yes. An extracted amount may have been misread; check values against the image as well.",
-    "next": "In Week 11 we package models into monitored applications.",
-    "notes": "Return to the receipt from the warm-up. Ask students to separate reading a value from calculating with it. Reconstruct the VLM path from pixels and question to new answer tokens. Name the bridge as a learned mapping, then distinguish conceptual training from the frozen models used in the lab. Compare the image and speech routes: they create different outputs and require different measures. A CLIP score checks alignment; speech WER checks recovered words through one recogniser. Neither covers all quality. End by explaining why a removable PNG label is not signed provenance and why a correct sum can still use wrongly extracted values."
-  }
+    "next": "Next: monitored systems.",
+    "notes": "In short: Connect each media route with its task-specific evidence.\n\nExplain: A VLM reads images and generates answer text. Alignment and instruction examples explain how its components learn to cooperate. Diffusion and TTS generate different output representations. Evaluation checks facts, alignment, recovered words and human quality separately. Permission and provenance accompany those technical checks.\n\nExample: An invoice can have correct arithmetic with a misread line; a generated voice can have zero WER but sound unnatural.\n\nAsk: What common principle connects these failures?\n\nAnswer: A partial check can succeed while another essential property fails; name the property and collect its own evidence.\n\nWatch out: Do not infer complete correctness from fluent text, one metric or a signed origin record."
+  },
+  "vocabulary_count": 4,
+  "vocabulary_notes": "In short: Name inputs, outputs and evidence before choosing a model.\n\nExplain: A modality is a kind of data. A VLM uses images with text to generate an answer. Autoregressive generation predicts one next token using an existing prefix. Ground truth is a known reference answer. These terms describe different parts of a workflow.\n\nExample: For our chart, pixels and a question are inputs; the answer is text. The source list fixes Thursday at 25.\n\nAsk: Which item is ground truth: the model answer or the plotted source?\n\nAnswer: The known source data. Compare the answer with it rather than treating confident wording as a reference.\n\nWatch out: A VLM reads images; this does not imply it generates image pixels."
 }

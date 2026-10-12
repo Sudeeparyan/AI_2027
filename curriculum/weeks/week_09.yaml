@@ -39,35 +39,52 @@ coverage:
 slides:
 - type: title
   figure: cover
-  notes: 'Welcome to week 9, the start of the multimodal part of the module. So far our models have handled one kind of data
-    at a time: images in weeks 2 to 4, text in weeks 5 to 8. Real-world information mixes text, images, audio and video, and
-    the most capable systems of 2026 handle them together.
+  notes: 'In short: This week connects images, words and speech by turning each into vectors that can be compared.
 
 
-    Analogy: A photo library whose search box accepts words needs a numerical description of every picture.
+    Explain: A modality is a type of data, such as images, text or audio. An encoder turns one input into a vector. A shared
+    space lets vectors from different modalities be compared. CLIP aligns images and captions this way. Whisper turns speech
+    into text.
 
 
-    Ask students: Which earlier week already joined an image model and a text model?
+    Example: A photo of a cat and the caption "a photo of a cat" become two 512-number vectors pointing in similar directions.
+    Their cosine similarity is high, while "a ship at sea" scores lower. A shared map is an analogy; places from two guidebooks
+    can be compared once both use the same coordinates.
 
-    Expected answer: Week 4: Stable Diffusion''s CLIP text encoder conditioned the image generator, and the lab''s CLIP score
-    measured prompt alignment.
+
+    Ask: What must two encoders share for their outputs to be comparable?
 
 
-    Common mistake: Thinking multimodal always means one giant model. Many systems join separate encoders.'
+    Answer: A common vector space, learned from matching pairs during training.
+
+
+    Watch out: Comparable vectors do not mean identical meaning; the scores are learned match scores.'
 - type: outcomes
-  notes: 'Six outcomes, matching the descriptor''s week 9 and MIMLO 2, which asks students to analyse and apply multimodal techniques
-    including alignment and cross-modal reasoning. The first two are vocabulary and representations. The third, contrastive
-    learning with CLIP, is the technical core and includes a loss students should be able to write and compute. The fourth surveys
-    architectures and vision-language transformers. The fifth adds audio with Whisper and evaluation metrics, touching MIMLO
-    4.
+  notes: 'In short: Students leave able to explain multimodal terms, use frozen CLIP and Whisper, and measure what they get
+    right and wrong.
 
 
-    Ask students: Which outcome includes a loss you should be able to compute by hand?
+    Explain: Alignment means learning which items correspond across modalities. Fusion means combining information from several
+    modalities. Zero-shot classification uses class descriptions without task training. Precision@k measures search quality.
+    Word error rate measures transcription errors.
 
-    Expected answer: Contrastive learning with CLIP.
+
+    Example: The lab classifies 1,000 CIFAR-10 images with ten class texts, searches them with text queries, and transcribes
+    ten audiobook clips. Each part produces a number: accuracy, precision@k or WER. The numbers are then read beside the actual
+    images and transcripts.
 
 
-    Common mistake: Treating alignment and fusion as synonyms.'
+    Ask: Which outcome checks speech recognition?
+
+
+    Answer: Measuring word error rate against reference transcripts.
+
+
+    Watch out: CLIP compares images and text; it does not generate either.'
+  items:
+  - Explain multimodal terms
+  - Use CLIP and Whisper
+  - Measure accuracy, precision and WER
 - type: agenda
   icon: fa:FaRoute
   items:
@@ -85,18 +102,27 @@ slides:
     minutes: 20
   - title: Lab preview and wrap-up
     minutes: 7
-  notes: 'The plan follows the descriptor: definition of modalities; key concepts and terminology; representation learning across
-    modalities; key multimodal architectures and models; contrastive learning with CLIP; and vision-language transformers. Section
-    three is the longest because it contains the maths and the real results from the lab, run in advance on CIFAR-10. Take the
-    break after section three.
+  notes: 'In short: The session moves from multimodal vocabulary, to shared vector spaces, to contrastive training, architectures,
+    and finally speech and evaluation.
 
 
-    Ask students: Why does section three take the longest?
+    Explain: Section one defines modality, alignment, fusion and grounding. Section two shows how each modality becomes vectors.
+    Section three explains CLIP''s contrastive training and SigLIP. Section four surveys vision-language architectures such
+    as LLaVA. Section five covers Whisper, evaluation and responsible use.
 
-    Expected answer: It contains the contrastive loss, its maths and the real lab results.
+
+    Example: Week 5 introduced transformers on text, and week 6 the language models built from them. This week attaches image
+    and audio encoders to that idea. Week 10 then uses several modalities in applications. A railway map is an analogy; each
+    section is a station on one line.
 
 
-    Common mistake: Skipping the maths and remembering only model names.'
+    Ask: Which earlier idea does a Vision Transformer reuse?
+
+
+    Answer: The transformer from week 5, applied to image patches instead of word tokens.
+
+
+    Watch out: Multimodal does not mean one giant model; many systems chain separate models.'
 - type: discussion
   title: Warm-up
   icon: fa:FaImages
@@ -104,353 +130,421 @@ slides:
   points:
   - 'Try a second query: “red umbrella”.'
   - Name the input and desired output.
-  notes: 'Give two minutes. Students usually propose training a classifier, then realise that they would need a
-    class for every possible query and labelled data for each. The key insight to draw out is the last point: if
-    text and images can be turned into vectors in the same space, where a matching image and description land close
-    together, then any query can be compared with any image by a similarity score, with no task-specific training.
+  notes: 'In short: Searching uncaptioned photos with words needs a way to compare text with pixels.
 
 
-    Analogy: Think of a photo library whose search box accepts words. The stored pictures need a comparable numerical
-    description.
+    Explain: The input is a text query and a set of photos. The output is a ranked list of photos. Keywords cannot help, because
+    the photos have no captions. The system must describe photos and words in one comparable form. A score then ranks each photo
+    against the query.
 
 
-    Ask students: What goes into image search, and what comes out?
+    Example: "A dog on a beach" should rank a photo of a dog on sand above a dog on grass. "Red umbrella" tests colour and object
+    together. If both queries return the same photos, the system is matching something too general.
 
-    Expected answer: A text query goes in; a ranked set of gallery images comes out.
+
+    Ask: What would the system need to have learned beforehand?
 
 
-    Common mistake: A search result is a model match, not proof that every requested detail is present.'
+    Answer: Which images and descriptions correspond, from many matching pairs.
+
+
+    Watch out: A top result is the best available match, not proof that the photo shows everything in the query.'
 - type: section
   number: 1
   title: Modalities and terminology
   question: What exactly does 'multimodal' mean?
   icon: fa:FaLayerGroup
-  notes: 'Section one establishes the vocabulary: modalities and how each is represented, the precise meanings of
-    cross-modal, multimodal, alignment and fusion, the difference between multimodal understanding and generation,
-    and the three ways of fusing modalities. These terms appear in the exam and in every multimodal paper. About
-    fifteen minutes.
+  notes: 'In short: Multimodal means a system that handles more than one type of data, and the details of how matter.
 
 
-    Analogy: Two languages can describe the same scene. Encoders supply comparable numerical descriptions; fusion
-    combines information.
+    Explain: Unimodal systems use one data type. Cross-modal systems go from one type to another, such as text to images. Multimodal
+    systems combine several types in one task. Alignment, fusion and grounding name different ways to connect them. Each needs
+    different data and evaluation.
 
 
-    Ask students: How are alignment and fusion different?
+    Example: A text-only chatbot is unimodal. Searching photos with words is cross-modal. Asking a question about a chart image
+    is multimodal. Whisper converting speech to text is cross-modal speech recognition.
 
-    Expected answer: Alignment learns correspondence; fusion combines information inside a system.
+
+    Ask: Is CLIP-based text-to-image search cross-modal or multimodal?
 
 
-    Common mistake: Sharing vector dimensions alone does not teach matching meanings.'
+    Answer: Cross-modal retrieval: a text query finds images, using a model trained on both modalities.
+
+
+    Watch out: Marketing often calls any model multimodal; check which inputs and outputs it actually supports.'
 - type: figure
   title: 'Four main modalities, one idea: turn everything into vectors'
   figure: modalities
-  notes: 'A modality is a type of data with its own structure: text is a sequence of discrete symbols; images are two-dimensional
-    grids of pixels; audio is a one-dimensional waveform, usually converted to a time-frequency spectrogram; video is a sequence
-    of images with time and often audio. Each modality is split into units: sub-word tokens, image patches, spectrogram frames
-    or codec tokens, and video frames with patches. A modality-specific encoder turns those units into vectors.
+  notes: 'In short: Images, text, audio and video can all be turned into vectors, which lets one model family handle them.
 
 
-    Analogy: Different instruments can be written in the same musical notation.
+    Explain: Text is split into tokens and embedded. Images are cut into patches and embedded. Audio becomes spectrogram frames.
+    Video becomes sampled frames with time positions. After encoding, each becomes vectors of numbers.
 
 
-    Ask students: What unit does each modality become before its encoder?
-
-    Expected answer: Text becomes sub-word tokens, images become patches, audio becomes spectrogram frames or codec tokens,
-    and video becomes frames split into patches.
+    Example: A 224 × 224 image with 32 × 32 patches gives 7 × 7 = 49 patch vectors. A 30-second clip at 16,000 samples per second
+    has 480,000 samples before Whisper turns it into spectrogram frames. Different inputs end in one numerical form.
 
 
-    Common mistake: Thinking Whisper reads raw audio samples. It uses log-mel spectrogram features.'
+    Ask: How many 32 × 32 patches does a 224 × 224 image have?
+
+
+    Answer: 49, because 224 ÷ 32 = 7 patches per side, and 7 × 7 = 49.
+
+
+    Watch out: Turning everything into vectors does not make the vectors comparable; that needs alignment training.'
 - type: table
   title: Key terms
   header:
   - Term
   - Meaning
-  - Example
   rows:
   - - Modality
     - A type of data
-    - A photo; a voice recording
   - - Unimodal
     - One type only
-    - A text-only chatbot
   - - Cross-modal
-    - From one type to another
-    - Search photos with words
+    - One type to another
   - - Multimodal
     - Several types together
-    - Ask a question about a photo
   - - Alignment
     - Learn which items correspond
-    - A photo lands near its caption
   - - Fusion
-    - Combine information in a model
-    - LLaVA joins image and question
+    - Combine information
   - - Grounding
-    - Link a claim to evidence
-    - Box the dog the caption names
-  notes: 'These definitions come straight from the descriptor''s list: modality, cross-modal, multimodal, alignment and fusion;
-    grounding is added because it appears in many vision-language papers. The distinction between cross-modal and multimodal
-    is subtle: cross-modal emphasises going from one modality to another, for example text-to-image search, while multimodal
-    means processing several together. Alignment is about correspondence between modalities; fusion is about how information
-    is combined inside a model. Encourage students to use these terms precisely in their reports.
+    - Link claims to evidence
+  notes: 'In short: Seven terms describe how modalities relate: unimodal, cross-modal and multimodal, plus alignment, fusion
+    and grounding.
 
 
-    Ask students: Is text-to-image search cross-modal or multimodal?
+    Explain: Unimodal means one data type, such as a text-only chatbot. Cross-modal means mapping between types, such as searching
+    photos with words. Multimodal means combining types, such as asking about a photo. Alignment learns which items correspond.
+    Fusion combines information inside a model, and grounding links a claim to evidence.
 
-    Expected answer: Cross-modal: the query is text and the results are images. A model that reads an image and a question together
-    is multimodal.
+
+    Example: CLIP aligns a photo with its caption. LLaVA fuses an image with a question to produce an answer. A grounded caption
+    system draws a box around the dog its caption mentions. One photo can therefore be used in three different ways.
 
 
-    Common mistake: Using alignment and fusion interchangeably. Alignment learns correspondence; fusion combines information.'
+    Ask: Which term describes drawing a box around the object a sentence mentions?
+
+
+    Answer: Grounding, because the claim is linked to visible evidence.
+
+
+    Watch out: Alignment is learned from data; it does not guarantee the model knows what every word means.'
 - type: compare
   title: Multimodal understanding vs. multimodal generation
   columns:
   - head: Understanding
-    icon: fa:FaEye
     points:
-    - Media → text, labels or vectors
-    - 'Whisper: lecture audio → transcript'
-    - 'CLIP: query → matching photos'
+    - Media → text, labels, vectors
+    - 'Whisper: audio → transcript'
+    - 'CLIP: query → photos'
   - head: Generation
-    icon: fa:FaPaintBrush
     points:
-    - Text → images, speech or video
+    - Text → images, speech, video
     - 'SD-Turbo: prompt → picture'
     - 'MMS-TTS: sentence → speech'
-  callout: Check the exact model’s supported inputs and outputs.
-  notes: 'Separate the two directions. Understanding maps non-text inputs to text, labels or vectors; generation maps text to
-    non-text outputs. They are closely linked: the text encoder inside Stable Diffusion from week 4 is CLIP''s text transformer,
-    and we measured prompt alignment with CLIP score in the week 4 lab. This week focuses on understanding and alignment; next
-    week covers multimodal LLMs and generation across modalities, including audio and video.
+  callout: Check supported inputs and outputs.
+  notes: 'In short: Multimodal understanding turns media into text, labels or vectors, while multimodal generation turns descriptions
+    into new media.
 
 
-    Ask students: Is Whisper an understanding model or a generation model?
+    Explain: Understanding models read images, audio or video and produce text or vectors. Generation models produce images,
+    speech or video from inputs such as text. Some systems do both. Each model supports specific input and output types. The
+    model card lists them.
 
-    Expected answer: Understanding: it maps audio to text.
+
+    Example: Whisper turns lecture audio into a transcript. CLIP turns a query into matching photos by comparing vectors. SD-Turbo
+    turns a prompt into a picture, and MMS-TTS turns a sentence into speech.
 
 
-    Common mistake: Assuming a model can produce every modality it can read. Check its supported outputs.'
+    Ask: Is CLIP an understanding or a generation model?
+
+
+    Answer: Understanding: it compares images and text but cannot create new images.
+
+
+    Watch out: A model that reads images cannot necessarily produce them, and the reverse.'
 - type: figure
   title: Three ways to fuse modalities
   figure: fusion
-  bullets:
-  - '**Early fusion:** combine inputs first.'
-  - '**Late fusion:** compare separately encoded outputs.'
-  - '**Cross-attention:** one modality queries another.'
   stack: true
-  notes: 'Fusion is about where information is combined. Early fusion puts all modalities into one model from the start, allowing
-    rich interactions, at higher cost; natively multimodal models such as those in the Gemini family process interleaved text
-    and image tokens. Late fusion keeps separate encoders and combines only their outputs, as CLIP does with a similarity score;
-    it is efficient because each item is encoded once, which is ideal for search over millions of images.
+  notes: 'In short: Modalities can be fused early, late or through cross-attention, and the choice decides what each part of
+    the model can see.
 
 
-    Analogy: Early fusion is a joint meeting; late fusion compares two separate reports; cross-attention lets one team question
-    the other.
+    Explain: Early fusion combines inputs before one model reads them. Late fusion encodes each modality separately and combines
+    the outputs. Cross-attention lets tokens of one modality attend to features of another. Late fusion is cheap for search.
+    Cross-attention allows detailed question answering.
 
 
-    Ask students: Why is late fusion efficient for searching millions of images?
+    Example: CLIP is late fusion: image and text vectors meet only in a dot product. Flamingo uses cross-attention; text tokens
+    attend to image features while generating an answer. Early fusion might feed image patches and words into one transformer
+    together.
 
-    Expected answer: Each image is encoded once and stored; a new query needs one text encoding and a similarity lookup.
+
+    Ask: Why does late fusion suit searching millions of images?
 
 
-    Common mistake: Assuming early fusion is always better. Every pair must pass through the model together, which costs more.'
+    Answer: Image vectors can be computed once and stored; each query then needs only dot products.
+
+
+    Watch out: Late fusion cannot answer questions that need detailed interaction, such as counting objects named in the question.'
 - type: quiz
-  question: CLIP encodes images and texts separately and compares them with cosine similarity. Which fusion strategy
-    is this?
+  question: CLIP encodes images and texts separately, then compares them. Which fusion?
   options:
   - Late fusion
   - Early fusion
   - Cross-attention fusion
   - 'No fusion: CLIP is unimodal'
   answer: 0
-  notes: 'Answer: A, late fusion. CLIP''s image and text encoders never see each other''s inputs; the modalities meet only at
-    the end, in the similarity score between two embeddings. This is what makes CLIP so efficient for retrieval: you can encode
-    a million images once, store the vectors, and compare any new text query against them. B and C describe designs where modalities
-    interact inside the network. D is wrong: CLIP is multimodal because it aligns two modalities in one space.
+  notes: 'In short: CLIP is late fusion, because its two encoders work separately and meet only in a similarity score.
 
 
-    Ask students: Why is option D wrong?
+    Explain: Late fusion combines modalities after separate encoding. CLIP''s image and text encoders never see each other''s
+    inputs. Their normalised outputs meet in a dot product. Early fusion would mix inputs first. Cross-attention would let one
+    modality read the other''s features.
 
-    Expected answer: CLIP aligns two modalities in one space, so it is multimodal.
+
+    Example: A gallery of 1,000 images is encoded once into a [1000, 512] table. Each new query needs one text encoding and
+    one matrix product. That efficiency comes from late fusion.
 
 
-    Common mistake: Thinking CLIP''s encoders see each other''s inputs. They meet only in the similarity score.'
+    Ask: Which option is correct?
+
+
+    Answer: A. Late fusion: separate encoders, combined only by the similarity score.
+
+
+    Watch out: CLIP is not unimodal; it is trained on two modalities, even though each encoder sees one.'
 - type: section
   number: 2
   title: Representation learning across modalities
   question: How does each modality become vectors that can be compared?
   icon: fa:FaVectorSquare
-  notes: 'Section two covers representation learning: how images, audio and video are turned into sequences of vectors
-    that transformers can process, and the idea of a shared embedding space in which different modalities can be
-    compared directly. It links back to tokens and embeddings from weeks 5 and 6. About seventeen minutes.
+  notes: 'In short: Representation learning turns each modality into vectors whose geometry reflects useful similarities.
 
 
-    Analogy: A map can record coordinates for different places. An embedding stores learned features, rather than
-    a literal address.
+    Explain: A representation is a vector describing an input''s useful features. Encoders learn representations during training.
+    Similar inputs should get nearby vectors. Alignment training makes vectors from different modalities comparable. The quality
+    of representations depends on the training data.
 
 
-    Ask students: Can we directly compare arbitrary image and text vectors of equal length?
+    Example: Two photos of cats should have more similar vectors than a cat and a ship. After alignment, the caption "a cat
+    sleeping" should sit near the cat photos too. In the lab, cosine similarities make this measurable.
 
-    Expected answer: No. Encoders need a learned shared representation and compatible preprocessing.
+
+    Ask: Predict: will a cat photo score higher with "a cat sleeping" than with "a ship at sea"?
 
 
-    Common mistake: A two-dimensional plot discards information from the full vectors.'
+    Answer: Usually yes; the lab''s 6 × 6 table shows whether the diagonal wins.
+
+
+    Watch out: Vectors capture what the training data emphasised, including its biases.'
 - type: bullets
   title: 'Representation learning: vectors that capture meaning'
-  icon: fa:FaCompass
   bullets:
-  - A **representation** describes useful input features with numbers.
-  - '**Alignment** learns correspondence from paired examples.'
-  - Noisy captions can teach wrong matches; more data does not remove the problem.
-  notes: 'Representation learning is the thread connecting this whole module: VAE latents, transformer embeddings and now multimodal
-    embeddings are all vectors that capture meaning. Unimodal models learn good representations within one modality by self-supervision.
-    Multimodal alignment needs paired data, where two modalities describe the same thing, and the web provides it at enormous
-    scale: images with alt-text captions, videos with subtitles, podcasts with transcripts. This data is noisy, since captions
-    often do not describe the image well, and scale does not remove misleading or missing labels.
+  - A representation describes features with numbers.
+  - Alignment learns correspondence from pairs.
+  - Noisy captions teach wrong matches.
+  notes: 'In short: A representation is a vector of learned features, and alignment trains image and text representations to
+    agree for matching pairs.
 
 
-    Ask students: What makes web image-caption pairs noisy?
+    Explain: Features are measurable properties, such as shapes or word meanings. A representation stores them as numbers. Alignment
+    uses matching pairs to pull corresponding vectors together. Web captions are noisy, so some pairs teach wrong matches. More
+    data reduces the effect of noise on average but cannot remove it.
 
-    Expected answer: Alt text often describes the page or the product, not what the picture shows.
+
+    Example: A photo captioned "my holiday" teaches little about what is in the photo. A photo captioned "a red car parked by
+    a river" teaches colour, object and setting. CLIP trained on about 400 million such pairs, good and bad.
 
 
-    Common mistake: Assuming more pairs remove the noise. Wrong captions still teach wrong matches.'
+    Ask: Why can more web data not remove caption noise entirely?
+
+
+    Answer: Noise is part of how web captions are written, so it grows with the data.
+
+
+    Watch out: A representation is not a readable description; it is a set of numbers learned for comparison.'
+  visual:
+    type: example_strip
+    items:
+    - label: Photo
+      text: cat on a sofa → 512 numbers
+    - label: Caption
+      text: '"a sleeping cat" → 512 numbers'
 - type: cards
   title: Every modality as a sequence of tokens
   cards:
   - head: Images
-    icon: fa:FaTh
-    text: A 224 × 224 photo becomes 49 patches of 32 × 32 pixels, each with a position.
+    text: 224 × 224 → 49 patches
   - head: Audio
-    icon: fa:FaWaveSquare
-    text: Spectrogram frames become vectors, as in Whisper; or a codec turns sound into IDs.
+    text: Spectrogram frames
   - head: Video
-    icon: fa:FaFilm
-    text: Frames sampled a few times a second, cut into patches with time positions.
+    text: Frames + time positions
   - head: Discrete tokens
-    icon: fa:FaCubes
-    text: A learned codebook maps image or audio pieces to IDs a model can predict.
-  notes: 'The unifying trick of modern multimodal AI is to turn every modality into a sequence of tokens, so the same transformer
-    machinery applies. Images become patches, as in the Vision Transformer from week 5. Audio is first converted into a spectrogram,
-    a picture of frequency content over time; its frames become tokens, as in Whisper, or audio can be compressed into discrete
-    codec tokens for generation.
+    text: Codebook IDs
+  notes: 'In short: Transformers can read any modality once it is cut into a sequence of tokens with positions.
 
 
-    Analogy: Cutting a photo into numbered tiles before describing each tile.
+    Explain: Images are cut into square patches, each embedded as a vector. Audio becomes spectrogram frames over time. Video
+    adds a time position to frame patches. Some models learn a codebook that maps pieces to discrete IDs. A transformer then
+    processes the sequence as it would words.
 
 
-    Ask students: A 224 × 224 image is cut into 32 × 32 patches. How many patch tokens is that?
+    Example: A 224 × 224 image with 32 × 32 patches gives 49 patches, as in CLIP ViT-B/32. Whisper turns 30 seconds of audio
+    into 3,000 spectrogram frames before its encoder reduces them. A codebook of 8,192 entries can turn an image into a grid
+    of IDs that a model predicts like text.
 
-    Expected answer: 7 × 7 = 49.
+
+    Ask: Why does each patch need a position?
 
 
-    Common mistake: Forgetting positions. Patch vectors need position information, as words do.'
+    Answer: Attention ignores order, so positions tell the model where each patch sits.
+
+
+    Watch out: Smaller patches mean more tokens and more computation for the same image.'
 - type: figure
   title: 'Audio as input: the Whisper pipeline'
   figure: whisper_pipeline
   bullets:
-  - Waveform → log-mel features → audio encoder.
-  - Text decoder attends to audio and predicts words.
-  - Check transcription against a reference.
+  - Compare the transcript with a reference.
   stack: true
-  notes: 'Whisper, released by OpenAI in 2022 and available as open weights, is our audio representation example. The waveform,
-    sampled at sixteen kilohertz, becomes a log-mel spectrogram. The encoder processes these time-frequency features. The decoder
-    generates transcript tokens while attending to the audio, using the encoder-decoder design from week 5. It was trained on
-    680,000 hours of weakly supervised audio with web transcripts. Large datasets still require data-quality checks and evaluation
-    across accents and recording conditions. Students transcribe real speech with Whisper in the lab.
+  notes: 'In short: Whisper turns a waveform into a log-mel spectrogram, encodes it, and decodes text that attends to the audio
+    features.
 
 
-    Analogy: A stenographer listens to the recording, then types the transcript word by word.
+    Explain: A waveform is a list of air-pressure samples over time. A log-mel spectrogram shows energy in frequency bands over
+    time. The encoder turns spectrogram frames into feature vectors. The decoder generates words one token at a time. Cross-attention
+    lets each word attend to the audio features.
 
 
-    Ask students: Which part of Whisper attends to the audio while writing?
+    Example: A clip sampled at 16,000 samples per second is cut into 25 ms windows every 10 ms. Each window gives 80 mel-band
+    energies, so 30 seconds become an 80 × 3,000 table. The decoder then writes the transcript token by token.
 
-    Expected answer: The decoder, through cross-attention to the encoder''s outputs.
+
+    Ask: Why use a spectrogram instead of the raw samples?
 
 
-    Common mistake: Assuming 680,000 hours of training removes accent and noise errors. Evaluate on your own recordings.'
+    Answer: It shows which frequencies are present over time, which is closer to what distinguishes speech sounds.
+
+
+    Watch out: A transcript can be fluent but wrong; check it against a reference where one exists.'
 - type: bullets
   title: Shared embedding spaces
-  icon: fa:FaProjectDiagram
   bullets:
-  - Learn comparable image and text vectors from matching pairs.
-  - Normalised dot products give cosine similarity.
-  - Rank candidates; a high score does not prove every detail matches.
-  notes: 'A shared embedding space is the direct answer to the warm-up. If a photo of a dog on a beach and the text a dog on
-    a beach at sunset map to nearby vectors, search becomes a nearest-neighbour lookup. The space enables many applications
-    without retraining: retrieval in both directions, zero-shot classification by comparing an image with class descriptions,
-    deduplication and clustering of image collections. CLAP does this for audio and text.
+  - Learn comparable vectors from pairs.
+  - Normalised dot product = cosine.
+  - High score ≠ every detail matches.
+  notes: 'In short: In a shared embedding space, normalised dot products give cosine similarities that rank candidates across
+    modalities.
 
 
-    Analogy: A shared map on which a place and its description land at the same spot.
+    Explain: Normalising divides a vector by its length, making the length 1. The dot product of two unit vectors is their cosine
+    similarity. Cosine ranges from −1 to 1. Ranking sorts candidates by this score. The top result is the closest match in the
+    learned space.
 
 
-    Ask students: Name two uses of a shared space that need no retraining.
+    Example: [3, 4] normalises to [0.6, 0.8], and [4, 3] to [0.8, 0.6]. Their dot product is 0.48 + 0.48 = 0.96. In CLIP the
+    same calculation runs over 512 numbers per vector.
 
-    Expected answer: Retrieval in either direction and zero-shot classification; also deduplication and clustering.
+
+    Ask: What does a cosine similarity of 0.96 tell you?
 
 
-    Common mistake: Reading a high similarity score as proof that every detail matches.'
+    Answer: The two vectors point in almost the same direction, so the model describes the inputs similarly.
+
+
+    Watch out: A high score is relative; compare it with the scores of the other candidates.'
+  visual:
+    type: example_strip
+    items:
+    - label: u · v
+      text: '[0.6, 0.8] · [0.8, 0.6] = 0.96'
+    - label: Rank
+      text: Highest score first
 - type: section
   number: 3
   title: 'Contrastive learning: CLIP and SigLIP'
   question: How do you teach a model that a picture and a sentence mean the same thing?
   icon: fa:FaMagnet
-  notes: 'Section three is the technical core. We describe CLIP, its training data and objective, write the contrastive
-    loss, and then look at what CLIP can do without further training, zero-shot classification and retrieval, using
-    real results from the lab run on CIFAR-10. We then introduce SigLIP''s sigmoid loss and the modality gap. About
-    thirty minutes; take the break afterwards.
+  notes: 'In short: Contrastive learning teaches matching by asking the model to pick the right partner for each item among
+    many wrong ones.
 
 
-    Analogy: Matching photo cards with caption cards is a batch-wide identification game. Read one row, then one
-    column.
+    Explain: A positive pair is an image with its own caption. Negative pairs mix an image with other captions. The loss rewards
+    high scores for positives and low scores for negatives. CLIP uses a softmax over each row and column. SigLIP scores each
+    pair independently with a sigmoid.
 
 
-    Ask students: Three pairs have equal choice probabilities. What is their loss?
+    Example: In a batch of three pairs, the 3 × 3 score table has three positives on the diagonal and six negatives elsewhere.
+    Training raises the diagonal and lowers the rest. With 32,768 pairs, each image has 32,767 negatives.
 
-    Expected answer: Each correct choice has probability 1/3, so the uniform-choice loss is ln 3, about 1.10.
+
+    Ask: Predict: how many negatives does each image have in a batch of N pairs?
 
 
-    Common mistake: Calculating loss does not train a model; training also updates weights with gradients.'
+    Answer: N − 1, the captions of all the other images.
+
+
+    Watch out: Some negatives may describe the image well; the loss still pushes them away.'
 - type: bullets
   title: 'CLIP: Contrastive Language–Image Pre-training (OpenAI, 2021)'
-  icon: fa:FaLink
   bullets:
-  - Two encoders; one shared comparison space.
-  - Train by identifying each image’s caption and each caption’s image.
-  - CLIP used 400 million web pairs and batches of 32,768.
-  - Use class descriptions without task-specific training.
-  notes: 'CLIP, by Radford and colleagues in 2021, is one of the most influential models in generative AI. Its data was four
-    hundred million image-text pairs collected from the internet. Its architecture is a dual encoder: an image encoder, a Vision
-    Transformer in the model we use, and a text transformer, each projecting into a shared five-hundred-and-twelve-dimensional
-    space. The training objective is contrastive: within each batch, every image must pick out its own caption from all the
-    captions, and every caption its own image.
+  - Two encoders, one shared space.
+  - Match pairs in both directions.
+  - 400 million pairs; batch 32,768.
+  notes: 'In short: CLIP trains an image encoder and a text encoder together so that matching image–caption pairs score highest.
 
 
-    Ask students: In a batch of 32,768 pairs, how many wrong captions does each image compete against?
+    Explain: CLIP stands for Contrastive Language–Image Pre-training. OpenAI released it in 2021. It trained on about 400 million
+    image–caption pairs from the web. Each batch held 32,768 pairs. After training, class descriptions allow classification
+    without task-specific training.
 
-    Expected answer: 32,767.
+
+    Example: CLIP ViT-B/32 cuts a 224 × 224 image into 49 patches of 32 × 32 pixels. Its image and text encoders each output
+    512 numbers. The lab uses this checkpoint, with about 151 million parameters, frozen.
 
 
-    Common mistake: Thinking CLIP was trained on class labels. It learned from captions.'
+    Ask: Why is CLIP useful without training on CIFAR-10?
+
+
+    Answer: Class names written as captions land near matching images in the space it already learned.
+
+
+    Watch out: CLIP compares; it does not generate captions or images.'
+  visual:
+    type: example_strip
+    items:
+    - label: Image encoder
+      text: ViT-B/32 → 512 numbers
+    - label: Text encoder
+      text: Transformer → 512 numbers
 - type: figure
   title: The contrastive objective as a matrix
   figure: clip_matrix
-  notes: 'Picture a batch of N image-caption pairs as an N by N matrix of similarities: row i is image i, column j is caption
-    j. The correct pairs are on the diagonal. Training increases the diagonal similarities and decreases the off-diagonal ones,
-    treating each row as a classification problem, which caption belongs to this image, and each column as a classification
-    problem, which image belongs to this caption.
+  notes: 'In short: The contrastive objective is easiest to see as a square table whose diagonal holds the matching pairs.
 
 
-    Analogy: Matching photo cards with caption cards: read one row, then one column.
+    Explain: Rows are images and columns are captions. Each cell is a scaled cosine similarity. The diagonal cells are the true
+    pairs. A row softmax asks each image to choose its caption. A column softmax asks each caption to choose its image.
 
 
-    Ask students: In a 4 × 4 similarity matrix, how many cells are correct pairs?
+    Example: With three pairs, a good table might have 0.30 on the diagonal and 0.10 elsewhere before scaling. Dividing by τ
+    = 0.07 gives about 4.3 and 1.4, so each row''s softmax gives the diagonal about 0.90.
 
-    Expected answer: Four, on the diagonal; the other twelve are negatives.
+
+    Ask: Where should the highest value in each row be?
 
 
-    Common mistake: Training only one direction. CLIP averages the image-to-text and text-to-image losses.'
+    Answer: On the diagonal, at the matching caption.
+
+
+    Watch out: A row can be right while its column is wrong; that is why both directions count.'
 - type: equation
   title: The contrastive (InfoNCE) loss
   eq:
@@ -470,93 +564,130 @@ slides:
   - - N
     - Pairs in this batch
   panel_h: 2.2
-  notes: 'Write the loss on the board. The similarity s i j is the cosine similarity between image i and text j, divided by
-    a temperature; CLIP learns the temperature and it ends up around one hundredth, which sharpens the softmax, the same temperature
-    idea as in week 1. For each image, the softmax over all captions should put its probability on the matching caption; the
-    loss is the negative log of that probability, a cross-entropy with the diagonal as the target.
+  notes: 'In short: The CLIP loss is cross-entropy over each row and column of the scaled score table, averaged over both directions.
 
 
-    Ask students: What does a temperature of 0.01 do to the scores?
+    Explain: s_ij is the scaled similarity of image i and text j. τ is the temperature, a small positive number such as 0.07.
+    The image-to-text loss treats each row as a choice among N captions. The text-to-image loss does the same over columns.
+    The CLIP loss averages the two.
 
-    Expected answer: It multiplies them by 100, which sharpens the softmax so the best match dominates.
+
+    Example: For three orthogonal pairs with τ = 1, each row is softmax([1, 0, 0]) ≈ [0.58, 0.21, 0.21], so each row''s loss
+    is −ln 0.58 ≈ 0.55. A smaller τ sharpens the softmax and lowers the loss when the diagonal already wins.
 
 
-    Common mistake: Forgetting to normalise the vectors. Without it the dot product is not a cosine similarity.'
+    Ask: What loss would a model that scores every pair equally get?
+
+
+    Answer: ln N, because each row would give the correct caption probability 1/N.
+
+
+    Watch out: τ is learned during CLIP training; a fixed value in the lab only illustrates its effect.'
 - type: bullets
   title: The loss in numbers (from the lab)
-  icon: fa:FaCalculator
   bullets:
   - '{{LOSS_NOTES}}'
-  - 'Compare measured loss with uniform choice: ln N.'
-  - Frozen embeddings illustrate the objective; no optimiser runs.
-  notes: 'These numbers come from the lab run: six CIFAR-10 images from different classes and six matching captions, embedded
-    with the pretrained CLIP. With the correct pairing the loss is far below the uniform-choice baseline of the log of six,
-    about 1.79, because each image is most similar to its own caption. When the captions are shuffled the loss rises above that
-    baseline, because the model is now confidently wrong. Students compute exactly this in part four of the lab, which makes
-    the abstract equation concrete.
+  - 'Uniform choice: ln N.'
+  notes: 'In short: On six real image–caption pairs, the measured loss is lowest for correct pairs and highest for shuffled
+    ones.
 
 
-    Ask students: Why does shuffling the captions raise the loss above ln 6?
+    Explain: The lab encodes six images and six captions with frozen CLIP. It computes the symmetric loss for the correct order.
+    It repeats the calculation with the captions shuffled. A uniform guess would give ln 6 ≈ 1.79. No optimiser runs, so the
+    weights never change.
 
-    Expected answer: The model is confidently wrong: each image still prefers its true caption, which is now in the wrong position.
+
+    Example: {{LOSS_NOTES}} Correct pairs score below the uniform baseline because most diagonal entries win. Shuffled pairs
+    score above it because the targets now point at wrong captions.
 
 
-    Common mistake: Thinking this calculation trains CLIP. No optimiser runs; the embeddings stay frozen.'
+    Ask: Why is the shuffled loss finite rather than enormous?
+
+
+    Answer: Softmax probabilities never reach zero, and some shuffled captions may still partly match.
+
+
+    Watch out: Six pairs illustrate the objective; they do not measure CLIP''s overall quality.'
+  visual:
+    type: example_strip
+    items:
+    - label: Correct
+      text: Diagonal wins → low loss
+    - label: Shuffled
+      text: Wrong targets → high loss
 - type: figure
   title: 'Zero-shot classification: describe the classes, then compare'
   figure: zeroshot_pipeline
-  notes: 'Zero-shot classification with CLIP takes no training. Write each class name into a caption template such as a photo
-    of a cat, embed all the captions with the text encoder, embed the image with the image encoder, and predict the class whose
-    caption is most similar. The classifier is defined entirely by text, so changing the classes means changing a list of words.
-    This is also why prompt engineering matters for CLIP, as the next slide shows.
+  notes: 'In short: Zero-shot classification describes each class in words, encodes the descriptions, and picks the class closest
+    to each image.
 
 
-    Analogy: A matching game in which you write the label cards yourself.
+    Explain: Each class name fills a caption template. The text encoder turns each description into a vector. Several templates
+    per class can be averaged. Each image vector is compared with every class vector. The highest similarity gives the predicted
+    class.
 
 
-    Ask students: How do you add an eleventh class to a zero-shot classifier?
+    Example: For CIFAR-10, the template "a photo of a {}." gives a [10, 512] class table. 1,000 image vectors give a [1000,
+    10] score table. The argmax of each row is that image''s prediction, and accuracy compares predictions with labels.
 
-    Expected answer: Write one more caption, such as a photo of a bicycle, and embed it. No training is needed.
+
+    Ask: Why is this called zero-shot?
 
 
-    Common mistake: Assuming any wording works equally well. The caption template changes accuracy.'
+    Answer: No CIFAR-10 example is used for training; only the class names are supplied.
+
+
+    Watch out: The labels are still needed to measure accuracy; zero-shot means no training on them.'
 - type: figure
   title: 'Real results: prompt templates matter for CLIP too'
   figure: zeroshot_results
   bullets:
   - '{{ZS_NOTES}}'
-  - Describe classes in caption-like templates.
-  - Average template vectors, then measure whether ensembling helps.
+  - Use caption-like templates.
+  - Measure whether ensembling helps.
   stack: true
-  notes: 'Real results from the lab: CLIP ViT-B/32 classifying CIFAR-10 test images zero-shot, with only the text prompt changing.
-    Here the bare class name did slightly worse than the template a photo of a, because CLIP''s text encoder was trained on
-    natural captions. Averaging several templates, including ones that mention blur and low resolution, which suits CIFAR''s
-    tiny images, helped a little more. On 1,000 images a one-point difference is ten images, so check whether such gaps hold
-    on other data. The lesson from week 7 transfers: prompts are part of the model and must be evaluated.
+  notes: 'In short: In the stored run, caption-like templates and template ensembling raised zero-shot accuracy slightly.
 
 
-    Ask students: Why can a photo of a cat beat the bare word cat?
+    Explain: A template frames the class name like a caption. CLIP''s text encoder was trained on captions, not single words.
+    An ensemble averages several template vectors per class. The average is normalised again. Accuracy is measured on the same
+    1,000 images for every choice.
 
-    Expected answer: CLIP''s text encoder was trained on caption-like sentences, not single words.
+
+    Example: {{ZS_NOTES}} With 1,000 images, one image is 0.1 percentage points, so convert each gain into images before judging
+    it. Your CPU core measured {{W09_CORE_ZS}}.
 
 
-    Common mistake: Choosing the best template on the test images. Choose it on separate data.'
+    Ask: Is the gain from ensembling large or small?
+
+
+    Answer: Small; it is a few images out of 1,000, so check it on more data before relying on it.
+
+
+    Watch out: Templates tuned on the test images overstate accuracy, as with any prompt tuning.'
 - type: figure
   title: Where zero-shot CLIP goes wrong (real confusion matrix)
   figure: lab_confusion
   caption: 'Measured heatmap: each row is a true class; each column is a prediction. Dark diagonal cells are correct.'
-  notes: 'The confusion matrix from the lab run shows where the zero-shot classifier fails. The diagonal is strong, and the
-    largest off-diagonal counts are between classes that look alike at low resolution: deer predicted as horses, dogs and frogs
-    predicted as cats, and airplanes predicted as ships. CIFAR''s thirty-two by thirty-two images are upscaled to CLIP''s input
-    size, which is a distribution shift from the web photos it was trained on.
+  notes: 'In short: The confusion matrix shows which CIFAR-10 classes zero-shot CLIP mixes up.
 
 
-    Ask students: Which classes does the model confuse most, and why?
+    Explain: Each row is a true class and each column a predicted class. Diagonal cells count correct predictions. Off-diagonal
+    cells count specific confusions. Bright off-diagonal cells reveal systematic errors. CIFAR images are only 32 × 32 pixels,
+    upscaled to 224 × 224.
 
-    Expected answer: Look-alike classes at low resolution: deer with horses, dogs and frogs with cats, airplanes with ships.
+
+    Example: Look for pairs such as cat and dog, or deer and horse, which are hard to separate at this resolution. A row with
+    100 images and 80 on the diagonal has 80% accuracy for that class.
 
 
-    Common mistake: Reporting overall accuracy without looking at which classes fail.'
+    Ask: What does a bright cell in row cat, column dog mean?
+
+
+    Answer: Many cat images were predicted as dogs.
+
+
+    Watch out: Overall accuracy can hide a class that fails badly; read the rows.'
 - type: figure
   title: Text-to-image retrieval (real)
   figure: lab_retrieval
@@ -564,295 +695,371 @@ slides:
   - Encode each query once; reuse gallery vectors.
   - '{{PREC_NOTES}}'
   stack: true
-  notes: 'Retrieval uses the same embeddings in the other direction. The query text is embedded once and compared with the stored
-    embeddings of all images; the top results are returned. The strip shows the top six CIFAR images for a free-text query about
-    a red sports car, and the bullet gives the measured precision at k for class-name queries.
+  notes: 'In short: Text-to-image retrieval ranks the stored image vectors against a query, and precision@k checks the top results.
 
 
-    Ask students: Precision@5 is 0.8. How many of the five results were relevant?
+    Explain: Each class query is encoded once. Its vector is compared with all stored image vectors. The images are sorted by
+    score. Precision@k is the fraction of the top k that match the queried class. It ignores relevant images ranked lower.
 
-    Expected answer: Four.
+
+    Example: {{PREC_NOTES}} If four of the first five images for "a photo of a car." are cars, precision@5 is 0.8. Recall would
+    instead ask how many of the gallery''s 100 cars were found.
 
 
-    Common mistake: Reading precision@k as recall. It says nothing about relevant images that were not returned.'
+    Ask: Can precision@5 be high while recall is low?
+
+
+    Answer: Yes. Five correct cars out of 100 in the gallery give precision@5 = 1.0 but recall of 0.05.
+
+
+    Watch out: Benchmarks such as COCO report recall@k, which uses a different denominator.'
 - type: equation
   title: 'SigLIP: a sigmoid loss instead of softmax (Zhai et al., 2023)'
   eq: \mathcal{L}_{\mathrm{SigLIP}} = -\frac{1}{N}\sum_{i=1}^{N} \;\; \sum_{j=1}^{N} \, \log \sigma\left(z_{ij}\left(t\, u_i
     \cdot v_j + b\right)\right), \qquad z_{ij} = +1 \ \mathrm{if}\ i = j,\ \mathrm{else}\ -1
   read_as:
-  - 'Each pair asks: match or non-match?'
-  - Sigmoid scores pairs independently, without row-wide softmax.
-  - This changes the training objective and batch requirements.
+  - Independent pairs.
+  - Average losses.
   terms:
-  - - $\sigma$
-    - Sigmoid
-  - - t / b
-    - Learned scale / offset
+  - - N,i,j
+    - Batch size; image/text indices
+  - - u,v
+    - Image/text vectors
+  - - σ,t,b
+    - Sigmoid; scale; offset
   - - $z_{ij}$
     - +1 match; −1 non-match
-  notes: 'SigLIP, from Google in 2023, replaces the softmax over the batch with an independent sigmoid, a logistic regression,
-    for every image-text pair: matching pairs should score high, all others low. Because each pair is scored separately, there
-    is no need to normalise over the whole batch, which reduces communication between devices and works well even with smaller
-    batches. SigLIP image encoders are widely used as the vision backbone of recent open vision-language models. The lab''s
-    optional extension compares SigLIP''s zero-shot accuracy with CLIP''s.
+  notes: 'In short: SigLIP replaces CLIP''s row-wide softmax with an independent yes-or-no sigmoid decision for every image–text
+    pair.
 
 
-    Ask students: Why does SigLIP work with smaller batches?
+    Explain: σ is the sigmoid function, mapping a score to between 0 and 1. z_ij is +1 for matching pairs and −1 otherwise.
+    t is a learned scale and b a learned offset. Each pair contributes its own loss term. No pair needs to be compared with
+    the whole row.
 
-    Expected answer: Each pair is scored on its own, so no softmax over the whole batch is needed.
+
+    Example: For a matching pair with scaled score 2, σ(2) ≈ 0.88 and the loss term is −ln 0.88 ≈ 0.13. For a non-matching pair
+    with score 2, the term is −ln σ(−2) ≈ 2.13. A batch of N pairs gives N² independent terms.
 
 
-    Common mistake: Thinking the sigmoid and softmax losses give the same training signal.'
+    Ask: Why can SigLIP train well with smaller batches than CLIP?
+
+
+    Answer: Each pair is scored independently, so it does not need many negatives in one softmax.
+
+
+    Watch out: Sigmoid scores are still not calibrated probabilities that a caption is true.'
 - type: figure
   title: The modality gap (real embeddings from the lab)
   figure: lab_modality_gap
   caption: 'Real saved projection: circles are images; stars are class descriptions. PCA compresses 512 dimensions into two.'
-  notes: 'A surprising property of CLIP-style spaces is visible when we project real embeddings to two dimensions
-    with PCA: images and texts form two separate clouds. This modality gap, studied by Liang and colleagues in 2022,
-    arises from initialisation and the contrastive objective. It does not break retrieval, because what matters
-    is which caption is closest to an image relative to the others. But it has practical consequences: image-to-image
-    similarities are typically much higher than image-to-text similarities, so thresholds must be set separately
-    for each comparison type.
+  notes: 'In short: Even after alignment, image vectors and text vectors occupy different regions of CLIP''s space.
 
 
-    Analogy: A flat map of a mountain preserves some relationships and loses height. A PCA plot similarly loses
-    information from the original 512-dimensional vectors.
+    Explain: PCA projects 512-number vectors onto the two directions of greatest spread. Circles are images and stars are class
+    texts. The two groups sit apart, which is called the modality gap. Matching still works because ranking compares relative
+    scores. The 2-D plot compresses the true distances.
 
 
-    Ask students: Does a point pair being nearby in this plot prove it is nearby in all 512 dimensions?
+    Example: Your CPU core measured a mean image–image similarity of {{W09_CORE_COS_II}} and a mean image–text similarity of
+    {{W09_CORE_COS_IT}}. A cat photo can be closer to a ship photo than to the text "a photo of a cat", yet "cat" still beats
+    "ship" among the texts.
 
-    Expected answer: No. Check the original-vector similarities as well as this compressed picture.
+
+    Ask: If texts and images sit apart, why does retrieval still work?
 
 
-    Common mistake: Separate clouds do not mean retrieval is broken. Ranking compares an image with the given
-    text candidates in the original space.'
+    Answer: Ranking compares scores among one modality''s candidates, so only the relative order matters.
+
+
+    Watch out: Do not read exact distances from a PCA plot; check claims with full-space cosine values.'
 - type: quiz
   question: Why did CLIP use very large batches (32,768 pairs)?
   options:
-  - Fewer model parameters are then needed
-  - More negative pair comparisons per step
-  - Large image files must be loaded together
-  - Batch size has no effect on what is learned
+  - Fewer parameters are needed
+  - More negatives per step
+  - Large files must load together
+  - Batch size has no effect
   answer: 1
-  notes: 'Answer: B. In the contrastive loss, every other caption in the batch is a negative for a given image. With a larger
-    batch, each image must be distinguished from more, and more similar, captions, which forces the embeddings to capture finer
-    distinctions. A and C are irrelevant. D is wrong for softmax-based contrastive learning, although SigLIP''s sigmoid loss
-    reduces the dependence on batch size, which is one of its selling points.
+  notes: 'In short: Large batches give each image many negative captions per step, which makes contrastive learning more informative.
 
 
-    Ask students: What makes a negative caption hard?
+    Explain: Each image''s row compares it with every caption in the batch. All captions except its own are negatives. More
+    negatives make the matching task harder. Harder tasks give more useful learning signals. Large batches also need much more
+    memory.
 
-    Expected answer: It is close to the true caption, such as a photo of a truck for an automobile, so the model must learn
-    finer distinctions.
+
+    Example: With 32,768 pairs, each image competes against 32,767 wrong captions. With 32 pairs it competes against only 31,
+    so easy distinctions dominate. CLIP''s score table had over a billion cells per batch.
 
 
-    Common mistake: Choosing A. Batch size does not change the number of parameters.'
+    Ask: Which option is correct?
+
+
+    Answer: B. More negative comparisons per step.
+
+
+    Watch out: Batch size does not change the number of model parameters.'
 - type: section
   number: 4
   title: Multimodal architectures and vision-language transformers
   question: How can a language model use visual features to answer an image question?
   icon: fa:FaSitemap
-  notes: 'Welcome back. Section four surveys the architectures named in the descriptor: dual encoders like CLIP,
-    fusion encoders, encoder-decoders, and a common design connecting a vision encoder to a language model. We trace
-    the history of vision-language transformers and finish with a map of important models.
+  notes: 'In short: Vision-language models connect image features to a language model so it can answer questions about pictures.
 
 
-    Analogy: A bridge lets visual features enter a language model in a useful format. Its learned mapping connects
-    representation spaces.
+    Explain: A vision encoder turns an image into feature vectors. A connector maps those features into the language model''s
+    input space. The language model then reads visual and text tokens together. Some designs use cross-attention instead. These
+    models generate text about images.
 
 
-    Ask students: Why does LLaVA need a projector?
+    Example: Asked "How many people are in this photo?", a vision-language model reads image features and the question, then
+    writes "three". CLIP alone could only score given captions such as "three people" against the image.
 
-    Expected answer: The projector maps vision features to vectors usable by the language component.
+
+    Ask: Predict: can CLIP answer an open question about an image?
 
 
-    Common mistake: A CLIP similarity score alone cannot answer a detailed visual question.'
+    Answer: No. It scores given captions; answering needs a generating language model connected to vision features.
+
+
+    Watch out: Fluent answers about images can still describe things that are not there.'
 - type: figure
   title: Four families of multimodal architecture
   figure: architectures
-  notes: 'Four families. Dual encoders, like CLIP and SigLIP, encode inputs separately and compare their vectors. They support
-    fast retrieval and zero-shot classification; a similarity score alone cannot answer a detailed visual question. Fusion encoders
-    read image and text jointly with attention. Encoder-decoders read one modality and generate another, as in captioning and
-    speech recognition. The fourth family connects a vision encoder to an LLM through a bridge. It is a common multimodal assistant
-    design and the focus of next week.
+  notes: 'In short: Four families cover most multimodal designs: dual encoders, fusion encoders, encoder-decoders and encoder-to-LLM
+    connectors.
 
 
-    Ask students: Which family would you choose to search a million product photos with text?
+    Explain: Dual encoders such as CLIP encode each modality separately for fast search. Fusion encoders mix modalities in one
+    transformer. Encoder-decoders such as Whisper read one modality and generate text. Connector models such as LLaVA project
+    image features into an LLM. Each trades speed against depth of interaction.
 
-    Expected answer: A dual encoder such as CLIP: encode the photos once, then compare each query.
+
+    Example: For searching a million photos, a dual encoder computes image vectors once. For answering "What is written on the
+    sign?", a connector model reads the image together with the question. The task decides the family.
 
 
-    Common mistake: Using a dual encoder to answer detailed visual questions. A similarity score cannot describe an image.'
+    Ask: Which family would you choose for a photo-search app?
+
+
+    Answer: A dual encoder, because image vectors can be precomputed and compared quickly.
+
+
+    Watch out: Real systems often combine families, such as a dual encoder for search and an LLM for answers.'
 - type: bullets
   title: 'Vision-language transformers: a short history'
-  icon: fa:FaHistory
   bullets:
-  - '2019: joint image-region and text models.'
-  - '2021: CLIP/ALIGN dual encoders.'
-  - '2022: Flamingo cross-attention; BLIP.'
-  - '2023: BLIP-2 Q-Former; LLaVA projector.'
-  - 'Week 10: applications using several modalities.'
-  notes: 'The history shows a convergence. Early vision-language transformers in 2019 extended BERT to image regions detected
-    by an object detector, with either one shared stream or two streams linked by cross-attention. CLIP and Google''s ALIGN
-    in 2021 showed the power of contrastive learning at web scale. DeepMind''s Flamingo in 2022 connected a frozen language
-    model to image features with gated cross-attention, enabling few-shot visual tasks.
+  - Dual encoders came first.
+  - LLM connectors came next.
+  - Week 10 builds applications.
+  notes: 'In short: Vision-language models moved from joint region–text encoders to dual encoders, then to models that connect
+    vision to large language models.
 
 
-    Ask students: What did Flamingo add in 2022?
+    Explain: Models from 2019, such as ViLBERT and LXMERT, jointly encoded image regions and text. CLIP and ALIGN in 2021 used
+    separate encoders trained on web pairs. Flamingo in 2022 added cross-attention to a frozen language model. BLIP-2 in 2023
+    used a Q-Former bridge. LLaVA in 2023 used a simple projector into an LLM.
 
-    Expected answer: Gated cross-attention that lets a frozen language model read image features, enabling few-shot visual tasks.
+
+    Example: LLaVA''s projector is a small network mapping CLIP patch features into the LLM''s embedding size. Training the
+    bridge first, then on visual instruction examples, made a capable visual chat model cheaply.
 
 
-    Common mistake: Thinking each new design replaced the old ones. Dual encoders are still the standard for search.'
+    Ask: What does a Q-Former or projector do?
+
+
+    Answer: It translates vision features into a form the language model can read as input tokens.
+
+
+    Watch out: Dates mark publication; capabilities improved through many smaller steps.'
+  visual:
+    type: mini_table
+    header:
+    - Year
+    - Idea
+    rows:
+    - - '2019'
+      - Region–text models
+    - - '2021'
+      - CLIP, ALIGN
+    - - '2022'
+      - Flamingo, BLIP
+    - - '2023'
+      - BLIP-2, LLaVA
 - type: flow
   title: 'The LLaVA recipe: connect a vision encoder to an LLM'
   steps:
   - label: Image
     sub: Pixels
+    role: data
   - label: Vision encoder
-    sub: Patch features
+    sub: CLIP ViT
+    role: model
   - label: Projector
-    sub: Map features for LLM
-    highlight: true
+    sub: Trainable bridge
+    role: model
   - label: LLM
-    sub: Visual + text → answer
+    sub: Reads question too
+    role: model
+  - label: Answer
+    sub: Text
+    role: output
   bullets:
-  - Train the bridge, then visual instruction examples.
-  - Resolution limits readable detail.
-  notes: 'LLaVA, by Liu and colleagues in 2023, made this design popular because it is remarkably simple. A pretrained CLIP
-    vision encoder turns the image into a grid of patch features; a small projection network maps each patch feature into the
-    LLM''s token-embedding space, producing visual tokens; the LLM reads them followed by the text prompt and generates an answer.
+  - Train the bridge first.
+  - Resolution limits detail.
+  notes: 'In short: LLaVA connects a frozen vision encoder to a language model through a small trainable projector.
 
 
-    Analogy: An interpreter turns visual features into vectors the language model can read.
+    Explain: The vision encoder, a CLIP ViT, turns the image into patch features. The projector maps each feature into the LLM''s
+    token-embedding size. These visual tokens are placed before the question''s text tokens. The LLM generates the answer. Training
+    first fits the projector, then fine-tunes on visual instruction examples.
 
 
-    Ask students: Which part does LLaVA train first?
-
-    Expected answer: The projector, on image-caption pairs; then the projector and the language model together on visual instruction
-    examples.
+    Example: A 336 × 336 image with 14 × 14 patches gives 24 × 24 = 576 visual tokens. With a 20-token question, the LLM reads
+    about 600 tokens. Small text in the image may vanish at this resolution.
 
 
-    Common mistake: Assuming the model sees every detail. Image resolution limits small text and objects.'
+    Ask: Why train the projector before fine-tuning the whole system?
+
+
+    Answer: The projector must first map vision features into the LLM''s input space; instruction data then teaches useful answers.
+
+
+    Watch out: Higher resolution means more visual tokens, more memory and slower answers.'
+  arrows:
+  - pixels
+  - patch features
+  - visual tokens
+  - tokens
 - type: table
   title: A map of important multimodal models
   header:
-  - Model (year)
-  - Modalities
+  - Model
   - Type
-  - Typical use
+  - Use
   rows:
   - - CLIP / SigLIP
-    - Image–text
-    - Dual encoder
-    - Search
-  - - ALIGN
-    - Image–text
     - Dual encoder
     - Search
   - - Flamingo
-    - Image/video–text
     - Cross-attention
     - VQA
   - - BLIP-2
-    - Image–text
     - Q-Former
     - Captioning
   - - LLaVA
-    - Image–text
     - Projector
     - Visual chat
   - - Whisper
-    - Audio–text
     - Encoder–decoder
     - Transcription
   - - CLAP
-    - Audio–text
     - Dual encoder
     - Audio search
   - - ImageBind
-    - Six types
-    - Image alignment
+    - Image-anchored
     - Retrieval
-  notes: 'This table is a map for revision and for choosing components in the project. Dual encoders for search and zero-shot
-    tasks; bridge-to-LLM models for question answering and chat about images; encoder-decoders for converting speech to text;
-    audio-text contrastive models such as CLAP for sound search; and ImageBind for experiments across many modalities. Most
-    are available as open weights on Hugging Face. Next week adds the natively multimodal assistants and generators.
+  notes: 'In short: A handful of model families cover search, question answering, captioning and speech, and their type predicts
+    their strengths.
 
 
-    Ask students: Which model in the table would you pick to search a sound library with text?
+    Explain: CLIP and SigLIP are dual encoders for image–text search. Flamingo uses cross-attention for visual question answering.
+    BLIP-2 bridges a vision encoder and an LLM with a Q-Former. Whisper is an encoder–decoder for transcription. CLAP aligns
+    audio and text, and ImageBind aligns six modalities through images.
 
-    Expected answer: CLAP, the audio-text dual encoder.
+
+    Example: To search a photo library by text, use a dual encoder such as SigLIP. To ask questions about a chart, use a vision-language
+    model such as LLaVA. To find sound effects by description, CLAP plays the role CLIP plays for images.
 
 
-    Common mistake: Choosing a model without checking its licence and supported modalities.'
+    Ask: Which model would you use to search audio clips with text?
+
+
+    Answer: CLAP, the audio–text dual encoder.
+
+
+    Watch out: Check each checkpoint''s licence and supported languages before using it.'
 - type: section
   number: 5
   title: Audio, evaluation and responsible AI
   question: How well does it work, and at what cost to whom?
   icon: fa:FaBalanceScale
-  notes: 'The final section returns to audio with real Whisper results, defines word error rate, summarises how
-    multimodal models are evaluated, and discusses the responsible-AI issues of multimodal data, which are serious:
-    consent, harmful content in scraped datasets, bias in zero-shot classification, and surveillance. About twenty
-    minutes.
+  notes: 'In short: The last section measures how well multimodal systems work and asks who bears the cost of their errors.
 
 
-    Analogy: A transcription is an intermediate message passed to search. A wrong word can change every later result.
+    Explain: Evaluation needs a metric matched to each capability. Speech recognition uses word error rate. Retrieval uses precision
+    or recall at k. Classification uses accuracy, read by class. Responsible use adds rights, privacy and fairness checks.
 
 
-    Ask students: Four of five search results match the query class. What is precision@5?
+    Example: A transcription system with 10% WER makes about one error per ten reference words. If errors concentrate on one
+    accent, those speakers bear more of the cost. The average hides that.
 
-    Expected answer: It is 4/5 = 0.8. This does not say how many of all relevant gallery images were retrieved.
+
+    Ask: Predict: can two systems with the same average WER treat users differently?
 
 
-    Common mistake: WER, image accuracy and retrieval precision use different denominators and answer different
-    questions.'
+    Answer: Yes. Errors can concentrate on particular accents or recording conditions.
+
+
+    Watch out: Report results by group whenever the task affects people.'
 - type: figure
   title: Speech recognition with Whisper (real)
   figure: lab_spectrogram
   bullets:
   - '{{WER_NOTES}}'
-  - This plot uses linear frequency bins; Whisper uses log-mel features.
+  - Linear bins here; Whisper uses log-mel.
+  - '"mister" vs "Mr." counts as an error.'
   stack: true
-  notes: 'An illustrative spectrogram of the first LibriSpeech clip from the lab, with time on the horizontal axis and linear
-    frequency bins on the vertical. This plot is not Whisper''s exact preprocessing, which uses log-mel features. Bright bands
-    show harmonics of the speaker''s voice. Whisper transcribed ten clips in the lab run with the word error rate reported in
-    the bullet. LibriSpeech is clean read audiobook speech, one of the easier benchmarks.
+  notes: 'In short: In the stored run, Whisper transcribed audiobook clips with a low but non-zero word error rate.
 
 
-    Analogy: A transcription is an intermediate message passed to search; a wrong word can change every later result.
+    Explain: The spectrogram shows energy over time and frequency for one clip. This plot uses linear frequency bins. Whisper''s
+    input uses log-mel bands instead. Word error rate counts substitutions, deletions and insertions. Text normalisation decides
+    whether "mister" and "Mr." match.
 
 
-    Ask students: Why might Whisper do worse on a recorded lecture than on LibriSpeech?
+    Example: {{WER_EXAMPLE}} Normalising both texts to the same spelling before scoring would remove that error. Your CPU core
+    measured a mean WER of {{W09_CORE_WER}}.
 
-    Expected answer: LibriSpeech is clean read speech; lectures add noise, accents, technical terms and overlapping speakers.
+
+    Ask: Is "Mr." versus "mister" a real recognition error?
 
 
-    Common mistake: Treating this spectrogram plot as Whisper''s input. Whisper uses log-mel features.'
+    Answer: Not for meaning; it is a formatting difference that a normaliser should handle before scoring.
+
+
+    Watch out: Clean audiobook speech is easier than noisy, accented or overlapping speech.'
 - type: equation
   title: Word error rate (WER)
   eq: \mathrm{WER} = \frac{S + D + I}{N}
   read_as:
-  - Count substitutions S, deletions D and insertions I.
-  - Divide their sum by the reference word count N.
-  - One missing word among six gives WER = 1/6.
+  - Count substitutions, deletions and insertions.
+  - Divide by the reference word count.
+  - 'One missing word among six: 1/6.'
   terms:
   - - S / D / I
     - Changed / missing / extra words
   - - N
     - Reference words
-  notes: 'Word error rate is the standard metric for speech recognition. The hypothesis is aligned to the reference with the
-    minimum number of word edits, the edit or Levenshtein distance used in the lab''s TODO, and the errors are divided by the
-    number of reference words. Work through the example. Note that WER can exceed one hundred percent if the system inserts
-    many words, and that it treats all errors equally, so a wrong name costs the same as a wrong article.
+  notes: 'In short: WER counts the word edits needed to turn the transcript into the reference, divided by the reference length.
 
 
-    Ask students: A reference has 10 words; the output has 2 substitutions and 1 insertion. What is the WER?
+    Explain: S counts substituted words. D counts deleted words, missing from the transcript. I counts inserted words, extra
+    in the transcript. N is the number of reference words. An edit-distance table finds the smallest total.
 
-    Expected answer: (2 + 0 + 1) / 10 = 0.3.
+
+    Example: Reference "a red car", transcript "a blue car": one substitution, so WER = 1/3. A six-word reference with one missing
+    word gives WER = 1/6 ≈ 0.17. A transcript with many extra words can push WER above 1.
 
 
-    Common mistake: Assuming WER cannot exceed 100%. Many inserted words can push it higher.'
+    Ask: What is the WER for reference "the cat sat" and transcript "the cat sat down"?
+
+
+    Answer: One insertion over three reference words, so 1/3.
+
+
+    Watch out: WER treats every word equally; a wrong name can matter far more than a wrong "the".'
 - type: table
   title: How multimodal models are evaluated
   header:
@@ -878,127 +1085,157 @@ slides:
   - - Fairness
     - Group comparisons
     - Task audit
-  notes: 'Each capability has standard metrics and benchmarks. Retrieval uses recall at k in both directions, typically on MS-COCO
-    and Flickr30k. Captioning uses reference-based metrics such as CIDEr plus CLIPScore and human rating. Visual question answering
-    has many benchmarks, including ones for charts and documents that matter for business applications. Speech recognition uses
-    word error rate on benchmarks such as LibriSpeech and the multilingual FLEURS.
+  notes: 'In short: Each multimodal capability has its own metric and benchmark, and none of them covers fairness on its own.
 
 
-    Ask students: Which metric would you report for text-to-image search?
+    Explain: Classification uses accuracy on labelled images. Retrieval uses recall@k on benchmarks such as COCO. Captioning
+    uses CIDEr or CLIPScore. Visual question answering uses answer accuracy. Speech recognition uses WER on sets such as LibriSpeech.
 
-    Expected answer: Recall@k, in both directions if both are used.
+
+    Example: The lab measures precision@k because each class query has many relevant images. COCO retrieval reports recall@k,
+    where each caption has one correct image. Group comparisons check whether errors fall unevenly.
 
 
-    Common mistake: Comparing WER, accuracy and precision as if they shared a denominator.'
+    Ask: Why can a benchmark score overstate performance on your own task?
+
+
+    Answer: Your images, speakers and questions may differ from the benchmark''s data.
+
+
+    Watch out: CLIPScore uses CLIP to judge captions, so it inherits CLIP''s blind spots.'
 - type: bullets
   title: 'Responsible AI lens: multimodal data and models'
-  icon: fa:FaUserShield
   bullets:
   - Check image, audio and video rights.
-  - Audit harmful errors across relevant groups.
-  - Printed text and altered audio can mislead models.
-  - Protect privacy; review dataset curation and consent.
-  notes: 'Multimodal data raises the sharpest responsible-AI issues of the module. Scraped images, voices and videos rarely
-    come with consent. In December 2023 the Stanford Internet Observatory reported child sexual abuse material in LAION-5B,
-    a dataset used to train open image models; LAION withdrew it and released a cleaned version in 2024. CLIP''s own paper and
-    follow-up audits reported biased misclassification of people into offensive categories. OpenAI showed that writing a word
-    on an object can fool CLIP.
+  - Audit errors across groups.
+  - Printed text can mislead models.
+  notes: 'In short: Multimodal data raises extra rights, privacy and fairness questions, and images or audio can be manipulated
+    to mislead models.
 
 
-    Ask students: How can a word written on an object fool CLIP?
+    Explain: Photos and recordings can identify people. Consent and licences govern their use for training and search. Performance
+    can differ across groups, accents or skin tones. Typographic attacks place misleading text in an image. Altered audio can
+    change a transcript.
 
-    Expected answer: CLIP learned to read text in images, so a handwritten label can outweigh the visual evidence.
+
+    Example: OpenAI showed that a paper label reading "iPod" stuck on an apple could make CLIP classify it as an iPod. A face
+    search tool trained on web photos may include people who never consented.
 
 
-    Common mistake: Assuming scraped images and voices were collected with consent.'
+    Ask: Why do typographic attacks work on CLIP?
+
+
+    Answer: CLIP learned that text in images often names what is shown, so printed words strongly influence its scores.
+
+
+    Watch out: Removing names does not remove identity from faces or voices.'
+  visual:
+    type: mini_table
+    header:
+    - Risk
+    - Check
+    rows:
+    - - Consent
+      - Rights to faces, voices
+    - - Bias
+      - Results by group
+    - - Attacks
+      - Typographic tests
 - type: lab
   title: 'Lab 9: CLIP embeddings, zero-shot classification and Whisper'
   steps:
-  - Encode image/text pairs; inspect similarity.
-  - Compare class prompts and classification errors.
-  - Search images; measure precision@k.
-  - Compare paired/shuffled contrastive loss.
-  - Inspect PCA; transcribe and measure WER.
-  runtime: Colab T4 GPU or CPU (slower). About 1 min on a 4 GB laptop GPU after downloads
-  deliverable: Notebook with similarity plots, accuracy table, retrieval metrics, loss values, WER table and three
-    answers
-  notes: 'The lab implements the descriptor''s tutorial: understand modalities and embeddings; explore text-image embeddings,
-    alignment and retrieval with pretrained models like CLIP. It adds the contrastive loss, so students connect the equation
-    to real embeddings, and a speech part with Whisper and word error rate, so that audio is covered as the descriptor''s modality
-    list requires. The slide results came from this notebook. The chained speech-to-image retrieval previews the cross-modal
-    systems of week 10.
+  - Encode images and captions.
+  - Classify with class texts.
+  - Search; measure precision@k.
+  - Compare correct and shuffled loss.
+  - Transcribe; measure WER.
+  runtime: CPU core took {{W09_CORE_TIME}}. SigLIP optional.
+  deliverable: Accuracy, precision, loss, WER, answers
+  notes: 'In short: The lab uses frozen CLIP and Whisper on a CPU to classify, search, score a loss and transcribe, measuring
+    each step.
 
 
-    Ask students: Which lab part chains two modalities?
+    Explain: CLIP ViT-B/32 encodes 1,000 CIFAR-10 test images once. Ten class texts give zero-shot predictions and accuracy.
+    Class queries give precision@k. Six pairs give the contrastive loss. Whisper-base transcribes ten audiobook clips for WER.
 
-    Expected answer: The speech-to-image search: Whisper''s transcript becomes a CLIP text query.
+
+    Example: On the course laptop with {{W09_CORE_THREADS}} CPU threads, the whole core took {{W09_CORE_TIME}} once the models
+    and data were downloaded. It measured {{W09_CORE_ZS}} and a mean WER of {{W09_CORE_WER}}.
 
 
-    Common mistake: Comparing your scores with the slides without noting hardware and library versions.'
+    Ask: Which part of the lab updates CLIP''s weights?
+
+
+    Answer: None. Every part uses the frozen model; the loss is only measured.
+
+
+    Watch out: Keep both API switches False for the core; the hosted caption cell is optional and sends text only.'
 - type: summary
   points:
   - Modalities become vectors.
-  - Alignment learns correspondence; fusion combines information.
-  - CLIP compares pairs in both directions.
-  - Frozen encoders classify and retrieve.
-  - Whisper transcribes; WER counts word errors.
-  - Check task performance, rights and group differences.
-  notes: 'Recap the six points. Students should be able to define the key terms, write and explain the contrastive loss, and
-    describe how zero-shot classification and retrieval work. Next week we build on these foundations: multimodal LLMs that
-    chat about images and documents, generation across modalities including speech and video, how multimodal generation is evaluated,
-    and responsible use including deepfakes and content provenance.
+  - Pairs align the spaces.
+  - CLIP scores both directions.
+  - Frozen encoders classify and search.
+  - WER measures transcripts.
+  - Check scores against the task.
+  notes: 'In short: Multimodal models turn different data types into comparable vectors, learned from matching pairs and checked
+    with task metrics.
 
 
-    Ask students: In one sentence, how does CLIP label an image class it was never trained to label?
+    Explain: Encoders map images, text and audio to vectors. Contrastive training aligns matching pairs in both directions.
+    Zero-shot classification and retrieval reuse the frozen space. Whisper adds speech through transcription. Accuracy, precision@k
+    and WER measure each capability.
 
-    Expected answer: It compares the image vector with vectors of class descriptions and picks the most similar.
+
+    Example: The lab''s 1,000 image vectors are computed once and reused for classification, search and the modality-gap plot.
+    A transcript error changes the query before CLIP sees it. Each number is read beside the actual images or words.
 
 
-    Common mistake: Calling zero-shot training-free in every sense. CLIP itself was trained on 400 million pairs.'
+    Ask: Which single habit matters most when using similarity scores?
+
+
+    Answer: Inspect the returned items and measure on labelled examples rather than trusting the scores.
+
+
+    Watch out: A system that works on CIFAR-10 thumbnails may fail on your own photos.'
 - type: resources
   items:
   - kind: paper
-    label: Radford et al. (2021) CLIP
-    note: Learning Transferable Visual Models from Natural Language Supervision
+    label: 'Radford et al. (2021): CLIP'
+    note: Original paper
     url: https://arxiv.org/abs/2103.00020
   - kind: paper
-    label: Zhai et al. (2023) SigLIP
-    note: Sigmoid loss for language-image pre-training
+    label: 'Zhai et al. (2023): SigLIP'
+    note: Sigmoid loss
     url: https://arxiv.org/abs/2303.15343
   - kind: paper
-    label: Radford et al. (2022) Whisper
-    note: Robust speech recognition via large-scale weak supervision
+    label: 'Radford et al. (2022): Whisper'
+    note: Speech recognition
     url: https://arxiv.org/abs/2212.04356
   - kind: doc
-    label: 'Hugging Face blog: Vision language models explained'
-    note: Architectures and training
+    label: 'HF blog: Vision language models'
+    note: Architectures
     url: https://huggingface.co/blog/vlms
-  - kind: course
-    label: Hugging Face Community Computer Vision Course
-    note: Multimodal units (CLIP, VLMs)
-    url: https://huggingface.co/learn/computer-vision-course/unit0/welcome/welcome
-  - kind: course
-    label: Hugging Face Audio Course
-    note: Spectrograms, Whisper, speech models
-    url: https://huggingface.co/learn/audio-course/chapter0/introduction
-  - kind: video
-    label: '3Blue1Brown / Welch Labs: How AI images and videos work'
-    note: Includes a clear CLIP explanation
-    url: https://www.youtube.com/watch?v=iv-5mZ_9CPY
-  - kind: book
-    label: Foster (2023) Generative Deep Learning, ch. 13 'Multimodal Models'
-    note: Core module text
-    url: https://www.oreilly.com/library/view/generative-deep-learning/9781098134174/
-  notes: 'The CLIP paper is long, but its first sections are very readable and its bias analysis is worth reading. SigLIP and
-    Whisper are the other two primary sources for today. Hugging Face''s blog post on vision language models is an excellent,
-    current overview of architectures. The computer vision and audio courses from Hugging Face have hands-on units on exactly
-    today''s models. The Welch Labs video explains CLIP visually. Foster''s chapter 13 covers multimodal models including DALL-E
-    and Flamingo. All links were last checked on 9 October 2026.
+  - label: 'Video: Stanford CS25 — Large Multimodal Models'
+    note: Ming Ding; architectures (2024)
+    url: https://www.youtube.com/watch?v=cYfKQ6YG9Qo
+    kind: video
+  notes: 'In short: Use the original papers for each model''s claims and the Hugging Face courses for working code.
 
 
-    Ask students: Which resource explains CLIP visually?
+    Explain: The CLIP paper describes the 400-million-pair training and zero-shot results. The SigLIP paper explains the sigmoid
+    loss and its batch-size behaviour. The Whisper paper describes weakly supervised speech training. The vision-language blog
+    surveys connector architectures. The audio course covers spectrograms and Whisper in code.
 
-    Expected answer: The Welch Labs video.
+
+    Example: Read the CLIP paper''s prompt-engineering section, then compare its template advice with your Part 2 results. In
+    the audio course, try Whisper on your own recording and compute its WER.
 
 
-    Common mistake: Reading only summaries. The CLIP paper''s bias analysis is worth reading in the original.'
+    Ask: Where would you check which languages a Whisper checkpoint supports?
+
+
+    Answer: Its model card and the Whisper paper''s language results.
+
+
+    Watch out: Paper benchmarks come from specific settings; your hardware and data will differ.'

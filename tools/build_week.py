@@ -20,6 +20,7 @@ Usage: .venv/Scripts/python.exe tools/build_week.py --weeks 1,2 | all
 from __future__ import annotations
 
 import argparse
+import base64
 import shutil
 import hashlib
 import importlib.util
@@ -31,6 +32,9 @@ from pathlib import Path
 
 import yaml
 import beginner
+import lecture_flows
+from output_files import atomic_text, atomic_copy
+from speaker_notes import legacy_warning, validate_speaker_notes
 
 ROOT = Path(__file__).resolve().parents[1]
 CUR = ROOT / "curriculum"
@@ -85,8 +89,10 @@ def load_week(n: int) -> dict:
     return beginner.enrich(wk)
 
 
-def validate(wk: dict) -> list[str]:
+def validate(wk: dict, *, strict_notes: bool | None = None,
+             note_warnings: list[str] | None = None) -> list[str]:
     errs = []
+    legacy_slides = []
     slides = wk.get("slides", [])
     expected = wk.get("expected_slides", 40)
     if len(slides) != expected:
@@ -102,9 +108,15 @@ def validate(wk: dict) -> list[str]:
         for f in ("bullets", "points"):
             if f in s and (not isinstance(s[f], list) or any(not isinstance(item, str) for item in s[f])):
                 errs.append(f"slide {i} ({t}): {f} must be a list of strings; quote YAML text containing ': '")
-        words = len(str(s.get("notes", "")).split())
-        if words < MIN_NOTE_WORDS:
-            errs.append(f"slide {i} ({t}: {s.get('title', '')[:40]}): speaker notes only {words} words")
+        errs.extend(f"slide {i} ({t}): {error}" for error in lecture_flows.errors(s))
+        note_check = validate_speaker_notes(str(s.get("notes", "")), strict_legacy=strict_notes,
+                                            quiz_answer=s.get("answer") if t == "quiz" else None)
+        errs.extend(f"slide {i} ({t}: {s.get('title', '')[:40]}): {error}" for error in note_check.errors)
+        if note_check.warnings:
+            legacy_slides.append(i)
+    warning = legacy_warning(legacy_slides)
+    if warning and note_warnings is not None:
+        note_warnings.append(warning)
     for k in ("subtitle", "mimlos", "objectives", "coverage"):
         if not wk.get(k):
             errs.append(f"missing top-level field {k!r}")
@@ -183,6 +195,18 @@ def asset(path: Path) -> dict:
     if scene_path.exists():
         result["scene"] = json.loads(scene_path.read_text(encoding="utf-8"))
     return result
+
+
+def lecture_flow_assets(n: int, wk: dict) -> dict[str, Path]:
+    flows = lecture_flows.collect(wk)
+    if not flows:
+        return {}
+    out = BUILD / "figures" / f"week_{n:02d}" / "lecture_flows"
+    out.mkdir(parents=True, exist_ok=True)
+    source = out / "flows.json"
+    atomic_text(source, json.dumps({"flows": flows}, ensure_ascii=False, indent=1))
+    subprocess.run(["node", str(TOOLS / "technical_diagrams.js"), "--flows", str(source), str(out)], check=True)
+    return {entry["id"]: out / (entry["id"] + ".png") for entry in flows}
 
 
 # Whole LaTeX command names -> Unicode (matched as complete words, so \le never eats \left or \leq).
@@ -378,11 +402,82 @@ def solution_md(lines: list[str]) -> list[str]:
 
 
 RUN_BANNER = """> **How to run this notebook**
-> - **Google Colab (recommended):** File ▸ Upload notebook, then Runtime ▸ Change runtime type ▸ **GPU** if available. A T4 is sufficient for the GPU examples. Free GPU access varies. Run cells top to bottom with Shift+Enter.
-> - **Local Jupyter / VS Code:** Python 3.10+; run the install cell once. Read this week's runtime note. Model downloads and training can take longer on CPU, and some full experiments need a GPU.
-> - **API keys (optional cells only):** store keys in Colab ▸ 🔑 Secrets or an environment variable. Never paste a key into a notebook you share.
+> - **Google Colab:** File ▸ Upload notebook. Keep the CPU runtime for the core path. Run cells top to bottom with Shift+Enter. Free resources vary; there is no guaranteed GPU.
+> - **Local Jupyter / VS Code:** select a Python 3.11+ kernel with the listed packages. Run the install cell once if needed.
+> - **Optional routes:** leave `USE_GPU`, `USE_GEMINI` and `USE_OPENAI` false for the complete local CPU lab. To compare a hosted answer, enable exactly one API switch in shared setup.
+> - **Gemini:** use synthetic prompts only. Store `GEMINI_API_KEY` in Colab Secrets or the environment. Account, age, region, quota and distribution terms affect eligibility; see the platform note. Never enable billing for this lab.
+> - **OpenAI API:** an optional paid alternative, using `OPENAI_API_KEY` from Secrets or the environment. A ChatGPT subscription does not supply API credit. Check your account's API pricing and budget first. Local users can point `LOCAL_ENV_FILE` to a private `.env`; never upload it or paste keys into notebook cells.
 > - Cells marked **TODO** are yours to complete before running dependent cells. Questions marked ✍️ need a short written answer.
 > - Read each diagram by following its numbered blocks. The solid arrows carry data to the next block. A dashed arrow shows a step that repeats."""
+
+LAB_PINS = {
+    "torch": "2.11.0", "torchvision": "0.26.0", "transformers": "5.18.0", "diffusers": "0.40.0",
+    "peft": "0.21.1", "sentence-transformers": "5.7.0", "ipywidgets": "7.7.1",
+    "google-genai": "2.29.0", "trl": "1.15.0", "openai": "3.28.0", "python-dotenv": "1.2.4",
+}
+
+
+def install_cell(code: str, *, first: bool) -> str:
+    """Use the dated platform inventory; never silently replace local test packages."""
+    value_flags = {"-i", "--index-url", "--extra-index-url", "--trusted-host", "-f", "--find-links",
+                   "--cache-dir", "-t", "--target", "--root", "--prefix", "--timeout", "--retries",
+                   "--proxy", "--cert", "--client-cert", "-c", "--constraint", "-r", "--requirement",
+                   "--only-binary", "--no-binary", "--platform", "--python-version", "--implementation", "--abi"}
+    output = []
+    for line in code.splitlines():
+        if not re.match(r"^\s*[%!]pip\s+install\b", line):
+            output.append(line)
+            continue
+        replacements = []
+        skip_value = False
+        for token in re.finditer(r'''"[^"]*"|'[^']*'|\S+''', line):
+            raw = token[0]
+            quote = raw[0] if raw[:1] in {"'", '"'} and raw[-1:] == raw[:1] else ""
+            value = raw[1:-1] if quote else raw
+            if value.startswith("#"):
+                break
+            if skip_value:
+                skip_value = False
+                continue
+            if value in value_flags:
+                skip_value = True
+                continue
+            requirement = re.fullmatch(r"([A-Za-z0-9][A-Za-z0-9_.-]*)(\[[^\]]+\])?(?:[<>=!~][^;]*)?(;.*)?", value)
+            if requirement:
+                name = requirement[1].lower().replace("_", "-").replace(".", "-")
+                if name in LAB_PINS:
+                    pinned = requirement[1] + (requirement[2] or "") + "==" + LAB_PINS[name] + (requirement[3] or "")
+                    replacements.append((token.start(), token.end(), quote + pinned + quote))
+        for start, end, value in reversed(replacements):
+            line = line[:start] + value + line[end:]
+        output.append(line)
+    code = "\n".join(output)
+    if first:
+        code += "\n%pip install -q google-genai==2.29.0 ipywidgets==7.7.1 openai==3.28.0 python-dotenv==1.2.4"
+    return code
+
+
+SHARED_SETUP_INTRO = """### Shared setup: choose, reproduce, check
+
+This cell chooses CPU computation, fixes the random seed and prints package versions.
+Expect a runtime record and no API request. `check()` prints helpful feedback.
+
+Leave `USE_GEMINI = False` and `USE_OPENAI = False` for the complete local lab.
+For an optional comparison, enable exactly one switch and rerun this setup cell.
+`ask_model()` selects Gemini (`gemini-3.5-flash-lite`) or the OpenAI API (`gpt-4.1-mini`).
+Both use a bounded retry, a shared 40-attempt ceiling and a local response cache.
+Free quotas are account-specific; a failed request returns `None` for the local fallback.
+Use only invented examples. Students in the EEA, UK and Switzerland should check
+the [Gemini terms](https://ai.google.dev/gemini-api/terms) before opting in:
+API-client distribution has a separate paid-service condition. Local tasks need no key or billing.
+OpenAI API usage may incur charges, separately from ChatGPT subscriptions; check
+[API pricing](https://developers.openai.com/api/docs/pricing) before opting in.
+Use `GEMINI_API_KEY` or `OPENAI_API_KEY` in Colab Secrets or your local environment.
+For local `.env` use, set `LOCAL_ENV_FILE` to that file's path. Secrets are read only after opt-in.
+Use invented prompts only. OpenAI requests set `store=False`; this is not a promise of zero retention.
+
+**Common errors:** a missing optional key means use the local result; a package import
+error means check the selected kernel and install cell. Change only one switch at a time."""
 
 
 def build_notebooks(n: int, wk: dict, outdir: Path) -> tuple[Path, Path]:
@@ -393,24 +488,63 @@ def build_notebooks(n: int, wk: dict, outdir: Path) -> tuple[Path, Path]:
     if not wk.get("beginner"):
         wk["beginner"] = beginner.load(n) or {}
     cells = parse_percent(src.read_text(encoding="utf-8"))
-    figures = {k: Path(v["path"]) for k, v in wk.get("assets", {}).get("figures", {}).items() if k.startswith("beginner_")}
-    if not figures and beginner.load(n):
-        figures = beginner.diagram_assets(n)
+    available = {k: Path(v["path"]) for k, v in wk.get("assets", {}).get("figures", {}).items()}
+    figures = {k: path for k, path in available.items() if k.startswith(("beginner_", "lecture_flow_"))}
+    if not any(k.startswith("beginner_") for k in figures) and beginner.load(n):
+        figures.update(beginner.diagram_assets(n))
+    if "assets" not in wk:
+        # --labs-only still resolves explicitly authored lecture-flow images.
+        figures.update(lecture_flow_assets(n, wk if wk.get("slides") else load_week(n)))
+    named_figures = {identifier for cell in cells if cell["type"] == "markdown"
+                     for identifier in re.findall(r"\(fig:([\w-]+)\)", "\n".join(cell["lines"]))}
+    extra_figures = named_figures - set(figures)
+    if extra_figures and "assets" not in wk:
+        available.update(run_figures(n))  # cached generated lecture figures also work with --labs-only
+    for identifier in extra_figures:
+        if identifier not in available:
+            raise ValueError(f"Notebook references unknown figure {identifier}")
+        figures[identifier] = available[identifier]
     diagram_dir = outdir / "Diagrams"
     if figures:
         diagram_dir.mkdir(exist_ok=True)
+        export_diagrams = BUILD / f"week_{n:02d}" / "Diagrams"
+        export_diagrams.mkdir(parents=True, exist_ok=True)
+        manifest = BUILD / f"week_{n:02d}" / "notebook_assets.json"
+        previous = set(json.loads(manifest.read_text(encoding="utf-8"))) if manifest.exists() else set()
+        for directory in (diagram_dir, export_diagrams):
+            for old in directory.iterdir():
+                if re.fullmatch(r"lecture_flow_\d+\.(?:png|svg)", old.name) and old.stem not in figures:
+                    old.unlink()  # only stale generator-owned lecture-flow exports
+            for identifier in previous - set(figures):
+                for extension in ("png", "svg"):
+                    (directory / f"{identifier}.{extension}").unlink(missing_ok=True)
         for fid, path in figures.items():
-            shutil.copy2(path, diagram_dir / (fid + ".png"))
-            shutil.copy2(path.with_suffix(".svg"), diagram_dir / (fid + ".svg"))
+            atomic_copy(path, diagram_dir / (fid + ".png"))
+            if path.with_suffix(".svg").exists():
+                atomic_copy(path.with_suffix(".svg"), diagram_dir / (fid + ".svg"))
+            else:
+                # A stored model output is a raster image, unlike the editable diagrams.
+                # Embed its exact PNG bytes in an SVG container without changing the archive.
+                from PIL import Image
+                with Image.open(path) as picture:
+                    width, height = picture.size
+                encoded = base64.b64encode(path.read_bytes()).decode("ascii")
+                atomic_text(diagram_dir / (fid + ".svg"),
+                            f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" '
+                            f'viewBox="0 0 {width} {height}"><image width="{width}" height="{height}" '
+                            f'href="data:image/png;base64,{encoded}"/></svg>\n')
+            atomic_copy(path, export_diagrams / (fid + ".png"))
+        atomic_text(manifest, json.dumps(sorted(figures), indent=2) + "\n")
     paths = []
     for variant in ("student", "solution"):
         nb = new_notebook()
         nb.metadata = {
             "kernelspec": {"name": "python3", "display_name": "Python 3", "language": "python"},
             "language_info": {"name": "python"},
-            "colab": {"provenance": [], "gpuType": "T4"},
-            "accelerator": "GPU",
+            "colab": {"provenance": []},
         }
+        setup_added = False
+        install_added = False
         for i, c in enumerate(cells):
             if variant == "student" and "solution-only" in c["tags"]:
                 continue  # instructor tooling (e.g. saving results for the slides)
@@ -442,6 +576,20 @@ def build_notebooks(n: int, wk: dict, outdir: Path) -> tuple[Path, Path]:
             else:
                 lines = student_code(c["lines"]) if variant == "student" else solution_code(c["lines"])
                 code = "\n".join(lines)
+                is_install = any(line.lstrip().startswith(("%pip ", "!pip ")) for line in lines)
+                if is_install:
+                    code = install_cell(code, first=not install_added)
+                    install_added = True
+                    meta = {"tags": sorted(set(c["tags"]) | {"colab-install"})}
+                elif not setup_added:
+                    intro = nb.cells.pop() if nb.cells and nb.cells[-1].cell_type == "markdown" else new_markdown_cell(
+                        "Run this cell and inspect its printed output.")
+                    nb.cells.append(new_markdown_cell(SHARED_SETUP_INTRO))
+                    nb.cells.append(new_code_cell((CUR / "labs" / "_setup.py").read_text(encoding="utf-8"),
+                                                  metadata={"tags": ["shared-setup"]}))
+                    # Preserve the original adjacent introduction for this first lab code cell.
+                    nb.cells.append(intro)
+                    setup_added = True
                 try:  # both variants must at least be valid Python (magics such as %pip excluded)
                     compile("\n".join(ln for ln in lines if not ln.lstrip().startswith(("%", "!"))), f"{variant} cell {i}", "exec")
                 except SyntaxError as e:
@@ -468,8 +616,12 @@ def build_notebooks(n: int, wk: dict, outdir: Path) -> tuple[Path, Path]:
         nbformat.validate(nb)
         name = f"Week_{n:02d}_Lab.ipynb" if variant == "student" else f"Week_{n:02d}_Lab_Solutions.ipynb"
         path = outdir / name
-        nbformat.write(nb, str(path))
-        beginner.python_export(nb, path.with_suffix(".py"))
+        atomic_text(path, nbformat.writes(nb) + "\n")
+        export_dir = BUILD / f"week_{n:02d}"
+        export_dir.mkdir(parents=True, exist_ok=True)
+        beginner.python_export(nb, export_dir / path.with_suffix(".py").name)
+        # These two generator-owned exports have moved to build/, as agreed in D3.
+        path.with_suffix(".py").unlink(missing_ok=True)
         paths.append(path)
     stu = paths[0].read_text(encoding="utf-8")
     if "### BEGIN SOLUTION" in stu or "BEGIN ANSWER" in stu:
@@ -478,9 +630,10 @@ def build_notebooks(n: int, wk: dict, outdir: Path) -> tuple[Path, Path]:
 
 
 # ---------------------------------------------------------------- build
-def build(n: int) -> dict:
+def build(n: int, *, strict_notes: bool | None = None) -> dict:
     wk = load_week(n)
-    errs = validate(wk)
+    note_warnings = []
+    errs = validate(wk, strict_notes=strict_notes, note_warnings=note_warnings)
     wk["slides"] = [slide_math(s) for s in wk["slides"]]
     bdir = BUILD / f"week_{n:02d}"
     bdir.mkdir(parents=True, exist_ok=True)
@@ -489,6 +642,7 @@ def build(n: int) -> dict:
 
     figs = {k: asset(p) for k, p in run_figures(n).items()}
     figs.update({k: asset(p) for k, p in beginner.diagram_assets(n).items()})
+    figs.update({k: asset(p) for k, p in lecture_flow_assets(n, wk).items()})
     eqs: dict = {}
     for s in wk["slides"]:
         for f in ("figure",):
@@ -497,7 +651,7 @@ def build(n: int) -> dict:
         if s["type"] == "equation":
             latex_list = s["eq"] if isinstance(s["eq"], list) else [s["eq"]]
             s["eq_assets"] = [asset(render_equation(l)) for l in latex_list]
-    notes_md = prepare_notes(wk["notes_md"], eqs)
+    notes_md = prepare_notes(lecture_flows.notes_with_flows(wk["notes_md"], wk["slides"]), eqs)
     for fid in re.findall(r"\]\(fig:([\w-]+)\)", notes_md):
         if fid not in figs:
             errs.append(f"notes: unknown figure {fid!r}")
@@ -528,7 +682,8 @@ def build(n: int) -> dict:
         errs.append(f"7.3 coverage terms missing: {missing}")
     words = sum(len(str(s.get("notes", "")).split()) for s in wk["slides"])
     qa = {"week": n, "slides": len(wk["slides"]), "speaker_note_words": words,
-          "notes_md_words": len(wk["notes_md"].split()), "errors": errs, "outdir": str(outdir)}
+          "notes_md_words": len(wk["notes_md"].split()), "errors": errs,
+          "warnings": note_warnings, "outdir": str(outdir)}
     (bdir / "qa.json").write_text(json.dumps(qa, indent=2), encoding="utf-8")
     return qa
 
@@ -537,6 +692,8 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--weeks", default="all")
     ap.add_argument("--labs-only", action="store_true", help="only rebuild the notebooks (no slides, notes or figures)")
+    ap.add_argument("--strict-speaker-notes", action="store_true", default=None,
+                    help="reject legacy speaker-note templates instead of warning during migration")
     a = ap.parse_args()
     weeks = sorted({w for part in a.weeks.split(",") for w in (range(1, 13) if part == "all" else range(int(part.split("-")[0]), int(part.split("-")[-1]) + 1))})
     bad = 0
@@ -551,9 +708,11 @@ def main() -> int:
         if not (CUR / "weeks" / f"week_{n:02d}.yaml").exists():
             print(f"week {n}: no source yet, skipped")
             continue
-        qa = build(n)
+        qa = build(n, strict_notes=a.strict_speaker_notes)
         status = "OK" if not qa["errors"] else f"{len(qa['errors'])} issue(s)"
         print(f"week {n:02d}: {status} | {qa['slides']} slides | {qa['speaker_note_words']} note words | notes {qa['notes_md_words']} words")
+        for warning in qa.get("warnings", []):
+            print("   WARNING:", warning)
         for e in qa["errors"]:
             print("   -", e)
         bad += bool(qa["errors"])

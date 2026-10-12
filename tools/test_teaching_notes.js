@@ -11,7 +11,7 @@ const row = metrics.rows.find(r => r[0].text.includes("Inception Score"));
 assert.equal(row.length, 3, "Conditional probability must not create a table column");
 assert.match(row[1].text, /p\(y\|\s*x\)/, "The full conditional probability belongs in the Captures cell");
 assert.match(row[2].text, /Ignores the real data/, "The limitation must remain in its own cell");
-const runtime = marked.lexer(spec(5).notes_md).find(t => t.type === "paragraph" && t.text.includes("Downloads: Tiny Shakespeare"));
+const runtime = marked.lexer(spec(5).notes_md).find(t => t.type === "paragraph" && t.text.includes("CPU core:") && t.text.includes("Tiny Shakespeare"));
 assert(runtime, "Missing lab download guidance");
 const nested = (tokens, type) => tokens.some(t => t.type === type || (t.tokens && nested(t.tokens, type)));
 assert(!nested(runtime.tokens, "del"), "Approximate download sizes must not become strikethrough");

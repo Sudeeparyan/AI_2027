@@ -3,327 +3,347 @@
   "prerequisites": [
     {
       "term": "Embedding",
-      "meaning": "A numerical vector representing an item's content for comparison.",
+      "meaning": "A numerical vector representing an item, often learned, for prediction or comparison.",
       "check": "Why must a question and passages use the same embedding model?",
-      "answer": "Vectors from different embedding models are not comparable, so similarity scores would be meaningless."
+      "answer": "Vectors from different embedding models are not comparable, so similarity scores would be meaningless.",
+      "short_meaning": "Vector for content comparison"
     },
     {
       "term": "Context",
       "meaning": "The input text made available to a language model for a response.",
       "check": "Does reading a passage in a prompt automatically change model weights?",
-      "answer": "No. The passage changes the input for that response, not the stored weights."
+      "answer": "No. The passage changes the input for that response, not the stored weights.",
+      "short_meaning": "Input text for this response"
     },
     {
       "term": "Tool call",
       "meaning": "A structured request for the program to run a named function.",
       "check": "Who actually executes a tool: the language model or the program?",
-      "answer": "The program. The model only proposes the call."
+      "answer": "The program. The model only proposes the call.",
+      "short_meaning": "Request for a named operation"
     },
     {
       "term": "Chunk",
-      "meaning": "One searchable piece of a document.",
+      "meaning": "A passage cut from a document for indexing and retrieval.",
       "check": "Why keep its source ID with the text?",
-      "answer": "So the answer can cite its source and a reader can check it."
+      "answer": "So the answer can cite its source and a reader can check it.",
+      "short_meaning": "One searchable document passage"
     }
   ],
   "diagrams": [
     {
       "id": "overview",
       "title": "Answer with retrieved evidence",
-      "subtitle": "Prepare searchable documents once; retrieve sources for each question",
+      "subtitle": "Existing index; new question.",
       "steps": [
         {
-          "title": "Prepare knowledge",
-          "detail": "Chunks, vectors and keywords",
-          "code": "CHUNKS",
-          "role": "data"
-        },
-        {
-          "title": "Search indexes",
-          "detail": "Question searches stored data",
-          "code": "dense_rank",
-          "role": "model"
-        },
-        {
-          "title": "Fuse + re-rank",
-          "detail": "Combine then rescore candidates",
+          "title": "Search",
+          "detail": "Compatible vectors",
+          "role": "tool",
           "code": "hybrid_rerank",
-          "role": "model"
+          "code_owner": true
         },
         {
-          "title": "Build source prompt",
-          "detail": "Passages, IDs and answer rules",
+          "title": "Select",
+          "detail": "top k",
+          "role": "tool",
+          "code": ""
+        },
+        {
+          "title": "Assemble",
+          "detail": "Numbered sources",
+          "role": "data",
           "code": "rag_answer",
-          "role": "data"
+          "code_owner": true
         },
         {
-          "title": "Generate answer",
-          "detail": "Request support or abstention",
+          "title": "Generate",
+          "detail": "Quote; abstain",
+          "role": "model",
           "code": "llm",
-          "role": "model"
+          "code_owner": true
         },
         {
-          "title": "Inspect evidence",
-          "detail": "Read claims and cited passages",
-          "code": "rag_df",
-          "role": "output"
+          "title": "Inspect",
+          "detail": "Cited text",
+          "role": "metric",
+          "code": ""
         }
       ],
       "arrows": [
-        "stored passages + indexes",
-        "candidate rankings",
-        "selected passages",
-        "sources + question",
-        "answer + source IDs"
+        "ranked IDs",
+        "passages",
+        "prompt",
+        "answer"
       ],
       "trace": [
-        "Prepare chunks from the fictional module handbook and keep each source document ID.",
-        "Ask how many GPU hours each student receives.",
-        "Hybrid retrieval and re-ranking select candidate passages, including the compute policy if search succeeds.",
-        "The model receives numbered passages; compare its answer with the known handbook fact.",
-        "For the external-examiner question, the handbook provides no answer; inspect whether the model abstains."
+        "Rank the same question against compatible passage representations.",
+        "Select actual passage IDs; optional re-ranking must be labelled.",
+        "Assemble numbered source text, generate an answer and inspect each citation."
       ],
-      "explanation": "Retrieval-augmented generation, or RAG, supplies relevant document text to a language model before it answers. There are two phases. Preparation splits each handbook document into overlapping chunks, embeds them as vectors and builds searchable vector and keyword indexes. At question time, retrieval ranks passages; hybrid search combines semantic and word matching, and re-ranking reads the question together with candidate text. The rag_answer function then inserts selected passages into a prompt with source numbers and answer instructions. The model is asked to answer from those sources, cite a source and say it does not know when evidence is missing. This adds context without changing model weights. A citation alone does not prove support: inspect the cited passage and individual answer claims. The lab's automatic checks are deliberately limited and should be supplemented by reading outputs.",
-      "check_question": "If the correct passage was retrieved but the model gives the wrong number, which stage failed?",
-      "check_answer": "Generation or use of evidence failed. Inspect the supplied passage and output before changing retrieval.",
-      "layout": "linear"
+      "explanation": "Search ranks candidate passages. Selection keeps a bounded set. Assembly attaches passage numbers and the question. Generation requests a supported quote or abstention. Checking compares claims with the actual cited text. Language-model weights remain fixed.\n A GPU-hours question retrieves three passages, perhaps including the compute policy. Source number two means the second selected passage for this request. A generated statement with [2] must be checked against that passage. The open-book analogy works only when we inspect which pages were opened and what their text actually supports.",
+      "check_question": "Right passage; wrong answer?",
+      "check_answer": "Generation or evidence use failed; inspect the supplied passage and output before changing retrieval.",
+      "layout": "linear",
+      "notes": "In short: The answer route selects passages from an existing index, supplies them as evidence and inspects their use.\nExplain: Search ranks candidate passages. Selection keeps a bounded set. Assembly attaches passage numbers and the question. Generation requests a supported quote or abstention. Checking compares claims with the actual cited text. Language-model weights remain fixed.\nExample: A GPU-hours question retrieves three passages, perhaps including the compute policy. Source number two means the second selected passage for this request. A generated statement with [2] must be checked against that passage. The open-book analogy works only when we inspect which pages were opened and what their text actually supports.\nAsk: If useful evidence arrived but the answer changed its number, which stage failed?\nAnswer: Generation or evidence use failed; the selected passage should be inspected before changing retrieval.\nWatch out: The core quote check is conservative: it verifies verbatim cited text. It can leave a valid paraphrase unverified and does not establish source truth or answer relevance."
     },
     {
       "id": "mechanism",
       "insert_before_title": "The agent loop (ReAct: reason, act, observe)",
       "title": "The agent proposes; code executes",
-      "subtitle": "A bounded loop alternates model decisions with tool observations",
+      "subtitle": "Observe before repeating.",
       "steps": [
         {
-          "title": "Task + history",
-          "detail": "Task and earlier observations",
-          "code": "messages",
-          "role": "data"
+          "title": "Read",
+          "detail": "History",
+          "role": "data",
+          "code": ""
         },
         {
-          "title": "Model decision",
-          "detail": "Propose call or final answer",
-          "code": "llm",
-          "role": "model"
+          "title": "Propose",
+          "detail": "Call",
+          "role": "model",
+          "code": ""
         },
         {
-          "title": "Parse proposal",
-          "detail": "Read name and arguments",
+          "title": "Parse",
+          "detail": "Object",
+          "role": "tool",
           "code": "parse_tool_calls",
-          "role": "tool"
+          "code_owner": true
         },
         {
-          "title": "Check call + gate",
-          "detail": "Allowlist; simulated approval",
+          "title": "Permit",
+          "detail": "Fields",
+          "role": "tool",
           "code": "execute",
-          "role": "tool"
+          "code_owner": true
         },
         {
-          "title": "Run permitted tool",
-          "detail": "Search, calculate, email stub",
-          "code": "TOOLS",
-          "role": "tool"
+          "title": "Run",
+          "detail": "Tool",
+          "role": "tool",
+          "code": ""
         },
         {
-          "title": "Record observation",
-          "detail": "Store result; bound the loop",
+          "title": "Record",
+          "detail": "Result",
+          "role": "output",
           "code": "run_agent",
-          "role": "output"
+          "code_owner": true
         }
       ],
       "arrows": [
-        "task + tool descriptions",
-        "proposed text",
-        "structured call",
-        "permitted arguments",
-        "result or error"
+        "context",
+        "text",
+        "call",
+        "permitted call",
+        "result"
       ],
-      "feedback": "Append the observation before requesting the next model decision.",
-      "feedback_to": 1,
       "trace": [
-        "A student asks for a final grade from project and exam marks.",
-        "The model may propose search_handbook; code runs it and returns the assessment text.",
-        "After reading that result, the model may propose calculator with the retrieved weights.",
-        "A turn with no parsed tool call ends as an answer; otherwise the loop continues within its limit.",
-        "For an injected external-email request, the simulated approval policy denies that destination."
+        "The model proposes text; parsing does not execute it.",
+        "Application code validates names, fields and permissions before invoking one tool.",
+        "Append the observation and repeat within the step and time limits."
       ],
-      "explanation": "An agent lets a language model choose intermediate actions instead of following one fixed sequence. The model receives the task, conversation history and tool descriptions, then emits text containing a proposed call or an answer. The program parses that proposal; the model itself never executes Python functions. The execute function checks the tool allowlist and applies the side-effect approval gate before calling a permitted function. Results become tool observations in messages, so the next model turn can use new evidence. The run_agent function processes only one proposed call per turn and stops when there is no parsed call or the step budget is exhausted. The lab simulates approval with an email-domain rule, and send_email only returns a message; nobody reviews or sends actual email here. This illustrates control points that a real application would need to implement and test.",
-      "check_question": "Why does the loop execute one call before requesting the next model decision?",
-      "check_answer": "The next decision can use the actual tool result instead of inventing arguments before the result is available.",
+      "explanation": "A proposal is not an action. Parsing obtains a name and argument object. Validation checks allowed names and fields. Permitted execution runs one tool. Recording adds the result or error. Repetition lets the next decision use that observation.\n The calculator receives an arithmetic expression only after search has supplied fictional assessment weights. A malformed or forbidden call returns an error observation. A local fallback may follow a predefined policy; its trace is labelled as fallback rather than model-chosen planning. Both routes pass through the same executor and budget.",
+      "check_question": "Proposal already executed?",
+      "check_answer": "No. Parsing identifies a proposal; application code must validate and permit it before execution.",
       "layout": "linear",
-      "feedback_from": 5
+      "feedback": "Observe",
+      "feedback_to": 1,
+      "feedback_from": 5,
+      "notes": "In short: The loop separates proposed text, parsed requests, permission decisions, execution and recorded observations.\nExplain: A proposal is not an action. Parsing obtains a name and argument object. Validation checks allowed names and fields. Permitted execution runs one tool. Recording adds the result or error. Repetition lets the next decision use that observation.\nExample: The calculator receives an arithmetic expression only after search has supplied fictional assessment weights. A malformed or forbidden call returns an error observation. A local fallback may follow a predefined policy; its trace is labelled as fallback rather than model-chosen planning. Both routes pass through the same executor and budget.\nAsk: Why observe one call before deciding the next dependent action?\nAnswer: Its actual result supplies the next inputs instead of relying on invented values.\nWatch out: The email and approval demonstrations are simulated. Inspect both executed-tool records and denied attempts; a reassuring final sentence can hide an earlier rejected proposal."
     },
     {
       "id": "lab",
-      "title": "Build and diagnose the assistant",
-      "subtitle": "Separate evidence retrieval, answer generation and agent execution",
+      "title": "Trace evidence selection",
+      "subtitle": "Same question; independent searches.",
       "steps": [
         {
-          "title": "No-retrieval test",
-          "detail": "Private facts without sources",
-          "code": "no_rag_df",
-          "role": "loss"
+          "title": "Rank words",
+          "detail": "BM25",
+          "role": "tool",
+          "code": "bm25_rank",
+          "code_owner": true
         },
         {
-          "title": "Prepare indexes",
-          "detail": "Chunk, embed and retain IDs",
-          "code": "CHUNKS",
-          "role": "data"
+          "title": "Rank vectors",
+          "detail": "Dense",
+          "role": "model",
+          "code": "dense_rank",
+          "code_owner": true
         },
         {
-          "title": "Compare search",
-          "detail": "Gold-document hits and ranks",
-          "code": "evaluate_retrieval",
-          "role": "loss"
+          "title": "Fuse",
+          "detail": "Positions",
+          "role": "tool",
+          "code": "rrf",
+          "code_owner": true
         },
         {
-          "title": "Answer + inspect",
-          "detail": "Check facts, citations, abstain",
-          "code": "rag_answer",
-          "role": "model"
+          "title": "Select",
+          "detail": "Cutoff",
+          "role": "tool",
+          "code": ""
         },
         {
-          "title": "Trace tool loop",
-          "detail": "Calculation and forum attack",
-          "code": "run_agent",
-          "role": "tool"
+          "title": "Read",
+          "detail": "Passages",
+          "role": "data",
+          "code": ""
         },
         {
-          "title": "Review controls",
-          "detail": "Audit and incomplete MCP file",
-          "code": "AUDIT",
-          "role": "output"
+          "title": "Check",
+          "detail": "Evidence",
+          "role": "metric",
+          "code": ""
         }
       ],
       "arrows": [
-        "baseline answers",
-        "searchable passages",
-        "ranked evidence",
-        "answer checks",
-        "agent trajectory"
+        null,
+        "dense IDs",
+        "fused IDs",
+        "selected IDs",
+        "passages"
       ],
       "trace": [
-        "Read a handbook fact and compare the no-retrieval answer with it.",
-        "Inspect a chunk's text, ID and parent document before searching.",
-        "Compare the first relevant document's rank across BM25, dense and hybrid methods.",
-        "Read retrieved hits beside each RAG answer; check whether the citation supports the claim.",
-        "Inspect the agent trace and AUDIT; the MCP file still needs its retrieval implementation connected."
+        "BM25 and dense search independently rank the same question.",
+        "Fuse both ranked ID lists, then select the current top-k passages.",
+        "Check exact annotated passages; matching their parent document alone is insufficient."
       ],
-      "explanation": "This lab measures each layer independently. The no_rag_df table records answers without handbook context. The chunk function and the indexes prepare the documents so retrieval can find evidence; document metadata stays attached to each passage. The evaluate_retrieval function checks whether a chunk from the target document appears in the returned ranking and how early its first occurrence is. This is document-level evidence evaluation rather than exhaustive relevance labels for every chunk. The rag_answer function supplies selected passages to the model, while the small correctness and number checks provide only rough output signals. Read answers and sources to diagnose unsupported claims. The agent exercise adds a bounded tool loop with an allowlist and simulated approval policy. Finally, server_code demonstrates an MCP tool declaration, but its retrieve_passages placeholder must be implemented before the exported file can serve real handbook searches.",
-      "check_question": "Can an answer pass numbers_supported while making an unsupported non-numeric claim?",
-      "check_answer": "Yes. That helper only looks for digit strings in the retrieved text; it does not validate the meaning of every claim.",
-      "layout": "linear"
+      "explanation": "BM25 ranks word matches. Dense search ranks compatible vectors. RRF combines their positions. Selection retains the requested cutoff. IDs recover passage text. Evidence checks use labelled relevant passages rather than parent-document identity alone.\n Suppose useful passage IDs are 2 and 7, while selected IDs are 2 and 9. Passage recall is one-half. A first relevant rank of two contributes one-half to MRR. The null connector between keyword and dense operations means independent searches of the same question; their ranked lists meet at fusion.",
+      "check_question": "Right document enough?",
+      "check_answer": "No. The returned passage must contain the labelled evidence; its parent document alone can be a false hit.",
+      "layout": "linear",
+      "branches": [
+        {
+          "from": 0,
+          "to": 2,
+          "label": "keyword IDs",
+          "lane": "bottom"
+        }
+      ],
+      "notes": "In short: Keyword and dense rankings are independent inputs to fusion, followed by selection and passage inspection.\nExplain: BM25 ranks word matches. Dense search ranks compatible vectors. RRF combines their positions. Selection retains the requested cutoff. IDs recover passage text. Evidence checks use labelled relevant passages rather than parent-document identity alone.\nExample: Suppose useful passage IDs are 2 and 7, while selected IDs are 2 and 9. Passage recall is one-half. A first relevant rank of two contributes one-half to MRR. The null connector between keyword and dense operations means independent searches of the same question; their ranked lists meet at fusion.\nAsk: Can a returned assessment passage still miss the pass-mark fact?\nAnswer: Yes. The relevant evidence span must appear in that selected passage.\nWatch out: Fusion changes order, not content. A re-ranker cannot recover a useful passage absent from its shortlist, and neither ranking score nor document hit establishes claim support."
     },
     {
       "id": "training",
       "title": "Prepare the document indexes",
-      "subtitle": "Indexing makes sources searchable without training the language model",
+      "subtitle": "Indexing; no generator update.",
       "insert_before_title": "Chunking: splitting documents into retrievable pieces",
       "steps": [
         {
-          "title": "Source documents",
-          "detail": "Keep source IDs; plan access",
-          "code": "DOCS",
-          "role": "data"
+          "title": "Load",
+          "detail": "Sources",
+          "role": "data",
+          "code": ""
         },
         {
-          "title": "Split passages",
-          "detail": "Overlapping searchable pieces",
+          "title": "Split",
+          "detail": "Passages",
+          "role": "data",
           "code": "chunk",
-          "role": "data"
+          "code_owner": true
         },
         {
-          "title": "Make vectors",
-          "detail": "One fixed embedding model",
+          "title": "Encode",
+          "detail": "Vectors",
+          "role": "model",
           "code": "embedder",
-          "role": "model"
+          "code_owner": true
         },
         {
-          "title": "Build search stores",
-          "detail": "Vectors plus keyword index",
-          "code": "index",
-          "role": "tool"
+          "title": "Store",
+          "detail": "Rows",
+          "role": "tool",
+          "code": ""
         },
         {
-          "title": "Inspect query hits",
-          "detail": "Read text and source metadata",
-          "code": "dense_rank",
-          "role": "output"
+          "title": "Check",
+          "detail": "IDs",
+          "role": "metric",
+          "code": ""
         }
       ],
       "arrows": [
-        "documents + metadata",
-        "chunks + source IDs",
-        "compatible vectors",
-        "searchable indexes"
+        "documents",
+        "chunks[N]",
+        "vectors[N,384]",
+        "rows[N]"
       ],
-      "explanation": "Indexing is the preparation phase of RAG. Load documents you are allowed to use, then split each into chunks that retain their source identity and other metadata. An embedding model converts each chunk to a vector. A vector index stores those vectors for meaning-based search; a keyword index stores word-matching information. A new question can then search both stores. This changes the available source collection without updating the language model weights. When a source changes, refresh its chunks and indexes. If the embedding model changes, recreate the stored vectors so questions and passages remain comparable. The classroom handbook is small; production indexing also needs tested access controls, versioning and deletion rules.",
+      "explanation": "Loading supplies authorised source text. Splitting creates whole-word overlapping passages. Encoding maps each passage into a vector. Storage preserves the vector table and row IDs. Checking verifies their correspondence and input lengths. This is indexing, not model training.\n Three passages encoded at width 384 give [3,384]. Row two must still identify the same text and source when search returns index two. A catalogue analogy explains reusable organisation, but a catalogue entry can be stale, mislabelled or inaccessible; a production system needs version, deletion and access enforcement.",
       "trace": [
-        "Split a handbook section into two overlapping passages with the same source ID.",
-        "Store a vector for each passage and add its words to the keyword index.",
-        "A question about penalties searches the prepared stores.",
-        "Read returned chunks and confirm the source IDs remain attached. A real application must add permission checks."
+        "Load sources and preserve identities while splitting passages.",
+        "Encode short passages into [N,384] vectors and retain aligned row metadata.",
+        "Check the row-to-source mapping; language-model weights are unchanged."
       ],
-      "check_question": "Does updating a handbook index fine-tune the language model?",
-      "check_answer": "No. It updates searched context; the language model weights stay fixed.",
-      "layout": "linear"
+      "check_question": "Generator weights change?",
+      "check_answer": "No. Indexing changes searchable representations and context, while generator weights stay fixed.",
+      "layout": "linear",
+      "notes": "In short: Index preparation creates searchable representations and preserves evidence identity without updating the language model.\nExplain: Loading supplies authorised source text. Splitting creates whole-word overlapping passages. Encoding maps each passage into a vector. Storage preserves the vector table and row IDs. Checking verifies their correspondence and input lengths. This is indexing, not model training.\nExample: Three passages encoded at width 384 give [3,384]. Row two must still identify the same text and source when search returns index two. A catalogue analogy explains reusable organisation, but a catalogue entry can be stale, mislabelled or inaccessible; a production system needs version, deletion and access enforcement.\nAsk: Does refreshing the handbook index fine-tune the language model?\nAnswer: No. It changes searchable context while generator weights remain fixed.\nWatch out: The MiniLM limit counts word pieces, while the chunk helper counts approximate characters. Inspect token lengths so truncation does not silently remove a required fact."
     },
     {
       "id": "inference",
       "title": "Who controls a tool call?",
-      "subtitle": "Trace one tool request and the next observation",
+      "subtitle": "Blocked calls skip execution.",
       "insert_before_title": "Function calling: tools are described, the model proposes, your code executes",
       "steps": [
         {
-          "title": "Task + tool list",
-          "detail": "Names, purposes and fields",
-          "code": "messages",
-          "role": "data"
+          "title": "Read",
+          "detail": "Proposal",
+          "role": "data",
+          "code": ""
         },
         {
-          "title": "Propose a call",
-          "detail": "Model gives name and arguments",
-          "code": "llm",
-          "role": "model"
+          "title": "Parse",
+          "detail": "Fields",
+          "role": "tool",
+          "code": "parse_tool_calls",
+          "code_owner": true
         },
         {
-          "title": "Parse + permit",
-          "detail": "Basic checks and simulated gate",
+          "title": "Permit",
+          "detail": "Gate",
+          "role": "tool",
           "code": "execute",
-          "role": "tool"
+          "code_owner": true
         },
         {
-          "title": "Run approved tool",
-          "detail": "Search, calculator or stub",
-          "code": "TOOLS",
-          "role": "tool"
+          "title": "Run",
+          "detail": "Tool",
+          "role": "tool",
+          "code": ""
         },
         {
-          "title": "Return observation",
-          "detail": "Result informs next decision",
-          "code": "run_agent",
-          "role": "output"
+          "title": "Return",
+          "detail": "Observation",
+          "role": "output",
+          "code": ""
         }
       ],
       "arrows": [
-        "formatted task",
-        "proposed call",
+        "text",
+        "call",
         "permitted call",
-        "result or error"
+        "result"
       ],
-      "explanation": "An agent inference turn produces a proposal, not an executed action. The language model sees the task and tool descriptions and may emit a tool name with arguments. The program parses that text, checks the allowlist and applies validation and approval before any function runs. This diagram traces a permitted call. A blocked call skips the tool and returns a refusal observation directly; the detailed agent-loop figure shows that branch. The next model turn reads the observation. The run_agent function limits the number of turns. The lab's email operation is simulated and its approval rule checks a domain; it does not ask a human or send mail. A real consequential action needs the corresponding real control and audit record.",
+      "explanation": "The input is a structured proposed operation. Parsing and validation check its object fields. A permission gate decides whether the tool may run. Execution returns a result. A rejected request returns a blocked observation directly. Application code controls both routes.\n A valid calculator expression runs bounded arithmetic. A recognised send_email request to archive@example.net fails the simulated gate. Its refusal reaches the history without sending a message. The diagram’s short bypass arrow is important: rejected input must not pass through the tool before its refusal is recorded.",
       "trace": [
-        "The model proposes calculator with an arithmetic expression.",
-        "execute checks the tool name and validates the operation before running it.",
-        "The result becomes an observation for the next turn.",
-        "An email proposal to a forbidden domain is refused by the simulated policy and recorded."
+        "Parse a proposed call into a named operation and fields.",
+        "Reject malformed or forbidden calls before tool execution.",
+        "Run permitted calls and return their actual observation or a refusal."
       ],
-      "check_question": "Who executes the tool: the language model or the application code?",
-      "check_answer": "The application code. The model only proposes; code controls permission and execution.",
-      "feedback": "Continue with the observation until an answer or the step limit.",
-      "feedback_to": 0,
+      "check_question": "Who executes tools?",
+      "check_answer": "Application code executes permitted tools; the model proposes operations.",
       "layout": "linear",
-      "feedback_from": 4
+      "branches": [
+        {
+          "from": 2,
+          "to": 4,
+          "label": "Blocked",
+          "lane": "bottom"
+        }
+      ],
+      "notes": "In short: A permitted call reaches the tool; a rejected call bypasses execution and becomes an observation.\nExplain: The input is a structured proposed operation. Parsing and validation check its object fields. A permission gate decides whether the tool may run. Execution returns a result. A rejected request returns a blocked observation directly. Application code controls both routes.\nExample: A valid calculator expression runs bounded arithmetic. A recognised send_email request to archive@example.net fails the simulated gate. Its refusal reaches the history without sending a message. The diagram’s short bypass arrow is important: rejected input must not pass through the tool before its refusal is recorded.\nAsk: Who executes the function?\nAnswer: The application program, after its checks; the model only proposes.\nWatch out: The teaching email tool returns a string and has no private grade access. A real consequential operation needs an actual approval mechanism, scoped access and audit evidence."
     }
   ],
   "glossary": [
@@ -366,6 +386,22 @@
     {
       "term": "Tool",
       "meaning": "A named function application code can run for the model."
+    },
+    {
+      "term": "Cited-quote support",
+      "meaning": "Verbatim segment equality against the particular cited passage; it does not establish complete sentences, entailment or source truth."
+    },
+    {
+      "term": "Passage recall",
+      "meaning": "Returned relevant passage IDs divided by all independently labelled relevant passage IDs."
+    },
+    {
+      "term": "Permission gate",
+      "meaning": "Application control deciding whether a proposed operation may execute."
+    },
+    {
+      "term": "Policy fallback",
+      "meaning": "A disclosed fixed local decision route, separate from model planning."
     }
   ],
   "pitfalls": [
@@ -392,7 +428,7 @@
     {
       "symbol": "numbers_supported",
       "role": "Provide a limited digit-presence check.",
-      "inspect": "Identify what the helper does not check, including non-numeric claims."
+      "inspect": "Legacy digit proxy only; use citation_support and inspect individual quoted claims."
     },
     {
       "symbol": "execute",
@@ -409,40 +445,42 @@
     "title": "Week 12: evidence and controlled tools",
     "cards": [
       {
-        "title": "Prepare sources",
-        "text": "Chunk authorised documents; keep vectors, IDs and permissions.",
+        "title": "Sources",
+        "text": "Preserve identity.",
         "role": "data"
       },
       {
-        "title": "Retrieve evidence",
-        "text": "Compare keyword and dense search; fuse and re-rank when useful.",
+        "title": "Search",
+        "text": "Find passages.",
         "role": "model"
       },
       {
-        "title": "Answer from sources",
-        "text": "Supply passages, check claims and citations, and abstain when needed.",
-        "role": "model"
+        "title": "Support",
+        "text": "Read citations.",
+        "role": "metric"
       },
       {
-        "title": "Evaluate each stage",
-        "text": "Inspect retrieval hits separately from correctness and faithfulness.",
-        "role": "loss"
-      },
-      {
-        "title": "Control tool execution",
-        "text": "Model proposes; code checks permission and runs bounded actions.",
+        "title": "Tools",
+        "text": "Validate requests.",
         "role": "tool"
       },
       {
-        "title": "Audit the system",
-        "text": "Test injection, access, approvals and missing evidence.",
-        "role": "output"
+        "title": "Limits",
+        "text": "Bound repetition.",
+        "role": "tool"
+      },
+      {
+        "title": "Evidence",
+        "text": "Measure success.",
+        "role": "metric"
       }
     ],
-    "example": "Handbook question → source search → cited answer; grade task → checked search → calculator → 68.8.",
-    "question": "A citation points to the correct document. Does it prove the answer is supported?",
-    "answer": "No. Read the exact passage and check each claim; the document may not contain the required fact.",
-    "next": "Use the complete 12-week pack to build, measure and explain a project with evidence.",
-    "notes": "Reconstruct the handbook example from preparation to the final answer. Indexing changes searchable context, not language-model weights. Ask students to locate the first failure: missing evidence, irrelevant selected text or misuse of a correct passage. The lab document-hit rate is narrower than exhaustive passage recall, and digit presence is only a small grounding proxy. Switch to the grade task: the model proposes a search and calculation, while application code controls tools and records results. The email and approval exercises are simulated. Finish with the exit question, then ask why a known path usually suits a fixed workflow and consequential actions need tested real controls."
-  }
+    "example": "Illustration: 0.6×72+0.4×64=68.8.",
+    "question": "Correct document proves support?",
+    "answer": "No. Inspect whether the particular cited passage supports each claim.",
+    "next": "Project: measure evidence and actions.",
+    "notes": "In short: Evaluate retrieved evidence and controlled execution through the specific claims supported by each measurement.\nExplain: Indexing preserves source identity. Retrieval selects passages. Citation checks inspect claims against their cited text. An agent proposes intermediate operations. Code validates and executes permitted tools. Task checks compare final outcomes with predeclared expectations.\nExample: With illustrative marks 72 and 64 and fictional weights 0.6 and 0.4, calculation gives 68.8. This checks arithmetic rather than overall agent competence. A cited handbook answer still needs the exact supporting passage. Calls and elapsed time per success describe resources; zero successes require an explicit undefined result rather than division by zero.\nAsk: Does a citation to the correct document establish support?\nAnswer: No. The particular passage must support each claim, and the response must answer the question.\nWatch out: Separate archived measurements from current runs. Prefer a simple workflow when its path is known, preserve a local fallback, and report the limits of automatic checks."
+  },
+  "vocabulary_count": 4,
+  "vocabulary_notes": "In short: Use the prerequisite words to follow evidence and proposed operations without confusing their authority.\nExplain: An embedding represents content as numbers. Context is text supplied for this response. A chunk is one searchable passage. A tool call is a structured operation proposal. None of these alone proves an answer or authorises an action.\nExample: A question vector [1,384] is compared with a passage table [N,384]. Retrieved passages become context. A calculator request then names an operation and expression rather than supplying evidence itself. Index-card and request-form analogies explain representation and structure, but neither represents a permission grant or verified meaning.\nAsk: Who executes a tool call?\nAnswer: The program checks and executes permitted code; the model proposes the request.\nWatch out: Keep vector rows, chunk IDs and citation positions distinct. Citation one means the first supplied passage for this question, not necessarily the first document in the corpus."
 }

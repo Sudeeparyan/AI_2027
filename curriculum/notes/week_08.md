@@ -1,6 +1,6 @@
 # Lecture plan at a glance
 
-This week is the core of MIMLO 3: adapting pretrained models by changing their weights. Students should leave able to decide when fine-tuning is appropriate, explain SFT, instruction tuning, RLHF, DPO and RL with verifiable rewards, compute LoRA parameter counts, fine-tune with PEFT/TRL, and evaluate base vs fine-tuned models honestly. The results in section 5 are real, from running this week's lab notebook in advance (saved to `curriculum/assets/week_08/results.json`).
+This week is the core of MIMLO 3: adapting pretrained models by changing their weights. Students should leave able to decide when fine-tuning is appropriate, explain SFT, instruction tuning, RLHF, DPO and RL with verifiable rewards, compute LoRA parameter counts, fine-tune with PEFT/TRL, and evaluate base vs fine-tuned models honestly. The charts in section 5 come from a stored full CPU run of an earlier, larger version of this lab (ten intents, 1,216 training messages, rank 16; `curriculum/assets/week_08/results.json`). The CPU core that students run is smaller; its measured numbers are in the lab guide.
 
 | Time | Slides | Segment | What you do |
 |---|---|---|---|
@@ -107,13 +107,13 @@ Only $A$ and $B$ are trained; $W$ is frozen; $B$ is initialised to zero so train
 
 **Worked example:** $d = k = 4096$, $r = 16$: $16 \times 8192 = 131{,}072$ trainable vs $16{,}777{,}216$ frozen (0.78%).
 
-After training, merge $BA$ into $W$ (no inference overhead) or keep adapters separate and swap them per task. Typical hyper-parameters: $r$ = 4–64, $\alpha \approx 2r$, dropout 0.05, learning rate $10^{-4}$–$3\times10^{-4}$, targets = attention projections (and sometimes MLP layers). The LoRA paper reported 10,000× fewer trainable parameters and 3× less GPU memory than full fine-tuning of GPT-3 with comparable quality.
+After training, merge $(\alpha/r)BA$ into $W$ (no inference overhead) or keep adapters separate and swap them per task. Typical hyper-parameters: $r$ = 4–64, $\alpha \approx 2r$, dropout 0.05, learning rate $10^{-4}$–$3\times10^{-4}$, targets = attention projections (and sometimes MLP layers). The LoRA paper reported 10,000× fewer trainable parameters and 3× less GPU memory than full fine-tuning of GPT-3 with comparable quality.
 
-**The lab model:** {{LORA_PARAMS}}
+**Stored larger run (rank 16):** {{LORA_PARAMS}} The current CPU core uses rank 8; its count is measured in the lab guide.
 
 ![LoRA](fig:lora)
 
-![Trainable parameters for the lab model](fig:param_compare)
+![Trainable parameters in the stored larger run](fig:param_compare)
 
 ### QLoRA
 
@@ -140,7 +140,7 @@ In **distillation**, a small student learns to imitate a larger teacher. It can 
 
 ## 5. Domain adaptation in practice
 
-**Start here.** Measure the best prompting baseline before training. Separate examples for learning, choosing settings and final evaluation. Watch validation loss, then inspect actual test replies. Also recheck general questions and safety, because learning one task can change other behaviour.
+**Start here.** Choose a strong prompting baseline on training or development examples, then freeze its settings before the final test. Separate examples for learning, choosing settings and final evaluation. Watch validation loss, then inspect actual test replies. Also recheck general questions and safety, because learning one task can change other behaviour.
 
 **Small worked example.** If training loss falls from 1.2 to 0.4 while validation loss rises from 0.9 to 1.3, investigate memorising the training data. Fewer passes, changed settings or more varied data may help; use the untouched test only for the final comparison.
 
@@ -148,13 +148,15 @@ In **distillation**, a small student learns to imitate a larger teacher. It can 
 
 **Pitfalls:** overfitting (validation loss rises); catastrophic forgetting (loss of general ability); data leakage; chat-template mismatch; learning rate too high; weak evaluation.
 
-### Real results from the lab (instructor run)
+### Measured results: stored full run and CPU core
 
 {{RESULTS_NOTES}}
 
-![Prompting vs LoRA fine-tuning](fig:results_bar)
+The CPU core ({{W08_CORE_MODEL}}, {{W08_CORE_N_INTENTS}} intents, {{W08_CORE_N_TRAIN}} training messages, rank {{W08_CORE_RANK}}) measured {{W08_CORE_COMPARISON}} on {{W08_CORE_N_TEST}} held-out messages. Ask students to compare the two runs: how large is each gain in messages, and which baseline is the real bar to beat?
 
-![Training and validation loss](fig:loss_curve)
+![Stored full run: prompting vs LoRA fine-tuning](fig:results_bar)
+
+![Stored full run: training and validation loss](fig:loss_curve)
 
 ### Evaluation after fine-tuning
 
@@ -176,6 +178,48 @@ BloombergGPT (2023; 50 B parameters, mixed financial and general data) is an exa
 | "A fine-tuned model is as safe as its base." | Fine-tuning can erode safety; re-test. |
 | "Good training loss means a good model." | Only held-out evaluation tells you. |
 
+# Worked examples to teach at the board
+
+## Count LoRA parameters for the lab model
+
+Qwen2.5-0.5B has hidden size 896, 24 layers and grouped-query attention, so q and o map 896 to 896 while k and v map 896 to 128.
+
+1. Per layer at rank r: r × (896 + 896) for q, r × (896 + 128) for k, the same for v, and r × (896 + 896) for o.
+2. That is r × (1,792 + 1,024 + 1,024 + 1,792) = r × 5,632.
+3. Across 24 layers: r × 135,168. Rank 8 gives 1,081,344; rank 16 gives 2,162,688.
+4. In 32-bit floats, rank 8 needs about 1,081,344 × 4 bytes ≈ 4.3 MB.
+
+## The SFT loss for one label
+
+The label lost_or_stolen_card might be three tokens with probabilities 0.5, 0.8 and 0.9. The loss is −(ln 0.5 + ln 0.8 + ln 0.9) ≈ 0.69 + 0.22 + 0.11 = 1.02. If the first probability rises to 0.9, the loss falls to about 0.43.
+
+## A reward-model loss
+
+With $r(x, y_w) = 2$ and $r(x, y_l) = 0$, σ(2) ≈ 0.88 and the loss is −ln 0.88 ≈ 0.13. Reversed scores give σ(−2) ≈ 0.12 and a loss of about 2.13.
+
+## A DPO loss
+
+With β = 0.1 and log ratios 0.5 (preferred) and −0.5 (rejected), the argument is 0.1 × (0.5 + 0.5) = 0.1. Then σ(0.1) ≈ 0.52 and the loss is about 0.64.
+
+# Frequently confused ideas
+
+| Student question | Answer |
+|---|---|
+| Is SFT the same as full fine-tuning? | No. SFT is the objective; full fine-tuning or LoRA decides which weights change. |
+| Does LoRA change the original weights? | No. It trains separate A and B matrices; W stays frozen unless you merge them. |
+| Does lower training loss mean higher test accuracy? | Not necessarily. Only the held-out test measures accuracy on new messages. |
+| Can fine-tuning teach the model this week's interest rate? | Poorly. Changing facts belong in retrieval; training them in goes out of date. |
+| Is DPO free of preference data? | No. It needs preference pairs; it removes the reward model and RL loop. |
+| Does a saved adapter contain the whole model? | No. It holds the added weights and configuration; load the same base model too. |
+
+# Self-checks with answers
+
+1. **Which tokens contribute to the SFT loss in the lab?** *Answer:* the answer (completion) tokens; the prompt is read as context but masked out of the loss.
+2. **Rank 8 on an 896 × 896 projection adds how many trainable numbers?** *Answer:* 8 × (896 + 896) = 14,336.
+3. **Why compare the adapter with the few-shot baseline rather than zero-shot?** *Answer:* few-shot is the best prompt; training must beat the best alternative to justify its cost.
+4. **The adapter scores 4 points higher than few-shot on 50 messages. How many messages is that?** *Answer:* two, because each message is 2 percentage points.
+5. **Name one check, besides task accuracy, to run after fine-tuning.** *Answer:* any of: older general abilities, safety refusals, robustness to rewording, time and cost, or expert review.
+
 # Responsible AI lens: fine-tuning
 
 * **Safety erosion:** fine-tuning aligned models, even on benign data, can weaken refusal behaviour (Qi et al., 2023). Re-run safety tests.
@@ -186,23 +230,31 @@ BloombergGPT (2023; 50 B parameters, mixed financial and general data) is an exa
 
 # Lab guide and answers
 
-**Runtime:** A GPU is recommended for the full lab. On the laptop CPU used to check this pack, training took about 76 minutes in the recorded run and about 53 minutes in a repeat run on 9 October 2026, which gave the same losses; the whole repeat notebook took about 84 minutes. Prepare a full CPU run before class or use the supplied recorded results for discussion. The tiny CPU smoke run uses six test messages, three training steps and batch size two to check that the pipeline executes. Its scores cannot establish model quality. Measure time on your hardware. Dataset: `mteb/banking77` (CC-BY-4.0 source data), 10 intents. **Hand-in:** comparison table, loss curve, confusion table, three answers.
+**CPU core:** {{W08_CORE_MODEL}} (about 1 GB, the same model as week 7) fine-tuned with a rank-{{W08_CORE_RANK}} LoRA adapter on the attention projections. The data are real Banking77 messages (CC-BY-4.0) for {{W08_CORE_N_INTENTS}} intents: {{W08_CORE_N_TRAIN}} training messages, a small validation set and {{W08_CORE_N_TEST}} test messages from Banking77's own test split. One epoch is {{W08_CORE_STEPS}} optimiser steps with batch size 8; training took {{W08_CORE_TRAIN_MIN}} minutes. On the course laptop ({{W08_CORE_THREADS}} CPU threads, model and data already downloaded) the complete core took {{W08_CORE_TIME}}, recorded on {{W08_CORE_DATE}}. **Optional stretch:** `RUN_FULL = True` runs a larger experiment like the stored one (ten intents, rank 16, 200 test messages); it takes over an hour on a CPU. **Optional hosted comparison:** keep `USE_GEMINI = False` and `USE_OPENAI = False` for the local route; enable exactly one in the shared setup to send five invented messages (five calls at most) to a hosted model with the few-shot prompt. OpenAI API use is billed separately from a ChatGPT subscription. **Hand-in:** the comparison table, the loss curve, the confusion table and three written answers.
 
-## TODOs
+## TODOs and expected outputs
 
-* **TODO 1** `{"prompt": [{"role": "user", "content": f"{INSTRUCTION}\nMessage: {text}\nIntent:"}], "completion": [{"role": "assistant", "content": label}]}`.
-* **TODO 2** `LoraConfig(r=16, lora_alpha=32, lora_dropout=0.05, target_modules=["q_proj","k_proj","v_proj","o_proj"], bias="none", task_type="CAUSAL_LM")`. Expect ≈ 0.4–0.5% trainable.
-* **TODO 3** evaluate the tuned model with the zero-shot prompt and build the table.
-* **TODO 4** sum file sizes in the adapter folder; model size = parameters × bytes per element.
+* **TODO 1** `to_chat`: `{"prompt": [{"role": "user", "content": f"{INSTRUCTION}\nMessage: {text}\nIntent:"}], "completion": [{"role": "assistant", "content": label}]}`. `check_to_chat` confirms that the label appears only in the completion.
+* **TODO 2** `LoraConfig(r=RANK, lora_alpha=2 * RANK, lora_dropout=0.05, target_modules=["q_proj", "k_proj", "v_proj", "o_proj"], bias="none", task_type="CAUSAL_LM")`. The check recomputes r × (inputs + outputs) for every adapted projection: {{W08_CORE_TRAINABLE}} trainable numbers ({{W08_CORE_TRAINABLE_PCT}} of the model) at rank {{W08_CORE_RANK}}.
+* **TODO 3** evaluate `tuned` with the zero-shot prompt and build the three-row `comparison` table.
+* **TODO 4** add up the file sizes in the adapter folder and multiply base parameters by their element size. The core adapter measured {{W08_CORE_ADAPTER_MB}} MB, about 4 bytes per trainable number plus small configuration files.
 
-## Expected results
+## Measured CPU core (course laptop)
 
-See the real results above. The recorded experiment found a strong few-shot gain and a further LoRA gain; these are observations for this run, not guaranteed student outcomes. Inspect wrong and unparsed labels. The adapter-on/off question illustrates a possible behaviour change, not a complete test of earlier abilities.
+| Quantity | Result |
+|---|---|
+| Comparison on {{W08_CORE_N_TEST}} held-out messages | {{W08_CORE_COMPARISON}} |
+| Trainable numbers | {{W08_CORE_TRAINABLE}} ({{W08_CORE_TRAINABLE_PCT}}) |
+| Training | {{W08_CORE_STEPS}} steps, {{W08_CORE_TRAIN_MIN}} minutes |
+| Saved adapter | {{W08_CORE_ADAPTER_MB}} MB |
+| Whole core | {{W08_CORE_TIME}} |
+
+With 50 test messages, each message is 2 percentage points; read the error rows and the confusion table before drawing conclusions. Students' numbers can differ slightly with library versions.
 
 ## Troubleshooting
 
-* *`SFTConfig` argument errors:* library versions change; this notebook uses `warmup_steps` (not `warmup_ratio`) and `max_length`.
-* *Out of memory:* lower `per_device_train_batch_size` to 8 and add `gradient_accumulation_steps=2`.
+* *`SFTConfig` argument errors:* library versions change; this notebook uses `warmup_steps` (not `warmup_ratio`), `max_length` and `completion_only_loss`.
+* *Very slow training:* check that the CPU core settings are active (`RUN_FULL = False`) and that no other heavy job is running.
 * *Accuracy does not improve:* check that `completion` holds only the label and that the evaluation prompt matches the training prompt.
 
 # Practice questions with model answers
@@ -218,7 +270,7 @@ See the real results above. The recorded experiment found a strong few-shot gain
 
 1. **Compute the LoRA trainable parameters for a 2048 × 2048 matrix with rank 8, and the percentage.** (3 marks) *Model answer:* 8 × (2048 + 2048) = 32,768; 2048² = 4,194,304; 0.78%.
 2. **Explain the difference between RLHF with PPO and DPO.** (4 marks) *Model answer:* RLHF trains a reward model on preferences and optimises the policy with RL under a KL penalty; DPO optimises the same objective directly with a loss on preference pairs, needing no reward model or RL loop; DPO is simpler and more stable.
-3. **Describe two signs of overfitting in fine-tuning and two remedies.** (4 marks) *Model answer:* validation loss rises while training loss falls; held-out accuracy drops or general abilities degrade; remedies: fewer epochs/early stopping, lower learning rate or rank, more/diverse data, mixing general data.
+3. **Describe two signs of overfitting in fine-tuning and two remedies.** (4 marks) *Model answer:* validation loss rises while training loss falls; held-out task accuracy worsens as training fit improves; remedies: fewer epochs/early stopping, lower learning rate or rank, or more/diverse data. Loss of earlier general abilities is a separate forgetting problem and needs its own regression checks.
 4. **Why is retrieval preferred over fine-tuning for frequently changing facts?** (3 marks) *Model answer:* updates require only re-indexing; answers can cite sources; fine-tuning is slow to update, opaque and can increase hallucination on new facts.
 
 ## Exam-style question
@@ -502,7 +554,7 @@ These explanations retain the detail moved off crowded slides. Read the short sl
 
 - Prepare data: Clean, label, split, format with the chat template
 
-- Baseline: Best prompting result on the same test set
+- Baseline: Choose prompting settings on training or development examples; freeze them before the final test
 
 - LoRA SFT: Small learning rate, few epochs, validation loss
 
@@ -573,11 +625,11 @@ These explanations retain the detail moved off crowded slides. Read the short sl
 
 ## Slide 38: Lab 8: LoRA fine-tuning for a banking domain task
 
-- Prepare Banking77 messages for 10 **intents**: categories describing the customer's request. Keep a separate final test.
+- Prepare Banking77 messages for {{W08_CORE_N_INTENTS}} **intents**: categories describing the customer's request. Keep a separate final test.
 
 - Measure the unadapted model with zero-shot and few-shot prompts.
 
-- Add LoRA paths with rank r = 16 using PEFT; count the trainable weights.
+- Add LoRA paths with rank r = {{W08_CORE_RANK}} using PEFT; check the trainable count by hand.
 
 - Train with TRL's SFTTrainer; plot training and validation loss.
 
@@ -610,7 +662,7 @@ SFT names the objective; full fine-tuning names which weights change. The lab ex
 
 Prompt tuning adds learned vectors to input embeddings. Prefix tuning adds learned key/value prefixes at transformer layers. Keep those mechanisms separate. LoRA freezes the original base and trains low-rank matrices. QLoRA stores quantised base weights; its compute and adapters use higher precision. Memory depends on sequence, batch, activations and implementation.
 
-The parameter chart reads the stored count and fails clearly if evidence is missing; it has no invented fallback or unmeasured rank 8 bar. Stored total includes adapters: original base count is total minus trainable. {{RUN_NOTE}} Evaluation adds more time. Falling validation loss is useful evidence but does not rule out all overfitting or lost abilities.
+The parameter chart reads the stored rank-16 count and fails clearly if evidence is missing; the CPU core's rank-{{W08_CORE_RANK}} count ({{W08_CORE_TRAINABLE}}) is printed and checked in the notebook. Stored total includes adapters: original base count is total minus trainable. {{RUN_NOTE}} Evaluation adds more time. Falling validation loss is useful evidence but does not rule out all overfitting or lost abilities.
 
 
 # Complete lecture code examples
@@ -618,16 +670,16 @@ The parameter chart reads the stored count and fails clearly if evidence is miss
 ## What a chat template produces (Qwen family)
 ```python
 messages = [
-    {"role": "system", "content": "You classify banking messages."},
-    {"role": "user", "content": "I lost my card!"},
+    {"role": "system", "content": "Name the intent."},
+    {"role": "user", "content": "Card lost!"},
     {"role": "assistant", "content": "lost_or_stolen_card"},
 ]
 print(tok.apply_chat_template(messages, tokenize=False))
 
 # <|im_start|>system
-# You classify banking messages.<|im_end|>
+# Name the intent.<|im_end|>
 # <|im_start|>user
-# I lost my card!<|im_end|>
+# Card lost!<|im_end|>
 # <|im_start|>assistant
 # lost_or_stolen_card<|im_end|>
 ```

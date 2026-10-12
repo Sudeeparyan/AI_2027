@@ -1,6 +1,6 @@
 # Lecture plan at a glance
 
-This final technical week connects models to knowledge and tools (MIMLO 3, 4, 5). Students should leave able to explain why RAG is needed, build and evaluate a RAG pipeline (chunking, embeddings, vector stores, hybrid retrieval, re-ranking, grounded generation with citations), describe advanced RAG, explain the components and loop of an agent, distinguish workflows from agents, explain MCP, and design guardrails against prompt injection. Results on the "real" slides come from running this week's lab in advance (`curriculum/assets/week_12/`).
+This final technical week connects models to knowledge and tools (MIMLO 3, 4, 5). Students should leave able to explain why RAG is needed, build and evaluate a RAG pipeline (chunking, embeddings, vector stores, hybrid retrieval, re-ranking, grounded generation with citations), describe advanced RAG, explain the components and loop of an agent, distinguish workflows from agents, explain MCP, and design guardrails against prompt injection. The recorded-result charts use an archived larger GPU run (`curriculum/assets/week_12/results.json`). The current CPU core has separate measured results and passage-level checks in the lab guide.
 
 | Time | Slides | Segment | What you do |
 |---|---|---|---|
@@ -41,7 +41,7 @@ A language model may lack current facts or private documents, produce unsupporte
 
 **Indexing (offline):** load documents → chunk → embed → store vectors with metadata, plus a keyword index. **Answering (online):** embed the question → retrieve (dense + BM25) → re-rank → prompt with numbered sources → LLM answers with citations or "I don't know".
 
-**Lab measurement (no retrieval):** the same model without retrieval answers almost none of the handbook questions correctly; it produces plausible guesses (hallucination).
+**Archived lab measurement (no retrieval):** the same model without retrieval answers almost none of the handbook questions correctly; it produces plausible guesses (hallucination).
 
 ## 2. Embeddings, chunking and vector databases
 
@@ -67,9 +67,9 @@ A language model may lack current facts or private documents, produce unsupporte
 
 ## 3. Retrieval, advanced RAG and evaluation
 
-**Start here.** Dense search uses vector meaning; BM25 uses words; hybrid search combines their rankings. A cross-encoder reads question and passage together to re-rank a smaller candidate set. Evaluate whether evidence was found separately from whether the model used it correctly. Lab hits are checked by known source-document ID.
+**Start here.** Dense search uses vector meaning; BM25 uses words; hybrid search combines their rankings. A cross-encoder reads question and passage together to re-rank a smaller candidate set. Evaluate whether evidence was found separately from whether the model used it correctly. Archived hits are checked by known source-document ID. The current core labels specific evidence spans and measures passage recall.
 
-**Small worked example.** First relevant results for three questions are at ranks 1, 2 and absent. MRR = (1 + 1/2 + 0)/3 = 0.5. Two have evidence in the first three results, so this lab's recall@3 = 2/3. These scores do not check the generated answer.
+**Small worked example.** First relevant results for three questions are at ranks 1, 2 and absent. MRR = (1 + 1/2 + 0)/3 = 0.5. Two have evidence in the first three results, so the archived document-hit@3 definition gives 2/3. Passage recall instead counts retrieved relevant passages divided by all labelled relevant passages. These scores do not check the generated answer.
 
 **Dense vs keyword.** Dense retrieval matches meaning (paraphrases); **BM25** matches words weighted by rarity (codes, names, rare terms). **Hybrid** search combines them, usually with **reciprocal rank fusion**:
 
@@ -77,11 +77,11 @@ $$\mathrm{RRF}(d) = \sum_{r} \frac{1}{c + \mathrm{rank}_r(d)}, \qquad c = 60$$
 
 The RRF constant $c$ smooths rank contributions; it is separate from the result cutoff $K$.
 
-**Metrics.** This lab's recall@K is the fraction of questions with a hit from the known source document in the first $K$ results; mean reciprocal rank averages one over the rank of the first relevant chunk:
+**Archived metrics.** The stored recall@K field is the fraction of questions with a hit from the known source document in the first $K$ results; mean reciprocal rank averages one over the rank of the first relevant chunk:
 
 $$\mathrm{MRR} = \frac{1}{|Q|}\sum_{q \in Q} \frac{1}{\mathrm{rank}_q}$$
 
-A question with no relevant result in the returned list contributes zero to MRR. In this lab relevance is checked using the source document ID: a chunk from the known target document counts as a hit.
+A question with no relevant result in the returned list contributes zero to MRR. In the archived run relevance was checked using the source document ID: a chunk from the known target document counts as a hit.
 
 **Re-ranking.** Use a fast search to find a larger candidate set, then a **cross-encoder** to read each question-passage pair together. Select a smaller set for the answer prompt. This adds scoring work but may reduce irrelevant prompt text. Candidate counts such as 20–100 followed by 3–5 are starting examples; tune them against evidence-finding scores and cost.
 
@@ -89,7 +89,7 @@ A question with no relevant result in the returned list contributes zero to MRR.
 
 ![Retrieval quality by method (lab)](fig:lab_retrieval)
 
-**Grounded generation.** Label each source and request an answer supported by it, with citations and a missing-evidence reply when needed. Tell the model to treat source text as data. Check whether the cited passage supports each claim; a citation number alone is not enough. In this lab, moving rules after the sources helped the 1.5 B model substantially. This is one measured prompt-placement result, not a general security guarantee.
+**Grounded generation.** Label each source and request an answer supported by it, with citations and a missing-evidence reply when needed. Tell the model to treat source text as data. Check whether the cited passage supports each claim; a citation number alone is not enough. In the archived run, moving rules after the sources helped the 1.5 B model. This is one measured prompt-placement result, not a general security guarantee.
 
 **Lab measurement (RAG vs no retrieval):** {{RAG_NOTES}}
 
@@ -199,7 +199,7 @@ An **agent** is an LLM that uses **tools** in a **loop** to achieve a goal, with
 
 # Lab guide and answers
 
-**Runtime:** Colab T4 GPU with Qwen2.5-1.5B-Instruct, BGE-small embeddings and an MS MARCO MiniLM cross-encoder; on CPU the notebook uses Qwen2.5-0.5B-Instruct. On the 4 GB GTX 1650 laptop GPU used to check this pack (9 October 2026), the full notebook with Qwen2.5-1.5B-Instruct ran in about 5 minutes with the models and data already downloaded. No API keys are needed. The handbook is fictional, so the model cannot have memorised it. **Hand-in:** retrieval and RAG tables, agent trajectories and audit log, three written answers.
+**CPU core:** MiniLM passage vectors, NumPy exact search, BM25/RRF, bounded SmolLM2-135M generation and controlled tools. The full local CPU core measured {{W12_CORE_TIME}} on {{W12_CORE_DATE}} using {{W12_CORE_THREADS}} threads; installation, downloads, widgets and optional stretch/API calls are excluded. This is not a Colab timing. GPU and API spending are optional. Separate database and cross-encoder demonstrations are stretches. Archived GPU measurements keep their original model/settings and metric definitions. **Hand-in:** actual retrieval/answer evidence tables, mode-labelled trajectories, success/resource metrics, audit and written explanations.
 
 **Simulation boundaries:** `approve` uses a destination-domain rule rather than asking a person, and `send_email` only returns a string; no email is sent. `AUDIT` records calls requiring simulated approval, while the trajectory records executed tool steps. The exported MCP server is an incomplete scaffold with a `retrieve_passages` placeholder; connect a working retrieval implementation and load its index before running it.
 
@@ -215,16 +215,16 @@ An **agent** is an LLM that uses **tools** in a **loop** to achieve a goal, with
 
 ## Model answers to the written questions
 
-1. **Retrieval methods and RAG vs no RAG.** Without retrieval the model guesses (hallucination) and almost never answers correctly; RAG raises accuracy sharply. BM25 is strong on exact terms (module code, "GPU hours"), dense retrieval on paraphrases ("hand in after the deadline"); hybrid fusion and re-ranking usually put the right chunk first. Diagnose each failure: if the gold document was not in the top k, it is a retrieval failure (chunking, hybrid search, query rewriting, larger k); if it was retrieved but misused, it is a generation failure (stronger model, clearer prompt, fewer and better chunks). Rigorous faithfulness evaluation decomposes answers into claims checked against the context (RAGAS faithfulness, groundedness evaluators), plus answer relevance, context precision/recall, a larger labelled set with unanswerable and multi-hop questions, and human spot checks.
+1. **Retrieval methods and RAG vs no RAG.** Report this run rather than assuming a gain. Without handbook context the model lacks evidence; RAG can still select or use it incorrectly. BM25 is strong on exact terms (module code, "GPU hours"), dense retrieval on paraphrases ("hand in after the deadline"); compare actual passage recall, MRR and scoring work before choosing hybrid fusion or optional re-ranking. Diagnose a failure by reading the actual chunks supplied to the generator. A gold-document hit can still be the wrong passage of that document. If the needed fact is absent, check chunking, retrieval, re-ranking and context assembly. If the fact is present but the answer misuses it, inspect generation, the prompt and conflicting context. An unanswerable question instead tests abstention. Rigorous faithfulness evaluation decomposes answers into claims checked against the context (RAGAS faithfulness, groundedness evaluators), plus answer relevance, context precision/recall, a larger labelled set with unanswerable and multi-hop questions, and human spot checks.
 2. **Agent trajectories and injection.** For the grade task a capable model searches the handbook for the weights, calls the calculator with 0.6 × 72 + 0.4 × 64 and answers 68.8; small models may skip tools or stop early. For the forum task the retrieved post contains an instruction to e-mail grades externally; a model may or may not follow it, because it cannot reliably separate data from instructions, so the system prompt is not a guarantee. The protections demonstrated in code are the allowlist, the simulated e-mail tool's limited access, and a simulated approval policy that denies external addresses. The approval audit records such an attempt if it occurs; a real action requires a real review mechanism.
 3. **Production design.** A fixed RAG workflow (hybrid retrieval, re-ranking, citations, abstention) fits factual student questions better than an autonomous agent: cheaper, faster, predictable and testable; add single tool calls only where needed. Use agents for open-ended multi-step tasks, with step, tool and permission limits. Evaluation: labelled real questions (paraphrases, multi-hop, unanswerable) with retrieval and answer metrics run after every change, plus sampled human review and feedback. Risk controls: untrusted-content handling and human approval for actions; access control and personal-data exclusion in the index; versioned, current index with visible sources; logging, monitoring and AI disclosure.
 
 ## Troubleshooting
 
-* *Agent never calls a tool:* smaller models (0.5 B on CPU) often answer directly; use the GPU and the 1.5 B model, or a hosted model through the OpenAI-compatible pattern from week 11.
+* *Agent never calls a tool:* inspect the parsed proposal and mode-labelled local policy fallback. This demonstrates the executor without claiming autonomous model success. Optional hosted comparisons remain synthetic and do not replace a complete local route.
 * *`chromadb` warnings about telemetry:* harmless.
 * *Out of memory on a small GPU:* move the embedder and re-ranker to CPU (`device="cpu"`).
-* *Different numbers from the slides:* generation is deterministic (greedy), but model and library versions change outputs; the patterns should match.
+* *Different numbers from the slides:* compare the actual checkpoint, settings and metric definitions. The CPU core and archived GPU run use different models and retrieval metrics; their scores and improvement patterns need not match. Greedy generation does not guarantee matching outputs across library versions.
 
 # Practice questions with model answers
 
@@ -238,7 +238,7 @@ An **agent** is an LLM that uses **tools** in a **loop** to achieve a goal, with
 ## Short answer
 
 1. **Compute RRF scores (k = 60) for chunk X ranked 1st by BM25 and 4th by dense, and chunk Y ranked 2nd by both.** (3 marks) *Model answer:* X: 1/61 + 1/64 = 0.01639 + 0.01563 = 0.03202; Y: 2/62 = 0.03226; Y ranks slightly higher.
-2. **Recall@3 and MRR:** first relevant chunk at ranks 1, 3 and 5 for three questions. (3 marks) *Model answer:* recall@3 = 2/3; MRR = (1 + 1/3 + 1/5)/3 = 0.511.
+2. **Recall@3 and MRR:** each of three questions has exactly one labelled relevant passage, at ranks 1, 3 and 5 respectively. (3 marks) *Model answer:* recall@3 = 2/3; MRR = (1 + 1/3 + 1/5)/3 = 0.511.
 3. **Explain indirect prompt injection and two guardrails that do not depend on the model.** (4 marks) *Model answer:* instructions hidden in retrieved or read content that the model may follow; guardrails: least-privilege tools, allowlists and argument validation, human approval for side effects, sandboxing and limits, audit logs.
 4. **When would you choose a workflow over an agent?** (3 marks) *Model answer:* when steps are known in advance (e.g. retrieve–answer–check), for predictability, testability, cost and latency; agents only when the path cannot be fixed.
 
@@ -250,28 +250,7 @@ An **agent** is an LLM that uses **tools** in a **loop** to achieve a goal, with
 
 # Glossary
 
-| Term | Meaning |
-|---|---|
-| Retrieval-augmented generation (RAG) | Answering from retrieved passages supplied in the prompt |
-| Chunk | Piece of a document indexed and retrieved as a unit |
-| Embedding model (bi-encoder) | Maps text to vectors for similarity search |
-| Vector database | Stores vectors with metadata and supports similarity search |
-| ANN (HNSW, IVF) | Approximate nearest-neighbour search structures |
-| BM25 | Keyword ranking function weighting rare matching terms |
-| Hybrid search | Combining dense and keyword retrieval |
-| Reciprocal rank fusion (RRF) | Combining rankings by summing 1/(k + rank) |
-| Cross-encoder re-ranker | Model scoring a question–passage pair jointly |
-| Recall@k / MRR | Retrieval metrics: evidence in top k / reciprocal rank of first hit |
-| Faithfulness (groundedness) | Answer claims supported by the retrieved context |
-| HyDE | Retrieval with a hypothetical generated answer |
-| GraphRAG | RAG over a knowledge graph and community summaries |
-| Agent | LLM using tools in a loop to reach a goal |
-| Function (tool) calling | Model outputs structured calls to described functions |
-| ReAct | Interleaving reasoning, actions and observations |
-| Workflow | LLM calls orchestrated by fixed code paths |
-| Model Context Protocol (MCP) | Open standard connecting AI applications to tools and data |
-| Indirect prompt injection | Malicious instructions hidden in content the system reads |
-| Human-in-the-loop approval | A person must approve an action before it runs |
+Use the Quick glossary in the beginner walkthrough for this week's terms. Definitions come from the shared course glossary; `00_Course/Course_Glossary.docx` collects all module terms.
 
 # Readings, videos and further practice
 
@@ -309,7 +288,7 @@ Welcome to week 12, the last technical week: retrieval-augmented generation and 
 
 Six outcomes matching the revised descriptor's week 12: motivation and LLM limitations; embeddings, vector databases and RAG architectures; advanced RAG and RAG evaluation; agentic AI concepts and components, including workflows versus agents, multi-agent systems and the Model Context Protocol; risks and guardrails; and choosing a design. This week practises MIMLO 5, implementing retrieval-augmented and agentic systems, together with MIMLO 3 and 4.
 
-## Slide 3: Agenda
+## Lecture plan
 
 The plan follows the revised descriptor. Sections one to three build and evaluate a RAG system, with real retrieval and answer-quality results from the lab. Take the break after section three. Section four explains agents with a real agent trajectory from the lab, and section five covers prompt injection, including a real test with a malicious document, and guardrails.
 
@@ -404,8 +383,8 @@ FAISS, from Meta, is a library: very fast, but you manage persistence yourself. 
 
 | Option | Type | Typical use |
 | --- | --- | --- |
-| FAISS | Library (in-process) | Fast search in notebooks and prototypes (the lab) |
-| Chroma | Lightweight vector database | Local apps with metadata filters (the lab) |
+| FAISS | Library (in-process) | Fast search in notebooks and prototypes (optional lab stretch) |
+| Chroma | Lightweight vector database | Local apps with metadata filters (optional lab stretch) |
 | pgvector (PostgreSQL) | Extension to a relational database | Keep vectors next to existing business data |
 | Qdrant, Weaviate, Milvus, Pinecone | Dedicated vector databases | Large scale, hybrid search, multi-tenant |
 | Azure AI Search, Google Vector Search (formerly Vertex AI Vector Search) | Managed cloud search | Enterprise RAG with security integration |
@@ -450,7 +429,7 @@ Read the lab's gold-document hit rate as: questions whose identified source appe
 
 - **RRF** adds 1/(c + rank) from each search list. A passage ranked highly in both lists gets a high combined score.
 
-- Lab recall@K asks whether any chunk from the known source document appears in the first K results.
+- Archived document-hit recall@K asks whether any chunk from the known source document appears in the first K results. The current CPU core checks the required passage instead.
 
 - **MRR** averages 1/rank for the first hit; no hit contributes 0. Keep RRF's constant c separate from cutoff K.
 
@@ -694,15 +673,15 @@ The lab covers both descriptor tutorials: building and evaluating a RAG pipeline
 
 - Measure the model's answers to private handbook questions without documents.
 
-- Split the handbook, create vectors and index it with FAISS and Chroma.
+- Split the handbook and create vectors for NumPy exact search. FAISS and Chroma are optional database stretches.
 
-- Compare BM25, dense search, RRF hybrid search and re-ranking; calculate recall@K and MRR.
+- Compare BM25, dense search and RRF hybrid search; calculate recall@K and MRR. Cross-encoder re-ranking is an optional stretch.
 
 - Answer from numbered sources; check accuracy, supported claims, citations and missing-evidence replies.
 
 - Trace a tool-using agent with search, calculator and simulated email; inspect approved-tool and simulated-approval checks, then an MCP scaffold.
 
-- **Runtime:** Colab T4 GPU; CPU uses a smaller model. About 5 min on a 4 GB laptop GPU after downloads.
+- **CPU core:** MiniLM passage vectors, NumPy exact search, BM25/RRF, bounded SmolLM2-135M generation and controlled tools. The full local CPU core measured {{W12_CORE_TIME}} on {{W12_CORE_DATE}} using {{W12_CORE_THREADS}} threads; installation, downloads, widgets and optional stretch/API calls are excluded. This is not a Colab timing. GPU and API spending are optional. Separate database and cross-encoder demonstrations are stretches. Archived GPU measurements keep their original model/settings and metric definitions. **Hand-in:** actual retrieval/answer evidence tables, mode-labelled trajectories, success/resource metrics, audit and written explanations.
 
 - **Hand in:** notebook with retrieval and RAG tables, agent trajectories and audit log, and three answers.
 
@@ -764,3 +743,55 @@ for step in range(MAX_STEPS):
         result = execute(call)            # allowlist, validation, approval
         messages.append({"role": "tool", "name": call["name"], "content": result})
 ```
+
+
+# Measured local CPU observations
+
+{{W12_CORE_RESULTS}}
+
+# Worked evidence checks for the CPU core
+
+## Passage recall differs from a document hit
+
+For a development question, suppose useful passage IDs are {2,7} and the top-three result IDs are [2,9,11]. One of two relevant passages was returned, so recall@3 = 1/2. If 9 shares the same parent document as 7 but omits the required fact, it still does not count. In a separate ranking [9,2,11], the first relevant passage has rank two, giving reciprocal rank 1/2. Average per-question recall across answerable questions for macro recall; exclude missing-evidence questions from this denominator and score abstention separately.
+
+The core labels passages using independently annotated evidence spans. Labels are evaluation data and never become answer prompts or a generation lookup table. Near-duplicate overlapping passages containing the same span are each labelled relevant; report this convention with recall. Freeze chunking, cutoff and prompting on development questions before final EVAL. If final-test errors drive another change, obtain a new untouched test.
+
+## A citation is local to one answer's evidence list
+
+Suppose selected source [1] says “The project weight is 60%.” and [2] says “The pass mark is 50%.” Both belong to assessment. “The project weight is 60% [2]” cites the right document but the wrong passage. A whole-context digit check finds 60 somewhere and can pass; cited-quote support must fail. “The project weight is 60% [1]” passes the conservative quote check.
+
+The core requests one complete quoted source sentence. Its automatic support check verifies equality with a verbatim segment in the particular cited passage, after harmless case/whitespace/punctuation normalisation. Chunks can end mid-sentence; segment equality does not establish sentence completeness, arbitrary paraphrase entailment, source truth or answer relevance. A valid paraphrase can remain unverified. A faithfully quoted but irrelevant sentence can still fail the question's reference check. Review full outputs and evidence; do not turn this conservative diagnostic into a general faithfulness claim.
+
+An abstention has zero factual claims. Its quote-support rate is undefined, rather than one. Evaluate whether abstention was appropriate separately. Missing/invalid citation IDs, wrong passages and invented non-numeric claims appear in explicit per-claim rows.
+
+## What the controlled loop demonstrates
+
+The local generator may propose a tool or fail to produce a usable call. A disclosed fixed local policy fills missing proposals for the teaching tasks. It reads actual search observations before building a calculation; it never supplies an answer from EVAL labels. Every request passes through the same executor. Trace rows record model or fallback decisions, structured calls, observations and stopping. Model-only, model-with-fallback and policy-only success are reported separately. A final-mark success requires an earlier handbook search containing both weights, a calculation derived from those weights and the submitted marks, a correct tool observation and a matching answer. A calculator call containing only the expected constant fails. The limited linear rubric binds one operand occurrence per submitted mark, retaining all other constants; this distinguishes equal mark values from weight constants. Counterfactual mark probes check the arithmetic dependency. Arbitrary nonlinear calculations are outside this teaching rubric.
+
+The illustrative grade calculation is 0.6×72 + 0.4×64 = 43.2 + 25.6 = 68.8. Source weights come from the fictional handbook; arithmetic comes from bounded AST evaluation. Unknown tools, missing/extra fields, wrong argument types and arbitrary Python expressions fail before execution. Email returns a simulated string; the domain gate is not a real person approving mail. A forced hostile proposal tests the gate even when a model ignores the forum instruction. Keep that probe separate from evidence of model susceptibility.
+
+## Resource cost per successful task
+
+Measure all attempted tasks, including failures. If three attempts take an illustrative total of six seconds and produce two successes, elapsed time per success is three seconds. These manufactured numbers explain the ratio; they are not this lab's runtime. Compute model calls and executed tool calls per success in the same way, with actual observations. With zero successes, report None/undefined alongside the attempted-task count. No monetary price or API cost is inferred.
+
+## FAQ and self-checks
+
+1. **Does refreshing the index train the LLM?** No; it changes searchable context, not generator weights.
+2. **Does cosine similarity mean a passage is true?** No; it ranks compatible representations.
+3. **Two useful passages, one selected: recall?** One-half. A parent-document match without the evidence span does not substitute.
+4. **A correct document ID but wrong passage: supported?** No; inspect the cited passage and individual claim.
+5. **Does a successful fallback show autonomous agent competence?** No; report its disclosed route separately.
+6. **Does a blocked action reach the tool?** It must bypass execution and return a refusal observation.
+7. **What does zero success mean for seconds per success?** Undefined, not zero or a hidden division error.
+8. **Does an exported MCP file serve searches?** No; the scaffold needs connected retrieval, a loaded index and separate client testing.
+
+# Reading and optional model help
+
+Retrieval **precision and recall** use different denominators. Passage precision divides retrieved relevant passages by retrieved passages; passage recall divides them by all labelled relevant passages. Report the cutoff, labels and averaging rule before comparing methods. Exclude questions without any relevant passage from retrieval recall, and test their answer abstention separately.
+
+The CPU encoder is [sentence-transformers/all-MiniLM-L6-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2): 384 dimensions and a default 256-word-piece truncation limit. The local generator is [HuggingFaceTB/SmolLM2-135M-Instruct](https://huggingface.co/HuggingFaceTB/SmolLM2-135M-Instruct), a compact teaching checkpoint rather than a claim about the best current model. Both official model pages were checked on 11 October 2026. The archived figures retain Qwen2.5-1.5B, BGE-small and their recorded cross-encoder.
+
+Read the [versioned MCP tools specification](https://modelcontextprotocol.io/specification/2026-07-28/server/tools), then watch the [Hugging Face Agents Course video/Q&A](https://www.youtube.com/watch?v=iLVyYDbdSmM). The [effective-agents guide](https://www.anthropic.com/engineering/building-effective-agents) helps compare fixed workflows with model-selected steps. The loop and evidence checks should be understood before selecting a framework.
+
+Optional `ask_model` critiques an invented claim with Gemini or OpenAI; both injected opt-ins default to False, and a complete local checklist remains available. Enable exactly one provider. OpenAI API usage may incur charges independently of a ChatGPT subscription; the core requires no API spending. Keys remain private, and only invented examples are sent. Gemini free-tier availability and EEA/UK/Swiss distribution conditions vary. This optional explanation supplies neither source evidence nor a measure of local agent success.

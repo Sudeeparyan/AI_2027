@@ -1,0 +1,72 @@
+{
+  "run": {
+    "model": "Qwen/Qwen2.5-0.5B-Instruct",
+    "device": "cpu",
+    "smoke": false,
+    "full": false,
+    "seed": 42,
+    "intents": [
+      "card_arrival",
+      "lost_or_stolen_card",
+      "exchange_rate",
+      "top_up_failed",
+      "age_limit"
+    ],
+    "rank": 8,
+    "n_train": 200,
+    "n_val": 30,
+    "n_test": 50,
+    "train_minutes": 6.79717909333364,
+    "steps": 25,
+    "elapsed_seconds": 781.6666813999764
+  },
+  "trainable": 1081344,
+  "total": 495114112,
+  "comparison": [
+    {
+      "model": "base, zero-shot",
+      "accuracy": 0.42,
+      "invalid": 0.04
+    },
+    {
+      "model": "base, few-shot",
+      "accuracy": 0.86,
+      "invalid": 0.0
+    },
+    {
+      "model": "LoRA fine-tuned",
+      "accuracy": 0.98,
+      "invalid": 0.0
+    }
+  ],
+  "adapter_mb": 4.356789,
+  "model_mb": 1976.131072,
+  "loss": {
+    "step": [
+      5,
+      10,
+      15,
+      20,
+      25
+    ],
+    "loss": [
+      0.9775023460388184,
+      0.10125142335891724,
+      0.06767776608467102,
+      0.0355896532535553,
+      0.12077193260192871
+    ]
+  },
+  "eval": {
+    "step": [
+      12,
+      24,
+      25
+    ],
+    "eval_loss": [
+      0.010103928856551647,
+      0.001196312252432108,
+      0.0011967598693445325
+    ]
+  }
+}

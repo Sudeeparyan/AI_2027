@@ -52,6 +52,8 @@ flowchart TD
 
 ## Beginner diagram contract
 
+Block roles distinguish training losses/updates (`loss`) from evaluation, validation and checking (`metric`). Both use the orange objective palette, with explicit legends “Loss / update” and “Measure / check”. Measuring a frozen model does not change its weights. The diagram tests guard this distinction in frozen-model lab flows.
+
 Each week defines `overview`, `mechanism`, `training`, `inference` and `lab` diagrams with four to seven numbered blocks. The `training` and `inference` IDs also cover preparing and using systems such as prompt tests, deployment and RAG. Each block names an operation, explains it in plain language and can name a real lab symbol. `arrows` contains one output label for each connection. An optional feedback route names the operation to repeat and `feedback_from` and `feedback_to` give its zero-based source and target. `insert_before_title` anchors each detailed diagram beside an exact existing slide title. IDs must be unique. The builder computes the final slide count from the authored diagrams.
 
 All seven PNGs (five technical diagrams, course map and recap) attach directly to notebook Markdown cells. The Word notes use the same PNGs. The PowerPoint uses editable blocks, labels and connectors. Separate SVG and PNG files appear in each week's `Diagrams/` folder. SVG and PowerPoint share one geometry function, so every arrow starts and ends on a block boundary in both formats. A correction to an authored diagram therefore updates every format on the next build. Shared scenes use measured Arial word wrapping and explicit single-line boxes. Rounded-corner adjustments apply only to rounded rectangles; applying them to ellipses makes Office reject a deck.
@@ -62,19 +64,27 @@ The recap replaces the original summary and moves to the last slide, keeping 46 
 
 `### BEGIN SOLUTION` and `### END SOLUTION` enclose instructor code. `### STUB` supplies the student's starter code. Markdown answer blocks use `<!-- BEGIN ANSWER -->` and `<!-- END ANSWER -->`. Cells tagged `solution-only` are omitted from student notebooks. Preserve these markers when explaining or editing code.
 
-The generated Python files translate `%pip` installation cells into ordinary Python subprocess calls. They are syntactically valid Python and keep the same student TODOs or instructor solutions as their corresponding notebook. Run completed code in order with the listed dependencies. Model downloads and training still require the relevant network access and compute resources.
+Distribute the `.ipynb` notebooks. Developer Python exports live in `build/week_XX/`, retain the same TODOs or solutions, and translate `%pip` into subprocess calls for syntax and code comparisons. The builder injects `curriculum/labs/_setup.py` once after installation. It supplies `DEVICE` and `SMOKE`, defaults to CPU, fixes seeds, prints versions and provides `check()` and optional `ask_model()`. `USE_GEMINI = False` and `USE_OPENAI = False` prevent provider access. Enable exactly one for a synthetic comparison; unavailable requests return `None` for the local fallback. Week sources add targeted semantic `check_…()` helpers after TODOs and keep widget cells tagged `skip-test`. Install cells use the dated pins in `research/weeks/platform_2026.md`; local tests skip installation and record their actual versions.
 
 ## Measured results
 
 Numbers from real runs never go straight into slide or note text. They flow through one path:
 
-1. A run writes a JSON file in `curriculum/assets/week_XX/`. Asset scripts `make_week_02.py` to `make_week_06.py` and `make_week_06_reasoning.py` write `metrics.json`; `make_week_05_bert.py` and `make_week_05_gpt2.py` write the measured attention tables `bert_attention.json` and `gpt2_attention.json`. A full lab run with `GENAI_RESULTS_PATH` set writes `results.json` (weeks 1, 5 and 7–12).
+1. A full lab run with `GENAI_RESULTS_PATH` set writes its export to a chosen scratch path. Compare the measured export and its settings before promoting a separate `curriculum/assets/week_XX/results_cpu_core.json`. Original `results.json`, `metrics.json`, attention tables and their plots remain archived evidence unless explicitly replaced. Asset scripts retain their own measured schemas.
 2. `tools/fill_results.py --weeks N` turns those files into the sentences, tables and numbers in `fill.json`.
 3. Slides and notes contain `{{PLACEHOLDER}}` names; `build_week.py` substitutes them and refuses to build while one is unfilled.
 
-Replace a stored file only with a complete run of the current notebook, after comparing it with the stored one, and record the run in `research/lab_runs_2026-10.json` if a time is quoted anywhere. Smoke runs check that the code runs; they never feed `fill.json`.
+Record successful full CPU cores under `iteration_3_full_runs` in `research/lab_runs_2026-10.json`, with device, measured seconds, date, environment and source/executed notebook hashes. `build_course.py` selects the latest successful full/core CPU record for every week; missing current evidence fails the guide build. Its current `LAB_TABLE` is computed from those records, while `LAB_INFO` supplies an explicitly archived earlier-experiment table. Smoke outputs never feed `fill.json`. Installation, downloads, interactive cells and optional stretches need separate evidence.
+
+For weeks 9–12, `harvest_figures.py --week N --dry-run` validates the complete figure set without changing assets. Harvesting reads `executed_solutions_full.ipynb` and its successful `lab_test_full.json`, checks code against the built notebook in order, and rejects missing or damaged images before writing any. Later smoke runs cannot replace this source. New run records also hash the executed notebook; older records lack that field and retain their original evidence limits. `test_lab_evidence.py` exercises these guards in temporary folders.
+
+`compare_lab_code.py` compares ordered Python syntax trees, including string contents. Comment or formatting edits are allowed; reordered or duplicated cells are changes. Missing or failed full-run records return a failure status. Shared setup defaults `USE_GEMINI` and `USE_OPENAI` to false. Enable exactly one for optional `ask_model()` calls; credentials alone do not enable requests, and smoke mode skips both. The helpers cap both providers together at 40 attempts, cache responses, back off on HTTP 429 and never display credentials. Local users can select a private file through `LOCAL_ENV_FILE`; it is read only after API opt-in. OpenAI API usage may incur charges separately from ChatGPT subscriptions; local completion needs no API spending. Quotas and eligibility remain account-specific.
+
+`check_links.py` makes at most two GET attempts for temporary server/transport failures and records each attempt. HTTP 403/429 remains blocked and unverified; HTTP 404 remains a failure. `test_link_checks.py` exercises these distinctions without network requests.
 
 ## Text conventions
+
+Speaker notes require exactly one ordered `In short:`, `Explain:`, `Example:`, `Ask:`, `Answer:` and `Watch out:`. Total whitespace-delimited length is 110–180 words including labels. Explain contains three to six sentences of at most twenty words. `tools/speaker_notes.py` validates the template; legacy notes now fail the ordinary build and prose audit. `audit_prose.py --strict-speaker-notes` explicitly selects the same strict policy. Quiz notes retain `Answer: X` before the explanation, matching the correct option.
 
 - Inline maths is written `$…$` in the notes and in slide text. The build converts it to Unicode with real sub- and superscripts and wraps it in `<var>…</var>`, which `notes.js` uses to set single-letter variables in italics and digits, operators and Greek letters upright. A `$` directly before a digit never closes maths, so prices such as "$0.10 input/$0.40 output" stay as text.
 - In the Word notes, companion headings are `## Slide N: Title`, where N and Title are those of the 46-slide deck; `verify_beginner.py` fails on a mismatch.
@@ -87,8 +97,14 @@ Replace a stored file only with a complete run of the current notebook, after co
 .venv/Scripts/python.exe tools/build_week.py --weeks 1-12
 .venv/Scripts/python.exe tools/build_course.py
 .venv/Scripts/python.exe tools/verify_beginner.py
+.venv/Scripts/python.exe tools/test_speaker_notes.py
 .venv/Scripts/python.exe tools/test_lab_helpers.py
+.venv/Scripts/python.exe tools/test_lab_setup.py
 .venv/Scripts/python.exe tools/test_lab_runtime.py
+.venv/Scripts/python.exe tools/test_lab_evidence.py
+.venv/Scripts/python.exe tools/test_link_checks.py
+.venv/Scripts/python.exe tools/test_output_files.py
+node tools/test_output_files.js
 .venv/Scripts/python.exe tools/test_beginner_support.py
 .venv/Scripts/python.exe tools/test_technical_figures.py
 node tools/test_teaching_notes.js
@@ -107,9 +123,13 @@ node tools/test_technical_diagrams.js
 .venv/Scripts/python.exe tools/build_revision_review.py
 ```
 
-Use `--weeks 12` for an individual week, or `--labs-only` to rebuild notebook and Python exports after a lab-only edit. After changing executable lab logic, execute the affected solution notebook with `tools/test_labs.py`. Rendering requires the local Microsoft Office installation and Poppler used by this repository.
+Use `--weeks 12` for an individual week, or `--labs-only` to rebuild notebooks and developer exports after a lab-only edit. After changing executable lab logic, execute the affected solution notebook with `tools/test_labs.py --weeks N --full --device cpu`. The runner owns `build/.busy` until it finishes, records the runtime environment and preserves mode-specific executed notebooks. Do not build or render the same week during execution. Rendering requires the local Microsoft Office installation and Poppler used by this repository.
+
+Iteration 3 closure (12 October 2026): all 26 release gates, all 12 final smoke runs, all 12 measured CPU cores and complete rendered review passed for the recorded release. `research/ITERATION3_2026-10-12.json` binds the actual checks and views to current artifacts. A later source change needs the relevant rebuild, checks and changed-output review; prior evidence cannot certify new content.
 
 The renderer also writes `slides.layout.json` with text boxes that exceed PowerPoint's measured text bounds. Review those boxes and the rendered images before distributing a rebuild. Structural checks confirm correct attachments and editable objects; visual review checks the actual page layout.
+
+Generated PowerPoint, Word, notebook and Python exports are written to unique adjacent temporary files, then replaced when complete. Bounded retries allow brief Windows reader locks to clear; an exhausted retry fails the build and preserves the previous destination. Atomic-writer tests cover replacement, temporary locks and failure preservation.
 
 ## Revision loop
 

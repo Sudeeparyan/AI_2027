@@ -61,228 +61,192 @@ def cover(path):
     save(fig, path, transparent=True)
 
 
+def _legend(ax, roles=("model",), repeat=False, y=.15):
+    names={"data":"Data","model":"Model","loss":"Loss","output":"Output","metric":"Check","tool":"Tool"}
+    x=.15
+    for role in roles:
+        role_box(ax,x,y,.24,.22,"",role,size=18)  # a FancyBbox swatch is kept in the editable PPT scene
+        ax.text(x+.34,y+.11,names[role],va="center",fontsize=18,color=TEXT)
+        x+=1.7
+    ax.plot([x,x+.4],[y+.11,y+.11],color=GREEN)
+    ax.text(x+.5,y+.11,"Flow",va="center",fontsize=18,color=TEXT)
+    if repeat:
+        ax.plot([x+2,x+2.4],[y+.11,y+.11],color=ORANGE,ls="--")
+        ax.text(x+2.5,y+.11,"Repeat",va="center",fontsize=18,color=TEXT)
+
+
 def rnn_vs_attention(path):
-    fig, ax = canvas(5.6)
-    ax.text(.1, 5.2, "Two ways to pass information", fontsize=22, color=INK, weight="bold")
-    ax.text(.1, 4.87, "Recurrence: process tokens one after another", fontsize=19, color=INK)
-    for i, text in enumerate(["animal", "crossed", "street", "because", "it"]):
-        x = .15 + i * 2.57
-        role_box(ax, x, 3.64, 2.03, .85, text + "\nupdate state", "model", size=18)
-        if i:
-            arrow(ax, x - .54, 4.065, x, 4.065, color=GREEN)
-    ax.text(.1, 3.18, "Self-attention: one token can directly use an allowed earlier token", fontsize=19, color=INK)
-    flow(ax, [("it + earlier\ntoken vectors", "data"), ("Compare\nquery and keys", "model"),
-              ("Make row\nweights", "model"), ("Mix value\nvectors", "model"), ("new it vector", "output")], y=1.45,
-         labels=["vectors", "scores", "weights", "mixture"], size=18)
-    routed_arrow(ax,[(1.165,1.45),(1.165,1.12),(8.875,1.12),(8.875,1.45)],color=BLUE,
-                 label="values from token vectors",label_xy=(5.0,1.12),size=17)
-    ax.text(.15, .67, "Illustrative route only. A causal decoder cannot use words after it.", fontsize=17, color=TEXT)
-    role_legend(ax,.15,size=18)
-    save(fig, path)
+    fig,ax=canvas(5.4)
+    ax.text(.1,5.0,"Illustrative information routes",fontsize=21,color=INK)
+    ax.text(.1,4.6,"Recurrence",fontsize=19,color=INK)
+    xs=[.15,4.45,8.75]
+    for x,word,label in zip(xs,["animal","street","it"],["Update h1","Update h2","Update h3"]):
+        role_box(ax,x,3.25,3.6,.9,label,"model",size=18)
+        ax.text(x+1.8,4.35,word,ha="center",fontsize=18,color=TEXT)
+        arrow(ax,x+1.8,4.25,x+1.8,4.15,color=BLUE)
+    for x,right,label in zip(xs,xs[1:],["h1","h2"]):
+        arrow(ax,x+3.6,3.7,right,3.7,color=GREEN)
+        ax.text((x+3.6+right)/2,4.0,label,ha="center",fontsize=18,color=TEXT)
+    ax.text(.1,2.65,"Attention",fontsize=19,color=INK)
+    for x,label in zip(xs,["Project Q/K/V","Weight Q/K","Mix values"]):
+        role_box(ax,x,1.35,3.6,.9,label,"model",size=18)
+    for x,right,label in zip(xs,xs[1:],["Q/K","weights"]):
+        arrow(ax,x+3.6,1.8,right,1.8,color=GREEN)
+        ax.text((x+3.6+right)/2,2.33,label,ha="center",fontsize=18,color=TEXT)
+    routed_arrow(ax,[(1.95,1.35),(1.95,.75),(10.55,.75),(10.55,1.35)],color=BLUE,label="V",label_xy=(6.3,.75),size=18)
+    _legend(ax)
+    save(fig,path)
 
 
 def qkv(path):
-    fig, ax = canvas(4.6)
-    flow(ax, [("Input X\n3 × 2", "data"), ("Project into\nQ, K and V", "model"),
-              ("Scores:\nQKᵀ ÷ √2", "model"), ("Mask then\nrow softmax", "model"), ("Weights × V\n3 × 2", "output")],
-         labels=["X", "Q and K", "3 × 3 scores", "3 × 3 weights"], size=18)
-    # V bypasses the matching calculation and enters the final mixture.
-    routed_arrow(ax, [(3.735, 1.8), (3.735, 1.1), (11.445, 1.1), (11.445, 1.8)],
-                 color=BLUE, label="V: the information to pass onward (3 × 2)", label_xy=(7.5, .79), size=18)
-    ax.text(.1, 4.05, "Query matches keys; the resulting weights mix values.", fontsize=21, weight="bold", color=INK)
-    role_legend(ax, .2, size=18)
-    save(fig, path)
+    fig,ax=canvas(4.7)
+    items=[("Read X","data"),("Project Q/K/V","model"),("Compare;\nscale","model"),("Mask;\nsoftmax","model"),("Mix values","output")]
+    flow(ax,items,labels=["X[3,2]","Q/K[3,2]","scores[3,3]","weights[3,3]"],size=18)
+    routed_arrow(ax,[(3.735,1.8),(3.735,1.0),(11.445,1.0),(11.445,1.8)],color=BLUE,label="V[3,2]",label_xy=(7.5,1.0),size=18)
+    ax.text(.1,4.1,"Matching and carrying are separate",fontsize=21,color=INK)
+    _legend(ax,("data","model","output"))
+    save(fig,path)
 
 
 def attn_worked(path):
-    toks = ["cat", "sat", "mat"]
-    q = np.array([[1., 0.], [0., 1.], [1., 1.]])
-    scores = q @ q.T / np.sqrt(2)
-    weights = np.exp(scores) / np.exp(scores).sum(1, keepdims=True)
-    values = np.array([[1., 0.], [0., 1.], [.5, .5]])
-    output = weights @ values
-    fig, axes = plt.subplots(1, 2, figsize=(13, 4.5))
-    fig.subplots_adjust(left=.06, right=.97, bottom=.30, top=.84, wspace=.45)
-    for ax, matrix, title in [(axes[0], scores, "1. Compare Q and K (scores)"), (axes[1], weights, "2. Softmax each row (weights)")]:
-        ax.imshow(matrix, cmap="Blues", vmin=0, vmax=1.5)
-        for i in range(3):
-            for j in range(3):
-                ax.text(j, i, f"{matrix[i,j]:.2f}", ha="center", va="center", fontsize=20,
-                        color="white" if matrix[i,j] > .9 else INK, weight="bold")
-        ax.set_xticks(range(3), toks, fontsize=18)
-        ax.set_yticks(range(3), toks, fontsize=18)
-        ax.set_title(title, fontsize=20, loc="left")
-        ax.set_xlabel("key position", fontsize=18)
-        ax.set_ylabel("query position", fontsize=18)
-        ax.grid(False)
-    fig.text(.08, .06, f"Illustrative unmasked example: V = [[1,0], [0,1], [0.5,0.5]]; cat output ≈ [{output[0,0]:.2f}, {output[0,1]:.2f}].", fontsize=18, color=TEXT)
-    save(fig, path)
+    fig,ax=canvas(4.9)
+    ax.text(.15,4.35,"Illustrative cat query [1,0]; keys [1,0], [0,1], [1,1]",fontsize=21,color=INK)
+    blocks=[(.15,3.0,"Read inputs\nq and three keys","data"),(3.65,2.7,"Compare; scale\n[0.71,0,0.71]","model"),
+            (6.85,2.9,"Row softmax\n[0.40,0.20,0.40]","model"),(10.25,2.6,"Mix values\n[0.60,0.40]","output")]
+    for x,w,label,role in blocks:role_box(ax,x,2.3,w,1.2,label,role,size=19)
+    for (x,w,_,_),(right,_,_,_),label in zip(blocks,blocks[1:],["q, K","scores","weights"]):
+        arrow(ax,x+w,2.9,right,2.9,color=GREEN)
+        ax.text((x+w+right)/2,3.75,label,ha="center",fontsize=18,color=BLUE)
+    role_box(ax,6.85,.75,2.9,.9,"Values V\n[1,0], [0,1], [0.5,0.5]","data",size=17)
+    routed_arrow(ax,[(9.75,1.2),(11.55,1.2),(11.55,2.3)],color=BLUE,label="V",label_xy=(10.65,1.2),size=18)
+    _legend(ax,("data","model","output"),y=.12)
+    save(fig,path)
 
 
 def causal_mask(path):
-    toks = ["cat", "sat", "mat"]
-    fig, axes = plt.subplots(1, 2, figsize=(13, 4.5))
-    fig.subplots_adjust(left=.06, right=.96, bottom=.30, top=.83, wspace=.4)
-    for ax, allowed, title in [(axes[0], np.ones((3,3)), "Encoder: all input positions"), (axes[1], np.tril(np.ones((3,3))), "Causal decoder: present and past")]:
-        ax.imshow(allowed, cmap="Blues", vmin=0, vmax=1.6)
+    fig,axes=plt.subplots(1,2,figsize=(13,4.7))
+    fig.subplots_adjust(left=.07,right=.95,bottom=.22,top=.82,wspace=.35)
+    for ax,allowed,title in [(axes[0],np.ones((3,3)),"Encoder"),(axes[1],np.tril(np.ones((3,3))),"Causal decoder")]:
+        ax.imshow(allowed,cmap="Blues",vmin=0,vmax=1.6)
         for i in range(3):
-            for j in range(3):
-                ax.text(j, i, "use" if allowed[i,j] else "block", ha="center", va="center", fontsize=20, color=INK)
-        ax.set_xticks(range(3), toks, fontsize=18)
-        ax.set_yticks(range(3), toks, fontsize=18)
-        ax.set_xlabel("key: input that may be used", fontsize=18)
-        ax.set_ylabel("query: current position", fontsize=18)
-        ax.set_title(title, fontsize=20, loc="left")
-        ax.grid(False)
-    fig.text(.08, .06, "Blue = allowed. White = blocked: set its score to −∞ before softmax, so its weight becomes 0.", fontsize=18, color=TEXT)
-    save(fig, path)
+            for j in range(3):ax.text(j,i,str(int(allowed[i,j])),ha="center",va="center",fontsize=23,color=INK)
+        ax.set_xticks(range(3),["cat","sat","mat"],fontsize=18)
+        ax.set_yticks(range(3),["cat","sat","mat"],fontsize=18)
+        ax.set_title(title,fontsize=21,loc="left");ax.grid(False)
+    fig.text(.07,.08,"Rows=query; columns=source. 1=allowed; 0=blocked.",fontsize=18,color=TEXT)
+    save(fig,path)
 
 
 def multihead(path):
-    fig, ax = canvas(4.6)
-    flow(ax, [("Input X\nT × d", "data"), ("Split h heads\neach d/h wide", "model"),
-              ("Run attention\nin each head", "model"), ("Join outputs\nT × d", "model"), ("Project with\noutput matrix", "output")],
-         labels=["vectors", "h Q/K/V sets", "h outputs", "joined features"], size=18)
-    ax.text(.1, 4.05, "Several learned views, then one joined representation", fontsize=21, color=INK, weight="bold")
-    ax.text(.2, 1.0, "Example: d = 12 and h = 3 gives 4 features per head. The joined output has 12 again.", fontsize=18, color=TEXT)
-    role_legend(ax, .25, size=18)
-    save(fig, path)
+    fig,ax=canvas(4.4)
+    flow(ax,[("Project Q/K/V","model"),("Split heads","model"),("Attend","model"),("Merge outputs","model"),("Project output","output")],labels=["[T,3d]","[h,T,d/h]","[h,T,d/h]","[T,d]"],size=18)
+    ax.text(.1,3.9,"Several learned mixtures",fontsize=21,color=INK)
+    ax.text(.2,1.0,"Illustration: d=12; h=3; four features/head.",fontsize=18,color=TEXT)
+    _legend(ax,("model","output"))
+    save(fig,path)
 
 
 def positional(path):
-    fig, axes = plt.subplots(1, 2, figsize=(13, 4.6))
-    fig.subplots_adjust(left=.02, right=.98, bottom=.16, top=.8, wspace=.18)
-    for ax in axes:
-        ax.axis("off"); ax.set_xlim(0,6); ax.set_ylim(0,3)
-    a, b = axes
-    a.set_title("Add a position vector", fontsize=21, loc="left")
-    role_box(a,.1,1.5,2.5,.9,"token [1, 0]", "data", size=20)
-    role_box(a,3.2,1.5,2.6,.9,"position [0, 1]", "data", size=20)
-    a.text(2.9,1.95,"+",fontsize=25,ha="center",color=GREEN)
-    a.text(.15,.55,"new input = [1, 1]\nIllustrative vectors; lab positions are learned.",fontsize=18,color=TEXT)
-    b.set_title("RoPE rotates Q and K",fontsize=21,loc="left")
-    role_box(b,.1,1.5,2.55,.9,"Q and K\nat position p","model",size=20)
-    role_box(b,3.35,1.5,2.5,.9,"rotate by\nposition angle","model",size=20)
-    arrow(b,2.65,1.95,3.35,1.95,color=GREEN)
-    b.text(.15,.55,"Relative position affects Q–K comparisons.\nRoPE is a different method from adding vectors.",fontsize=18,color=TEXT)
-    fig.text(.02,.1,"Without positions, self-attention cannot tell cat sat from sat cat by order alone.",fontsize=18,color=TEXT)
+    fig,axes=plt.subplots(1,2,figsize=(13,4.6))
+    fig.subplots_adjust(left=.02,right=.98,bottom=.24,top=.83,wspace=.18)
+    for ax in axes:ax.axis("off");ax.set_xlim(0,6);ax.set_ylim(0,3)
+    a,b=axes
+    a.set_title("Add position",fontsize=21,loc="left")
+    role_box(a,.1,1.2,2.4,1.0,"Look up token\n[1,0]","model",size=18)
+    role_box(a,3.45,1.2,2.4,1.0,"Add position\n[1,1]","model",size=18)
+    arrow(a,2.5,1.7,3.45,1.7,color=GREEN)
+    a.text(2.8,2.55,"vector",ha="center",fontsize=18,color=TEXT)
+    arrow(a,4.65,.45,4.65,1.2,color=BLUE);a.text(4.65,.18,"position [0,1]",ha="center",fontsize=18,color=TEXT)
+    b.set_title("RoPE",fontsize=21,loc="left")
+    role_box(b,.1,1.2,2.4,1.0,"Project Q/K","model",size=18)
+    role_box(b,3.45,1.2,2.4,1.0,"Rotate pairs","model",size=18)
+    arrow(b,2.5,1.7,3.45,1.7,color=GREEN);b.text(2.8,2.55,"Q/K",ha="center",fontsize=18,color=TEXT)
+    b.text(.1,.3,"Position changes comparison angles.",fontsize=18,color=TEXT)
     legend=fig.add_axes([.02,.015,.96,.07]);legend.set_xlim(0,13);legend.set_ylim(0,.4);legend.axis("off")
-    role_legend(legend,.03,size=18)
+    _legend(legend)
     save(fig,path)
 
 
 def block(path):
-    fig, ax = canvas(4.8)
-    role_box(ax,.12,1.95,2.05,1.35,"token +\nposition\nembeddings","data",size=18)
-    role_box(ax,2.8,1.95,2.7,1.35,"LayerNorm →\nMulti-head\nself-attention","model",size=18)
-    role_box(ax,6.45,1.95,2.85,1.35,"LayerNorm →\nFeed-forward MLP\n(4× wider)","model",size=18)
-    role_box(ax,10.25,1.95,2.5,1.35,"→ next block\n(× N)","output",size=18)
-    centres=[(5.98,2.625),(9.78,2.625)]
-    for x,y in centres:
-        ax.add_patch(plt.Circle((x,y),.20,fc="white",ec=GREEN,lw=1.8,zorder=4))
-        ax.text(x,y,"+",ha="center",va="center",fontsize=21,color=GREEN,zorder=5)
-    for xa,xb in [(2.17,2.8),(5.5,5.78),(6.18,6.45),(9.3,9.58),(9.98,10.25)]:
-        arrow(ax,xa,2.625,xb,2.625,color=GREEN)
-    # The arrows are too short for labels; the caption says once that each carries a T × d table.
-    routed_arrow(ax,[(1.145,3.3),(1.145,3.8),(5.98,3.8),(5.98,2.825)],color=BLUE,
-                 label="copy of the input (residual)",label_xy=(3.6,3.8),size=18)
-    routed_arrow(ax,[(5.98,2.425),(5.98,1.4),(9.78,1.4),(9.78,2.425)],color=BLUE,
-                 label="copy of the input (residual)",label_xy=(7.85,1.4),size=18)
-    ax.text(.1,4.33,"Pre-norm block: learn a change, then add the input back",fontsize=21,weight="bold",color=INK)
-    ax.text(.2,.75,"Every arrow carries a T × d table. LayerNorm rescales features; the MLP works per position.",fontsize=18,color=TEXT)
-    role_legend(ax,.22,size=18)
+    fig,ax=canvas(4.8)
+    xs=[.1+i*1.85 for i in range(7)]
+    names=[("Input x","data"),("Normalise","model"),("Attend","model"),("Add","model"),("Normalise","model"),("MLP","model"),("Add","model")]
+    for x,(label,role) in zip(xs,names):role_box(ax,x,2.0,1.5,1.1,label,role,size=18)
+    for x,right in zip(xs,xs[1:]):
+        arrow(ax,x+1.5,2.55,right,2.55,color=GREEN)
+        ax.text((x+1.5+right)/2,3.35,"[T,d]",ha="center",fontsize=18,color=BLUE)
+    centre=lambda i:xs[i]+.75
+    routed_arrow(ax,[(centre(0),3.1),(centre(0),3.85),(centre(3),3.85),(centre(3),3.1)],color=BLUE,label="residual x[T,d]",label_xy=(3.6,3.85),size=18)
+    routed_arrow(ax,[(centre(3),2.0),(centre(3),1.15),(centre(6),1.15),(centre(6),2.0)],color=BLUE,label="residual h[T,d]",label_xy=(9.2,1.15),size=18)
+    ax.text(.1,4.35,"Pre-norm; residual additions",fontsize=21,color=INK)
+    ax.text(.2,.65,"MLP acts per position.",fontsize=18,color=TEXT)
+    _legend(ax,("data","model"))
     save(fig,path)
 
 
 def architecture_comparison(path):
-    fig, ax = canvas(4.8)
-    columns=[("Encoder", "All input positions", "label / vector", "BERT"),
-             ("Decoder", "Present + past", "next token", "GPT-2 / CharGPT"),
-             ("Encoder–decoder", "Encoder input +\ndecoder past", "output sequence", "T5 / translation")]
-    for i,(name,allowed,out,example) in enumerate(columns):
-        x=.15+i*4.3
-        role_box(ax,x,3.43,4.05,.65,name,"model",size=22)
-        ax.text(x+.18,2.92,"Can use: " + allowed,fontsize=19,color=TEXT,va="top")
-        ax.text(x+.18,1.65,"Produces: " + out,fontsize=19,color=TEXT)
-        ax.text(x+.18,.95,"Example: " + example,fontsize=19,color=TEXT)
-        ax.text(x+.18,.6,["Useful for search / classification","Useful for text continuation","Useful for input → output tasks"][i],fontsize=17,color=TEXT)
-    ax.text(.1,4.5,"Choose the attention rule for the task",fontsize=22,weight="bold",color=INK)
-    role_legend(ax,.1,size=18)
+    fig,ax=canvas(4.7)
+    rows=[("Encoder","Whole input","Label/vector"),("Decoder","Current; past","Continuation"),("Encoder–decoder","Source; output past","Output sequence")]
+    for x,label in zip([.3,4.5,8.5],["Family","Reads","Produces"]):ax.text(x,3.9,label,fontsize=21,color=INK,weight="bold")
+    for i,row in enumerate(rows):
+        for x,value in zip([.3,4.5,8.5],row):ax.text(x,3.0-i*.85,value,fontsize=20,color=TEXT)
+    ax.text(.3,.4,"Task guidance; evaluate the actual system.",fontsize=18,color=TEXT)
     save(fig,path)
 
 
 def three_archs(path):
-    """How information flows in the three families (the next slide compares their uses)."""
-    fig,ax=canvas(5.7)
-    rows=[("Encoder-only\n(BERT)",[("Whole input\nsentence","data"),("Encoder: each\ntoken sees all","model"),
-                                   ("One vector\nper token","output"),("Label or\nsearch vector","output")]),
-          ("Decoder-only\n(GPT-2)",[("Prefix\nso far","data"),("Decoder: sees\npresent + past","model"),
-                                    ("Next-token\nprobabilities","output"),("Sample and\nappend token","model")]),
-          ("Encoder–\ndecoder (T5)",[("Source\ntext","data"),("Encoder: sees\nwhole source","model"),
-                                     ("Decoder: past +\ncross-attention","model"),("Output\nsequence","output")])]
-    w,gap,h=2.3,.42,1.0
-    for r,(name,items) in enumerate(rows):
-        y=4.45-r*1.75
-        ax.text(.1,y+h/2,name,fontsize=18,color=INK,weight="bold",va="center")
-        for i,(label,role) in enumerate(items):
-            x=2.35+i*(w+gap)
-            role_box(ax,x,y,w,h,label,role,size=18)
-            if i:
-                arrow(ax,x-gap,y+h/2,x,y+h/2,color=GREEN)
-        if r==1:  # generation repeats with the appended token
-            routed_arrow(ax,[(2.35+3*(w+gap)+w/2,y),(2.35+3*(w+gap)+w/2,y-.32),(2.35+w/2,y-.32),(2.35+w/2,y)],
-                         color=ORANGE,dashed=True,label="repeat with the longer prefix",label_xy=(6.43,y-.32),size=17)
-    role_legend(ax,.08,size=18)
+    fig,ax=canvas(6.7)
+    rows=[("Encoder: BERT","Encode all","Select vector","IDs","vectors"),("Decoder: GPT-2","Decode causally","Sample; append","prefix","probabilities"),("Encoder–decoder: T5","Encode source","Decode cross+causal","source","encoded source")]
+    for i,(name,left,right,incoming,edge) in enumerate(rows):
+        y=5.25-i*2.05
+        ax.text(.1,y+.5,name,fontsize=18,color=INK,va="center")
+        role_box(ax,3.5,y,3.3,1.0,left,"model",size=18);role_box(ax,8.5,y,3.6,1.0,right,"model",size=18)
+        arrow(ax,3.0,y+.5,3.5,y+.5,color=BLUE);ax.text(3.0,y+1.12,incoming,fontsize=18,ha="center",color=TEXT)
+        arrow(ax,6.8,y+.5,8.5,y+.5,color=GREEN);ax.text(7.65,y+1.12,edge,fontsize=18,ha="center",color=TEXT)
+        if i==1:routed_arrow(ax,[(10.3,y),(10.3,y-.38),(4.9,y-.38),(4.9,y)],color=ORANGE,dashed=True,label="extended prefix",label_xy=(7.6,y-.38),size=18)
+    _legend(ax,repeat=True,y=.05)
     save(fig,path)
 
 
 def kv_cache(path):
-    fig,ax=canvas(5.2)
-    items=[("Known prefix\nThe cat sat", "data"), ("Read sat\n(known token)", "data"),
-           ("Compute Q/K/V\nfor sat", "model"), ("Attend to K/V\nfor The cat sat", "model"), ("Next-token\nprobabilities", "output")]
-    flow(ax,items,y=2.15,labels=["last token", "sat vector", "new Q/K/V", "last output"],size=18)
-    routed_arrow(ax,[(1.165,2.15),(1.165,1.5),(8.875,1.5),(8.875,2.15)],color=BLUE,
-                 label="cached K/V for The and cat (earlier passes)",label_xy=(6.7,1.18),size=18)
-    ax.text(.1,4.6,"The query comes from the last known token, never an unknown future token.",fontsize=20,color=INK,weight="bold")
-    ax.text(.15,.68,"Append sat's new K/V. CharGPT recomputes its context; a cache reuses earlier K/V.",fontsize=18,color=TEXT)
-    role_legend(ax,.15,size=18)
+    fig,ax=canvas(5.3)
+    xs=[.15,3.35,6.55,9.75]
+    for x,label in zip(xs,["Read last token","Project Q/K/V","Attend","Score next token"]):role_box(ax,x,2.75,2.65,1.0,label,"model",size=18)
+    for x,right,label in zip(xs,xs[1:],["sat vector","query q","last output"]):
+        arrow(ax,x+2.65,3.25,right,3.25,color=GREEN);ax.text((x+2.65+right)/2,3.95,label,fontsize=18,ha="center",color=BLUE)
+    role_box(ax,.15,.85,2.65,.9,"Cache:\nearlier K/V","data",size=18)
+    role_box(ax,3.35,.85,2.65,.9,"Append K/V","model",size=18)
+    arrow(ax,4.67,2.75,4.67,1.75,color=GREEN);ax.text(4.8,2.25,"new K/V",fontsize=18,color=BLUE,va="center")
+    arrow(ax,2.8,1.3,3.35,1.3,color=GREEN)
+    routed_arrow(ax,[(6.0,1.3),(7.87,1.3),(7.87,2.75)],color=BLUE,label="all K/V",label_xy=(6.95,1.3),size=18)
+    ax.text(.1,4.75,"Current query uses a known token",fontsize=21,color=INK)
+    _legend(ax,("data","model"),y=.15)
     save(fig,path)
 
 
 def moe(path):
-    fig,ax=canvas(4.8)
-    role_box(ax,.15,1.95,1.7,1.15,"token vector","data",size=18)
-    role_box(ax,2.45,1.95,1.7,1.15,"router:\nchoose 2","model",size=18)
-    role_box(ax,5.15,2.75,2.45,.85,"expert MLP A","model",size=18)
-    role_box(ax,5.15,1.35,2.45,.85,"expert MLP B","model",size=18)
-    role_box(ax,8.55,1.95,2.0,1.15,"weighted sum","model",size=18)
-    role_box(ax,11.1,1.95,1.7,1.15,"new vector","output",size=18)
-    arrow(ax,1.85,2.525,2.45,2.525,color=GREEN)
-    routed_arrow(ax,[(4.15,2.85),(4.65,2.85),(4.65,3.175),(5.15,3.175)],color=GREEN)
-    routed_arrow(ax,[(4.15,2.2),(4.65,2.2),(4.65,1.775),(5.15,1.775)],color=GREEN)
-    routed_arrow(ax,[(7.6,3.175),(8.03,3.175),(8.03,2.85),(8.55,2.85)],color=GREEN)
-    routed_arrow(ax,[(7.6,1.775),(8.03,1.775),(8.03,2.2),(8.55,2.2)],color=GREEN)
-    arrow(ax,10.55,2.525,11.1,2.525,color=GREEN)
-    for x,y,t in [(2.15,3.25,"vector"),(4.66,3.57,"vector"),(4.66,1.07,"vector"),
-                  (8.03,3.57,"result"),(8.03,1.07,"result"),(10.83,3.25,"vector")]:
-        ax.text(x,y,t,fontsize=17,ha="center",color=BLUE)
-    routed_arrow(ax,[(3.3,3.1),(3.3,4.0),(9.55,4.0),(9.55,3.1)],color=BLUE,
-                 label="router mixture weights",label_xy=(6.3,4.0),size=17)
-    ax.text(.1,4.45,"Mixture of experts: only selected networks run for each token",fontsize=21,color=INK,weight="bold")
-    ax.text(.2,.7,"Unselected experts do no work for this token. The sum uses the router's weights.",fontsize=18,color=TEXT)
-    role_legend(ax,.22,size=18)
+    fig,ax=canvas(4.9)
+    role_box(ax,.8,1.9,2.2,1.0,"Route token","model",size=18)
+    role_box(ax,4.4,2.7,2.7,.9,"Run expert A","model",size=18)
+    role_box(ax,4.4,1.15,2.7,.9,"Run expert B","model",size=18)
+    role_box(ax,9.0,1.9,2.7,1.0,"Weighted sum","model",size=18)
+    for y,end in [(2.65,3.15),(2.15,1.6)]:routed_arrow(ax,[(3,y),(3.7,y),(3.7,end),(4.4,end)],color=GREEN)
+    for y,end in [(3.15,2.65),(1.6,2.15)]:routed_arrow(ax,[(7.1,y),(8,y),(8,end),(9,end)],color=GREEN)
+    ax.text(3.7,3.85,"vectors",fontsize=18,color=TEXT);ax.text(3.7,.7,"vectors",fontsize=18,color=TEXT)
+    ax.text(7.6,3.85,"outputs",fontsize=18,color=TEXT);ax.text(7.6,.7,"outputs",fontsize=18,color=TEXT)
+    routed_arrow(ax,[(1.9,2.9),(1.9,4.3),(10.35,4.3),(10.35,2.9)],color=BLUE,label="routing weights",label_xy=(6.3,4.3),size=18)
+    arrow(ax,.1,2.4,.8,2.4,color=BLUE);arrow(ax,11.7,2.4,12.8,2.4,color=GREEN)
+    ax.text(.1,3.3,"token",fontsize=18,color=TEXT);ax.text(12,3.3,"vector",fontsize=18,color=TEXT)
+    _legend(ax)
     save(fig,path)
 
 
 def vit_patches(path):
-    fig,ax=canvas(4.8)
-    flow(ax,[("RGB photo\n32 × 32","data"),("4 patches\n16 × 16","model"),
-             ("Flatten\n768 values","model"),("Project\n+ position","model"),("Encoder\nmix tokens","model"),
-             ("Mean pool\nthen head","model"),("Scores:\nflower\nother","output")],
-         w=1.42,gap=.38,labels=["pixels","patches","vectors","tokens","features","logits"],size=17)
-    ax.text(.1,4.12,"A vision transformer treats image patches as tokens",fontsize=21,color=INK,weight="bold")
-    ax.text(.2,.96,"Illustrative RGB example: 16 × 16 × 3 = 768 numbers per patch before projection.",fontsize=18,color=TEXT)
-    role_legend(ax,.22,size=18)
+    fig,ax=canvas(4.7)
+    flow(ax,[("Split\npatches","model"),("Flatten","model"),("Embed +\nposition","model"),("Encode","model"),("Pool","model"),("Score\nclasses","output")],w=1.7,gap=.43,labels=["[4,16,16,3]","[4,768]","[4,d]","[4,d]","[d]"],size=18)
+    ax.text(.1,4.1,"Illustrative RGB image: 32×32",fontsize=21,color=INK)
+    ax.text(.2,1.0,"16×16×3=768 values/patch; four patches.",fontsize=18,color=TEXT)
+    _legend(ax,("model","output"))
     save(fig,path)
 
 
@@ -296,11 +260,11 @@ def complexity(path):
         label_y = y*.25 if i == 0 else y*.5
         ax.text(x*1.15,label_y,f"{y*1e3:.3g} MB" if y<1 else f"{y:.3g} GB",ha="left",va="top",fontsize=18)
     ax.set_xlim(300,8e5);ax.set_ylim(1e-5,200)
-    ax.set_xlabel("sequence length n (tokens)",fontsize=18)
-    ax.set_ylabel("one score matrix (GB)",fontsize=18)
+    ax.set_xlabel("length n",fontsize=18)
+    ax.set_ylabel("score-table GB",fontsize=18)
     ax.tick_params(labelsize=16)
-    ax.set_title("Calculated example: 4× more tokens make the n × n table 16× larger",loc="left",fontsize=20)
-    fig.text(.11,.03,"One head, 2 bytes per score (fp16); excludes other tensors. Efficient kernels need not store the full table.",fontsize=17,color=TEXT)
+    ax.set_title("Calculated score-table memory",loc="left",fontsize=20)
+    fig.text(.11,.03,"One head; two bytes/score; excludes other tensors.",fontsize=17,color=TEXT)
     save(fig,path)
 
 
@@ -311,14 +275,14 @@ def bert_summary(path):
     fig,ax=plt.subplots(figsize=(13,4.6))
     fig.subplots_adjust(left=.25,right=.95,bottom=.26,top=.78)
     ax.barh([1,0],[weight,1-weight],color=[BLUE,GREEN],height=.52)
-    ax.set_yticks([1,0],["animal", "all other positions\n(aggregate)"],fontsize=20)
+    ax.set_yticks([1,0],["animal", "other positions"],fontsize=20)
     ax.set_xlim(0,1); ax.tick_params(axis="x",labelsize=18)
-    ax.set_xlabel("attention weight from the query it",fontsize=20)
+    ax.set_xlabel("Query it: weight",fontsize=20)
     for y,v in [(1,weight),(0,1-weight)]:
         ax.text(v+.025,y,f"{v:.3f}",va="center",fontsize=21,color=INK)
-    ax.set_title(f"Measured BERT head with the largest it → animal weight: layer {result['layer']}, head {result['head']}",
+    ax.set_title(f"Archived selected BERT: layer {result['layer']}, head {result['head']}",
                  fontsize=21,loc="left")
-    fig.text(.06,.06,"Chosen from all 144 heads, as in lab TODO 5. Other positions are summed. A weight is not understanding.",
+    fig.text(.06,.06,"Largest it→animal weight; selection disclosed. Routing alone is not explanation.",
              fontsize=18,color=TEXT)
     save(fig,path)
 
@@ -349,16 +313,15 @@ def gpt2_causal_summary(path):
     fig.subplots_adjust(left=.1,right=.88,bottom=.25,top=.9,wspace=.32)
     for ax,head,note in zip(axes,data["heads"][:2],["mixes several earlier tokens","looks at the previous token"]):
         image=ax.imshow(head["weights"],cmap="Oranges",vmin=0,vmax=1)
-        ax.set_xticks(range(len(toks)),toks,rotation=60,ha="right",rotation_mode="anchor",fontsize=17)
-        ax.set_yticks(range(len(toks)),toks,fontsize=17)
-        ax.set_title(f"Layer {head['layer']}, head {head['head']}: {note}",loc="left",fontsize=18)
-        ax.set_xlabel("key: token read",fontsize=17)
+        ax.set_xticks([0,8,12],[0,8,12],fontsize=18)
+        ax.set_yticks([0,8,12],[0,8,12],fontsize=18)
+        ax.set_title(f"L{head['layer']} H{head['head']}",loc="left",fontsize=18)
+        ax.set_xlabel("source",fontsize=18)
         ax.grid(False)
-    axes[0].set_ylabel("query: current token",fontsize=17)
+    axes[0].set_ylabel("query",fontsize=18)
     bar=fig.colorbar(image,ax=axes,fraction=.025,pad=.02)
-    bar.set_label("measured weight",fontsize=17); bar.ax.tick_params(labelsize=17)
-    fig.text(.1,.025,f"Every square above the diagonal (a later token) has weight {data['max_future_weight']:.1f} "
-             f"in all {data['layers']*data['heads_per_layer']} heads.",fontsize=18,color=TEXT)
+    bar.set_label("weight",fontsize=18); bar.set_ticks([0,.5,1]); bar.ax.tick_params(labelsize=18)
+    fig.text(.1,.025,f"L=layer; H=head. 8=it; 11=tired; 12=full-stop. Future max={data['max_future_weight']:.1f}; heads={data['layers']*data['heads_per_layer']}.",fontsize=18,color=TEXT)
     save(fig,path)
 
 

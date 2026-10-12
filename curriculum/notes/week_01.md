@@ -39,7 +39,7 @@ A **generative model** learns patterns in examples and uses them to create new e
 
 A **discriminative model** predicts a label $y$ for input $x$, written $p(y \mid x)$. A spam filter labels an email. A generative model writes an email.
 
-Most systems in use today are **foundation models**: large models trained once on broad data and then adapted to many tasks. The term comes from a 2021 Stanford report. One foundation model can summarise, translate, answer questions and write code without a separate model for each task.
+Many current generative applications use **foundation models**: large models trained once on broad data and then adapted to many tasks. The term comes from a 2021 Stanford report. One foundation model can summarise, translate, answer questions and write code without a separate model for each task.
 
 > **Key idea:** Generating means sampling from a learned probability distribution. VAEs, GANs, diffusion models and large language models (LLMs) are different ways of learning that distribution and sampling from it.
 
@@ -74,7 +74,7 @@ When a product "gets smarter overnight", ask which layer changed: the model, the
 
 | | Proprietary (closed-weight) | Open-weight |
 |---|---|---|
-| Access | App or paid API; weights never released | Weights downloadable (subject to licence) |
+| Access | Provider app or API; weights controlled by provider | Weights downloadable (subject to licence) |
 | Examples (families) | GPT, Claude, Gemini | Llama, Qwen, Mistral, Gemma, DeepSeek |
 | Strengths | Often the strongest general capability; no hardware needed | Privacy, control, can be fine-tuned and inspected; predictable cost at scale |
 | Weaknesses | Data leaves your organisation; provider controls updates and retirements | You manage hardware, updates and safety; smaller models are less capable |
@@ -99,8 +99,8 @@ Tokens matter in practice because the **context window**, token-priced API costs
 
 ### Training versus inference
 
-* **Training** searches for parameter values that make the training data likely, by computing a loss and adjusting parameters with gradient descent over many passes. It is expensive: large GPU clusters for weeks or months.
-* **Inference** uses the fixed parameters to produce an output for a new input. For an LLM, each generated token requires one forward pass through the network.
+* **Training** finds parameters that make observed examples likely. Our count model learns a table directly. Neural networks often minimise a **loss**, a score to reduce, using **gradient descent**. Gradient descent updates parameters in a direction that lowers that score. Frontier-scale pre-training can require large GPU clusters; these labs use small CPU jobs.
+* **Inference** uses the fixed parameters to produce an output for a new input. Ordinary autoregressive decoding repeatedly runs the model to extend the output. Some implementations use caching or generate more than one candidate per step.
 
 > **Misconception:** "The chatbot learns from my conversation." Within a conversation the model only sees more context; its weights do not change. Some providers may later use conversations to train future models, which is a privacy question and why data-sharing settings matter.
 
@@ -138,6 +138,35 @@ Any joint distribution over a sequence can be factorised exactly with the chain 
 $$p(x_1, x_2, \ldots, x_T) = \prod_{t=1}^{T} p(x_t \mid x_1, \ldots, x_{t-1})$$
 
 A model that predicts the next token given all previous ones therefore defines a probability for any sequence. Such a model is **autoregressive**: it generates by feeding its own outputs back as inputs. GPT-style LLMs are autoregressive transformers (weeks 5–6). The factorisation is exact; the modelling assumption is only in how well the network approximates each conditional.
+
+## Worked example: counts become a conditional distribution
+
+Suppose our vocabulary is only dot, a and b. The dot marks a name boundary. This is illustrative arithmetic, separate from the lab’s measured dataset results.
+
+| Step | Values | Meaning |
+|---|---|---|
+| Count pairs after a | [2, 1, 0] | Three observations; none ended with b |
+| Add one to each count | [3, 2, 1] | Give unseen pairs a nonzero chance |
+| Find the row total | 3 + 2 + 1 = 6 | Count all possible next-character columns |
+| Divide each entry by six | [1/2, 1/3, 1/6] | Conditional probabilities given a |
+| Check the sum | 1/2 + 1/3 + 1/6 = 1 | All possible next outcomes are covered |
+
+**Read the shapes.** With a vocabulary of three characters, N and P each have shape [3, 3]. Selecting the row for a returns a vector of shape [3]. In the full lab, the vocabulary is larger, but the row operation is the same.
+
+**Predict before sampling.** Which next character is most likely? Dot, because it has probability one-half. Does that force every name to stop here? No: a and b still have positive probabilities. Over many comparable draws, the choices follow the row’s chances, although a short run may look uneven.
+
+**Where the analogy breaks.** A bag of counters illustrates drawing with unequal chances. Our sampler changes to the newly selected character’s row after each draw; it does not keep using one bag throughout the name.
+
+## Worked example: Bayes’ rule normalises two class scores
+
+For two illustrative classes, suppose the likelihood multiplied by the prior gives 0.12 for class A and 0.08 for class B. These values are supplied for this calculation; they are not measured classifier outputs.
+
+1. Add the products across classes: 0.12 + 0.08 = 0.20.
+2. Divide A’s product by that total: 0.12 / 0.20 = 0.60.
+3. Divide B’s product by the same total: 0.08 / 0.20 = 0.40.
+4. Check the class probabilities: 0.60 + 0.40 = 1.
+
+The prior describes class frequency before the input. The likelihood describes the input under each class. The normalised answer describes the class given the input. For continuous inputs, a likelihood can be a density; a density value is not the probability of one exact point. The equation’s denominator converts class scores into probabilities summing to one.
 
 ### Likelihood and maximum likelihood
 
@@ -249,7 +278,7 @@ A **hallucination** is a generated claim that is false or lacks evidence. Exampl
 * **Bias and fairness:** outputs reflect patterns and gaps in training data, e.g. stereotyped images of professions. Test outputs across groups.
 * **Privacy:** personal or confidential data pasted into a tool may be stored or used for training; check settings and organisational policy (GDPR applies).
 * **Intellectual property:** copyright in training data is contested in several jurisdictions; check output licences and attribute sources.
-* **Transparency and law:** Article 50 of the EU AI Act applies from 2 August 2026. Duties differ by role. Tell people when they directly interact with AI unless this is obvious. Providers must machine-mark generated media, with exceptions such as standard editing. Deployers must disclose deepfakes and relevant AI-written public-interest text, subject to the editorial-review exception. For systems marketed before 2 August 2026, the 2 December 2026 transition concerns the Article 50(2) marking duty only. The Commission published guidelines on 31 July 2026. Read the official text for full scope and exceptions.
+* **Transparency and law:** Article 50 of the EU AI Act applies from 2 August 2026. Duties differ by role. Tell people when they directly interact with AI unless this is obvious. Providers must machine-mark generated media, with exceptions such as standard editing. Deployers must disclose deepfakes and relevant AI-written public-interest text, subject to the editorial-review exception. For systems marketed before 2 August 2026, the 2 December 2026 transition concerns the Article 50(2) marking duty only. The Commission published guidelines on 20 July 2026; the publication page was last updated on 31 July 2026. Read the official text for full scope and exceptions.
 * **Academic integrity:** follow the module's AI-use policy, disclose how AI was used, and remember that the student is accountable for everything submitted.
 * **Security and misuse:** prompt injection (weeks 7 and 12), deepfakes and harmful content; safety filters reduce but do not remove risk.
 
@@ -268,6 +297,26 @@ Other modules in the programme (Explainable and Emerging AI Technologies) cover 
 | "Bigger models are always better." | Data quality, post-training and task fit matter; small models can be faster, cheaper, private and good enough. |
 | "Discriminative models are old-fashioned." | For pure classification they are often better; generative models solve a harder problem. |
 
+# Questions students often ask
+
+**Why does a row of P sum to one?** It lists every possible next character after the selected previous character. Divide across columns within that row, not down a column across different conditions.
+
+**Is smoothing maximum likelihood?** The unsmoothed relative count is the maximum-likelihood estimate for that count table. Adding one changes it to avoid zero probabilities; the lab should identify the smoothing choice explicitly.
+
+**Why did my output differ with the same weights?** Sampling makes random choices. A seed helps repeat them in a fixed environment, while software and hardware changes can affect reproducibility.
+
+**Does a lower NLL make the answer true?** No. NLL describes agreement with the model distribution on supplied data. Check factual claims and citations against evidence.
+
+**Can a model know today’s news without retraining?** An application can retrieve new information and include it in context. This changes the input without changing the weights; its interpretation still needs checking.
+
+# Five self-checks with answers
+
+1. **A three-entry row is [3, 2, 1]. What probabilities follow?** Divide by six: [1/2, 1/3, 1/6]. They sum to one.
+2. **You sample a new letter m. Which row comes next?** The row for m, because this bigram model remembers the most recent character.
+3. **Does adding conversation context perform training?** No. Ordinary generation uses fixed weights with the extended input; fine-tuning performs actual parameter updates.
+4. **Why can two applications using one model answer differently?** Instructions, retrieved evidence, tools, stored context and interfaces can differ.
+5. **A citation exists. What second check remains?** Read it and verify that it supports the specific claim, rather than merely sharing the topic.
+
 # Responsible AI lens: the five-step checklist
 
 Use this checklist in every lab and in the group project. It also works as an exam answer structure for "how should an organisation use tool X?" questions.
@@ -284,11 +333,12 @@ Use this checklist in every lab and in the group project. It also works as an ex
 
 **Where the numbers come from.** The results below were recorded in {{W01_RUN}}; the run saved them to `curriculum/assets/week_01/results.json`. Students' numbers can differ slightly with another dataset download, model revision or hardware, so they should record their own dataset, model, settings and outputs. The recap arithmetic is illustrative.
 
-**Runtime:** Google Colab with a T4 GPU is recommended, but every part runs on a laptop CPU. The main downloads are the SmolLM2 model (about 700 MB for the 360M version) and the names dataset (a fallback list is built in); dependency installation also needs access. On the laptop CPU used to check this pack (9 October 2026), the complete notebook ran in about 1 minute with the models and data already downloaded. **Hand-in:** completed notebook with five code TODOs, four written answers and the evidence table.
+**Route:** Use Colab or local VS Code on the CPU by default. A GPU is optional. The measured results below identify their run with {{W01_RUN}}; they do not predict waiting time on a new machine or network. Use the shared setup cell to print the actual environment. **Hand-in:** complete the notebook tasks, self-checks, written explanations and evidence table.
 
 ## Before the lab
 
-* Students need a Google account (Colab) and can download this public model without a Hugging Face account. The optional Part 4 comparison uses a Gemini API key (availability and quotas depend on the account) from Google AI Studio, stored in Colab Secrets as `GEMINI_API_KEY`; students without a key use any chat assistant in the browser.
+* Colab requires a Google account; local VS Code does not. The public core model needs no Hugging Face account.
+* Optional hosted comparison: enable exactly one of `USE_GEMINI` or `USE_OPENAI` in shared setup; both are false by default. Use `GEMINI_API_KEY` or `OPENAI_API_KEY` from Colab Secrets or the environment. Local users may select a private `.env` through `LOCAL_ENV_FILE`. Never include keys in a notebook. OpenAI API charges are separate from ChatGPT subscriptions. Check provider eligibility and pricing first; the complete local comparison needs no key or API spending. Gemini free eligibility and quotas depend on the account; do not enable paid Gemini billing for this lab.
 * Remind students never to paste API keys into notebooks or share notebooks that contain them.
 
 ## Part 1: a generative model from counts
@@ -306,19 +356,21 @@ Use this checklist in every lab and in the group project. It also works as an ex
 
 ## Part 3: a small LLM in action
 
-* Recorded with SmolLM2's tokenizer: **{{W01_TOKENS}}** for the same sentence. Link this to cost, speed and context limits, and to fairness across languages. The `Ġ` symbol marks a leading space in byte-level BPE; Hindi appears as raw byte pieces because the vocabulary has few Devanagari tokens.
+**Stored measurement, not the current core model.** The retained language-model results below were measured on 9 October 2026 with `HuggingFaceTB/SmolLM2-360M-Instruct`, CPU, seed 42, in a full run. The current CPU core uses `HuggingFaceTB/SmolLM2-135M-Instruct`; its outputs can differ. Top-token inspection used T = 0.5, 1.0 and 1.5. Definition sampling used T = 0.2 and 1.2, top-p = 0.9, and at most 60 new tokens. The fictional-paper experiment used T = 0.7, top-p = 0.9, and at most 90 new tokens, with the stated honesty instruction in its second condition. These settings identify the original result; do not present it as a new 135M measurement.
+
+* Stored 360M run, tokenizer counts: **{{W01_TOKENS}}** for the same sentence. Link this to cost, speed and context limits, and to fairness across languages. The `Ġ` symbol marks a leading space in byte-level BPE; Hindi appears as raw byte pieces because the vocabulary has few Devanagari tokens.
 * **TODO 5:** `torch.softmax(logits / T, dim=-1)`. Recorded for "The cat sat on the": *mat* gets {{W01_MAT}}, while {{W01_RUNNERS_UP}} gain probability as T rises.
 * Compare repeated outputs at T = 0.2 and T = 1.2. Record actual variation; a small number of outputs need not show a clear difference.
 
 ## Part 4: hallucination
 
-* In the recorded run SmolLM2-360M invented a summary of the non-existent paper **both** without the honesty instruction ("{{W01_FICTION_PLAIN}}") and with it ("{{W01_FICTION_HONEST}}"). Sampling makes each run different, so students compare their own recorded answers. A search-enabled assistant may find supporting sources, but the sources and its use of them still require checking; no answer format proves factual accuracy.
+* In the stored 360M run identified above, SmolLM2-360M invented a summary of the non-existent paper **both** without the honesty instruction ("{{W01_FICTION_PLAIN}}") and with it ("{{W01_FICTION_HONEST}}"). Sampling makes each run different, so students compare their own recorded answers. A search-enabled assistant may find supporting sources, but the sources and its use of them still require checking; no answer format proves factual accuracy.
 
 ## Troubleshooting
 
-* *Model download is slow or fails:* re-run the cell; on Colab switch runtime off and on. On a slow network set `MODEL_ID` to the 135M model.
+* *Model download is slow or fails:* re-run the cell; on Colab switch runtime off and on. The core already uses the 135M model; retain the completed local probability and classifier tasks while checking access.
 * *CUDA out of memory:* unlikely for this model; restart the runtime.
-* *`google.colab` not found:* expected outside Colab; set the environment variable `GEMINI_API_KEY` instead or skip the optional cell.
+* *`google.colab` not found:* expected outside Colab. Optional API keys can use the environment or a selected private `.env`; keep both switches false for local work.
 
 # Practice questions with model answers
 
@@ -374,7 +426,7 @@ Use this checklist in every lab and in the group project. It also works as an ex
 * Foster, D. (2023) *Generative Deep Learning*, 2nd ed., O'Reilly: chapter 1, "Generative Modeling" (probabilistic framing, generative vs. discriminative, representation learning).
 * Tunstall, von Werra & Wolf (2022) *Natural Language Processing with Transformers*, O'Reilly: chapter 1, "Hello Transformers" (optional preview of weeks 5–6).
 
-**Videos (links last checked 9 October 2026)**
+**Videos and worked lessons**
 
 * [3Blue1Brown: Large Language Models explained briefly](https://www.youtube.com/watch?v=LPZh9BOjkQs): 8-minute visual introduction to next-token prediction.
 * [Google Cloud Tech: Introduction to Generative AI](https://www.youtube.com/watch?v=G2fqAlgmoPo): accessible overview.
@@ -382,6 +434,10 @@ Use this checklist in every lab and in the group project. It also works as an ex
 * [Andrej Karpathy: How I use LLMs](https://www.youtube.com/watch?v=EWvNQjAaOHw): practical tour of AI tools and their settings.
 
 **Official learning pages**
+
+* [Karpathy: Building makemore](https://www.youtube.com/watch?v=PaCmpygFfXo): a worked count-table language model; the deeper neural coding is optional.
+* [Google: Introduction to large language models](https://developers.google.com/machine-learning/crash-course/llm): tokens, context and probability.
+* [Hugging Face: Generation parameters](https://huggingface.co/docs/transformers/main/en/main_classes/text_generation): current decoding documentation.
 
 * [Microsoft Learn: Introduction to generative AI and agents](https://learn.microsoft.com/en-us/training/modules/fundamentals-generative-ai/)
 * [Microsoft: Generative AI for Beginners](https://github.com/microsoft/generative-ai-for-beginners): lessons 1–3, including "Using generative AI responsibly".
@@ -447,7 +503,7 @@ Choose using your task, cost, data needs, licence and available hardware.
 
 - The provider runs the model and updates it
 
-- You pay for access or usage
+- Check access conditions and usage costs
 
 - Check where your data goes and how long it stays
 
@@ -676,7 +732,7 @@ Use this checklist in every lab and in your group project. It is also a good exa
 
 ## Slide 38: Lab 1: probability, sampling and a first look at an LLM
 
-Google Colab (T4 GPU) or local Jupyter; everything also runs on a CPU
+Google Colab or local VS Code on the CPU by default; a GPU is optional and availability varies.
 
 Completed notebook with five code TODOs, four written answers and the evidence table
 
@@ -691,6 +747,8 @@ Completed notebook with five code TODOs, four written answers and the evidence t
 - Run a small language model. Inspect token pieces, next-token chances and generated text.
 
 - Test a fictional-paper prompt and verify claims. Complete the evidence table.
+
+<!-- pagebreak -->
 
 ## Slide 39: Summary
 

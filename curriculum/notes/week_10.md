@@ -1,6 +1,6 @@
 # Lecture plan at a glance
 
-This week turns last week's multimodal foundations into applications (MIMLO 2, 3, 4). Students should leave able to explain the two designs of multimodal LLMs, describe how such models are trained and adapted, use models for image, speech and cross-modal tasks, choose evaluation methods for each modality (including hallucination probes), and propose a layered provenance and consent strategy for synthetic media. All images and numbers on the "real" slides come from running this week's lab notebook in advance (`curriculum/assets/week_10/`).
+This week turns last week's multimodal foundations into applications (MIMLO 2, 3, 4). Students should leave able to explain the two designs of multimodal LLMs, describe how such models are trained and adapted, use models for image, speech and cross-modal tasks, choose evaluation methods for each modality (including hallucination probes), and propose a layered provenance and consent strategy for synthetic media. The archived measured images and results come from `curriculum/assets/week_10/`; the revised CPU core records its own observations separately.
 
 | Time | Slides | Segment | What you do |
 |---|---|---|---|
@@ -13,7 +13,7 @@ This week turns last week's multimodal foundations into applications (MIMLO 2, 3
 | 92–114 min | 29–37 | 5 · Responsible use, applications, trends | Harms; provenance layers; labelling discussion; consent and rights; applications; trends; design pattern; checklist. |
 | 114–120 min | 38–40 | Lab preview, summary, resources | |
 
-> **Teaching tip:** Bring a real receipt or open a scanned invoice, and ask a multimodal assistant live to total it. Then ask it to extract the line items as JSON and total them yourself. Students see the "perceive with the model, compute with code" pattern before you name it.
+> **Teaching tip:** Use the fictional invoice supplied by the lab, and ask a local multimodal model to read a field. Then ask it to extract the line items as JSON and total them yourself. Students see the "perceive with the model, compute with code" pattern before you name it.
 
 <!-- pagebreak -->
 
@@ -47,11 +47,11 @@ A **multimodal large language model (MLLM)** processes text alongside other supp
 | LLaVA | Open research | Images | Reference modular design |
 | SmolVLM, Gemma, Llama vision | Open-weight | Images | Small models for laptops and devices |
 
-**Real captions (lab run):** {{CAPTIONS}}
+**Archived captions (Qwen3-VL-2B, CPU; asset date not recorded):** {{CAPTIONS}}
 
 **Visual tokens and cost.** In a simple patch design, 336/14 = 24 patches per side, giving 24 × 24 = 576 patch vectors. Other models add, combine or tile visual features. Higher resolution can preserve small text but needs more computation. Video samples frames and may miss events between them. Providers use different media billing rules; estimate a small sample with the current endpoint pricing before processing a large collection.
 
-**Cross-modal reasoning, measured.** The lab generates a bar chart and an invoice image, so the correct answers are known exactly (the busiest day, a single value, a total that requires adding five bars, the invoice number, the total due, the customer). **Lab result:** {{QA_NOTES}}
+**Archived cross-modal reasoning, measured.** The lab generates a bar chart and an invoice image, so the correct answers are known exactly (the busiest day, a single value, a total that requires adding five bars, the invoice number, the total due, the customer). **Lab result:** {{QA_NOTES}}
 
 ![Generated chart and invoice used for evaluation](fig:lab_chart)
 
@@ -92,17 +92,17 @@ A **multimodal large language model (MLLM)** processes text alongside other supp
 | Text → music/audio | Diffusion or token LMs over audio codecs | MusicGen, Stable Audio |
 | Text → video | Diffusion transformers over spacetime patches, some with synchronised audio | Sora, Veo families, open video models |
 
-**Text → image (real).** SD-Turbo is a distilled model: two steps, no classifier-free guidance, a second or two per 512 × 512 image on a GPU. **Lab result:** {{T2I_NOTES}}
+**Archived text → image.** SD-Turbo is a distilled model: the stored experiment used two steps, zero guidance and 512 × 512 outputs. This figure has no per-image runtime claim. **Lab result:** {{T2I_NOTES}}
 
 ![SD-Turbo text-to-image outputs](fig:lab_t2i)
 
-**Image-to-image (real).** Strength controls how much starting noise the pipeline adds before denoising. A lower value tends to retain more original structure; a higher one allows greater change. This scheduler derives effective steps from steps times strength, with rounding. Inspect the outputs rather than assuming a setting guarantees a particular result.
+**Archived image-to-image.** Strength controls how much starting noise the pipeline adds before denoising. A lower value tends to retain more original structure; a higher one allows greater change. This scheduler derives effective steps from steps times strength, with rounding. Inspect the outputs rather than assuming a setting guarantees a particular result.
 
 ![Image-to-image at three strengths](fig:lab_i2i)
 
 **Editing, control and personalisation.** Inpainting/outpainting (regenerate a masked region or extend the canvas); control (ControlNet and adapters following edges, depth, pose or a reference image); instruction-based editing ("make it winter"), now conversational in natively multimodal models; personalisation with LoRA or DreamBooth on a few images of a subject or style, which raises likeness and style-rights questions.
 
-**Speech.** **TTS** means text-to-speech. A model predicts sound features or tokens and creates a waveform; VITS-based MMS combines these stages. Audio-codec token models represent short sound segments as IDs. Voice cloning can imitate a speaker and requires permission and safeguards against impersonation. Speech-to-speech systems recognise or directly process sound and reply aloud; delay varies by system. **Lab round trip (MMS-TTS → Whisper):** {{SPEECH_NOTES}}
+**Speech.** **TTS** means text-to-speech. A model predicts sound features or tokens and creates a waveform; VITS-based MMS combines these stages. Audio-codec token models represent short sound segments as IDs. Voice cloning can imitate a speaker and requires permission and safeguards against impersonation. Speech-to-speech systems recognise or directly process sound and reply aloud; delay varies by system. **Archived round trip (MMS-TTS → Whisper):** {{SPEECH_NOTES}}
 
 **Music, sound and video.** MusicGen is a language model over audio-codec tokens; Stable Audio is a latent diffusion model. Rights holders have sued several music-generation companies over training data. Text-to-video models extend diffusion transformers to space and time; since 2025 some generate synchronised sound. Open problems: temporal consistency, physics, long durations and cost.
 
@@ -123,7 +123,7 @@ A **multimodal large language model (MLLM)** processes text alongside other supp
 
 **CLIP score** is 100 × the cosine similarity between CLIP's image and text embeddings. A useful sanity check is that the lab compares each image’s own-prompt score with its mean score against the other prompts. That comparison does not establish that the own prompt ranks first.
 
-**Multimodal hallucination** means describing absent objects, misreading numbers, inventing text in documents, or agreeing with leading questions. **POPE** (Li et al., 2023) asks balanced "Is there a {object} in the image?" questions about present and absent objects and reveals a **yes-bias**. **Lab probe:** {{POPE_NOTES}} Mitigations: higher resolution; "answer only from what is visible"; extraction with verification; preference training against hallucination.
+**Multimodal hallucination** means describing absent objects, misreading numbers, inventing text in documents, or agreeing with leading questions. **POPE** (Li et al., 2023) asks balanced "Is there a {object} in the image?" questions about present and absent objects and reveals a **yes-bias**. **Archived classroom probe:** {{POPE_NOTES}} Mitigations: higher resolution; "answer only from what is visible"; extraction with verification; preference training against hallucination.
 
 **Human evaluation:** show two outputs side by side and randomise their positions. Give reviewers a rubric: prompt match, defects and realism for images; naturalness and clarity for sound. Use varied content, accents, languages and raters. Report agreement and disagreements. Automatic scores check different pieces of quality and support this review.
 
@@ -185,29 +185,93 @@ A **multimodal large language model (MLLM)** processes text alongside other supp
 
 # Lab guide and answers
 
-**Runtime:** Colab T4 GPU with Qwen3-VL-2B-Instruct, SD-Turbo, CLIP ViT-B/32, MMS-TTS and Whisper base. On CPU the notebook automatically uses SmolVLM-256M-Instruct; set the environment variable `GENAI_VLM` to choose another model. The stored results come from the laptop CPU used to check this pack (9 October 2026), with Qwen3-VL-2B-Instruct chosen through `GENAI_VLM`: the full notebook took about 7 minutes with the models and data already downloaded. The 4 GB laptop GPU was not used for this week. The GPU path was not timed. Models are downloaded from the Hugging Face Hub; no API key is needed. **Hand-in:** QA accuracy table, hallucination probe, generated images with CLIP scores, speech WER table, three written answers.
+**Before the lab:** open the notebook in free Google Colab with a Python runtime, or in local VS Code with the course kernel. Run the pinned installation and single injected setup once. CPU is the default; leave `USE_GPU`, `USE_GEMINI` and `USE_OPENAI` disabled for the complete local core.
+
+**Current CPU core:** SmolVLM-256M-Instruct; float32; maximum input side 384 pixels; at most 32 generated tokens per answer; two captions, three reading questions and two yes/no probes. It also computes known totals, runs semantic TODO probes, executes the real word-edit WER algorithm and resaves honest metadata. The design target is at most 15 minutes of cached CPU waiting. Initial installs and checkpoint downloads are additional.
+
+**Measured local core:** {{W10_CORE_TIME}} on {{W10_CORE_DATE}}, using {{W10_CORE_THREADS}} CPU threads. Installation, downloads, widgets and optional stretch/API calls are excluded. This is a local run, not a timed Colab run. {{W10_CORE_RESULTS}}
+
+
+**Optional extensions:** `RUN_STRETCH = False` keeps SD-Turbo generation/editing, CLIP inference and MMS-TTS/Whisper inference disabled. Their original implementations remain available behind that switch. The core inspects stored image strips and transcript examples. `GENAI_VLM` is an instructor override: changing it changes the experiment and requires separate recording and timing. A GPU may help extensions, but is optional; the current core does not choose it automatically.
+
+**Optional text comparison:** choose exactly one shared `USE_GEMINI` or `USE_OPENAI` switch only if wanted. `ask_model` uses Colab Secrets or environment variables; local users may choose a private `.env` through `LOCAL_ENV_FILE`. Keys are never displayed or placed in notebooks. Availability follows the account and provider terms; OpenAI API charges are separate from ChatGPT subscriptions. The one request contains fictional amounts, and a complete local calculation remains if the API is disabled or unavailable. No provider or image-upload service is required.
+
+**Historical runtime record:** the ledger records 416.0 seconds on a laptop CPU for the earlier full notebook, starting 9 October 2026 at 21:26:31 UTC, with Qwen3-VL-2B selected through `GENAI_VLM` and cached models. Its notebook SHA-256 was `4c77bd1c6d11624eead9ea4470f222fc51119be28cdaebe25c28d1ef1ad57d5e`. This record describes that earlier notebook, not the revised SmolVLM core. The results JSON identifies Qwen3-VL-2B and CPU but does not record an asset date; the asset date is not inferred from this timing record.
+
+**Instructor export:** set `GENAI_RESULTS_PATH` to a distinct `results_cpu_core.json` when measuring the current core. Its existing result keys remain, with empty image/speech extension tables and an explicit `run_kind=core`. The original `results.json`, `fill.json` and image bytes remain archived; do not harvest a core run as full extension evidence.
+
+**Hand-in:** predictions, full replies with their known references, reading/arithmetic/hallucination error analysis, verified code totals, metadata observations and five answered self-checks. If an extension runs, submit its fresh configuration and outputs separately from archived evidence.
+
+
+## Worked examples: representations, scores and verification
+
+**1. Trace image shapes before trusting a caption.** A single RGB image resized to width 384 and height 256 can be represented as `[1, 3, 256, 384]`: one image, three colour channels, rows and columns. This is an illustrative tensor layout before model-specific tiling and batching. The actual processor prints its returned tensor shapes in `ask`; inspect those instead of assuming every VLM shares this shape. In a simple patch design, $N=(H/P)(W/P)$, where $N$ is patch count, $H$ image height, $W$ width and $P$ square patch size. At 336 × 336 pixels with 14-pixel patches, $N=24×24=576$. Cropping, additional summary tokens and tiling change this calculation.
+
+**2. Decode the continuation.** Autoregressive generation follows $p(a\mid I,q)=\prod_{t=1}^{T}p(a_t\mid I,q,a_{1:t-1})$. Here $p$ is the model probability, $a$ the complete answer, $I$ the image, $q$ the question, $t$ a token position, $T$ the answer length, $a_t$ the next answer token and $a_{1:t-1}$ the earlier answer tokens; the product multiplies conditional probabilities across positions. `generate` returns a sequence containing the input prefix and generated continuation. If the input has 30 token IDs and the sequence has 42, decode positions 30 onward: 12 new answer tokens. A token may be a word fragment rather than a whole word. This calculation does not establish factual accuracy.
+
+**3. Separate perception from calculation.** The synthetic chart source is `[12, 30, 18, 25, 9]`, totalling 94. Thursday is 25, and Tuesday is the largest value. The fictional invoice has 40 × EUR 0.50 and 2 × EUR 7.50, giving EUR 20 + EUR 15 = EUR 35. A model can correctly read one field yet fail aggregation. Code can also correctly sum EUR 200 and EUR 15 if the first field was misread. Inspect source values before summing. A schema-valid number remains a candidate value until checked against the image.
+
+**4. Understand image-text alignment.** The extension computes $s=100(e_I\cdot e_T)/(\Vert e_I\Vert\Vert e_T\Vert)$. Here $s$ is the reported CLIP cosine score, $e_I$ the image embedding vector, $e_T$ the text embedding vector, the centred dot is their dot product and each norm is vector length. The factor 100 rescales similarity; it does not turn the score into a probability. For illustrative vectors `[1,0]` and `[1,1]`, the cosine is $1/\sqrt{2}$, giving approximately 70.7. This is a worked calculation, not a lab measurement. A high score for “two red cups” can coexist with three visible cups; count them and inspect defects separately.
+
+**5. Understand speech errors.** Word error rate is $WER=(S+D+I)/N$. $S$ counts substituted reference words, $D$ deleted words, $I$ inserted words and $N$ reference word count. The dynamic-programming table considers the minimum edit path. For reference “the red cup” and hypothesis “the blue cup”, one substitution across three reference words gives $1/3$. Changing “nine” to “9” may preserve meaning but creates a literal token disagreement unless the normaliser treats them equivalently. The recogniser may also correct an expected mispronunciation. Listen for naturalness, pronunciation and timing separately from WER.
+
+**6. Test operations without heavy downloads.** `check_edits()` passes a probe pipeline to `make_edits`: three calls must use strengths 0.3, 0.6 and 0.9, four steps, zero guidance and equal seeds. Each returned image must match its distinct pipeline output. Calling the pipeline and then returning repeated source images fails. `check_speech()` supplies a probe synthesiser with a deliberately non-default sampling rate and known sample values. The recogniser must receive that waveform and rate, and the helper must return stripped text. These probes check implementation contracts; only the optional real inference establishes generated media quality.
+
+**7. Label the actual source honestly.** The core saves a chart fixture with `ai_generated=false`, `model=matplotlib/synthetic-fixture` and its rendering description. The real diffusion extension uses `ai_generated=true`, its actual pipeline identifier and prompt. Reopening the PNG checks exact fields; the JPEG experiment checks their disappearance. The same text fields can be edited or forged, so this exercise establishes metadata behaviour, not signed provenance or truth.
+
+## Core/extension checklist by part
+
+| Part | Core task | Change one thing | Optional stretch | Common error |
+|---|---|---|---|---|
+| Images | Trace captions and tensor shapes. | Shorten the requested description. | Compare another checkpoint with separate evidence. | Treating fluent details as visible facts. |
+| Chart/invoice | Check three fields and compute source totals. | Change one source value. | Evaluate all six original questions. | Summing misread values correctly. |
+| Images/editing | Inspect archived prompt and strength strips. | Predict a strength effect before revealing it. | Execute SD-Turbo, edits and CLIP. | Changing seed and strength together. |
+| Speech | Run word-edit examples and the semantic probe. | Substitute one reference word. | Execute MMS-TTS and Whisper, then listen. | Hardcoding a sampling rate. |
+| Provenance | Resave honestly labelled fixture metadata. | Edit one unsigned field. | Label a real extension-generated image. | Calling an editable label C2PA or proof. |
+
+## Five self-checks with answers
+
+1. **What enters and leaves `ask`?** Image pixels and question token IDs enter; the continuation is decoded into answer text. Exact tensor shapes depend on the processor.
+2. **Does a correct EUR 215 sum fix an extracted EUR 200 instead of EUR 20?** No. The arithmetic is correct for wrong inputs; compare fields with the image first.
+3. **Why inspect absent-object replies and full answers?** They expose unsupported claims and yes bias; the substring/first-number heuristic can accept a misleading reply.
+4. **Does high CLIP similarity or zero WER establish complete quality?** No. Global image-text alignment and recovered words are partial measures; count objects, inspect defects and listen separately.
+5. **What does C2PA establish that unsigned PNG fields do not?** A signed provenance assertion can support verified origin/edit history and integrity. It does not prove that the depicted event occurred, and credentials can be unavailable after resharing.
+
+## FAQ: choosing and checking a media route
+
+**Does a multimodal model necessarily generate pictures?** No. Many VLMs generate text from images and questions. Name the accepted inputs and generated outputs for the exact checkpoint.
+
+**Should I increase resolution until every invoice answer is correct?** Larger images may preserve text, but also cost computation and may still fail. Check the processor's resize/tiling rules and measure representative fields.
+
+**Can the model judge whether its own answer is correct?** A second answer is another model output. Known values, independent calculation and source review supply stronger evidence for this fixture.
+
+**Do these two probes reproduce POPE?** No. They are a classroom demonstration of present/absent checking. Only a complete leading `yes` or `no` word is scored; uncertainty and words such as `Nobody` are non-answers. The full benchmark uses its specified data and procedure.
+
+**Why use an API for a calculation already supplied locally?** The optional comparison examines wording and the separation of extraction from arithmetic. It is an extension, with account costs and data handling considered explicitly.
+
+![Checked multimodal application route](fig:lecture_flow_41)
 
 ## TODOs
 
-* **TODO 1** `score(answer, gold)`: for numeric reference answers, compare the first number found in the answer; otherwise check that the normalised gold string appears in the answer.
-* **TODO 2** `AutoPipelineForImage2Image.from_pipe(t2i)` and call it at strengths 0.3, 0.6, 0.9 with `num_inference_steps=4`, `guidance_scale=0.0`.
-* **TODO 3** `tts(**tts_tok(s, return_tensors="pt")).waveform`, then `asr({"raw": wav, "sampling_rate": sr})["text"]`, then WER.
-* **TODO 4** add `ai_generated`, `model` and `prompt` text fields to `PngInfo`, save, reload, and observe that re-saving as JPEG drops them.
+* **TODO 1** `score(answer, gold)`: compare the first signed parsed number for numeric references, otherwise match a lower-cased substring. `check_score()` covers decimal equivalence, positive and negative signs, comma removal, text matching and mismatches. The heuristic remains deliberately limited.
+* **TODO 2** implement `make_edits` using the supplied image-to-image pipeline at strengths 0.3, 0.6 and 0.9 with four steps, zero guidance and the same source/prompt/seed. `check_edits()` checks exact calls and the corresponding returned images with a lightweight probe; real generation remains optional.
+* **TODO 3** implement `synthesise_and_transcribe`: tokenise the sentence, obtain `.waveform[0]`, preserve its configured sampling rate, pass both to ASR and return stripped text. `check_speech()` checks data flow with probes; `check_wer()` checks real word edits.
+* **TODO 4** add honest `ai_generated`, `model` and `prompt` fields to `PngInfo`, save and reload. `check_metadata()` checks the selected source labels and their loss on JPEG conversion. Core fixture and real generated-image labels differ intentionally.
 
-## Measured results (instructor run)
+## Archived measured results (instructor run; unchanged asset bytes)
 
 {{RESULTS_NOTES}}
 
 ## Model answers to the written questions
 
-1. **VLM accuracy on charts and documents.** Strong small VLMs usually read single values and text fields correctly but are less reliable at aggregation (summing the chart), and can answer "yes" to absent objects or unmentioned fields; tiny models often read labels but miss numbers. Failures cluster into reading/OCR errors, arithmetic, and hallucination under leading questions. Before processing invoices: extract fields into a validated schema and compute totals in code, cross-check against printed totals, use higher resolution or a document-specialised model, measure field-level accuracy on a labelled set of real invoices, and keep human review for low-confidence or high-value cases.
+1. **VLM accuracy on charts and documents.** Judge the current core from its own full replies and references. The archived Qwen3-VL experiment shows that correct field reading can coexist with an aggregation error; another checkpoint needs its own evaluation and may fail different questions. Models can also answer "yes" to absent objects or unmentioned fields. Failures cluster into reading/OCR errors, arithmetic, and hallucination under leading questions. Before processing invoices: extract fields into a validated schema and compute totals in code, cross-check against printed totals, use higher resolution or a document-specialised model, measure field-level accuracy on a labelled set of real invoices, and keep human review for low-confidence or high-value cases.
 2. **TTS → ASR round trip.** It measures intelligibility as judged by one ASR model. It does not measure naturalness, prosody, emotion, speaker similarity, pronunciation of names, or latency, and the ASR can "correct" expected words. Proper evaluation adds human listening tests (MOS, intelligibility), hard content (numbers, dates, names, accents, languages), latency measurements, and consent and disclosure checks for synthetic voices.
 3. **Why metadata is insufficient.** Ordinary re-saving can strip a simple metadata label. C2PA signs provenance, while watermarks embed signals; each has limits. Neither proves the depicted event is true. Article 50 distinguishes provider machine-marking from deployer disclosure, with exceptions and a limited pre-August-system marking transition described above. Use several layers and check what survives resharing.
 
 ## Troubleshooting
 
 * *Out of memory on Colab:* restart the runtime and run parts separately, or delete the VLM (`del vlm; torch.cuda.empty_cache()`) before Part 3.
-* *Slow on CPU:* the notebook switches to SmolVLM-256M; expect lower accuracy. SD-Turbo on CPU takes about a minute per image; reduce to one prompt.
+* *Slow on CPU:* confirm the SmolVLM checkpoint, image cap and short answer cap. Keep `RUN_STRETCH` disabled for the core. The heavier models have separate download and inference costs; no current extension runtime is promised.
 * *Different answers from the slides:* generation is deterministic with `do_sample=False` and fixed seeds, but GPU type and library versions can change results slightly.
 * *Audio does not play in the notebook:* the WAV file `tts_example.wav` is saved in the working directory; download and play it locally.
 
@@ -270,6 +334,11 @@ A **multimodal large language model (MLLM)** processes text alongside other supp
 
 **Courses, guides and explainers**
 
+* [MIT 6.S191 2026: Generative AI lecture](https://www.youtube.com/watch?v=R8V8CbuxryI)
+* [SmolVLM-256M model card](https://huggingface.co/HuggingFaceTB/SmolVLM-256M-Instruct)
+* [CLIP original paper](https://arxiv.org/abs/2103.00020)
+* [C2PA 2.3 specification](https://spec.c2pa.org/specifications/specifications/2.3/index.html)
+
 * [Hugging Face blog: Vision language models explained](https://huggingface.co/blog/vlms)
 * [Google Gemini API: Image understanding](https://ai.google.dev/gemini-api/docs/image-understanding)
 * [Hugging Face Diffusers documentation](https://huggingface.co/docs/diffusers/index)
@@ -286,6 +355,8 @@ Apply perceive, verify, act, review and label. Report task accuracy, hallucinati
 
 # Detailed explanations behind the short slides
 
+The expanded explanations below retain the full topic coverage. References to measured diffusion, editing, speech and Qwen3-VL results describe archived experiments; the current core/extension split is defined in the lab guide above.
+
 The slides show one idea at a time. Use the detail below for follow-up questions, technical terms and further study.
 
 ## Slide 1: Title
@@ -296,7 +367,7 @@ Welcome to week 10, multimodal generative AI applications. Last week we learned 
 
 Six outcomes matching the descriptor's week 10: multimodal LLMs; training and fine-tuning multimodal models; evaluation of multimodal generative AI; and applications, extended with generation across modalities and responsible use, which the revised 7.3 adds explicitly because deepfakes and content provenance are now regulated. The practical outcome is designing an application that combines a multimodal model with verification and labelling, which feeds directly into projects that process images, documents or speech. This week practises MIMLO 2, 3 and 4.
 
-## Slide 3: Agenda
+## Lecture plan
 
 The plan follows the revised descriptor. Sections one and three contain the real outputs from the lab run: captions, chart and document question answering, text-to-image, image editing and speech round trips. Take the break after section three. Section five covers deepfakes, provenance and applications, and ends with a design pattern that students can reuse in their projects.
 
@@ -346,7 +417,7 @@ Multimodal LLMs have a wide range of capabilities. Describing and answering ques
 
 ## Slide 8: Multimodal model families (examples, 2026)
 
-A snapshot of families, without version numbers, which change monthly. The proprietary families from OpenAI, Google and Anthropic all accept images and documents; OpenAI and Google also handle audio natively, and Gemini is notable for very long video and document contexts. Among open-weight models, the Qwen vision-language and omni families are strong on documents and charts; LLaVA is the research reference; small models such as SmolVLM run on laptops. In the lab we use Qwen3-VL-2B on a GPU and SmolVLM on a CPU, both Apache-licensed.
+A snapshot of families, without version numbers, which change monthly. The proprietary families from OpenAI, Google and Anthropic all accept images and documents; OpenAI and Google also handle audio natively, and Gemini is notable for very long video and document contexts. Among open-weight models, the Qwen vision-language and omni families are strong on documents and charts; LLaVA is the research reference; small models such as SmolVLM run on laptops. The current CPU core uses SmolVLM-256M-Instruct. Archived Qwen3-VL-2B GPU results remain a separately labelled comparison.
 
 | Family | Access | Inputs | Notes |
 | --- | --- | --- | --- |
@@ -454,7 +525,7 @@ This map summarises the main generation tasks, how they work and example model f
 
 ## Slide 19: Text → image with a distilled model (real)
 
-Three prompts rendered by SD-Turbo with two steps in the lab run. Quality is good for a distilled model, and each image takes a second or two on a GPU. The bullet reports the CLIP scores: each image scores higher against its own prompt than the mean score against the other prompts, a simple sanity check of prompt alignment that the lab automates. Remind students that SD-Turbo uses the Stability AI Community License, with conditional commercial use, registration and revenue limits, which matters for projects.
+Three prompts rendered by SD-Turbo with two steps in the lab run. Inspect prompt match and defects in these stored images; no per-image runtime was measured for this claim. The bullet reports the CLIP scores: each image scores higher against its own prompt than the mean score against the other prompts, a simple sanity check of prompt alignment that the lab automates. Remind students that SD-Turbo uses the Stability AI Community License, with conditional commercial use, registration and revenue limits, which matters for projects.
 
 - SD-Turbo is a distilled image generator. This run uses 2 denoising steps and no guidance.
 
@@ -693,9 +764,9 @@ The lab covers the descriptor's list of multimodal generative tasks: image to te
 
 - Add illustrative metadata to an image and observe what survives re-saving; this is not signed C2PA.
 
-- **Runtime:** Colab T4 GPU or CPU. About 7 min on a laptop CPU with the 2B model, after downloads.
+- **Current runtime:** {{W10_CORE_TIME}} for the cached local CPU core on {{W10_CORE_DATE}}, with {{W10_CORE_THREADS}} threads. Downloads and optional stretches are excluded. The earlier full-notebook record has different settings, described in the lab guide.
 
-- **Hand in:** notebook with QA accuracy table, hallucination probe, generated images with CLIP scores, speech WER table and three answers.
+- **Hand in:** current core evidence and five self-check explanations; original heavy experiments and three written questions remain available as optional extensions.
 
 ## Slide 39: Summary
 

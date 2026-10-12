@@ -1,0 +1,39 @@
+{
+  "run": {
+    "checkpoint": "HuggingFaceTB/SmolLM2-135M-Instruct",
+    "device": "cpu",
+    "smoke": false,
+    "seed": 42,
+    "reply_cap": 24,
+    "manual_steps": 16,
+    "stretches": {
+      "tokenizer": false,
+      "family": false,
+      "reasoning": false
+    }
+  },
+  "tokens_per_word": {
+    "BERT": {
+      "Code": 2.73,
+      "English": 1.33,
+      "Irish": 2.54
+    },
+    "SmolLM2": {
+      "Code": 2.45,
+      "English": 1.25,
+      "Irish": 3.0
+    }
+  },
+  "perplexity": {
+    "normal": 273.556,
+    "shuffled words": 4605.366,
+    "Irish": 1030.749,
+    "code": 8.656
+  },
+  "core_replies": {
+    "QA": "The capital of Ireland is Dublin.",
+    "Translate": "Ich habe einmal 20 Jahre, um 20 Jahre zu kaufen.",
+    "Summarise": "Generative models learn distributions and sample new examples, while VAEs, GANs, diffusion models, and language",
+    "Sentiment": "This is a fictional review. The reviewer has provided a negative review, which is a subjective assessment of the product's quality"
+  }
+}

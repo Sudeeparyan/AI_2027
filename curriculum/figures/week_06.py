@@ -54,7 +54,7 @@ def nlp_timeline(path):
         ax.text(x+1.425,y+1.28,year,ha="center",fontsize=17,color=INK,fontweight="bold")
         if col<3:routed_arrow(ax,[(x+2.85,y+.575),(x+3.25,y+.575)])
     routed_arrow(ax,[(11.95,3.2),(11.95,3.05),(.1,3.05),(.1,1.875),(.2,1.875)])
-    ax.text(.2,5.15,"A sequence of ideas; earlier methods still have useful jobs",fontsize=19,color=INK,fontweight="bold")
+    ax.text(.2,5.15,"Older methods still have uses",fontsize=19,color=INK,fontweight="bold")
     role_legend(ax,.12,size=16)
     save(fig,path)
 
@@ -147,31 +147,34 @@ def next_token(path):
 def family_tree(path):
     fig, ax = canvas(5.4)
     role_box(ax,5.1,4.35,2.8,.7,"Transformer","model",size=20)
-    columns=[(.2,"Encoder-only",["Read all supplied text","BERT / ModernBERT","Masks; labels; embeddings"]),
+    columns=[(.2,"Encoder-only",["Reads all input","BERT / ModernBERT","Masks; labels; embeddings"]),
              (4.5,"Encoder–decoder",["Read source; generate output","T5 / Flan-T5: text → text","Whisper: audio → transcript"]),
-             (8.8,"Decoder-only",["Continue a token prefix","Qwen / Llama / Gemma","GPT-style text generation"])]
+             (8.8,"Decoder-only",["Continue a token prefix","Qwen / Llama / Gemma","GPT-style generation"])]
     for x,title,items in columns:
         role_box(ax,x,3.1,4,.8,title,"model",size=20)
         routed_arrow(ax,[(6.5,4.35),(6.5,4.15),(x+2,4.15),(x+2,3.9)])
         for j,item in enumerate(items):ax.text(x+.1,2.7-j*.52,item,fontsize=16,color=TEXT)
-    ax.text(.2,.8,"Architecture and access are separate. Proprietary internals may be undisclosed.",fontsize=16,color=MUTED)
     role_legend(ax,.15,size=16)
     save(fig,path)
 
 
 def reasoning(path):
     fig, ax = canvas(4.8)
+    blue = "#0072B2"
     ax.text(.2,4.45,"Extra inference computation is a budget to evaluate",fontsize=19,color=INK,fontweight="bold")
-    role_box(ax,.2,3.0,2.3,.85,"Prompt","data",size=21)
-    role_box(ax,4.0,3.0,4.2,.85,"Generate answer","model",size=21)
-    role_box(ax,9.7,3.0,2.8,.85,"Check answer","output",size=21)
-    routed_arrow(ax,[(2.5,3.425),(4,3.425)]); routed_arrow(ax,[(8.2,3.425),(9.7,3.425)])
-    role_box(ax,.2,1.45,2.3,1.1,"Prompt","data",size=21)
-    role_box(ax,4,1.45,4.2,1.1,"Extra computation\n(budgeted thinking)","model",size=20)
-    role_box(ax,9.7,1.45,2.8,1.1,"Check final\nanswer","output",size=20)
-    routed_arrow(ax,[(2.5,2.0),(4,2.0)]); routed_arrow(ax,[(8.2,2.0),(9.7,2.0)])
-    ax.text(.2,.8,"Check correctness, completion, tokens and seconds; more thinking can still fail.",fontsize=16,color=TEXT)
+    for y,h,middle,end_label,arrow_labels in ((3.0,.85,"Generate answer","Check answer",("prompt IDs","answer")),
+                                             (1.45,1.1,"Extra computation\n(budgeted thinking)","Check final\nanswer",
+                                              ("prompt IDs","trace + answer"))):
+        role_box(ax,.2,y,2.3,h,"Prompt","data",size=21)
+        role_box(ax,4,y,3.9,h,middle,"model",size=20)
+        role_box(ax,9.7,y,2.8,h,end_label,"metric",size=20)
+        mid=y+h/2
+        routed_arrow(ax,[(2.5,mid),(4,mid)]); routed_arrow(ax,[(7.9,mid),(9.7,mid)])
+        ax.text(3.25,mid+.12,arrow_labels[0],ha="center",va="bottom",fontsize=16,color=blue)
+        ax.text(8.8,mid+.12,arrow_labels[1],ha="center",va="bottom",fontsize=16,color=blue)
     role_legend(ax,.15,size=16)
+    routed_arrow(ax,[(9.5,.26),(10.05,.26)])
+    ax.text(10.2,.26,"Flow",fontsize=16,color=TEXT,va="center")
     save(fig,path)
 
 

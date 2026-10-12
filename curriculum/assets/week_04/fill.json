@@ -12,5 +12,8 @@
   "MNIST_DEVICE": "an NVIDIA GTX 1650 laptop GPU",
   "MNIST_MIN": "8",
   "SD_DEVICE": "a laptop CPU, float32",
-  "SD_TIMES": "SD 1.5, 2 steps: 45 s; 10 steps: 163 s; 25 steps: 419 s; SD-Turbo, 1 step: 25 s; SD-Turbo, 4 steps: 46 s per 512 × 512 image"
+  "SD_TIMES": "SD 1.5, 2 steps: 45 s; 10 steps: 163 s; 25 steps: 419 s; SD-Turbo, 1 step: 25 s; SD-Turbo, 4 steps: 46 s per 512 × 512 image",
+  "W04_CORE_TIME": "39 seconds",
+  "W04_CORE_DATE": "11 October 2026",
+  "W04_CORE_THREADS": "4"
 }

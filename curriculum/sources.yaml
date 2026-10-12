@@ -355,6 +355,20 @@ sources:
     weeks: [12]
     verified_on: "2026-10-09"
     evidence: "Defines hosts, per-server clients, servers and protocol primitives; connectivity does not itself authorise tool side effects."
+  - id: hf_inference_providers_pricing
+    kind: doc
+    label: "Hugging Face Inference Providers: pricing and billing"
+    url: https://huggingface.co/docs/inference-providers/pricing
+    weeks: [11]
+    verified_on: "2026-10-10"
+    evidence: "Free accounts have no included monthly credits; purchased credits or eligible paid-plan credits are required."
+  - id: gemini_api_pricing
+    kind: doc
+    label: "Gemini API: pricing by model and feature"
+    url: https://ai.google.dev/gemini-api/docs/pricing
+    weeks: [11]
+    verified_on: "2026-10-10"
+    evidence: "Free-tier availability differs by model and feature; some are paid-only."
   - id: ec_ai_act_annex3
     kind: doc
     label: "European Commission AI Act Service Desk: Annex III"
@@ -362,3 +376,232 @@ sources:
     weeks: [1, 12]
     verified_on: "2026-10-09"
     evidence: "Lists specified high-risk use cases, including admissions and learning-outcome evaluation; classification depends on intended use."
+
+  # ---- Iteration 3 teaching references (11 October 2026) ----
+  - id: iter3_67bece0b21b8
+    kind: video
+    label: 'Karpathy: makemore'
+    url: https://www.youtube.com/watch?v=PaCmpygFfXo
+    weeks:
+    - 1
+  - id: iter3_fb0c4e6d41cb
+    kind: doc
+    label: 'Hugging Face: Generation parameters'
+    url: https://huggingface.co/docs/transformers/main/en/main_classes/text_generation
+    weeks:
+    - 1
+  - id: iter3_6c3efae2cfc1
+    kind: doc
+    label: European Commission guidelines (July 2026)
+    url: https://digital-strategy.ec.europa.eu/en/library/guidelines-transparency-obligations-providers-and-deployers-ai-systems
+    weeks:
+    - 1
+  - id: iter3_118ac2accad8
+    kind: doc
+    label: PyTorch VAE
+    url: https://github.com/pytorch/examples/blob/main/vae/main.py
+    weeks:
+    - 2
+  - id: iter3_3df8eac451b7
+    kind: video
+    label: MIT 6.S191 2026
+    url: https://www.youtube.com/watch?v=R8V8CbuxryI
+    weeks:
+    - 2
+    - 3
+    - 10
+  - id: iter3_144e38705c23
+    kind: doc
+    label: Diffusers AutoencoderKL
+    url: https://huggingface.co/docs/diffusers/api/models/autoencoderkl
+    weeks:
+    - 2
+  - id: iter3_8e5bc719cc2f
+    kind: doc
+    label: Commission timing guidance
+    url: https://digital-strategy.ec.europa.eu/en/factpages/quick-facts-transparency-rules-ai-systems
+    weeks:
+    - 3
+    - 10
+    - 11
+  - id: iter3_75a2dd9f20ac
+    kind: doc
+    label: Published SDXL-Turbo model card
+    url: https://huggingface.co/stabilityai/sdxl-turbo
+    weeks:
+    - 3
+  - id: iter3_3d20e45f614a
+    kind: course
+    label: HF diffusion course
+    url: https://huggingface.co/learn/diffusion-course/en/unit1/1
+    weeks:
+    - 4
+  - id: iter3_e86cda2e9a19
+    kind: video
+    label: DataScienceCastnet — Hugging Face Diffusion Course walkthrough
+    url: https://www.youtube.com/watch?v=09o5cv6u76c
+    weeks:
+    - 4
+  - id: iter3_663452d123e7
+    kind: doc
+    label: 'Hugging Face: Transformer architectures'
+    url: https://huggingface.co/learn/llm-course/chapter1/6
+    weeks:
+    - 5
+  - id: iter3_ea6afdae27cf
+    kind: paper
+    label: 'Meta: The Llama 3 Herd of Models'
+    url: https://arxiv.org/abs/2407.21783
+    weeks:
+    - 5
+  - id: iter3_31ff4e3be2e0
+    kind: paper
+    label: 'Jiang et al.: Mixtral of Experts'
+    url: https://arxiv.org/abs/2401.04088
+    weeks:
+    - 5
+  - id: iter3_de539966b9f5
+    kind: paper
+    label: 'DeepSeek-AI: DeepSeek-V3 Technical Report'
+    url: https://arxiv.org/abs/2412.19437
+    weeks:
+    - 5
+  - id: iter3_2abfb1f6b0da
+    kind: doc
+    label: PyTorch SDPA
+    url: https://docs.pytorch.org/docs/2.11/generated/torch.nn.functional.scaled_dot_product_attention.html
+    weeks:
+    - 5
+  - id: iter3_b40e89a13a38
+    kind: doc
+    label: BERT publisher page
+    url: https://huggingface.co/google-bert/bert-base-uncased
+    weeks:
+    - 5
+  - id: iter3_a48091c0c202
+    kind: doc
+    label: GPT-2 publisher page
+    url: https://huggingface.co/openai-community/gpt2
+    weeks:
+    - 5
+  - id: iter3_7b843916b604
+    kind: course
+    label: HF LLM course
+    url: https://huggingface.co/learn/llm-course/en/chapter1/6
+    weeks:
+    - 6
+  - id: iter3_709061a06780
+    kind: docs
+    label: Chat templates
+    url: https://huggingface.co/docs/transformers/en/chat_templating
+    weeks:
+    - 6
+  - id: iter3_f4042a5f92b0
+    kind: docs
+    label: Perplexity guidance
+    url: https://huggingface.co/docs/transformers/en/perplexity
+    weeks:
+    - 6
+  - id: iter3_314f6582ea77
+    kind: doc
+    label: Qwen/Qwen2.5-0.5B-Instruct
+    url: https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct
+    weeks:
+    - 7
+  - id: iter3_4859188de615
+    kind: video
+    label: 'LoRA: the inventor explains'
+    url: https://www.youtube.com/watch?v=DhRoTONcyZE
+    weeks:
+    - 8
+  - id: iter3_1509c14dfec8
+    kind: video
+    label: 'Video: Stanford CS25 — Large Multimodal Models'
+    url: https://www.youtube.com/watch?v=cYfKQ6YG9Qo
+    weeks:
+    - 9
+  - id: iter3_95231230bb02
+    kind: doc
+    label: SmolVLM model card
+    url: https://huggingface.co/HuggingFaceTB/SmolVLM-256M-Instruct
+    weeks:
+    - 10
+  - id: iter3_2f0c70144441
+    kind: doc
+    label: C2PA specification
+    url: https://spec.c2pa.org/specifications/specifications/2.3/index.html
+    weeks:
+    - 10
+  - id: iter3_44e36a446a9f
+    kind: doc
+    label: EU AI Act, Article 50
+    url: https://artificialintelligenceact.eu/article/50/
+    weeks:
+    - 10
+  - id: iter3_6001b4e9bb3d
+    kind: doc
+    label: official SD-Turbo licence
+    url: https://huggingface.co/stabilityai/sd-turbo/blob/main/LICENSE.md
+    weeks:
+    - 10
+  - id: iter3_459f3498ce72
+    kind: doc
+    label: FastAPI testing
+    url: https://fastapi.tiangolo.com/tutorial/testing/
+    weeks:
+    - 11
+  - id: iter3_970d3c5d5339
+    kind: doc
+    label: SmolLM2 model card
+    url: https://huggingface.co/HuggingFaceTB/SmolLM2-135M-Instruct
+    weeks:
+    - 11
+    - 12
+  - id: iter3_933911c5d2d2
+    kind: doc
+    label: Gradio quickstart
+    url: https://www.gradio.app/guides/quickstart
+    weeks:
+    - 11
+  - id: iter3_ab448d8cf566
+    kind: doc
+    label: Spaces conditions
+    url: https://huggingface.co/docs/hub/en/spaces-overview
+    weeks:
+    - 11
+  - id: iter3_31575e76834d
+    kind: video
+    label: Spaces introduction
+    url: https://www.youtube.com/watch?v=3bSVKNKb_PY
+    weeks:
+    - 11
+  - id: iter3_da0c810c053d
+    kind: doc
+    label: official Spaces overview
+    url: https://huggingface.co/docs/hub/spaces-overview
+    weeks:
+    - 11
+  - id: iter3_920caecd56af
+    kind: doc
+    label: MCP tools
+    url: https://modelcontextprotocol.io/specification/2026-07-28/server/tools
+    weeks:
+    - 12
+  - id: iter3_6e98f7fc575e
+    kind: video
+    label: Agents course Q&A
+    url: https://www.youtube.com/watch?v=iLVyYDbdSmM
+    weeks:
+    - 12
+  - id: iter3_929c7f3f8857
+    kind: doc
+    label: the consolidated Act
+    url: https://eur-lex.europa.eu/eli/reg/2024/1689/2026-07-27/eng/pdf
+    weeks:
+    - 12
+  - id: iter3_32e2db27eca9
+    kind: doc
+    label: sentence-transformers/all-MiniLM-L6-v2
+    url: https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2
+    weeks:
+    - 12

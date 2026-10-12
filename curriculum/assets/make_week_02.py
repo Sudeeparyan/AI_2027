@@ -1,6 +1,6 @@
 """Train small VAEs / an autoencoder on MNIST and save REAL result images for week 2 slides and notes.
 
-Run once with the lab environment (CPU is fine, ~5 minutes):
+Run once with the lab environment (CPU supported; measure waiting time for this experiment):
     .venv-labs/Scripts/python.exe curriculum/assets/make_week_02.py
 Outputs: curriculum/assets/week_02/*.png and metrics.json (checked into the project as source assets).
 """

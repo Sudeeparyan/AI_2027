@@ -14,9 +14,9 @@ import hashlib
 import json
 import re
 import subprocess
+import tempfile
 import traceback
 import xml.etree.ElementTree as ET
-from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 from zipfile import ZipFile
@@ -193,11 +193,53 @@ def flattened(scene: dict) -> dict:
     """The scene as tools/technical_diagrams.js flattenedScene places it: one text item per line."""
     items = []
     for item in scene["items"]:
-        if item["kind"] == "text":
-            items += [{**item, "text": row} for row in item["text"].splitlines()]
+        if item["kind"] == "text" and "\n" in item["text"]:
+            rows = item["text"].splitlines()
+            height = item["size"] * 1.16
+            top = item["y"] + (item["h"] - len(rows) * height) / 2
+            items += [{**item, "text": row, "y": top + index * height, "h": height}
+                      for index, row in enumerate(rows)]
         else:
             items.append(item)
     return {**scene, "items": items}
+
+
+def native_scene_text(spec: dict, numbers: list[int]) -> dict[int, list[dict]]:
+    """Collect expected text geometry from the actual layouts, without writing a deck."""
+    script = """const fs=require('fs'),layouts=require('./tools/slides.js').layouts;
+const {spec,numbers}=JSON.parse(fs.readFileSync(0,'utf8'));
+(async()=>{const result={};for(const number of numbers){const texts=[];
+const slide={addShape(){},addImage(){},addText(text,options){
+if(options.fontFace==='Arial')texts.push({text,box:{x:options.x,y:options.y,w:options.w,h:options.h},font_pt:options.fontSize});}};
+const source=spec.slides[number-1];await layouts[source.type](slide,source,spec);result[number]=texts;}
+process.stdout.write(JSON.stringify(result));})().catch(error=>{console.error(error);process.exit(1);});"""
+    completed = subprocess.run(["node", "-e", script], input=json.dumps({"spec": spec, "numbers": numbers}),
+                               capture_output=True, text=True, encoding="utf-8", cwd=ROOT, check=True)
+    return {int(number): rows for number, rows in json.loads(completed.stdout).items()}
+
+
+def shape_box(shape) -> dict[str, float] | None:
+    offset = shape.find("p:spPr/a:xfrm/a:off", NS)
+    extent = shape.find("p:spPr/a:xfrm/a:ext", NS)
+    if offset is None or extent is None:
+        return None
+    return {"x": int(offset.get("x", "0")) / 914400, "y": int(offset.get("y", "0")) / 914400,
+            "w": int(extent.get("cx", "0")) / 914400, "h": int(extent.get("cy", "0")) / 914400}
+
+
+def match_scene_shape(available: list, expected: dict, number: int):
+    label = verify_beginner.normalise(expected["text"])
+    # PPTX uses integer EMUs; allow two EMUs of serialization rounding. Geometry,
+    # rather than label alone, distinguishes course-week numbers from slide footers.
+    candidates = [shape for shape in available if shape_text(shape) == label
+                  and (box := shape_box(shape)) is not None
+                  and box["y"] < 7.0
+                  and all(abs(box[key] - expected["box"][key]) <= 2 / 914400 for key in box)]
+    require(len(candidates) == 1,
+            f"Slide {number}: expected one scene text shape matching label and geometry for {label!r}; found {len(candidates)}")
+    shape = candidates[0]
+    available.remove(shape)
+    return shape
 
 
 def scene_font_contract(deck: Path, spec: dict) -> dict:
@@ -206,38 +248,86 @@ def scene_font_contract(deck: Path, spec: dict) -> dict:
         asset = spec.get("assets", {}).get("figures", {}).get(slide.get("figure"), {})
         if asset.get("scene"):
             scenes[number] = asset["scene"]
-    records, failures = [], []
+    expected_texts = native_scene_text(spec, sorted(scenes))
+    records, failures, body_failures = [], [], []
     with ZipFile(deck) as archive:
         for number, scene in sorted(scenes.items()):
             root = ET.fromstring(archive.read(f"ppt/slides/slide{number}.xml"))
-            available = defaultdict(list)
-            for shape in root.findall(".//p:sp", NS):
-                if shape.find("p:txBody", NS) is not None:
-                    available[shape_text(shape)].append(shape)
+            available = [shape for shape in root.findall(".//p:sp", NS)
+                         if shape.find("p:txBody", NS) is not None and shape_text(shape)]
+            for shape in available:
+                box = shape_box(shape)
+                if box and 1.60 <= box["y"] < 7.0:
+                    smallest = min(shape_font_sizes(shape))
+                    if smallest < 14 - 0.001:
+                        body_failures.append({"slide": number, "text": shape_text(shape), "minimum_font_pt": smallest})
             item_records = []
-            # The deck places each line of a multi-line label as its own text shape (flattenedScene).
-            for item in flattened(scene)["items"]:
-                if item["kind"] != "text" or not item["text"].strip():
-                    continue
+            scene_items = [item for item in flattened(scene)["items"]
+                           if item["kind"] == "text" and item["text"].strip()]
+            expected = expected_texts[number]
+            require([verify_beginner.normalise(item["text"]) for item in scene_items]
+                    == [verify_beginner.normalise(item["text"]) for item in expected],
+                    f"Slide {number}: native scene labels differ from source scene")
+            for item in expected:
                 label = verify_beginner.normalise(item["text"])
-                candidates = available[label]
-                require(bool(candidates), f"Slide {number}: no distinct text shape for scene item {label!r}")
-                shape = candidates.pop(0)
+                shape = match_scene_shape(available, item, number)
                 sizes = shape_font_sizes(shape)
                 smallest = min(sizes)
-                item_records.append({"text": label, "minimum_font_pt": round(smallest, 3)})
+                require(all(abs(size - item["font_pt"]) <= 0.011 for size in sizes),
+                        f"Slide {number}: scene font differs from layout scale for {label!r}: {sizes} vs {item['font_pt']}")
+                item_records.append({"text": label, "minimum_font_pt": round(smallest, 3),
+                                     "expected_font_pt": round(item["font_pt"], 3), "box_inches": shape_box(shape)})
                 if smallest < 14 - 0.001:
                     failures.append({"slide": number, "text": label, "minimum_font_pt": smallest})
             records.append({"slide": number, "scene_text_items": len(item_records),
                             "minimum_font_pt": min(row["minimum_font_pt"] for row in item_records),
                             "items": item_records})
     require(not failures, f"Scene text smaller than 14 pt: {failures}")
-    return {"slides_checked": len(records), "scope": "Only text shapes matched to scene items; slide chrome/title excluded",
-            "minimum_required_pt": 14, "scene_slides": records, "failures": failures}
+    require(not body_failures, f"Scene-slide body text smaller than 14 pt: {body_failures}")
+    return {"slides_checked": len(records), "scope": "Scene labels match actual layout geometry and font scale; all scene-slide body text checked; chrome/title excluded",
+            "minimum_required_pt": 14, "scene_slides": records, "failures": failures,
+            "body_font_failures": body_failures}
 
 
 def clean_code(source: str) -> str:
     return "\n".join(line for line in source.splitlines() if not line.lstrip().startswith(("%", "!")))
+
+
+def expected_code_cells(source_cells: list[dict], transform, student: bool) -> list[dict]:
+    """Account explicitly for authored cells, pinned installs and one injected setup."""
+    expected, setup_added, install_added = [], False, False
+    for cell in source_cells:
+        if cell["type"] != "code" or (student and "solution-only" in cell["tags"]):
+            continue
+        lines = transform(cell["lines"])
+        code, tags = "\n".join(lines), set(cell["tags"])
+        is_install = any(line.lstrip().startswith(("%pip ", "!pip ")) for line in lines)
+        if is_install:
+            code = build_week.install_cell(code, first=not install_added)
+            install_added = True
+            tags.add("colab-install")
+        elif not setup_added:
+            expected.append({"source": (ROOT / "curriculum/labs/_setup.py").read_text(encoding="utf-8"),
+                             "tags": {"shared-setup"}, "origin": "injected shared setup"})
+            setup_added = True
+        expected.append({"source": code, "tags": tags, "origin": "authored install" if is_install else "authored code"})
+    require(setup_added, "Authored lab has no computation cell for the required shared setup")
+    return expected
+
+
+def verify_code_cells(actual: list, expected: list[dict], variant: str) -> int:
+    authored_count = sum(cell["origin"] != "injected shared setup" for cell in expected)
+    require(len(actual) == authored_count + 1,
+            f"{variant}: expected {authored_count} authored code cells plus one shared setup; found {len(actual)}")
+    for index, (built, authored) in enumerate(zip(actual, expected, strict=True), 1):
+        require(built.source == authored["source"],
+                f"{variant}: code cell {index} differs from its expected {authored['origin']} text")
+        require(set(built.metadata.get("tags", [])) == authored["tags"],
+                f"{variant}: code cell {index} metadata tags differ from its expected {authored['origin']}")
+        require(verify_beginner.ast_dump(clean_code(built.source))
+                == verify_beginner.ast_dump(clean_code(authored["source"])),
+                f"{variant}: code cell {index} differs from its intended source variant")
+    return authored_count
 
 
 def notebook_contract(directory: Path) -> dict:
@@ -252,21 +342,20 @@ def notebook_contract(directory: Path) -> dict:
         result = verify_beginner.verify_notebook(path, directory / "Diagrams", variant == "student", source)
         nb = nbformat.read(path, as_version=4)
         actual = [cell for cell in nb.cells if cell.cell_type == "code"]
-        expected = [cell for cell in source_cells if cell["type"] == "code"
-                    and not (variant == "student" and "solution-only" in cell["tags"])]
-        require(len(actual) == len(expected), f"{variant}: built code-cell count differs from source")
-        for index, (built, authored) in enumerate(zip(actual, expected, strict=True), 1):
-            target = clean_code("\n".join(transform(authored["lines"])))
-            require(verify_beginner.ast_dump(clean_code(built.source)) == verify_beginner.ast_dump(target),
-                    f"{variant}: code cell {index} differs from its intended source variant")
+        expected = expected_code_cells(source_cells, transform, variant == "student")
+        authored_count = verify_code_cells(actual, expected, variant)
         guidance = []
         for index, cell in enumerate(nb.cells):
             if cell.cell_type == "code":
                 require(index > 0 and nb.cells[index - 1].cell_type == "markdown",
                         f"{variant}: cell {index + 1} has no immediately preceding Markdown guide")
                 guide = nb.cells[index - 1].source
-                require(all(label in guide for label in ("**What/why:**", "**Predict:**", "**Expected output:**")),
-                        f"{variant}: cell {index + 1} guide lacks what/why, prediction or expected output")
+                if "shared-setup" in cell.metadata.get("tags", []):
+                    require(guide == build_week.SHARED_SETUP_INTRO,
+                            f"{variant}: shared setup guide differs from the documented injection")
+                else:
+                    require(all(label in guide for label in ("**What/why:**", "**Predict:**", "**Expected output:**")),
+                            f"{variant}: cell {index + 1} guide lacks what/why, prediction or expected output")
                 guidance.append(index + 1)
             references = set(re.findall(r"attachment:([^\s)]+)", cell.source))
             require(set(cell.get("attachments", {})) == references,
@@ -280,18 +369,99 @@ def notebook_contract(directory: Path) -> dict:
                 attachment_records.append({"variant": variant, "cell_one_based": index + 1, "image": name,
                                            "sha256": hashlib.sha256(raw).hexdigest(), "referenced": True,
                                            "identical_to_standalone": True})
-        if variant == "instructor":
-            require(len(actual) == 17, f"Expected 17 instructor code cells, found {len(actual)}")
-        else:
+        if variant == "student":
             todo_lines = [line.strip() for cell in actual for line in cell.source.splitlines() if "TODO" in line]
             require(len(todo_lines) >= 5, "Student implementation TODOs are missing")
-            require("**Model answer:**" not in "\n".join(cell.source for cell in nb.cells), "Instructor answer heading leaked")
+            require(not re.search(r"\*\*(?:✅\s*)?Model answer:", "\n".join(cell.source for cell in nb.cells)),
+                    "Instructor answer heading leaked")
             result["implementation_todo_lines"] = todo_lines
-        result.update({"code_cells": len(actual), "guided_code_cell_locations": guidance,
+        result.update({"code_cells": len(actual), "authored_code_cells": authored_count,
+                       "injected_shared_setup_code_cells": 1, "install_pinning_checked": True,
+                       "exact_code_text_and_tags_match": True, "guided_code_cell_locations": guidance,
                        "code_ast_matches_intended_source_variant": True})
         results[variant] = result
     return {"variants": results, "attachments": attachment_records,
             "student_instructor_separation": "Exact code ASTs compared with source marker transformations; instructor-only content checked by existing helper"}
+
+
+def self_tests() -> list[str]:
+    """Adversarial checks on copies; never mutate a deliverable or execute notebook code."""
+    from copy import deepcopy
+
+    passed = []
+
+    def rejected(operation, description: str) -> None:
+        try:
+            operation()
+        except AssertionError:
+            passed.append(description)
+        else:
+            raise AssertionError(f"Adversarial fixture was accepted: {description}")
+
+    directory = one((ROOT / "deliverables").glob("Week_05_*"), "Week 5 deliverables folder")
+    spec = read_json(ROOT / "build/week_05/spec.json")
+    deck = directory / "Week_05_Lecture_Slides.pptx"
+    scene_font_contract(deck, spec)
+    passed.append("Current native scenes pass geometry and scaled-font matching despite footer-label collisions")
+    with ZipFile(deck) as archive:
+        member = "ppt/slides/slide3.xml"
+        original = ET.fromstring(archive.read(member))
+        expected = next(row for row in native_scene_text(spec, [3])[3] if row["text"] == "3")
+        candidates = [shape for shape in original.findall(".//p:sp", NS)
+                      if shape.find("p:txBody", NS) is not None and shape_text(shape)]
+        matched = match_scene_shape(candidates, expected, 3)
+        require(shape_box(matched)["y"] < 7.0, "Course-week number matched its footer")
+        passed.append("Course-week number matches its body coordinates rather than the 10-point page number")
+        with tempfile.TemporaryDirectory(prefix="pilot-font-check-") as temporary:
+            for mutation in ("undersized", "displaced"):
+                root = deepcopy(original)
+                shapes = [shape for shape in root.findall(".//p:sp", NS)
+                          if shape.find("p:txBody", NS) is not None and shape_text(shape)]
+                shape = match_scene_shape(shapes, expected, 3)
+                if mutation == "undersized":
+                    for properties in shape.findall("p:txBody/a:p/a:r/a:rPr", NS):
+                        properties.set("sz", "1200")
+                else:
+                    offset = shape.find("p:spPr/a:xfrm/a:off", NS)
+                    offset.set("x", str(int(offset.get("x")) + 91440))
+                path = Path(temporary) / f"{mutation}.pptx"
+                with ZipFile(path, "w") as output:
+                    for entry in archive.infolist():
+                        output.writestr(entry.filename,
+                                        ET.tostring(root) if entry.filename == member else archive.read(entry.filename))
+                rejected(lambda: scene_font_contract(path, spec), f"Reject {mutation} native scene text")
+
+    source = (ROOT / "curriculum/labs/week_05_lab.py").read_text(encoding="utf-8")
+    source_cells = build_week.parse_percent(source)
+    expected = expected_code_cells(source_cells, build_week.student_code, True)
+    nb = nbformat.read(directory / "Week_05_Lab.ipynb", as_version=4)
+    actual = [cell for cell in nb.cells if cell.cell_type == "code"]
+    verify_code_cells(actual, expected, "student")
+    passed.append("Current student variant has exactly the authored cells and one exact shared setup")
+    rejected(lambda: verify_code_cells(actual + [nbformat.v4.new_code_cell("leaked_answer = 123")], expected, "student"),
+             "Reject extra undocumented code cell")
+    altered = deepcopy(actual)
+    setup_index = next(index for index, cell in enumerate(altered) if "shared-setup" in cell.metadata.get("tags", []))
+    altered[setup_index].source = "USE_OPENAI = True"
+    rejected(lambda: verify_code_cells(altered, expected, "student"), "Reject altered injected setup")
+    altered = deepcopy(actual)
+    install_index = next(index for index, cell in enumerate(altered) if "colab-install" in cell.metadata.get("tags", []))
+    altered[install_index].source = "%pip install -q torch"
+    rejected(lambda: verify_code_cells(altered, expected, "student"), "Reject unpinned install despite an empty Python AST")
+    altered = deepcopy(actual)
+    widget_index = next(index for index, cell in enumerate(altered) if "skip-test" in cell.metadata.get("tags", []))
+    altered[widget_index].metadata.tags = []
+    rejected(lambda: verify_code_cells(altered, expected, "student"), "Reject lost widget skip-test tag")
+    authored = next(cell for cell in source_cells if cell["type"] == "code"
+                    and "### BEGIN SOLUTION" in "\n".join(cell["lines"]))
+    stub = "\n".join(build_week.student_code(authored["lines"]))
+    solution = "\n".join(build_week.solution_code(authored["lines"]))
+    require(stub != solution, "Student and instructor implementations are unexpectedly identical")
+    altered = deepcopy(actual)
+    index = next(index for index, cell in enumerate(altered) if cell.source == stub)
+    altered[index].source = solution
+    rejected(lambda: verify_code_cells(altered, expected, "student"), "Reject instructor implementation in a student TODO cell")
+    return passed
 
 
 def word_count(text: str) -> int:
@@ -339,7 +509,12 @@ def main() -> int:
     parser.add_argument("--before", type=Path, default=REVISION / "before")
     parser.add_argument("--protected-baseline", type=Path, default=REVISION / "protected_hashes.json")
     parser.add_argument("--output", type=Path, default=REVISION / "pilot_artifacts.json")
+    parser.add_argument("--self-test", action="store_true", help="run adversarial verifier checks on scratch copies")
     args = parser.parse_args()
+    if args.self_test:
+        for result in self_tests():
+            print(f"PASS {result}")
+        return 0
     report = {"week": 5, "recorded_at_utc": datetime.now(timezone.utc).isoformat(), "ok": True,
               "visual_inspection_claimed": False, "labs_executed_by_this_tool": False,
               "checks": {}, "failures": [], "warnings": []}

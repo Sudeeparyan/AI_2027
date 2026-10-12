@@ -1,0 +1,119 @@
+{
+  "model": "HuggingFaceTB/SmolLM2-135M-Instruct",
+  "device": "cpu",
+  "gpu": "CPU",
+  "latency": [
+    {
+      "question": "What is a large language model? Answer i",
+      "TTFT (s)": 0.184,
+      "total (s)": 1.32,
+      "output tokens": 24,
+      "tokens/s": 18.2
+    },
+    {
+      "question": "Give three tips for writing a good promp",
+      "TTFT (s)": 0.182,
+      "total (s)": 1.47,
+      "output tokens": 25,
+      "tokens/s": 17.0
+    },
+    {
+      "question": "Explain what an API rate limit is to a n",
+      "TTFT (s)": 0.201,
+      "total (s)": 1.53,
+      "output tokens": 24,
+      "tokens/s": 15.7
+    }
+  ],
+  "quant": [
+    {
+      "scheme": "fp32",
+      "perplexity": 98.04,
+      "weight error (layer 0)": "0%",
+      "approx. size (MB)": 538
+    },
+    {
+      "scheme": "int8, per row",
+      "perplexity": 99.2,
+      "weight error (layer 0)": "0.9%",
+      "approx. size (MB)": 135
+    },
+    {
+      "scheme": "int4, per row",
+      "perplexity": 260.23,
+      "weight error (layer 0)": "16.6%",
+      "approx. size (MB)": 67
+    },
+    {
+      "scheme": "int4, groups of 64",
+      "perplexity": 137.0,
+      "weight error (layer 0)": "11.4%",
+      "approx. size (MB)": 71
+    }
+  ],
+  "quant_layer_error": {
+    "int8, per row": 0.009188543073832989,
+    "int4, per row": 0.16649551689624786,
+    "int4, groups of 64": 0.11388925462961197
+  },
+  "batch": [
+    {
+      "batch size": 1,
+      "requests": 4,
+      "seconds": 1.89,
+      "tokens/s": 16.9
+    },
+    {
+      "batch size": 2,
+      "requests": 4,
+      "seconds": 1.12,
+      "tokens/s": 28.5
+    },
+    {
+      "batch size": 4,
+      "requests": 4,
+      "seconds": 0.68,
+      "tokens/s": 47.4
+    }
+  ],
+  "cost": [
+    {
+      "option": "small hosted model",
+      "USD / month": 60.0
+    },
+    {
+      "option": "mid-size hosted model",
+      "USD / month": 300.0
+    },
+    {
+      "option": "frontier hosted model",
+      "USD / month": 1380.0
+    },
+    {
+      "option": "self-hosted small GPU, always on",
+      "USD / month": 432.0
+    }
+  ],
+  "requests_per_month": 300000,
+  "monitor": {
+    "requests": 4,
+    "blocked": 1,
+    "redacted": 1,
+    "p50 latency (s)": 1.48,
+    "p95 latency (s)": 1.79,
+    "avg completion tokens": 24.0,
+    "est. cost of these requests at small-model prices (USD)": 4.3e-05
+  },
+  "api_answer": "FastAPI is a microframework for building web applications that provides a simple and flexible way to build web services. Here are",
+  "api_usage": {
+    "prompt_tokens": 37,
+    "completion_tokens": 24,
+    "total_tokens": 61
+  },
+  "evidence": {
+    "started_at_utc": "2026-10-11T14:10:10.074169+00:00",
+    "seconds": 39.5,
+    "notebook_sha256": "52be350922abd29c14946f53c2c6e2e1875b355f77cebadb320b410d55b504d5",
+    "executed_notebook_sha256": "833735d9134e1b27e989be82209fcc824d8902bb069081a5912410cc17027891"
+  }
+}

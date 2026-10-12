@@ -41,23 +41,51 @@ coverage:
 slides:
 - type: title
   figure: cover
-  notes: 'Welcome to week 4, diffusion models. Almost every image and video generator you have used since 2022 is
-    built on the ideas of today: Stable Diffusion, the image generators in chat assistants, Midjourney-style tools,
-    and video models. The images on this slide were generated for this lecture by Stable Diffusion running on an
-    ordinary laptop. Today we connect three threads: last week''s GANs, whose sample quality diffusion matches;
-    week 2''s VAEs, whose latent space diffusion runs in; and week 1''s probability, because diffusion is trained
-    with a bound on the likelihood. The lab trains a small diffusion model and uses a pretrained one.
+  notes: 'In short: Diffusion learns to predict deliberately added noise, then uses those predictions to generate new samples.
 
-    '
+
+    Explain: A generative model produces examples resembling its training distribution. Gaussian noise contains random values
+    drawn from a bell-shaped distribution. A denoiser is a network that predicts noise from a corrupted input. A sampler repeatedly
+    updates the input using that prediction.
+
+
+    Example: Imagine practising repairs on many noisy sketches whose original versions are available. Later, begin with fresh
+    static and use learned drawing patterns. The analogy breaks because generation has no particular hidden sketch to recover.
+    Our cover contains stored Stable Diffusion outputs from a separate measured image experiment.
+
+
+    Ask: When generation starts from random noise, is there an original photograph waiting underneath?
+
+
+    Answer: There is no original photograph. The trained model and optional conditions influence which new sample emerges.
+
+
+    Watch out: Recognisable output can still contain errors, resemble training material or fail a requested constraint.'
 - type: outcomes
-  notes: 'Six outcomes. The first sets up the motivation by comparing with the previous two weeks. Outcomes two
-    and three are the theoretical core: the forward process with its closed form, the reverse process, and the remarkably
-    simple training objective of predicting the noise. Outcome four covers the architecture used in practice, particularly
-    latent diffusion, which explains how Stable Diffusion works. Outcome five is hands-on: in the lab students generate
-    images and vary steps, guidance, seeds and negative prompts. Outcome six brings us to 2026: flow matching, few-step
-    distillation, editing, video and audio, and how to evaluate generators. This week touches MIMLOs 1 to 4.
+  notes: 'In short: Today you will explain the diffusion loops, implement their updates and judge controlled generation experiments.
 
-    '
+
+    Explain: The forward process adds noise using a fixed rule. Training changes network weights to improve noise predictions.
+    The reverse process generates examples through repeated updates. Latent diffusion performs these updates in a compact numerical
+    representation. Evaluation checks outputs against the intended task.
+
+
+    Example: For a point batch shaped [256, 2], predict two noise coordinates per point. For an image batch [16, 1, 28, 28],
+    predict an equally shaped tensor. The small point model teaches the same noise objective while keeping each calculation
+    inspectable; it does not establish image-model quality.
+
+
+    Ask: Which outcome requires looking at generated samples rather than only writing a correct equation?
+
+
+    Answer: Judging quality, variety and prompt fit requires observed outputs and a stated evaluation method.
+
+
+    Watch out: A correct implementation and a low training loss do not establish complete coverage or useful generation.'
+  items:
+  - Train denoisers.
+  - Trace diffusion.
+  - Evaluate outputs.
 - type: agenda
   icon: fa:FaRoute
   items:
@@ -75,115 +103,205 @@ slides:
     minutes: 22
   - title: Lab preview and wrap-up
     minutes: 8
-  notes: 'The plan follows the descriptor: motivation and limitations of GANs and VAEs, theoretical foundations,
-    core architecture, the denoising process, variants, evaluation and applications, and a comparison with other
-    generative models. Section two has the equations, so take the break after it. Section four shows real Stable
-    Diffusion outputs generated for these slides, so students can see what each setting does before trying it themselves.
-    If time is short, compress the variants cards; the video and audio models return in week 10.
+  notes: 'In short: Week 4 connects probability and latent representations to the repeated generation of points and images.
 
-    '
+
+    Explain: Week 1 introduced sampling from a probability distribution. Week 2 introduced the VAE, which learns a hidden representation.
+    Week 3 introduced GAN training through competing networks. This week uses a known numerical noise target. Attention in Week
+    5 will explain how image features read text.
+
+
+    Example: Trace a text-to-image request on the course map. Probability supplies starting noise, the latent representation
+    reduces the number of values, and attention supplies conditioning. Our small CPU model uses two coordinates without text,
+    so its diagram isolates the diffusion mechanism before the larger pipeline.
+
+
+    Ask: Which earlier week helps explain the smaller image state used by latent diffusion?
+
+
+    Answer: Week 2 supplies the VAE idea: encode an image into a smaller representation and decode it later.
+
+
+    Watch out: The course map links mechanisms; moving between weeks does not mean their training objectives become identical.'
 - type: discussion
   title: Warm-up
   icon: fa:FaTv
-  prompt: Could you restore a photo covered in light static? What if you had to start from pure static and remove
-    a little at a time, a thousand times?
+  prompt: Could you repair a noisy sketch? What changes when you begin from entirely new noise?
   points:
-  - How would you learn which part is noise?
-  - If you always start from different random static, will you get the same photo?
-  - What information would help you decide what the final photo should show?
-  notes: 'Two minutes in pairs. A partly visible image provides clues, but the exact clean image is not uniquely
-    recoverable. Analogy: restore a damaged sketch using patterns learned from other sketches. The model receives
-    the noisy state and its noise level, not the clean original. Ask: where does the target noise come from during
-    training? We add and record it. Common mistake: treating generation as recovering a hidden original from fresh
-    random noise. Generation instead produces a new sample. Starting noise and optional conditions influence the
-    result; inspect actual variety and prompt fit.'
+  - Where does the training target come from?
+  - Is an original picture hidden in new noise?
+  - How could a prompt influence the sample?
+  notes: 'In short: Repairing light corruption is an intuition for denoising, but generation begins without a known original.
+
+
+    Explain: Corruption removes or obscures information about clean data. The network learns patterns from many deliberately
+    corrupted training examples. A timestep identifies the amount of corruption. Conditions such as text can influence the generated
+    content. Fresh starting noise can produce different samples.
+
+
+    Example: Two damaged sketches might share similar visible marks while having different originals. Learned patterns help
+    propose a plausible completion. Starting from pure static leaves even more uncertainty. Unlike restoring a saved file, the
+    model cannot recover a uniquely determined original from a fresh random draw.
+
+
+    Ask: Where does the exact target noise come from when we train this model?
+
+
+    Answer: The training code draws the noise, adds it to known data and retains the draw for comparison.
+
+
+    Watch out: Text conditions narrow the task but do not guarantee that every object, count or relationship will be correct.'
 - type: section
   number: 1
   title: Why diffusion?
   question: How does diffusion train and sample differently from VAEs and GANs?
   icon: fa:FaQuestionCircle
-  notes: 'Section one motivates diffusion by comparison with the two families we have studied. We summarise their
-    limitations, place the three families on a trade-off triangle of quality, diversity and speed, and state the
-    core idea of diffusion in one slide. Ask students to recall one weakness of VAEs and one of GANs before you
-    show the next slide. About twelve minutes.
+  notes: 'In short: Diffusion offers a different training mechanism, with sampling cost as a practical tradeoff.
 
-    '
+
+    Explain: A VAE combines reconstruction with a penalty on its latent distribution. A GAN trains a generator against a changing
+    discriminator. Noise-prediction diffusion compares a network output with a known target. Traditional diffusion sampling
+    requires repeated network calls. Quality and coverage remain empirical questions.
+
+
+    Example: Suppose a service needs images while a user waits. One generator call and 200 denoiser calls are different computational
+    workloads. They are not directly comparable seconds because network sizes and hardware also differ. Compare outputs for
+    the actual task before choosing a family.
+
+
+    Ask: Which practical requirement could make repeated denoising inconvenient even when its images look useful?
+
+
+    Answer: A strict response-time or compute budget can make many sequential network calls too expensive.
+
+
+    Watch out: Family names describe mechanisms and tendencies; they do not guarantee stable training, diversity or visual quality.'
 - type: table
-  title: Limitations of VAEs and GANs that diffusion addresses
+  title: Generative training and sampling
   header:
   - ''
-  - VAE (week 2)
-  - GAN (week 3)
-  - Diffusion (today)
+  - VAE
+  - GAN
+  - Diffusion
   rows:
-  - - Image quality
-    - Often slightly blurry
-    - Often sharp
-    - Detailed with enough steps
-  - - Coverage of the data
-    - Usually broad; still check
-    - Can miss whole classes
-    - Usually broad; still check
+  - - Learns
+    - Reconstruct + KL
+    - Fool discriminator
+    - Predict noise
+  - - Coverage
+    - Check
+    - Collapse risk
+    - Check
   - - Training
-    - One stable loss
-    - Two networks in a moving game
-    - 'One stable loss: predict the added noise'
-  - - Following a prompt or label
-    - Possible
-    - Possible
-    - Strong, with guidance
-  - - Generation cost
-    - One network pass
-    - One network pass
-    - Many passes (fewer if distilled)
-  notes: 'Use this table to compare mechanisms and practical tendencies. A VAE has a reconstruction-and-KL objective;
-    a GAN has two changing players; this diffusion model predicts known noise with a fixed regression target. None
-    guarantees useful quality or complete coverage. Analogy: one learner practices against an answer sheet, while
-    two players adapt to each other. Ask: which model needs repeated calls at generation time? Traditional diffusion
-    does. Common mistake: reading a model family as a guarantee of sharpness, stability or diversity. Evaluate samples,
-    failures, coverage and cost in the actual task.'
+    - One objective
+    - Moving game
+    - Known target
+  - - Sampling
+    - One pass
+    - One pass
+    - Repeated calls
+  notes: 'In short: Compare model families by what they learn and how they sample, then measure their actual behaviour.
+
+
+    Explain: Reconstruction means rebuilding an observed input. A discriminator is a learned checker used in adversarial training.
+    Regression predicts numerical values, such as added noise. Coverage describes which parts of the real distribution generated
+    samples represent. Sampling cost includes the network calls needed for an output.
+
+
+    Example: A GAN that generates sharp portraits may still miss some kinds of faces. A diffusion model may need many calls
+    and still make malformed hands. The table summarises mechanisms, while the fuller Word comparison records practical tendencies.
+    Neither example supplies a universal ranking.
+
+
+    Ask: Can one attractive sample establish that a generator covers its training distribution?
+
+
+    Answer: It cannot. Inspect varied outputs and assess coverage with appropriate reference data and evaluation settings.
+
+
+    Watch out: A fixed regression target removes the moving opponent, but does not remove optimisation failures or data problems.'
 - type: figure
   title: 'The generative trilemma: quality, diversity, speed'
   figure: trilemma
-  notes: 'The triangle organises three measurements: useful quality, varied coverage and generation speed. Positions
-    are schematic tendencies, not numerical rankings. Analogy: compare vehicles by journey time, carrying capacity
-    and running cost. Ask: what evidence would justify a model choice? Use matched tasks and settings, sampled outputs,
-    coverage checks and recorded runtime. Common mistake: assuming diffusion automatically covers every mode or
-    that flow matching always generates in one to four calls. Some distilled models need few calls after extra training;
-    measure their quality and failures.
+  notes: 'In short: Useful generation requires balancing quality, coverage and cost using evidence from a matched task.
 
 
-    Figure discussion prompts: Measure useful quality, varied coverage and speed. Traditional diffusion uses many
-    steps. Distillation can reduce network calls. No family guarantees success on every task.
+    Explain: Quality means usefulness under a stated rubric. Diversity means variation between generated examples. Coverage
+    asks whether important kinds of real data are represented. Speed measures elapsed generation time on specified hardware.
+    The triangle illustrates tradeoffs rather than measured positions.
 
-    '
+
+    Example: Compare two generators on the same set of synthetic product prompts. Show all sampled outputs, record settings
+    and time the work. A fast generator with repeated layouts may be unsuitable despite attractive individual images. The triangle
+    cannot tell you the size of that tradeoff without measurements.
+
+
+    Ask: What additional evidence is needed beside the schematic triangle to choose a model?
+
+
+    Answer: Matched outputs, a quality rubric, coverage checks and measured cost on the intended hardware are needed.
+
+
+    Watch out: Distillation can reduce calls after additional training; a shorter sampler alone is not a quality guarantee.'
 - type: bullets
   title: The core idea in one slide
-  icon: fa:FaLightbulb
   bullets:
-  - 'Training: take a real image and add noise that you drew yourself.'
-  - The network learns to predict exactly that noise.
-  - 'Generation: start from fresh random noise; no real image exists.'
-  - Remove a little predicted noise at a time, many times.
-  callout: Training has a known answer (the added noise); generation does not.
-  notes: 'State the loop before the equations. A fixed rule adds sampled noise to known clean data. A network receives
-    the noisy state and timestep and learns to predict that recorded noise. At generation time, fresh noise starts
-    a repeated reverse update; there is no known original image. Analogy: practice restoring many damaged sketches,
-    then use the learned patterns to build a new sketch from static. Ask: which values are known to the trainer?
-    Clean data, timestep and sampled noise. Common mistake: feeding the target noise to the denoiser or promising
-    that every local update is easy.'
+  - Training knows the sampled noise.
+  - One network handles many noise levels.
+  - Generation reuses trained weights.
+  notes: 'In short: Training predicts known added noise, while generation repeatedly applies a trained predictor to fresh noise.
+
+
+    Explain: The clean training example is available to the noising rule. The rule also receives a sampled noise tensor and
+    timestep. The denoiser receives the resulting noisy tensor and timestep. Its prediction is compared with the separate noise
+    target. Sampling later holds the learned weights fixed.
+
+
+    Example: With clean value 1, signal coefficient 0.64 and noise −0.5, the noisy value is 0.5. The denoiser''s target is −0.5,
+    not 1 or 0.5. These are illustrative arithmetic values, not an experimental result. Image tensors apply the calculation
+    to many entries together.
+
+
+    Ask: Which training value follows a separate route into the loss instead of entering the denoiser?
+
+
+    Answer: The sampled noise is the target. Giving it to the denoiser would reveal the answer.
+
+
+    Watch out: Predicting noise does not mean predicting a perfect clean image in a single call from arbitrary static.'
+  visual:
+    type: example_strip
+    items:
+    - label: Noisy input
+      text: 0.8 × 1 + 0.6 × (−0.5) = 0.5
+    - label: Target noise
+      text: −0.5, known during training
 - type: section
   number: 2
   title: Forward and reverse processes
   question: What exactly is added, what exactly is learned?
   icon: fa:FaExchangeAlt
-  notes: 'Section two gives the theoretical foundations. We define the forward process and its very useful closed
-    form, look at real images being noised and at noise schedules, define the reverse process, and derive the training
-    objective that predicts the added noise. We then connect this to the score-based view, show the training and
-    sampling code, and see real results from small diffusion models trained for these slides. This is the core exam
-    material; allow about thirty minutes.
+  notes: 'In short: Separate the fixed corruption rule from the learned reverse update before reading the equations.
 
-    '
+
+    Explain: A schedule assigns a noise amount to each timestep. The forward distribution describes corruption of real data.
+    The reverse distribution describes a modelled move towards less noisy data. Network weights determine the predicted noise.
+    A loss measures prediction error during training.
+
+
+    Example: Follow one scalar through the training diagram: clean 1, added noise −0.5, noisy input 0.5. Then follow a generated
+    point through repeated reverse updates. The first route has a known target and an optimiser step; the second has neither
+    a clean target nor a weight update.
+
+
+    Ask: Why should the training diagram show a target branch that the generation diagram lacks?
+
+
+    Answer: Training deliberately draws and records the corruption. Generation begins with fresh noise and has no known correct
+    sample.
+
+
+    Watch out: The schedule index measures corruption level; it is not the number of completed training updates.'
 - type: equation
   title: The forward (noising) process
   eq:
@@ -191,55 +309,89 @@ slides:
   - q(x_t \mid x_0) = \mathcal{N}\left(\sqrt{\bar{\alpha}_t}\, x_0,\; (1 - \bar{\alpha}_t) I\right), \quad \bar{\alpha}_t
     = \prod_{s=1}^{t}(1 - \beta_s)
   read_as:
-  - Mix scaled signal and Gaussian noise.
-  - The schedule supplies known coefficients.
-  - Create a selected noise level directly.
+  - Mix scaled signal with Gaussian noise.
+  - Select a noise level directly.
+  - 'Illustration: 0.8 × 1 + 0.6 × (−0.5) = 0.5'
   terms:
-  - - x₀
-    - clean image; $x_t$ noisy image at step $t$
+  - - $x_0$
+    - clean data
+  - - $x_t$
+    - noisy data
   - - $\beta_t$
-    - noise added at step t (the schedule)
-  - - ᾱ_t
-    - fraction of original signal variance left
-  - - ε
-    - standard Gaussian noise
+    - added noise variance
+  - - $\bar{\alpha}_t$
+    - retained signal coefficient
   panel_h: 2.1
-  notes: 'Define the forward process as a Markov chain: each step multiplies the current image by the square root
-    of one minus beta and adds Gaussian noise with variance beta. The scaling preserves unit marginal variance when
-    the input already has unit variance; general data variance tends towards one. Because Gaussians compose, we
-    can jump to any step directly, and the reparameterised form, x t equals root alpha-bar times x nought plus root
-    one minus alpha-bar times epsilon, is the one we implement. Point out the link to week 2: this is exactly the
-    reparameterisation trick. After a thousand steps essentially no signal remains.
+  notes: 'In short: The closed-form forward rule creates a selected noise level directly from clean data and sampled noise.
 
-    '
+
+    Explain: The symbol q names the fixed forward probability distribution. The index t selects the timestep. Beta is the noise
+    variance added at one step. Alpha-bar multiplies the retained-signal factors through that step. The identity matrix gives
+    independent equal-variance noise across coordinates.
+
+
+    Example: Let alpha-bar be 0.64, clean value 1 and sampled noise −0.5. The signal weight is 0.8 and noise weight 0.6, producing
+    0.5. The square roots are coefficients of values; alpha-bar itself is a variance coefficient. These calculated values illustrate
+    the displayed Gaussian formula.
+
+
+    Ask: Must the code run all earlier noising steps to construct this training input?
+
+
+    Answer: It can use the closed form and the chosen coefficient, which makes random-timestep training practical.
+
+
+    Watch out: A schedule coefficient represents a fraction of total variance only when the clean data has suitable normalisation.'
 - type: figure
   title: The forward process on real digits
   figure: forward_mnist_slide
-  caption: Real MNIST digits noised with the DDPM linear schedule (T = 1000). ᾱ shows the fraction of signal variance
-    remaining.
-  notes: 'Three real digits at increasing timesteps. At t equals fifty the digit is clearly visible; by five hundred
-    it is barely perceptible; by nine hundred and ninety-nine only noise remains. Ask students: if you were the
-    network and saw the image at t equals seven hundred and fifty, could you predict exactly which noise was added?
-    Not exactly, but you could make a reasonable guess of which digit shape is underneath, and that partial information
-    is what the model learns to exploit. Note that most information is destroyed in the middle timesteps, which
-    motivates better schedules on the next slide.
+  caption: 'Stored MNIST corruption: linear schedule, 1000 entries; index 0 already adds noise.'
+  notes: 'In short: The stored digit strip shows how a fixed schedule progressively reduces visible clean-image information.
 
-    '
+
+    Explain: MNIST contains small greyscale handwritten digit images. Each row begins from a real digit. The timestep selects
+    a known signal coefficient. Gaussian noise increasingly dominates as that coefficient decreases. The strip demonstrates
+    corruption rather than learning or generation.
+
+
+    Example: Read one row from index 0 to index 999 in the recorded 1000-step linear schedule. The lab indexes its first noisy
+    state as 0, so that column already includes a small noise increment. The clean tensor is separately named x0. This indexing
+    convention differs from equations starting at 1.
+
+
+    Ask: At a heavily corrupted column, can a viewer uniquely identify the original digit?
+
+
+    Answer: The remaining evidence can be ambiguous. The learned model uses distributional patterns rather than recovering a
+    uniquely identified original.
+
+
+    Watch out: Compare the actual columns; a visible pattern in one noisy draw does not quantify the schedule''s information
+    loss.'
 - type: figure
   title: Noise schedules decide how fast information is destroyed
   figure: schedules
-  notes: 'The schedule is a design choice. With the original linear schedule, alpha-bar falls to near zero well
-    before the last step, so many training steps are spent on almost pure noise. The cosine schedule keeps more
-    signal for longer. The plot on the right shows the signal-to-noise ratio on a log scale, which is the quantity
-    that later work, such as the EDM framework of Karras and colleagues, identified as the natural way to describe
-    schedules. Students do not need to memorise schedules, but should know that the schedule affects both training
-    quality and how many sampling steps are needed.
+  notes: 'In short: The noise schedule sets retained signal, and its effect must match the model''s training and sampler.
 
 
-    Figure discussion prompts: Schedule sets remaining signal. Linear and cosine remove it differently. SNR compares
-    signal and noise power. Check the actual end-of-schedule signal.
+    Explain: A linear beta schedule increases per-step noise variance uniformly. A cosine construction follows a different retained-signal
+    curve. Signal-to-noise ratio compares signal power with noise power. The right plot uses a logarithmic scale to display
+    large changes. End-of-schedule signal matters when starting from noise.
 
-    '
+
+    Example: For clean data with unit variance and alpha-bar 0.8, the ratio is 0.8 divided by 0.2, giving 4. This is illustrative
+    arithmetic. If the clean variance changes, include it in the numerator. The curves compare known schedule formulas, not
+    measured training quality.
+
+
+    Ask: Does seeing a gentler signal curve prove that a newly trained model will generate better samples?
+
+
+    Answer: That conclusion needs training and evaluation. The curve describes corruption, while sample quality depends on additional
+    choices.
+
+
+    Watch out: Replacing a checkpoint''s schedule arbitrarily can violate the noise levels and prediction convention it learned.'
 - type: equation
   title: The reverse (denoising) process is learned
   eq:
@@ -247,531 +399,821 @@ slides:
   - \mu_\theta(x_t, t) = \frac{1}{\sqrt{\alpha_t}}\left(x_t - \frac{\beta_t}{\sqrt{1 - \bar{\alpha}_t}}\, \epsilon_\theta(x_t,
     t)\right)
   read_as:
-  - One network handles many noise levels.
-  - Use its prediction to calculate a reverse mean.
-  - DDPM adds sampling noise except at the final step.
+  - Predict noise; calculate a reverse mean.
+  - Add sampling noise except at the end.
   terms:
-  - - $\epsilon_\theta(x_t, t)$
-    - the network's noise prediction
+  - - $\theta$
+    - network weights
+  - - $\mu_\theta$
+    - reverse mean
+  - - $\sigma_t^2$
+    - sampling variance
+  - - $\epsilon_\theta$
+    - predicted noise
   - - $\alpha_t$
     - $1 - \beta_t$
-  - - $\sigma_t^2$
-    - sampling noise, often $\beta_t$
   panel_h: 2.1
-  notes: 'The reverse process runs the chain backwards. When each forward step adds only a small amount of noise,
-    the true reverse step is also approximately Gaussian, so we model it as a Gaussian whose mean is produced by
-    a network. DDPM parameterises that mean through a noise-prediction network: given the noisy image and the timestep,
-    it predicts the noise, and the formula converts that prediction into the mean of the slightly cleaner image.
-    The same network is used at every step and receives the timestep as an extra input, usually through a sinusoidal
-    embedding like the positional encodings we meet next week.
+  notes: 'In short: A noise prediction and the schedule determine the modelled mean of the next reverse state.
 
-    '
+
+    Explain: The symbol p names the learned reverse distribution. Theta denotes the network''s adjustable weights. Mu is its
+    reverse-step mean. Sigma-squared specifies fresh sampling-noise variance. The same denoiser receives different timestep
+    values throughout generation.
+
+
+    Example: For noisy value 0.5, beta 0.1, alpha 0.9, alpha-bar 0.81 and predicted noise 0.2, the mean is about 0.479. These
+    are worked arithmetic inputs, not a measured model output. DDPM can add random noise after calculating this mean, except
+    at the final update.
+
+
+    Ask: Does the denoiser directly output the whole Gaussian reverse distribution in this parameterisation?
+
+
+    Answer: It outputs a noise estimate. The displayed formula converts that estimate into the mean; the variance is specified
+    separately.
+
+
+    Watch out: Simply subtracting predicted noise omits schedule scaling and the random component of this DDPM update.'
 - type: equation
   title: 'Training objective: predict the noise'
   eq: \mathcal{L}_{\mathrm{simple}}(\theta) = \mathbb{E}_{x_0,\, t,\, \epsilon}\left[\left\| \epsilon - \epsilon_\theta\left(\sqrt{\bar{\alpha}_t}\,
     x_0 + \sqrt{1 - \bar{\alpha}_t}\, \epsilon,\; t\right)\right\|^2\right]
   read_as:
-  - Draw real $x_0$, timestep $t$ and noise $\epsilon$.
-  - Construct $x_t$ directly; predict $\epsilon$ from $x_t$ and $t$.
-  - Minimise squared prediction error.
+  - Draw data, time and noise.
+  - Make noisy input; predict its noise.
+  - Minimise squared error.
+  - 'Scalar error: (−0.5 + 0.3)² = 0.04.'
   terms:
-  - - t
-    - uniform random step in 1…T
-  - - ε
-    - the noise we added (the target)
+  - - $t$
+    - selected timestep
+  - - $\epsilon$
+    - known noise target
   - - $\epsilon_\theta$
-    - the network's guess
-  notes: 'Draw a real image, a timestep and fresh noise; construct the noisy input directly and compare the predicted
-    and recorded noise. The loss averages squared errors. Ho et al. derived a weighted objective from an evidence
-    lower bound and found a simpler reweighting useful. Analogy: a learner practices against an answer sheet that
-    the teacher created. Ask: why is a discriminator unnecessary? The recorded noise supplies the target. Common
-    mistake: calling optimisation guaranteed stable or assuming a likelihood connection proves complete sample coverage.
-    Check actual training and outputs.'
+    - predicted noise
+  notes: 'In short: Noise-prediction training minimises squared error against the exact noise used to corrupt each example.
+
+
+    Explain: The expectation averages over clean data, timesteps and sampled noise. Epsilon names the sampled Gaussian noise
+    target. The denoiser output is its estimate using noisy input and time. Squared norm adds squared errors across entries.
+    Mean squared error averages those errors in the lab.
+
+
+    Example: A scalar target of −0.5 and prediction of −0.3 give squared error 0.04. A batch [256, 2] contains 512 coordinate
+    errors before averaging. The example teaches the calculation; it is not a recorded training loss. The DDPM paper derives
+    this simplified objective from a reweighted likelihood bound.
+
+
+    Ask: Does one training example require the network to generate a complete sample through the reverse chain?
+
+
+    Answer: One randomly chosen noisy state supplies one prediction and its target. Generation uses a separate repeated loop.
+
+
+    Watch out: The clean example constructs the input, but substituting it for the noise target changes the objective.'
 - type: code
   title: Training and sampling in a few lines
-  code: "# One training prediction per image\nt = torch.randint(0, T, (len(x0),), device=x0.device)\neps = torch.randn_like(x0)\n\
-    a = abar.to(x0.device)[t].view(-1, 1, 1, 1)\nxt = a.sqrt() * x0 + (1 - a).sqrt() * eps\nloss = F.mse_loss(model(xt,\
-    \ t), eps)\n\n# Reuse trained weights: reverse_step is in the lab\nmodel.eval()\nwith torch.no_grad():\n   \
-    \ x = torch.randn(n, 1, 28, 28, device=x0.device)\n    for k in reversed(range(T)):\n        x = reverse_step(model,\
-    \ x, k, betas, alphas, abar)\n"
+  code: "# Illustrative pseudocode\nt, eps = draw_training_pair(x0)\nxt = q_sample(x0, t, eps)\nloss = mse(model(xt, t), eps)\n\
+    update_weights(loss)\n\n# Fixed weights during sampling\nfor t in reversed_schedule:\n    x = reverse_step(model, x, t,\
+    \ schedule)"
   bullets:
-  - Training uses one selected noise level.
-  - Sampling repeats the lab reverse_step.
-  - The timestep and coefficients match the image batch.
-  notes: 'This is a fragment using the model and schedules defined in the lab. Each training image gets a timestep
-    tensor entry. Reshape its scalar coefficient to one by one by one so it broadcasts across that image. The reverse_step
-    helper forms a timestep tensor for every image in the sampling batch, predicts noise and applies the DDPM mean
-    and optional noise. Analogy: one practice question versus a sequence of refinement passes. Ask: where do weights
-    change? In the training optimiser step, never in this sampling loop. Common mistake: passing a Python integer
-    directly to TinyUNet, which expects a batch of timestep values. The notes retain the expanded update.'
+  - 'Full algorithm: Word notes and notebook.'
+  notes: 'In short: The code performs one training prediction, while sampling repeatedly calls the same fixed network.
+
+
+    Explain: A batch groups examples for one calculation. Broadcasting applies a reshaped coefficient across each example''s
+    entries. The loss compares predicted and known noise. Evaluation mode disables training-specific behaviour. Disabling gradients
+    avoids building derivative calculations during generation.
+
+
+    Example: For eight greyscale images, the clean and noise tensors have shape [8, 1, 28, 28]. The coefficient tensor is [8,
+    1, 1, 1]. Each image receives its own chosen level. The fragment calculates a loss; the optimiser update is shown in the
+    full Word explanation and lab.
+
+
+    Ask: Why does the sampling loop call reverse_step instead of merely lowering the number in the training code?
+
+
+    Answer: Sampling needs a state update at each visited level. Training predicts known corruption and updates model weights.
+
+
+    Watch out: The printed fragment assumes matching schedules and a created model; it is not an independent complete notebook.'
 - type: bullets
   title: The score-based view (Song et al., 2021)
-  icon: fa:FaCompass
   bullets:
-  - 'Score: the direction in which an image becomes more likely, at one noise level.'
-  - 'A rescaled noise prediction estimates the score: removing noise moves towards likely data.'
-  - 'Continuous view: noise is added smoothly over time, as an SDE (a change with randomness).'
-  - Its deterministic twin, the probability-flow ODE, underlies fast samplers such as DDIM and DPM-Solver.
-  notes: 'A score is a gradient of log probability, giving a local direction towards more likely data at a noise
-    level. The displayed scale converts noise prediction into a score estimate. Introduce SDE as a continuous equation
-    with random changes and ODE as a deterministic equation for a changing state. Numerical samplers approximate
-    such paths with finite updates. These connections explain related methods. Avoid claiming every discrete DDIM
-    setting is exactly the continuous probability-flow ODE.
+  - 'Score: direction towards higher noisy-data density.'
+  - Rescale predicted noise to estimate it.
+  - SDE adds randomness; ODE has deterministic dynamics.
+  notes: 'In short: The score describes a direction towards higher noisy-data density and connects noise prediction to continuous
+    dynamics.
 
-    '
+
+    Explain: A gradient gives the direction of local numerical increase. The score is the gradient of log probability density.
+    Rescaling a noise estimate gives a score estimate at that level. A stochastic differential equation includes random changes.
+    An ordinary differential equation specifies deterministic changes.
+
+
+    Example: If predicted noise is −0.2 and the noise standard deviation is 0.5, the estimated score is +0.4. This is a one-coordinate
+    illustration. A landscape analogy suggests following a local slope, but the landscape changes with noise level and the learned
+    estimate can be wrong.
+
+
+    Ask: Does a score tell us the class label or human quality rating of the current image?
+
+
+    Answer: It describes a local density direction. It is neither a classifier label nor a subjective quality score.
+
+
+    Watch out: A deterministic probability-flow path still needs numerical integration; determinism does not imply one network
+    call.'
+  visual:
+    type: mini_table
+    header:
+    - Quantity
+    - Illustration
+    rows:
+    - - Noise estimate
+      - −0.2
+    - - Noise scale
+      - '0.5'
+    - - Score estimate
+      - '+0.4'
 - type: figure
   title: 'A real diffusion model on 2-D data: noise becomes structure'
   figure: reverse_2d_slide
   stack: true
   bullets:
-  - The same 2,000 points are shown at six reverse steps, from t = 199 down to t = 0.
-  - The cloud only settles onto the grey spiral in the last 20 steps.
-  - 'Most points end on the spiral, but its inner end is covered less well: inspect coverage.'
-  caption: 'A small MLP trained with the noise-prediction loss on a 2-D swiss roll (grey). Blue: 2,000 samples during
-    the reverse process.'
-  notes: 'A real result on data we can see. We trained a tiny three-layer network on points from a two-dimensional
-    swiss roll using exactly the loss on the previous slides, then ran the reverse process from pure Gaussian noise.
-    At the first reverse step the points are a shapeless cloud; as the steps proceed, they are pulled onto the spiral,
-    and at the end they lie on the data. No adversary or learned encoder is used. Inspect the observed spiral coverage
-    and deviations; this example does not prove complete coverage. Students train this model in the first part of
-    the lab.
+  - 'Stored run: 2,000 points, indices 199…0.'
+  - Structure appears as noise is reduced.
+  - Inspect the spiral's uneven coverage.
+  caption: 'Stored MLP run: grey training points; blue generated states. The CPU core uses a shorter training budget.'
+  notes: 'In short: The stored point trajectory makes reverse generation visible while also revealing imperfect distribution
+    coverage.
 
-    '
+
+    Explain: An MLP is a network of fully connected layers. Here it predicts two noise coordinates from a point and timestep.
+    The grey cloud represents real synthetic training data. Blue dots are generated states at selected reverse indices. Learned
+    weights stay fixed throughout the trajectory.
+
+
+    Example: The stored figure shows the same 2,000 generated points from index 199 through index 0. Inspect the inner end of
+    the spiral as well as its outer arms. This separate measured run used its own training budget; the shorter CPU lab configuration
+    must be assessed from its actual output.
+
+
+    Ask: What could be missed if we judged only whether the final cloud roughly resembles a spiral?
+
+
+    Answer: We could overlook regions with too few samples, concentrations in the wrong places or points far from the data.
+
+
+    Watch out: A visual match on two-dimensional toy data does not establish image-generation quality or coverage.'
 - type: figure
-  title: A tiny diffusion model on MNIST, trained for this lecture
+  title: Stored MNIST diffusion run
   figure: reverse_mnist_slide
   bullets:
-  - Rows run from pure noise (t = 999) to finished digits (t = 0).
-  - Digit shapes appear between t = 400 and t = 200; strokes sharpen at the end.
-  - One tiny U-Net ({{UNET_PARAMS}} parameters), trained for about {{MNIST_MIN}} minutes on {{MNIST_DEVICE}}.
-  - Not every sample is a clean digit, so inspect them all.
-  notes: 'These digits come from a very small U-Net trained for a few epochs with the same code as the lab. Reading
-    down the rows, the reverse process starts from noise, coarse shapes emerge around the middle timesteps, and
-    fine strokes are refined at the end. This coarse-to-fine behaviour is typical of diffusion: early reverse steps
-    decide the global layout, late steps add detail. It is also why editing methods such as SDEdit start from a
-    partially noised image: they keep the layout decided by the input and let the model repaint details.
+  - Noise becomes digit-like structure.
+  - '{{UNET_PARAMS}} parameters; {{MNIST_MIN}} min on {{MNIST_DEVICE}}.'
+  - Inspect malformed digits and variety.
+  notes: 'In short: The stored MNIST run illustrates image denoising, while the required lab learns on smaller two-dimensional
+    data.
 
 
-    Figure discussion prompts: One tiny timestep-aware U-Net. Inspect structure across reverse steps. Judge the
-    recorded samples and failures.
+    Explain: A U-Net combines shrinking and expanding image-processing stages. Its skip connections copy features between matching
+    resolutions. A timestep embedding turns the level index into numerical features. The network predicts image-shaped noise.
+    Sampling calls the trained network without further optimiser updates.
 
-    '
+
+    Example: Read the stored rows from index 999 to index 0. The measured training record supplies {{UNET_PARAMS}} parameters
+    and about {{MNIST_MIN}} minutes on {{MNIST_DEVICE}}. These values describe that recorded image run. Enabling the optional
+    MNIST stretch creates a new run whose time and quality must be recorded separately.
+
+
+    Ask: Why should the predicted noise have the same shape as the noisy digit batch?
+
+
+    Answer: Training compares corresponding entries, so every image value needs a matching noise prediction.
+
+
+    Watch out: Visible digit-like strokes do not mean every sample is a valid digit; inspect failures and variety.'
+  caption: Separate measured image-training run; MNIST training is an optional lab stretch.
 - type: quiz
-  question: During DDPM training, what does the network learn to predict?
+  question: DDPM training predicts which target?
   options:
-  - The clean image, predicted directly from pure noise in a single step
-  - The value of the next pixel, given all the previous pixels in raster order
-  - The class label of the image, so that sampling can be guided by class
-  - The Gaussian noise that was added to create $x_t$, for a randomly chosen step $t$
+  - Clean data
+  - Next pixel
+  - Class label
+  - Added noise
   answer: 3
-  notes: 'Answer: D. The network receives a noisy image and its timestep and predicts the noise that was mixed in; the loss
-    is mean squared error against the true noise. A does not describe this training target. Some trained and distilled systems
-    can generate in one step; our model instead learns a conditional noise prediction at each selected level. Some variants
-    do predict the clean image or a velocity, but always at a given noise level, not from pure noise in one shot. C describes
-    a classifier and B an autoregressive model. B is a good distractor because it is how autoregressive image models such as
-    PixelCNN work.
+  notes: 'In short: This DDPM parameterisation learns the noise added to a training example at a chosen timestep.
 
-    '
+
+    Explain: The clean image supplies the starting data. A sampled Gaussian tensor supplies the corruption. The timestep selects
+    its signal and noise coefficients. The model receives only the corrupted image and level. Training compares the output with
+    the recorded noise.
+
+
+    Example: Revisit clean value 1, alpha-bar 0.64 and sampled noise −0.5. The resulting input is 0.5, while the correct target
+    is −0.5. Have pairs explain why each other option describes a different task or parameterisation. Predicting clean data
+    can be valid elsewhere, but it is not this objective.
+
+
+    Ask: Which option matches the noise-prediction objective shown in this lecture?
+
+
+    Answer: D. It predicts the Gaussian noise added at timestep t. A describes direct clean-image prediction, B autoregression,
+    and C classification.
+
+
+    Watch out: Some diffusion models predict velocity or clean data; always identify the parameterisation before interpreting
+    their outputs.'
 - type: section
   number: 3
   title: Architecture and latent diffusion
   question: What network does the denoising, and how does text get in?
   icon: fa:FaProjectDiagram
-  notes: 'Welcome back. Section three moves from maths to engineering. Which network predicts the noise, U-Net or
-    transformer? Why do practical systems run diffusion in the latent space of an autoencoder, connecting back to
-    week 2? And how does a text prompt influence the denoiser? By the end students should be able to explain the
-    full Stable Diffusion pipeline component by component, which is a common exam question.
+  notes: 'In short: The denoiser architecture processes noisy data, while conditioning and latent compression have separate
+    roles.
 
-    '
+
+    Explain: Architecture describes how a network''s operations connect. A U-Net passes image features through several spatial
+    resolutions. A transformer processes representations through attention-based blocks. A latent is a compact hidden numerical
+    representation. Conditioning supplies information such as text or labels.
+
+
+    Example: The point model takes [256, 2] plus a timestep for each point. The optional MNIST denoiser takes [16, 1, 28, 28].
+    A text-to-image latent model uses a smaller image state and prompt vectors. These shape examples expose different inputs
+    without suggesting that architecture alone determines sample quality.
+
+
+    Ask: Is the scheduler another neural network that must be trained alongside the denoiser?
+
+
+    Answer: In these examples, it is a numerical update procedure using predictions and schedule coefficients, not another learned
+    network.
+
+
+    Watch out: A text-conditioned pretrained pipeline includes components absent from our unconditional point and digit teaching
+    models.'
 - type: figure
   title: 'Two denoiser architectures: U-Net and diffusion transformer'
   figure: unet_dit
-  notes: 'U-Net combines downsampling, upsampling and saved skip features. A diffusion transformer instead represents
-    image or latent patches as tokens. Both need timestep information. Text-conditioned designs also accept text
-    vectors, while the small MNIST lab model has no text condition. Ask students to trace input and output shapes.
-    In this lab noise prediction has the same shape as the noisy input. The architecture can change while this training
-    target stays the same.
+  notes: 'In short: U-Nets and diffusion transformers can both predict noise, using different operations to combine input information.
 
 
-    Figure discussion prompts: U-Net: shrink, expand, join saved features. DiT: process image or latent patches.
-    Supply timestep and applicable conditions. Noise output matches the input shape.
+    Explain: Convolutions process local image neighbourhoods with shared filters. Downsampling reduces spatial dimensions. Upsampling
+    increases them again. Skip connections carry saved features into matching later stages. A diffusion transformer instead
+    processes patches through transformer blocks.
 
-    '
+
+    Example: In the lab U-Net, spatial shapes go 28 × 28, 14 × 14 and 7 × 7, then return. Saved features join the expanding
+    stages. The diagram''s solid skip arrows carry data, not training feedback. Its transformer path shows a different arrangement,
+    not a claim that the small lab trains a DiT.
+
+
+    Ask: Do skip connections reveal the clean target image to the denoiser?
+
+
+    Answer: They copy internal features computed from the noisy input. The clean image is not secretly supplied through them.
+
+
+    Watch out: Channel counts also matter: concatenating saved features changes tensor channels even when spatial dimensions
+    match.'
 - type: figure
   title: 'Latent diffusion: the Stable Diffusion pipeline'
   figure: ldm_pipeline
-  notes: 'Walk through the pipeline left to right. The prompt is tokenised and encoded by a pretrained text encoder,
-    CLIP''s text transformer in Stable Diffusion 1.5, T5 as well in later models. Generation starts from random
-    noise in the latent space, not in pixel space. The denoiser runs for a number of steps, each time attending
-    to the text embeddings through cross-attention, a mechanism explained next week. The final clean latent is decoded
-    to pixels by the VAE decoder. For scale: Stable Diffusion 1.5 has a U-Net of about 860 million parameters, a
-    123-million-parameter CLIP text encoder and an 84-million-parameter VAE.
+  notes: 'In short: Latent diffusion updates a compact image state using text conditions, then decodes the final state into
+    pixels.
 
 
-    Figure discussion prompts: Text encoder: prompt → vectors. Denoiser: repeatedly update a small latent. Scheduler:
-    choose numerical update steps. VAE decoder: final latent → pixels.
-
-    '
-- type: cards
-  title: What each component contributes
-  cards:
-  - icon: fa:FaCompressArrowsAlt
-    head: Autoencoder (VAE)
-    text: Shrinks a 512 × 512 image to a 64 × 64 × 4 latent; decodes the final latent back to pixels.
-  - icon: fa:FaFont
-    head: Text encoder
-    text: Turns the prompt into vectors (CLIP's text model in SD 1.5) that guide every step.
-  - icon: fa:FaBrain
-    head: Denoiser
-    text: A U-Net or transformer that predicts the noise in the current latent, given t and the text.
-  - icon: fa:FaClock
-    head: Scheduler / sampler
-    text: 'Not a network: a formula that turns each noise prediction into the next, cleaner latent.'
-  notes: 'Summarise the division of labour. The autoencoder is trained first and frozen; it makes the whole system
-    affordable, which is why latent diffusion made open-source image generation possible on consumer GPUs. The text
-    encoder is usually a frozen pretrained model; weaknesses in prompt following, such as counting objects or rendering
-    text, often trace back to it, which is why newer models use larger text encoders. The denoiser is the part trained
-    on hundreds of millions of image-caption pairs. The scheduler is not a network at all; in the Hugging Face Diffusers
-    library you can swap it with one line, which students do in the lab.
+    Explain: The text encoder converts prompt tokens into vectors. A VAE encoder compresses real images during model training.
+    Generation starts from noise in that compressed space. The denoiser and scheduler repeatedly update the latent. The VAE
+    decoder converts the finished latent into an image.
 
 
+    Example: The historical SD 1.5 example uses 512 × 512 × 3 pixels and 64 × 64 × 4 latent values. That is 786,432 compared
+    with 16,384 values, or 48 times fewer. These shape calculations describe this architecture; other pipelines can have different
+    channel counts and compression factors.
 
-    This diagram is the Stable Diffusion 1.5 example. Other models can use different autoencoders, text encoders
-    and denoiser architectures. Swap only compatible schedulers whose prediction type and coefficients match the
-    trained model. Ask which component runs repeatedly: the denoiser. Common mistake: treating the scheduler as
-    learned weights or decoding pixels at every latent update.'
+
+    Ask: Does an ordinary text-to-image request require the VAE encoder and a real input image?
+
+
+    Answer: It starts from random latent noise, so generation needs the decoder but no real-image encoding step.
+
+
+    Watch out: The smaller representation can lose fine detail; fewer values do not guarantee faithful text, counts or identities.'
+- type: quiz
+  notes: 'In short: The VAE decoder produces image pixels after the repeated latent denoising updates finish.
+
+
+    Explain: A text encoder supplies representations of the prompt. A denoiser predicts noise in the current latent. A scheduler
+    turns that prediction into an updated latent. A decoder converts a latent into image values. A seed controls random-number
+    draws.
+
+
+    Example: Trace the final 64 × 64 × 4 SD 1.5 latent to a 512 × 512 × 3 image. The decoder performs that conversion. The scheduler
+    changes the latent at earlier steps, while the text encoder supplies conditioning. Ask students to name one input and output
+    for each component before answering.
+
+
+    Ask: Which component converts the final latent into pixels in the shown pipeline?
+
+
+    Answer: A. The trained VAE decoder. B supplies schedule values, C encodes the prompt, and D draws starting noise.
+
+
+    Watch out: Generating the image is a pipeline operation; assigning the whole request to the denoiser hides its other components.'
+  question: Which component converts the final latent into pixels?
+  answer: 0
+  options:
+  - The trained VAE decoder
+  - The timestep noise schedule
+  - The prompt text encoder
+  - The seeded noise generator
 - type: section
   number: 4
   title: Sampling, guidance and prompts
   question: Why do steps, guidance scale, seeds and negative prompts change the picture?
   icon: fa:FaSlidersH
-  notes: 'Section four is practical and visual. Every image generator exposes a few controls: number of steps, sampler,
-    guidance scale, seed and negative prompt. Students will use all of them in the lab and in the project. We explain
-    what each one does in terms of the maths from section two, using real Stable Diffusion outputs generated with
-    a fixed seed so that only one setting changes at a time.
+  notes: 'In short: A controlled sampling experiment changes one setting while recording every other relevant choice.
 
-    '
+
+    Explain: A sampler specifies the numerical updates between noise levels. Step count sets how many updates are taken. Guidance
+    combines conditioned and reference predictions. A seed selects a random-number sequence. A negative prompt changes the reference
+    condition where guidance is supported.
+
+
+    Example: Use one lighthouse prompt, one checkpoint and seed 42. Changing only the number of steps tests a different question
+    from changing the guidance scale. Starting from a matched random draw helps comparison, but altered software or hardware
+    may still change outputs. Model-specific operating rules remain essential.
+
+
+    Ask: What makes changing both the prompt and guidance an ambiguous comparison?
+
+
+    Answer: Either change could explain the result. A controlled comparison isolates the setting whose effect we want to inspect.
+
+
+    Watch out: Record compatible sampler, dimensions, precision and versions as well as the visually prominent settings.'
 - type: compare
   title: 'Samplers: from 1000 steps to a handful'
   columns:
   - head: DDPM
     icon: fa:FaWalking
     points:
-    - Follows all 1,000 small steps, adding a little fresh noise each time.
-    - Slow, but the reference baseline.
-  - head: DDIM / ODE methods
+    - Full schedule; fresh sampling noise.
+  - head: DDIM
     icon: fa:FaRunning
     points:
-    - Visits only selected noise levels, for example 50 of the 1,000.
-    - Same trained network; only the update rule changes.
-  - head: Distilled models
+    - Selected levels; fixed trained denoiser.
+  - head: Distillation
     icon: fa:FaRocket
     points:
-    - A student network is trained to make big jumps.
-    - Some generate in 1–4 steps (for example SD-Turbo).
-  notes: 'Three groups of samplers. DDPM''s ancestral sampler follows a stochastic reverse chain. This lab''s DDIM
-    uses deterministic updates over selected timesteps spanning the full schedule; ODE solvers such as DPM-Solver
-    are another route to fewer evaluations. Neither requires retraining the noise predictor. Simply lowering the
-    steps argument in the lab''s DDPM function truncates its loop, so use the full DDPM schedule as the baseline
-    and DDIM for timestep skipping. Measure quality and runtime in the actual experiment. Distillation goes further
-    by training a student model for large jumps, giving few-step generation. Consistency models and adversarial
-    diffusion distillation, which connects with last week''s GAN discriminator, are examples.
+    - New student trained for larger jumps.
+  notes: 'In short: Fewer sampling calls require a valid update rule or a model trained for larger jumps.
 
-    '
+
+    Explain: DDPM uses a stochastic reverse chain. DDIM can visit selected levels with deterministic updates when its noise
+    parameter is zero. Numerical ODE methods approximate continuous dynamics. Distillation trains a student model from a teacher.
+    These approaches change different parts of the system.
+
+
+    Example: The core point experiment compares 200 DDPM calls with 40 DDIM calls using one trained denoiser. The optional digit
+    stretch compares 1000 with 50. Those call ratios are arithmetic, not measured wall-clock speedups. Networks, batching and
+    update overhead affect the observed time and quality.
+
+
+    Ask: Does sample_ddpm(steps=50) implement a valid 50-step journey through the original 1000-step schedule?
+
+
+    Answer: The lab function would truncate its chain. Use schedule-spanning DDIM updates rather than silently changing the
+    starting index.
+
+
+    Watch out: Few-step distilled checkpoints have their own compatible schedules and controls; ordinary denoisers are not interchangeable
+    with them.'
 - type: figure
-  title: Effect of the number of steps (Stable Diffusion 1.5, same seed)
+  title: Stored SD 1.5 step comparison
   figure: sd_steps
   stack: true
   bullets:
-  - Same prompt, seed and guidance; only the number of denoising steps changes.
-  - '2 steps: a blurred colour layout. 5: the scene is recognisable. 10–25: details settle.'
-  - 'Time on the lecture CPU: {{W04_T2}} s for 2 steps, {{W04_T25}} s for 25.'
-  caption: DPM-Solver++ sampler, guidance 7.5, seed 42. Real outputs generated for this lecture.
-  notes: 'Real outputs with everything fixed except the number of steps. With two steps the image is a blurry colour
-    layout, showing that the global composition is decided early. By five steps the scene is recognisable; ten steps
-    add most details; twenty-five steps refine textures. Beyond about twenty-five to thirty steps with a good solver,
-    improvements are small, which is why most tools default to twenty to fifty. Ask students to connect this with
-    the coarse-to-fine MNIST figure. With the same model and guidance, more steps usually increase denoiser work;
-    fixed overhead means total runtime need not be exactly linear; the timings are in the teaching notes.
+  - Fixed prompt, seed 42, guidance 7.5.
+  - 'DPM-Solver++: 2, 5, 10, 25 updates.'
+  - 'CPU evidence: {{W04_T2}} s and {{W04_T25}} s at endpoints.'
+  caption: Separate measured image-model run; compare detail and visible failures.
+  notes: 'In short: The stored SD 1.5 step sweep isolates sampling-call count while holding other image controls fixed.
 
-    '
+
+    Explain: The checkpoint specifies learned model weights. DPM-Solver++ is the sampler used for this stored comparison. Guidance
+    determines how predictions use the prompt. The seed fixes its starting random draw in this run. Timing refers to the recorded
+    machine and settings.
+
+
+    Example: Compare the saved 2-, 5-, 10- and 25-step lighthouse outputs. The source evidence supplies {{W04_T2}} seconds and
+    {{W04_T25}} seconds for the two endpoints. These are recorded SD 1.5 image timings, not the new point-model runtime. Inspect
+    scene layout, detail and failures throughout the grid.
+
+
+    Ask: Can the stored curve establish that extra steps improve every model at every setting?
+
+
+    Answer: It supports a comparison for this checkpoint and experiment. Distilled models and other tasks need their own evaluations.
+
+
+    Watch out: A shorter elapsed time can accompany a poor output; report both the workload and what the samples actually show.'
 - type: equation
   title: Classifier-free guidance (Ho & Salimans, 2022)
   eq: \hat{\epsilon} = \epsilon_\theta(x_t, \varnothing) + w \cdot \left(\epsilon_\theta(x_t, c) - \epsilon_\theta(x_t,
     \varnothing)\right)
   read_as:
-  - Train with the condition sometimes dropped.
+  - Sometimes drop text during training.
   - Combine conditional and reference predictions.
-  - Here w = 1 gives the conditional prediction.
+  - 'Illustration: 0.2 + 3 × 0.3 = 1.1'
   terms:
-  - - c
-    - text condition (prompt embedding)
-  - - ∅
-    - empty prompt
-  - - w
-    - guidance scale
-  notes: 'Classifier-free guidance is the single most important trick behind prompt-following image generation.
-    During training, the prompt is replaced by an empty prompt some of the time, so one network learns both conditional
-    and unconditional noise predictions. At sampling time we compute both and extrapolate from the unconditional
-    prediction towards the conditional one. The difference vector points in the direction that makes the image more
-    like the prompt; multiplying it by w greater than one exaggerates that direction. The cost is two network evaluations
-    per step. It replaced classifier guidance, which needed a separate noise-aware classifier.
+  - - $c$
+    - prompt representation
+  - - $\varnothing$
+    - empty condition
+  - - $w$
+    - guidance weight; 1 gives conditional
+  notes: 'In short: Classifier-free guidance combines conditional and reference predictions to increase the influence of a condition.
 
 
+    Explain: The condition c is a numerical representation of the prompt. The empty condition supplies the reference prediction.
+    Training sometimes drops the condition so one network supports both cases. The weight w scales their difference. Our convention
+    gives the conditional prediction when w equals 1.
 
-    Here w = 1 gives the conditional prediction; the symbol convention varies across papers. Active guidance requires
-    two predictions, which software can batch into one network call with twice the examples. Pipelines may skip
-    the reference prediction when guidance is disabled. Do not apply an SD1.5 guidance default to every model: SD-Turbo
-    disables guidance. Ask what w = 0 gives in the displayed formula: the reference prediction.'
+
+    Example: Use illustrative predictions 0.2 without text and 0.5 with text. Weight 1 gives 0.5; weight 3 gives 0.2 + 3 × 0.3
+    = 1.1. This is extrapolation beyond the conditional prediction, not a probability. Actual image behaviour must be checked
+    for the chosen model.
+
+
+    Ask: Under the displayed convention, what does setting the guidance weight to 1 recover?
+
+
+    Answer: It recovers the conditional prediction. A weight above 1 extrapolates further along the difference from the reference.
+
+
+    Watch out: SD-Turbo disables this guidance mechanism in its documented usage, so its settings cannot validate an ordinary
+    guidance sweep.'
 - type: figure
-  title: Effect of the guidance scale (same seed)
+  title: Stored SD 1.5 guidance comparison
   figure: sd_guidance
   stack: true
   bullets:
-  - Same prompt, seed and 25 steps; only the guidance scale w changes.
-  - 'w = 1: washed out, no sunset. 7.5: lighthouse, cliff and sunset all present. 15: harsh, oversaturated colours.'
-  - 'w above 1 runs the denoiser twice per step (with and without the prompt), so it is slower: {{W04_G1}} s at w = 1,
-    {{W04_G75}} s at w = 7.5 on the lecture CPU.'
-  notes: 'Real outputs with only the guidance scale changing. At one, the model is the plain conditional model and
-    the image often ignores parts of the prompt. Around seven and a half, the default for Stable Diffusion 1.5,
-    the lighthouse, cliff and sunset are all present. At fifteen, colours saturate and contrast becomes harsh, a
-    characteristic artefact of excessive guidance. This is also a diversity trade-off: higher guidance makes different
-    seeds look more alike. Connect to GANs: the truncation trick in BigGAN trades diversity for quality in a similar
-    way. On cost: at a scale of one the pipeline skips the second, prompt-free pass, so each step needs one network
-    call instead of two. Treat single CPU timings as rough: the same 7.5, 25-step setting took {{W04_G75}} seconds here
-    and {{W04_T25}} seconds in the steps experiment.
+  - Fixed prompt, seed and 25 steps.
+  - Inspect prompt fit, saturation and artefacts.
+  - 'CPU evidence: {{W04_G1}} s at 1; {{W04_G75}} s at 7.5.'
+  notes: 'In short: The stored guidance sweep shows one model''s prompt-control tradeoff under a fixed prompt, seed and step
+    count.
 
 
-    Figure discussion prompts: Keep prompt and seed fixed. Compare prompt fit and visual artefacts. A useful range
-    depends on the model. Large guidance can reduce variety.
+    Explain: Guidance strengthens the difference between conditional and reference predictions. Stronger conditioning can alter
+    colours, detail and variety. The grid uses historical SD 1.5 with 25 updates. Implementations can evaluate the two predictions
+    together as a batch. Their cost still includes both denoiser predictions.
 
-    '
+
+    Example: Inspect guidance 1, 3, 7.5 and 15 in the recorded lighthouse grid. The evidence supplies {{W04_G1}} seconds at
+    1 and {{W04_G75}} seconds at 7.5. Discuss visible prompt fit and saturation, then distinguish those measured observations
+    from a universal recommended guidance range.
+
+
+    Ask: Why might stronger guidance increase compute even if the number of scheduler steps stays fixed?
+
+
+    Answer: The guided update needs both reference and conditional predictions. Fusing them in one batch does not eliminate
+    that work.
+
+
+    Watch out: A visually striking image or higher alignment score can still contain worse artefacts or less varied samples.'
+  caption: Separate measured run; guided prediction evaluates conditional and reference branches.
 - type: figure
   title: Seeds and negative prompts
   figure: seeds_negative_slide
   stack: true
   bullets:
-  - 'Seeds 1–4: same prompt and settings, different starting noise, so four different pictures.'
-  - 'Right pair: the same seed, with and without the negative prompt "lamp, blurry, low quality".'
-  - 'The lamp is still there: a negative prompt pushes away from features; it cannot guarantee removal.'
-  notes: 'A seed sets a random-number sequence, rather than directly naming an image. Holding seed and settings
-    fixed makes controlled comparisons easier within the same setup. Exact results can still vary across hardware,
-    software, model versions or nondeterministic operations. A negative prompt supplies an alternative condition
-    in guidance and encourages movement away from its features. It cannot guarantee removal. Ask students to record
-    all controls and inspect actual images.
+  - Four seeds change starting randomness.
+  - Right pair holds seed fixed; changes negative prompt.
+  - 'The lamp remains: removal is not guaranteed.'
+  notes: 'In short: Seeds select starting randomness, while negative prompts alter a supported guidance reference without guaranteeing
+    removal.
 
 
-    Figure discussion prompts: Seed sets the random-number sequence. Record model, sampler, software and settings.
-    Negative prompts supply a guidance reference. Neither control guarantees a correct picture.
+    Explain: A seed initialises a random-number generator. Different starting draws can lead to different layouts. A negative
+    prompt supplies a reference text condition. The guided prediction moves away from its influence. Repeatability also depends
+    on model, software, hardware and settings.
 
-    '
+
+    Example: The stored montage shows four seed choices and a matched reading-corner pair. Its negative prompt includes lamp,
+    blurry and low quality. Inspect the actual lamp instead of assuming the words delete it. This guided SD 1.5 evidence is
+    distinct from SD-Turbo, whose documented usage ignores negative prompts.
+
+
+    Ask: Does an unchanged lamp prove that the negative prompt argument was ignored by every image model?
+
+
+    Answer: It only describes this controlled output. Inspect the active model, guidance and implementation before interpreting
+    the mechanism.
+
+
+    Watch out: Fixing the seed improves experimental control within a setup but does not ensure identical pixels across changed
+    environments.'
+  caption: Stored guided SD 1.5 outputs; software and settings also affect repeatability.
 - type: section
   number: 5
   title: Variants, evaluation and responsible use
   question: What has changed since Stable Diffusion, and how do we judge the results?
   icon: fa:FaStar
-  notes: 'The final section brings us to the current state of the field. Flow matching and rectified flow, used
-    by Stable Diffusion 3 and FLUX; few-step distillation, with a real SD-Turbo example; the many variants for editing,
-    control, video and audio; how to evaluate image generators; a comparison of all the generative families so far;
-    and responsible use, including copyright and memorisation, which are live issues for diffusion models.
+  notes: 'In short: Variants alter training, conditioning or sampling, and each proposed benefit needs a matching evaluation.
 
-    '
+
+    Explain: Flow matching trains a velocity field. Distillation trains a faster student from another model. Editing conditions
+    generation on existing visual information. A metric measures a chosen aspect of output behaviour. Responsible use considers
+    data rights, harm and source disclosure.
+
+
+    Example: A request for three cubes on a table tests object counts and layout, not just image realism. A model can produce
+    an attractive table while drawing two cubes. Use this concrete failure to connect the following variants to evaluation.
+    New architecture labels do not remove the need to inspect constraints.
+
+
+    Ask: Which evaluation would a beautiful but miscounted image fail despite looking plausible?
+
+
+    Answer: It would fail the stated object-count constraint. Visual attractiveness and prompt compliance are different aspects
+    of the task.
+
+
+    Watch out: The lecture introduces mechanisms rather than ranking current commercial systems; model availability and terms
+    need source checks.'
 - type: figure
-  title: 'Flow matching and rectified flow: straighter paths'
+  title: 'Flow matching: training paths and learned velocity'
   figure: flow_paths
-  notes: 'Flow matching, introduced by Lipman and colleagues and in rectified flow by Liu and colleagues in 2022,
-    learns a velocity field that transports noise to data along simple paths, usually straight lines between a noise
-    sample and a data sample. The panel compares schematic paired training paths. The learned marginal velocity
-    generally averages possible pairwise targets, so generated trajectories need not follow one straight training
-    pair. Efficiency depends on training, model and numerical solver. Conceptually they are close relatives of diffusion:
-    both learn to turn noise into data gradually with a regression loss.
+  notes: 'In short: Flow matching uses specified training paths to learn velocity, while generated trajectories can still curve.
 
 
+    Explain: Velocity describes the direction and rate of change of a state. A training pair joins data with a noise sample.
+    A linear interpolation defines one straight path for that pair. The network learns predictions from many pairs. A numerical
+    solver follows the learned field during generation.
 
-    Ask which paths are shown: paired training interpolations, not measured sample trajectories. The regression
-    fits a marginal field across many possible pairings. The sample solver follows that learned field, which can
-    curve.'
+
+    Example: For scalar data 1 and noise −1, the interpolation at time 0.25 is 0.5. Its paired target velocity is −2. The diagram
+    illustrates these known training paths, not recorded generated trajectories. At one state, many pairs can contribute different
+    targets, so the learned sampling path need not stay straight.
+
+
+    Ask: Does a straight training line prove that the generated sample follows exactly that line?
+
+
+    Answer: It does not. Sampling follows the learned velocity field, which combines information from many training pairs.
+
+
+    Watch out: The time convention here places data at 0 and noise at 1; some descriptions reverse that convention.'
 - type: equation
   title: The flow-matching objective
   eq:
   - x_t = (1 - t)\, x_0 + t\, \epsilon, \qquad t \in [0, 1]
   - \mathcal{L}_{\mathrm{FM}} = \mathbb{E}_{x_0, \epsilon, t}\left[\left\| v_\theta(x_t, t) - (\epsilon - x_0) \right\|^2\right]
   read_as:
-  - Here t = 0 is data; t = 1 is noise.
-  - Train velocity towards $\epsilon - x_0$.
-  - Generate by integrating backwards from noise.
+  - 'Time 0: data; time 1: noise.'
+  - Predict velocity; integrate backwards to generate.
+  - 'Data 1, noise −1: velocity −2.'
   terms:
-  - - x₀
+  - - $x_0$
     - data sample
-  - - ε
-    - noise sample
+  - - $\epsilon$
+    - paired noise
   - - $v_\theta$
     - predicted velocity
-  notes: 'The objective is as simple as DDPM''s. Mix a data point and a noise sample with a linear interpolation,
-    and train the network to predict the constant velocity of that straight path, the noise minus the data. At sampling
-    time, start from noise and integrate the learned velocity field back to the data with a few ODE steps. Warn
-    students that sign and time conventions vary between papers: some write the data at time one. The important
-    ideas are the linear path, the velocity target and the regression loss. In the lab, the optional extension converts
-    the MNIST model to flow matching with a two-line change.
+  notes: 'In short: The displayed flow objective trains a velocity predictor for a chosen interpolation between data and noise.
 
-    '
+
+    Explain: The continuous time t runs between 0 and 1. The clean sample is x-zero, and epsilon is its paired noise sample.
+    Their difference gives the target velocity for this linear path. Theta denotes learned network weights. The expectation
+    averages squared velocity errors over training pairs and times.
+
+
+    Example: With data 1 and noise −1, the velocity target is −2. At time 0.25, the mixed state is 0.5. Generation starts at
+    time 1 and integrates backwards, reversing the direction of time. These scalar values demonstrate the stated objective,
+    not a measured image trajectory.
+
+
+    Ask: Can we reuse the DDPM lab loss unchanged and simply call its output a velocity?
+
+
+    Answer: The target and time input must change. DDPM predicts noise; this formulation predicts the paired velocity.
+
+
+    Watch out: The point MLP scales integer indices by T2; a continuous-time extension must adjust that input convention.'
 - type: figure
-  title: Few-step generation with a distilled model (SD-Turbo)
+  title: Stored SD-Turbo few-step comparison
   figure: sd_turbo
   stack: true
   bullets:
-  - One distilled model at 1, 2 and 4 steps, with no guidance.
-  - 'Time on the lecture CPU: {{W04_TURBO1}} s for 1 step, {{W04_TURBO4}} s for 4; SD 1.5 with 25 steps took {{W04_T25}} s.'
-  - 'Costs: fixed 512 × 512 size, less variety and weaker control from negative prompts.'
-  notes: 'A real result from SD-Turbo, released by Stability AI in 2023. It was distilled from Stable Diffusion
-    2.1 using adversarial diffusion distillation, which combines a distillation loss with a GAN discriminator, connecting
-    last week and this week. With one step it already produces a coherent image, and four steps add detail. Compare
-    with the twenty-five steps and classifier-free guidance, meaning fifty network calls, used on the previous slides.
-    The timings measured on the lecture machine are in the notes. The costs: fixed resolution, somewhat less diversity,
-    and weaker control through negative prompts, since guidance is disabled.
+  - Distilled SD 2.1; guidance disabled.
+  - 512 × 512 outputs at 1, 2, 4 steps.
+  - 'CPU evidence: {{W04_TURBO1}} s at 1; {{W04_TURBO4}} s at 4.'
+  notes: 'In short: SD-Turbo is a distilled historical image model with published few-step settings and guidance disabled.
 
 
-    Figure discussion prompts: SD-Turbo distils Stable Diffusion 2.1. Use 1–4 steps; guidance disabled. Negative
-    prompts have no effect in this path. Measure time, detail and prompt fit.
+    Explain: Distillation teaches a student using a teacher model. SD-Turbo derives from Stable Diffusion 2.1. Adversarial diffusion
+    distillation combines teacher information with an adversarial training objective. Its documented sampling range is 1–4 steps.
+    Ordinary classifier-free guidance and negative prompts are disabled.
 
-    '
+
+    Example: The stored grid compares 1, 2 and 4 steps at 512 × 512 pixels. Evidence supplies {{W04_TURBO1}} and {{W04_TURBO4}}
+    seconds for its endpoint settings. These recorded times differ from the required CPU point model. The model card specifies
+    the operating rules: https://huggingface.co/stabilityai/sd-turbo.
+
+
+    Ask: Would increasing guidance in a wrapper that forces zero create a genuine SD-Turbo guidance experiment?
+
+
+    Answer: It would not. The requested setting is inactive, so report the limitation and compare supported controls instead.
+
+
+    Watch out: A few calls reflect specialised training; reducing an ordinary sampler to one call does not reproduce this checkpoint.'
+  caption: Separate measured image-model run; negative prompts are inactive.
 - type: cards
   title: 'Beyond text-to-image: diffusion variants'
   cards:
-  - icon: fa:FaEdit
-    head: Editing
-    text: Partly noise a photo, then denoise with a new prompt; inpainting repaints only a masked area.
-  - icon: fa:FaDraftingCompass
-    head: Control
-    text: ControlNet makes the image follow an edge map, depth map or body pose.
-  - icon: fa:FaUserTag
-    head: Personalisation
-    text: Teach a new subject from a few images (for example LoRA, week 8), only with consent.
-  - icon: fa:FaFilm
-    head: Video
-    text: Denoise many frames together so that objects move consistently.
-  - icon: fa:FaMusic
-    head: Audio
-    text: Generate music or speech as spectrograms or compressed audio codes.
-  - icon: fa:FaDna
-    head: Science
-    text: Propose protein structures or molecules for experts to test in the lab.
-  notes: 'Diffusion is a general recipe, so it has spread far beyond text-to-image. Editing methods exploit the
-    coarse-to-fine structure: noise an existing image partly, then denoise with a new prompt; inpainting restricts
-    changes to a mask. ControlNet adds a trainable copy of the encoder that reads structural conditions such as
-    edges, depth maps or human pose. Personalisation methods, including LoRA, which we study in week 8, teach a
-    model a new subject from a handful of images. Video models extend diffusion transformers to space and time;
-    audio models diffuse in spectrogram or codec latent spaces. In science, diffusion designs proteins and forecasts
-    weather. Week 10 revisits video and audio.
+  - head: Editing
+    text: Inpainting fills selected regions.
+  - head: Control
+    text: Edges, depth or pose guide layout.
+  - head: Personalisation
+    text: Adapt weights with authorised examples.
+  - head: Video
+    text: Model coherence across frames.
+  - head: Audio
+    text: Generate sound representations.
+  - head: Science
+    text: Propose candidates; validate experimentally.
+  notes: 'In short: Diffusion variants change their conditions or output representation while retaining a learned generation
+    mechanism.
 
-    '
+
+    Explain: Inpainting modifies a selected image region. ControlNet supplies structural conditions such as edges or pose. Personalisation
+    adapts model weights to a subject or style. Video models process information across frames. Audio models can operate on
+    spectrograms or compressed sound representations.
+
+
+    Example: An edge map can guide the layout of a fictional room, while a text prompt describes its appearance. Neither input
+    guarantees that every requested feature is present. Compare the supplied edge structure with the generated image. Personalising
+    to a subject changes a different part of the system and needs authorised examples.
+
+
+    Ask: How does supplying an edge map differ from merely choosing a new random seed?
+
+
+    Answer: The edge map is a structural condition. The seed chooses randomness without encoding the requested room layout.
+
+
+    Watch out: A protein or molecule proposal still needs domain validation; generated plausibility does not establish scientific
+    correctness.'
 - type: table
   title: Evaluating image generators
   header:
   - Aspect
-  - How to measure it
-  - Watch out for
+  - Measure
+  - Limit
   rows:
-  - - Realism and coverage
-    - FID or KID against real images
-    - Depends on the feature network and the number of images
+  - - Distribution
+    - FID / KID
+    - Reference set matters
   - - Prompt fit
-    - CLIP similarity of image and prompt
-    - Can miss counts and positions ("three cubes")
-  - - Objects and relations
-    - Detector-based tests, such as counting the cubes
-    - The detector makes its own mistakes
-  - - Human preference
-    - People rate or rank images
-    - Needs a rubric, several raters and agreement
+    - CLIP similarity
+    - Can miss counts
+  - - Constraints
+    - Inspect objects
+    - Check evaluator errors
+  - - Preference
+    - Human rubric
+    - Raters differ
   - - Cost
-    - Seconds and memory per image
-    - Always state the hardware
-  notes: 'Compare several sources of evidence. FID compares feature means and covariances; it depends on the feature
-    network, reference set and sample count. CLIP similarity measures one image-text relationship and can miss counts
-    or spatial errors. Detector-based compositional tests inherit detector errors. Human ratings need a clear rubric,
-    several raters and reported agreement. Analogy: assess a meal by taste, nutrition, cost and consistency rather
-    than one score. Ask which test would catch a request for three objects that produces two. Common mistake: treating
-    one automatic metric or a preference vote as complete validation.'
-- type: table
-  title: Comparing the generative families (weeks 2–4)
-  header:
-  - ''
-  - VAE
-  - GAN
-  - Diffusion
-  - Flow matching
-  rows:
-  - - Learns to
-    - Rebuild the input + KL (ELBO)
-    - Fool a learned checker
-    - Predict the added noise
-    - Predict a velocity (direction)
-  - - Typical quality
-    - Often blurry
-    - Often sharp
-    - Detailed
-    - Detailed
-  - - Typical coverage
-    - Usually broad
-    - Can collapse
-    - Usually broad
-    - Usually broad
-  - - Generation cost
-    - One pass
-    - One pass
-    - Many steps; fewer if distilled
-    - Several solver steps
-  - - Typical role today
-    - Latent spaces, compression
-    - Fast, sharp outputs
-    - Image, video, audio
-    - Image generation (SD 3, FLUX)
-  notes: 'This table completes the comparison with other generative models required by the descriptor and is a strong
-    revision aid. It also shows how the families work together in practice: the VAE provides the latent space, diffusion
-    or flow matching does the generation, and GAN losses keep decoders sharp and help distil fast samplers. Transformers,
-    next week, supply both the text encoder and, increasingly, the denoiser backbone. Encourage students to use
-    this table to structure an exam answer on choosing a model family.
+    - Time / memory
+    - Record hardware
+  notes: 'In short: Evaluate image generators with complementary measurements because each metric captures only part of the
+    task.
 
-    '
+
+    Explain: FID compares feature distributions of real and generated images. KID is another feature-distribution comparison.
+    CLIP similarity compares image and text vector directions. Human preference records judgments under a rubric. Efficiency
+    measures time and memory under stated conditions.
+
+
+    Example: For a prompt requesting three red cubes left of a blue sphere, inspect count, colour and position separately. CLIP
+    may recognise the relevant concepts without checking every relation. Report that failure alongside any similarity score.
+    Distribution metrics need suitable reference images and sufficient samples rather than one picture.
+
+
+    Ask: What additional check would you add when CLIP similarity is high but object counts matter?
+
+
+    Answer: Inspect the objects and relationships, using a stated rubric or a validated detector, and record any mistakes.
+
+
+    Watch out: Changing the feature network, reference set or sample count makes distribution scores difficult to compare fairly.'
+- type: quiz
+  notes: 'In short: No single alignment, randomness or timing result proves that an image satisfies its intended task.
+
+
+    Explain: A metric summarises a specific measurement. Alignment concerns agreement with the prompt. Reproducibility concerns
+    repeating a procedure under recorded settings. Efficiency concerns its computational cost. Correctness requires the actual
+    requested constraints to hold.
+
+
+    Example: An attractive image of two cubes can score highly against a three-cube prompt because related concepts are present.
+    A fixed seed makes that failure easier to reproduce. A short runtime makes it faster to obtain. None of those observations
+    repairs the count. Inspect the requested objects and their relations.
+
+
+    Ask: Which single result proves that an image is correct for its prompt?
+
+
+    Answer: B. None of the listed results proves correctness. Inspect constraints such as object counts and relations alongside
+    broader quality measures.
+
+
+    Watch out: Evaluation should describe the tested requirement and the measurement''s limits, rather than treating a convenient
+    score as complete evidence.'
+  question: Which single result proves an image is correct?
+  answer: 1
+  options:
+  - A high CLIP similarity score
+  - None; inspect objects and relations
+  - A fixed seed and sampler
+  - A short measured generation time
 - type: bullets
   title: 'Responsible AI lens: diffusion models'
-  icon: fa:FaBalanceScale
   bullets:
-  - 'Rights: models learned from scraped images; check licences before commercial use.'
-  - 'Memorisation: images repeated in training can be regenerated almost exactly.'
-  - 'Bias: audit who appears for prompts such as "a CEO" or "a nurse".'
-  - 'Disclosure: label generated images and keep provenance (EU AI Act Article 50).'
-  - Report the compute and energy of your actual workload.
-  notes: 'Each point is a live issue. Copyright: diffusion models were trained on large scraped datasets such as
-    LAION, and courts in several countries are considering claims by artists and image libraries; students should
-    not assume training use is settled law. Memorisation: Carlini and colleagues showed that images duplicated many
-    times in training can be regenerated almost exactly, a privacy and copyright risk. Bias audits of Stable Diffusion
-    found strong occupational and racial stereotypes. Safety filters and source history (provenance) tools help,
-    and Article 50 distinguishes provider marking from deployer disclosure of deepfakes and certain public-interest
-    text, with scope and exceptions; consult the official text. In the lab, the pipeline''s safety checker is discussed
-    rather than removed silently.
+  - Check data rights and model terms.
+  - Audit biased outputs and near-copies.
+  - Label generated media; record its source.
+  notes: 'In short: Responsible generation records source and settings, checks rights and examines concrete output harms.
 
-    '
+
+    Explain: A licence states conditions for using a model or dataset. Memorisation can produce close copies of training examples.
+    Bias means systematic differences in representation or treatment. Provenance records the source and processing history of
+    content. Compute claims require measurements of the actual workload.
+
+
+    Example: Compare synthetic occupation prompts across demographic conditions, then inspect all outputs using a stated rubric.
+    Keep generated media labelled and preserve its source record. EU disclosure duties depend on scope and role; consult current
+    Commission guidance at https://digital-strategy.ec.europa.eu/en/faqs/transparency-obligations-under-article-50-ai-act. A
+    label does not establish consent or eliminate bias.
+
+
+    Ask: Does a model''s safety checker establish that every generated image is acceptable to publish?
+
+
+    Answer: It is one screening component. People must still assess the image, intended use, rights and relevant policies.
+
+
+    Watch out: Fewer inference steps reduce one workload only; an energy comparison must also account for what was measured.'
+  visual:
+    type: mini_table
+    header:
+    - Risk
+    - Check
+    rows:
+    - - Bias
+      - Vary demographic prompts
+    - - Memorisation
+      - Inspect suspicious matches
+    - - Compute
+      - Measure actual workload
 - type: lab
-  title: 'Lab 4: train a diffusion model and use Stable Diffusion'
+  title: 'Lab 4: diffusion on the CPU'
   steps:
-  - Create and inspect noisy examples.
-  - Train point and image denoisers.
-  - Compare full DDPM with DDIM.
-  - Load a pretrained latent pipeline.
-  - Change one control per comparison.
-  - Measure time, alignment and failures.
-  runtime: GPU recommended for images. About 17 min on a laptop CPU (SD-Turbo) after downloads
-  deliverable: Models, figures, sampler timings, alignment table, three answers
-  notes: 'The lab has two halves. First, students implement the forward process and the training and sampling loops
-    themselves, on 2-D data where everything is fast, and then on MNIST with a tiny U-Net (six epochs on a Colab GPU, two on a CPU). Second,
-    they use the Hugging Face Diffusers library with Stable Diffusion 1.5 and SD-Turbo, sweeping the controls we
-    discussed and measuring time. They finish with a small evaluation using CLIP score, which previews week 9, and
-    a failure case. Remind students that Stable Diffusion''s licence has use restrictions, and that generated images
-    of real people are not permitted in the lab.
+  - Check direct noising.
+  - Train point denoiser.
+  - Compare DDPM and DDIM.
+  - Inspect stored images.
+  - Explain visible failures.
+  runtime: 'CPU core took {{W04_CORE_TIME}}. Image training/downloads: optional.'
+  deliverable: Samples, timings, comparison and explanations
+  notes: 'In short: The required lab trains a real small point diffusion model on CPU, with image experiments as optional stretches.
 
-    '
+
+    Explain: The core uses synthetic two-dimensional training points. You implement direct noising, the noise loss and reverse
+    updates. DDIM then compares selected-level sampling with the full point chain. Synthetic vectors expose the cosine calculation.
+    Downloaded image models and MNIST training are explicit extensions.
+
+
+    Example: The point batch has shape [256, 2], training runs 10,000 updates and the full sampler uses 200 steps. A 40-step
+    DDIM comparison reuses the trained weights. On the course laptop the whole core took {{W04_CORE_TIME}}.
+
+
+    Ask: Which results in your report belong to your run, and which belong to stored lecture image evidence?
+
+
+    Answer: Your point outputs and measured time describe your run. The labelled MNIST and SD 1.5 figures describe separate
+    stored experiments.
+
+
+    Watch out: Do not replace recorded image-model timings with the faster point-model time; they describe different workloads.'
 - type: summary
   points:
   - Noising is fixed; the denoiser learns.
@@ -780,52 +1222,68 @@ slides:
   - Latent generation connects several components.
   - Controls affect results and runtime.
   - Evaluate alignment, coverage, quality and rights.
-  notes: 'Recap the six points. The key equation is the noise-prediction loss with the closed-form forward process;
-    the key system is the latent diffusion pipeline; the key controls are steps, guidance, seed and negative prompt.
-    Next week we open the black box that appears everywhere in today''s pipeline: the transformer and its attention
-    mechanism, which powers the text encoder, the diffusion transformer and, in week 6, large language models. Ask
-    students to finish the lab and read Foster chapter 8.
+  notes: 'In short: The central distinction is fixed noising, learned prediction and repeated generation with unchanged weights.
 
-    '
+
+    Explain: Known sampled noise supplies a training target. A timestep tells the denoiser its corruption level. The reverse
+    update combines the prediction with schedule coefficients. Latent image pipelines add conditioning and decoding. Evaluation
+    examines both useful outputs and visible failures.
+
+
+    Example: Narrate the scalar calculation: clean 1 and noise −0.5 combine to noisy 0.5 at signal variance coefficient 0.64.
+    Training targets the noise. Generation instead begins from a fresh draw and follows its sampler. The arithmetic example
+    establishes meanings, while your actual point run supplies empirical observations.
+
+
+    Ask: What stays fixed when one denoiser is called at many generation timesteps?
+
+
+    Answer: Its learned weights stay fixed. The current state, timestep and possibly random sampling noise change at each update.
+
+
+    Watch out: A valid formula, recognisable sample or high similarity score alone does not establish complete coverage or prompt
+    correctness.'
 - type: resources
   items:
   - kind: book
-    label: Foster (2023) Generative Deep Learning, 2nd ed., ch. 8 'Diffusion Models'
-    note: Core module text
+    label: Foster, ch. 8
+    note: Core reading
     url: https://www.oreilly.com/library/view/generative-deep-learning/9781098134174/
   - kind: paper
-    label: Ho, Jain & Abbeel (2020) Denoising Diffusion Probabilistic Models
-    note: The DDPM paper
+    label: DDPM paper
+    note: Noise objective
     url: https://arxiv.org/abs/2006.11239
   - kind: course
-    label: Hugging Face Diffusion Models Course
-    note: Free units with notebooks (Diffusers)
-    url: https://huggingface.co/learn/diffusion-course/unit0/1
+    label: HF diffusion course
+    note: Guided notebooks
+    url: https://huggingface.co/learn/diffusion-course/en/unit1/1
   - kind: video
-    label: '3Blue1Brown / Welch Labs: But how do AI images and videos actually work?'
-    note: Visual explanation including CLIP and guidance
-    url: https://www.youtube.com/watch?v=iv-5mZ_9CPY
+    label: 'Video: DataScienceCastnet — Diffusion Course'
+    note: Independent HF class walkthrough
+    url: https://www.youtube.com/watch?v=09o5cv6u76c
   - kind: doc
-    label: 'Lilian Weng: What are diffusion models?'
-    note: Derivations, samplers, guidance
-    url: https://lilianweng.github.io/posts/2021-07-11-diffusion-models/
-  - kind: doc
-    label: 'Jay Alammar: The Illustrated Stable Diffusion'
-    note: Pipeline explained visually
-    url: https://jalammar.github.io/illustrated-stable-diffusion/
-  - kind: course
-    label: 'MIT 6.S184: Flow Matching and Diffusion Models'
-    note: Lecture notes for flow matching
-    url: https://diffusion.csail.mit.edu/
-  - kind: paper
-    label: Rombach et al. (2022) Latent Diffusion Models
-    note: Stable Diffusion's architecture
-    url: https://arxiv.org/abs/2112.10752
-  notes: 'Foster chapter 8 builds a diffusion model step by step in Keras. The DDPM paper is short and readable
-    after today. The Hugging Face Diffusion Models Course is the best hands-on follow-up and uses the same Diffusers
-    library as the lab. The Welch Labs video on the 3Blue1Brown channel is an excellent visual explanation, including
-    classifier-free guidance. Lilian Weng''s post covers the maths in depth; Jay Alammar''s illustrated guide explains
-    the pipeline; the MIT course notes are the reference for flow matching. All links were checked in September
-    2026.
+    label: SD-Turbo model card
+    note: Supported settings
+    url: https://huggingface.co/stabilityai/sd-turbo
+  notes: 'In short: Use the introductory course for implementation, original papers for objectives and current model cards for
+    operating rules.
 
-    '
+
+    Explain: The diffusion course supplies guided explanations and notebooks. The DDPM paper derives noise-prediction training.
+    The latent-diffusion paper explains compression and text conditioning. Scheduler documentation describes numerical update
+    choices. Model cards specify checkpoint settings and limitations.
+
+
+    Example: First follow the noising example and reproduce its tensor shapes. Then match one lab function to the relevant paper
+    equation. Watch the linked course walkthrough before tackling the optional image pipeline. Finally read SD-Turbo''s card
+    before attempting a few-step experiment. No paper''s headline result substitutes for measuring your own run.
+
+
+    Ask: Which source should you inspect before applying ordinary guidance and negative prompts to SD-Turbo?
+
+
+    Answer: Inspect its current official model card. It disables those controls, unlike the historical guided SD 1.5 comparison.
+
+
+    Watch out: Older tutorials can name deprecated repositories or incompatible versions; verify their details against current
+    primary documentation.'

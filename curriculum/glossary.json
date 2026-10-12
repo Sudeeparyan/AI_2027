@@ -16,6 +16,13 @@
       ]
     },
     {
+      "term": "ADA",
+      "meaning": "Adaptive discriminator augmentation: adjust data augmentation to reduce discriminator overfitting.",
+      "weeks": [
+        3
+      ]
+    },
+    {
       "term": "Adapter",
       "meaning": "Small added weights trained while the base is fixed.",
       "weeks": [
@@ -48,6 +55,14 @@
       "meaning": "One set of query, key and value projections and its weighted information mixture.",
       "weeks": [
         5
+      ]
+    },
+    {
+      "term": "Attention mask",
+      "meaning": "Rules marking which token pairs an attention operation may use; Boolean conventions vary by API.",
+      "weeks": [
+        5,
+        6
       ]
     },
     {
@@ -121,10 +136,24 @@
       ]
     },
     {
+      "term": "Cited-quote support",
+      "meaning": "Verbatim segment equality against the particular cited passage; it does not establish complete sentences, entailment or source truth.",
+      "weeks": [
+        12
+      ]
+    },
+    {
       "term": "CLIP score",
       "meaning": "A similarity between image and text representations; it is not a complete quality measure.",
       "weeks": [
         4
+      ]
+    },
+    {
+      "term": "Cold measurement",
+      "meaning": "A measurement including specified initialisation work; state which downloads or setup it includes.",
+      "weeks": [
+        11
       ]
     },
     {
@@ -146,6 +175,13 @@
       "meaning": "A comparison of vector directions, independent of vector length.",
       "weeks": [
         9
+      ]
+    },
+    {
+      "term": "Critic",
+      "meaning": "A learned unrestricted score, used instead of a probability-valued discriminator.",
+      "weeks": [
+        3
       ]
     },
     {
@@ -200,9 +236,16 @@
     },
     {
       "term": "ELBO",
-      "meaning": "A lower bound on data log-likelihood; its negative balances reconstruction and KL at beta = 1.",
+      "meaning": "A lower bound on data log-likelihood; its negative balances reconstruction and KL at β = 1.",
       "weeks": [
         2
+      ]
+    },
+    {
+      "term": "EMA",
+      "meaning": "Exponential moving average: a weighted average of recent model weights.",
+      "weeks": [
+        3
       ]
     },
     {
@@ -294,6 +337,20 @@
       ]
     },
     {
+      "term": "Generative precision",
+      "meaning": "How much generated data lies in the real-data region of a chosen feature space.",
+      "weeks": [
+        3
+      ]
+    },
+    {
+      "term": "Generative recall",
+      "meaning": "How much real-data variety is covered by generated data in a chosen feature space.",
+      "weeks": [
+        3
+      ]
+    },
+    {
       "term": "Generator",
       "meaning": "A network that transforms a random code into a generated example.",
       "weeks": [
@@ -338,6 +395,13 @@
       ]
     },
     {
+      "term": "HTTP 422",
+      "meaning": "The response used here when request validation fails before generation.",
+      "weeks": [
+        11
+      ]
+    },
+    {
       "term": "Image tensor",
       "meaning": "A numerical array holding a batch of images, their channels, rows, and columns.",
       "weeks": [
@@ -372,6 +436,13 @@
       "weeks": [
         7,
         11
+      ]
+    },
+    {
+      "term": "KID",
+      "meaning": "Kernel inception distance: compare real and generated feature distributions using a kernel statistic.",
+      "weeks": [
+        3
       ]
     },
     {
@@ -553,6 +624,13 @@
       ]
     },
     {
+      "term": "Passage recall",
+      "meaning": "Returned relevant passage IDs divided by all independently labelled relevant passage IDs.",
+      "weeks": [
+        12
+      ]
+    },
+    {
       "term": "PCA",
       "meaning": "A projection that compresses vectors into fewer dimensions for inspection.",
       "weeks": [
@@ -560,10 +638,24 @@
       ]
     },
     {
+      "term": "Permission gate",
+      "meaning": "Application control deciding whether a proposed operation may execute.",
+      "weeks": [
+        12
+      ]
+    },
+    {
       "term": "Perplexity",
       "meaning": "The exponential of average negative log-probability, summarising prediction uncertainty.",
       "weeks": [
         5
+      ]
+    },
+    {
+      "term": "Policy fallback",
+      "meaning": "A disclosed fixed local decision route, separate from model planning.",
+      "weeks": [
+        12
       ]
     },
     {
@@ -679,6 +771,13 @@
       ]
     },
     {
+      "term": "Response cache",
+      "meaning": "Saved complete answers reused only when all response-changing inputs match.",
+      "weeks": [
+        11
+      ]
+    },
+    {
       "term": "RRF",
       "meaning": "Reciprocal rank fusion: combine rankings using candidates' rank positions.",
       "weeks": [
@@ -735,6 +834,13 @@
       ]
     },
     {
+      "term": "Synthetic traffic",
+      "meaning": "Invented requests used to exercise an application and its monitoring.",
+      "weeks": [
+        11
+      ]
+    },
+    {
       "term": "Temperature",
       "meaning": "A positive divisor on model scores that changes how concentrated sampling probabilities are.",
       "weeks": [
@@ -754,6 +860,13 @@
       "meaning": "The number of entries along each dimension of an array.",
       "weeks": [
         4
+      ]
+    },
+    {
+      "term": "TestClient",
+      "meaning": "An in-process HTTP request tester; its timing excludes real network transport.",
+      "weeks": [
+        11
       ]
     },
     {
@@ -800,6 +913,13 @@
       ]
     },
     {
+      "term": "Train/test split",
+      "meaning": "Separate examples for learning and for the final, fair check.",
+      "weeks": [
+        8
+      ]
+    },
+    {
       "term": "Training",
       "meaning": "Learning a model's parameters or probability table from data.",
       "weeks": [
@@ -817,7 +937,11 @@
       "term": "Training target",
       "meaning": "The known answer used to measure a model's prediction error.",
       "weeks": [
-        5
+        1,
+        2,
+        5,
+        6,
+        8
       ]
     },
     {
@@ -832,6 +956,13 @@
       "meaning": "Text-to-speech: turning written words into an audio waveform.",
       "weeks": [
         10
+      ]
+    },
+    {
+      "term": "TTUR",
+      "meaning": "Two time-scale update rule: separate learning rates for the generator and discriminator.",
+      "weeks": [
+        3
       ]
     },
     {
@@ -854,6 +985,13 @@
       "meaning": "A vision-language model that processes images together with text.",
       "weeks": [
         10
+      ]
+    },
+    {
+      "term": "Warm measurement",
+      "meaning": "A measurement after specified initialisation or warm-up; state what work it excludes.",
+      "weeks": [
+        11
       ]
     },
     {

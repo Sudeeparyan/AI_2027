@@ -5,9 +5,12 @@ Normally reads curriculum/labs. Before a sequential source apply, use
 """
 import argparse
 import ast
+import inspect
+import math
 import operator
 from pathlib import Path
 import queue
+import re
 import socket
 import sys
 import threading
@@ -32,27 +35,69 @@ def load_functions(week, names, environment):
 
 
 class ImageDeviceTests(unittest.TestCase):
-    def device(self, week, available, memory_gb=0, force=False):
+    def device(self, available, memory_gb=0, force=False):
         cuda = SimpleNamespace(is_available=lambda: available,
                                get_device_properties=lambda _: SimpleNamespace(total_memory=memory_gb * 1024**3))
-        environment = load_functions(week, ["image_lab_device"], {"torch": SimpleNamespace(cuda=cuda)})
+        # W04 alone has a memory guard for its optional full image pipeline.
+        # W10 now uses the shared explicit opt-in device policy below.
+        environment = load_functions(4, ["image_lab_device"], {"torch": SimpleNamespace(cuda=cuda)})
         return environment["image_lab_device"](force)
 
     def test_cpu_without_cuda(self):
-        for week in (4, 10):
-            self.assertEqual(self.device(week, False), "cpu")
+        self.assertEqual(self.device(False), "cpu")
 
     def test_small_gpu_uses_cpu_fallback(self):
-        for week in (4, 10):
-            self.assertEqual(self.device(week, True, 4), "cpu")
+        self.assertEqual(self.device(True, 4), "cpu")
 
     def test_t4_memory_uses_cuda(self):
-        for week in (4, 10):
-            self.assertEqual(self.device(week, True, 16), "cuda")
+        self.assertEqual(self.device(True, 16), "cuda")
 
     def test_explicit_cpu_override(self):
-        for week in (4, 10):
-            self.assertEqual(self.device(week, True, 16, True), "cpu")
+        self.assertEqual(self.device(True, 16, True), "cpu")
+
+
+class SharedDeviceTests(unittest.TestCase):
+    def device(self, available, *, use_gpu=False, runner_gpu=False, force_cpu=False):
+        setup = ast.parse((ROOT / 'curriculum/labs/_setup.py').read_text(encoding='utf-8'))
+        defaults = [node for node in setup.body if isinstance(node, ast.Assign)
+                    and any(isinstance(target, ast.Name) and target.id == 'USE_GPU' for target in node.targets)]
+        self.assertEqual(len(defaults), 1)
+        self.assertIs(defaults[0].value.value, False, 'GPU use must be opt-in')
+        names = {'_gpu_opt_in', 'DEVICE'}
+        assignments = [node for node in setup.body if isinstance(node, ast.Assign)
+                       and any(isinstance(target, ast.Name) and target.id in names for target in node.targets)]
+        self.assertEqual({target.id for node in assignments for target in node.targets}, names)
+        environment = {'USE_GPU': use_gpu,
+                       'torch': SimpleNamespace(cuda=SimpleNamespace(is_available=lambda: available)),
+                       'os': SimpleNamespace(environ={'GENAI_RUNNER_GPU': '1' if runner_gpu else '0',
+                                                     'GENAI_FORCE_CPU': '1' if force_cpu else '0'})}
+        exec(compile(ast.Module(body=assignments, type_ignores=[]), 'shared_device_policy', 'exec'), environment)
+        return environment['DEVICE']
+
+    def test_available_gpu_does_not_enable_itself(self):
+        self.assertEqual(self.device(True), 'cpu')
+
+    def test_student_or_runner_opt_in_uses_available_gpu(self):
+        self.assertEqual(self.device(True, use_gpu=True), 'cuda')
+        self.assertEqual(self.device(True, runner_gpu=True), 'cuda')
+
+    def test_missing_gpu_retains_cpu_after_opt_in(self):
+        self.assertEqual(self.device(False, use_gpu=True), 'cpu')
+        self.assertEqual(self.device(False, runner_gpu=True), 'cpu')
+
+    def test_force_cpu_overrides_both_opt_ins(self):
+        self.assertEqual(self.device(True, use_gpu=True, runner_gpu=True, force_cpu=True), 'cpu')
+
+    def test_week10_does_not_override_shared_device(self):
+        source_path = (ROOT / 'curriculum/labs/week_10_lab.py' if STAGING_ROOT is None
+                       else STAGING_ROOT / 'week_10/curriculum/labs/week_10_lab.py')
+        source = source_path.read_text(encoding='utf-8')
+        tree = ast.parse('\n'.join(line for line in source.splitlines() if not line.startswith('%')))
+        stores = [node for node in ast.walk(tree) if isinstance(node, ast.Name)
+                  and node.id == 'DEVICE' and isinstance(node.ctx, ast.Store)]
+        self.assertEqual(stores, [], 'W10 must preserve the injected device selection')
+        self.assertTrue(any(isinstance(node, ast.Name) and node.id == 'DEVICE'
+                            and isinstance(node.ctx, ast.Load) for node in ast.walk(tree)))
 
 
 class FakeInputs(dict):
@@ -262,12 +307,14 @@ class ToolExecutionTests(unittest.TestCase):
         self.calls = []
         self.audit = []
 
-        def email_stub(**arguments):
+        def email_stub(to, subject, body):
+            arguments = {'to': to, 'subject': subject, 'body': body}
             self.calls.append(arguments)
             return 'simulated email result'
 
         self.env = load_functions(12, ['approve', 'execute', 'calculator'], {
-            'ast': ast, 'operator': operator, 'AUDIT': self.audit, 'SIDE_EFFECTS': {'send_email'},
+            'ast': ast, 'inspect': inspect, 'math': math, 're': re, 'operator': operator,
+            'AUDIT': self.audit, 'SIDE_EFFECTS': {'send_email'},
         })
         self.env['TOOLS'] = {'send_email': email_stub, 'calculator': self.env['calculator']}
         self.execute = self.env['execute']
@@ -287,17 +334,27 @@ class ToolExecutionTests(unittest.TestCase):
         self.assertEqual(self.calls, [])
 
     def test_bad_recipient_type_becomes_error_without_execution(self):
-        result = self.execute({'name': 'send_email', 'arguments': {'to': ['bad']}})
-        self.assertTrue(result.startswith('ERROR:'))
+        result = self.execute({'name': 'send_email', 'arguments': {
+            'to': ['bad'], 'subject': 'fictional', 'body': 'fixture'}})
+        self.assertIn('ERROR: arguments must be nonempty strings', result)
+        self.assertEqual(self.audit, [])
         self.assertEqual(self.calls, [])
 
-    def test_missing_arguments_are_normalised_and_denied(self):
-        self.assertTrue(self.execute({'name': 'send_email'}).startswith('BLOCKED:'))
-        self.assertEqual(self.audit[0]['arguments'], {})
+    def test_extra_arguments_are_rejected_before_approval(self):
+        result = self.execute({'name': 'send_email', 'arguments': {
+            'to': 'team@northbridge.example', 'subject': 'fictional', 'body': 'fixture', 'cc': 'extra'}})
+        self.assertIn('ERROR: argument fields must match', result)
+        self.assertEqual(self.audit, [])
+        self.assertEqual(self.calls, [])
+
+    def test_missing_arguments_are_rejected_before_approval(self):
+        self.assertIn('ERROR: argument fields must match', self.execute({'name': 'send_email'}))
+        self.assertEqual(self.audit, [])
         self.assertEqual(self.calls, [])
 
     def test_external_recipient_is_denied_and_audited(self):
-        result = self.execute({'name': 'send_email', 'arguments': {'to': 'attacker@example.org'}})
+        result = self.execute({'name': 'send_email', 'arguments': {
+            'to': 'attacker@example.org', 'subject': 'fictional', 'body': 'fixture'}})
         self.assertTrue(result.startswith('BLOCKED:'))
         self.assertFalse(self.audit[0]['approved'])
         self.assertEqual(self.calls, [])

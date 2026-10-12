@@ -4,334 +4,365 @@
     {
       "term": "Vector",
       "meaning": "An ordered list of numbers used to represent an item.",
-      "check": "What is the length of the vector [0.2, 0.4, 0.1]?",
-      "answer": "Three."
+      "short_meaning": "List of numbers",
+      "check": "How many numbers are in one CLIP embedding?",
+      "answer": "512."
     },
     {
       "term": "Encoder",
-      "meaning": "A model that converts input data into useful numerical features.",
-      "check": "Does an image encoder return a photograph or numerical features?",
-      "answer": "Numerical features: a vector, not a picture."
+      "meaning": "A network that converts input data into numerical representations or distribution parameters.",
+      "short_meaning": "Turns input into a vector",
+      "check": "Do CLIP's image and text encoders share weights?",
+      "answer": "No. They are separate networks whose outputs share one space."
     },
     {
-      "term": "Similarity",
-      "meaning": "A score comparing two representations; larger means more similar here.",
-      "check": "Which candidate ranks first when scores are 0.2, 0.7 and 0.4?",
-      "answer": "The candidate scoring 0.7."
-    },
-    {
-      "term": "Pair",
-      "meaning": "Two examples marked as describing the same content.",
-      "check": "Which caption should match a dog photo?",
-      "answer": "The caption that describes the dog photo, such as 'a photo of a dog'."
-    },
-    {
-      "term": "Inference",
-      "meaning": "Using a trained model without updating its weights.",
-      "check": "Does searching a gallery train CLIP again?",
-      "answer": "No. Search uses the trained weights without changing them."
+      "term": "Cosine similarity",
+      "meaning": "A comparison of vector directions, independent of vector length.",
+      "short_meaning": "Direction match, −1 to 1",
+      "check": "What is the cosine similarity of [3, 4] and [4, 3]?",
+      "answer": "0.96, because (12 + 12) ÷ (5 × 5) = 0.96."
     }
   ],
   "diagrams": [
     {
       "id": "overview",
       "title": "Find an image using words",
-      "subtitle": "Separate image and text encoders meet at a similarity score",
+      "subtitle": "Shared space",
       "steps": [
         {
-          "title": "Query + gallery",
-          "detail": "Text and stored pictures",
-          "code": "query",
-          "role": "data"
+          "title": "Gallery",
+          "detail": "1,000 images",
+          "role": "data",
+          "code": "",
+          "code_owner": false
         },
         {
-          "title": "Prepare inputs",
-          "detail": "Pixels and query tokens",
-          "code": "proc",
-          "role": "data"
+          "title": "Encode images",
+          "detail": "ViT",
+          "role": "model",
+          "code": "embed_images",
+          "code_owner": true
         },
         {
-          "title": "Encode each type",
-          "detail": "Comparable normalised vectors",
+          "title": "Query",
+          "detail": "car",
+          "role": "data",
+          "code": "",
+          "code_owner": false
+        },
+        {
+          "title": "Encode text",
+          "detail": "frozen",
+          "role": "model",
           "code": "embed_texts",
-          "role": "model"
+          "code_owner": true
         },
         {
-          "title": "Compare directions",
-          "detail": "Query against stored images",
-          "code": "scores",
-          "role": "model"
+          "title": "Compare",
+          "detail": "dot products",
+          "role": "metric",
+          "code": "",
+          "code_owner": false
         },
         {
-          "title": "Rank images",
-          "detail": "Display highest scores",
-          "code": "top",
-          "role": "output"
+          "title": "Rank",
+          "detail": "top 6",
+          "role": "output",
+          "code": "",
+          "code_owner": false
         }
       ],
       "arrows": [
-        "raw inputs",
-        "prepared inputs",
-        "normalised vectors",
-        "one score per image"
+        "pixels",
+        null,
+        "tokens",
+        "[1, 512]",
+        "[1, N] scores"
+      ],
+      "branches": [
+        {
+          "from": 1,
+          "to": 4,
+          "label": "[N, 512]",
+          "lane": "bottom"
+        }
       ],
       "trace": [
-        "Use the typed query 'a red sports car on a road'.",
-        "CIFAR-10 photographs already have image vectors stored in img_emb.",
-        "Encode the query once and compare it with every image vector.",
-        "Display the six highest-ranked images; inspect whether they match the words."
+        "1,000 CIFAR-10 test images are encoded once into a [1000, 512] table.",
+        "The query \"a red sports car on a road\" is tokenised and encoded into [1, 512].",
+        "Both tables are normalised, so a dot product is a cosine similarity.",
+        "One matrix product scores the query against every image: [1, 1000].",
+        "The six highest scores give the returned images."
       ],
-      "explanation": "A modality is a kind of data, such as text or an image. CLIP connects these two modalities through an embedding: a vector describing an input. The image branch prepares photographs and passes them through the image encoder; the text branch tokenizes the query and passes it through the text encoder. Projection layers put both outputs into one shared vector space. Normalisation makes vector length consistent so the dot product measures cosine similarity. Each image receives one score against the query, then ranking selects the highest scores. The gallery can be encoded before a query arrives, which avoids repeating image processing for each search. This lab uses a pretrained, frozen CLIP model. Retrieval changes the query and ranking, rather than training new model weights.",
-      "check_question": "When a new text query arrives, must every gallery image be encoded again?",
-      "check_answer": "No. Reuse stored image embeddings, encode the new query and compare its vector with them.",
-      "layout": "linear"
+      "explanation": "Text-to-image search uses two separate encoders that were trained to share one vector space. The gallery is encoded once into a table with one 512-number row per image. A query is tokenised and encoded into one 512-number vector. After normalisation, a single matrix product gives one similarity score per image, and the highest scores are returned. No caption is needed for the gallery images, and nothing is trained: the encoders are frozen.",
+      "check_question": "Shared encoder?",
+      "check_answer": "No. Separate image and text encoders map into one shared space.",
+      "layout": "linear",
+      "notes": "In short: CLIP finds images for a text query by encoding both into one vector space and ranking images by similarity.\n\nExplain: The gallery images pass through the image encoder once. The query passes through a separate text encoder. Both outputs are normalised 512-number vectors. A dot product then gives a cosine similarity for every image. The highest scores are the search results.\n\nExample: 1,000 CIFAR-10 images become a [1000, 512] table. The query \"a red sports car on a road\" becomes [1, 512]. Multiplying the query by the transposed table gives [1, 1000] scores, and the top six are shown. A library catalogue is the analogy; books and requests use one shared set of subject codes.\n\nAsk: Why encode the gallery only once?\n\nAnswer: Image vectors do not depend on the query, so they can be stored and reused for every search.\n\nWatch out: The returned images are the closest matches, not proof that every word in the query is shown."
     },
     {
       "id": "mechanism",
       "insert_before_title": "The contrastive objective as a matrix",
-      "title": "How matching pairs teach CLIP",
-      "subtitle": "Learn which caption belongs to each image, and vice versa",
+      "title": "Score one batch of pairs",
+      "subtitle": "Matching diagonal",
       "steps": [
         {
-          "title": "Paired inputs",
-          "detail": "Keep image-caption order",
-          "code": "batch_imgs",
-          "role": "data"
+          "title": "Pairs",
+          "detail": "N pairs",
+          "role": "data",
+          "code": "",
+          "code_owner": false
         },
         {
-          "title": "Prepare branches",
-          "detail": "Pixels and caption tokens",
-          "code": "proc",
-          "role": "data"
+          "title": "Encode",
+          "detail": "[N,512]",
+          "role": "model",
+          "code": "",
+          "code_owner": false
         },
         {
-          "title": "Encode + project",
-          "detail": "Normalise both vector batches",
-          "code": "embed_images",
-          "role": "model"
+          "title": "Scores",
+          "detail": "u vᵀ / τ",
+          "role": "model",
+          "code": "",
+          "code_owner": false
         },
         {
-          "title": "Score all pairs",
-          "detail": "One row and column per pair",
+          "title": "Cross-entropy",
+          "detail": "S and Sᵀ",
+          "role": "loss",
+          "code": "",
+          "code_owner": false
+        },
+        {
+          "title": "Average",
+          "detail": "loss",
+          "role": "loss",
           "code": "clip_loss",
-          "role": "model"
-        },
-        {
-          "title": "Match both ways",
-          "detail": "Diagonal is the target",
-          "code": "clip_loss",
-          "role": "loss"
-        },
-        {
-          "title": "Average loss",
-          "detail": "Combine both errors",
-          "code": "clip_loss",
-          "role": "loss"
+          "code_owner": true
         }
       ],
       "arrows": [
-        "ordered pairs",
-        "model inputs",
-        "normalised vectors",
-        "score matrix",
-        "two matching losses"
+        "pairs",
+        "u, v",
+        "S [N,N]",
+        "two losses"
       ],
-      "feedback": "In training, loss gradients update encoders; the lab only measures loss.",
-      "feedback_to": 2,
       "trace": [
-        "Imagine three pairs: car with car caption, bird with bird caption, ship with ship caption.",
-        "All comparisons form a 3 by 3 score matrix; the correct pairs occupy its diagonal.",
-        "The car row should prefer the car caption over the bird and ship captions.",
-        "The car-caption column should prefer the car image over the other images.",
-        "Compare correct versus shuffled captions in the lab; no optimiser runs here."
+        "With three pairs, S is [3, 3]; the diagonal holds the matching pairs.",
+        "Each row's softmax asks which caption matches that image.",
+        "Each column's softmax asks which image matches that caption.",
+        "Cross-entropy is low when the diagonal entry wins its row and its column.",
+        "The lab measures this loss on frozen embeddings; no optimiser runs."
       ],
-      "explanation": "Contrastive learning learns a representation by comparing matching and non-matching examples. A batch is a small group of image-caption pairs processed together. After both encoders produce vectors, every image is compared with every caption. If the input lists retain their original pairing, the correct comparisons lie on the diagonal of the matrix. Each row asks which caption belongs to an image; each column asks which image belongs to a caption. Temperature changes how sharply score differences affect the matching probabilities. Cross-entropy measures the error in these choices, and CLIP averages the two directions. In training, backpropagation uses that error to change encoder weights. In this lab the embeddings are frozen: clip_loss demonstrates the objective by comparing correct and shuffled pairs, without performing a training step.",
-      "check_question": "For three matching pairs, how many comparisons are made, and where are the three target pairs?",
-      "check_answer": "Nine comparisons form a 3 by 3 matrix. The three target pairs are on the diagonal.",
+      "explanation": "For a batch of N matching image–caption pairs, both encoders produce normalised vectors u and v. The score table S = u vᵀ / τ compares every image with every caption, so it is N × N, and the matching pairs lie on its diagonal. A row-wise softmax with cross-entropy asks each image to pick its own caption; the same on the transposed table asks each caption to pick its own image. CLIP averages the two losses. In the lab these losses are only measured on frozen embeddings.",
+      "check_question": "Targets?",
+      "check_answer": "On the diagonal: image i should match caption i, and caption i should match image i.",
       "layout": "linear",
-      "feedback_from": 5
+      "notes": "In short: CLIP's loss scores every image against every caption in a batch and rewards the diagonal in both directions.\n\nExplain: A batch holds N matching image–caption pairs. Encoding gives N image vectors u and N text vectors v. The score table S = u vᵀ / τ has one row per image and one column per caption. Row losses ask each image to pick its caption. Column losses ask each caption to pick its image.\n\nExample: With three orthogonal pairs and τ = 1, each row is softmax([1, 0, 0]) ≈ [0.58, 0.21, 0.21]. The loss per row is −ln 0.58 ≈ 0.55, and the columns give the same. Shuffled captions move the high scores off the diagonal, so the loss rises.\n\nAsk: Why compute the loss in both directions?\n\nAnswer: Search runs both ways, from images to captions and from captions to images, so both should be learned.\n\nWatch out: The other captions in the batch act as negatives, even when one of them also describes the image well."
     },
     {
       "id": "lab",
-      "title": "Follow the multimodal lab",
-      "subtitle": "Inspect representations before judging search and speech outputs",
+      "title": "Zero-shot classification route",
+      "subtitle": "No training; ten class texts",
       "steps": [
         {
-          "title": "Load gallery",
-          "detail": "Pictures with evaluation labels",
-          "code": "images",
-          "role": "data"
+          "title": "Images",
+          "detail": "CIFAR-10 test",
+          "role": "data",
+          "code": "",
+          "code_owner": false
         },
         {
-          "title": "Build vectors",
-          "detail": "Inspect pair similarity",
-          "code": "img_emb",
-          "role": "model"
+          "title": "Encode images",
+          "detail": "[N, 512]",
+          "role": "model",
+          "code": "embed_images",
+          "code_owner": true
         },
         {
-          "title": "Classify images",
-          "detail": "Compare class descriptions",
-          "code": "pred",
-          "role": "output"
+          "title": "Class names",
+          "detail": "10 classes",
+          "role": "data",
+          "code": "",
+          "code_owner": false
         },
         {
-          "title": "Search gallery",
-          "detail": "Measure class precision@k",
-          "code": "recall_at_k",
-          "role": "output"
+          "title": "Encode texts",
+          "detail": "templates, averaged",
+          "role": "model",
+          "code": "zero_shot_accuracy",
+          "code_owner": true
         },
         {
-          "title": "Inspect objective",
-          "detail": "Loss and compressed PCA view",
-          "code": "clip_loss",
-          "role": "loss"
-        },
-        {
-          "title": "Add speech",
-          "detail": "Transcript, WER and search",
-          "code": "asr",
-          "role": "model"
+          "title": "Predict",
+          "detail": "highest cosine",
+          "role": "output",
+          "code": "",
+          "code_owner": false
         }
       ],
       "arrows": [
-        "images + labels",
-        "stored vectors",
-        "same frozen vectors",
-        "paired vectors",
-        "text-query interface"
+        "pixels",
+        null,
+        "filled templates",
+        "[10, 512]"
+      ],
+      "branches": [
+        {
+          "from": 1,
+          "to": 4,
+          "label": "[N, 512]",
+          "lane": "bottom"
+        }
       ],
       "trace": [
-        "Inspect img_emb.shape: one row represents one gallery image.",
-        "Compare classification accuracy for a class name and for caption-like templates.",
-        "If four of five returned pictures have the queried class, precision@5 is 0.8.",
-        "Look at both loss values and the PCA plot; neither changes CLIP's weights.",
-        "Inspect a Whisper transcript before using it as a CLIP search query."
+        "Each of the 1,000 gallery images is encoded once.",
+        "Each class name fills one or more templates, such as \"a photo of a cat.\"",
+        "The template vectors for a class are averaged and normalised again.",
+        "Every image is compared with the ten class vectors: a [N, 10] score table.",
+        "The highest score in each row is the predicted class; the labels only score the predictions."
       ],
-      "explanation": "The notebook first loads labelled photographs; the labels are used to evaluate outputs, rather than train CLIP. The embed_images and embed_texts functions prepare the shared representations reused throughout the lab. The zero_shot_accuracy function compares each image with descriptions of all classes and measures how often the selected class is correct. Retrieval reverses that perspective: a text query ranks the gallery. Despite its historical name, recall_at_k measures the fraction of returned images belonging to the requested class, averaged across class queries: precision at k. The clip_loss function then illustrates the training objective, while PCA compresses vectors into a two-dimensional view for inspection. Finally, Whisper converts speech into words. The wer function evaluates transcription errors before the transcript becomes a text query. Each intermediate output helps locate which stage caused a failure.",
-      "check_question": "Four of five returned images match the query class. What does 4/5 measure in this lab?",
-      "check_answer": "Precision@5: the fraction of returned results that are relevant, rather than the fraction of all relevant gallery images retrieved.",
-      "layout": "linear"
+      "explanation": "Zero-shot classification reuses the shared space. Each class name is placed into caption-like templates, encoded, averaged and normalised, giving ten class vectors. Each image vector is compared with all ten, and the most similar class is the prediction. The CIFAR-10 labels are used only to measure accuracy afterwards; no weights are trained on them. Changing the template wording changes the class vectors, so it can change both the predictions and the accuracy.",
+      "check_question": "Any weights updated?",
+      "check_answer": "No. The labels are used only to score the predictions.",
+      "layout": "linear",
+      "notes": "In short: Zero-shot classification turns class names into caption vectors and gives each image the most similar class.\n\nExplain: A template is caption wording with a slot for the class name. Several templates per class are encoded and averaged. The average is normalised again so its length is 1. Each image vector is compared with the ten class vectors. The highest score in each row is the prediction.\n\nExample: \"a photo of a cat.\" and \"a blurry photo of a cat.\" are encoded and averaged into one cat vector. Ten class vectors form a [10, 512] table, and 1,000 images give a [1000, 10] score table. Accuracy is the fraction of rows whose highest score matches the label. A multiple-choice exam is the analogy; the options are written by us, not learned from this dataset.\n\nAsk: Why normalise again after averaging?\n\nAnswer: An average of unit vectors is usually shorter than 1, which would scale every score for that class.\n\nWatch out: A template that sounds unnatural to CLIP's training captions can lower accuracy without any model change."
     },
     {
       "id": "training",
-      "title": "One contrastive learning step",
-      "subtitle": "CLIP training is explained here; the lab uses fixed encoders",
       "insert_before_title": "The contrastive (InfoNCE) loss",
+      "title": "One contrastive training step",
+      "subtitle": "Original CLIP training",
       "steps": [
         {
-          "title": "Matching pairs",
-          "detail": "Preserve each pairing",
-          "code": "batch_imgs",
-          "role": "data"
-        },
-        {
-          "title": "Encode both types",
-          "detail": "Image and caption vectors",
-          "code": "embed_images",
-          "role": "model"
-        },
-        {
-          "title": "Compare all pairs",
-          "detail": "Square similarity matrix",
-          "code": "clip_loss",
-          "role": "model"
-        },
-        {
-          "title": "Measure error",
-          "detail": "Diagonal matches both ways",
-          "code": "clip_loss",
-          "role": "loss"
-        },
-        {
-          "title": "Update in training",
-          "detail": "Conceptual; no optimiser here",
+          "title": "Web pairs",
+          "detail": "image+caption",
+          "role": "data",
           "code": "",
-          "role": "model"
+          "code_owner": false
+        },
+        {
+          "title": "Encoders",
+          "detail": "both",
+          "role": "model",
+          "code": "",
+          "code_owner": false
+        },
+        {
+          "title": "Score table",
+          "detail": "[B,B]",
+          "role": "model",
+          "code": "",
+          "code_owner": false
+        },
+        {
+          "title": "Symmetric loss",
+          "detail": "diagonal",
+          "role": "loss",
+          "code": "",
+          "code_owner": false
+        },
+        {
+          "title": "Update",
+          "detail": "weights",
+          "role": "tool",
+          "code": "",
+          "code_owner": false
         }
       ],
       "arrows": [
-        "paired examples",
-        "normalised vectors",
-        "all-pair scores",
-        "average loss"
+        "pairs",
+        "u, v",
+        "scores",
+        "loss"
       ],
-      "explanation": "Contrastive training teaches encoders to distinguish matching pairs from non-matching pairs. Each row of a batch contains an image and its own caption. The encoders produce vectors, and every image is compared with every caption to make a square score matrix. The labelled matches lie on the diagonal when the pairing order is preserved. One loss asks each image to choose its caption; another asks each caption to choose its image. Their average supplies the learning signal. In a training system, gradients from this loss update encoder weights. This lab deliberately does not run that update: it uses a pretrained CLIP model and compares the loss for correct and shuffled pairs.",
-      "trace": [
-        "Take three pairs: dog, car and ship, each with its own caption.",
-        "There are 3 × 3 = 9 comparisons, with 3 diagonal matches.",
-        "If every caption choice has probability 1/3, one loss is −ln(1/3) = ln 3, about 1.10.",
-        "A confident correct choice gives lower loss; no training step is performed in the lab."
-      ],
-      "check_question": "Is calculating a loss the same as training the model?",
-      "check_answer": "No. Training also needs gradients and an optimiser step to update weights.",
-      "layout": "linear",
-      "feedback": "Training gradients update encoders; this lab only measures loss.",
+      "feedback": "Gradients",
       "feedback_from": 4,
-      "feedback_to": 1
+      "feedback_to": 1,
+      "trace": [
+        "CLIP trained on about 400 million image–caption pairs collected from the web.",
+        "Each batch of 32,768 pairs gave a 32,768 × 32,768 score table.",
+        "The symmetric loss rewarded matching pairs on the diagonal in both directions.",
+        "Gradients updated both encoders; the next batch repeated the step.",
+        "The lab never runs this update; it only measures the loss on six pairs."
+      ],
+      "explanation": "CLIP's original training repeated one contrastive step many times. A batch of web image–caption pairs passes through both encoders, every image is scored against every caption, and the symmetric cross-entropy rewards the matching pairs on the diagonal. Backpropagation then updates both encoders, pulling matching pairs together and pushing mismatched pairs apart. Large batches give many negatives per step. The lab measures this loss on frozen encoders but never performs the update.",
+      "check_question": "Lab updates weights?",
+      "check_answer": "No. It measures the loss on frozen embeddings; only the original training ran this loop.",
+      "layout": "linear",
+      "notes": "In short: CLIP was trained by repeating one step: score a batch of image–caption pairs, compute the symmetric loss, and update both encoders.\n\nExplain: Each training batch contains matching image–caption pairs from the web. Both encoders produce vectors for every item. The score table compares every image with every caption. The symmetric loss rewards the diagonal in both directions. Gradients then update both encoders, and the next batch repeats the step.\n\nExample: CLIP used about 400 million pairs and batches of 32,768, so each score table had over a billion entries. Each image competed against 32,767 wrong captions in its row. The lab uses six pairs and never updates the weights. Learning faces at a party is the analogy; every introduction also teaches who is not who.\n\nAsk: Why do larger batches help contrastive training?\n\nAnswer: They provide more negative captions per image, which makes the matching task harder and more informative.\n\nWatch out: Some \"negatives\" may describe the image well; contrastive training treats them as wrong anyway."
     },
     {
       "id": "inference",
-      "title": "Search a gallery using speech",
-      "subtitle": "A speech transcript becomes the text query for CLIP",
       "insert_before_title": "Speech recognition with Whisper (real)",
+      "title": "Search a gallery using speech",
+      "subtitle": "Two models in a chain",
       "steps": [
         {
-          "title": "Spoken request",
-          "detail": "Audio plus sampling rate",
-          "code": "load_audio",
-          "role": "data"
+          "title": "Audio",
+          "detail": "16 kHz",
+          "role": "data",
+          "code": "",
+          "code_owner": false
         },
         {
-          "title": "Transcribe",
-          "detail": "Whisper generates words",
+          "title": "Whisper",
+          "detail": "transcript",
+          "role": "model",
           "code": "asr",
-          "role": "model"
+          "code_owner": true
         },
         {
-          "title": "Check transcript",
-          "detail": "Use reference when available",
-          "code": "wer",
-          "role": "loss"
-        },
-        {
-          "title": "Encode text query",
-          "detail": "Compare with stored images",
+          "title": "Encode text",
+          "detail": "[1, 512]",
+          "role": "model",
           "code": "embed_texts",
-          "role": "model"
+          "code_owner": true
         },
         {
-          "title": "Rank + display",
-          "detail": "Inspect returned pictures",
-          "code": "top",
-          "role": "output"
+          "title": "Compare",
+          "detail": "vs gallery",
+          "role": "metric",
+          "code": "",
+          "code_owner": false
+        },
+        {
+          "title": "Rank",
+          "detail": "top 5",
+          "role": "output",
+          "code": "",
+          "code_owner": false
         }
       ],
       "arrows": [
-        "audio waveform",
-        "transcript text",
-        "checked query",
-        "image scores"
+        "waveform",
+        "text",
+        "query vector",
+        "scores"
       ],
-      "explanation": "This inference chain joins two existing models without training either one. Whisper converts the spoken request into text. A wrong transcription can change what is searched, so read the transcript before interpreting retrieval results. Where a reference transcript is available, WER counts changed, missing and extra words. CLIP then encodes the text query and compares it with gallery image vectors that have already been stored. Ranking returns the highest-scoring pictures. A failed result can come from the audio, transcription, text encoding or image ranking. Inspecting each intermediate output helps identify the cause instead of treating the whole chain as one unexplained error.",
       "trace": [
-        "The speaker says \"a red car on a road\".",
-        "If the transcript says \"a red cart\", search may change before CLIP runs.",
-        "Correct the query for a controlled comparison, then encode it once.",
-        "Compare the query with the stored gallery vectors and inspect the returned images."
+        "A spoken request is loaded as a 16,000-samples-per-second waveform.",
+        "Whisper converts it to a log-mel spectrogram and decodes words.",
+        "The transcript is encoded by CLIP's text encoder.",
+        "The query vector is compared with the stored gallery vectors.",
+        "The five highest-scoring images are returned; a misheard word changes them."
       ],
-      "check_question": "Which stage should you inspect first if the text query does not match the spoken words?",
-      "check_answer": "The speech transcript; CLIP is receiving the wrong query before image search begins.",
-      "layout": "linear"
+      "explanation": "Speech search chains two models. Whisper turns the audio into a transcript, and CLIP's text encoder turns that transcript into a query vector, which is compared with the stored gallery vectors. Each stage can be tested separately: word error rate measures the transcript, and precision@k measures the search. Because the image search sees only the transcript, any transcription error, and any information that is not words, such as tone, is lost before the search begins.",
+      "check_question": "Where do errors enter?",
+      "check_answer": "In the transcript: a misheard word changes the text query and so the ranking.",
+      "layout": "linear",
+      "notes": "In short: Speech search chains Whisper and CLIP: audio becomes text, text becomes a query vector, and the gallery is ranked.\n\nExplain: Whisper is an encoder–decoder model for speech recognition. It reads a log-mel spectrogram and generates words. The transcript then goes to CLIP's text encoder. The query vector is compared with the stored image vectors. Word error rate measures the first stage separately.\n\nExample: Suppose a speaker says \"a red car\" and Whisper hears \"a bed car\". The WER is 1/3, one substitution in three words. CLIP now searches for a bed car, and the top images may change. A relay race is the analogy; a dropped baton in the first leg slows every later runner.\n\nAsk: What information is lost when speech becomes text?\n\nAnswer: Anything that is not words, such as tone, emotion, background sounds and who is speaking.\n\nWatch out: Measure each stage on its own; a poor search result may come from the transcript, not from CLIP."
     }
   ],
   "glossary": [
     {
       "term": "Modality",
-      "meaning": "A type of data with its own structure, such as text, images or audio."
+      "meaning": "A type of data, such as text, images or audio, with its own structure."
     },
     {
       "term": "Embedding",
-      "meaning": "A learned vector representing the content of an item."
+      "meaning": "A numerical vector representing an item, often learned, for prediction or comparison."
     },
     {
       "term": "Shared space",
@@ -356,83 +387,97 @@
     {
       "term": "PCA",
       "meaning": "A projection that compresses vectors into fewer dimensions for inspection."
+    },
+    {
+      "term": "Inference",
+      "meaning": "Using a trained model to predict or generate without updating its learned weights."
+    },
+    {
+      "term": "Pair",
+      "meaning": "Two examples marked as describing the same content."
+    },
+    {
+      "term": "Similarity",
+      "meaning": "A score comparing two representations; larger means more similar here."
     }
   ],
   "pitfalls": [
-    "A high similarity score indicates model alignment, not proof that every detail in a query is present.",
-    "The lab's recall_at_k function computes precision@k; benchmark recall uses a different denominator.",
-    "A two-dimensional PCA plot discards information; visible distances do not fully describe the original embedding space."
+    "A cosine similarity is a match score, not a calibrated probability.",
+    "Precision@k counts relevant items in the top k; recall counts how many of all relevant items were found.",
+    "A transcription error changes the text query before CLIP sees it."
   ],
   "code_walkthrough": [
     {
-      "symbol": "proc",
-      "role": "Prepare each modality for its encoder.",
-      "inspect": "Compare pixel_values with token input_ids and attention_mask."
-    },
-    {
       "symbol": "embed_images",
-      "role": "Make one vector for each photograph.",
-      "inspect": "Check row count, embedding dimension and vector norms."
+      "role": "Encodes images in batches and normalises each row.",
+      "inspect": "Check the shape [N, 512] and that every norm is close to 1."
     },
     {
       "symbol": "embed_texts",
-      "role": "Make comparable vectors for descriptions and queries.",
-      "inspect": "Follow one caption from tokens to projected features."
+      "role": "Encodes captions or class templates and normalises them.",
+      "inspect": "Print the shape and compare scores for two wordings of one caption."
     },
     {
       "symbol": "zero_shot_accuracy",
-      "role": "Evaluate class descriptions as a classifier.",
-      "inspect": "Compare the reported accuracy and confusion matrix across templates."
+      "role": "Averages template vectors per class and predicts the most similar class.",
+      "inspect": "Compare accuracy across template sets and read the confusion matrix."
+    },
+    {
+      "symbol": "precision_at_k",
+      "role": "Measures the fraction of relevant images among each query's top k.",
+      "inspect": "Check the toy example, then compare k = 1, 5 and 10."
     },
     {
       "symbol": "clip_loss",
-      "role": "Measure how well a batch's pair identities match scores.",
-      "inspect": "Compare the correct and shuffled caption conditions."
+      "role": "Computes CLIP's symmetric contrastive loss on fixed embeddings.",
+      "inspect": "Compare correct, shuffled and uniform-guess losses."
     },
     {
       "symbol": "wer",
-      "role": "Measure word-level transcription disagreement.",
-      "inspect": "Read the reference and transcript alongside the reported error rate."
+      "role": "Computes word error rate with a word-level edit distance.",
+      "inspect": "Read the transcripts beside the reference sentences."
     }
   ],
   "recap": {
-    "title": "Week 9: connect modalities",
+    "title": "What we learned: multimodal models",
     "cards": [
       {
-        "title": "Represent",
-        "text": "Encoders turn images, text and audio into useful vectors.",
+        "title": "Modalities",
+        "text": "Become vectors",
         "role": "data"
       },
       {
-        "title": "Align",
-        "text": "Paired examples teach cross-modal correspondence.",
+        "title": "Alignment",
+        "text": "Pairs teach",
         "role": "model"
       },
       {
-        "title": "Learn CLIP",
-        "text": "Match each image and caption both ways; average their losses.",
+        "title": "CLIP",
+        "text": "Both directions",
         "role": "loss"
       },
       {
-        "title": "Use frozen encoders",
-        "text": "Describe classes or rank gallery images without weight updates.",
-        "role": "model"
-      },
-      {
-        "title": "Add speech",
-        "text": "Whisper produces words; WER checks them against reference words.",
+        "title": "Zero-shot",
+        "text": "Class texts",
         "role": "output"
       },
       {
-        "title": "Check the result",
-        "text": "Inspect scores, errors, group differences and data rights.",
-        "role": "output"
+        "title": "Speech",
+        "text": "WER counts",
+        "role": "metric"
+      },
+      {
+        "title": "Checks",
+        "text": "Scores ≠ truth",
+        "role": "tool"
       }
     ],
-    "example": "“A red car” → text vector → compare stored image vectors → ranked gallery.",
-    "question": "Four of five returned images match. What is precision@5?",
-    "answer": "4/5 = 0.8. The denominator is returned results, not all relevant images.",
-    "next": "In Week 10 we connect multimodal models to generation and checked applications.",
-    "notes": "Ask students to reconstruct the gallery search without reading the slide. Start with the text query and stored image vectors. Explain why the same learned comparison supports class-description matching and retrieval. Then ask which operations update weights: contrastive training can, but this lab uses frozen encoders. Revisit the three-pair matrix and the uniform-choice loss ln 3. Finish with the speech chain: an incorrect transcript gives CLIP an incorrect query. Use the exit question to distinguish precision from recall. A strong similarity score is one check, so students still inspect actual images, speech errors, data rights and performance across groups."
-  }
+    "example": "Illustration: cos([3, 4], [4, 3]) = 0.96.",
+    "question": "High score proves a match?",
+    "answer": "No; inspect the results.",
+    "next": "Next: multimodal applications.",
+    "notes": "In short: Multimodal models turn different data types into comparable vectors, and every score still needs checking against the task.\n\nExplain: Encoders map images, text and audio to vectors. Contrastive training aligns matching pairs in a shared space. Zero-shot classification compares images with class texts. Retrieval ranks images for a text query. Speech search adds a transcription stage measured by WER.\n\nExample: In the lab, 1,000 images are encoded once and reused for classification, retrieval and the modality-gap plot. Precision@5 counts how many of the top five images match the query class. A transcript error changes the query before CLIP sees it.\n\nAsk: Which single habit protects you most when using similarity scores?\n\nAnswer: Inspect the actual returned items and measure on labelled examples, rather than trusting the scores.\n\nWatch out: Compare the stored GPU results with your CPU run only after naming their settings."
+  },
+  "vocabulary_count": 3,
+  "vocabulary_notes": "In short: Vectors, encoders and cosine similarity are the three ideas behind every result in today's lab.\n\nExplain: A vector is an ordered list of numbers. An encoder is a network that turns an input into a vector. CLIP has one encoder for images and another for text. Cosine similarity compares the directions of two vectors. A high value means the two inputs are described similarly.\n\nExample: The vectors [3, 4] and [4, 3] both have length 5. Their dot product is 12 + 12 = 24, so the cosine similarity is 24 ÷ 25 = 0.96. CLIP does the same with 512 numbers per vector. A compass bearing is an analogy; two walkers heading almost the same way have similar bearings, whatever their speeds.\n\nAsk: Why divide by the two lengths?\n\nAnswer: So the score measures direction only; normalised vectors make the dot product the cosine directly.\n\nWatch out: A cosine similarity is a match score, not a probability."
 }

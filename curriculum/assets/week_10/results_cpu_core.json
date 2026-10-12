@@ -1,0 +1,96 @@
+{
+  "vlm": "HuggingFaceTB/SmolVLM-256M-Instruct",
+  "device": "cpu",
+  "gpu": "CPU",
+  "qa": [
+    {
+      "question": "Which day had the most tickets? Answer with the day onl",
+      "gold": "tue",
+      "answer": "Tue.",
+      "correct": 1,
+      "seconds": 20.1
+    },
+    {
+      "question": "How many tickets were there on Thursday? Answer with a ",
+      "gold": "25",
+      "answer": "29.",
+      "correct": 0,
+      "seconds": 19.9
+    },
+    {
+      "question": "What is the invoice number? Answer with the number only",
+      "gold": "2027-0415",
+      "answer": "2027-0415",
+      "correct": 1,
+      "seconds": 21.5
+    }
+  ],
+  "qa_accuracy": 0.6666666666666666,
+  "pope": [
+    {
+      "question": "Is there a flower in the image? Answer yes or no.",
+      "gold": "yes",
+      "answer": "Yes.",
+      "correct": 1
+    },
+    {
+      "question": "Is there a dog in the image? Answer yes or no.",
+      "gold": "no",
+      "answer": "No.",
+      "correct": 1
+    }
+  ],
+  "pope_accuracy": 1.0,
+  "t2i": [],
+  "speech": [],
+  "captions": {
+    "temple": "In this image we can see a building, trees, water, sky and some objects.",
+    "flower": "In this image there is a flower in the center of the image and there are leaves in the background."
+  },
+  "run_kind": "core",
+  "runtime": {
+    "environment": "local",
+    "python": "3.12.10",
+    "device": "cpu",
+    "seed": 42,
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 158 Stepping 10, GenuineIntel",
+    "logical_cpus": 12,
+    "cpu_threads": 4,
+    "packages": {
+      "torch": "2.14.0+cpu",
+      "transformers": "5.17.0",
+      "diffusers": "0.40.0",
+      "peft": "0.21.0",
+      "trl": "1.14.0",
+      "sentence-transformers": "6.1.0",
+      "google-genai": "2.29.0",
+      "openai": "3.28.0",
+      "python-dotenv": "1.2.4",
+      "ipywidgets": "7.7.1"
+    }
+  },
+  "model_revision": "7e3e67edbbed1bf9888184d9df282b700a323964",
+  "processor_class": "Idefics3Processor",
+  "settings": {
+    "max_image_side": 384,
+    "max_answer_tokens": 32,
+    "qa_indices": [
+      0,
+      1,
+      3
+    ],
+    "probe_count": 2,
+    "caption_count": 2,
+    "max_core_calls": 7,
+    "dtype": "torch.float32",
+    "seed": 42,
+    "run_stretch": false
+  },
+  "evidence": {
+    "started_at_utc": "2026-10-11T13:42:13.449177+00:00",
+    "seconds": 175.4,
+    "notebook_sha256": "15ae0fa9bc401308923cb734a9aa20e6980754d3195919995c50f8c5eb5e93be",
+    "executed_notebook_sha256": "4c8d38e198c3d5cc8dc0bb3e188f052674f7c3f7528718173de48f62c4bf9725"
+  }
+}

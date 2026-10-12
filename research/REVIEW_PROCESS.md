@@ -2,7 +2,8 @@
 
 This is the working routine used for the October 2026 revision. Follow it when you (a person, Claude or
 Codex) improve the pack again, so each pass finds the same kinds of mistakes and leaves the same
-evidence behind. The plan and its rules are in `improvements.md`; the open and closed findings are in
+evidence behind. The rules are in `AGENTS.md` and the current tasks in `research/TASKS.md`
+(`improvements.md` is superseded); the open and closed findings are in
 `research/AUDIT_2026-10.md`; what changed is in `research/REVISION_2026-10.md`.
 
 ## Rules that never change
@@ -46,17 +47,19 @@ evidence behind. The plan and its rules are in `improvements.md`; the open and c
    ```powershell
    # quick structural check (tiny settings)
    .venv-labs/Scripts/python.exe tools/test_labs.py --weeks N
-   # full run on the CPU path (hides the GPU)
-   $env:CUDA_VISIBLE_DEVICES=""; $env:HF_HUB_OFFLINE="1"; .venv-labs/Scripts/python.exe tools/test_labs.py --weeks N --full
-   # full run on the GTX 1650, exporting results for the slides; raise the per-cell limit for long cells
-   $env:GENAI_RESULTS_PATH="<scratch>/results.json"; .venv-gpu/Scripts/python.exe tools/test_labs.py --weeks N --full --timeout 7200
+   # measured required CPU core, with locally cached models and data
+   $env:HF_HUB_OFFLINE="1"; $env:GENAI_RESULTS_PATH="<scratch>/results_cpu_core.json"
+   .venv-labs/Scripts/python.exe tools/test_labs.py --weeks N --full --device cpu
+   # optional GPU/stretch measurements need their own settings, export and run record
    ```
 
    `test_labs.py` executes the built notebook in `deliverables/`, so run `build_week.py --weeks N` after
-   any lab edit and before the run. On the 4 GB GTX 1650, Week 8 (fp32 LoRA) and Week 10 (Qwen3-VL-2B,
-   set `GENAI_VLM`) must run on the CPU. Compare a new export with the stored one before replacing it,
-   then run `.venv/Scripts/python.exe tools/fill_results.py --weeks N`. Run `tools/harvest_figures.py`
-   only after a full run, never after a smoke run.
+   any lab edit and before the run. Every current required core uses CPU by default, including bounded
+   Week 8 LoRA and the smaller Week 10 VLM. Keep optional larger-model/GPU experiments separate.
+   Compare the scratch export with its settings before promoting `results_cpu_core.json`, retain the
+   original archived assets, and record successful full cores in `iteration_3_full_runs`. Then run
+   `.venv/Scripts/python.exe tools/fill_results.py --weeks N`. Harvest figures only from the matching
+   successful full notebook, never from smoke output.
 
 4. **Rebuild and render:**
 
@@ -84,9 +87,14 @@ These are the mistakes found so far. Most now have an automatic check; the rest 
 
 | Look for | Example | Checked by |
 |---|---|---|
-| Speaker-note boilerplate pasted on many slides | the same Ask/Analogy/Common mistake on 8 slides | `audit_prose.py` (REPEAT) |
+| Speaker-note boilerplate pasted on many slides | the same Ask/Example/Watch out sentence on 8 slides | `audit_prose.py` (REPEAT) |
+| Missing or reordered modern note sections | repeated Explain, no Watch out, or an out-of-order Answer | strict `tools/speaker_notes.py`; `test_speaker_notes.py` |
+| Required CPU core confused with an archived larger run | earlier Week 8 training time presented as today's core | latest successful `iteration_3_full_runs`; separate archived table |
+| Provider credentials silently enable requests | a stored key activates a comparison | shared default-False switches; stubbed setup tests; `ask_model()` local fallback |
 | An answer labelled as a mistake | "Ask: …? Common mistake: No." | `audit_prose.py` (LABEL) |
-| Every Ask has an Answer that fits the slide | an Ask about RoPE on a slide about decoding | reading |
+| Every Ask has an Answer that fits the slide | an Ask about RoPE on a slide about decoding | `audit_prose.py` (ANSWER) checks presence; reading checks meaning |
+| Final test remains separate from choosing settings | picking the best prompt on the final test | reading; choose on development examples and freeze before testing |
+| Document-level retrieval hits really include the needed fact | the right source document, but the wrong passage | inspect the actual chunks passed to the generator |
 | Counts in the notes match the slide | "Recap the eight points" on a six-point slide | reading |
 | Notes describe what the figure really shows | notes describe an invalid-answer chart the figure leaves out | reading |
 | Negative numbers and ranges | `-0.5` → −0.5, `5-8` → 5–8 | `audit_prose.py` (MINUS, RANGE) |
@@ -96,6 +104,8 @@ These are the mistakes found so far. Most now have an automatic check; the rest 
 | Claims that only hold on one path | Flan-T5-small on the CPU path answers "ireland" | executed notebook |
 | Picture text smaller than 14 pt when projected | chart tick labels | `audit_figure_text.py` |
 | Legends over data or axis labels | figure-level legends | `lint_figures.py` + eye |
+| Evaluation labelled as training | “Loss / update” beneath frozen-model scoring or validation | use `metric` (“Measure / check”) for checking; keep `loss` for a training objective/update; read the flow and run diagram tests |
+| Windows locks an output during rebuilding | WinError 1224 or an UNKNOWN open/write error | atomic output writers preserve the old file; bounded replacement retries, writer tests and a successful rebuild |
 | Stray paragraphs left from other weeks | an SD-Turbo licence line at the end of Week 6 | reading |
 | One answer letter for most quizzes | 21 of 24 slide quizzes were B; 33 of 45 practice answers were (b) | `audit_prose.py` (QUIZ) |
 | The correct option is the longest | a full sentence against three two-word distractors | `audit_prose.py` (QUIZ); when fixing, keep each distractor's wrong idea so the explanation still fits |
@@ -119,7 +129,7 @@ These are the mistakes found so far. Most now have an automatic check; the rest 
   ```python
   import sys; sys.path.insert(0, "tools")
   from yaml_edit import edit_slides
-  edit_slides(7, {16: {"notes": "Say: ..."}})
+  edit_slides(7, {16: {"title": "One idea on this slide"}})
   ```
 
 - Write edit scripts to a file and run them with `.venv/Scripts/python.exe`. Inline shell heredocs can
@@ -133,22 +143,47 @@ These are the mistakes found so far. Most now have an automatic check; the rest 
   the instructor guide's lab table relies on (minutes, hardware, environment, notebook hash). Add a record
   when a new full run replaces a time; never write a time that has no record.
 - `tools/compare_lab_code.py -v` compares the code cells of each week's last full run with the built
-  notebook. If it reports a code change, re-run the lab before trusting its stored results or time. (Week 1
-  reports two metadata fields added to the results export after its 9 October run; the run record explains.)
+  notebook in order, retaining string contents while ignoring comments and formatting. Missing or failed
+  full-run evidence fails the check. If it reports a code change, re-run the lab before trusting its stored
+  results or time. The 10 October follow-up re-ran Weeks 1, 6 and 11 after their explicit hosted-call gates changed.
+- `tools/harvest_figures.py --week N --dry-run` checks weeks 9–12 against the successful mode-specific
+  full notebook before any assets change. A later smoke run cannot become the figure source. All figures
+  must be present and valid PNGs before writing. New run records include the executed notebook's hash;
+  older records are not retroactively given one. Run `tools/test_lab_evidence.py` after changing these guards.
+- Optional provider code uses shared `ask_model()` with `USE_GEMINI=False` and `USE_OPENAI=False`.
+  Enable exactly one explicitly; a stored credential alone never starts a request. Keep local fallback
+  answers, fictional prompts and `skip-test` widgets. Test default, retry and smoke paths with stubbed
+  clients; a CPU run does not verify the hosted endpoint. OpenAI API billing is separate from ChatGPT.
+- Modern six-label speaker notes are strict by default: 110–180 total words including labels, and three
+  to six Explain sentences of at most twenty words. Keep quiz `Answer: X` aligned with its option.
+- The course guide derives current CPU times from the latest successful full/core CPU ledger records.
+  Preserve timestamps, settings and both notebook hashes; older full experiments remain archived.
+- `check_links.py` retries temporary server/transport failures at most once, preserving the attempt history.
+  It still fails on missing pages and reports blocked pages as unverified. Run `test_link_checks.py` after
+  editing this logic; an initial failed attempt remains part of the follow-up evidence.
 - Notebooks are byte-identical when their sources have not changed, so a hash shows whether a smoke or full
   run still applies. PowerPoint and Word files are not: each build writes a new timestamp, and Word
   hyperlinks get random relationship ids. Compare their contents, not their hashes.
 - Swapping quiz options: move the correct option and one distractor only, then rewrite every letter the
   explanation names by hand. A blind letter replacement is unsafe ("A bigger model" uses A as a word).
 
-## Status (10 October 2026)
+## Archived status (10 October 2026)
 
-Every week has been through the loop once. The evidence for the final build is in the table at the end of
-`research/REVISION_2026-10.md`.
+Every week completed the original review. The independent follow-up corrected additional source,
+instructor-answer and evidence defects. The separate evidence tables in `research/REVISION_2026-10.md`
+distinguish the original review from checks run again during the follow-up. Run and current image hashes
+are retained in `research/FOLLOWUP_2026-10-10.json`.
 
 | Week | Text audits | Evidence checked | Slides viewed | Word pages viewed | Audit section |
 |---|---|---|---|---|---|
-| 1–12 | pass (0 problems) | full run 9 Oct; smoke run 10 Oct on the delivered notebooks | yes | yes | yes, no open rows |
+| 1–12 | pass (0 problems) | all current smoke hashes checked; full 1/6/11 repeated; other full-run code unchanged | earlier full review plus changed-image review | earlier full review plus changed-image review | yes, no open rows |
 
-Not yet checked, and worth doing in the next pass: a timed run on a Colab T4, a clean installation with
-downloads, and classroom feedback from the exit questions.
+This table describes the earlier review; it does not certify the upgraded sources.
+
+## Iteration 3 status (completed 12 October 2026)
+
+All 26 current release gates passed; all 12 final smoke runs and successful measured CPU cores are recorded. Current executable core code matches the full-run evidence. The strict modern note template, canonical glossary and primary/video references apply to every week.
+
+Final rendered review covers 552 slides, 402 weekly Word pages, 103 delivered diagram PNGs,130 notebook images and 50 course pages. All 12 PowerPoint layout reports are []; zero open material findings. Changed images were viewed; unchanged images retain exact prior-view hashes. The durable evidence and actual view reports are linked in `ITERATION3_2026-10-12.json`; findings are under Iteration 3 in the audit.
+
+CPU measurements exclude installation/downloads, widgets, live providers and optional GPU/media stretches. Unverified: timed Colab/clean installation, live Gemini/OpenAI, browser widgets, public deployment, optional stretches, four publisher-blocked links and student feedback. Local measurements do not establish those conditions. Root serialises future builds, lab runs and Office renders and records any new findings before closing them.

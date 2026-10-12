@@ -13,8 +13,8 @@ skipped. This audit reports:
 4. LOWER: a sentence that starts in lower case after a full stop ("... the loss. ways to reduce").
 5. DOUBLE: a word typed twice ("the the").
 6. REPEAT: the same speaker-note sentence on three or more slides of one week. Each slide's Ask, Answer,
-   Analogy and Common mistake should be about that slide.
-7. LABEL: "Common mistake: No." and similar, where an answer was labelled as a mistake.
+   Analogy/Common mistake or Example/Watch out should be about that slide.
+7. LABEL: "Common mistake: No." or "Watch out: No.", where an answer was labelled as a mistake.
 8. TAG: a bare <tag> in Markdown prose (notes, guides, lab Markdown). Word and Jupyter treat it as HTML and
    drop it, so "use tags such as <document>" printed as "use tags such as". Put it in `code`.
    ARROW: an arrow typed as "->" or "=>" in prose instead of →.
@@ -22,6 +22,8 @@ skipped. This audit reports:
    than 40% of the course's quiz answers (21 of 24 were B before October 2026) or of the multiple-choice
    practice questions in the notes (33 of 45 were (b)). It also fails when, in more than a third of either
    set, the correct option is over 30% longer than every distractor (17 of 24 and 32 of 45 were).
+10. ANSWER: an explicit Ask/Ask students/Ask class prompt without an instructor Answer or Expected answer.
+11. NOTES: malformed six-section notes; legacy templates warn once per week until the final migration gate.
 
 ALLOW lists the few matches that are correct as written (document numbers, names that start in lower
 case). Add to it only after reading the match in context.
@@ -30,12 +32,14 @@ This audit must report nothing before a release.
 
 Usage: .venv/Scripts/python.exe tools/audit_prose.py
 """
+import argparse
 import json
 import re
 import sys
 from pathlib import Path
 
 import yaml
+from speaker_notes import ALL_LABEL_RE, legacy_warning, quiz_answer_letter, validate_speaker_notes
 
 ROOT = Path(__file__).resolve().parents[1] / "curriculum"
 # Fields that hold code, maths source, file names or ids rather than prose.
@@ -154,9 +158,16 @@ def repeated_notes():
         seen = {}
         for i, s in enumerate(slides, 1):
             notes = str(s.get("notes", ""))
-            for sentence in {x.strip() for x in re.split(r"(?<=[.?!])\s+", notes) if len(x.split()) >= 7}:
-                seen.setdefault(sentence, []).append(i)
-            for m in re.finditer(r"Common mistake: (?:Yes|No)\.", notes):
+            label_text = notes.replace("**", "")
+            if (re.search(r"\bAsk(?: students| class)?:", label_text, re.I)
+                    and not re.search(r"\b(?:Expected )?Answers?:|\bAnswer [ABCD]\b", label_text, re.I)):
+                found.append(f"ANSWER {p.relative_to(ROOT.parent).as_posix()} slide {i}: class question has no explicit instructor answer")
+            sentences = {ALL_LABEL_RE.sub("", x.strip()).strip()
+                         for x in re.split(r"(?<=[.?!])\s+", notes) if len(x.split()) >= 7}
+            for sentence in sentences:
+                if sentence:
+                    seen.setdefault(sentence, []).append(i)
+            for m in re.finditer(r"(?:Common mistake|Watch out): (?:Yes|No)\.", label_text):
                 found.append(f"LABEL  {p.relative_to(ROOT.parent).as_posix()} slide {i}: '{m.group(0)}' is an answer, "
                              "not a mistake")
         for sentence, where in seen.items():
@@ -175,10 +186,10 @@ def quiz_answers():
             letter = "ABCD"[s["answer"]]
             letters.append(letter)
             cues["quiz"].append(longest_is_answer(s["options"], s["answer"]))
-            m = re.search(r"Answer:?\s+([A-D])\b", str(s.get("notes", "")))
-            if not m or m.group(1) != letter:
+            note_letter = quiz_answer_letter(str(s.get("notes", "")))
+            if note_letter != letter:
                 found.append(f"QUIZ   {p.relative_to(ROOT.parent).as_posix()} slide {i}: answer index is {letter}, "
-                             f"notes say {m.group(1) if m else 'nothing'}")
+                             f"notes say {note_letter or 'nothing'}")
     practice = []  # "1. ... **(a)** ...; **(b)** ... *Answer: (b).*" lines in the notes' practice questions
     for p in sorted((ROOT / "notes").glob("week_*.md")):
         for line in re.findall(r"^\d\. .*\*\*\(d\)\*\* .*\*Answer: \([a-d]\).*$", p.read_text(encoding="utf-8"), re.M):
@@ -204,8 +215,32 @@ def longest_is_answer(options, answer):
     return lengths[answer] > 1.3 * max(others)
 
 
-def main():
-    found = problems() + repeated_notes() + quiz_answers()
+def speaker_note_templates(*, strict_notes: bool | None = None):
+    """Audit source-note templates, retaining one migration warning per week."""
+    found, warnings = [], []
+    for path in sorted((ROOT / "weeks").glob("week_*.yaml")):
+        legacy_slides = []
+        for index, slide in enumerate(yaml.safe_load(path.read_text(encoding="utf-8"))["slides"], 1):
+            result = validate_speaker_notes(str(slide.get("notes", "")), strict_legacy=strict_notes)
+            found.extend(f"NOTES  {path.relative_to(ROOT.parent).as_posix()} slide {index}: {error}"
+                         for error in result.errors)
+            if result.warnings:
+                legacy_slides.append(index)
+        warning = legacy_warning(legacy_slides)
+        if warning:
+            warnings.append(f"{path.stem}: {warning}")
+    return found, warnings
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--strict-speaker-notes", action="store_true", default=None,
+                        help="reject legacy note templates at the final migration gate")
+    args = parser.parse_args(argv)
+    templates, warnings = speaker_note_templates(strict_notes=args.strict_speaker_notes)
+    found = problems() + repeated_notes() + quiz_answers() + templates
+    for warning in warnings:
+        print("WARNING:", warning)
     for f in found:
         print(f)
     print(f"{len(found)} prose problem(s)")

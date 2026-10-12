@@ -13,12 +13,20 @@
 # 5. Inspect two pretrained models, BERT and GPT-2.
 # 6. Optionally measure generation with and without a **key/value cache**.
 #
-# **Runtime:** the complete GPU experiment trains for 3,000 updates.
-# The CPU route uses a smaller model, shorter sequences and 200 updates.
-# These settings teach the same operations; their results are not comparable.
+# **Core:** Tiny Shakespeare (1.1 MB download), a real character transformer and 2,000 updates.
+# The teaching notes give the measured CPU time on the course laptop; the training cell prints yours.
+# Downloaded BERT/GPT-2 inspection, cache timing and longer training are optional.
+# Stored lecture results belong to their documented longer experiment, not this core.
 # Runtime and output quality depend on your machine and settings.
 # A smoke run checks execution with very small settings; it does not measure
 # the quality of a trained language model.
+
+# %% [markdown]
+# **Core, changes and stretches:** complete Parts 1–4 locally. The core uses context 64, batch 32, width 128, four heads, three layers and 2,000 updates on Tiny Shakespeare. The model genuinely trains: expect speaker names, line breaks and word-like spellings, with many invented words.
+#
+# **Change one thing:** alter only a selected setting before training, then record the dataset, seed and observed result. **Optional stretch:** RUN_STRETCH trains a larger model for longer; USE_TINY_SHAKESPEARE = False switches to the small bundled text. RUN_PRETRAINED downloads separate historical inspection models, and RUN_CACHE_BENCHMARK additionally measures their generation. Enable stretches after the core and report them separately.
+#
+# **Common setup errors:** use the shared DEVICE and SEED. Do not create another automatic GPU selector. If a library import fails, rerun installation; model download failures affect only optional inspection.
 
 # %% [markdown]
 # ## Start here: follow one character through the system
@@ -33,9 +41,10 @@
 #
 # ## Find each diagram block in the notebook
 #
-# ![The notebook pipeline, mapped to its functions](fig:beginner_lab)
+# ![The character-training data route](fig:beginner_lab)
+# This flow shows training only. Numerical checks and pretrained inspection use separate inputs.
 #
-# | Diagram operation | Code to find | What to inspect |
+# | Independent experiment | Code to find | What to inspect |
 # |---|---|---|
 # | Calculate attention | `attention`, `causal_mask` | Weights and forbidden future positions |
 # | Assemble a block | `MultiHeadAttention`, `Block` | Batch, head, position and feature axes |
@@ -64,10 +73,10 @@
 # %% [markdown]
 # ### Select the available hardware
 #
-# **What/why:** import the tools, set a random seed and choose GPU or CPU.
+# **What/why:** import the tools and read the CPU device and seed from shared setup.
 # A seed makes this run easier to repeat; different hardware can still differ.
 # **Predict:** which device will your runtime report?
-# **Expected output:** `device: cuda` for a supported GPU, otherwise `device: cpu`.
+# **Expected output:** CPU by default; GPU only after the shared USE_GPU switch is enabled.
 # **Change/check:** GPU availability changes runtime, not the attention rule.
 
 # %%
@@ -82,15 +91,30 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-SMOKE = os.environ.get("GENAI_LAB_SMOKE") == "1"
-SEED = 0
-torch.manual_seed(SEED)
-DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+# Shared injected setup supplies CPU DEVICE, SMOKE, SEED and API opt-in switches.
+RUN_STRETCH = False
+RUN_PRETRAINED = False
+RUN_CACHE_BENCHMARK = False
+USE_TINY_SHAKESPEARE = True
+if SMOKE:
+    RUN_STRETCH = RUN_PRETRAINED = RUN_CACHE_BENCHMARK = USE_TINY_SHAKESPEARE = False
+bert_att = None
+layer = head = None
+kv_timings = {}
+cache_ratio = None
+n_new = repeats = None
+core_started = time.perf_counter()
 print("device:", DEVICE)
-print("run:", "smoke execution check" if SMOKE else "teaching experiment")
+print("run:", "smoke engineering check" if SMOKE else ("optional stretch" if RUN_STRETCH else "bounded CPU core"))
 
 # %% [markdown]
 # ## Part 1: Mix information with attention
+#
+# **Core:** Predict a row sum and one mixture.
+# **Change one thing:** Change V alone; weights should remain fixed.
+# **Optional stretch:** Compare query and source lengths in cross-attention.
+# **Common errors:** Normalise source columns per row; at least one key must remain allowed.
+# **Check:** run the associated check_ function and explain the actual output.
 #
 # Think of each position asking: "Which earlier information helps me?"
 # A **query**, Q, describes what it seeks. A **key**, K, describes what a
@@ -108,7 +132,7 @@ print("run:", "smoke execution check" if SMOKE else "teaching experiment")
 # For three positions, the score and weight tables are `[3, 3]`.
 # Rows ask questions; columns supply information. They are not word meanings.
 #
-# **TODO 1:** implement `attention(q, k, v, mask=None)`.
+# **TODO 1:** implement `attention(q, k, v, mask=None)`. **Hint:** compare, scale, mask, row-normalise, mix V.
 # Q and K have shape `[..., n, d_k]` here. V has one row per input position.
 # A boolean mask uses `True` for **not allowed**; replace those scores with
 # negative infinity before softmax. Return the mixed values and their weights.
@@ -129,6 +153,8 @@ def attention(q, k, v, mask=None):
     weights = scores.softmax(dim=-1)
     return weights @ v, weights
     ### END SOLUTION
+    ### STUB weights = torch.full((*q.shape[:-1], k.size(-2)), 1 / k.size(-2), device=q.device)  # TODO 1: query-key scores, mask and row softmax
+    ### STUB return weights @ v, weights
 
 
 # These small arrays are a worked calculation, not trained model measurements.
@@ -137,13 +163,24 @@ V = torch.tensor([[1.0, 0.0], [0.0, 1.0], [0.5, 0.5]])
 out, w = attention(Q, Q, V)
 print("weights:\n", w.numpy().round(3))
 print("outputs:\n", out.numpy().round(3))
-assert torch.allclose(w[2], torch.tensor([0.248, 0.248, 0.503]), atol=2e-3)
-assert torch.allclose(w.sum(-1), torch.ones(3))
-
 x = torch.randn(2, 4, 7, 16)  # [batch, heads, positions, features]
-ref = F.scaled_dot_product_attention(x, x, x)
-assert torch.allclose(attention(x, x, x)[0], ref, atol=1e-5)
-print("PASS: attention matches the worked example and PyTorch")
+
+
+def check_attention():
+    try:
+        ref = F.scaled_dot_product_attention(x, x, x, dropout_p=0.0)
+        good = torch.allclose(w[2], torch.tensor([0.248, 0.248, 0.503]), atol=2e-3)
+        good = good and torch.allclose(w.sum(-1), torch.ones(3))
+        good = good and torch.allclose(attention(x, x, x)[0], ref, atol=1e-5)
+        print("Q:", tuple(Q.shape), "scores/weights:", tuple(w.shape), "output:", tuple(out.shape))
+        return check(good, "Attention matches the worked example and PyTorch.",
+                     "Compare Q with transposed K, scale, normalise rows, then mix V.")
+    except (RuntimeError, TypeError, ValueError) as error:
+        return check(False, "Attention checked.", "Print your axes and inspect the score/weight shapes: " + str(error))
+
+
+if not check_attention():
+    raise ValueError("Fix check_attention before building the model.")
 
 # %% [markdown]
 # ### Why divide the scores by the square root of the feature count?
@@ -157,7 +194,7 @@ print("PASS: attention matches the worked example and PyTorch")
 
 # %%
 for d in (4, 64, 512):
-    a, b = torch.randn(10000, d), torch.randn(10000, d)
+    a, b = torch.randn(1000, d), torch.randn(1000, d)
     dots = (a * b).sum(-1)
     row = torch.randn(8, d) @ torch.randn(d)
     print(f"d_k={d:4d}: raw score std={dots.std():6.2f}; "
@@ -167,10 +204,16 @@ for d in (4, 64, 512):
 # %% [markdown]
 # ## Part 2: Hide the future and identify positions
 #
+# **Core:** Predict which mask entries lie above the diagonal.
+# **Change one thing:** Change sequence length and inspect allowed positions.
+# **Optional stretch:** Add learned or fixed positions to the shuffle experiment.
+# **Common errors:** Custom True blocks; SDPA True allows. The current diagonal remains allowed.
+# **Check:** run the associated check_ function and explain the actual output.
+#
 # A **causal mask** lets a position use itself and earlier positions.
 # It prevents training from revealing the character the model must predict.
 #
-# **TODO 2:** complete `causal_mask(n)`. Return a boolean `[n, n]` table
+# **TODO 2:** complete `causal_mask(n)`. **Hint:** torch.triu with diagonal=1. Return a boolean `[n, n]` table
 # with `True` above the diagonal: those columns are future positions.
 #
 # **What/why:** build the mask and check that future positions receive zero weight.
@@ -183,15 +226,24 @@ def causal_mask(n, device="cpu"):
     ### BEGIN SOLUTION
     return torch.triu(torch.ones(n, n, dtype=torch.bool, device=device), diagonal=1)
     ### END SOLUTION
+    ### STUB return torch.zeros(n, n, dtype=torch.bool, device=device)  # TODO 2: block entries above the diagonal
 
 
 m = causal_mask(5)
 _, w = attention(torch.randn(5, 8), torch.randn(5, 8), torch.randn(5, 8), mask=m)
 print(w.numpy().round(2))
-assert torch.all(w[m] == 0), "future positions must have zero weight"
-ref = F.scaled_dot_product_attention(x, x, x, is_causal=True)
-assert torch.allclose(attention(x, x, x, mask=causal_mask(7))[0], ref, atol=1e-5)
-print("PASS: causal masking matches PyTorch")
+def check_causal_mask():
+    expected = torch.ones(5, 5, dtype=torch.bool).triu(1)
+    ref = F.scaled_dot_product_attention(x, x, x, is_causal=True, dropout_p=0.0)
+    good = m.dtype == torch.bool and m.shape == (5, 5) and torch.equal(m, expected)
+    good = good and bool(torch.all(w[expected] == 0)) and bool(torch.all(w.diag() > 0))
+    good = good and torch.allclose(attention(x, x, x, mask=causal_mask(7))[0], ref, atol=1e-5)
+    return check(good, "Causal mask blocks the future and keeps the diagonal.",
+                 "Use a Boolean upper triangle with diagonal=1; custom True means blocked.")
+
+
+if not check_causal_mask():
+    raise ValueError("Fix check_causal_mask before continuing.")
 
 # %% [markdown]
 # ### What happens if we shuffle positions?
@@ -230,12 +282,18 @@ assert same
 # %% [markdown]
 # ## Part 3: Combine heads and build a transformer block
 #
+# **Core:** Predict each head width before reshaping.
+# **Change one thing:** Change head count while preserving total model width.
+# **Optional stretch:** Trace the residual block and compare its outputs.
+# **Common errors:** A tokenwise projection can pass shape checks without implementing attention; run the reference-mixture check.
+# **Check:** run the associated check_ function and explain the actual output.
+#
 # An **attention head** learns one set of queries, keys and values.
 # Several heads mix information in parallel; their outputs are combined.
 # They are not guaranteed to learn separate human named concepts.
 #
 # **TODO 3:** project to Q, K and V; split their features into heads; apply
-# attention; merge heads; apply the output projection.
+# attention; merge heads; apply the output projection. **Hint:** reshape before transpose, then reverse both operations.
 # For `[2, 10, 32]` and four heads, each head has eight features.
 # The attention arrays use `[2, 4, 10, 8]`; the final output is `[2, 10, 32]`.
 #
@@ -292,20 +350,40 @@ class Block(nn.Module):
 
 mha = MultiHeadAttention(32, 4)
 y = mha(torch.randn(2, 10, 32), causal_mask(10))
-assert y.shape == (2, 10, 32)
-xa = torch.randn(1, 10, 32)
-xb = xa.clone()
-xb[0, 7:] = torch.randn(3, 32)
-ya, yb = mha(xa, causal_mask(10)), mha(xb, causal_mask(10))
-assert torch.allclose(ya[0, :7], yb[0, :7], atol=1e-5), "earlier outputs used future inputs"
-print("PASS: multi-head attention has the right shape and hides the future")
+def check_multihead():
+    try:
+        xa = torch.randn(1, 10, 32)
+        xb = xa.clone()
+        xb[0, 7:] = torch.randn(3, 32)
+        ya, yb = mha(xa, causal_mask(10)), mha(xb, causal_mask(10))
+        q, k, v = mha.qkv(xa).chunk(3, dim=-1)
+        q, k, v = (t.reshape(1, 10, 4, 8).transpose(1, 2) for t in (q, k, v))
+        reference = F.scaled_dot_product_attention(q, k, v, is_causal=True, dropout_p=0.0)
+        reference = mha.proj(reference.transpose(1, 2).reshape(1, 10, 32))
+        good = y.shape == (2, 10, 32) and torch.allclose(ya, reference, atol=1e-5)
+        good = good and torch.allclose(ya[0, :7], yb[0, :7], atol=1e-5)
+        print("head arrays:", tuple(q.shape), "joined output:", tuple(ya.shape))
+        return check(good, "Heads match the reference mixture, shape and causal boundary.",
+                     "Split and transpose heads, run attention, then merge before the output projection.")
+    except (RuntimeError, TypeError, ValueError) as error:
+        return check(False, "Heads checked.", "Print axes after reshape/transpose: " + str(error))
+
+
+if not check_multihead():
+    raise ValueError("Fix check_multihead before training.")
 
 # %% [markdown]
 # ## Part 4: Train a small next-character model
 #
+# **Core:** Predict which shifted target belongs to the first input.
+# **Change one thing:** Change temperature using the same seed and prefix.
+# **Optional stretch:** Train longer on Tiny Shakespeare after the core.
+# **Common errors:** Set eval to disable dropout; no_grad alone is insufficient. Report poor samples honestly.
+# **Check:** run the associated check_ function and explain the actual output.
+#
 # ### Prepare the training pairs
 #
-# **What/why:** download Tiny Shakespeare, give each character an ID, and
+# **What/why:** download Tiny Shakespeare (about 1.1 million characters), give each character an ID, and
 # reserve the final 10% of the text for validation: checking text not used to train.
 # `get_batch` selects a **batch**, a small collection of training examples.
 # Input `ROME` and target `OMEO` illustrate the one-character shift.
@@ -314,22 +392,59 @@ print("PASS: multi-head attention has the right shape and hides the future")
 # **Expected output:** dataset source, character count, vocabulary size and batch shape.
 # **Change/check:** decode one batch row and its target. Check the one-character shift.
 #
-# **Offline fallback:** repeated lines allow the code to run without a download.
-# The training and validation portions then repeat the same lines.
-# A low validation error on that fallback cannot demonstrate generalisation
-# to unfamiliar writing. The notebook labels which dataset you actually used.
+# **Core corpus:** Tiny Shakespeare, a public-domain collection of play dialogue. The final 10% is held out.
+# It is one author's style, so its score is not evidence of broad writing ability.
+# If the download fails, the cell falls back to a short bundled teaching text (much weaker results).
+# Do not select settings on a final test; these periodic validation checks are development evidence.
 
 # %%
 URL = "https://raw.githubusercontent.com/karpathy/char-rnn/master/data/tinyshakespeare/input.txt"
-DATA_SOURCE = "Tiny Shakespeare download"
-try:
-    with urllib.request.urlopen(URL, timeout=20) as response:
-        text = response.read().decode("utf-8")
-except Exception as error:
-    print("download failed; using repeated built-in text:", error)
-    DATA_SOURCE = "repeated offline fallback; validation is not independent content"
-    text = ("ROMEO:\nBut soft, what light through yonder window breaks?\n"
-            "It is the east, and Juliet is the sun.\n" * 300)
+# Original synthetic teaching text: no repeated copy is shared across the split.
+BUNDLED_TEXT = """ROMEO:
+The morning train carried a small box of books to the town.
+A teacher opened the box and placed the books on a wooden table.
+JULIET:
+Each book held a different story, and each story began with a name.
+The class read one page slowly and compared the words that followed it.
+ROMEO:
+A cat waited beside the window while rain moved across the garden.
+The street was wide, but the animal stayed near the quiet house.
+JULIET:
+We wrote a question on the board and looked for clues in the sentence.
+The answer changed when the final adjective changed from tired to wide.
+ROMEO:
+One reader counted letters, another marked the positions of the spaces.
+They kept the earlier words and predicted which character might come next.
+JULIET:
+A number selected a row, and a row contained a list of learned numbers.
+Three vectors could share information without becoming the same vector.
+ROMEO:
+The first position could read itself; the next could read the first two.
+No position was allowed to borrow a character from its own future.
+JULIET:
+We added a small correction to the old vector and kept the resulting shape.
+Then we checked a fresh passage rather than repeating the training answers.
+ROMEO:
+The library closed at dusk, and the students walked towards the river.
+They described the imperfect samples and recorded the settings they had used.
+JULIET:
+A good explanation named the input, the operation and the output.
+It also named a limit, because a plausible sentence could still be wrong.
+ROMEO:
+The next lesson began with an unfamiliar paragraph and a different question.
+We compared predictions without claiming that every story would make sense.
+"""
+text = BUNDLED_TEXT
+DATA_SOURCE = "bundled original teaching dialogue; limited domain"
+if USE_TINY_SHAKESPEARE:
+    try:
+        with urllib.request.urlopen(URL, timeout=20) as response:
+            text = response.read().decode("utf-8")
+        DATA_SOURCE = "Tiny Shakespeare (public-domain plays)"
+    except Exception as error:
+        print("download unavailable; using the short bundled teaching text:", error)
+        text = BUNDLED_TEXT
+        DATA_SOURCE = "bundled original teaching dialogue; download unavailable"
 chars = sorted(set(text))
 stoi = {c: i for i, c in enumerate(chars)}
 itos = {i: c for c, i in stoi.items()}
@@ -341,14 +456,16 @@ VOCAB = len(chars)
 # Smaller settings preserve the operations while making CPU and smoke runs practical.
 if SMOKE:
     CTX, BATCH_SIZE, D_MODEL, N_HEADS, N_LAYERS, default_steps = 32, 4, 48, 4, 2, 4
-elif DEVICE == "cuda":
+elif RUN_STRETCH and DEVICE == "cuda":
     CTX, BATCH_SIZE, D_MODEL, N_HEADS, N_LAYERS, default_steps = 128, 64, 192, 6, 4, 3000
+elif RUN_STRETCH:
+    CTX, BATCH_SIZE, D_MODEL, N_HEADS, N_LAYERS, default_steps = 128, 32, 192, 6, 4, 3000
 else:
-    CTX, BATCH_SIZE, D_MODEL, N_HEADS, N_LAYERS, default_steps = 64, 8, 96, 4, 2, 200
+    CTX, BATCH_SIZE, D_MODEL, N_HEADS, N_LAYERS, default_steps = 64, 32, 128, 4, 3, 2000
 STEPS = int(os.environ.get("GENAI_TRAIN_STEPS", default_steps))
 if STEPS < 1:
     raise ValueError("GENAI_TRAIN_STEPS must be at least 1")
-VAL_BATCHES = 2 if SMOKE else (10 if DEVICE == "cuda" else 4)
+VAL_BATCHES = 2 if SMOKE else (10 if DEVICE == "cuda" else 8)
 print("dataset:", DATA_SOURCE)
 print(f"{len(text):,} characters; {VOCAB} distinct characters")
 print(f"context={CTX}, batch={BATCH_SIZE}, features={D_MODEL}, "
@@ -492,7 +609,7 @@ plt.show()
 # **Perplexity** is `exp(average cross-entropy loss)` with natural logarithms.
 # It expresses uncertainty on the same prediction task. Uniform guessing over
 # `VOCAB` characters has perplexity `VOCAB`; lower is better on the same text.
-# **TODO 4:** compute perplexity from the final measured validation loss.
+# **TODO 4:** compute perplexity from the final measured validation loss. **Hint:** exponentiate the average natural-log loss.
 #
 # **What/why:** make the model's uncertainty easier to interpret.
 # **Predict:** what perplexity corresponds to loss `log(VOCAB)`?
@@ -505,6 +622,18 @@ final_loss = curve[-1][1]
 perplexity = math.exp(final_loss)
 ### END SOLUTION
 ### STUB perplexity = None  # TODO 4
+def check_perplexity():
+    try:
+        good = perplexity is not None and math.isfinite(perplexity) and perplexity >= 1.0
+        good = good and abs(math.log(perplexity) - final_loss) < 1e-6
+        return check(good, "Perplexity corresponds to the measured natural-log loss.",
+                     "Apply math.exp to final_loss; natural log should recover that loss.")
+    except (TypeError, ValueError, OverflowError):
+        return check(False, "Perplexity checked.", "Return a finite number using math.exp(final_loss).")
+
+
+if not check_perplexity():
+    raise ValueError("Fix check_perplexity before recording results.")
 print(f"validation perplexity={perplexity:.2f}; uniform baseline={VOCAB}")
 
 # %% [markdown]
@@ -526,7 +655,7 @@ print(f"validation perplexity={perplexity:.2f}; uniform baseline={VOCAB}")
 gpt.eval()  # No gradients alone would not disable training-time dropout.
 prompt = torch.tensor([[stoi[ch] for ch in "ROMEO:\n" if ch in stoi]], device=DEVICE)
 samples = {}
-N_SAMPLE = 24 if SMOKE else (250 if DEVICE == "cuda" else 100)
+N_SAMPLE = 24 if SMOKE else 250
 for temperature in (0.5, 1.0, 1.5):
     torch.manual_seed(SEED)
     generated = gpt.generate(prompt, N_SAMPLE, temperature=temperature)
@@ -547,12 +676,36 @@ for temperature in (0.5, 1.0, 1.5):
 # Plausible fragments do not prove understanding or a coherent story.
 # A character and a word piece are different prediction units. Compare models
 # using the same tokenizer and held-out text, or a defined per-character measure.
-# If you used the repeated offline fallback, the validation content overlaps
-# with training content; the result cannot establish generalisation to new writing.
+# Tiny Shakespeare is one author's dialogue; the held-out 10% comes from the same plays.
+# Its validation result does not establish generalisation to broad writing.
+# Repeated validation checks are development observations, not an untouched final test.
 # <!-- END ANSWER -->
 
 # %% [markdown]
-# ## Part 5: Inspect separate pretrained models
+# ### Change temperature without training
+# **What/why:** rescale a small supplied score row and inspect probability concentration.
+# **Predict:** does moving temperature change learned weights?
+# **Expected output:** a slider, probabilities summing to one and a small bar chart.
+# **Check:** only the distribution changes. Automated execution skips this interactive cell.
+
+# %% tags=["skip-test"]
+import ipywidgets as widgets
+from IPython.display import display
+
+
+def show_temperature(temperature):
+    scores = torch.tensor([2.0, 0.0, 0.0])
+    probabilities = (scores / temperature).softmax(0)
+    print("probabilities:", probabilities.numpy().round(3), "sum:", float(probabilities.sum()))
+    plt.bar(["A", "B", "C"], probabilities.numpy())
+    plt.ylim(0, 1); plt.ylabel("probability"); plt.show()
+
+
+display(widgets.interactive(show_temperature,
+                           temperature=widgets.FloatSlider(value=1.0, min=0.2, max=2.0, step=0.1, description="Temperature")))
+
+# %% [markdown]
+# ## Part 5: Optional separate pretrained-model inspection
 #
 # BERT is an **encoder**: each position may attend to the complete input.
 # GPT-2 is a **decoder**: a position may attend only to itself and its past.
@@ -569,24 +722,30 @@ for temperature in (0.5, 1.0, 1.5):
 # **Change/check:** inspect `toks` to see special tokens and word pieces.
 # The first use downloads model files; later runs may use the local cache.
 
-# %%
-from transformers import AutoModel, AutoTokenizer
 
-sentence = "The animal didn't cross the street because it was too tired."
-bert_tok = AutoTokenizer.from_pretrained("bert-base-uncased")
-bert = AutoModel.from_pretrained("bert-base-uncased", attn_implementation="eager").eval()
-enc = bert_tok(sentence, return_tensors="pt")
-with torch.no_grad():
-    bert_att = torch.stack(bert(**enc, output_attentions=True).attentions)[:, 0]
-toks = bert_tok.convert_ids_to_tokens(enc["input_ids"][0])
-i_it, i_animal, i_street = toks.index("it"), toks.index("animal"), toks.index("street")
-print(f"BERT: {bert_att.shape[0]} layers, {bert_att.shape[1]} heads per layer")
-print("tokens:", toks)
+# **Optional:** enable RUN_PRETRAINED only after the local core. Stored lecture figures already show measured examples.
+# %%
+if RUN_PRETRAINED:
+    from transformers import AutoModel, AutoTokenizer
+
+    sentence = "The animal didn't cross the street because it was too tired."
+    bert_tok = AutoTokenizer.from_pretrained("google-bert/bert-base-uncased")
+    bert = AutoModel.from_pretrained("google-bert/bert-base-uncased", attn_implementation="eager").eval()
+    enc = bert_tok(sentence, return_tensors="pt")
+    with torch.no_grad():
+        bert_att = torch.stack(bert(**enc, output_attentions=True).attentions)[:, 0]
+    toks = bert_tok.convert_ids_to_tokens(enc["input_ids"][0])
+    i_it, i_animal, i_street = toks.index("it"), toks.index("animal"), toks.index("street")
+    print(f"BERT: {bert_att.shape[0]} layers, {bert_att.shape[1]} heads per layer")
+    print("tokens:", toks)
+
+else:
+    print("Optional pretrained inspection skipped; local core remains complete.")
 
 # %% [markdown]
 # ### Find and inspect one selected head
 #
-# **TODO 5:** find the layer/head with the largest weight from `it` to `animal`.
+# **TODO 5 (optional):** find the layer/head with the largest it-to-animal weight. **Hint:** flatten scores, argmax, divmod by head count.
 # Plot its full table, then compare that weight across all heads.
 #
 # **What/why:** inspect information routing, including the selection we made.
@@ -596,31 +755,44 @@ print("tokens:", toks)
 # **Change/check:** inspect a typical head as well as the largest one.
 
 # %%
-### BEGIN SOLUTION
-scores = bert_att[:, :, i_it, i_animal]
-layer, head = divmod(int(scores.argmax()), scores.shape[1])
-### END SOLUTION
-### STUB layer, head = 0, 0  # TODO 5
-print(f"layer {layer + 1}, head {head + 1}: "
-      f"it -> animal={bert_att[layer, head, i_it, i_animal]:.3f}; "
-      f"it -> street={bert_att[layer, head, i_it, i_street]:.3f}")
-plt.figure(figsize=(8, 7))
-plt.imshow(bert_att[layer, head].numpy(), cmap="Purples", vmin=0, vmax=1)
-plt.xticks(range(len(toks)), toks, rotation=70)
-plt.yticks(range(len(toks)), toks)
-plt.xlabel("key/value position: information source")
-plt.ylabel("query position: information recipient")
-plt.title(f"Selected BERT layer {layer + 1}, head {head + 1}")
-plt.colorbar(label="attention weight")
-plt.tight_layout()
-plt.show()
+if RUN_PRETRAINED:
+    ### BEGIN SOLUTION
+    scores = bert_att[:, :, i_it, i_animal]
+    layer, head = divmod(int(scores.argmax()), scores.shape[1])
+    ### END SOLUTION
+    ### STUB layer, head = 0, 0  # TODO 5
+    def check_selected_head():
+        all_scores = bert_att[:, :, i_it, i_animal]
+        good = 0 <= layer < all_scores.shape[0] and 0 <= head < all_scores.shape[1]
+        good = good and torch.allclose(all_scores[layer, head], all_scores.max())
+        return check(good, "Selected head has the largest recorded it-to-animal weight.",
+                     "Flatten layer/head scores, find argmax and recover both indices with divmod.")
 
-plt.hist(bert_att[:, :, i_it, i_animal].flatten().numpy(), bins=30)
-plt.xlabel("attention weight: it -> animal")
-plt.ylabel("number of heads")
-plt.title(f"Across all {bert_att.shape[0] * bert_att.shape[1]} BERT heads")
-plt.tight_layout()
-plt.show()
+
+    check_selected_head()
+    print(f"layer {layer + 1}, head {head + 1}: "
+          f"it -> animal={bert_att[layer, head, i_it, i_animal]:.3f}; "
+          f"it -> street={bert_att[layer, head, i_it, i_street]:.3f}")
+    plt.figure(figsize=(8, 7))
+    plt.imshow(bert_att[layer, head].numpy(), cmap="Purples", vmin=0, vmax=1)
+    plt.xticks(range(len(toks)), toks, rotation=70)
+    plt.yticks(range(len(toks)), toks)
+    plt.xlabel("key/value position: information source")
+    plt.ylabel("query position: information recipient")
+    plt.title(f"Selected BERT layer {layer + 1}, head {head + 1}")
+    plt.colorbar(label="attention weight")
+    plt.tight_layout()
+    plt.show()
+
+    plt.hist(bert_att[:, :, i_it, i_animal].flatten().numpy(), bins=30)
+    plt.xlabel("attention weight: it -> animal")
+    plt.ylabel("number of heads")
+    plt.title(f"Across all {bert_att.shape[0] * bert_att.shape[1]} BERT heads")
+    plt.tight_layout()
+    plt.show()
+
+else:
+    print("Optional pretrained inspection skipped; local core remains complete.")
 
 # %% [markdown]
 # ### Test GPT-2's causal boundary
@@ -634,23 +806,27 @@ plt.show()
 # the complete sentence.
 
 # %%
-gpt2_tok = AutoTokenizer.from_pretrained("gpt2")
-gpt2 = AutoModel.from_pretrained("gpt2", attn_implementation="eager").eval()
-it_rows = []
-for s in (sentence, sentence.replace("tired", "wide")):
-    ids = gpt2_tok(s, return_tensors="pt")
-    with torch.no_grad():
-        att = torch.stack(gpt2(**ids, output_attentions=True).attentions)[:, 0]
-    gt = gpt2_tok.convert_ids_to_tokens(ids["input_ids"][0])
-    j_it = [k for k, token in enumerate(gt) if token.lstrip("Ġ") == "it"][0]
-    j_an = [k for k, token in enumerate(gt) if token.lstrip("Ġ") == "animal"][0]
-    j_st = [k for k, token in enumerate(gt) if token.lstrip("Ġ") == "street"][0]
-    it_rows.append(att[:, :, j_it, :j_it + 1].clone())
-    avg = att[:, :, j_it].mean(dim=(0, 1))
-    print(f"{s[-12:]!r}: mean it -> animal={avg[j_an]:.3f}; "
-          f"it -> street={avg[j_st]:.3f}")
-assert torch.allclose(it_rows[0], it_rows[1], atol=1e-6)
-print("PASS: a later adjective does not change attention at 'it'")
+if RUN_PRETRAINED:
+    gpt2_tok = AutoTokenizer.from_pretrained("openai-community/gpt2")
+    gpt2 = AutoModel.from_pretrained("openai-community/gpt2", attn_implementation="eager").eval()
+    it_rows = []
+    for s in (sentence, sentence.replace("tired", "wide")):
+        ids = gpt2_tok(s, return_tensors="pt")
+        with torch.no_grad():
+            att = torch.stack(gpt2(**ids, output_attentions=True).attentions)[:, 0]
+        gt = gpt2_tok.convert_ids_to_tokens(ids["input_ids"][0])
+        j_it = [k for k, token in enumerate(gt) if token.lstrip("Ġ") == "it"][0]
+        j_an = [k for k, token in enumerate(gt) if token.lstrip("Ġ") == "animal"][0]
+        j_st = [k for k, token in enumerate(gt) if token.lstrip("Ġ") == "street"][0]
+        it_rows.append(att[:, :, j_it, :j_it + 1].clone())
+        avg = att[:, :, j_it].mean(dim=(0, 1))
+        print(f"{s[-12:]!r}: mean it -> animal={avg[j_an]:.3f}; "
+              f"it -> street={avg[j_st]:.3f}")
+    assert torch.allclose(it_rows[0], it_rows[1], atol=1e-6)
+    print("PASS: a later adjective does not change attention at 'it'")
+
+else:
+    print("Optional pretrained inspection skipped; local core remains complete.")
 
 # %% [markdown]
 # **Question 3.** Does the selected attention plot explain a pronoun decision?
@@ -684,43 +860,47 @@ print("PASS: a later adjective does not change attention at 'it'")
 # can have noisy timings. The displayed ratio applies only to this configuration.
 
 # %%
-from transformers import AutoModelForCausalLM
+if RUN_CACHE_BENCHMARK and RUN_PRETRAINED:
+    from transformers import AutoModelForCausalLM
 
-# Free inspection models before loading another GPT-2 copy.
-del bert, gpt2
-lm = AutoModelForCausalLM.from_pretrained("gpt2").to(DEVICE).eval()
-ids = gpt2_tok("Once upon a time", return_tensors="pt").to(DEVICE)
-n_new = 4 if SMOKE else (200 if DEVICE == "cuda" else 20)
-repeats = 1 if SMOKE else 3
-kv_timings = {}
-
-
-@torch.no_grad()
-def run_generation(use_cache, count):
-    return lm.generate(
-        **ids, max_new_tokens=count, min_new_tokens=count,
-        do_sample=False, use_cache=use_cache, pad_token_id=gpt2_tok.eos_token_id,
-    )
+    # Free inspection models before loading another GPT-2 copy.
+    del bert, gpt2
+    lm = AutoModelForCausalLM.from_pretrained("openai-community/gpt2").to(DEVICE).eval()
+    ids = gpt2_tok("Once upon a time", return_tensors="pt").to(DEVICE)
+    n_new = 4 if SMOKE else (200 if DEVICE == "cuda" else 20)
+    repeats = 1 if SMOKE else 3
+    kv_timings = {}
 
 
-# Warm-up is outside the measured interval for each configuration.
-for use_cache in (True, False):
-    run_generation(use_cache, 2)
-synchronize_device()
-for use_cache in (True, False):
-    timings = []
-    for _ in range(repeats):
-        synchronize_device()
-        timer_start = time.perf_counter()
-        output_ids = run_generation(use_cache, n_new)
-        synchronize_device()
-        timings.append(time.perf_counter() - timer_start)
-        assert output_ids.shape[1] == ids["input_ids"].shape[1] + n_new
-    kv_timings[str(use_cache)] = timings
-    print(f"use_cache={use_cache}: median={np.median(timings):.3f} seconds "
-          f"for {n_new} new tokens ({repeats} measured run(s))")
-cache_ratio = float(np.median(kv_timings["False"]) / np.median(kv_timings["True"]))
-print(f"measured uncached/cached time ratio: {cache_ratio:.2f}")
+    @torch.no_grad()
+    def run_generation(use_cache, count):
+        return lm.generate(
+            **ids, max_new_tokens=count, min_new_tokens=count,
+            do_sample=False, use_cache=use_cache, pad_token_id=gpt2_tok.eos_token_id,
+        )
+
+
+    # Warm-up is outside the measured interval for each configuration.
+    for use_cache in (True, False):
+        run_generation(use_cache, 2)
+    synchronize_device()
+    for use_cache in (True, False):
+        timings = []
+        for _ in range(repeats):
+            synchronize_device()
+            timer_start = time.perf_counter()
+            output_ids = run_generation(use_cache, n_new)
+            synchronize_device()
+            timings.append(time.perf_counter() - timer_start)
+            assert output_ids.shape[1] == ids["input_ids"].shape[1] + n_new
+        kv_timings[str(use_cache)] = timings
+        print(f"use_cache={use_cache}: median={np.median(timings):.3f} seconds "
+              f"for {n_new} new tokens ({repeats} measured run(s))")
+    cache_ratio = float(np.median(kv_timings["False"]) / np.median(kv_timings["True"]))
+    print(f"measured uncached/cached time ratio: {cache_ratio:.2f}")
+
+else:
+    print("Optional cache benchmark skipped; local core remains complete.")
 
 # %% [markdown] tags=["solution-only"]
 # ### Instructor measurement export (optional)
@@ -747,7 +927,7 @@ if results_path:
     destination.parent.mkdir(parents=True, exist_ok=True)
     record = {
         "week": 5,
-        "mode": "smoke" if SMOKE else "full",
+        "mode": "smoke" if SMOKE else ("stretch" if RUN_STRETCH else "core"),
         "recorded_at_utc": datetime.now(timezone.utc).isoformat(),
         "seed": SEED,
         "libraries": {"torch": torch.__version__, "transformers": transformers.__version__},
@@ -767,15 +947,17 @@ if results_path:
             "final_validation_loss": float(final_loss), "perplexity": float(perplexity),
             "samples_by_temperature": samples,
         },
-        "bert_selected_head": {
+        "bert_selected_head": ({
             "layer_one_based": int(layer + 1), "head_one_based": int(head + 1),
             "weight_it_to_animal": float(bert_att[layer, head, i_it, i_animal]),
-        },
+        } if bert_att is not None else None),
         "gpt2_cache_benchmark": {
             "new_tokens": n_new, "repeats": repeats, "seconds_by_cache_setting": kv_timings,
             "uncached_over_cached_median_time": cache_ratio,
             "cuda_synchronised": DEVICE == "cuda", "warmup_tokens_each_setting": 2,
-        },
+        } if kv_timings else None,
+        "core_elapsed_seconds": time.perf_counter() - core_started,
+        "optional": {"pretrained": RUN_PRETRAINED, "cache": RUN_CACHE_BENCHMARK, "stretch": RUN_STRETCH},
     }
     # Exclusive creation protects historical measurements from accidental overwrite.
     with destination.open("x", encoding="utf-8") as handle:
@@ -807,3 +989,34 @@ else:
 # **Before next week:** watch Karpathy's *Intro to Large Language Models*
 # and skim Tunstall et al., Chapter 1. Explain one generated fragment using
 # token IDs, attention, the causal mask and sampling.
+
+# %% [markdown]
+# ### Optional explanation comparison with a local fallback
+# **What/why:** critique one synthetic claim using the local checklist or an opted-in Gemini/OpenAI API provider.
+# **Predict:** can an API response reveal the internal attention weights of our CharGPT?
+# **Expected output:** a short critique; local output is always available.
+# **Check:** the injected USE_GEMINI=False and USE_OPENAI=False keep the core local. Enable exactly one for an optional call. Keys come from Colab Secrets or provider environment variables and are never printed. Send no personal data. Gemini free-tier availability varies; EEA/UK/Swiss API-client distribution has paid-service conditions. Shared helpers limit calls and back off on 429.
+
+# %%
+claim = "A bright attention cell proves that the model understood a pronoun and that its answer is true."
+local_critique = "It records one head's routing weight. Test outputs or interventions; the cell alone proves neither understanding nor truth."
+response = ask_model("Critique this synthetic teaching claim in two sentences: " + claim, max_output_tokens=120)
+print(response if response else local_critique)
+
+# %% [markdown]
+# ## Five exit self-checks
+#
+# 1. Which vectors are mixed by attention weights?
+# 2. Can the current causal position read itself?
+# 3. What shape is the score table for three queries and five source keys?
+# 4. Which quantity changes during generation: weights or prefix?
+# 5. Why is a selected attention picture insufficient as a causal explanation?
+#
+# <!-- BEGIN ANSWER -->
+# 1. Values. Queries and keys determine the weights.
+# 2. Yes. Each position attends to itself and earlier positions; only later positions are blocked.
+# 3. [3,5], one query-source pair per entry.
+# 4. The prefix; learned weights stay fixed.
+# 5. Selection may be unrepresentative, and values, residuals and other layers also affect outputs. Use controlled interventions and measured output changes.
+# <!-- END ANSWER -->
+

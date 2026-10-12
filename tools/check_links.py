@@ -13,6 +13,7 @@ import datetime as dt
 import json
 import re
 import sys
+import time
 import urllib.parse
 from pathlib import Path
 
@@ -21,29 +22,57 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 UA = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) teaching-pack-link-check/1.0"}
+TRANSIENT_STATUSES = {500, 502, 503, 504}
+TRANSPORT_ERRORS = (requests.ConnectionError, requests.Timeout, requests.exceptions.ChunkedEncodingError)
+
+
+def get_with_retry(url: str, *, timeout: int) -> tuple[requests.Response | None, list[dict]]:
+    """Make at most two GET attempts, recording failures even after recovery."""
+    attempts = []
+    for number in (1, 2):
+        try:
+            response = requests.get(url, headers=UA, timeout=timeout, allow_redirects=True)
+        except requests.RequestException as exc:
+            attempts.append({"attempt": number, "status": None,
+                             "error": str(exc)[:200], "error_type": type(exc).__name__})
+            if number == 2 or not isinstance(exc, TRANSPORT_ERRORS):
+                return None, attempts
+        else:
+            attempts.append({"attempt": number, "status": response.status_code})
+            if number == 2 or response.status_code not in TRANSIENT_STATUSES:
+                return response, attempts
+            response.close()
+        time.sleep(0.5)
+    raise AssertionError("GET attempt loop must return")
 
 
 def check(src: dict) -> dict:
     url = src["url"]
-    out = {"id": src["id"], "url": url, "ok": False, "status": None, "title": None}
+    out = {"id": src["id"], "url": url, "ok": False, "status": None, "title": None,
+           "attempt_count": 0, "attempts": []}
     try:
-        if "youtube.com/watch" in url:
-            o = requests.get("https://www.youtube.com/oembed?format=json&url=" + urllib.parse.quote(url, safe=""), headers=UA, timeout=20)
-            out["status"] = o.status_code
-            if o.ok:
-                data = o.json()
+        is_video = "youtube.com/watch" in url
+        target = "https://www.youtube.com/oembed?format=json&url=" + urllib.parse.quote(url, safe="") if is_video else url
+        r, attempts = get_with_retry(target, timeout=20 if is_video else 25)
+        out["attempts"] = attempts
+        out["attempt_count"] = len(attempts)
+        if r is None:
+            out["error"] = attempts[-1]["error"]
+            return out
+        out["status"] = r.status_code
+        # A blocked request is unverified, not evidence of a reachable page.
+        if r.status_code in (403, 429):
+            out["blocked"] = True
+            out["note"] = "blocked automated check; open manually"
+        if is_video:
+            if r.ok:
+                data = r.json()
                 out["title"] = data.get("title")
                 out["author"] = data.get("author_name")
                 out["ok"] = True
             return out
-        r = requests.get(url, headers=UA, timeout=25, allow_redirects=True)
-        out["status"] = r.status_code
         out["final_url"] = r.url
-        # A blocked request is unverified, not evidence of a reachable page.
         out["ok"] = r.status_code < 400
-        if r.status_code in (403, 429):
-            out["blocked"] = True
-            out["note"] = "blocked automated check; open manually"
     except Exception as e:  # noqa: BLE001
         out["error"] = str(e)[:200]
     return out

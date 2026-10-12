@@ -50,12 +50,20 @@ class StreamingTests(unittest.TestCase):
     def test_normal_stream_keeps_observed_timing(self):
         result = self.measure(["", "Hello", " world"], [0.0, 0.2, 0.8])
         self.assertEqual(result, {"TTFT (s)": 0.2, "total (s)": 0.8, "output tokens": 2,
-                                  "tokens/s": 1.7, "answer": "Hello world"})
+                                  "tokens/s": 2.5, "answer": "Hello world"})
 
-    def test_single_token_has_no_remaining_decode_throughput(self):
+    def test_single_token_has_whole_duration_throughput(self):
         result = self.measure(["Hello"], [0.0, 0.1, 0.3])
         self.assertEqual(result["TTFT (s)"], 0.1)
-        self.assertEqual(result["tokens/s"], 0.0)
+        self.assertEqual(result["tokens/s"], 3.3)
+
+    def test_buffering_changes_first_text_but_not_whole_duration_rate(self):
+        early = self.measure(["hello world third"], [0.0, 1.0, 3.0])
+        buffered = self.measure(["", "hello world third"], [0.0, 2.0, 3.0])
+        self.assertEqual(early["TTFT (s)"], 1.0)
+        self.assertEqual(buffered["TTFT (s)"], 2.0)
+        self.assertEqual(early["tokens/s"], 1.0)
+        self.assertEqual(buffered["tokens/s"], 1.0)
 
 
 class CacheTests(unittest.TestCase):
@@ -92,9 +100,12 @@ class RetrievalTests(unittest.TestCase):
         namespace = {
             # The helper uses only scalar means; keep these tests dependency-free.
             "np": SimpleNamespace(mean=lambda values: sum(values) / len(values)),
-            "CHUNKS": [{"doc": "target"}, {"doc": "other"}, {"doc": "second"}],
+            # IDs 0 and 3 share a document, but only 0 contains annotated evidence.
+            "CHUNKS": [{"doc": "target"}, {"doc": "other"}, {"doc": "second"}, {"doc": "target"}],
             "EVAL": [("hit", "", "target"), ("miss", "", "second"), ("unanswerable", None, None)],
+            "GOLD_PASSAGES": {"hit": {0}, "miss": {2}},
         }
+        self.passage_metric = extract(12, "passage_metrics", namespace)
         self.metric = extract(12, "evaluate_retrieval", namespace)
 
     def test_missing_gold_in_truncated_ranking_contributes_zero(self):
@@ -105,9 +116,31 @@ class RetrievalTests(unittest.TestCase):
         result = self.metric(lambda query: [], ks=(1, 3))
         self.assertEqual(result, {"recall@1": 0.0, "recall@3": 0.0, "MRR": 0.0})
 
-    def test_successful_ranks_keep_original_metric(self):
+    def test_successful_passage_ranks_and_missing_hits(self):
         result = self.metric(lambda query: [0, 2] if query == "hit" else [1, 2, 0], ks=(1, 3))
         self.assertEqual(result, {"recall@1": 0.5, "recall@3": 1.0, "MRR": 0.75})
+
+    def test_same_document_without_evidence_is_not_a_hit(self):
+        result = self.metric(lambda query: [3], ks=(1, 3))
+        self.assertEqual(result, {"recall@1": 0.0, "recall@3": 0.0, "MRR": 0.0})
+
+    def test_recall_denominator_counts_all_relevant_passages(self):
+        result = self.passage_metric([9, 0, 0], {0, 2}, ks=(1, 2, 3))
+        self.assertEqual(result, {"recall@1": 0.0, "recall@2": 0.5, "recall@3": 0.5, "MRR": 0.5})
+
+    def test_unanswerable_queries_are_excluded_from_the_mean(self):
+        seen = []
+
+        def retrieve(query):
+            seen.append(query)
+            return [0] if query == "hit" else [2]
+
+        self.assertEqual(self.metric(retrieve, ks=(1,)), {"recall@1": 1.0, "MRR": 1.0})
+        self.assertEqual(seen, ["hit", "miss"])
+
+    def test_unlabelled_passage_recall_is_rejected(self):
+        with self.assertRaisesRegex(ValueError, "at least one labelled relevant passage"):
+            self.passage_metric([0], set())
 
 
 if __name__ == "__main__":

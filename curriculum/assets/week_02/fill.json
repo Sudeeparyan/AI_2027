@@ -8,5 +8,8 @@
   "W02_REC_B1": "87.9",
   "W02_KL_B1": "22.8",
   "W02_REC_B4": "119.3",
-  "W02_KL_B4": "8.6"
+  "W02_KL_B4": "8.6",
+  "W02_CORE_TIME": "24 seconds",
+  "W02_CORE_DATE": "11 October 2026",
+  "W02_CORE_THREADS": "4"
 }

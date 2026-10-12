@@ -5,65 +5,94 @@
       "term": "Probability",
       "meaning": "A number from 0 to 1 describing how likely an outcome is.",
       "check": "If two possible outcomes have probabilities 0.7 and 0.3, what is their sum?",
-      "answer": "1.0. The probabilities of all possible outcomes add up to 1."
+      "answer": "1.0. The probabilities of all possible outcomes add up to 1.",
+      "short_meaning": "Chance from zero to one."
     },
     {
       "term": "Array index",
       "meaning": "A numbered position used to select an item or a matrix row.",
       "check": "In N[i, j], which index selects the row?",
-      "answer": "i selects the row; j selects the column."
+      "answer": "i selects the row; j selects the column.",
+      "short_meaning": "Numbered position in an array."
     },
     {
       "term": "Loop",
       "meaning": "Code that repeats a task for several items or steps.",
       "check": "How many adjacent pairs are in the sequence . e m m a .?",
-      "answer": "Five: .e, em, mm, ma and a."
+      "answer": "Five: .e, em, mm, ma and a.",
+      "short_meaning": "Repeated execution of a task."
+    },
+    {
+      "term": "Bigram",
+      "meaning": "Two neighbouring symbols; this model predicts from the previous character only.",
+      "short_meaning": "Pair of neighbouring symbols.",
+      "check": "What character follows e in emma?",
+      "answer": "m; the observed pair is em."
+    },
+    {
+      "term": "Sampling",
+      "meaning": "Drawing an outcome randomly according to a probability distribution.",
+      "short_meaning": "Random choice using probabilities.",
+      "check": "Must the most likely character be chosen?",
+      "answer": "No. Other characters with positive probabilities remain possible."
+    },
+    {
+      "term": "Temperature",
+      "meaning": "A positive divisor on model scores that changes how concentrated sampling probabilities are.",
+      "short_meaning": "Concentration of sampling choices.",
+      "check": "Does temperature retrain weights?",
+      "answer": "No. It changes sampling probabilities."
     }
   ],
   "diagrams": [
     {
       "id": "overview",
       "title": "Learn a name model, then generate",
-      "subtitle": "Count which letter follows which; then use those counts to make new names.",
+      "subtitle": "Learn; sample.",
       "steps": [
         {
           "title": "Read names",
-          "detail": "Add start and end markers.",
+          "detail": "Markers",
           "code": "words",
-          "role": "data"
+          "role": "data",
+          "code_owner": true
         },
         {
           "title": "Count pairs",
-          "detail": "Previous row; next column.",
+          "detail": "Increment cell",
           "code": "N",
-          "role": "model"
+          "role": "model",
+          "code_owner": true
         },
         {
-          "title": "Make probabilities",
-          "detail": "Smooth; divide by row total.",
+          "title": "Normalise",
+          "detail": "Row totals",
           "code": "P",
-          "role": "model"
+          "role": "model",
+          "code_owner": true
         },
         {
-          "title": "Choose a character",
-          "detail": "Read one row and sample.",
+          "title": "Sample",
+          "detail": "Character",
           "code": "sample_name",
-          "role": "model"
+          "role": "model",
+          "code_owner": true
         },
         {
-          "title": "Append or stop",
-          "detail": "Dot stops; letter repeats.",
+          "title": "Check stop",
+          "detail": "Dot ends",
           "code": "sample_name",
-          "role": "output"
+          "role": "output",
+          "code_owner": false
         }
       ],
       "arrows": [
-        "character pairs",
-        "counts N",
-        "P + current character",
-        "sampled character"
+        "pairs",
+        "counts [V,V]",
+        "probabilities [V,V]",
+        "character"
       ],
-      "feedback": "For a letter, use its row and sample again.",
+      "feedback": "Letter: repeat.",
       "feedback_to": 3,
       "trace": [
         "The training name emma gives five pairs: .→e, e→m, m→m, m→a and a→. (the end marker).",
@@ -73,63 +102,70 @@
         "avg_nll scores a supplied name; sample_name creates a new one using the same P."
       ],
       "explanation": "A generative model describes possible data so that we can draw new examples. This first model learns from counts instead of a neural network. A bigram is a pair of neighbouring characters. The matrix N stores how often each pair occurs; its row identifies the previous character and its column identifies the next character. Adding one to every count prevents unseen pairs from receiving zero probability. Dividing by each row's total creates P, a conditional distribution: probabilities for the next character given the previous one. Generation begins with the special start marker '.'. The sampler chooses a character from the corresponding row, moves to that character's row, and repeats. A sampled '.' ends the name. Temperature changes the choices during sampling, while the learned counts remain fixed. This model remembers one previous character, so locally plausible pairs can still produce unusual names.",
-      "check_question": "After generating e, which row of P supplies the next-character probabilities?",
+      "check_question": "Which row follows e?",
       "check_answer": "The row indexed by stoi['e']; the model conditions on the most recently generated character.",
       "layout": "linear",
       "feedback_from": 4,
-      "insert_before_title": "A short history: from VAEs to agents"
+      "insert_before_title": "A short history: from VAEs to agents",
+      "notes": "In short: The name-maker first learns a conditional probability table, then repeatedly samples from it.\nExplain: A bigram is a pair of neighbouring characters. N stores how often each pair appeared in training names. The previous character selects a row and the next character selects a column. Smoothing gives unseen pairs a nonzero chance. Row normalisation creates the probability table P.\nExample: Mark emma as . e m m a . and count five adjacent pairs. Starting at dot, one possible sampled path returns emma. This is an illustrative path rather than a guaranteed output; a bigram model remembers only the most recent character.\nAsk: After generating e, which row supplies the next character’s distribution?\nAnswer: The row indexed by stoi[\"e\"], because e is now the most recent character.\nWatch out: Scoring a supplied name and sampling a new name use the same learned table but perform different operations."
     },
     {
       "id": "mechanism",
       "insert_before_title": "An LLM outputs a probability distribution over the next token",
       "title": "One language-model generation step",
-      "subtitle": "A text prompt becomes scores, probabilities, and one more token.",
+      "subtitle": "Fixed weights.",
       "steps": [
         {
-          "title": "Provide context",
-          "detail": "Start with prompt text.",
+          "title": "Provide",
+          "detail": "Context",
           "code": "prompt",
-          "role": "data"
+          "role": "data",
+          "code_owner": true
         },
         {
-          "title": "Encode tokens",
-          "detail": "Text pieces become IDs.",
+          "title": "Tokenise",
+          "detail": "IDs",
           "code": "tok",
-          "role": "model"
+          "role": "model",
+          "code_owner": true
         },
         {
-          "title": "Predict scores",
-          "detail": "Fixed weights predict logits.",
+          "title": "Predict",
+          "detail": "Scores",
           "code": "model",
-          "role": "model"
+          "role": "model",
+          "code_owner": true
         },
         {
-          "title": "Make probabilities",
-          "detail": "Temperature, then softmax.",
+          "title": "Normalise",
+          "detail": "Softmax",
           "code": "next_token_probs",
-          "role": "model"
+          "role": "model",
+          "code_owner": false
         },
         {
-          "title": "Choose a token",
-          "detail": "Sample or take top score.",
+          "title": "Choose",
+          "detail": "Token",
           "code": "chat",
-          "role": "model"
+          "role": "model",
+          "code_owner": false
         },
         {
-          "title": "Extend context",
-          "detail": "Append the chosen token ID.",
+          "title": "Append",
+          "detail": "Context",
           "code": "chat",
-          "role": "output"
+          "role": "output",
+          "code_owner": false
         }
       ],
       "arrows": [
         "text",
-        "token IDs",
-        "next-token logits",
-        "next-token probabilities",
-        "chosen token ID"
+        "IDs [B,L]",
+        "logits [B,V]",
+        "probabilities [B,V]",
+        "ID [B,1]"
       ],
-      "feedback": "Repeat prediction with the extended token context.",
+      "feedback": "Repeat extended context.",
       "feedback_to": 2,
       "trace": [
         "tok maps 'The cat sat on the' to IDs; exact pieces depend on the tokenizer.",
@@ -138,114 +174,134 @@
         "chat uses model.generate to select and append tokens repeatedly, then decodes the new tokens."
       ],
       "explanation": "A token is a text piece from a fixed vocabulary, represented by an integer ID. It can be a word, part of a word, or punctuation. The tokenizer maps the prompt into these IDs. The language model uses learned parameters, also called weights, to assign a logit to every possible next token. A logit is an unnormalised score, not a probability. For positive temperature T, dividing scores by T and applying softmax creates probabilities that sum to one. Lower T concentrates probability on stronger candidates; higher T spreads it more widely. In the lab, next_token_probs exposes this distribution but does not generate an answer. The chat function calls model.generate, which repeatedly selects tokens and extends the context. Its top-p setting limits the candidates used in sampling. This is inference: the input grows, but model weights do not change. Fluent output still needs checking against evidence.",
-      "check_question": "Does changing temperature from 0.5 to 1.5 retrain the model?",
+      "check_question": "Does temperature retrain weights?",
       "check_answer": "No. It changes how the fixed next-token scores become sampling probabilities.",
       "layout": "linear",
-      "feedback_from": 5
+      "feedback_from": 5,
+      "notes": "In short: One language-model generation step converts context into scores, probabilities and a chosen token.\nExplain: The tokenizer maps text pieces to integer IDs. The model uses fixed weights to predict logits. Logits are numerical scores, not probabilities. Positive temperature followed by softmax produces a distribution over next-token candidates. Generation selects a candidate and appends its ID to the context.\nExample: For an input with B examples and L tokens, the model’s output logits have shape [B, L, V]. V counts vocabulary entries. Selecting the final position gives [B, V] next-token scores. Shapes describe the operation, not a measured probability value.\nAsk: Does the distribution-inspection function generate a complete answer?\nAnswer: No. next_token_probs exposes scores and probabilities; chat calls generation to extend the context repeatedly.\nWatch out: Changing the context or temperature during inference does not update the weights; a fluent continuation still needs evidence checking."
     },
     {
       "id": "lab",
-      "title": "Follow the Week 1 experiments",
-      "subtitle": "Connect probability, generation, classification, and verification to actual code.",
+      "title": "Lab: score a known name",
+      "subtitle": "Score names.",
       "steps": [
         {
-          "title": "Build the table",
-          "detail": "Read names; count and divide.",
-          "code": "N / P",
-          "role": "model"
+          "title": "Read",
+          "detail": "Names",
+          "code": "words",
+          "role": "data",
+          "code_owner": true
         },
         {
-          "title": "Score and sample",
-          "detail": "Score names; draw new ones.",
-          "code": "avg_nll / sample_name",
-          "role": "model"
+          "title": "Count",
+          "detail": "Pairs",
+          "code": "N",
+          "role": "model",
+          "code_owner": true
         },
         {
-          "title": "Compare classifiers",
-          "detail": "Predict classes; draw points.",
-          "code": "disc / genm",
-          "role": "model"
+          "title": "Smooth",
+          "detail": "Add one",
+          "code": "",
+          "role": "model",
+          "code_owner": false
         },
         {
-          "title": "Inspect tokens",
-          "detail": "Print text pieces and IDs.",
-          "code": "tok",
-          "role": "model"
+          "title": "Normalise",
+          "detail": "Rows",
+          "code": "P",
+          "role": "model",
+          "code_owner": true
         },
         {
-          "title": "Inspect generation",
-          "detail": "Read chances; get replies.",
-          "code": "next_token_probs / chat",
-          "role": "model"
+          "title": "Score",
+          "detail": "Name",
+          "code": "avg_nll",
+          "role": "metric",
+          "code_owner": true
         },
         {
-          "title": "Verify and record",
-          "detail": "Check claims against sources.",
-          "code": "fictional_prompt",
-          "role": "output"
+          "title": "Report",
+          "detail": "NLL",
+          "code": "",
+          "role": "output",
+          "code_owner": false
         }
       ],
       "arrows": [
-        "learned table P",
-        "scores and samples",
-        "classes and generated points",
-        "token IDs",
-        "replies to check"
+        "names",
+        "N[V,V]",
+        "(N+1)[V,V]",
+        "P[V,V]",
+        "NLL"
       ],
       "trace": [
-        "Check that every row of P sums to 1 before interpreting any sampled names.",
-        "Use avg_nll on emma and xqzz; inspect scores without assuming a particular result.",
-        "QDA stores a mean and covariance for each class; compare new_points with the real scatter plot.",
-        "Print tokenizer pieces and the top-five candidates before using chat on a full question.",
-        "The deliberately fictional paper prompt tests unsupported claims; record what you actually observed."
+        "Read the names used to count character pairs; emma is also a concrete supplied scoring example.",
+        "Count all boundary-marked adjacent pairs in N; adding one smooths the counts.",
+        "P divides each smoothed row by its total, creating conditional probabilities.",
+        "avg_nll receives both a supplied name and P, looks up its transitions and averages their negative log probabilities.",
+        "Report the observed score. Classification and neural-language-model exercises have separate data inputs."
       ],
-      "explanation": "The lab uses three small systems to make the same distinction visible: learning a distribution, using it, and checking the result. First, N and P form a character model. The avg_nll function measures how surprising a supplied name is under that model; sample_name draws a new name. Second, logistic regression predicts a class from a point, while QDA also describes the point distribution within each class. That learned distribution lets QDA produce new class-0 points. Third, a pretrained language model provides next-token scores and generated text. You inspect the tokenizer and probabilities before comparing complete answers. The fictional paper prompt is a controlled verification test: a plausible summary is not evidence that the paper exists. Keep the model, settings, observations, and verification method together in the evidence table. Compare actual runs, because random sampling and different model configurations can change the outputs.",
-      "check_question": "Which operation creates a new name: avg_nll or sample_name?",
-      "check_answer": "sample_name creates a name; avg_nll scores a name supplied to it.",
-      "layout": "linear"
+      "explanation": "The diagram follows one connected experiment, scoring a known name. The dataset supplies names and pair counts. Adding one smooths the counts; normalising rows creates P. The supplied-name branch and probability-table arrow both enter avg_nll. This function looks up adjacent-character probabilities, takes their logarithms and reports the negative mean. It does not update P. The separate classifier exercise uses synthetic two-dimensional points, while the language-model exercise uses tokenised text. Those independent inputs are not outputs of this name-scoring pipeline.",
+      "check_question": "Does lower NLL prove truth?",
+      "check_answer": "No. It measures agreement with the learned distribution; facts require separate evidence.",
+      "layout": "linear",
+      "notes": "In short: Trace a known name through learned probabilities to measure its average negative log-likelihood.\nExplain: Training names provide observed character pairs. N counts pairs in previous-character rows and next-character columns. Adding one prevents unseen pairs from receiving zero probability. P divides each smoothed row by its total. The avg_nll function scores a supplied name using P; scoring leaves the table unchanged.\nExample: Mark emma as . e m m a . and look up five transition probabilities. With an illustrative uniform vocabulary of 27 characters, each transition has probability 1/27. Averaging five negative logarithms gives the same penalty as one; the example explains averaging rather than claiming realistic names are uniform.\nAsk: Does lower NLL prove a generated claim is true?\nAnswer: No. NLL scores agreement with a distribution; verifying facts requires separate evidence.\nWatch out: Classification uses two-dimensional points, and the language model uses text tokens; neither receives this pipeline's outputs.",
+      "branches": [
+        {
+          "from": 0,
+          "to": 4,
+          "label": "emma"
+        }
+      ]
     },
     {
       "id": "training",
       "title": "Learn probabilities from names",
       "insert_before_title": "Likelihood and maximum likelihood training",
-      "subtitle": "Training turns observed character pairs into a reusable probability table.",
+      "subtitle": "Counts become probabilities.",
       "steps": [
         {
-          "title": "Prepare examples",
-          "detail": "Mark each name’s boundaries.",
+          "title": "Mark boundaries",
+          "detail": "Names",
           "code": "words",
-          "role": "data"
+          "role": "data",
+          "code_owner": true
         },
         {
           "title": "Count pairs",
-          "detail": "Increase one cell per pair.",
+          "detail": "Pairs",
           "code": "N",
-          "role": "model"
+          "role": "model",
+          "code_owner": true
         },
         {
-          "title": "Smooth counts",
-          "detail": "Add one to every cell.",
+          "title": "Smooth",
+          "detail": "Add one",
           "code": "N",
-          "role": "model"
+          "role": "model",
+          "code_owner": false
         },
         {
-          "title": "Normalise each row",
-          "detail": "Divide by its row total.",
+          "title": "Normalise",
+          "detail": "Row totals",
           "code": "P",
-          "role": "model"
+          "role": "model",
+          "code_owner": true
         },
         {
-          "title": "Check row sums",
-          "detail": "Every probability row sums to 1.",
+          "title": "Check",
+          "detail": "Sum = 1",
           "code": "P",
-          "role": "output"
+          "role": "metric",
+          "code_owner": false
         }
       ],
       "arrows": [
-        "marked names",
-        "pair counts",
-        "smoothed counts",
-        "conditional probabilities"
+        "names",
+        "counts [V,V]",
+        "smoothed [V,V]",
+        "probabilities [V,V]"
       ],
       "explanation": "Training learns something reusable from examples. Our first model learns a table rather than neural-network weights. For each adjacent character pair, the first character selects a row of N and the second selects a column. Add-one smoothing gives even unseen pairs a small chance. Divide each row by its total to get P. This is a conditional probability table: it describes the next character given the current character. Once P is learned, both scoring and generation use it without changing the counts.",
       "trace": [
@@ -254,52 +310,58 @@
         "Divide by 6: [0.50, 0.33, 0.17], rounded. The exact values add to 1.",
         "The lab uses the full alphabet, but the same row operation."
       ],
-      "check_question": "What changes during this training: the input prompt or the count table?",
+      "check_question": "Training changes counts or prompts?",
       "check_answer": "The count table N changes as examples are read. Normalising the smoothed counts then produces the learned table P.",
-      "layout": "linear"
+      "layout": "linear",
+      "notes": "In short: Learning the name model counts pairs, smooths counts, normalises rows and checks the resulting probabilities.\nExplain: Each training pair adds one to a cell of N. The row identifies the previous character and the column identifies the next. Add-one smoothing changes every count before division. Normalising means dividing each value by its row total. The resulting row describes possible next characters given the current one.\nExample: In an illustrative three-character vocabulary, [2, 1, 0] becomes [3, 2, 1]. Divide by six to obtain [1/2, 1/3, 1/6]. Use the exact fractions to check the sum; rounded decimals may differ slightly from one.\nAsk: Which axis should we normalise when rows represent the previous character?\nAnswer: Each row separately, across its possible next-character columns.\nWatch out: Smoothing changes the unsmoothed maximum-likelihood estimate; it is not merely a display or sampling adjustment."
     },
     {
       "id": "inference",
       "title": "Generate a name from a fixed table",
       "insert_before_title": "Decoding strategies: how we pick the next token",
-      "subtitle": "Inference repeatedly reads the learned table. It does not add new training counts.",
+      "subtitle": "Use fixed probabilities.",
       "steps": [
         {
-          "title": "Start at the dot",
-          "detail": "Use the start-marker row.",
+          "title": "Start",
+          "detail": "Dot",
           "code": "stoi",
-          "role": "data"
+          "role": "data",
+          "code_owner": false
         },
         {
-          "title": "Read next chances",
-          "detail": "Select the current row.",
+          "title": "Read row",
+          "detail": "Current",
           "code": "P",
-          "role": "model"
+          "role": "model",
+          "code_owner": false
         },
         {
-          "title": "Adjust and sample",
-          "detail": "Positive temperature; draw.",
+          "title": "Sample",
+          "detail": "Temperature",
           "code": "sample_name",
-          "role": "model"
+          "role": "model",
+          "code_owner": true
         },
         {
-          "title": "Append or stop",
-          "detail": "Letter continues; dot stops.",
+          "title": "Check stop",
+          "detail": "Dot ends",
           "code": "sample_name",
-          "role": "output"
+          "role": "output",
+          "code_owner": false
         },
         {
-          "title": "Return the name",
-          "detail": "Stop also at maximum length.",
+          "title": "Return",
+          "detail": "Name",
           "code": "sample_name",
-          "role": "output"
+          "role": "output",
+          "code_owner": false
         }
       ],
       "arrows": [
-        "current character",
-        "row probabilities",
-        "sampled character",
-        "finished name"
+        "character",
+        "probabilities [V]",
+        "character",
+        "name"
       ],
       "explanation": "Inference uses a model already learned from data. Here the learned object is P. Starting at the dot, sample_name reads one row, applies the temperature setting and chooses a character. A letter becomes the current character for the next choice. A dot ends the name. The length limit prevents a very long loop. The table stays fixed throughout generation. Random choices can give different names. A plausible spelling does not prove that the name exists, just as likely language-model text does not prove a factual claim.",
       "trace": [
@@ -310,10 +372,11 @@
       ],
       "check_question": "After sampling m, which row is read next?",
       "check_answer": "Read P[stoi[\"m\"]], because this bigram model remembers only the most recent character.",
-      "feedback": "For a letter, select its row and repeat.",
+      "feedback": "Letter: repeat.",
       "feedback_to": 1,
       "layout": "linear",
-      "feedback_from": 3
+      "feedback_from": 3,
+      "notes": "In short: Inference reads the fixed table repeatedly and ends when the sampler chooses the stop marker or length limit.\nExplain: The dot serves as a boundary marker. P supplies conditional probabilities for the current character. A positive temperature changes how concentrated those probabilities are. A sampled letter becomes the current character for the next step. A sampled dot stops the sequence.\nExample: A possible path is dot, e, m, m, a, dot. After the first m, the next choice uses the row for m, not the earlier row for e. The maximum-length safeguard prevents endless continuation; it does not guarantee a plausible or real name.\nAsk: Does a sampled m increase the training count for the previous pair?\nAnswer: No. Sampling uses P without adding counts to N or changing the learned table.\nWatch out: Repeated random choices can differ with fixed weights; do not interpret that variation as online learning or new knowledge."
     }
   ],
   "glossary": [
@@ -335,7 +398,7 @@
     },
     {
       "term": "Temperature",
-      "meaning": "A positive scaling setting that changes how concentrated sampling probabilities are."
+      "meaning": "A positive divisor on model scores that changes how concentrated sampling probabilities are."
     },
     {
       "term": "Training",
@@ -343,11 +406,15 @@
     },
     {
       "term": "Inference",
-      "meaning": "Using an already learned model to make predictions or generate outputs."
+      "meaning": "Using a trained model to predict or generate without updating its learned weights."
     },
     {
       "term": "Hallucination",
       "meaning": "Generated content that presents an unsupported or incorrect claim as if it were reliable."
+    },
+    {
+      "term": "Training target",
+      "meaning": "The known answer used to measure a model's prediction error."
     }
   ],
   "pitfalls": [
@@ -391,40 +458,42 @@
     "title": "Week 1: what we learned",
     "cards": [
       {
-        "title": "Model and application",
-        "text": "Weights predict; an app adds instructions, tools and an interface.",
+        "title": "Application",
+        "text": "Model; tools.",
         "role": "model"
       },
       {
-        "title": "Training and inference",
-        "text": "Training changes learned numbers. Ordinary generation uses fixed numbers.",
+        "title": "Training",
+        "text": "Learn; use.",
         "role": "model"
       },
       {
-        "title": "Tokens and probability",
-        "text": "Text becomes IDs. Choose a next token, append it and repeat.",
+        "title": "Tokens",
+        "text": "Pieces→IDs.",
         "role": "data"
       },
       {
-        "title": "Likelihood and sampling",
-        "text": "NLL scores known examples. Temperature changes choices during sampling.",
-        "role": "loss"
+        "title": "Probability",
+        "text": "Score; sample.",
+        "role": "metric"
       },
       {
-        "title": "Generative families",
-        "text": "Autoregressive, VAE, GAN and diffusion models generate in different ways.",
+        "title": "Families",
+        "text": "Different operations.",
         "role": "model"
       },
       {
-        "title": "Responsible use",
-        "text": "Protect data, verify evidence and disclose how AI helped.",
+        "title": "Responsibility",
+        "text": "Protect; verify; disclose.",
         "role": "output"
       }
     ],
-    "example": "Illustrative sequence: 0.5 × 0.2 × 0.1 = 0.01. A probable sequence can still contain a false claim.",
-    "question": "If temperature changes, which changes: sampling choices or learned weights?",
+    "example": "Illustrative: 0.5×0.2×0.1=0.01.",
+    "question": "Temperature changes: choices or weights?",
     "answer": "Sampling choices change. The weights stay fixed during this generation.",
-    "next": "In Week 2 we draw a hidden code and use a decoder to make an image.",
-    "notes": "Show this recap after the lab preview. Ask students to cover the cards and explain the name model in three sentences: count, normalise, sample. Point to N as learned counts and P as the reusable table. Then trace a token through the neural model. Ask the exit question before revealing its answer. Correct the common mistake that more varied wording means more knowledge. Finally ask for one source-checking action that would catch a fictional citation. This is an end-of-class learning check, not a lab measurement. Use uncertain answers to revisit the relevant card before moving to the VAE next week."
-  }
+    "next": "Next: decode hidden codes.",
+    "notes": "In short: The recap connects the name-maker, neural text generation and evidence checking into one explanation.\nExplain: Learning changes counts or neural weights. Inference uses the resulting model with a supplied input. Tokens are text pieces identified by vocabulary numbers. Likelihood measures how well a model explains supplied examples. Temperature changes sampling probabilities without adding factual knowledge.\nExample: Ask students to cover the cards and explain count, normalise and sample in their own words. The illustrative sequence probabilities 0.5, 0.2 and 0.1 multiply to 0.01. A numerical score for text still does not establish that its reference or claim is true.\nAsk: What would you check after a fluent answer names a paper you have never encountered?\nAnswer: Open an authoritative record, confirm the publication and inspect the passage supporting the claim.\nWatch out: The recap is a learning check, not a measured experiment; uncertainty is a reason to revisit the matching worked example."
+  },
+  "vocabulary_notes": "In short: Use the vocabulary to explain the name model’s operations, rather than memorising isolated definitions.\nExplain: A probability describes how likely an outcome is. An array index selects a numbered position, while a loop repeats a task. A bigram is a pair of neighbouring symbols. A conditional probability uses information already given. Sampling draws an outcome according to its chance. Temperature adjusts concentration during sampling, without learning new counts.\nExample: In . e m m a ., the pair e followed by m identifies one count-table cell. The row for e later supplies next-character chances. This tiny example links vocabulary to indices and operations; it does not claim the model understands names or remembers the whole word.\nAsk: Which term describes choosing a character randomly from the learned row?\nAnswer: Sampling. Scoring with negative log-likelihood instead evaluates a character or sequence that was already supplied.\nWatch out: An unsupported factual claim is a hallucination even when its wording is grammatically correct and probable under the model.",
+  "vocabulary_count": 6
 }

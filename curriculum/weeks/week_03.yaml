@@ -34,23 +34,44 @@ coverage:
 slides:
 - type: title
   figure: cover
-  notes: 'Welcome to week 3. Last week''s VAEs gave us a principled likelihood-based model with a smooth latent
-    space, but blurry samples. Today we meet the model family that was designed to produce sharp, realistic images:
-    generative adversarial networks, or GANs, introduced by Ian Goodfellow and colleagues in 2014. The digits on
-    this slide were produced by a small GAN trained on a laptop for these slides; you will train the same model
-    in the lab. GANs dominated image generation from about 2016 to 2021 and their ideas are still inside many modern
-    systems.
+  notes: 'In short: A GAN learns to generate through a changing checker, so training and evaluating both networks matters.
 
-    '
+    Explain: GAN means generative adversarial network. The generator makes samples from random numerical codes. The discriminator
+    learns to distinguish generated examples from dataset examples. Adversarial describes their competing training goals. After
+    learning, the generator can make new samples without running the discriminator.
+
+    Example: The cover digits come from the archived eight-epoch lecture experiment. They demonstrate one trained system, rather
+    than the output guaranteed by today’s shorter CPU core. Compare convincing digits with malformed ones before deciding what
+    quality means.
+
+    Ask: Does one convincing digit prove that the generator covers every digit class?
+
+    Answer: No. Quality of one sample and coverage of the dataset’s variety are separate questions.
+
+    Watch out: A basic VAE can blur uncertain details, but neither blur nor sharpness is guaranteed by a model-family name.'
 - type: outcomes
-  notes: 'Six outcomes. The first two are about the game itself and its mathematics: students should be able to
-    write the minimax objective, state the optimal discriminator and explain why we use the non-saturating loss.
-    The third is practical diagnosis, a favourite exam topic because GAN training fails in characteristic ways.
-    The fourth covers variants they will meet in papers and industry, the fifth evaluation metrics, especially FID
-    which is also used for diffusion next week, and the sixth combines implementation with a responsible-AI discussion
-    of deepfakes. This week practises MIMLO 1, 3 and 4.
+  notes: 'In short: Today’s outcomes join the GAN mechanism, its mathematical objectives, practical diagnosis and evidence-based
+    evaluation.
 
-    '
+    Explain: An objective states what training tries to improve. Minimax describes one player minimising what another maximises.
+    Non-saturating names the generator loss used for stronger early feedback. Coverage asks which parts of the target distribution
+    appear. MIMLO means minimum intended module learning outcome.
+
+    Example: A complete explanation traces a fake image through two different training roles. During the discriminator update
+    it has target zero. During the generator update its desired target is one. These targets describe goals, rather than changing
+    whether the image came from the generator.
+
+    Ask: Which outcome helps diagnose sharp images that show only one digit class?
+
+    Answer: Evaluate coverage and diagnose collapse, rather than relying only on sharpness or training loss.
+
+    Watch out: The compact outcome phrases are prompts for the fuller objectives; show both correct implementation and a justified
+    interpretation.'
+  items:
+  - Explain the GAN game
+  - Diagnose training failures
+  - Measure quality and coverage
+  - Label synthetic media
 - type: agenda
   icon: fa:FaRoute
   items:
@@ -68,731 +89,986 @@ slides:
     minutes: 18
   - title: Lab preview and wrap-up
     minutes: 7
-  notes: 'The plan follows the descriptor''s topics for this week: motivation, architecture, objective, training
-    challenges, variants, evaluation and applications. Section two contains the mathematics; take the break after
-    it. Section three uses real training runs, including a small experiment that shows mode collapse happening.
-    If short of time, compress the variants section, but keep the evaluation slides because FID returns next week
-    for diffusion models and in the project.
+  notes: 'In short: Week three adds adversarial feedback to the course’s growing collection of generation mechanisms.
 
-    '
+    Explain: A VAE, or variational autoencoder, compresses and rebuilds examples through hidden codes. A GAN trains a generator
+    with a discriminator’s feedback. An LLM, or large language model, predicts token sequences. RAG means retrieval-augmented
+    generation: retrieve evidence before answering. Later weeks adapt, combine and deploy these components.
+
+    Example: Today’s teaching plan allocates the largest block to the objective and its gradients. The course map places GANs
+    after VAEs and before diffusion. This order compares mechanisms; it does not rank every possible system by image quality.
+
+    Ask: Why does the lecture return to evaluation after introducing model variants?
+
+    Answer: A different architecture still needs task-specific checks of samples, coverage, cost and responsible use.
+
+    Watch out: Teaching minutes describe the classroom plan, not a measured notebook runtime or a guaranteed training wait.'
 - type: discussion
   title: Warm-up
-  icon: fa:FaUserSecret
-  prompt: How would you train an art forger if you had no rulebook for 'realistic', only a detective who compares
-    fakes with real paintings?
+  prompt: A forger learns from a changing detective. What could go wrong?
   points:
-  - What feedback would the forger need from the detective?
-  - What happens if the detective becomes perfect very quickly?
-  - What if the forger finds one painting that always fools the detective?
-  notes: 'Use the forger and detective as an analogy for two learners, each receiving a numerical loss. A discriminator
-    that confidently rejects fakes can give weak minimax-loss derivatives. The non-saturating generator loss changes
-    this derivative, so a high discriminator accuracy alone does not establish that all generator gradients vanish.
-    Ask: who changes weights in each turn? Only the player whose optimiser steps. Common mistake: treating a probability
-    score as the whole gradient. If one successful fake pattern is repeated while other real patterns disappear,
-    that is mode collapse. We diagnose it using sample variety and coverage, not loss curves alone.'
+  - Detective becomes too strong.
+  - Forger repeats one successful painting.
+  - Feedback improves useful detail.
+  notes: 'In short: The forger-and-checker analogy makes the two learning roles intuitive, provided we translate it into numerical
+    operations.
+
+    Explain: The generator is the forger in this analogy. The discriminator is the checker trained using real and generated
+    examples. Feedback means derivatives of a numerical loss. A gradient describes how a small change affects that loss. An
+    optimiser changes its registered weights using those gradients.
+
+    Example: Imagine a forger repeatedly producing one convincing painting. Success against the current checker does not demonstrate
+    a varied collection. For GANs, compare many generated examples with the real distribution; neither network has human intentions
+    or receives a verbal critique.
+
+    Ask: When the discriminator optimiser steps, which network’s registered weights change?
+
+    Answer: The discriminator’s weights. Computing a derivative elsewhere does not itself perform an optimiser update.
+
+    Watch out: An accurate discriminator can yield weak minimax feedback, but its probability score alone is not the complete
+    generator gradient.'
 - type: section
   number: 1
   title: Why adversarial learning?
   question: Can we learn the loss function itself?
   icon: fa:FaChessKnight
-  notes: 'Section one motivates GANs. The key idea is that instead of writing down a loss that measures realism,
-    such as pixel-wise error, which caused blur in VAEs, we train a second network whose job is to measure realism,
-    and we use its judgement as the loss for the generator. We look at the architecture and the roles of the two
-    networks. This section takes about fifteen minutes.
+  notes: 'In short: Adversarial learning replaces a fixed realism rule with a checker learned from actual examples.
 
-    '
+    Explain: A reconstruction loss compares an output with its paired target. Uncertain pixel targets can reward average-looking
+    intensities. A discriminator instead learns differences between generated and dataset examples. The generator uses that
+    changing feedback to improve its outputs. The learning problem therefore has two adapting networks.
+
+    Example: A slightly shifted sharp edge can receive a large pixel penalty. Averaging possible edge positions can reduce that
+    penalty while looking blurred. This motivates a learned checker; it does not establish that every discriminator learns the
+    visual properties people care about.
+
+    Ask: Why does the generator’s training task change after the discriminator improves?
+
+    Answer: The same generated image is now scored by a different learned checker.
+
+    Watch out: GANs do not remove the need to specify data, objectives and evaluation; the checker can learn shortcuts or dataset
+    biases.'
 - type: bullets
   title: 'The motivation: a learned loss for realism'
-  icon: fa:FaLightbulb
   bullets:
-  - Pixel losses can blur uncertain details.
-  - D learns real-versus-generated differences.
-  - G learns from D’s feedback.
-  - Basic GANs sample without a tractable likelihood.
-  callout: Learn a checker from real examples.
-  notes: 'Connect to last week. A pixel-wise loss says a slightly shifted sharp edge is as bad as a blurred edge,
-    so under uncertainty the model predicts the blur. A discriminator judges the whole image: a blurry digit is
-    easy to spot as fake, so the generator is pushed towards sharp outputs. The price is that GANs are implicit
-    generative models: you can draw samples, but you cannot compute the probability of an image, so direct likelihood
-    evaluation is unavailable; other GAN-based anomaly approaches are possible. That is why evaluation later in
-    the lecture needs sample-based metrics.
+  - Pixel loss averages uncertain detail.
+  - A learned checker supplies realism feedback.
+  notes: 'In short: A basic GAN learns a sample-based realism signal rather than an explicit probability for every possible
+    image.
 
-    '
+    Explain: An implicit generative model provides a sampling procedure without a tractable explicit density. The generator
+    maps a random code to an example. The discriminator learns to separate real and generated sources. Adversarial feedback
+    depends on its current parameters. Sample-based evaluation compares generated examples with suitable reference data.
+
+    Example: For the digit task, a generator converts 64 numerical values into one image with shape [1,28,28]. No real digit
+    is paired with that particular code. The discriminator supplies a learned signal about the resulting image, rather than
+    a target picture to reconstruct.
+
+    Ask: Can this basic GAN directly report a tractable likelihood for the digit it generated?
+
+    Answer: No. Use sample checks and appropriate distribution comparisons instead.
+
+    Watch out: Conditional variants can also use paired reconstruction targets; the absence of a paired target describes this
+    unconditional training route.'
+  visual:
+    type: example_strip
+    items:
+    - label: Pixels
+      text: Two possible edges can average into blur.
+    - label: Learned checker
+      text: D compares real and generated samples.
 - type: figure
   title: 'GAN architecture: two networks, one game'
   figure: gan_arch
-  notes: 'Walk through the diagram. The generator takes a random noise vector, typically sixty-four to five hundred
-    and twelve numbers from a standard Gaussian, and outputs an image. The discriminator is a binary classifier
-    that takes an image, real or generated, and outputs the probability that it is real. The dashed arrow is the
-    crucial part: In this basic unconditional lab, G receives real-data information through D rather than matching
-    each code to a real image. It only receives gradients that flow back through the discriminator, telling it how
-    to change its output to be judged more real. Ask: where is the latent variable from week 1? It is z, the noise
-    input.
+  notes: 'In short: Real examples train the discriminator, while generated examples connect its feedback back to the generator.
 
-    '
+    Explain: The latent code z is a random input vector. G denotes the generator that turns it into pixels. D denotes the discriminator
+    scoring those pixels or real examples. A solid arrow carries a tensor forward. A dashed arrow marks learning feedback or
+    repetition.
+
+    Example: A batch of B codes has shape [B,64], and G produces [B,1,28,28]. D produces one logit per image, giving shape [B].
+    Sigmoid can turn each logit into a probability for diagnostics; the training loss can consume logits directly.
+
+    Ask: After training, which network is needed to create a fresh digit?
+
+    Answer: G and a new latent code are sufficient; D supplied training feedback.
+
+    Watch out: Real images bypass G in this unconditional model. Their information affects G through D, without a matching real
+    image for each code.'
+  caption: 'Predict: after training, which network is needed?'
 - type: compare
   title: Generator vs. discriminator
   columns:
   - head: Generator G
-    icon: fa:FaPaintBrush
     points:
-    - Turns a random code z into an image.
-    - Learns only from D's feedback, aiming to be called real.
-    - Kept after training to make new images.
-    - 'Example: 64 random numbers in, a 28 × 28 digit out.'
+    - 'Input: code [B,64].'
+    - 'Output: image [B,1,28,28].'
+    - 'Goal: D accepts fakes.'
   - head: Discriminator D
-    icon: fa:FaSearch
     points:
-    - Gives each image a real-or-fake score.
-    - Learns from real images and the current fakes.
-    - Usually discarded after training.
-    - 'Example: a clear real digit scores 0.9; a smudge, 0.1.'
-  callout: Two networks, two losses, two updates.
-  notes: 'Summarise the roles. The generator is an upsampling network; the discriminator is an ordinary image classifier.
-    After training we keep the generator and usually throw the discriminator away, although discriminators are sometimes
-    reused as feature extractors. The key difference from every model students have trained before is in the callout:
-    the loss of each network depends on the parameters of the other, so we are looking for an equilibrium of a two-player
-    game rather than a minimum of a fixed function. That single fact explains most of the training difficulties
-    in section three.
+    - 'Input: real or fake image.'
+    - 'Output: source logit [B].'
+    - 'Goal: separate sources.'
+  callout: Two losses; separate updates.
+  notes: 'In short: The generator creates examples, the discriminator separates sources, and their optimisers update different
+    registered weights.
 
-    '
+    Explain: Upsampling increases the spatial size of feature grids. A convolution combines nearby input values using learned
+    weights. The generator uses learned operations to turn codes into images. The discriminator maps images to source scores.
+    Each network’s objective depends on the other network’s current behaviour.
+
+    Example: During one batch, D learns from real digits labelled one and generated digits labelled zero. G then asks the updated
+    D to give its generated digits the real label. The desired label changes with the training role, even though the pixels
+    are generated in both cases.
+
+    Ask: Must D be retained when deploying the trained generator?
+
+    Answer: Usually no. It may be reused for other purposes, but ordinary GAN generation needs only G.
+
+    Watch out: A discriminator’s confidence describes its learned source decision, not an independent guarantee of visual quality,
+    authenticity or consent.'
 - type: callout
   label: Analogy and its limits
-  icon: fa:FaTheaterMasks
-  statement: The generator makes samples. The discriminator checks them. Each learns from the other.
-  sub: At the ideal solution, real and generated samples have the same distribution. Training may fail to reach
-    it.
-  notes: 'The forger and detective analogy is useful, but state its limits clearly, since the course asks students
-    to explain analogies critically. At the ideal end point the generator''s samples are hard to tell apart from
-    real data, so the best the discriminator can do is output one half everywhere, a coin flip. But unlike a human
-    forger, the generator never looks at real examples, only at the discriminator''s feedback. And real training
-    does not always converge: the two networks can oscillate, each one''s improvement undoing the other''s. We see
-    both in section three.
+  statement: G makes samples; D checks sources.
+  sub: Both learn. Matching distributions is an ideal goal, not a training guarantee.
+  notes: 'In short: The ideal GAN target matches generated and real distributions; a checker score of one-half alone does not
+    establish success.
 
-    '
+    Explain: A distribution describes how examples vary and how likely regions are. Equilibrium is a state where the ideal players
+    have no beneficial change to make. At matching positive densities, the optimal discriminator returns one-half. Actual networks
+    and optimisation are finite. Their updates can oscillate or miss the ideal solution.
+
+    Example: A broken checker returning 0.5 for every image would also produce one-half scores. Its outputs would not establish
+    that random noise resembles digits. Compare samples and coverage before interpreting the score as balance between useful
+    networks.
+
+    Ask: What extra evidence would distinguish successful matching from an ineffective checker?
+
+    Answer: Inspect generated samples, reference data and independent quality or coverage measurements.
+
+    Watch out: The forger analogy explains opposing goals; networks lack intentions, and training is not guaranteed to settle
+    into a human-style compromise.'
 - type: section
   number: 2
   title: The GAN objective
   question: What game are the networks playing, and where does it end?
   icon: fa:FaChess
-  notes: 'Section two gives the mathematics. We write the minimax value function from the original paper, derive
-    the optimal discriminator for a fixed generator, show what the generator then minimises, and explain why the
-    loss used in practice differs from the textbook one. Then we look at the training loop in code. This is the
-    core exam material for the week; go at a steady pace and work through the optimal-discriminator derivation on
-    the board.
+  notes: 'In short: The GAN objective states opposing goals, and its derivatives explain the practical update choices.
 
-    '
+    Explain: A value function assigns a numerical result to both players’ current choices. D maximises the original value, while
+    G minimises it. An expectation is an average under a specified distribution. A mini-batch estimates such an average using
+    a few examples. Alternating updates change one network at a time.
+
+    Example: Start with real score 0.9 and fake score 0.2. Their original log terms are ln(0.9) and ln(0.8). Work those numbers
+    before introducing the optimal-discriminator derivation; each symbol then refers to an operation the class has already followed.
+
+    Ask: Which term in the basic minimax value can the generator influence directly?
+
+    Answer: The generated-example term, because its output enters D through G(z).
+
+    Watch out: Distinguish the original minimax value from the non-saturating generator loss used in the implementation; they
+    have different gradients.'
 - type: equation
   title: The minimax game (Goodfellow et al., 2014)
   eq: \min_G \max_D \; V(D, G) = \mathbb{E}_{x \sim p_{\mathrm{data}}}\left[\log D(x)\right] + \mathbb{E}_{z \sim
     p(z)}\left[\log\left(1 - D(G(z))\right)\right]
   read_as:
-  - 'D increases the value: separate real and fake.'
-  - 'G decreases it: make fakes score higher.'
-  - Alternate updates on batches.
+  - D maximises source separation.
+  - G minimises the fake term.
   terms:
   - - D(x)
-    - probability D assigns to x being real
+    - real-source probability
   - - G(z)
-    - sample generated from noise z
+    - generated sample
   - - $p_{\mathrm{data}}$
-    - distribution of real data
+    - real-data distribution
   - - p(z)
-    - noise prior, e.g. N(0, I)
-  notes: 'Read the equation as two expectations. The first is over real data: the discriminator wants log D of x
-    to be high, meaning D of x near one. The second is over noise: the discriminator wants one minus D of G of z
-    to be high, meaning fakes get low scores. So the discriminator maximises exactly the negative binary cross-entropy
-    of a real-versus-fake classifier. The generator appears only in the second term and wants to make it small,
-    pushing D of G of z up. In practice we alternate gradient ascent steps for D and descent steps for G on mini-batches.
+    - noise-code distribution
+  notes: 'In short: The minimax value rewards D for separating sources and asks G to make generated samples harder to reject.
 
-    '
+    Explain: V is the two-player value function. x is a real example and z is a random latent code. The data distribution supplies
+    x, while the prior supplies z. G creates an image and D gives its real-source probability. Expectations average the two
+    log terms; log means natural logarithm.
+
+    Example: With D(real)=0.9 and D(fake)=0.2, the value estimate is ln(0.9)+ln(0.8), approximately −0.329. D seeks a larger
+    value. G affects the second term by changing the image it sends to D; these are illustrative probabilities, not measured
+    lab outputs.
+
+    Ask: Why does a practical discriminator loss negate this value?
+
+    Answer: Standard optimisers minimise losses, so negative value implements D’s maximising goal.
+
+    Watch out: The lab uses stable binary cross-entropy on logits. Do not apply sigmoid twice before BCEWithLogitsLoss or confuse
+    a logit with probability.'
 - type: equation
   title: The optimal discriminator and what G really minimises
   eq:
   - D^{*}_G(x) = \dfrac{p_{\mathrm{data}}(x)}{p_{\mathrm{data}}(x) + p_g(x)}
   - V(D^{*}_G, G) = -\log 4 + 2\, \mathrm{JSD}\left(p_{\mathrm{data}} \,\|\, p_g\right)
   read_as:
-  - Fix G; ideal D compares both densities.
-  - Equal positive densities give D* = 0.5.
-  - Under ideal assumptions, G seeks matching distributions.
+  - Fix G; compare densities.
+  - Equal positive densities give one-half.
   terms:
   - - $p_g$
-    - distribution of G(z)
+    - generated distribution
   - - JSD
-    - Jensen–Shannon divergence (≥ 0, symmetric)
-  - - D* = ½
-    - D can do no better than a coin flip
-  notes: 'Derive the first line on the board: for each x, D maximises p data times log D plus p g times log of one
-    minus D, and setting the derivative to zero gives p data over p data plus p g. Substituting back gives minus
-    log four plus twice the Jensen-Shannon divergence, a symmetric measure of the difference between two distributions.
-    So, in the idealised setting with an optimal discriminator and infinite capacity, training the generator minimises
-    a proper divergence, and the unique optimum is when the generator''s distribution equals the data distribution.
-    Real training never reaches this ideal, but it explains what the game is aiming for.
+    - Jensen–Shannon divergence
+  - - D*
+    - ideal discriminator
+  notes: 'In short: For a fixed generator, the ideal discriminator compares the real and generated densities at the same input.
 
-    '
+    Explain: A density describes probability mass per unit of input space. The star marks an optimal discriminator for the fixed
+    G. The denominator adds the two source densities. JSD means Jensen–Shannon divergence, a symmetric measure of distribution
+    difference. The ideal value equals minus log four plus twice that divergence.
+
+    Example: If the real density is 0.3 and generated density is 0.1, D* is 0.3/(0.3+0.1)=0.75. Matching positive densities
+    give one-half. At zero JSD the ideal value is −ln(4), approximately −1.386; the full derivation is in the Word notes.
+
+    Ask: Is D* defined by this ratio where both densities are zero?
+
+    Answer: No. The zero denominator lies outside their positive support and needs separate treatment.
+
+    Watch out: The result assumes an optimal discriminator and sufficient model capacity; finite alternating training does not
+    guarantee the ideal distribution match.'
 - type: figure
   title: The optimal discriminator in pictures
   figure: optimal_d
-  notes: 'A one-dimensional illustration. The teal area is the data distribution, the orange curve the generator''s
-    distribution, and the dashed purple line the optimal discriminator. On the left, early in training, the discriminator
-    is close to one where only real data lives and close to zero where only fakes live, and its slope tells the
-    generator which way to move its samples. On the right, at equilibrium, the two distributions coincide and the
-    discriminator is flat at one half: it carries no information, and the generator receives no further push. Ask:
-    what does a flat D look like in the lab''s plots? D of real and D of fake both near one half.
+  notes: 'In short: The density picture explains the ideal source comparison without turning its shape into a convergence guarantee.
 
-    '
+    Explain: The teal distribution represents real examples. The orange distribution represents generated examples. The dashed
+    curve is the optimal D for those fixed densities. A density’s height is not the probability of one exact continuous point.
+    Matching positive densities give an ideal discriminator probability of one-half.
+
+    Example: On the left the supplied distributions differ; on the right they coincide. At a location with real density three
+    times the generated density, the formula gives 0.75. These are constructed mathematical curves illustrating the equation,
+    rather than observed digit-training statistics.
+
+    Ask: Would a flat observed discriminator curve by itself prove that the two learned distributions coincide?
+
+    Answer: No. A weak discriminator can also be uninformative; inspect samples and independent comparisons.
+
+    Watch out: The ideal-density argument explains a target. It does not prove that every finite discriminator slope supplies
+    useful generator-weight gradients.'
 - type: figure
   title: Why practitioners use the non-saturating generator loss
   figure: saturating
-  notes: 'This is a practical detail with a big effect, also from the original paper. At the start of training the
-    generator''s samples are obviously fake, so D of G of z is near zero. The discriminator probability is sigmoid
-    of a logit s. Through this sigmoid, the minimax derivative with respect to s is −D(fake), which becomes small
-    when D rejects the image. The plot uses this logit axis. The fix is to have the generator maximise log D of
-    G of z instead, which is steep near zero. Both losses are optimised by the same equilibrium. In code, the non-saturating
-    loss is simply binary cross-entropy with the fake samples labelled as real.
+  notes: 'In short: The non-saturating objective changes early generator feedback while keeping distribution matching as the
+    intended target.
 
+    Explain: A logit s is D’s raw source score. Sigmoid converts it to probability p. The original minimax derivative with respect
+    to s is minus p. The non-saturating derivative is p minus one. These derivatives concern the logit path, rather than every
+    generator weight directly.
 
-    Figure discussion prompts: Early fakes often receive small probabilities. Minimax gradients through sigmoid
-    can be weak. Use −log D(G(z)) for stronger early feedback. This changes the objective, not the ideal matching
-    target.
+    Example: At p=0.01, the derivatives are −0.01 and −0.99. The larger non-saturating magnitude provides stronger early feedback
+    through this local path. Backpropagation also depends on the rest of D and G, so the comparison is not a universal guarantee
+    of healthy gradients.
 
-    '
+    Ask: Which loss gives stronger local feedback when D confidently rejects a generated sample?
+
+    Answer: The non-saturating loss, because p−1 remains near minus one.
+
+    Watch out: A large generator loss does not establish good or bad image quality; inspect how training changes samples and
+    coverage.'
+  caption: 'Predict: which loss gives stronger early feedback?'
 - type: code
   title: One training step in PyTorch
-  code: '# --- 1. discriminator step: real -> 1, fake -> 0
+  code: 'fake = G(z)
 
-    fake = G(torch.randn(b, z_dim))
-
-    loss_D = bce(D(x_real), ones) + bce(D(fake.detach()), zeros)
+    loss_D = d_loss_fn(D, real, fake)
 
     opt_D.zero_grad(); loss_D.backward(); opt_D.step()
 
+    loss_G = g_loss_fn(D, fake)
 
-    # --- 2. generator step (non-saturating): make D call the fakes real
-
-    loss_G = bce(D(fake), ones)
-
-    opt_G.zero_grad(); loss_G.backward(); opt_G.step()
-
-    '
+    opt_G.zero_grad(); loss_G.backward(); opt_G.step()'
   bullets:
-  - 'D targets: real 1, detached fake 0.'
-  - 'G target: linked fake 1.'
-  - Detach cuts the gradient route to G.
-  - Only the chosen optimiser steps its weights.
-  notes: 'This is the complete core of GAN training, and it is what students write in the lab. First update the
-    discriminator on a real batch labelled one and a fake batch labelled zero; the detach call is essential, otherwise
-    that backward pass also computes unwanted generator gradients. The discriminator optimiser still steps only
-    D’s registered parameters. Then update the generator by passing the same fakes through the discriminator, this
-    time with the label one, and backpropagating through the discriminator into the generator. Only the generator''s
-    optimiser steps in the second update. The Adam settings come from the DCGAN paper and are still a sensible default.
+  - Detach inside d_loss_fn.
+  - Use fresh D forward pass.
+  - Step the selected optimiser.
+  notes: 'In short: One GAN batch updates D with detached fakes, then updates G through a fresh D forward pass on connected
+    fakes.
 
-    '
+    Explain: Detach keeps a tensor’s values while cutting its gradient connection for an operation. Zero_grad clears accumulated
+    gradients. Backward computes derivatives through the current computation graph. Step changes the optimiser’s registered
+    parameters. A fresh D call after its update uses its new weights.
+
+    Example: The same fake tensor can be detached for D’s loss and retained for G’s loss. D targets real as one and fake as
+    zero. G targets its generated image as one. The complete helper definitions are in the lab and Word notes, where each operation
+    is visible.
+
+    Ask: Why must the second loss be computed after D’s optimiser step?
+
+    Answer: It needs a fresh graph using the updated discriminator, with a connected route back to G.
+
+    Watch out: Computing D gradients during G’s backward pass does not update D unless its optimiser steps; clear gradients
+    before its next own update.'
 - type: quiz
-  question: Where real and generated densities match and are positive, what does ideal D output?
+  question: 'Equal positive real and generated densities: ideal D returns?'
   options:
-  - 1 for real images and 0 for fakes, as it is never fooled
-  - The digit class of the image, as a classifier would
-  - 0.5 everywhere, as the two densities are equal
-  - log 4, for real and generated inputs alike
+  - Perfect source labels.
+  - The digit class.
+  - '0.5: sources indistinguishable.'
+  - log 4.
   answer: 2
-  notes: 'Answer: C. When the generator''s distribution equals the data distribution, the optimal discriminator is p data divided
-    by twice p data, which is one half everywhere. A describes a discriminator that is winning, which happens early in training
-    or when the generator fails. B confuses the discriminator with a classifier of digit classes; a standard GAN discriminator
-    only judges real versus fake. D is the value of the objective at equilibrium, minus log four, not the discriminator''s output.
-    In practice you rarely see exactly one half, but D values drifting towards it suggest the game is balanced.
+  notes: 'In short: When real and generated densities match on positive support, the ideal discriminator returns one-half.
 
-    '
+    Explain: The ideal ratio divides real density by the sum of both densities. If they match, the denominator is twice the
+    numerator. A probability describes the source prediction, rather than a digit class. The minimax value is a separate numerical
+    objective. Its matched value is minus log four.
+
+    Example: Ask students to vote before discussing options. Equal densities 0.2 and 0.2 give 0.2/0.4=0.5. The calculation concerns
+    the ideal D; an observed half score can also come from a poor checker and needs additional evidence.
+
+    Ask: Which option gives the correct ideal source probability?
+
+    Answer: C. One-half; the real and generated sources have equal density at that input.
+
+    Watch out: A describes perfect source separation, B predicts a digit class, and D confuses the game’s value with D’s probability
+    output.'
 - type: section
   number: 3
   title: Training challenges and fixes
   question: Why are GANs notoriously hard to train, and what helps?
   icon: fa:FaTools
-  notes: 'Welcome back from the break. Section three is about what goes wrong. We look at real loss curves from
-    the DCGAN trained for these slides, see mode collapse happen in a small experiment, summarise the failure modes
-    and their symptoms, and then cover the main stabilisation techniques, including the Wasserstein loss. This is
-    highly practical: students will meet these problems in the lab and possibly in the project.
+  notes: 'In short: GAN diagnosis combines changing losses, fixed-code images and distribution coverage rather than treating
+    one number as success.
 
-    '
+    Explain: Instability means training behaviour changes unpredictably or fails to settle usefully. Mode collapse means generated
+    outputs miss substantial data variety. A fixed code keeps a generator input unchanged across snapshots. Coverage checks
+    which data regions appear. A remedy changes an identified cause or tests a plausible one.
+
+    Example: A generator may produce sharp ones and sevens while missing the other digits. A low loss against its current opponent
+    can coexist with that failure. Keep the input codes fixed and compare the snapshots, then count classes with a classifier
+    whose reliability you have checked.
+
+    Ask: Which observation directly challenges a claim that sharpness means complete digit coverage?
+
+    Answer: A class histogram or sample inspection showing that several digit types are absent.
+
+    Watch out: A single run cannot isolate a cause when loss, learning rates, architecture and update frequency all change together.'
 - type: figure
   title: 'Real training curves: losses do not tell you quality'
   figure: losses
-  notes: 'These curves come from the DCGAN trained for today. Unlike every supervised model students have trained,
-    the losses do not steadily fall; they fluctuate, because each update of one network changes the other''s objective.
-    A healthy run keeps the discriminator''s average output on real images above its output on fakes without either
-    collapsing to zero or one. If D(fake) stays near zero, D separates sources easily. This alone does not prove
-    vanishing G gradients, especially with the non-saturating loss; inspect actual progress. The practical lesson
-    is to monitor samples at fixed noise vectors every epoch and to compute a quality metric, which the lab does.
+  notes: 'In short: The archived curves show a changing game, so inspect progress with samples and independent checks alongside
+    losses.
 
+    Explain: A loss measures the current training objective. Each opponent update changes that objective’s context. D(real)
+    and D(fake) are average diagnostic probabilities. A fixed-noise snapshot reuses identical latent inputs. Quality asks whether
+    samples fit the task, while coverage asks whether varied target regions appear.
 
-    Figure discussion prompts: Each network changes the other’s task. Losses can rise and fall. Inspect fixed-noise
-    samples. Check quality and coverage separately.
+    Example: These curves belong to the archived lecture DCGAN, rather than today’s bounded CPU core. D(fake) near zero says
+    the checker rejects generated examples. Under a non-saturating loss it does not, by itself, prove that every generator gradient
+    vanished.
 
-    '
+    Ask: What would you inspect before deciding that a fluctuating generator loss means training failed?
+
+    Answer: Fixed-code sample changes, coverage and appropriate independent measurements.
+
+    Watch out: A supervised classifier’s steadily falling training loss is not a template that the two adapting GAN networks
+    must reproduce.'
+  caption: Archived eight-epoch DCGAN. Losses alone do not establish quality.
 - type: figure
   title: Mode collapse, seen in a real experiment
   figure: mode_collapse_slide
-  caption: 'Target: 8 Gaussian clusters on a ring (grey). Blue/green: 1,500 generated points at each training step,
-    same network sizes.'
-  notes: 'This is a real experiment on a toy problem where we can see the whole distribution. The data are eight
-    small clusters on a ring. The top row is a standard GAN; the bottom row uses the Wasserstein loss with gradient
-    penalty. Mode collapse means the generator covers only some of the modes, producing plausible but repetitive
-    samples. In this run the standard GAN quickly produces tight, sharp clusters, but by step 2,000 it has dropped
-    the bottom-left cluster entirely and never recovers it: 7 of 8 modes. The Wasserstein GAN with gradient penalty
-    learns more slowly, sweeping across the plane at first, but covers all 8 by the end. Other seeds drop more or
-    fewer modes, which is itself a lesson: always report seeds and repeat runs. In image terms, mode collapse is
-    a digit generator that never draws, say, a two.
+  caption: 'Archived ring experiment: eight target clusters; 1,500 generated points per checkpoint.'
+  notes: 'In short: The eight-cluster archive makes missing modes visible, but its comparison evaluates complete training configurations.
 
+    Explain: A mode is a region of substantial probability mass. Collapse misses such regions despite plausible samples elsewhere.
+    The target contains eight Gaussian clusters. A Wasserstein critic gives unrestricted scores instead of source probabilities.
+    Gradient penalty encourages smooth input feedback at sampled interpolation points.
 
+    Example: The archived final standard-GAN coverage is {{W03_RING_STANDARD_MODES}} of eight modes; the WGAN-GP configuration
+    covers {{W03_RING_WGAN_MODES}}. Their learning rates and critic-update counts also differ. The images and stored metrics
+    support that run’s comparison, rather than proving the loss alone caused the coverage difference.
 
-    Explain the comparison limit: the configurations also use different learning rates and five versus one critic
-    update. The result compares systems, not the loss alone. Ask students to name the extra compute cost before
-    attributing improved coverage solely to Wasserstein distance.'
+    Ask: Which extra computation distinguishes the WGAN-GP configuration in this experiment?
+
+    Answer: It uses five critic updates per generator update and differentiates the gradient penalty.
+
+    Watch out: Report actual seeds, settings and coverage. Today’s short run may differ, and no toy result guarantees complete
+    image-class coverage.'
 - type: table
   title: 'Failure modes: symptoms and remedies'
   header:
   - Problem
-  - What you see
-  - Common remedies
+  - Symptom
+  - Try
   rows:
-  - - Mode collapse
-    - Many samples look alike; some digits never appear
-    - Count classes; WGAN-GP or spectral normalisation
-  - - Weak generator gradients
-    - D wins easily and G stops improving
-    - Non-saturating G loss; keep D and G balanced
-  - - Unstable training
-    - Losses and samples swing back and forth
-    - Lower or separate learning rates; average G's weights (EMA)
-  - - D memorises the data
-    - D trusts training images but not new real ones
-    - Augment real and fake images (ADA)
-  - - Checkerboard artefacts
-    - Grid-like patterns in the images
-    - Resize, then convolve, instead of transposed convolution
-  notes: 'This table is a practical checklist and a good exam answer structure. Link each row to the warm-up: the
-    forger who repeats one trick is mode collapse; the detective who wins too fast gives vanishing gradients; the
-    endless chase is non-convergence. Two remedies deserve mention by name. TTUR, the two time-scale update rule,
-    uses separate learning rates for the discriminator and generator and comes from the same paper that introduced
-    FID. ADA, adaptive discriminator augmentation from the StyleGAN team, lets GANs train on a few thousand images
-    by augmenting what the discriminator sees. Checkerboard artefacts come from transposed convolutions.
+  - - Collapse
+    - Missing classes
+    - Count; regularise
+  - - Weak gradients
+    - Little improvement
+    - Non-saturating loss
+  - - Instability
+    - Swinging samples
+    - Tune rates
+  - - Memorisation
+    - Training-only confidence
+    - Augment sources
+  - - Checkerboards
+    - Grid artefacts
+    - Resize; convolve
+  notes: 'In short: Diagnose a concrete symptom first, then choose a remedy whose mechanism addresses that symptom.
 
-    '
+    Explain: Collapse concerns missing variety. Weak gradients concern insufficient useful feedback for parameter changes. Overfitting
+    means learning training-specific patterns that fail on new examples. Checkerboard artefacts are visible grid patterns from
+    some upsampling designs. A moving average smooths generator parameters across training updates.
+
+    Example: If a checker accepts training digits but rejects held-out real digits, test overfitting rather than immediately
+    increasing G’s training time. Compare appropriate augmentation and separate reference data. For repeated generated classes,
+    inspect coverage before trying a distribution-focused remedy.
+
+    Ask: Would an extra epoch necessarily repair a collapsed generator?
+
+    Answer: No. Measure the symptom and test a targeted change, keeping other settings recorded.
+
+    Watch out: Suggested remedies are hypotheses, not guaranteed fixes; retain the fuller comparison table and explanations
+    in the Word notes.'
 - type: equation
   title: The Wasserstein GAN with gradient penalty (WGAN-GP)
   eq:
   - \min_G \max_{\|D\|_L \leq 1} \; \mathbb{E}_{x \sim p_{\mathrm{data}}}[D(x)] - \mathbb{E}_{z}[D(G(z))]
   - \mathrm{critic\ loss} = \mathbb{E}_{z}[D(G(z))] - \mathbb{E}_{x}[D(x)] + \lambda\, \mathbb{E}_{\hat{x}}\left[\left(\|\nabla_{\hat{x}} D(\hat{x})\|_2 - 1\right)^2\right]
   read_as:
-  - The critic D gives any real number, not a probability.
-  - Training widens the average score gap between real and generated images.
-  - The penalty keeps the critic's slope near 1 at points between real and fake.
+  - Critic scores are unrestricted numbers.
+  - Penalty encourages unit input slope.
   terms:
-  - - $\|D\|_L \leq 1$
-    - 'Lipschitz limit: the score cannot change faster than its input'
+  - - 1-Lipschitz
+    - bounded score changes
   - - $\hat{x}$
-    - a random point between a real and a generated image
+    - real/fake interpolated input
   - - $\lambda$
-    - penalty weight, often 10
-  notes: 'The critic produces scores rather than real/fake probabilities. Its score gap approximates a Wasserstein
-    comparison under the required smoothness assumptions. The gradient penalty checks randomly mixed real and fake
-    inputs. It encourages gradient norm near one at those points, rather than proving a global Lipschitz bound.
-    Ask students to separate an input gradient used by this penalty from a weight gradient used by the optimiser.
-    Both are derivatives, but they answer different questions.
+    - penalty weight
+  notes: 'In short: WGAN changes source probabilities into critic scores, while its gradient penalty encourages a local smoothness
+    condition.
 
-    '
+    Explain: Wasserstein distance measures the work needed to move probability mass between distributions. A critic outputs
+    an unrestricted real score. A Lipschitz bound limits score changes relative to input movement. The input gradient measures
+    how the score changes as an example moves. Lambda weights the penalty term.
+
+    Example: With average real score two and generated score one-half, the score gap is 1.5. For input-gradient norm 1.4 and
+    lambda ten, the point penalty is 10×(1.4−1)²=1.6. These arithmetic examples explain the terms; they are not measured critic
+    outputs.
+
+    Ask: Does encouraging gradient norm one at random mixed inputs prove a global Lipschitz bound?
+
+    Answer: No. It regularises sampled locations rather than certifying every possible input.
+
+    Watch out: The critic’s score is not a probability, and the penalty’s input derivative differs from the weight derivative
+    used by an optimiser.'
 - type: cards
   title: Stabilisation techniques you will meet
   cards:
-  - icon: fa:FaWater
-    head: Wasserstein loss + GP
-    text: Scores keep giving G useful gradients; the penalty keeps the critic smooth.
-  - icon: fa:FaCompressAlt
-    head: Spectral normalisation
-    text: Caps each D layer's scale, so D cannot change too sharply.
-  - icon: fa:FaStopwatch
-    head: TTUR
-    text: Separate learning rates for D and G (two time-scale update rule).
-  - icon: fa:FaChartLine
-    head: EMA of G weights
-    text: Average G's recent weights; sample from the smoother average.
-  - icon: fa:FaRandom
-    head: Augmentation (ADA)
-    text: Flip, crop or recolour real and fake images, so D cannot memorise.
-  - icon: fa:FaBalanceScale
-    head: R1 penalty
-    text: Penalise D's slope on real images so it does not overreact.
-  notes: 'These six techniques cover most of what modern GAN code uses. Students do not need to derive them, but
-    should know what problem each addresses. Spectral normalisation is a one-line change in PyTorch, torch dot nn
-    dot utils dot spectral norm, and is one of the most effective. EMA, the exponential moving average of generator
-    weights, is also used in diffusion model training. R1 regularisation penalises the discriminator''s gradient
-    on real data and is the default in StyleGAN2. A good lab extension is to add spectral normalisation to the discriminator
-    and compare sample quality and stability.
+  - head: WGAN-GP
+    text: Penalise input slopes.
+  - head: Spectral normalisation
+    text: Limit layer scale.
+  - head: TTUR
+    text: Separate learning rates.
+  - head: EMA
+    text: Average generator weights.
+  - head: ADA
+    text: Adapt source augmentation.
+  - head: R1
+    text: Penalise real-input slopes.
+  notes: 'In short: Stabilisation methods target different parts of the training game, so choose and evaluate them deliberately.
 
-    '
+    Explain: Spectral normalisation scales a layer using its largest singular value. TTUR means two time-scale update rule:
+    use separate learning rates. EMA means exponential moving average of generator weights. ADA means adaptive discriminator
+    augmentation. R1 regularisation penalises discriminator input gradients on real examples.
+
+    Example: For a small dataset, augmenting examples seen by D can reduce memorisation shortcuts. For oscillating samples,
+    an averaged generator may give steadier outputs. Each method changes a different operation; compare actual quality and coverage
+    while keeping the experiment’s other settings fixed.
+
+    Ask: Which method explicitly gives D and G separate learning rates?
+
+    Answer: TTUR. It changes their update speeds rather than replacing the generator architecture.
+
+    Watch out: Normalising individual layers does not automatically certify the whole network’s smoothness; shortcuts, activations
+    and implementation details still matter.'
 - type: quiz
-  question: Your MNIST GAN produces sharp digits, but almost all of them are 1s and 7s. What is the most appropriate
-    first step?
+  question: Sharp samples show only 1s and 7s. First step?
   options:
-  - Train for many more epochs with the same settings, hoping other digits appear
-  - Check the class histogram of samples, then try a Wasserstein loss or spectral normalisation
-  - Remove the discriminator and train the generator with pixel-wise MSE on real digits
-  - Raise the sampling temperature so the generator draws more varied digits
+  - Train longer unchanged.
+  - Check class counts; try regularisation.
+  - Remove D; minimise pixels.
+  - Raise sampling temperature.
   answer: 1
-  notes: 'Answer: B. Sharp but repetitive samples are the signature of mode collapse. The first step is to measure
-    it, for example by classifying generated digits and plotting the class histogram, which students do in the lab;
-    then apply a remedy aimed at coverage, such as the Wasserstein loss with gradient penalty, spectral normalisation
-    or minibatch statistics. A rarely helps, since a collapsed generator often stays collapsed or hops between modes.
-    C would produce a blurry average, essentially giving up on the adversarial idea. D confuses GANs with language
-    models: a GAN has no temperature; the related idea is the truncation trick, which trades diversity for quality.
+  notes: 'In short: Sharp digits of only two classes indicate a possible coverage failure that should be measured before choosing
+    a fix.
 
-    '
+    Explain: A class histogram counts predicted labels over generated examples. Coverage concerns the variety present in the
+    target data. Mode collapse can retain realistic-looking outputs while missing other regions. A classifier’s errors affect
+    its histogram. A remedy should address the observed failure rather than only improving one image.
+
+    Example: A sample set mostly labelled one and seven could miss several real digit classes. Inspect images and classifier
+    accuracy before interpreting the counts. Then test a targeted change, such as a different objective or discriminator regularisation,
+    and record its computational cost.
+
+    Ask: Which option first checks the coverage symptom?
+
+    Answer: B. Inspect the class histogram, then test an appropriate remedy.
+
+    Watch out: A promises recovery from more training, C replaces this task with unpaired pixel matching, and D imports language-model
+    temperature into this GAN.'
 - type: section
   number: 4
   title: 'Variants: from DCGAN to StyleGAN'
   question: How did GANs go from blurry digits to photorealistic faces?
   icon: fa:FaLayerGroup
-  notes: 'Section four surveys the variants named in the descriptor: DCGAN, which made GANs work with convolutions;
-    conditional GANs, which let us choose what to generate; pix2pix and CycleGAN, which translate images from one
-    domain to another; and StyleGAN, which produced the photorealistic faces that made deepfakes a public concern.
-    We also look at real samples from the DCGAN trained for these slides and at latent interpolation.
+  notes: 'In short: GAN variants change architectures, conditions or consistency checks while retaining adversarial feedback.
 
-    '
+    Explain: DCGAN means deep convolutional GAN. A conditional GAN receives information specifying the desired output. Pix2pix
+    learns translation from paired images. CycleGAN learns with unpaired image domains and round-trip consistency. StyleGAN
+    supplies style controls at several generator resolutions.
+
+    Example: A labelled-digit generator receives a digit class along with its noise code. A sketch-to-photo model instead receives
+    an input image. These conditions serve different tasks, so the label-conditioned diagram is an example rather than a blueprint
+    for every image translator.
+
+    Ask: Which variant would naturally use matched sketch-and-photo training pairs?
+
+    Answer: Pix2pix, which combines adversarial training with a paired reconstruction objective.
+
+    Watch out: The named methods are historical research designs. Their names do not establish current market share, universal
+    quality or suitability for every dataset.'
 - type: figure
   title: 'DCGAN: the architecture that made GANs work on images'
   figure: dcgan_arch
-  notes: 'The deep convolutional GAN paper by Radford, Metz and Chintala in 2015 established a set of architecture
-    guidelines that made GAN training reliable enough to use widely. The generator starts from the noise vector,
-    projects it to a small spatial grid, and doubles the resolution with each transposed convolution, using batch
-    normalisation and ReLU, finishing with tanh so that pixels lie between minus one and one. The discriminator
-    mirrors this with strided convolutions and leaky ReLU. Our lab model is exactly this architecture for 28 by
-    28 images, with about a million parameters in total.
+  notes: 'In short: The DCGAN generator grows a spatial feature grid into pixels through learned upsampling operations.
 
-    '
+    Explain: A transposed convolution is a learned operation that can increase spatial size. Batch normalisation rescales activations
+    using batch or stored statistics. ReLU keeps positive activations, while LeakyReLU also passes a small negative slope. Tanh
+    bounds the generator’s output between minus one and one. Adam uses adaptive gradient-based updates.
+
+    Example: Here [B,64] codes become [B,128,7,7], then [B,64,14,14], then [B,1,28,28]. B is the batch size; the remaining dimensions
+    are channels, height and width. The source preserves this convolutional mechanism in the short CPU core.
+
+    Ask: Why scale real images to the same range as tanh outputs?
+
+    Answer: It prevents D from separating sources using an avoidable difference in pixel range.
+
+    Watch out: The architecture and conventional learning settings are starting choices, rather than a guarantee of convergence
+    or a measured runtime.'
 - type: figure
   title: Real DCGAN samples across training epochs
   figure: epochs_slide
   stack: true
   bullets:
-  - Each column follows one fixed noise vector through training.
-  - Some columns change digit between epochs, because G keeps changing as D changes.
-  caption: The same 16 noise vectors decoded after each epoch (MNIST, CPU training).
-  notes: 'These samples use fixed noise vectors, so each column shows how one generated digit evolves. Before training
-    the output is noise. After one epoch rough strokes appear. After two to four epochs digits become recognisable
-    and sharper than last week''s VAE samples, although some are malformed. By eight epochs many samples are readable
-    digits, but several are still malformed. Notice that the same noise vector can change digit identity between
-    epochs, for example the tenth column, a sign that the generator''s mapping is still moving as the game continues.
-    In the lab students produce this figure themselves; ask them to record how long one epoch takes on their hardware.
+  - Fixed codes isolate training changes.
+  - Current shorter CPU core can differ.
+  caption: 'Archived eight epochs: the same sixteen codes.'
+  notes: 'In short: Fixed-code snapshots isolate changes in the generator mapping from changes in its random inputs.
 
-    '
+    Explain: An epoch is one pass over the selected training data. A snapshot records generated images at a training stage.
+    Fixed noise reuses the same code vectors. Evaluation mode uses stored BatchNorm statistics. A changing image identity can
+    reflect the mapping’s movement during the game.
+
+    Example: The archived grid shows the same 16 codes before training and after one, two, four and eight epochs. Several digits
+    become readable, while some remain malformed. Today’s shorter core trains the same mechanism with a smaller budget, so it
+    need not reproduce this archived visual progression.
+
+    Ask: If the codes changed at every snapshot, what extra source of variation would enter the comparison?
+
+    Answer: Different latent inputs could change the images even without a weight update.
+
+    Watch out: Fixed-code progress is useful evidence, but a small grid cannot establish complete class coverage or a transferable
+    waiting time.'
 - type: figure
   title: 'Conditional GANs: choose what to generate'
   figure: cgan
-  notes: 'A conditional GAN, from Mirza and Osindero in 2014, adds information to both players. The generator receives
-    the noise and the condition, for example the label seven, and the discriminator receives an image together with
-    a label. A real seven paired with the label three should be rejected, so the generator is forced to produce
-    images that match their condition. The same principle extends to any kind of condition: text for text-to-image
-    GANs, a semantic map for image synthesis, or an entire image for image-to-image translation, which is the next
-    slide.
+  notes: 'In short: A class-conditioned GAN supplies the desired class to both networks so training can reward matching image-condition
+    pairs.
 
+    Explain: The condition y specifies information that generation should respect. G receives noise z and y. D judges an image
+    together with its condition. A conditional distribution describes outputs given the selected condition. Conditions can be
+    labels, images or other representations, depending on the model.
 
-    Figure discussion prompts: Give condition y to both networks. G(z, y) creates a sample. D(x, y) judges the image-condition
-    pair. A label, image or text can condition generation.
+    Example: With condition seven, G should produce a plausible seven. The checker receives both the generated image and the
+    same condition. Paired image translation can also use reconstruction feedback; its precise training pairs and discriminator
+    input must match that task.
 
-    '
+    Ask: Why would sending the label only to G leave the checker’s task less direct?
+
+    Answer: D could judge realism without testing whether the generated image matches the requested label.
+
+    Watch out: Standard CycleGAN uses domain discriminators, rather than giving each discriminator the corresponding source
+    image as a condition.'
 - type: cards
   title: Landmark GAN variants
   cards:
-  - icon: fa:FaPencilAlt
-    head: pix2pix (2017)
-    text: Learns from matched pairs, such as a sketch and its photo; a pixel (L1) loss keeps outputs faithful.
-  - icon: fa:FaSyncAlt
-    head: CycleGAN (2017)
-    text: No pairs needed, such as horses ↔ zebras; translating there and back must return the original.
-  - icon: fa:FaUserAstronaut
-    head: StyleGAN (2019–21)
-    text: Photorealistic faces with separate controls for coarse features (pose) and fine ones (hair).
-  - icon: fa:FaGlobe
-    head: BigGAN (2018)
-    text: Large-scale ImageNet images by class; the truncation trick trades variety for quality.
-  notes: 'Four landmark variants. Pix2pix needs paired examples and combines the adversarial loss with an L1 pixel
-    loss, so outputs are both realistic and faithful to the input. CycleGAN removes the need for pairs by training
-    two translators and requiring that translating there and back returns the original image. StyleGAN, from NVIDIA,
-    maps noise through a mapping network into a style vector that controls each resolution of the generator separately,
-    which gives photorealistic faces and control over coarse features like pose and fine features like hair texture.
-    BigGAN showed that scaling up batch size and model size gives much more realistic ImageNet samples,
-    and popularised the truncation trick.
+  - head: pix2pix
+    text: Paired translation; reconstruction loss.
+  - head: CycleGAN
+    text: Unpaired translation; round-trip loss.
+  - head: StyleGAN
+    text: Style controls at multiple scales.
+  - head: BigGAN
+    text: Class conditioning; truncation trade-off.
+  notes: 'In short: Landmark GAN variants solve different supervision and control problems, so their mechanisms matter more
+    than name recognition.
 
-    '
+    Explain: Paired examples match an input with its desired output. Pix2pix combines adversarial feedback with an L1 reconstruction
+    loss. CycleGAN uses round-trip consistency when such pairs are absent. StyleGAN maps noise into intermediate styles used
+    at multiple layers. BigGAN scales class-conditioned generation and uses truncated sampling.
+
+    Example: A sketch and its photograph supply a direct paired target. Separate horse and zebra collections do not. The second
+    task needs additional constraints to relate translation to the input, while the first can compare with its matched image.
+
+    Ask: Does cycle consistency alone prove that every horse’s meaning or identity is preserved?
+
+    Answer: No. Round-trip agreement is a constraint, and semantic preservation needs separate evidence.
+
+    Watch out: Style controls can interact, and truncation can reduce variety; demonstrate and measure the claimed effect rather
+    than treating labels as guarantees.'
 - type: equation
   title: 'CycleGAN''s key idea: cycle consistency'
   eq: \mathcal{L}_{\mathrm{cyc}} = \mathbb{E}_{x}\left[\|F(G(x)) - x\|_1\right] + \mathbb{E}_{y}\left[\|G(F(y))
     - y\|_1\right]
   read_as:
-  - G translates X → Y; F translates back.
-  - Compare the round-trip image with its input.
-  - Add both cycle losses to adversarial training.
+  - Translate out and back.
+  - Compare recovered input pixels.
   terms:
   - - G, F
-    - the two translators
-  - - ‖·‖₁
-    - sum of absolute pixel differences
-  notes: 'Without paired data, an adversarial loss alone would let the generator output any realistic zebra, unrelated
-    to the input horse. The cycle-consistency loss fixes this: translating a horse to a zebra and back must reproduce
-    the original horse, and vice versa. This is a general idea worth remembering, using round-trip consistency as
-    supervision when direct labels are missing; it appears again in unsupervised translation of text. Point out
-    the limitation: cycle consistency encourages, but does not guarantee, that semantic content is preserved, and
-    CycleGAN can hide information in imperceptible patterns to pass the cycle test.
+    - opposite translators
+  - - x, y
+    - domain inputs
+  - - L1 norm
+    - absolute pixel differences
+  notes: 'In short: Cycle consistency penalises failure to recover an input after translating to another domain and back.
 
-    '
+    Explain: X and Y name two image domains. G translates from X to Y, while F translates back. The L1 norm sums absolute pixel
+    differences. Expectations average errors over examples from each domain. The total cycle loss includes both directions alongside
+    adversarial objectives.
+
+    Example: An input [0.2,0.8] returning as [0.3,0.6] has error |0.3−0.2|+|0.6−0.8|=0.3. This two-pixel calculation illustrates
+    one direction. Requiring that round trip limits arbitrary translations, but it can still permit hidden information or semantically
+    wrong intermediate images.
+
+    Ask: Why include the second round trip starting from Y?
+
+    Answer: It constrains the opposite translation direction rather than checking only examples from X.
+
+    Watch out: Cycle consistency supplies indirect supervision; it does not replace evaluation of the translated image’s content
+    or task suitability.'
 - type: figure
   title: Latent interpolation in a GAN
   figure: interpolation
   stack: true
   bullets:
-  - Each row decodes 10 evenly spaced codes on the straight line between two random noise vectors.
-  - 'Top row: a 6 closes into a 0. Bottom row: an 8 opens into a 5.'
-  - A basic GAN has no encoder, so it cannot find the code of a real photo directly.
-  notes: 'As with VAEs, walking between codes can show smooth transitions, but smooth interpolation does not prove
-    absence of memorisation or guarantee plausible intermediate images. A key difference from VAEs is that a standard
-    GAN has no encoder, so we cannot directly find the latent code of a real image. GAN inversion methods improve
-    a latent vector to reproduce a given image, which enables editing real photos. StyleGAN''s intermediate style
-    space turned out to be particularly well organised, with directions for age, smile or pose, and this powered
-    a wave of face-editing tools, with obvious misuse potential.
+  - Decode ten straight-line codes per row.
+  - Inspect changes and malformed outputs.
+  - Basic GANs lack a direct encoder.
+  notes: 'In short: Interpolation explores the generator’s mapping between codes, while inversion requires extra work for a
+    real image.
 
+    Explain: Linear interpolation combines endpoints along a straight line. Spherical interpolation follows their angular relationship.
+    A latent norm measures a code’s length. A basic GAN has no encoder mapping arbitrary images into codes. Inversion searches
+    for a code, or uses an added encoder, to approximate a real image.
 
-    Figure discussion prompts: Choose two codes; decode points between. Inspect intermediate samples. Basic GANs
-    have no encoder. Inversion searches for a real image’s code.
+    Example: The archived figure decodes ten evenly spaced codes along each supplied path. Compare changes and malformed intermediate
+    digits. In the lab, equal-length endpoints support constant-radius spherical interpolation; unequal random endpoints need
+    not keep exactly one radius.
 
-    '
+    Ask: Does a smooth row of interpolated images prove that the model never memorised training examples?
+
+    Answer: No. It probes selected paths and does not test memorisation directly.
+
+    Watch out: Inspect endpoint and midpoint norms, and handle nearly parallel or zero-length codes before using the formula
+    as a general-purpose utility.'
+  caption: Archived interpolation; smooth codes do not guarantee valid images.
 - type: section
   number: 5
   title: Evaluation, applications and risks
-  question: How good is a generator, and where are GANs used in 2026?
+  question: What evidence supports quality, coverage and responsible use?
   icon: fa:FaClipboardCheck
-  notes: 'The final section covers evaluation, which is required by the descriptor and by MIMLO 4, then where GANs
-    are used today, and a responsible AI discussion of deepfakes. Because GANs have no likelihood, evaluation relies
-    on comparing samples with real data, and the Fréchet Inception Distance is the standard. The same metrics are
-    used for diffusion models next week and for image generation in the project, so this section has lasting value.
+  notes: 'In short: Evaluation compares generated samples with task requirements and reference data because a basic GAN lacks
+    tractable explicit likelihood.
 
-    '
+    Explain: A feature vector is a numerical representation extracted by a network. A reference dataset supplies real examples
+    for comparison. FID means Fréchet Inception Distance, using Inception image features. Coverage measures which target regions
+    are represented. Responsible evaluation also checks consent, disclosure and possible misuse.
+
+    Example: A digit model needs recognisable samples and varied digit classes. An image-restoration model also needs faithfulness
+    to its input. A generic visual score cannot establish either requirement alone; choose independent checks that reflect the
+    actual task.
+
+    Ask: Why will this evaluation section remain useful when next week introduces diffusion?
+
+    Answer: The generator mechanism changes, but sample quality, coverage and checking methods still require evidence.
+
+    Watch out: Standard FID and the lab’s custom digit-feature distance use different representations and must not share an
+    unqualified numerical scale.'
 - type: equation
   title: Fréchet Inception Distance (FID)
   eq: \mathrm{FID} = \|\mu_r - \mu_g\|_2^2 + \mathrm{Tr}\left(\Sigma_r + \Sigma_g - 2\left(\Sigma_r \Sigma_g\right)^{1/2}\right)
   read_as:
-  - Extract real and generated features with one network.
   - Compare feature means and covariances.
-  - Lower FID means closer Gaussian summaries, not guaranteed correctness.
+  - Lower distance needs context.
   terms:
-  - - μ (r, g)
-    - mean feature vectors, real and generated
-  - - Σ (r, g)
-    - feature covariance matrices
+  - - $\mu_r, \mu_g$
+    - feature means
+  - - $\Sigma_r, \Sigma_g$
+    - feature covariances
   - - Tr
-    - trace (sum of the diagonal)
-  notes: 'FID compares Gaussian summaries of real and generated image features: their means and covariance matrices.
-    Use the same feature network and image preparation for both sets. A lower score means closer feature statistics.
-    Zero does not prove that images or full distributions are identical. Means and covariances both affect the score,
-    so avoid calling one a pure quality measure and the other a pure diversity measure. The lab uses custom DigitCNN
-    features rather than standard Inception FID.
+    - sum of diagonal entries
+  notes: 'In short: FID compares Gaussian summaries of real and generated features, rather than verifying each image or its
+    factual correctness.
 
-    '
+    Explain: Mu names a feature mean vector. Sigma names a covariance matrix describing joint feature variation. Subscripts
+    r and g identify real and generated sets. Trace adds matrix diagonal entries. The squared norm measures the difference between
+    means. The matrix square-root term contributes the covariance comparison.
+
+    Example: For one-dimensional features, real mean zero and variance one versus generated mean 0.5 and variance 0.25 gives
+    0.25+1.25−1=0.50. These supplied values illustrate arithmetic. The lab instead extracts 128-dimensional DigitCNN features,
+    while standard Inception FID uses a different feature network.
+
+    Ask: Would score zero establish that every original and generated image is identical?
+
+    Answer: No. Matching these summaries does not prove identity of the full distributions or individual images.
+
+    Watch out: Keep feature network, preprocessing and sample count fixed for comparisons, and label the custom lab distance
+    explicitly.'
 - type: figure
   title: What FID measures, in feature space
   figure: fid
-  notes: 'A two-dimensional illustration of what happens in the two-thousand-dimensional feature space. On the left
-    the generated features have a similar centre and spread to the real ones, giving a low FID. On the right they
-    are shifted, meaning the average generated image differs from the average real image, and narrow, meaning low
-    diversity, which is exactly what mode collapse produces; both effects increase FID. Remind students that FID
-    values are only comparable when computed with the same feature network, the same number of samples, and the
-    same image preprocessing.
+  notes: 'In short: The feature-space sketch shows how shifted centres and altered spread affect a Gaussian-summary distance.
 
-    '
+    Explain: An embedding maps an image into a feature vector. The mean locates the average vector. Covariance describes its
+    spread and relationships between coordinates. The constructed panels use only two feature coordinates for visibility. Real
+    FID compares much higher-dimensional representations.
+
+    Example: The first generated cloud resembles the supplied reference centre and spread. The second is shifted and narrow.
+    Both effects can raise the distance, but neither term is a pure quality or diversity measurement. These constructed points
+    illustrate the formula rather than measured GAN feature statistics.
+
+    Ask: What must remain fixed before comparing two reported feature distances?
+
+    Answer: The feature network, preprocessing, sampling protocol and number of examples.
+
+    Watch out: A visual two-dimensional projection can hide differences in other dimensions; do not equate a similar-looking
+    scatter plot with complete distribution matching.'
 - type: table
   title: 'Evaluating GANs: the main tools'
   header:
-  - Metric
-  - What it measures
-  - Watch out for
+  - Check
+  - Meaning
+  - Limit
   rows:
   - - FID
-    - Distance between real and generated image features (lower is better)
-    - Needs thousands of images; depends on the feature network and resizing
+    - Feature distance
+    - Extractor-dependent
   - - Inception Score
-    - Whether a classifier finds the images confident and varied
-    - Never compares with real data
-  - - Precision / recall
-    - Realism (precision) and coverage of real data (recall), separately
-    - Depends on the feature space and neighbour count
+    - Confidence; variety
+    - No real comparison
+  - - Precision and recall
+    - Realism; coverage
+    - Feature-dependent
   - - KID
-    - Like FID, but unbiased with fewer images
-    - Still noisy when images are few
-  - - Human checks
-    - Realism and usefulness for the task
-    - Needs a rubric and several raters
-  notes: 'No single metric is sufficient, so reports should combine them. Inception Score rewards images that a
-    classifier labels confidently and a set of images covering many classes, but it never compares with real data.
-    Precision and recall for generative models, from 2019, separate the two things FID mixes: are samples realistic,
-    and do they cover the data distribution. An unbiased KID estimator avoids the plug-in bias of empirical FID,
-    but its variance, feature choice and sample count still matter; no metric is universally preferable. Human evaluation
-    can assess task-specific realism and usefulness and must be designed properly: several raters, a clear rubric,
-    and agreement statistics. This table maps directly onto MIMLO 4 and the project''s evaluation section.
+    - Feature discrepancy
+    - Sampling noise
+  - - Human rubric
+    - Task usefulness
+    - Rater variation
+  notes: 'In short: Use complementary evaluation tools because each statistic detects some failures and misses others.
 
-    '
+    Explain: Inception Score rewards confident and varied predicted classes without comparing real examples. Generative precision
+    concerns realism, while recall concerns coverage in a chosen feature space. KID means Kernel Inception Distance, based on
+    a kernel comparison. Its unbiased estimator still has sampling uncertainty. Human evaluation needs a stated rubric.
+
+    Example: A generated set can show many predicted classes while containing implausible images. A single attractive sample
+    can coexist with missing classes. Compare multiple signals and inspect disagreements; neither metric names nor a low number
+    determine task success by themselves.
+
+    Ask: Which listed automated score never compares generated samples with real data?
+
+    Answer: Inception Score. Its classifier predictions describe confidence and class variety within the generated set.
+
+    Watch out: Report sample counts, features and uncertainty. An unbiased KID estimate is not a universal guarantee of lower
+    error than every FID estimate.'
 - type: cards
-  title: Where GANs are used in 2026
+  title: Published adversarial applications
   cards:
-  - icon: fa:FaExpand
-    head: Super-resolution
-    text: Sharpen low-resolution photos or video frames in one fast pass.
-  - icon: fa:FaBolt
-    head: Fast diffusion
-    text: A discriminator helps cut diffusion to 1–4 steps (SDXL-Turbo).
-  - icon: fa:FaCompressArrowsAlt
-    head: Sharper autoencoders
-    text: A GAN loss keeps latent-diffusion decoders sharp (week 2's VAE).
-  - icon: fa:FaVolumeUp
-    head: Audio vocoders
-    text: Turn speech features into waveforms in real time (e.g. HiFi-GAN).
-  - icon: fa:FaExchangeAlt
-    head: Image translation
-    text: Day to night, sketch to photo, or one painting style to another.
-  - icon: fa:FaTable
-    head: Synthetic data
-    text: Extra tabular or image records; audit them for privacy leaks.
-  notes: 'Diffusion models have replaced GANs as the main text-to-image generators, but GANs are far from gone.
-    They excel where speed matters: a GAN produces an image in one forward pass, while diffusion needs many steps.
-    So GAN-based upscalers are everywhere, and adversarial distillation, as in Stability AI''s SDXL-Turbo, uses
-    a discriminator to compress a diffusion model into one to four steps. Adversarial losses also keep the decoders
-    of latent-diffusion autoencoders and image tokenizers sharp, and GAN vocoders are standard in speech synthesis.
-    Point out the link to last week: the VAE inside Stable Diffusion was trained with a GAN loss.
+  - head: Real-ESRGAN
+    text: Restore image detail.
+  - head: SDXL-Turbo
+    text: Adversarial diffusion distillation.
+  - head: Autoencoders
+    text: Learned reconstruction realism.
+  - head: HiFi-GAN
+    text: Features into waveforms.
+  - head: Translation
+    text: Change image domains.
+  - head: Synthetic data
+    text: Check privacy and utility.
+  notes: 'In short: Adversarial learning remains a useful component of restoration, efficient generation, autoencoders and audio
+    synthesis.
 
-    '
+    Explain: Super-resolution increases image resolution while estimating missing detail. A vocoder maps a sound representation
+    into a waveform. Distillation trains a smaller or faster generator from another model’s signals. Adversarial losses can
+    complement reconstruction losses. Synthetic data still needs privacy and task-quality checks.
+
+    Example: Published examples include Real-ESRGAN for restoration, HiFi-GAN for audio, and SDXL-Turbo’s adversarial diffusion
+    distillation. The SDXL-Turbo model card documents one-to-four sampling steps. These illustrate mechanisms and documented
+    models; they do not establish current market share or a runtime on the student’s hardware.
+
+    Ask: Why might an autoencoder use both reconstruction and adversarial feedback?
+
+    Answer: Reconstruction checks input faithfulness, while the discriminator supplies a learned realism signal.
+
+    Watch out: Generated detail can be plausible but wrong. Test the relevant task, documented limits and licence before using
+    a published implementation.'
 - type: bullets
   title: 'Responsible AI lens: deepfakes and synthetic media'
-  icon: fa:FaUserSecret
   bullets:
-  - Synthetic media can impersonate or mislead.
-  - False positives and new generators defeat detectors.
-  - Check provenance and disclosure.
-  - Use authorised data; prevent abuse.
-  notes: 'Adversarial training is, by design, optimised to fool a detector, so it is no surprise that GAN outputs
-    raised the first wave of deepfake concerns. Discuss the harms concretely, including the liar''s dividend, where
-    genuine recordings are dismissed as fakes. Explain why detection alone is insufficient: detectors generalise
-    poorly to new generators. The policy response combines source history (provenance), meaning signed content credentials
-    such as C2PA, watermarks, and legal duties. Article 50 distinguishes provider marking from deployer disclosure,
-    with scope and exceptions, including special treatment of artistic works. Read the official text for the role
-    and use concerned. The rules apply from 2 August 2026; systems already on the market have until 2 December 2026
-    for the Article 50(2) marking duty only, not for every transparency duty.
-    Week 10 returns to watermarking in detail. Ask students where their project could create synthetic media and
-    how they would label it.
+  - Check consent and source history.
+  - Disclose synthetic-media use appropriately.
+  - Evaluate deception and detector errors.
+  notes: 'In short: Synthetic-media responsibility combines authorised inputs, disclosure, provenance and checks of potential
+    harms.
 
-    '
+    Explain: A deepfake misleadingly resembles an existing person, object or event. Provenance records source and edit history.
+    Content credentials can authenticate recorded history but not every claim in an image. The liar’s dividend describes dismissing
+    genuine evidence as fake. Detectors can fail on new generators or falsely flag real media.
+
+    Example: A synthetic training portrait used with consent and clear disclosure differs from an impersonation presented as
+    a real person. Assess the use and evidence, rather than trusting realism. A removed credential is also not proof that an
+    image was generated.
+
+    Ask: Can a detector alone establish that every uploaded portrait is authentic?
+
+    Answer: No. Combine source checks, disclosure, review and proportionate technical measures.
+
+    Watch out: EU Article 50 separates provider marking and deployer disclosure, with exceptions; consult the official text
+    for the particular role and use.'
+  visual:
+    type: example_strip
+    items:
+    - label: Provenance
+      text: Recorded history supports source checks.
+    - label: Detection
+      text: A score alone cannot establish authenticity.
 - type: table
   title: 'VAE vs. GAN: a summary for the exam'
   header:
-  - ''
-  - VAE (week 2)
-  - GAN (week 3)
+  - Design
+  - VAE
+  - Basic GAN
   rows:
-  - - Training signal
-    - Rebuild the input + KL penalty
-    - A learned real-or-fake checker
-  - - Likelihood
-    - A lower bound (ELBO) can be computed
-    - None; quality must be measured
-  - - Encoder
-    - Yes, image → code
-    - 'Basic GAN: no'
-  - - Samples
-    - Often slightly blurry
-    - Often sharp
-  - - Coverage
-    - Usually broad; still check
-    - Can miss whole classes (collapse)
   - - Training
-    - One loss to minimise; stable
-    - Two networks in a moving game
-  - - Typical uses
-    - Latent spaces, anomaly scores
-    - Fast, sharp generation
-  notes: 'This comparison appears frequently in exams, so present it as a revision tool. VAEs improve a bound on
-    likelihood, have an encoder and train stably, but their samples blur. GANs produce sharper samples through a
-    learned critic, but have no likelihood, no encoder, and can collapse. The two families are complementary, and
-    modern systems combine them: VAE-GAN hybrids and autoencoders trained with adversarial losses. Next week, diffusion
-    models achieve the quality of GANs with the stability and coverage of likelihood-based models, at the cost of
-    many sampling steps.
+    - Reconstruction + KL
+    - Learned source feedback
+  - - Likelihood
+    - Computable lower bound
+    - No tractable explicit density
+  - - Encoder
+    - Image → code
+    - Requires extra method
+  notes: 'In short: VAE and GAN designs differ in training signals, explicit likelihood bounds and their route from images to
+    codes.
 
-    '
+    Explain: A VAE learns an encoder and decoder with a likelihood-bound objective. Its reconstruction term checks input recovery.
+    A basic GAN trains with a discriminator’s changing feedback. It provides sampling without a tractable explicit likelihood.
+    GAN inversion needs extra optimisation or an added encoder.
+
+    Example: For a real digit, the VAE encoder gives a code directly. The basic GAN generator maps the other direction, from
+    code to image. Comparing their samples still requires quality and coverage evidence; possible VAE blur and possible GAN
+    sharpness are tendencies, not guarantees.
+
+    Ask: Can adversarial feedback and a VAE-style autoencoder appear in the same system?
+
+    Answer: Yes. Reconstruction and learned-realism objectives can be combined, as in adversarially trained autoencoders.
+
+    Watch out: Neither family name proves stable training or full coverage. Next week’s diffusion also requires measured quality
+    and cost comparisons.'
 - type: lab
   title: 'Lab 3: train and diagnose a DCGAN'
   steps:
-  - Build G and D.
-  - Implement detached D loss.
-  - Implement connected G loss.
-  - Inspect fixed-noise snapshots.
-  - Check features and class coverage.
-  - Compare toy training configurations.
-  runtime: Colab GPU or local CPU. About 19 min on a laptop CPU after downloads
-  deliverable: Figures, diagnostics, distances, toy comparison, four answers
-  notes: 'The lab mirrors the lecture. Students first implement the two losses, especially the detached path for
-    the discriminator update. They then train and inspect fixed-noise samples. Evaluation uses a small digit classifier:
-    its predictions estimate class coverage, and its features supply a custom Fréchet distance. This uses the FID
-    formula with a different feature network, so its values cannot be compared directly with standard Inception
-    FID. Check classifier accuracy before interpreting either result. Finally the ring experiment makes missing
-    modes visible and lets students test the Wasserstein objective with gradient penalty. The trained generator
-    and evaluation code can be reused in the project.
+  - Build real G and D.
+  - Implement both losses.
+  - Inspect fixed-code snapshots.
+  - Check quality and coverage.
+  - Compare bounded ring training.
+  runtime: CPU core took {{W03_CORE_TIME}}; GPU optional
+  deliverable: Update trace, plots, checks and explanations
+  notes: 'In short: The CPU core trains a real GAN long enough to see digit shapes, traces both updates and evaluates its own
+    outputs.
 
-    '
+
+    Explain: The discriminator loss uses real target one and detached fake target zero. The generator loss uses connected fake
+    target one. Fixed-noise snapshots expose changes in G. A digit classifier supplies predicted classes and custom features.
+    The toy ring makes missing modes directly visible.
+
+
+    Example: Students inspect [B,64] codes, [B,1,28,28] images and [B] source logits before training. The core runs 800 updates:
+    four epochs of 25,600 images. On the course laptop the whole core took {{W03_CORE_TIME}}. The archived images came from
+    a longer run, so today''s digits can look rougher.
+
+
+    Ask: Does the local route require a GPU or a Gemini key?
+
+
+    Answer: No. Both are optional, and all core experiments and checking tasks remain local.
+
+
+    Watch out: Distinguish the custom DigitCNN Fréchet distance from standard FID, and report observed results rather than forcing
+    archived outcomes.'
 - type: summary
   points:
-  - G creates; D checks.
-  - Alternate two weight updates.
-  - Non-saturating loss improves early feedback.
-  - Collapse loses data variety.
-  - Metrics need features and sample counts.
-  - Consent, disclosure and provenance matter.
-  notes: 'Recap the six points. The essential equations are the minimax objective and the optimal discriminator;
-    the essential practical knowledge is the non-saturating loss, the failure modes, and FID. Next week we meet
-    diffusion models, which learn to reverse a gradual noising process. Their known noise targets avoid the two-player
-    adversarial game. Many produce detailed images; useful quality, coverage and cost still require evaluation.
-    Ask students to finish the lab, read Foster chapter 4 and, if they want the history, chapter 10 on advanced
-    GANs including StyleGAN.
+  - G generates; D checks.
+  - Separate updates; preserve G gradients.
+  - Check quality and coverage.
+  - Document features and sample counts.
+  - Consider consent, disclosure and provenance.
+  notes: 'In short: The recap connects opposing training roles with the independent checks needed to interpret generated samples.
 
-    '
+    Explain: G creates examples from codes, and D distinguishes sources. Alternating optimisers change different registered
+    weights. Non-saturating loss supplies stronger early feedback through the discriminator-logit path. Mode collapse misses
+    data variety. Evaluation needs documented features, sample counts and actual observations.
+
+    Example: Ask students to explain why the fake image gets target zero in D’s update and target one in G’s update. Then show
+    two sharp examples of the same class. Correct update code and sharp outputs still leave the coverage question unanswered.
+
+    Ask: Which gradient route must remain connected for the generator’s own update?
+
+    Answer: The route from its loss through D and the generated image back to G’s parameters.
+
+    Watch out: Diffusion uses known noise targets rather than this adversarial game, but it does not remove the need to evaluate
+    samples or responsible use.'
 - type: resources
   items:
-  - kind: book
-    label: Foster (2023) Generative Deep Learning, 2nd ed., ch. 4 'GANs' and ch. 10 'Advanced GANs'
-    note: Core module text
-    url: https://www.oreilly.com/library/view/generative-deep-learning/9781098134174/
   - kind: paper
-    label: Goodfellow et al. (2014) Generative Adversarial Networks
-    note: The original paper
+    label: GAN game
+    note: Original derivation
     url: https://arxiv.org/abs/1406.2661
   - kind: doc
-    label: 'PyTorch tutorial: DCGAN'
-    note: Official step-by-step implementation
+    label: DCGAN tutorial
+    note: Official implementation
     url: https://docs.pytorch.org/tutorials/beginner/dcgan_faces_tutorial.html
-  - kind: course
-    label: 'Google for Developers: GAN course'
-    note: Short free course with exercises
-    url: https://developers.google.com/machine-learning/gan
   - kind: paper
-    label: Arjovsky et al. (2017) Wasserstein GAN
-    note: Why the Wasserstein distance helps
-    url: https://arxiv.org/abs/1701.07875
-  - kind: paper
-    label: Karras et al. (2019) StyleGAN
-    note: Style-based generator
-    url: https://arxiv.org/abs/1812.04948
-  - kind: paper
-    label: Heusel et al. (2017) TTUR and FID
-    note: Defines the Fréchet Inception Distance
+    label: FID paper
+    note: Evaluation definition
     url: https://arxiv.org/abs/1706.08500
-  notes: 'Foster chapter 4 introduces GANs with Keras code and chapter 10 covers ProGAN, StyleGAN and related work. The original
-    Goodfellow paper is short and contains the optimal-discriminator derivation. The PyTorch DCGAN tutorial is the official
-    reference implementation and trains on faces. Google''s short GAN course has clear explanations of loss functions and common
-    problems. The WGAN, StyleGAN and FID papers are for deeper reading. All links were last checked on 9 October 2026.
+  - kind: video
+    label: MIT generative lecture
+    note: Visual explanation
+    url: https://www.youtube.com/watch?v=R8V8CbuxryI
+  notes: 'In short: Choose one reading that resolves a concrete uncertainty, then test the explanation with a worked example
+    or code trace.
 
-    '
+    Explain: The original GAN paper states the game and ideal discriminator. The PyTorch tutorial implements alternating DCGAN
+    updates. The FID paper connects feature comparisons with evaluation. A visual lecture provides another explanation of generation
+    mechanisms. The textbook develops implementation and broader variants.
+
+    Example: A student uncertain about detach can trace the official tutorial’s discriminator and generator updates, then explain
+    the two fake targets. A student uncertain about FID can redo the one-dimensional example before reading the higher-dimensional
+    formula. Reading is preparation for an explanation, not evidence of a successful training run.
+
+    Ask: Which source would you consult before claiming that your custom DigitCNN number equals standard FID?
+
+    Answer: The original FID definition and the actual feature extractor and preprocessing used by both experiments.
+
+    Watch out: Keep historical papers distinct from current package documentation, and verify source details before repeating
+    a model capability or legal duty.'

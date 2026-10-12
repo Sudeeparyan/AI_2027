@@ -1,0 +1,20 @@
+# R4 · Week 12: retrieved evidence and controlled tools
+
+Checked **2026-10-10**. Read: built slide titles and lab headings only. CPU budgets below are design targets, not measurements.
+
+**Explanations to adapt.**
+- RAG resembles an open-book answer: find passages, then write with them. The [original RAG paper](https://arxiv.org/abs/2005.11401) combines learned parameters with retrieved memory. Retrieval does not guarantee that a passage is correct or that the answer uses it faithfully.
+- A workflow follows a fixed recipe; an agent chooses its next step within allowed boundaries. [Anthropic's effective-agents guide](https://www.anthropic.com/engineering/building-effective-agents) provides this distinction. Neither analogy gives the model permission to execute arbitrary code or tools.
+- MCP is a standard connector, analogous to a shared socket; its [specification](https://modelcontextprotocol.io/specification/2026-07-28) standardises tools/context exchange. A compatible socket does not establish trust in the server or the returned content.
+
+**Five misconceptions.** (1) Retrieval updates model weights. (2) Similarity is the probability a passage is correct. (3) A citation guarantees claim support. (4) A tool proposal has already executed. (5) Retrieved instructions outrank the application's rules. Treat corpus/tool text as untrusted data; validate the tool name, arguments, permissions and result separately. Prompt wording alone is not an injection defence.
+
+**Current practice and versions.** [`sentence-transformers/all-MiniLM-L6-v2`](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2) produces 384-dimensional vectors; default truncation is 256 word pieces. Bound chunks or record truncation. MCP latest redirects to **2026-07-28**; [tools documentation](https://modelcontextprotocol.io/specification/2026-07-28/server/tools) defines discovery, schemas and calls, including required request metadata. Test raw protocol examples against that version. R0's Colab snapshot has sentence-transformers `5.7.0`, transformers `5.18.0`, torch `2.11.0+cpu`; verify compatibility. Use NumPy exact search before optional databases/frameworks.
+
+**Own-style visuals and beginner barriers.** Draw documents → chunk/embed → index, then query → retrieve → evidence plus question → cited answer; use two panels. Separate proposed action → code validation → allowed tool → observed result; dashed arrows show repetition. Lab barriers: chunk IDs versus vector rows, cosine normalisation, hybrid rankings, JSON schemas and multi-step failures. Teach one retrieval result and calculator call before reranking/frameworks/MCP implementation.
+
+**CPU core proposal, target ≤15 minutes of waiting; unmeasured.** Embed a small synthetic handbook once, compare keyword/dense retrieval over labelled questions, generate capped answers with citations, and execute allowlisted read/calculator tools under a small step limit. Use a top-k slider without API callbacks. Include missing evidence and a harmless injected instruction; record whether checks prevent the proposed action. Measure retrieval recall@k separately from claim-level citation support; measure agent task success and calls/time per successful task. Show monetary cost only with verified rates, and handle zero successful tasks explicitly. Optional Gemini can compare grounded generation/tool proposals in a few calls using R0's `gemini-3.5-flash-lite`; local completion remains independent. Retain `USE_GEMINI=False`, synthetic data and R0's unresolved EEA/Swiss/UK distribution caveat; no billing or paid API substitute.
+
+**Further reading:** [RAG paper](https://arxiv.org/abs/2005.11401) · [MiniLM encoder card](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2) · [Effective agents](https://www.anthropic.com/engineering/building-effective-agents) · [MCP tools](https://modelcontextprotocol.io/specification/2026-07-28/server/tools) · [Hugging Face Agents Course video/Q&A](https://www.youtube.com/watch?v=iLVyYDbdSmM).
+
+Handoff: research complete; retrieval/agent scores, timing, live API calls and protocol/widget execution unverified.

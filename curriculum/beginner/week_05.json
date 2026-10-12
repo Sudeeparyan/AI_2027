@@ -3,82 +3,106 @@
   "prerequisites": [
     {
       "term": "Vector",
-      "meaning": "An ordered list of numbers representing one item, such as a token.",
+      "meaning": "An ordered list of numbers used to represent an item.",
       "check": "How many entries are in the vector [1, 0, 1]?",
-      "answer": "Three entries."
+      "answer": "Three entries.",
+      "short_meaning": "Ordered list of numbers"
     },
     {
       "term": "Matrix shape",
       "meaning": "The number of rows and columns in a table of numbers.",
       "check": "What does shape [3, 2] tell you about three token vectors?",
-      "answer": "Three rows, one per token, and two numbers in each token vector."
+      "answer": "Three rows, one per token, and two numbers in each token vector.",
+      "short_meaning": "Table rows and columns"
     },
     {
       "term": "Training target",
       "meaning": "The known answer used to measure a model's prediction error.",
       "check": "For input characters 'cat', which characters follow them in 'cats'?",
-      "answer": "a, t and s: each input character is paired with the character after it."
+      "answer": "a, t and s: each input character is paired with the character after it.",
+      "short_meaning": "Known answer for prediction"
+    },
+    {
+      "term": "Embedding",
+      "meaning": "A numerical vector representing an item, often learned, for prediction or comparison.",
+      "short_meaning": "Learned vector from an ID",
+      "check": "What selects an embedding row?",
+      "answer": "The vocabulary ID."
+    },
+    {
+      "term": "Causal mask",
+      "meaning": "A rule preventing a position from attending to later positions.",
+      "short_meaning": "Blocks future input positions",
+      "check": "Is the current position allowed?",
+      "answer": "Yes; only later positions are blocked."
+    },
+    {
+      "term": "Softmax",
+      "meaning": "Turns a row of scores into nonnegative numbers summing to one.",
+      "short_meaning": "Scores into probability weights",
+      "check": "What does each row sum to?",
+      "answer": "One, before display rounding."
     }
   ],
   "diagrams": [
     {
       "id": "overview",
       "title": "Text to the next character",
-      "subtitle": "Trace ROMEO: through the lab model. V is vocabulary size; d is vector size.",
+      "subtitle": "Predict; append; repeat.",
       "steps": [
         {
-          "title": "Text",
-          "detail": "ROMEO: 6 tokens",
-          "code": "text",
-          "role": "data"
-        },
-        {
-          "title": "Token IDs",
-          "detail": "6 numbers from a table",
+          "title": "Encode",
+          "detail": "Characters",
+          "role": "data",
           "code": "stoi",
-          "role": "data"
+          "code_owner": true
         },
         {
-          "title": "Add position",
-          "detail": "6 vectors; d features",
-          "code": "tok + pos",
-          "role": "model"
+          "title": "Embed",
+          "detail": "Positioned",
+          "role": "model",
+          "code": ""
         },
         {
-          "title": "Causal blocks",
-          "detail": "Attention then MLP",
-          "code": "Block",
-          "role": "model"
+          "title": "Transform",
+          "detail": "Causal",
+          "role": "model",
+          "code": ""
         },
         {
-          "title": "Token scores",
-          "detail": "6 rows; V scores",
+          "title": "Score",
+          "detail": "Vocabulary",
+          "role": "model",
           "code": "head",
-          "role": "model"
+          "code_owner": true
         },
         {
-          "title": "Softmax",
-          "detail": "V possible choices",
-          "code": "softmax",
-          "role": "model"
+          "title": "Select",
+          "detail": "Last row",
+          "role": "model",
+          "code": ""
         },
         {
-          "title": "Append token",
-          "detail": "Sample ID; read text",
-          "code": "generate",
-          "role": "output"
+          "title": "Normalise",
+          "detail": "Softmax",
+          "role": "model",
+          "code": ""
+        },
+        {
+          "title": "Sample; append",
+          "detail": "ID",
+          "role": "output",
+          "code": ""
         }
       ],
       "arrows": [
-        "ROMEO: text",
-        "IDs [1,6]",
-        "X [1,6,d]",
-        "H [1,6,d]",
-        "last logits [V]",
-        "chances [V]"
+        "IDs[1,6]",
+        "X[1,6,d]",
+        "H[1,6,d]",
+        "logits[1,6,V]",
+        "last[1,V]",
+        "P[1,V]"
       ],
-      "feedback": "Repeat with the extended prefix; weights stay fixed.",
-      "feedback_to": 1,
       "trace": [
         "The prefix 'ROMEO:' becomes a sequence of IDs using stoi.",
         "CharGPT adds a learned position vector to each character vector.",
@@ -87,59 +111,66 @@
         "A sampled ID is appended; repeated predictions form a continuation."
       ],
       "explanation": "A token is the unit the model reads. This lab deliberately uses one character per token, although larger language models often use word pieces. The dictionary stoi maps characters to integer IDs; an embedding table maps those IDs to vectors. A separate table adds where each character occurs. Transformer blocks then build contextual vectors: the same character can carry different information in different prefixes. The causal mask prevents a position from using later characters. The output layer produces logits, which are scores rather than probabilities. Generation converts the final position's scores into probabilities, samples one character ID, and repeats. Training instead compares every position with its known next character. The model learns patterns in text; fluent-looking output alone does not establish factual knowledge or coherent reasoning.",
-      "check_question": "Can the next-character prediction use characters that have not been generated yet?",
+      "check_question": "Future characters allowed?",
       "check_answer": "No. Its prediction uses the existing prefix; the continuation is generated one character at a time.",
-      "layout": "linear"
+      "layout": "linear",
+      "feedback": "New prefix",
+      "feedback_to": 0,
+      "feedback_from": 6,
+      "notes": "In short: The overview follows actual text processing into next-character probabilities and an extended prefix.\nExplain: Encoding maps each character to an ID. Token and position lookups form input vectors. Causal blocks exchange and transform allowed information. A vocabulary head produces logits at every position. Only the final current position supplies scores for the next unknown character.\nExample: ROMEO: has six characters, giving IDs [1,6] for one example. Positioned vectors have [1,6,d], and logits have [1,6,V], where d is width and V vocabulary size. Selecting the last row gives [1,V]. Sampling appends an ID while learned weights remain fixed.\nAsk: Can the next prediction use characters that have not been generated?\nAnswer: No. It uses the current prefix and repeats after one character is appended.\nWatch out: The embedding lookup and contextual representation are different stages. Fluent text alone does not demonstrate knowledge, and generation does not update weights."
     },
     {
       "id": "mechanism",
       "insert_before_title": "Queries, keys and values",
       "title": "Inside one attention head",
-      "subtitle": "Turn comparisons between tokens into a mixture of information",
+      "subtitle": "Match; then mix.",
       "steps": [
         {
-          "title": "Inputs X",
-          "detail": "3 tokens; 2 features",
-          "code": "attention",
-          "role": "data"
+          "title": "Read",
+          "detail": "X",
+          "role": "data",
+          "code": ""
         },
         {
-          "title": "Project QKV",
-          "detail": "Query, key, value",
+          "title": "Project",
+          "detail": "Q/K/V",
+          "role": "model",
           "code": "qkv",
-          "role": "model"
+          "code_owner": true
         },
         {
-          "title": "Score QK",
-          "detail": "QKᵀ / √2",
-          "code": "attention",
-          "role": "model"
+          "title": "Compare; scale",
+          "detail": "q·k ÷ √2",
+          "role": "model",
+          "code": "scores",
+          "code_owner": true
         },
         {
-          "title": "Apply mask",
-          "detail": "Block future positions",
-          "code": "causal_mask",
-          "role": "model"
+          "title": "Mask",
+          "detail": "Future",
+          "role": "model",
+          "code": ""
         },
         {
-          "title": "Row softmax",
-          "detail": "Row sums are 1",
-          "code": "attention",
-          "role": "model"
+          "title": "Normalise",
+          "detail": "Row softmax",
+          "role": "model",
+          "code": "weights",
+          "code_owner": true
         },
         {
-          "title": "Weights × V",
-          "detail": "Mix values; 3 new vectors",
-          "code": "attention",
-          "role": "output"
+          "title": "Mix",
+          "detail": "Values",
+          "role": "output",
+          "code": ""
         }
       ],
       "arrows": [
-        "X [3,2]",
-        "Q,K [3,2]",
-        "scores [3,3]",
-        "masked scores",
-        "weights [3,3]"
+        "X[3,2]",
+        "Q/K[3,2]",
+        "scores[3,3]",
+        "masked[3,3]",
+        "weights[3,3]"
       ],
       "trace": [
         "In the lecture example, cat's query is [1, 0].",
@@ -149,66 +180,71 @@
         "With a causal mask at the first position, later tokens receive zero weight."
       ],
       "explanation": "A query describes the information a token seeks; a key supplies features for matching; a value carries the information passed onward. These are learned numerical projections, rather than literal questions or words. A dot product compares each query with every key. Dividing by the square root of the key dimension controls the scale of those comparisons. A causal mask, when used, removes future positions before softmax turns each row into weights. Multiplying those weights by the values gives one new vector per query. Multi-head attention performs this process in several smaller vector spaces, then joins their outputs. Printing shapes helps: the score table is token positions by token positions, while the output still has one vector per position. A bright attention cell describes information routing and does not by itself explain a prediction.",
-      "check_question": "Do attention weights mix the key vectors or the value vectors to form the output?",
+      "check_question": "Mix keys or values?",
       "check_answer": "They mix the value vectors. Keys are used to calculate the matching scores.",
       "layout": "linear",
       "branches": [
         {
-          "to": 5,
-          "label": "V [3,2] carries the information",
           "from": 1,
+          "to": 5,
+          "label": "V[3,2]",
           "lane": "bottom"
         }
-      ]
+      ],
+      "notes": "In short: The attention pipeline makes weights from queries and keys, while values arrive on their own branch.\nExplain: Projection creates Q, K and V vectors. Query-key dot products make scores. Scaling controls their magnitude. A mask blocks disallowed positions before softmax. Row weights then multiply values to make the output mixture.\nExample: For three positions and two features, Q and K are [3,2], while scores and weights are [3,3]. Values [3,2] give output [3,2]. In the supplied unmasked example, cat weights are approximately [0.40,0.20,0.40], giving output approximately [0.60,0.40]. These vectors illustrate arithmetic rather than learned word meanings.\nAsk: Which branch supplies information rather than matching scores?\nAnswer: The value branch supplies the vectors mixed at the final operation.\nWatch out: A finite zero score keeps positive softmax weight. Blocking requires a negative-infinity score, and each row must retain at least one allowed key."
     },
     {
       "id": "lab",
-      "title": "Build, train and inspect",
-      "subtitle": "Connect each experiment to the function that performs it",
+      "title": "Trace one character-training step",
+      "subtitle": "Independent inspections stay separate.",
       "steps": [
         {
-          "title": "Check maths",
-          "detail": "Match attention; test mask",
-          "code": "attention",
-          "role": "tool"
-        },
-        {
-          "title": "Build model",
-          "detail": "Join heads; add residuals",
-          "code": "Block",
-          "role": "model"
-        },
-        {
-          "title": "Make batches",
-          "detail": "Inputs and shifted answers",
+          "title": "Batch",
+          "detail": "Inputs; targets",
+          "role": "data",
           "code": "get_batch",
-          "role": "data"
+          "code_owner": true
         },
         {
-          "title": "Train model",
-          "detail": "Loss then gradient update",
-          "code": "gpt / opt",
-          "role": "loss"
+          "title": "Predict",
+          "detail": "Logits",
+          "role": "model",
+          "code": "gpt",
+          "code_owner": true
         },
         {
-          "title": "Check output",
-          "detail": "Held-out loss; generated text",
+          "title": "Compare",
+          "detail": "Targets",
+          "role": "loss",
+          "code": ""
+        },
+        {
+          "title": "Backward",
+          "detail": "Gradients",
+          "role": "loss",
+          "code": ""
+        },
+        {
+          "title": "Step",
+          "detail": "Weights",
+          "role": "loss",
+          "code": "opt.step",
+          "code_owner": true
+        },
+        {
+          "title": "Validate",
+          "detail": "Separate text",
+          "role": "metric",
           "code": "val_loss",
-          "role": "output"
-        },
-        {
-          "title": "Inspect heads",
-          "detail": "Separate BERT and GPT-2",
-          "code": "bert_att",
-          "role": "tool"
+          "code_owner": true
         }
       ],
       "arrows": [
-        "checked operation",
-        "model components",
-        "input + target IDs",
-        "trained weights",
-        "inspection ready"
+        "IDs[B,T]",
+        "logits[B,T,V]",
+        "loss",
+        "gradients",
+        "weights"
       ],
       "trace": [
         "First verify that future positions get zero weight in a masked test.",
@@ -218,59 +254,78 @@
         "Finally, inspect separate pretrained models; their weights were not trained by CharGPT."
       ],
       "explanation": "The lab begins with a small numerical operation and builds upward. First, attention is checked against a worked example and PyTorch. Next, MultiHeadAttention handles parallel heads, while Block adds normalisation, a per-position feed-forward network and residual additions. The get_batch function returns input characters and targets shifted one position ahead. The training loop computes cross-entropy, a measure of prediction error, and the optimizer updates parameters using gradients. The val_loss function measures error on the separate validation text. Perplexity summarises that uncertainty, but character perplexity cannot be compared directly with word-piece perplexity. The final inspection is a separate experiment with pretrained BERT and GPT-2. GPT-2's representation at 'it' cannot depend on 'tired' or 'wide' occurring later; unchanged attention there is the expected consequence of causality.",
-      "check_question": "Which function supplies the known next characters during training, and which evaluates separate text?",
-      "check_answer": "get_batch supplies shifted targets; val_loss evaluates batches drawn from val_data.",
-      "layout": "linear"
+      "check_question": "Validation changes weights?",
+      "check_answer": "No. val_loss runs under no_grad on val_data and never calls the optimiser; only training batches from get_batch update weights.",
+      "layout": "linear",
+      "notes": "In short: This flow shows the character-training experiment; the numerical checks and pretrained inspection remain separate activities.\nExplain: get_batch supplies inputs and shifted targets. CharGPT predicts vocabulary logits. Cross-entropy compares them with the target IDs. Backward computes gradients. The optimiser changes weights, and validation evaluates separate text without an update.\nExample: For B examples, T positions and V vocabulary items, [B,T] inputs become [B,T,V] logits before a scalar loss. The score comparison consumes target IDs directly; those targets do not pass through embedding or attention. Optional BERT and GPT-2 inspection use other weights and inputs, so their plots are not downstream data from this training loop.\nAsk: Which function evaluates separate development text?\nAnswer: val_loss, using batches from val_data and evaluation mode.\nWatch out: The local corpus is a limited teaching example. Record its scope, actual samples and measurements rather than claiming broad writing ability or archive-equivalent outcomes.",
+      "branches": [
+        {
+          "from": 0,
+          "to": 2,
+          "label": "targets[B,T]",
+          "lane": "bottom"
+        }
+      ]
     },
     {
       "id": "training",
       "title": "Train next-character predictions with known targets",
       "insert_before_title": "Training objectives",
-      "subtitle": "B is batch size; T is sequence length; d is vector size; V is vocabulary size.",
+      "subtitle": "Targets bypass representations.",
       "steps": [
         {
-          "title": "Shift text",
-          "detail": "cat inputs; ats targets",
+          "title": "Batch",
+          "detail": "Shifted",
+          "role": "data",
           "code": "get_batch",
-          "role": "data"
+          "code_owner": true
         },
         {
-          "title": "Embed IDs",
-          "detail": "Add token and position vectors",
-          "code": "tok + pos",
-          "role": "model"
+          "title": "Embed",
+          "detail": "Positions",
+          "role": "model",
+          "code": ""
         },
         {
-          "title": "Causal blocks",
-          "detail": "Use present and past inputs",
-          "code": "Block",
-          "role": "model"
+          "title": "Transform",
+          "detail": "Causal",
+          "role": "model",
+          "code": ""
         },
         {
-          "title": "Token scores",
-          "detail": "One vocabulary row per input",
+          "title": "Score",
+          "detail": "Vocabulary",
+          "role": "model",
           "code": "head",
-          "role": "model"
+          "code_owner": true
         },
         {
           "title": "Compare",
-          "detail": "Cross-entropy with targets",
-          "code": "forward",
-          "role": "loss"
+          "detail": "Targets",
+          "role": "loss",
+          "code": ""
+        },
+        {
+          "title": "Backward",
+          "detail": "Gradients",
+          "role": "loss",
+          "code": ""
         },
         {
           "title": "Update",
-          "detail": "Use gradients; change weights",
+          "detail": "Weights",
+          "role": "loss",
           "code": "opt.step",
-          "role": "loss"
+          "code_owner": true
         }
       ],
       "arrows": [
-        "input IDs [B,T]",
-        "X [B,T,d]",
-        "H [B,T,d]",
-        "logits [B,T,V]",
-        "scalar loss"
+        "IDs[B,T]",
+        "X[B,T,d]",
+        "H[B,T,d]",
+        "logits[B,T,V]",
+        "loss",
+        "gradients"
       ],
       "explanation": "Next-character training uses the source text to supply targets. The get_batch function chooses a segment for inputs and the following characters for targets. The model turns inputs into token and position vectors, then processes them with causal transformer blocks. The causal mask stops a position from reading later input characters. A vocabulary head returns next-character scores at every position. Cross-entropy compares those scores with the known targets. Backpropagation and the optimiser update weights. The val_loss function measures predictability on text held separate from training.",
       "trace": [
@@ -279,69 +334,72 @@
         "The mask lets each position see its own input and earlier positions.",
         "One forward pass supplies all three prediction losses. The optimiser then takes a training step."
       ],
-      "check_question": "Where do the target labels come from?",
+      "check_question": "Where do targets originate?",
       "check_answer": "The next characters in the training text. A person does not need to label every example.",
-      "feedback": "Repeat: the optimiser updates all trainable model parameters.",
-      "feedback_to": 1,
       "layout": "linear",
       "branches": [
         {
           "from": 0,
           "to": 4,
-          "label": "known targets [B,T]: ats",
+          "label": "targets[B,T]",
           "lane": "bottom"
         }
-      ]
+      ],
+      "feedback": "Fresh batch",
+      "feedback_to": 0,
+      "feedback_from": 6,
+      "notes": "In short: Next-character targets bypass the representation path and join predicted scores at the training loss.\nExplain: get_batch returns matching input and target shapes. Inputs pass through token-position lookups and causal blocks. The vocabulary head scores possible next characters. Cross-entropy compares these scores with targets. Gradients and an optimiser step update learned parameters.\nExample: From cats, cat predicts ats. The c input predicts a while reading only c; the a input predicts t while reading c and a. One masked forward pass can score all three positions. The target branch carries the known answers directly into the comparison rather than leaking them into earlier representations.\nAsk: Where do these target labels come from?\nAnswer: The following characters in the text, rather than manually assigned class labels.\nWatch out: Shifting targets is not a replacement for masking. Validation must avoid updates, and repeated validation checks are development evidence rather than a frozen final test."
     },
     {
       "id": "inference",
       "title": "Generate with a small decoder transformer",
       "insert_before_title": "Faster generation: the KV cache",
-      "subtitle": "Inference repeatedly adds a chosen character to the existing prefix.",
+      "subtitle": "Evaluation mode; fixed weights.",
       "steps": [
         {
-          "title": "Prefix text",
-          "detail": "Start with ROMEO:",
-          "code": "text",
-          "role": "data"
+          "title": "Encode; crop",
+          "detail": "Prefix",
+          "role": "data",
+          "code": ""
         },
         {
-          "title": "Encode IDs",
-          "detail": "Keep last CTX characters",
-          "code": "stoi",
-          "role": "data"
+          "title": "Predict",
+          "detail": "Scores",
+          "role": "model",
+          "code": "gpt",
+          "code_owner": true
         },
         {
-          "title": "Run model",
-          "detail": "Trained weights stay fixed",
-          "code": "forward",
-          "role": "model"
+          "title": "Select",
+          "detail": "Last row",
+          "role": "model",
+          "code": ""
         },
         {
-          "title": "Last scores",
-          "detail": "Use final position logits",
-          "code": "head",
-          "role": "model"
+          "title": "Rescale; normalise",
+          "detail": "Temperature",
+          "role": "model",
+          "code": ""
         },
         {
-          "title": "Sample ID",
-          "detail": "Temperature; then softmax",
-          "code": "generate",
-          "role": "model"
+          "title": "Sample",
+          "detail": "ID",
+          "role": "model",
+          "code": ""
         },
         {
-          "title": "Append ID",
-          "detail": "Read with itos; extend prefix",
-          "code": "itos",
-          "role": "output"
+          "title": "Append",
+          "detail": "Prefix",
+          "role": "output",
+          "code": ""
         }
       ],
       "arrows": [
-        "6 characters",
-        "IDs [1,T]",
-        "logits [1,T,V]",
-        "last row [V]",
-        "one token ID"
+        "IDs[1,T]",
+        "logits[1,T,V]",
+        "last[1,V]",
+        "P[1,V]",
+        "ID[1,1]"
       ],
       "explanation": "Generation begins with a prefix and uses fixed trained weights. CharGPT.generate keeps the most recent CTX characters, runs the model and reads only the last position's scores for the next character. It applies temperature and softmax, samples an ID, and appends it to the prefix. The next iteration uses the extended prefix. The lab's simple CharGPT recomputes its current context each time. Larger systems may cache earlier keys and values to reduce repeated work. Both approaches must preserve the causal rule.",
       "trace": [
@@ -350,17 +408,19 @@
         "If a space is sampled, append its ID and predict again from \"ROMEO: \".",
         "The prefix grows, while the stored model weights remain unchanged."
       ],
-      "check_question": "Why do we use the final position's logits to generate the next character?",
-      "check_answer": "That position represents the end of the current prefix. Earlier positions predict characters already inside the prefix.",
-      "feedback": "Repeat with the extended prefix; no training update.",
-      "feedback_to": 1,
-      "layout": "linear"
+      "check_question": "Do weights change?",
+      "check_answer": "No. Generation reuses the trained weights; only the prefix grows by one sampled character each step.",
+      "layout": "linear",
+      "feedback": "New prefix",
+      "feedback_to": 0,
+      "feedback_from": 5,
+      "notes": "In short: Generation repeatedly predicts one character from the current prefix without changing learned parameters.\nExplain: Encoding maps a prefix into IDs. The model keeps the latest context window. Its final position produces logits for the next character. Temperature rescales those logits before softmax and sampling. Appending the sampled ID creates the next prefix.\nExample: A prefix ROMEO: becomes [1,6]. The model returns [1,6,V] scores, from which generation selects [1,V]. If a space is sampled, the next input is ROMEO: followed by that space. CharGPT recomputes its context; the separate optional cache benchmark reuses larger-model key-value states.\nAsk: Why select the final position’s scores?\nAnswer: They predict the next character after the complete existing prefix; earlier positions predict characters already inside it.\nWatch out: Use eval to disable dropout and no_grad to avoid gradient recording. They are separate controls, and the unknown next token cannot provide the current query."
     }
   ],
   "glossary": [
     {
       "term": "Embedding",
-      "meaning": "A learned vector looked up from a token ID."
+      "meaning": "A numerical vector representing an item, often learned, for prediction or comparison."
     },
     {
       "term": "Causal mask",
@@ -376,7 +436,7 @@
     },
     {
       "term": "Logit",
-      "meaning": "An unnormalised model score for a possible output token."
+      "meaning": "An unnormalised model score. Sigmoid or softmax can turn logits into probabilities."
     },
     {
       "term": "Perplexity",
@@ -397,6 +457,10 @@
     {
       "term": "Query, key and value",
       "meaning": "Learned vectors used to compare tokens and mix their information."
+    },
+    {
+      "term": "Attention mask",
+      "meaning": "Rules marking which token pairs an attention operation may use; Boolean conventions vary by API."
     }
   ],
   "pitfalls": [
@@ -440,40 +504,42 @@
     "title": "What we learned: transformers",
     "cards": [
       {
-        "title": "Text becomes numbers",
-        "text": "IDs select vectors; positions tell the model where tokens occur.",
+        "title": "Vectors",
+        "text": "IDs plus positions.",
         "role": "data"
       },
       {
-        "title": "Attention mixes values",
-        "text": "Queries match keys; row weights mix the value vectors.",
+        "title": "Attention",
+        "text": "Mix values.",
         "role": "model"
       },
       {
-        "title": "Build a block",
-        "text": "Join heads, add residuals, and transform each position.",
+        "title": "Blocks",
+        "text": "Add corrections.",
         "role": "model"
       },
       {
-        "title": "Learn from targets",
-        "text": "Shift the text, measure prediction loss, then update weights.",
+        "title": "Training",
+        "text": "Update weights.",
         "role": "loss"
       },
       {
-        "title": "Generate with a prefix",
-        "text": "Block future inputs; sample and append; learned weights stay fixed.",
+        "title": "Generation",
+        "text": "Extend prefix.",
         "role": "output"
       },
       {
-        "title": "Check evidence and cost",
-        "text": "Inspect loss and samples; caching saves work; routing is not explanation.",
-        "role": "tool"
+        "title": "Evidence",
+        "text": "Routing limits.",
+        "role": "metric"
       }
     ],
-    "example": "cat → ats targets; attention weights [0.401, 0.198, 0.401] mix V to give [0.602, 0.398].",
-    "question": "What changes during training, and what changes during generation?",
+    "example": "Illustration: [2,0,0] → [0.79,0.11,0.11].",
+    "question": "Training or generation changes weights?",
     "answer": "Training changes parameters using target errors. Generation keeps them fixed and extends the prefix.",
-    "next": "In Week 6 we see how large language models learn, decode and differ.",
-    "notes": "Say: Rebuild today’s system from memory. Text becomes IDs, then positioned vectors. Queries compare with keys; the resulting weights mix values. Several heads and residual additions form a block. Training uses known next-character targets and changes parameters. Generation extends a prefix with fixed parameters. Analogy: practice changes a musician’s skill; performance uses it. Ask the class to trace cat and its shifted targets ats. Common mistake: an attention weight, a low perplexity or a fluent sample does not prove factual understanding. Mention that KV caches save repeated work, expert routing selects networks, and patches or audio can supply other input sequences."
-  }
+    "next": "Next: LLM training.",
+    "notes": "In short: Correct information access, numerical mixtures and evidence interpretation connect the whole transformer lesson.\nExplain: Token IDs select vectors, and positions provide order. Queries compare with keys. Row weights mix values. Residuals add corrections to their inputs. Training changes weights while generation changes the prefix.\nExample: Use the supplied [2,0,0] score row to recover approximately [0.79,0.11,0.11]. Then trace cat and ats to show where the mask hides future inputs. Neither a correctly normalised row nor an attractive continuation proves truthfulness, coherence or a complete explanation of the model’s decisions.\nAsk: What changes during training and during generation?\nAnswer: Training changes parameters using target errors. Generation holds them fixed and appends a selected character.\nWatch out: Report dataset, tokenizer, settings and limitations. A cache reduces repeated work, while expert routing selects networks; neither removes the need to evaluate the outputs."
+  },
+  "vocabulary_count": 6,
+  "vocabulary_notes": "In short: Use the prerequisite terms to describe the numerical input, target and mask before implementing attention.\nExplain: A vector is an ordered list of numbers. A matrix shape names row and column counts. A target is the known answer used to score a prediction. An embedding supplies a learned vector for an ID. Softmax turns a score row into probabilities. A causal mask blocks later input positions.\nExample: For input cat from cats, the target is ats. Three characters looked up at width eight give [3,8]. Vocabulary IDs identify characters, while row indices identify positions. This separates the catalogue lookup analogy from target shifting and avoids treating a larger ID as a more important character.\nAsk: Do inputs and shifted targets have different sequence lengths?\nAnswer: No. Each input position has one following-character target.\nWatch out: Explain named axes before reshaping. An attention mask and positional information solve different problems, and neither is a known target."
 }

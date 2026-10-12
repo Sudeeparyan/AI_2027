@@ -23,6 +23,7 @@ import nbformat
 import yaml
 
 import beginner
+import lecture_flows
 
 ROOT = Path(__file__).resolve().parents[1]
 NS = {
@@ -232,7 +233,7 @@ def verify_schema(week: int, data: dict, original: dict) -> dict:
             require(all(isinstance(step.get(k), str) for k in ("title", "detail", "code")), "invalid step fields")
             require(bool(step["title"].strip()) and bool(step["detail"].strip()), "empty step text")
             require(len(step["detail"].split()) <= 12, f"{diagram['id']}: detail exceeds 12 words")
-            require(step.get("role", "model") in {"input", "data", "model", "loss", "output", "human", "tool"},
+            require(step.get("role", "model") in {"input", "data", "model", "loss", "metric", "output", "human", "tool"},
                     f"{diagram['id']}: unknown block role")
         for branch in diagram.get("branches", []):
             require(all(isinstance(branch.get(k), int) and 0 <= branch[k] < len(steps) for k in ("from", "to")),
@@ -281,6 +282,12 @@ def verify_spec(spec: dict, data: dict) -> dict:
             following = next((s for s in slides[index + 1:] if not s.get("beginner_support")), None)
             require(following and following.get("title") == authored["insert_before_title"],
                     "diagram slide does not precede its exact core anchor")
+    for number, slide in enumerate(slides, 1):
+        if lecture_flows.annotated(slide):
+            require(not lecture_flows.errors(slide), f"slide {number}: invalid authored lecture flow")
+            require(slide.get("flow_asset") == f"lecture_flow_{number:02d}", f"slide {number}: missing lecture-flow asset")
+            require(bool(spec.get("assets", {}).get("figures", {}).get(slide["flow_asset"], {}).get("scene")),
+                    f"slide {number}: missing shared editable lecture scene")
     return {"slides": expected, "technical_slides": [i + 1 for i, _ in technical], "vocabulary_slides": 1}
 
 
@@ -294,7 +301,7 @@ def verify_pptx(path: Path, spec: dict) -> dict:
         presentation = ET.fromstring(archive.read("ppt/presentation.xml"))
         require(len(presentation.findall("p:sldIdLst/p:sldId", NS)) == expected, "PPTX slide order has wrong count")
         for number, slide in enumerate(spec["slides"], 1):
-            figure_asset = spec.get("assets", {}).get("figures", {}).get(slide.get("figure"), {})
+            figure_asset = spec.get("assets", {}).get("figures", {}).get(slide.get("figure") or slide.get("flow_asset"), {})
             if figure_asset.get("scene"):
                 figure_root = ET.fromstring(archive.read(f"ppt/slides/slide{number}.xml"))
                 require(not figure_root.findall(".//p:pic", NS), f"slide {number}: editable scene was rasterised")
@@ -302,7 +309,7 @@ def verify_pptx(path: Path, spec: dict) -> dict:
                 labels = [item["text"] for item in figure_asset["scene"]["items"] if item["kind"] == "text"]
                 for label in labels:
                     require(normalise(label) in visible_text, f"slide {number}: scene text missing: {label!r}")
-                editable_figures.append({"slide": number, "figure": slide["figure"], "scene_texts": len(labels), "pictures": 0})
+                editable_figures.append({"slide": number, "figure": slide.get("figure") or slide["flow_asset"], "scene_texts": len(labels), "pictures": 0})
             if slide.get("type") != "technical":
                 continue
             root = ET.fromstring(archive.read(f"ppt/slides/slide{number}.xml"))
@@ -318,7 +325,8 @@ def verify_pptx(path: Path, spec: dict) -> dict:
             require(pictures == 0, f"slide {number}: contains {pictures} pictures instead of a fully native technical diagram")
             text = normalise(" ".join(t.text or "" for t in root.findall(".//a:t", NS)))
             labels = [diagram["title"], diagram["subtitle"]]
-            labels += [value for step in diagram["steps"] for value in (step["title"], step["detail"], step["code"]) if value]
+            labels += [value for step in diagram["steps"]
+                       for value in (step["title"], step["detail"], step["code"] if step.get("code_owner") is True else "") if value]
             labels += [a for a in diagram["arrows"] if a]
             labels += [b["label"] for b in diagram.get("branches", [])]
             if diagram.get("feedback"):
@@ -330,7 +338,7 @@ def verify_pptx(path: Path, spec: dict) -> dict:
     return {"slide_count": expected, "technical": metrics, "editable_figures": editable_figures}
 
 
-def verify_docx(path: Path, data: dict, diagram_dir: Path) -> dict:
+def verify_docx(path: Path, data: dict, diagram_dir: Path, spec: dict | None = None) -> dict:
     with zipfile.ZipFile(path) as archive:
         root = ET.fromstring(archive.read("word/document.xml"))
         text = normalise(" ".join(t.text or "" for t in root.findall(".//w:t", NS)))
@@ -349,16 +357,23 @@ def verify_docx(path: Path, data: dict, diagram_dir: Path) -> dict:
         for image in diagram_dir.glob("beginner_*.png"):
             require(hashlib.sha256(image.read_bytes()).hexdigest() in hashes,
                     f"DOCX missing exact shared support image {image.name}")
-    return {"beginner_titles": len(data["diagrams"]), "embedded_beginner_images": len(data["diagrams"]), "total_media": len(media)}
+        for identifier in lecture_flows.asset_ids(spec):
+            image = diagram_dir / f"{identifier}.png"
+            require(hashlib.sha256(image.read_bytes()).hexdigest() in hashes,
+                    f"DOCX missing exact shared lecture flow {image.name}")
+    return {"beginner_titles": len(data["diagrams"]), "embedded_beginner_images": len(data["diagrams"]),
+            "embedded_lecture_flows": len(lecture_flows.asset_ids(spec)), "total_media": len(media)}
 
 
-def verify_diagrams(directory: Path, data: dict) -> dict:
+def verify_diagrams(directory: Path, data: dict, spec: dict | None = None, lab_source: str = "") -> dict:
     pngs = sorted(directory.glob("*.png"))
     svgs = sorted(directory.glob("*.svg"))
     expected = {f"beginner_{d['id']}" for d in data["diagrams"]}
     expected.add("beginner_course_map")
     if data.get("recap"):
         expected.add("beginner_recap")
+    expected.update(lecture_flows.asset_ids(spec))
+    expected.update(re.findall(r"\(fig:([\w-]+)\)", lab_source))
     require({p.stem for p in pngs} == expected, "Diagrams directory PNGs differ from authored diagrams")
     require({p.stem for p in svgs} == expected, "Diagrams directory SVGs differ from authored diagrams")
     for path in pngs:
@@ -392,10 +407,23 @@ def verify_notebook(path: Path, diagram_dir: Path, student: bool, lab_source: st
                 require(raw.startswith(PNG_SIGNATURE), f"cell {index}: attachment {reference} has invalid PNG bytes")
                 require(raw == (diagram_dir / reference).read_bytes(), f"cell {index}: attachment differs from {reference}")
                 references.append(reference)
-    expected_images = {p.name for p in diagram_dir.glob("*.png")}
+    # Every support diagram travels with every lab; lecture flows are optional
+    # and appear only where the authored lab references them. Preserve variant
+    # exclusions and answer-marker transformations when deriving those refs.
+    from build_week import parse_percent, student_md, solution_md
+    authored_refs = set()
+    for authored in parse_percent(lab_source):
+        if authored["type"] != "markdown" or (student and "solution-only" in authored["tags"]):
+            continue
+        transform = student_md if student else solution_md
+        text = "\n".join(transform(authored["lines"]))
+        authored_refs.update(re.findall(r"\(fig:([\w-]+)\)", text))
+    expected_images = {p.name for p in diagram_dir.glob("beginner_*.png")} | {fid + ".png" for fid in authored_refs}
     require(len(references) == len(expected_images) and set(references) == expected_images,
-            f"expected every authored diagram once, found {references}")
-    export = path.with_suffix(".py")
+            f"expected every required support/authored figure once, found {references}")
+    require(not path.with_suffix(".py").exists(), "deliverables must contain notebooks only, without Python exports")
+    week = int(re.search(r"Week_(\d+)_", path.name)[1])
+    export = ROOT / "build" / f"week_{week:02d}" / path.with_suffix(".py").name
     source = export.read_text(encoding="utf-8")
     compile(source, str(export), "exec")
     require(ast_dump(source) == ast_dump(expected_export_source(nb)), f"{export.name}: code AST differs from notebook")
@@ -405,6 +433,9 @@ def verify_notebook(path: Path, diagram_dir: Path, student: bool, lab_source: st
     if student:
         require(not MARKERS.search(source), f"{export.name}: solution/answer/stub marker leaked")
     excluded = check_excluded_source_cells(nb, lab_source) if student else 0
+    require(sum("shared-setup" in c.metadata.get("tags", []) for c in nb.cells) == 1,
+            "notebook must contain exactly one shared setup cell")
+    require("accelerator" not in nb.metadata, "core notebook must not request a GPU")
     return {"nbformat_valid": True, "cells": len(nb.cells), "resolved_png_references": len(references),
             "code_compiles": True, "python_export_compiles": True, "matching_code_ast": True,
             "student_markers_clean": student, "excluded_source_cells_absent": excluded}
@@ -445,9 +476,9 @@ def audit_week(week: int) -> dict:
     diagrams = output / "Diagrams"
     check("schema", lambda: verify_schema(week, data, original))
     check("spec", lambda: verify_spec(spec, data))
-    check("diagrams", lambda: verify_diagrams(diagrams, data))
+    check("diagrams", lambda: verify_diagrams(diagrams, data, spec, lab))
     check("pptx", lambda: verify_pptx(output / f"Week_{week:02d}_Lecture_Slides.pptx", spec))
-    check("docx", lambda: verify_docx(output / f"Week_{week:02d}_Teaching_Notes.docx", data, diagrams))
+    check("docx", lambda: verify_docx(output / f"Week_{week:02d}_Teaching_Notes.docx", data, diagrams, spec))
     check("student_notebook_and_python", lambda: verify_notebook(output / f"Week_{week:02d}_Lab.ipynb", diagrams, True, lab))
     check("solution_notebook_and_python", lambda: verify_notebook(output / f"Week_{week:02d}_Lab_Solutions.ipynb", diagrams, False, lab))
     result["review_symbols"] = symbol_warnings(data, lab)

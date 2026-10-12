@@ -6,7 +6,24 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 
-from _style import ACCENT, INK, MUTED, PRIMARY, TEAL, TEXT, TINT, arrow, box, routed_arrow, save
+from _style import (ACCENT, INK, MUTED, PRIMARY, ROLE_COLORS, TEAL, TEXT, TINT, arrow, box, role_box,
+                    role_legend, routed_arrow, save as save_raster, save_editable_scene)
+
+BLUE, GREEN, LOSS = ROLE_COLORS["data"], ROLE_COLORS["model"], ROLE_COLORS["loss"]
+
+
+def save(fig, path, transparent=False):
+    # Block schematics become editable PowerPoint objects; charts and images stay raster.
+    if not transparent and all(not ax.axison and not ax.images for ax in fig.axes):
+        save_editable_scene(fig, path)
+    else:
+        save_raster(fig, path, transparent=transparent)
+
+
+def dashed_key(ax, x, y, label, size=18):
+    """Legend entry for dashed backward (gradient) routes."""
+    ax.plot([x, x + 0.5], [y + 0.11, y + 0.11], color=LOSS, lw=1.8, linestyle="--")
+    ax.text(x + 0.62, y + 0.11, label, fontsize=size, color=TEXT, va="center")
 
 # Full-width lecture figures use at least 18pt source labels.
 _LECTURE_LABELS = {"font.size": 18, "axes.labelsize": 18, "axes.titlesize": 20,
@@ -134,59 +151,63 @@ def cover(path):
 
 def vae_arch(path):
     fig, ax = plt.subplots(figsize=(13, 4.8))
+    fig.subplots_adjust(left=.01, right=.99, bottom=.02, top=.98)
     ax.axis("off")
     ax.set_xlim(0, 13)
     ax.set_ylim(0, 4.8)
-    box(ax, 0.1, 1.6, 1.5, 1.6, "input\nimage x", size=18)
-    box(ax, 2.2, 1.3, 2.0, 2.2, "Encoder\nqφ(z | x)", fc="white", size=18)
-    box(ax, 4.9, 2.6, 1.3, 0.9, "μ", fc=TINT, size=18)
-    box(ax, 4.9, 1.3, 1.3, 0.9, "log σ²", fc=TINT, size=18)
-    box(ax, 6.9, 1.8, 1.9, 1.2, "z = μ + σ ⊙ ε", fc=ORANGE, ec=ACCENT, size=18)
-    box(ax, 6.95, 3.6, 1.8, 0.8, "ε ~ N(0, I)", fc="white", ec=ACCENT, size=18, weight="normal")
-    box(ax, 9.4, 1.3, 2.0, 2.2, "Decoder\npθ(x | z)", fc="white", size=18)
-    box(ax, 11.8, 1.6, 1.1, 1.6, "x̂", size=18)
-    arrow(ax, 1.6, 2.4, 2.2, 2.4)
-    arrow(ax, 4.2, 2.8, 4.9, 3.05)
-    arrow(ax, 4.2, 2.0, 4.9, 1.75)
-    arrow(ax, 6.2, 3.05, 6.9, 2.6)
-    arrow(ax, 6.2, 1.75, 6.9, 2.2)
-    arrow(ax, 7.85, 3.6, 7.85, 3.0, color=ACCENT)
-    arrow(ax, 8.8, 2.4, 9.4, 2.4)
-    arrow(ax, 11.4, 2.4, 11.8, 2.4)
-    ax.text(0.9, 0.55, "Loss = reconstruction(x, x̂)  +  β · KL( qφ(z | x) ‖ N(0, I) )", fontsize=18, color=INK, fontweight="bold")
-    ax.text(4.55, 4.25, "the code is a distribution,\nnot a single point", fontsize=18, color=MUTED, ha="center")
+    entries = [(0.1, "Flatten\nx", "data"),
+               (2.7, "Encode\nμ, log σ²", "model"),
+               (5.3, "Sample\nz=μ+σε", "model"),
+               (7.9, "Decode\nlogits", "model"),
+               (10.5, "Reshape\n[B,28,28]", "output")]
+    for left, text, role in entries:
+        role_box(ax, left, 1.55, 2.0, 1.3, text, role, size=18)
+    labels = ["x [B,784]", "μ, logvar [B,d]", "z [B,d]", "logits [B,784]"]
+    for left, label in zip([2.1, 4.7, 7.3, 9.9], labels):
+        arrow(ax, left, 2.2, left + 0.6, 2.2, color=GREEN)
+        ax.text(left + 0.3, 1.2, label, ha="center", va="center", fontsize=18, color=BLUE)
+    # The noise is an independent input: nothing flows into it from the encoder.
+    role_box(ax, 5.3, 3.75, 2.0, 0.75, "Draw ε~N(0,I)", "data", size=18)
+    arrow(ax, 6.3, 3.75, 6.3, 2.85, color=GREEN)
+    ax.text(6.45, 3.3, "ε [B,d]", fontsize=18, ha="left", va="center", color=BLUE)
+    ax.text(6.5, 0.72, "Loss: reconstruction + β × KL", fontsize=18,
+            ha="center", va="center", color=TEXT)
+    role_legend(ax, 0.08, size=18)
     save(fig, path)
 
 
 def reparam(path):
     fig, axes = plt.subplots(1, 2, figsize=(13, 4.6))
-    for a in axes:
-        a.axis("off")
-        a.set_xlim(0, 6)
-        a.set_ylim(0.6, 5.0)
-    red = "#B91C1C"
-    a = axes[0]
-    a.set_title("Sampling directly: the gradient stops", loc="left", fontsize=18, color=INK)
-    box(a, 0.2, 2.9, 1.2, 0.8, "μ, σ", fc=TINT, size=18)
-    box(a, 2.3, 2.7, 1.6, 1.2, "sample\nz ~ N(μ, σ²)", fc=ORANGE, ec=ACCENT, size=18)
-    box(a, 4.6, 2.9, 1.2, 0.8, "loss", size=18)
-    arrow(a, 1.4, 3.5, 2.3, 3.5)
-    arrow(a, 3.9, 3.5, 4.6, 3.5)
-    # The backward (gradient) arrow reaches the random draw and stops there.
-    a.annotate("", xy=(3.9, 3.05), xytext=(4.6, 3.05), arrowprops=dict(arrowstyle="-|>", color=red, lw=2, ls="--"))
-    a.text(1.0, 1.9, "✗ gradient cannot pass through a random draw,\n   so μ and σ (and the encoder) never learn", color=red, fontsize=17, va="top")
-    b = axes[1]
-    b.set_title("Reparameterised: noise is an input", loc="left", fontsize=18, color=INK)
-    box(b, 0.2, 2.9, 1.2, 0.8, "μ, σ", fc=TINT, size=18)
-    box(b, 0.2, 0.9, 1.4, 0.8, "ε ~ N(0, I)", fc="white", ec=ACCENT, size=18, weight="normal")
-    box(b, 2.3, 2.7, 1.6, 1.2, "z = μ + σ ε", fc=TINT, size=18)
-    box(b, 4.6, 2.9, 1.2, 0.8, "loss", size=18)
-    arrow(b, 1.4, 3.5, 2.3, 3.5)
-    routed_arrow(b, [(1.6, 1.3), (3.1, 1.3), (3.1, 2.7)], color=ACCENT)
-    arrow(b, 3.9, 3.5, 4.6, 3.5)
-    # Gradients travel back from the loss through z to μ and σ (above the boxes, so no line crosses).
-    routed_arrow(b, [(5.2, 3.7), (5.2, 4.25), (0.8, 4.25), (0.8, 3.7)], color=TEAL, dashed=True)
-    b.text(3.0, 4.6, "✓ gradient flows back to μ and σ", color=TEAL, fontsize=17, ha="center", va="center")
+    for ax in axes:
+        ax.axis("off")
+        ax.set_xlim(0, 6)
+        ax.set_ylim(0.3, 5.0)
+    fig.subplots_adjust(left=.01, right=.99, bottom=.12, top=.9, wspace=.12)
+    left, right = axes
+    left.set_title("sample(): gradient stops", loc="left", fontsize=18, color=INK)
+    right.set_title("Independent noise", loc="left", fontsize=18, color=INK)
+    for ax in axes:
+        role_box(ax, 0.1, 2.5, 1.5, 1.0, "Encoder\nμ, σ", "data", size=18)
+        role_box(ax, 4.5, 2.5, 1.4, 1.0, "Loss", "loss", size=18)
+        arrow(ax, 1.6, 3.0, 2.2, 3.0, color=GREEN)
+        arrow(ax, 3.9, 3.0, 4.5, 3.0, color=GREEN)
+        ax.text(1.9, 2.2, "μ, σ", ha="center", va="center", fontsize=18, color=BLUE)
+        ax.text(4.2, 2.2, "z", ha="center", va="center", fontsize=18, color=BLUE)
+    role_box(left, 2.2, 2.5, 1.7, 1.0, "sample()", "model", size=18)
+    routed_arrow(left, [(5.2, 3.5), (5.2, 4.0), (3.05, 4.0), (3.05, 3.5)], color=LOSS, dashed=True)
+    left.text(4.1, 4.25, "Stopped", ha="center", va="center", fontsize=18, color=LOSS)
+    role_box(right, 2.2, 2.5, 1.7, 1.0, "Shift/scale\nμ+σε", "model", size=18)
+    role_box(right, 2.2, 0.75, 1.7, 0.75, "Draw ε", "data", size=18)
+    arrow(right, 3.05, 1.5, 3.05, 2.5, color=GREEN)
+    right.text(3.25, 2.0, "ε", va="center", fontsize=18, color=BLUE)
+    routed_arrow(right, [(5.2, 3.5), (5.2, 4.0), (0.85, 4.0), (0.85, 3.5)], color=LOSS, dashed=True)
+    right.text(3.0, 4.25, "Gradients: μ,σ", ha="center", va="center", fontsize=18, color=LOSS)
+    legend = fig.add_axes([.01, .0, .98, .09])
+    legend.set_xlim(0, 13)
+    legend.set_ylim(0, .4)
+    legend.axis("off")
+    role_legend(legend, .06, size=18)
+    dashed_key(legend, 8.0, .06, "Gradient (backward)")
     save(fig, path)
 
 
@@ -226,22 +247,23 @@ def beta_tradeoff(path):
 
 
 def ae_diagram(path):
-    fig, ax = plt.subplots(figsize=(12, 3.4))
+    fig, ax = plt.subplots(figsize=(13, 3.3))
+    fig.subplots_adjust(left=.01, right=.99, bottom=.02, top=.98)
     ax.axis("off")
-    ax.set_xlim(0, 12)
-    ax.set_ylim(0, 3.4)
-    ax.fill([2.0, 4.6, 4.6, 2.0], [0.4, 1.2, 2.2, 3.0], color=TINT, ec=PRIMARY, lw=1.5)
-    ax.fill([7.4, 10.0, 10.0, 7.4], [1.2, 0.4, 3.0, 2.2], color=TINT, ec=PRIMARY, lw=1.5)
-    box(ax, 5.2, 1.2, 1.6, 1.0, "code z", fc=ORANGE, ec=ACCENT, size=18)
-    box(ax, 0.1, 1.0, 1.5, 1.4, "x\n784 pixels", size=18)
-    box(ax, 10.4, 1.0, 1.5, 1.4, "x̂\n784 pixels", size=18)
-    ax.text(3.3, 1.7, "Encoder", ha="center", fontsize=18, fontweight="bold", color=INK)
-    ax.text(8.7, 1.7, "Decoder", ha="center", fontsize=18, fontweight="bold", color=INK)
-    ax.text(6.0, 0.16, "bottleneck, e.g. 2–32 numbers", ha="center", fontsize=18, color=MUTED)
-    arrow(ax, 1.6, 1.7, 2.0, 1.7)
-    arrow(ax, 4.6, 1.7, 5.2, 1.7)
-    arrow(ax, 6.8, 1.7, 7.4, 1.7)
-    arrow(ax, 10.0, 1.7, 10.4, 1.7)
+    ax.set_xlim(0, 13)
+    ax.set_ylim(0, 3.3)
+    entries = [(0.2, "Flatten\n[B,1,28,28]", "data"),
+               (3.4, "Encode\nshort code", "model"),
+               (6.6, "Decode\nlogits", "model"),
+               (9.8, "Reshape\n[B,28,28]", "output")]
+    for left, text, role in entries:
+        role_box(ax, left, 1.2, 2.2, 1.2, text, role, size=18)
+    for left, label in [(2.4, "pixels [B,784]"), (5.6, "code [B,d]"), (8.8, "logits [B,784]")]:
+        arrow(ax, left, 1.8, left + 1.0, 1.8, color=GREEN)
+        ax.text(left + 0.5, 2.75, label, ha="center", va="center", fontsize=18, color=BLUE)
+    ax.text(6.4, 0.78, "d = 2 example; the loss compares the output with the original pixels", ha="center",
+            va="center", fontsize=18, color=TEXT)
+    role_legend(ax, 0.08, size=18)
     save(fig, path)
 
 

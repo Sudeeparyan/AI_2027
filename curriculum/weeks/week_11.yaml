@@ -42,31 +42,53 @@ coverage:
 slides:
 - type: title
   figure: cover
-  notes: 'Welcome to week 11, deployment and frameworks. So far we have used models inside notebooks. This week we turn a model
-    into something other people can use: an application with an interface and an API, running somewhere sensible, at an acceptable
-    cost and speed, with guardrails and monitoring. Every number on the "real" slides was measured by running this week''s lab
-    in advance, on a small open model, so students can reproduce them on Colab.
+  notes: 'In short: Deployment turns a model into an application people can use and maintain.
 
 
-    Ask students: What separates a notebook that works from an application other people can use?
+    Explain: A model predicts tokens, while an application receives requests and returns useful answers. Deployment means making
+    that complete system available. An interface serves people; an API connects programs through declared messages. Monitoring
+    records failures, time, token use and versions after requests arrive. Weights stay fixed during the serving experiments
+    in this lecture.
 
-    Expected answer: An interface or API, a place to run, controlled cost and speed, guardrails and monitoring.
+
+    Example: Imagine a course assistant answering one invented question in a notebook. Now imagine 500 students requesting answers.
+    The model is unchanged, but queues, access controls and operating responsibilities become essential. The classroom example
+    does not establish real concurrent capacity.
 
 
-    Common mistake: Treating deployment as copying the notebook to a server.'
+    Ask: What separates a working notebook from a maintained service?
+
+
+    Answer: Request handling, an interface, deployment choices, tests, controls and monitoring around the model.
+
+
+    Watch out: A successful single answer does not demonstrate reliable service for hundreds of simultaneous users.'
 - type: outcomes
-  notes: 'Six outcomes matching the descriptor''s week 11: frameworks; API platforms; deployment options; building applications
-    and interfaces; deploying and monitoring with standard tools; and comparison. The final outcome is the one examiners and
-    employers care about: justifying a deployment decision with evidence about latency, cost and quality rather than habit.
-    This week practises MIMLO 5, deploying generative AI with contemporary frameworks, together with MIMLO 3 and 4.
+  notes: 'In short: Choose and operate a deployment using evidence about quality, time, cost and data.
 
 
-    Ask students: Which outcome matters most to employers?
+    Explain: Serving means running an existing model for requests. Frameworks provide reusable components for model access or
+    application coordination. Quantisation represents weights with fewer values; batching processes requests together. Caching
+    reuses computation or completed answers. The full outcomes include building interfaces, packaging dependencies and monitoring
+    every reachable request route.
 
-    Expected answer: Justifying a deployment decision with evidence about latency, cost and quality.
+
+    Example: For a fictional course assistant, identify who owns the interface, model runtime and logs. Compare a local model
+    with a hosted API using the same questions. A comparison needs task quality as well as token counts; a cheap incorrect answer
+    is not sufficient.
 
 
-    Common mistake: Choosing a framework out of habit rather than for a specific need.'
+    Ask: Which evidence would justify choosing one deployment?
+
+
+    Answer: Task quality, request timing, total operating cost, data handling and maintenance constraints.
+
+
+    Watch out: Tool familiarity is useful, but it cannot replace measurements or the requirements of the actual task.'
+  items:
+  - Choose layers.
+  - Build interfaces.
+  - Measure operation.
 - type: agenda
   icon: fa:FaRoute
   items:
@@ -84,17 +106,27 @@ slides:
     minutes: 21
   - title: Lab preview and wrap-up
     minutes: 6
-  notes: 'The plan follows the revised descriptor. Sections two and three contain real measurements from the lab: streaming
-    latency, quantisation and batching. Take the break after section three. Sections four and five show the code students will
-    write in the lab and how to monitor and protect the application.
+  notes: 'In short: The course now connects trained models to usable systems and measured operation.
 
 
-    Ask students: Which sections contain real measurements?
+    Explain: Earlier weeks explained model families, prompting, evaluation and adaptation. This week adds serving, interfaces
+    and operating measurements. Serving uses fixed weights rather than changing them through training. Week twelve extends applications
+    with retrieval and controlled tools. Read the highlighted course position before naming the dependencies needed for the
+    lab.
 
-    Expected answer: Sections two and three: streaming latency, quantisation and batching.
+
+    Example: A student fine-tunes a classifier in an earlier week, then exposes its predictions through an API here. The training
+    notebook supplies weights; the application supplies request validation and responses. The course map shows conceptual dependencies
+    rather than an executable data pipeline.
 
 
-    Common mistake: Reading measurements from one laptop GPU as typical of every deployment.'
+    Ask: Does moving a model behind an API train its weights?
+
+
+    Answer: No. Deployment changes how requests reach the model; training requires a separate objective and update.
+
+
+    Watch out: Do not interpret every connection on the course map as a model-training step or a compulsory software dependency.'
 - type: discussion
   title: Warm-up
   icon: fa:FaUsers
@@ -103,397 +135,491 @@ slides:
   - Waiting time and capacity.
   - Cost and privacy.
   - Failures and operating responsibility.
-  notes: 'Two minutes in pairs. Collect answers under the four headings on the slide; together they are the agenda
-    for today. Students often mention speed first. Push them on cost: a public link to a paid API with no limits
-    can produce a large bill overnight. Push them on keys: API keys pasted into notebooks or GitHub are routinely
-    stolen by automated scanners. And on operations: without logs you do not know that the app is failing until
-    users complain.
+  notes: 'In short: More users create questions about capacity, privacy, cost and responsibility.
 
 
-    Analogy: A classroom tap works for one cup; serving 500 people needs measured flow, capacity and someone watching
-    for leaks.
+    Explain: Capacity is the workload a service can handle under stated conditions. Concurrent requests overlap in time and
+    can create queues. Latency measures how long a request waits. Throughput measures total completed work per unit time. Responsibility
+    includes deciding who diagnoses failures, controls access and keeps the application working.
 
 
-    Ask students: What changes when one notebook serves 500 students?
+    Example: Imagine 500 students each sending one question before a deadline. A notebook that answered one question tells us
+    little about that burst. Like a service counter, the application can develop a queue; unlike a simple counter, model requests
+    also vary in length.
 
-    Expected answer: Concurrent requests, waiting time, cost, failure handling and operating responsibilities all
-    need testing.
+
+    Ask: Which concern would you measure first for the deadline burst?
 
 
-    Common mistake: A successful single request does not demonstrate capacity for many simultaneous users.'
+    Answer: Measure arrival patterns, individual waits and errors, then compare capacity with the quality and budget requirements.
+
+
+    Watch out: A public demo link is an interface feature, not evidence of capacity, access control or reliable operation.'
 - type: section
   number: 1
   title: Frameworks and the tool stack
   question: Which tools exist, and which do you need?
   icon: fa:FaLayerGroup
-  notes: 'Section one maps the tool landscape into layers, compares the main frameworks named in the descriptor,
-    introduces the OpenAI-compatible API pattern that connects them, and discusses when an orchestration framework
-    helps and when plain code is better. Ask students which of these tools they have already used: most know a chat
-    assistant, few have called an API directly. About twenty minutes.
+  notes: 'In short: Separate the model, serving layer, application coordination and interface before choosing tools.
 
 
-    Analogy: A restaurant separates the menu, kitchen and waiter. Model libraries, servers and application code
-    likewise do different jobs.
+    Explain: The model computes token predictions from stored weights. A serving layer runs that computation for requests. Application
+    coordination connects prompts, retrieval, tools and checks. An interface presents controls to people or endpoints to programs.
+    These responsibilities can share one process, but they remain different design decisions.
 
 
-    Ask students: Does using a workflow framework automatically host the model?
+    Example: A restaurant separates the menu, waiter and kitchen. Similarly, Gradio displays controls while model code generates
+    answers. The analogy breaks when software components run together or call remote services; their physical location does
+    not define their responsibility.
 
-    Expected answer: No. Coordination, model execution and hosting are separate choices.
+
+    Ask: Does an orchestration framework automatically host the model?
 
 
-    Common mistake: An OpenAI-compatible endpoint may implement only a subset of the client features.'
+    Answer: No. Workflow coordination and model execution are separate choices, even when one package can connect them.
+
+
+    Watch out: An OpenAI-compatible endpoint can implement only part of the client format; always test the fields you need.'
 - type: figure
   title: The generative AI stack
   figure: stack
-  notes: 'Think in layers. At the bottom is hardware: cloud GPUs and TPUs, servers, laptops and phones with neural processing
-    units. Models are proprietary, reached only through APIs, or open-weight, downloaded from the Hugging Face Hub. The access
-    and serving layer is how you run a model: cloud APIs, self-hosted serving engines such as vLLM, or local runners such as
-    Ollama. Orchestration frameworks compose prompts, tools, retrieval and agents. At the top are applications and interfaces.
+  notes: 'In short: The stack assigns distinct responsibilities to hardware, models, serving, coordination and applications.
 
 
-    Ask students: In which layer do vLLM and Ollama sit?
+    Explain: Hardware supplies computation and memory. Model weights determine learned predictions, while generation settings
+    control inference. Serving accepts requests and invokes a model runtime. Orchestration connects multiple application operations.
+    Monitoring crosses these layers because a slow or incorrect answer can originate in several different places.
 
-    Expected answer: Access and serving: they run models; they are neither models nor orchestration frameworks.
+
+    Example: Trace a browser message through application code to a model on a laptop. The browser is an interface; the laptop
+    is hardware. A serving engine runs weights, whereas a retrieval framework finds evidence. The layer table classifies responsibilities
+    rather than passing data between its rows.
 
 
-    Common mistake: Confusing orchestration, such as LangChain, with model hosting.'
+    Ask: Where do vLLM and Ollama belong in this stack?
+
+
+    Answer: They provide ways to run and access models; they are serving or local-runtime tools.
+
+
+    Watch out: Do not label a model library, orchestration framework and hosting service as interchangeable products.'
 - type: table
   title: Frameworks and platforms at a glance
   header:
   - Tool
-  - Layer
-  - Use it for (example)
+  - Role
   rows:
   - - Hugging Face
-    - Models / hosting
-    - Download Qwen2.5-0.5B; host a demo
-  - - OpenAI / Azure
-    - Provider API
-    - Call a GPT model with a key
-  - - Gemini / Vertex
-    - Provider API
-    - Call Gemini; free tier in AI Studio
-  - - vLLM / SGLang / TGI
-    - Server
-    - Serve 50 users from one GPU
-  - - Ollama / llama.cpp / LM Studio
-    - Local
-    - Run a small model on a laptop
+    - Distribute models
+  - - OpenAI / Azure OpenAI
+    - Hosted API
+  - - Gemini API
+    - Hosted API
+  - - vLLM / Ollama
+    - Run models
   - - LangChain / LangGraph
-    - Coordination
-    - Chain retrieval, a model and tools
+    - Coordinate steps
   - - LlamaIndex
-    - Retrieval
-    - Index a handbook for search
-  notes: 'Walk through the table by layer. Hugging Face is the hub for open models and also offers hosted inference through
-    partner providers. OpenAI''s API and Microsoft''s Azure OpenAI serve GPT models; Azure adds enterprise features such as
-    private networking, regional data residency and compliance certifications, which matter to universities and companies. Google''s
-    Gemini API has a free tier through AI Studio, and Gemini Enterprise Agent Platform (formerly Vertex AI) is its enterprise route. vLLM is the most widely used open-source
-    serving engine for GPUs. Ollama makes local models easy.
+    - Retrieve evidence
+  notes: 'In short: Choose each named tool for its role rather than collecting frameworks without a need.
 
 
-    Ask students: Which tool would you use to run a small model on a laptop without a GPU?
+    Explain: Hugging Face offers model distribution and tools for running or accessing models. OpenAI, Azure OpenAI and Gemini
+    API provide hosted model access. vLLM and Ollama illustrate serving and local model execution. LangChain and LangGraph coordinate
+    application operations; LlamaIndex supports indexing and retrieval. Model availability, features and hosting conditions
+    require current official documentation.
 
-    Expected answer: A local runner such as Ollama or llama.cpp.
+
+    Example: For one laptop request, a local runtime may be sufficient. For a retrieval assistant, application code also needs
+    evidence selection. The table groups examples by role; it does not rank model quality or promise any account a free hosted
+    machine.
 
 
-    Common mistake: Choosing a GPU serving engine such as vLLM for one user on a laptop.'
+    Ask: Which kind of tool runs a small model locally?
+
+
+    Answer: A local model runtime, such as Ollama or direct Transformers code, subject to the device and model requirements.
+
+
+    Watch out: An example name is not a guarantee of current pricing, capacity, eligibility or identical behaviour across releases.'
 - type: figure
   title: 'One client, many back ends: the OpenAI-compatible API'
   figure: openai_compat
-  notes: 'Several providers and serving tools accept the basic OpenAI chat-completions format. Examples include compatible endpoints
-    from Gemini, Hugging Face, vLLM and Ollama. The lab builds a small compatible endpoint with FastAPI. Reuse the basic client
-    pattern by changing its base URL, key and model name. Then check supported fields, streaming behaviour and model features:
-    compatibility does not mean every endpoint has identical capabilities. Provider-specific features may need a native SDK.
+  notes: 'In short: A compatible API reuses a basic request format while backend capabilities can differ.
 
 
-    Ask students: Which three settings change when the client switches to another compatible back end?
+    Explain: A client is the program sending a request. An endpoint is the address and handler receiving it. Compatibility means
+    supporting specified request and response fields. It does not guarantee identical answers, tools, streaming or error behaviour.
+    Changing endpoints therefore requires feature checks and a repeated task evaluation.
 
-    Expected answer: The base URL, the key and the model name.
+
+    Example: Keep a messages list containing one user question, then change the endpoint, credential and model identity. The
+    local lab returns choices and usage fields in a compatible shape. It deliberately lacks the complete provider API, production
+    authentication and streaming response protocol.
 
 
-    Common mistake: Assuming every compatible endpoint supports every field, such as tools or streaming options.'
+    Ask: Which settings usually identify another compatible backend?
+
+
+    Answer: The endpoint address, its credential and the model identifier, followed by checks of required features.
+
+
+    Watch out: Compatibility concerns a contract between programs; it does not make their models equally capable or their data
+    terms identical.'
 - type: compare
   title: Plain SDK or orchestration framework?
   columns:
-  - head: Plain SDK + code
-    icon: fa:FaCode
+  - head: SDK + code
     points:
-    - Call and debug directly
-    - Own prompts, checks and retries
-    - 'Example: 30 lines that call the API and validate the JSON'
+    - Direct calls
+    - Explicit checks
+    - Simple debugging
   - head: Framework
-    icon: fa:FaProjectDiagram
     points:
-    - Connectors and tracked workflows
-    - Useful abstraction; more dependencies
-    - 'Example: a LangGraph agent with checkpoints and approval steps'
-  callout: Start simple; add a framework for a specific need.
-  notes: 'Students often assume they must use LangChain. Frameworks are useful when you need their connectors to data sources,
-    retrievers, state management for multi-step agents, or tracing integrations, and LangGraph in particular is designed for
-    controllable agent workflows. But they add abstraction layers, and their APIs change quickly, which makes debugging harder.
-    Guides from Anthropic and OpenAI on building agents recommend starting with direct API calls and simple code, and adding
-    frameworks only when they solve a real problem.
+    - Reusable connectors
+    - Managed state
+    - More dependencies
+  callout: Add coordination for a stated need.
+  notes: 'In short: An SDK is enough for a simple call; frameworks help when coordination becomes a real requirement.
 
 
-    Ask students: When does an orchestration framework earn its extra dependencies?
+    Explain: An SDK is a software library for communicating with a service. Plain code can format prompts, make calls and validate
+    results directly. Frameworks add connectors, state management and reusable workflow components. State means information
+    retained between operations. Each extra abstraction also adds dependencies and another place to inspect failures.
 
-    Expected answer: When you need its connectors, multi-step state or tracing; otherwise direct API calls are easier to debug.
+
+    Example: Compare one call followed by JSON validation with a workflow that retrieves evidence and resumes interrupted steps.
+    The latter may benefit from managed state. A framework can organise that work, but the same underlying model still needs
+    task evaluation and operating controls.
 
 
-    Common mistake: Starting with a framework before the basic calls work.'
+    Ask: When does an orchestration framework justify its dependencies?
+
+
+    Answer: When its connectors, workflow state or tracing solve a specific application requirement that plain code handles
+    poorly.
+
+
+    Watch out: A framework does not automatically provide suitable privacy controls, model hosting or correct answers.'
 - type: quiz
-  question: Student data must stay on university servers. What fits the existing compatible client?
+  question: University data stays on campus. Which route fits?
   options:
-  - Self-host a suitable compatible model; change URL and re-test
-  - Rewrite every component for a new local framework
-  - Send data to the external API, then request deletion
-  - Switch to a larger external model with better accuracy
+  - Self-host compatible model; re-test
+  - Replace all client components
+  - Send externally; request deletion
+  - Choose larger external model
   answer: 0
-  notes: 'Answer: A. Because vLLM exposes an OpenAI-compatible API, the application code stays the same; only the base URL,
-    key and model name change. You must then re-evaluate quality, because the open model will behave differently, and plan capacity
-    for the GPUs. B is unnecessary work. C does not satisfy a requirement that data never leaves. D changes nothing about where
-    data goes.
+  notes: 'In short: A data-location requirement must be satisfied before comparing model quality or convenience.
 
 
-    Ask students: After switching to a self-hosted model, what must you re-test?
+    Explain: Self-hosting means your organisation operates the model runtime. A compatible endpoint can preserve the basic client
+    contract. The organisation still needs capacity, access controls and maintenance. Re-evaluation checks the replacement model
+    on the real task. Deleting data after sending it cannot satisfy a requirement that it never leaves university servers.
 
-    Expected answer: Answer quality on your test set, and capacity under realistic load.
+
+    Example: An invented student record must remain on university infrastructure. Changing to a suitable university-hosted compatible
+    endpoint can preserve the request pattern. Verify that logging, backups and auxiliary tools also respect the same location
+    requirement; changing one URL alone does not establish that.
 
 
-    Common mistake: Choosing C. Asking for deletion after sending data does not meet a rule that data never leaves.'
+    Ask: Which option fits the stated data-location requirement?
+
+
+    Answer: A. Self-host a suitable compatible model, change the endpoint and repeat feature, quality and capacity tests.
+
+
+    Watch out: A larger external model remains external, and requesting later deletion does not undo the earlier transfer.'
 - type: section
   number: 2
   title: API platforms
   question: Keys, tokens, pricing, rate limits and streaming
   icon: fa:FaPlug
-  notes: 'Section two covers what every developer must know about API platforms: authentication and key management,
-    how tokens determine cost, rate limits and error handling, and streaming. We look at real latency measurements
-    and a cost calculation. The same skills apply to OpenAI, Azure, Google and Hugging Face. About twenty-two minutes.
+  notes: 'In short: API operation requires credentials, bounded requests, cost arithmetic and explicit error handling.
 
 
-    Analogy: A taxi bill records distance and waiting separately. API bills can price input and output tokens separately.
+    Explain: Authentication establishes who is requesting access. Token counts measure input and generated text under the selected
+    tokenizer. Rate limits restrict requests or tokens within a time window. Streaming exposes pieces of an answer before completion.
+    Prices and supported fields are provider-specific, so classroom cost inputs are explicitly illustrative.
 
 
-    Ask students: With 300,000 requests, how many input tokens arise at 800 per request?
+    Example: At 500 students, 20 requests daily and 30 days, the scenario contains 300,000 requests. Multiplying by 800 input
+    tokens gives 240 million input tokens. Output tokens need a separate count and price. These are planning assumptions, not
+    observed traffic or current vendor rates.
 
-    Expected answer: 240 million input tokens; 300 output tokens per request adds 90 million output tokens.
+
+    Ask: Why count input and output tokens separately?
 
 
-    Common mistake: Streaming changes when users can read output; it does not guarantee less model computation.'
+    Answer: They represent different work and can have different prices, quotas and effects on waiting time.
+
+
+    Watch out: Streaming changes when output becomes visible; it does not automatically reduce total generation work.'
 - type: cards
   title: What an API platform gives you, and what it expects
   cards:
-  - icon: fa:FaKey
-    head: Authentication
-    text: A secret key or cloud identity says who is calling and who pays.
-  - icon: fa:FaCoins
-    head: Tokens / prices
-    text: Priced per million tokens; output usually costs more than input.
-  - icon: fa:FaTachometerAlt
-    head: Rate limits
-    text: Caps on requests and tokens per minute; HTTP 429 means wait and retry.
-  - icon: fa:FaStream
-    head: Streaming
-    text: Text arrives chunk by chunk, so users start reading sooner.
-  - icon: fa:FaBoxes
-    head: Batch / cache
-    text: Offline batches and repeated prompt prefixes can cost less.
-  - icon: fa:FaTools
-    head: Schemas / tools
-    text: Ask for JSON fields or tool calls in a declared format.
-  notes: 'Six concepts cover most API platforms. Authentication uses API keys, or for enterprise clouds, identities such as
-    Microsoft Entra ID, which avoid long-lived secrets. Pricing is per million tokens, with output tokens usually several times
-    more expensive than input, so long answers cost more than long prompts. Rate limits cap requests and tokens per minute.
-    Streaming sends tokens as they are generated. Batch APIs process large offline jobs asynchronously at a discount, and prompt
-    caching discounts repeated prefixes such as long system prompts.
+  - head: Identity
+    text: Credential + permissions
+  - head: Usage
+    text: Input / output tokens
+  - head: Limits
+    text: Bound requests; handle 429
+  - head: Streaming
+    text: Expose pieces before completion
+  - head: Reuse
+    text: Batch / cache policies
+  - head: Schema
+    text: Validate declared fields
+  notes: 'In short: Read an API platform as a contract for identity, requests, responses, quotas and billing.
 
 
-    Ask students: Why can long answers cost more than long prompts?
+    Explain: Credentials establish the calling account or identity. Request fields specify messages, output limits and supported
+    settings. Responses return useful data or an error that the application must handle. Quotas bound requests or token use.
+    Schema validation checks declared fields, while billing and data-use terms need separate provider documentation.
 
-    Expected answer: Output tokens are usually priced several times higher than input tokens.
+
+    Example: An invented request contains messages and max_tokens=24. The platform checks access and field validity before serving
+    it. A successful reply may include separate input and output counts. The same JSON shape does not imply a shared tokenizer,
+    free access or identical request limits.
 
 
-    Common mistake: Retrying a 429 error immediately and repeatedly.'
+    Ask: Does a valid schema guarantee a correct model answer?
+
+
+    Answer: No. A schema checks structure; correctness still requires evidence and task evaluation.
+
+
+    Watch out: Do not assume every provider supports the same tools, output formats, cache rules or streaming fields.'
 - type: bullets
   title: Keeping API keys safe
-  icon: fa:FaUserShield
+  notes: 'In short: Keep provider credentials on the server and apply deliberate access and request controls.
+
+
+    Explain: An API key is a secret credential identifying an account. Browser code and shared notebooks can reveal embedded
+    credentials. Server-side secrets keep that key outside the user interface. Restricted permissions and usage controls limit
+    what a stolen credential can do. Revocation disables a leaked key; reviewing usage helps identify what happened.
+
+
+    Example: A browser sends an invented question to your application server. The server reads a secret only after the optional
+    provider route is enabled. The browser receives answer text, never the key. This separation still needs authentication and
+    limits on the browser-facing endpoint.
+
+
+    Ask: Should a browser receive the provider key to call the model?
+
+
+    Answer: No. It should call a controlled application server that holds the provider credential.
+
+
+    Watch out: A private notebook can later be shared or committed; its privacy setting is not a secrets-management strategy.'
+  visual:
+    type: example_strip
+    items:
+    - label: Browser
+      text: Question only
+    - label: Server
+      text: Restricted secret + request limits
+    - label: Provider
+      text: Answer + usage
+    caption: Revoke leaked keys; review usage.
   bullets:
-  - Keep keys out of notebooks and Git.
-  - Load server-side secrets; the browser calls your server.
-  - Use restricted credentials and spending controls.
-  - Revoke leaked keys; review usage.
-  notes: 'Key security is a practical skill every student needs. Keys committed to public repositories are found by automated
-    scanners very quickly and used to run up bills. Store keys in Colab Secrets, environment variables or a cloud secrets manager.
-    Never embed a key in front-end code, because anyone can read it in the browser; the front end must call your own back end,
-    which holds the key. Use separate keys per project with spending limits and alerts.
-
-
-    Ask students: Where should a web app''s API key live?
-
-    Expected answer: On your server, loaded from a secrets store; the browser calls your server, never the provider directly.
-
-
-    Common mistake: Putting a key in front-end code or a shared notebook.'
+  - Keep credentials in trusted server code.
 - type: figure
   title: 'Anatomy of a request: where the time goes'
   figure: request_anatomy
   bullets:
-  - '**TTFT:** wait before the first token.'
-  - '**Decoding:** generate remaining tokens.'
-  - Streaming exposes output sooner; computation can be unchanged.
+  - 'First output: network + queue + prefill.'
+  - 'Remaining output: decoding.'
+  - Streaming exposes pieces sooner.
   stack: true
-  notes: 'Break latency into parts. Network and authentication add tens of milliseconds. Under load, requests wait in a queue.
-    Prefill processes the whole prompt in parallel, so it grows with prompt length, which matters for RAG with long contexts.
-    Then decoding generates one token at a time, which is why output length dominates total time. Time to first token is network
-    plus queue plus prefill; total latency is roughly time to first token plus the number of output tokens divided by the decoding
-    speed.
+  notes: 'In short: First-token wait and full-answer wait measure different stages of one request.
 
 
-    Ask students: Why does a long RAG prompt increase the time to first token?
+    Explain: Network travel and authentication occur before model work. A queue adds waiting when capacity is occupied. Prefill
+    processes the input prompt. Decoding generates continuation tokens sequentially. Time to first token ends when the first
+    model token becomes available; completion time covers the whole request.
 
-    Expected answer: Prefill must process every prompt token before the first output token appears.
+
+    Example: In a hypothetical calculation, first output arrives after one second and 100 further tokens take five seconds.
+    Total wait is roughly six seconds. The notebook observes first non-empty decoded text instead of internal token timestamps;
+    one text chunk can contain several tokens.
 
 
-    Common mistake: Thinking streaming reduces total computation. It only shows text sooner.'
+    Ask: Does showing streamed text necessarily shorten completion time?
+
+
+    Answer: No. It can let users read earlier while the same generation work continues.
+
+
+    Watch out: TestClient excludes real network transport; neither its timing nor a decoded chunk is a complete production TTFT
+    measurement.'
 - type: figure
-  title: 'Measured: streaming latency of a small open model'
+  title: 'Stored GPU run: streaming latency'
   figure: lab_latency
   bullets:
   - '{{LAT_NOTES}}'
-  - 'This lab times first non-empty decoded text: an approximate TTFT.'
+  - First decoded text approximates TTFT.
   stack: true
-  notes: 'This is the lab''s measurement for Qwen2.5-0.5B-Instruct. The dark part of each bar is time to first token, the light
-    part the rest of the answer. The numbers are quoted in the bullet. Time to first token is a small fraction of the total,
-    which is why streaming is standard in chat interfaces. Hosted frontier models run on far larger hardware, but they are also
-    much larger, so the same pattern holds.
+  notes: 'In short: Read the latency chart together with the recorded model, hardware and measurement boundary.
 
 
-    Ask students: In the measured bars, how large is the first-token wait compared with the whole answer?
+    Explain: The stored chart comes from the archived instructor run. First non-empty decoded text approximates time to first
+    token. Full-answer duration includes the complete observed generation. Retokenising decoded text estimates output length
+    and can differ from generated token IDs. The revised CPU lab creates its own table using a smaller bounded workload.
 
-    Expected answer: A small fraction; most of the time is spent decoding the rest of the answer.
+
+    Example: The shorter bar marks when readable text began; the longer bar marks completion for the same question. Use the
+    stored result placeholder for the recorded values. Then compare your new table only after noting model identity, output
+    cap, device and warm-up conditions.
 
 
-    Common mistake: Reporting average latency without the slow cases.'
+    Ask: Can the stored chart predict your exact CPU waiting time?
+
+
+    Answer: No. It records a specified earlier run; your hardware, model, workload and timing boundary may differ.
+
+
+    Watch out: Never copy archived values into a fresh table or describe an unmeasured revised path as already timed.'
+  caption: Qwen2.5-0.5B-Instruct · GTX 1650 · 9 Oct 2026
 - type: table
   title: 'Estimating cost: 500 students, 20 requests a day, one month'
   header:
-  - Option (illustrative prices)
-  - Price per 1M tokens (in / out)
-  - USD per month
+  - Classroom option
+  - Input / output $/1M
+  - Monthly USD
   rows:
-  - - Small hosted model
-    - $0.10 / $0.40
-    - $60
-  - - Mid-size hosted model
-    - $0.50 / $2.00
-    - $300
-  - - Frontier hosted model
-    - $2.00 / $10.00
-    - $1,380
-  - - Self-hosted small GPU, always on
-    - $0.60 per hour
-    - $432 + staff time
-  callout: 300,000 requests × (800 input + 300 output tokens). Illustrative prices; check current provider rates.
+  - - Small
+    - 0.10 / 0.40
+    - '60'
+  - - Medium
+    - 0.50 / 2.00
+    - '300'
+  - - Frontier
+    - 2.00 / 10.00
+    - 1,380
+  - - Always-on GPU
+    - 0.60/hour
+    - 432 + staff
+  callout: 300,000 requests; 800 input, 300 output tokens. Illustrative rates.
   callout_label: Method
-  notes: 'Walk through the arithmetic. Five hundred students times twenty requests a day times thirty days is three hundred
-    thousand requests. Each has eight hundred input and three hundred output tokens. For the small model, that is three hundred
-    thousand times eight hundred tokens at ten cents per million, plus three hundred thousand times three hundred tokens at
-    forty cents per million: twenty-four plus thirty-six, sixty dollars. The same formula gives three hundred dollars for the
-    mid-size model and one thousand three hundred and eighty dollars for the frontier model.
+  notes: 'In short: Estimate monthly cost by multiplying requests and separate token charges using consistent units.
 
 
-    Ask students: What would the small-model bill be if answers were 600 tokens instead of 300?
+    Explain: Input and output prices here are hypothetical classroom values. A million-token unit requires dividing token totals
+    by one million. Requests per month come from users, requests per day and days. An always-on machine instead accumulates
+    hourly charges. Staff work, peak capacity and answer quality remain separate comparison requirements.
 
-    Expected answer: $24 for input plus $72 for output: $96 a month.
+
+    Example: The scenario gives 300,000 requests with 800 input and 300 output tokens each. At illustrative rates 0.10 and 0.40
+    dollars per million, each request costs 0.0002 dollars, giving 60 dollars monthly. This arithmetic is not a current provider
+    quotation.
 
 
-    Common mistake: Comparing an API bill with GPU rental and forgetting staff time.'
+    Ask: Which costs are absent from the always-on GPU row?
+
+
+    Answer: Staff time and other operating costs; the row also does not establish enough capacity for peak demand.
+
+
+    Watch out: Keep rates dated and labelled, and do not compare model prices without checking the quality required by the task.'
 - type: code
   title: Streaming and retries in code
-  code: "from openai import OpenAI\nclient = OpenAI(base_url=BASE_URL, api_key=API_KEY)\n# Read API_KEY from a secrets\
-    \ store.\nstream = client.chat.completions.create(\n    model=MODEL, messages=messages,\n    stream=True, max_tokens=300)\n\
-    for chunk in stream:\n    text = chunk.choices[0].delta.content or \"\"\n    print(text, end=\"\")\n# Retry\
-    \ 429 with capped backoff and jitter."
+  code: "stream = client.chat.completions.create(\n    model=MODEL, messages=messages,\n    stream=True, max_tokens=24)\nfor\
+    \ chunk in stream:\n    print(chunk.choices[0].delta.content or \"\", end=\"\")"
   bullets:
-  - Cap output and request time.
-  - '**Backoff:** longer waits; **jitter:** random variation.'
-  - Limit retries and report failure.
-  notes: 'Two patterns every application needs. Streaming: set stream to true and print each chunk''s delta as it arrives. Retries:
-    when the provider returns HTTP 429, too many requests, wait and retry, doubling the wait each time and adding random jitter
-    so that many clients do not retry at the same moment. Always set a maximum number of output tokens, which caps both cost
-    and latency, and a timeout. The official SDKs have built-in retries for some errors, but you should understand and configure
-    them.
+  - Set timeouts.
+  - '429: bounded backoff + jitter.'
+  - 'Full retry logic: notebook.'
+  notes: 'In short: Streaming and retries need explicit limits and clear failure handling.
 
 
-    Ask students: Why add random jitter to retry waits?
+    Explain: A stream yields pieces while generation continues. The displayed pseudocode consumes chunks instead of waiting
+    for one complete answer. HTTP 429 signals rate limiting. Backoff increases retry delays; jitter varies them so callers do
+    not retry simultaneously. Capped attempts and timeouts prevent endless waiting, while permanent errors need a different
+    response.
 
-    Expected answer: So that many clients that failed together do not all retry at the same moment.
+
+    Example: A fictional provider returns two 429 errors before succeeding. Base delays of 0.2 then 0.4 seconds can receive
+    a small random variation. The local simulation demonstrates scheduling; it makes no hosted requests and does not establish
+    a provider quota.
 
 
-    Common mistake: Retrying forever. Cap the retries and report the failure.'
+    Ask: Why add jitter as well as exponential backoff?
+
+
+    Answer: It reduces synchronised retries by many clients after a shared limit or outage.
+
+
+    Watch out: Every attempted hosted call can affect quotas or cost; cap combined attempts and do not retry invalid credentials
+    indefinitely.'
 - type: section
   number: 3
   title: Deployment options and efficient serving
   question: Cloud, self-hosted or local, and how to make it cheaper and faster
   icon: fa:FaServer
-  notes: 'Section three compares the three deployment options, then covers the three main efficiency techniques
-    named in the descriptor: quantisation, batching and caching, with real measurements. The key message: cost and
-    speed are design choices that can be measured, and every efficiency gain must be checked against quality. About
-    twenty-five minutes; take the break afterwards.
+  notes: 'In short: Choose the hosting location and then test efficiency changes against task quality.
 
 
-    Analogy: Sharing a bus trip can move more passengers per hour while making one passenger wait. Batching has
-    the same tradeoff.
+    Explain: Hosted APIs run the model through a provider. Self-hosting makes your organisation responsible for the runtime.
+    Local execution runs on the student or user device. Quantisation, batching and caching improve different parts of operation.
+    Their effects depend on the actual model, workload, hardware and implementation rather than a universal speed ranking.
 
 
-    Ask students: Does fake_quantize store four-bit tensors in this lab?
+    Example: For a fictional course assistant, compare where prompts travel, who maintains the runtime and how cost accumulates.
+    Then hold questions and output length constant while testing an efficiency change. A lower weight estimate does not prove
+    lower total memory or satisfactory answers.
 
-    Expected answer: No. It rounds then reconstructs floating-point tensors; the displayed storage estimate is hypothetical.
+
+    Ask: What should be checked after changing numerical precision?
 
 
-    Common mistake: The weight-size estimate omits cache, activations, scales and runtime overhead.'
+    Answer: The actual task answers, timing and complete memory requirements under the chosen serving configuration.
+
+
+    Watch out: An optimisation can change quality, capacity or individual waiting time; measure each relevant outcome separately.'
 - type: table
   title: Cloud API vs. self-hosted vs. local
   header:
   - ''
-  - Cloud API
+  - Hosted API
   - Self-hosted
   - Local
   rows:
-  - - Models
-    - Provider's list
-    - Open models you can run
-    - What fits the device
+  - - Model
+    - Provider list
+    - Runnable weights
+    - Device fit
   - - Cost
-    - Pay per token
-    - GPU hire + staff time
-    - Device + electricity
+    - Token charges
+    - Infrastructure + staff
+    - Device + energy
   - - Data
-    - Leaves to the provider
-    - Stays on your servers
-    - Stays on the device
-  - - Operations
-    - Provider runs the model
-    - Your team runs it
-    - The device owner
-  - - Example
-    - Gemini for a prototype
-    - vLLM for a university
-    - Ollama on a laptop
-  notes: 'There is no universally best option. A cloud API provides hosted models and shifts model-server operation to the provider.
-    Check its quality, charges, region and data terms. Self-hosting gives your team control over compatible open models, but
-    you pay for hardware, electricity and staff. High steady use can improve its economics. Local processing can keep data on
-    a configured device; check network features, licences and resource costs. Some applications combine these routes, after
-    testing quality and access requirements.
+    - Provider terms
+    - Your infrastructure
+    - Your device
+  - - Owner
+    - Provider
+    - Your team
+    - Device owner
+  notes: 'In short: Hosting choices trade data location, operating work, model access and cost structure.
 
 
-    Ask students: Which option keeps data on a device you configure?
+    Explain: A cloud API charges for provider-managed access. Self-hosting runs suitable weights on infrastructure your team
+    maintains. Local execution uses the device owner''s available resources. Data location depends on all routes, logs and connected
+    services. No option removes the need to evaluate quality and request handling.
 
-    Expected answer: Local, after checking network features and licences.
+
+    Example: Suppose invented data must stay on a university server. A university-hosted runtime may satisfy that condition,
+    while a provider API requires a different agreement. For public fictional prompts, a hosted route may be convenient. These
+    scenarios illustrate requirements rather than a universal recommendation.
 
 
-    Common mistake: Assuming self-hosting is always cheaper. Staff time and idle GPUs cost money.'
+    Ask: Which cost can make self-hosting expensive at low usage?
+
+
+    Answer: An idle rented machine still incurs charges, and maintenance staff time continues.
+
+
+    Watch out: Local execution is not costless: hardware, energy, setup, reliability and model suitability still matter.'
 - type: equation
   title: 'Quantisation: fewer bits per weight'
   eq:
@@ -501,453 +627,628 @@ slides:
   - s = \frac{\max |w|}{2^{b-1} - 1}, \qquad q = \mathrm{round}\left(\frac{w}{s}\right), \qquad \hat{w} = q \cdot
     s
   read_as:
-  - 'Weights: parameters × bits/8 bytes, before overhead.'
-  - 'Absmax: scale, round, then reconstruct with q × s.'
-  - Group scales trade storage for lower error.
+  - 'Weights: parameters × bits/8, before overhead.'
+  - Scale → round → reconstruct.
   terms:
+  - - N
+    - Parameter count
+  - - w
+    - Original weights
   - - b
-    - Bits per weight
+    - Bits
   - - s
-    - Group scale
+    - Scale
   - - q
     - Rounded integer
   - - $\hat{w}$
-    - Reconstructed value
-  notes: 'Quantisation stores weights with fewer bits. Memory is roughly the number of parameters times bits divided by eight:
-    a seven-billion-parameter model needs fourteen gigabytes in sixteen-bit, seven in eight-bit and under four in four-bit,
-    which is the difference between needing a data-centre GPU and running on a laptop. The absmax method scales each group of
-    weights so the largest maps to the largest integer, rounds, and stores the integers plus one scale per group. Smaller groups
-    keep more precision.
+    - Reconstruction
+  notes: 'In short: Quantisation rounds weights to a limited set of values using an explicit scale.
 
 
-    Ask students: How much memory do the weights of a 7 B model need at 8-bit?
+    Explain: The parameter count determines ideal weight storage before overhead. Bits per weight divided by eight converts
+    that count to bytes. The symbol b denotes bits and s denotes the scale. Integer q is the rounded value; reconstructed weight
+    w-hat equals q times s. Separate group scales trade added metadata for potentially lower rounding error. N with subscript
+    params means parameter count, while w means original weights.
 
-    Expected answer: About 7 GB, before scales and runtime memory.
+
+    Example: For one billion weights, 16-bit ideal storage is two billion bytes; four-bit storage is half a billion bytes. In
+    a four-bit symmetric group with largest magnitude one, the scale is one divided by seven. Rounding 0.2 then reconstructing
+    gives approximately 0.143.
 
 
-    Common mistake: Forgetting the per-group scales, which add storage.'
+    Ask: Does the fake_quantize helper allocate packed four-bit tensors?
+
+
+    Answer: No. It reconstructs floating-point tensors to measure numerical approximation error.
+
+
+    Watch out: Weight-only arithmetic excludes scales, attention caches, intermediate tensors and runtime memory; it cannot
+    guarantee that a model fits.'
 - type: figure
-  title: 'Measured: size and quality after quantisation'
+  title: 'Stored GPU run: rounding and perplexity'
   figure: lab_quant
   bullets:
   - '{{QUANT_NOTES}}'
-  - The lab simulates rounding in floating-point tensors. Re-check task quality.
+  - Reconstructed floats; theoretical size.
   stack: true
-  notes: 'The lab rounds weights in linear layers, excluding the output language-model head, then reconstructs floating-point
-    values for inference. It measures perplexity on one paragraph. The displayed storage sizes are estimates of hypothetical
-    packed weights; this demonstration does not store four-bit tensors. Compare the measured quality for eight-bit, row-scaled
-    four-bit and grouped four-bit rounding. Separate group scales can preserve detail at additional storage cost. One paragraph
-    is only a quick check; rerun the actual task evaluation before deployment.
+  notes: 'In short: The quantisation chart separates hypothetical packed storage from a measured quality proxy.
 
 
-    Ask students: Which 4-bit scheme lost less quality in the lab, and why?
+    Explain: Fake quantisation rounds then reconstructs floating-point weights. The size estimate describes hypothetical packed
+    storage, not observed tensor allocations. Perplexity is exponential average token loss under this model and tokenizer. It
+    probes one paragraph rather than every application task. Original weights are restored so later experiments start from the
+    unchanged reference.
 
-    Expected answer: Groups of 64: each group has its own scale, so small weights keep more precision.
+
+    Example: Compare per-row four-bit rounding with groups of 64 weights. Each group has its own scale, so differently sized
+    values can receive different resolutions. Read the archived result placeholder for the actual recorded error and perplexity;
+    the mechanism alone cannot predict their order.
 
 
-    Common mistake: Judging quality from one paragraph''s perplexity. Rerun the task evaluation.'
+    Ask: What evidence would establish acceptable quality after rounding?
+
+
+    Answer: Task-specific evaluation on held-out examples, alongside the numerical error and perplexity probe.
+
+
+    Watch out: Do not call theoretical size a measured memory saving or treat one paragraph as a complete deployment benchmark.'
+  caption: Qwen2.5-0.5B-Instruct · GTX 1650 · 9 Oct 2026
 - type: figure
-  title: 'Measured: batching raises throughput'
+  title: 'Stored GPU run: batch throughput'
   figure: lab_batch
   bullets:
   - '{{BATCH_NOTES}}'
-  - Batching raises aggregate throughput; an individual request may wait longer.
-  - Continuous batching admits work as capacity frees.
+  - Throughput differs from individual wait.
   stack: true
-  notes: 'Generating for one request at a time leaves most of a GPU idle, because decoding is limited by memory bandwidth, not
-    arithmetic. Processing several requests together reuses each weight read for many sequences. The lab measures throughput
-    for batch sizes one to eight; the numbers are in the bullet. Production engines go further with continuous batching, adding
-    and removing requests at every step rather than waiting for a whole batch to finish. The trade-off: larger batches increase
-    throughput but can increase each user''s latency.
+  notes: 'In short: Batch throughput measures aggregate work and does not directly state each user''s waiting time.
 
 
-    Ask students: Why does batching raise throughput on a GPU?
+    Explain: Batching processes several input sequences in one model operation. Padding aligns their lengths, and an attention
+    mask identifies real tokens. Aggregate throughput counts generated tokens divided by elapsed time. The lab fixes generation
+    length for a fair workload comparison. Continuous batching can admit new work as existing requests finish.
 
-    Expected answer: Decoding is limited by memory bandwidth, and batching reuses each weight read for several sequences.
+
+    Example: Four prompts with eight generated tokens each create 32 output tokens. If the measured workload takes t seconds,
+    aggregate throughput is 32 divided by t. This worked formula does not assign a value to t or claim the batch is faster on
+    every CPU.
 
 
-    Common mistake: Assuming every user gets a faster answer. A request may wait for its batch.'
+    Ask: Must a throughput improvement shorten each request''s latency?
+
+
+    Answer: No. Waiting for a batch or sharing capacity can increase an individual request''s wait.
+
+
+    Watch out: Compare equal prompts and token counts; do not infer concurrent production capacity from this small sequential
+    timing experiment.'
+  caption: Qwen2.5-0.5B-Instruct · GTX 1650 · 9 Oct 2026
 - type: bullets
   title: Serving engines and caching
-  icon: fa:FaBolt
+  notes: 'In short: Distinguish reused attention computation, reused prefixes and reused complete answers.
+
+
+    Explain: A key-value cache stores earlier attention state during generation. Prefix caching reuses computation for a repeated
+    input beginning. Response caching instead returns an already completed answer. PagedAttention organises attention-cache
+    memory, while speculative decoding proposes then verifies candidate tokens. These mechanisms solve different kinds of repeated
+    work.
+
+
+    Example: The lab response-cache key includes model identity, complete messages and output cap. Changing any field should
+    require a new answer. A cached library-hours reply remains unsupported when no timetable evidence was supplied; speed does
+    not turn an invented answer into a fact.
+
+
+    Ask: Can a response-cache hit still return a wrong answer?
+
+
+    Answer: Yes. It reuses the stored text and inherits its errors unless separate evidence and freshness checks are applied.
+
+
+    Watch out: A provider prefix cache is not the same operation as storing full application responses in a dictionary.'
+  visual:
+    type: mini_table
+    header:
+    - Mechanism
+    - Reuses / changes
+    rows:
+    - - KV / prefix cache
+      - Earlier attention / input work
+    - - Response cache
+      - Complete answer
+    - - PagedAttention
+      - Cache layout
+    - - Speculation
+      - Propose, then verify
+    caption: Re-check quality and freshness.
   bullets:
-  - '**KV cache:** reuse earlier attention keys/values.'
-  - '**PagedAttention:** organise cache pages; batch requests.'
-  - '**Prefix / response cache:** reuse input computation / answers.'
-  - '**Speculation:** propose then verify tokens.'
-  - Test smaller adapted models.
-  notes: 'vLLM''s key idea, PagedAttention, manages the key-value cache in fixed-size pages, like an operating system''s virtual
-    memory, which reduces wasted memory and allows larger batches. Prefix caching reuses the KV cache for shared prompt beginnings,
-    such as a long system prompt, and API providers pass on the saving as discounted cached input tokens. Response caching answers
-    repeated questions instantly. Speculative decoding speeds up generation by letting a small model draft tokens that the large
-    model verifies in parallel.
-
-
-    Ask students: Which technique saves work when every request starts with the same long system prompt?
-
-    Expected answer: Prefix caching.
-
-
-    Common mistake: Thinking speculative decoding changes the output. The large model checks every proposed token.'
+  - Cache keys must capture response-changing inputs.
 - type: stat
   title: What fits where? (weights only)
   stats:
   - value: ≈ 1 GB
-    label: 0.5 B weights, 16-bit
+    label: 0.5 B, 16-bit
   - value: ≈ 4 GB
-    label: 7–8 B weights, 4-bit
+    label: 7–8 B, 4-bit
   - value: 16 GB
-    label: T4 GPU capacity
+    label: T4 capacity
   - value: ≈ 140 GB
-    label: 70 B weights, 16-bit
-  caption: Weights only. Add scales, KV caches, activations and runtime memory.
-  notes: 'The figures estimate weight storage, not total runtime memory or a guaranteed model fit. A 0.5 B model at 16-bit needs
-    about 1 GB for weights; 7–8 B at 4-bit about 4 GB before scales; 70 B at 16-bit about 140 GB. A T4 has 16 GB total, shared
-    with attention caches, activations and framework overhead. Context length and batch size change the required runtime memory.
-    Measure the actual configuration before recommending hardware.
+    label: 70 B, 16-bit
+  caption: Weights only; add scales, caches and runtime.
+  notes: 'In short: Weight storage is only the first part of a model''s complete memory budget.
 
 
-    Ask students: Can a 7 B model at 16-bit run on a T4?
+    Explain: A billion parameters contain a billion learned weight values. Sixteen bits require two bytes per value before overhead.
+    Four-bit storage needs additional scales or metadata in a real implementation. Serving also allocates attention caches,
+    intermediate tensors and runtime state. Longer prompts and larger batches can increase these additional allocations.
 
-    Expected answer: Its weights alone need about 14 GB of the T4''s 16 GB, leaving little for caches and activations; 8-bit
-    or 4-bit is safer.
+
+    Example: The arithmetic gives about one gigabyte for 0.5 billion weights at 16 bits. Seven billion four-bit weights need
+    about 3.5 gigabytes before metadata. Compare those estimates with device capacity only after allowing room for caches and
+    the actual runtime configuration.
 
 
-    Common mistake: Treating weight size as total memory.'
+    Ask: Why can fitting the weight estimate still cause an out-of-memory error?
+
+
+    Answer: Generation needs additional caches, temporary tensors and runtime memory beyond the weights.
+
+
+    Watch out: A device-capacity example is not a guarantee that a particular model, context length or batch will run successfully.'
 - type: quiz
-  question: An accurate self-hosted model struggles with 50 concurrent users. What should you test?
+  question: Accurate model, 50 concurrent users, slow replies. Test?
   options:
-  - A higher temperature so replies finish sooner
-  - Continuous batching and quantisation; re-check quality
-  - A longer prompt with more detailed instructions
-  - Disable streaming so each reply is sent whole
+  - Raise temperature; expect capacity
+  - Batch / quantise; re-check quality
+  - Extend prompts; expect capacity
+  - Disable streaming; expect capacity
   answer: 1
-  notes: 'Answer: B. With many concurrent users, a naive server processes requests one at a time, so queues grow. A serving
-    engine with continuous batching raises throughput dramatically, and quantisation reduces memory so more requests fit in
-    a batch. Quality must be rechecked after quantising. A changes randomness, not speed. C makes prefill slower. D does not
-    change total time and makes perceived latency worse.
+  notes: 'In short: Concurrent-user pressure calls for capacity experiments while preserving acceptable model quality.
 
 
-    Ask students: Why is option D wrong?
+    Explain: Concurrency means requests overlap in time. Continuous batching shares model operations across requests as capacity
+    becomes available. Quantisation can reduce weight storage in a suitable serving implementation. Both changes need evaluation
+    under the intended workload. Changing temperature or disabling streaming does not by itself establish enough capacity.
 
-    Expected answer: Streaming does not change total time; turning it off only makes the wait feel longer.
+
+    Example: An already accurate model struggles with 50 overlapping users. Test a serving configuration with the same task
+    examples and realistic arrival patterns. Record waiting-time percentiles, errors and answer checks alongside throughput.
+    The notebook''s small batch experiment is preparation for this larger load test.
 
 
-    Common mistake: Quantising without re-checking quality.'
+    Ask: Which option deserves testing in the stated situation?
+
+
+    Answer: B. Continuous batching and quantisation, followed by quality, latency and capacity checks.
+
+
+    Watch out: Efficiency techniques are hypotheses to test, not promises; fake rounding alone does not create a production
+    low-bit serving engine.'
 - type: section
   number: 4
   title: Building applications and interfaces
   question: Gradio, FastAPI and Docker
   icon: fa:FaWindowRestore
-  notes: 'Welcome back. Section four shows how the pieces fit together into an application: an interface for people,
-    an API for other programs, guardrails and logging around the model, and a container for deployment. The code
-    on these slides is what students write in the lab. About fourteen minutes.
+  notes: 'In short: An interface, an endpoint and a package expose the same model through different responsibilities.
 
 
-    Analogy: An interface is a front door; an API is another entrance. Controls on one door do not automatically
-    protect the other.
+    Explain: FastAPI maps declared HTTP requests to Python handlers. Gradio connects browser controls to a Python function.
+    Docker packages code and dependencies with a start command. Request validation checks structure before generation. Authentication,
+    content controls and monitoring still need explicit implementation on every route.
 
 
-    Ask students: Does the lab FastAPI route inherit respond input checks?
+    Example: TestClient sends a JSON request to the FastAPI application inside the notebook process. Calling respond directly
+    exercises a separate checked route. An optional Gradio interface can call respond too, but it does not automatically send
+    requests through FastAPI or inherit its schema.
 
-    Expected answer: No. FastAPI calls generate directly, while Gradio calls respond; each route needs its own controls.
+
+    Ask: Does creating a Gradio interface also create a FastAPI deployment?
 
 
-    Common mistake: The exported Docker files are a smaller scaffold, not the full checked notebook application.'
+    Answer: No. They are separate application components; connecting them requires an explicit design and implementation.
+
+
+    Watch out: A Docker scaffold does not reproduce notebook controls unless those handlers, checks and logs are actually included.'
 - type: figure
   title: Proposed integrated application architecture
   figure: app_architecture
-  notes: 'This is a proposed integrated design. A user interface or other client calls a back-end API, with input checks, model
-    generation, output checks and logs inside that request path. In the lab the routes are separate: Gradio calls respond and
-    generate directly, while the SDK and LangChain call the FastAPI endpoint. That endpoint does not inherit respond''s guardrails
-    or logs. The exported app.py is a smaller packaging scaffold without all notebook checks and logging.
+  notes: 'In short: The architecture diagram shows a proposed integrated route, distinct from the lab''s separate exercises.
 
 
-    Ask students: In the proposed design, where should input checks and logs sit?
+    Explain: A browser submits a request to an application entry point. Input controls can check fields, access and supported
+    data patterns. Fixed model weights generate an answer. Output controls inspect the reply before it reaches a user. Metadata
+    logs support monitoring without storing complete conversations by default.
 
-    Expected answer: Inside the back-end request path, so every client passes through them.
+
+    Example: Follow an invented question through UI, checks, model and checked answer. The proposed architecture places controls
+    on the common route. In the lab, TestClient reaches FastAPI while respond is called separately; joining those routes is
+    an optional architecture exercise, not existing behaviour.
 
 
-    Common mistake: Putting checks only in the user interface, where other clients bypass them.'
+    Ask: Can controls on one route protect another independent endpoint?
+
+
+    Answer: No. Each reachable entry point must invoke and test the relevant controls.
+
+
+    Watch out: A dashed arrow means feedback or repetition; logging actual metadata is a solid data transfer, not a model-training
+    update.'
 - type: code
   title: An OpenAI-compatible endpoint with FastAPI
-  code: "@api.post(\"/v1/chat/completions\")\ndef chat(req: ChatRequest):\n    text, n_in, n_out = generate(\n \
-    \       req.messages, req.max_tokens)\n    return {\n        \"object\": \"chat.completion\",\n        \"choices\"\
-    : [{\"index\": 0, \"finish_reason\": \"stop\",\n                     \"message\": {\"role\": \"assistant\",\n\
-    \                                 \"content\": text}}],\n        \"usage\": {\"prompt_tokens\": n_in,\n    \
-    \              \"completion_tokens\": n_out,\n                  \"total_tokens\": n_in + n_out}}"
+  code: "@api.post(\"/v1/chat/completions\")\ndef chat(req: ChatRequest):\n    text, n_in, n_out = generate(req.messages, 24)\n\
+    \    return compatible_reply(text, n_in, n_out)"
   bullets:
-  - FastAPI exposes a Python handler.
-  - Basic compatible JSON; test required features.
-  - This route calls generate directly, separately from checked Gradio.
-  notes: 'FastAPI turns a Python function into a web API. Pydantic models validate the request body automatically, rejecting
-    malformed requests, and FastAPI generates interactive documentation. By returning the OpenAI response format, including
-    the usage block with token counts, our server works with the OpenAI SDK and LangChain unchanged, as students verify in the
-    lab. In production you would add authentication, request size limits, timeouts and streaming, and run the server behind
-    a process manager.
+  - 'Pseudocode: full schema in notebook.'
+  - 'TestClient: in-process requests.'
+  - Usage = input + output.
+  notes: 'In short: The FastAPI handler converts a validated request into a generated answer and usage fields.
 
 
-    Ask students: Why return a usage block with token counts?
+    Explain: A decorator associates a Python function with an HTTP route. Pydantic validates declared message roles, content
+    and token limits. The handler invokes fixed-weight generation using supported settings. Prompt tokens and completion tokens
+    are separate counts. TestClient exercises the same application handler without opening a network port.
 
-    Expected answer: Clients such as the OpenAI SDK read it to log usage and estimate cost.
+
+    Example: A valid request contains one user message and max_tokens=24. The response places answer text inside choices and
+    reports prompt_tokens, completion_tokens and their sum. A negative output limit instead returns HTTP 422 before generation.
+    The full implementation and schema appear in the reference notes and lab.
 
 
-    Common mistake: Exposing the endpoint publicly without authentication, size limits and timeouts.'
+    Ask: What should total_tokens equal in this response?
+
+
+    Answer: The prompt token count plus the completion token count for the actual model call.
+
+
+    Watch out: This minimal compatible endpoint has no production authentication or inherited respond guardrails; schema validity
+    does not guarantee safe content.'
 - type: code
   title: A chat interface with Gradio
-  code: "import gradio as gr\n\ndef respond(message, history):\n    allowed, cleaned, reason = check_input(message)\
-    \   # guardrail\n    if not allowed:\n        return f\"Sorry, I can't help with that ({reason}).\"\n    answer,\
-    \ n_in, n_out = generate(build_messages(cleaned, history))\n    log_request(n_in, n_out, reason)           \
-    \        # metadata only\n    return check_output(answer)\n\ndemo = gr.ChatInterface(respond, title=\"Course\
-    \ assistant\")\ndemo.launch(share=True)     # temporary public link from Colab\n"
+  code: "if RUN_GRADIO_STRETCH:\n    demo = gr.ChatInterface(respond)\n    demo.launch(share=False)"
   bullets:
-  - Gradio connects a browser to respond.
-  - Spaces hardware, quotas and costs vary.
-  - Public links need appropriate access and request controls.
-  notes: 'Gradio builds a web interface from a Python function; ChatInterface provides a complete chat UI in one line. The respond
-    function wraps the model with an input check, logging and an output check. In Colab, share equals true prints a temporary
-    public link, useful for demonstrations but anyone with the link can use it. For longer-lived demos, Hugging Face Spaces
-    hosts Gradio apps, with secrets for API keys. Streamlit is a popular alternative for data-oriented apps.
+  - Optional local interface.
+  - Handler supplies checks and logs.
+  - 'Remote hosting: separate controls.'
+  notes: 'In short: Gradio connects browser inputs to a handler; the handler supplies checks and model work.
 
 
-    Ask students: Who can use a share=True link?
+    Explain: An interface displays controls and results. ChatInterface calls a function with the current message and recent
+    history. The lab''s respond function performs limited current-input checks and metadata logging. The interface is optional;
+    direct Python calls demonstrate the same handler. A public link requires separate access, retention and request-budget decisions.
 
-    Expected answer: Anyone who has the link, until it expires or the session stops.
+
+    Example: Create ChatInterface only after enabling the local Gradio stretch. With share=False, the classroom demo stays on
+    its local route. Its previous messages still need inspection because checking the newest message alone does not clean earlier
+    history. An interface wrapper cannot solve that limitation.
 
 
-    Common mistake: Leaving the public link running after the demonstration.'
+    Ask: Which component supplies the input checks in this example?
+
+
+    Answer: The respond handler, not the Gradio button or chat display itself.
+
+
+    Watch out: Do not promise free hosting or launch a public link by default; hosting eligibility and operating controls need
+    separate checks.'
 - type: bullets
   title: 'Packaging and releasing: Docker, versions, CI'
-  icon: fa:FaDocker
+  notes: 'In short: Packaging records the environment, while release testing checks the actual application behaviour.
+
+
+    Explain: A Docker image packages code, dependencies and a start command. Exact dependency pins identify tested versions
+    rather than broad allowed ranges. Continuous integration, abbreviated CI, runs automated checks before release. Versioning
+    records model, prompt, settings and relevant data identities. Rollback means returning to a previously tested release after
+    a problem.
+
+
+    Example: Inspect the exported requirements and Dockerfile as a scaffold. A range such as transformers==5.* does not identify
+    one exact installed version. Compare the smaller app handler with notebook redaction, output checks and logging before calling
+    the package equivalent to the monitored application.
+
+
+    Ask: Do broad dependency ranges guarantee an identical future environment?
+
+
+    Answer: No. Record tested exact versions and rebuild the package before relying on reproducibility.
+
+
+    Watch out: Secrets belong in controlled runtime configuration, not source code, notebook output, Docker image layers or
+    browser fields.'
+  visual:
+    type: example_strip
+    items:
+    - label: Package
+      text: Code + tested pins
+    - label: Release
+      text: Evaluate + version
+    - label: Recover
+      text: Monitor + rollback
+    caption: Secrets supplied at runtime.
   bullets:
-  - Docker records app, dependencies and start command.
-  - Provide secrets at runtime.
-  - Record model, prompt, settings and data versions.
-  - Run CI evaluations before release.
-  - Trial gradually; retain a rollback version.
-  notes: 'A Docker image packages code, dependencies and a start command. Record tested exact versions for repeatable deployment;
-    the lab export supplies version ranges as a starting scaffold. A container reduces environment differences but still depends
-    on compatible hardware, platform settings, network access and resources. Pass secrets at run time. Version the model, prompts,
-    decoding settings and retrieval index as well as the code. Re-run evaluations after changes, release gradually and keep
-    a rollback path.
-
-
-    Ask students: Why version prompts and decoding settings as well as code?
-
-    Expected answer: Any of them can change answers, so a release must record them all to reproduce a result.
-
-
-    Common mistake: Releasing to everyone at once with no rollback version.'
+  - Release a tested version; keep rollback available.
 - type: section
   number: 5
   title: Monitoring, guardrails and comparison
   question: How do you know it is working, and safe?
   icon: fa:FaChartLine
-  notes: 'The final section covers what to monitor, a real monitoring summary from the lab, layered guardrails,
-    the LLMOps tooling for tracing and evaluation, a comparison of deployment choices, and a responsible deployment
-    checklist. It answers the question every client asks after launch: how do we know it is still working? About
-    twenty-one minutes.
+  notes: 'In short: Monitoring checks how a released application behaves and connects failures to recorded versions.
 
 
-    Analogy: A dashboard records several dials because one average can hide a queue. Tail latency, quality and cost
-    need different measurements.
+    Explain: Monitoring records operational measurements after requests arrive. Evaluation checks answers against task criteria
+    and remains necessary after release. Guardrails block or modify specified input and output patterns. False positives block
+    harmless requests; false negatives miss unwanted behaviour. Traces link individual request steps so problems can be investigated.
 
 
-    Ask students: If p95 is two seconds, what does that describe?
+    Example: A fictional service sees slower answers after a prompt change. Latency logs show the timing change, while version
+    fields identify the prompt release. A repeated held-out test checks answer quality. Neither measurement alone explains every
+    failure, so inspection combines operational and task evidence.
 
-    Expected answer: Approximately 95% of measured allowed requests took at most two seconds; blocked requests are
-    counted separately.
+
+    Ask: Does a good latency dashboard establish correct answers?
 
 
-    Common mistake: Simple pattern checks can miss attacks and personal-data formats; logs are not a full evaluation.'
+    Answer: No. Speed and reliability measurements must be combined with repeated task-quality checks.
+
+
+    Watch out: A rise in blocked requests may indicate attacks, changed rules or harmless inputs being blocked; inspect examples
+    with appropriate data controls.'
 - type: cards
   title: What to monitor
   cards:
-  - icon: fa:FaStopwatch
-    head: Performance
-    text: Time to first text, full answer time, p95 and requests per second.
-  - icon: fa:FaDollarSign
-    head: Cost
-    text: Tokens and spend per user and per day, with a budget alert.
-  - icon: fa:FaExclamationTriangle
-    head: Reliability
-    text: Errors, timeouts, 429s and provider outages.
-  - icon: fa:FaCheckDouble
-    head: Quality
-    text: A fixed test set re-run weekly, plus sampled human reviews.
-  - icon: fa:FaShieldAlt
-    head: Safety
-    text: Blocked inputs, redactions and attacks that got through.
-  - icon: fa:FaCodeBranch
-    head: Versions
-    text: Which model, prompt and index answered each request.
-  notes: 'Monitoring for generative AI extends normal web monitoring. Performance uses percentiles because averages hide slow
-    requests: p95 means ninety-five percent of requests are faster. Cost must be tracked per user and per day, with alerts.
-    Reliability includes rate-limit errors and provider outages. Quality needs signals such as user feedback, sampled reviews
-    and regression tests, because model and data drift can silently degrade answers. Safety metrics track guardrail activity.
+  - head: Performance
+    text: First text; full wait; throughput
+  - head: Cost
+    text: Tokens + budget
+  - head: Reliability
+    text: Errors; 429; timeouts
+  - head: Quality
+    text: Task tests + review
+  - head: Checks
+    text: Blocks; misses; redactions
+  - head: Versions
+    text: Model + prompt + data
+  notes: 'In short: Monitor speed, cost, failures, quality, checks and versions as separate signals.
 
 
-    Ask students: Which signals would reveal that answer quality is drifting?
+    Explain: Performance includes first output, completion wait and throughput. Reliability records failures, timeouts and rate-limit
+    responses. Cost needs token usage and the relevant dated charging rules. Quality needs task tests and suitable human review.
+    Version fields help link changed behaviour to model, prompt, settings or retrieved-data changes.
 
-    Expected answer: Regression tests on a fixed set, sampled human reviews and user feedback.
+
+    Example: Suppose most fictional requests finish quickly but several wait much longer. The mean can hide those slow cases;
+    percentiles expose the distribution. Pair that chart with error counts and answer checks. A small lab traffic sample demonstrates
+    aggregation rather than guaranteeing production service levels.
 
 
-    Common mistake: Monitoring only speed and errors, not answer quality.'
+    Ask: What does p95 latency describe?
+
+
+    Answer: A duration at or below which approximately 95 percent of the measured request waits fall.
+
+
+    Watch out: The population matters: state whether percentiles include blocked requests, failed requests, cache hits or only
+    successful generation.'
 - type: figure
-  title: 'Measured: a monitoring summary from the lab app''s logs'
+  title: 'Stored GPU run: ten-request monitoring'
   figure: lab_monitor
   bullets:
   - '{{MONITOR_NOTES}}'
-  - Handler logs timing, tokens, blocks and versions; no raw prompts.
+  - Metadata only; allowed-request percentiles.
   stack: true
-  notes: 'The lab sends simulated traffic through the app, including a prompt-injection attempt and messages containing an e-mail
-    address and a phone number. Each bar is one request: blue answered, orange answered after redacting personal data, red blocked.
-    The dashed line marks the ninety-fifth percentile latency. The summary in the bullet is computed from the log file. Point
-    out the design choice: logs store metadata, not message text, following GDPR data minimisation; if you need text for quality
-    review, redact it and limit retention and access.
+  notes: 'In short: The monitoring chart represents a recorded traffic sample with explicitly separated request outcomes.
 
 
-    Ask students: Why does the log store metadata rather than message text?
+    Explain: Allowed requests reach generation and can consume prompt and completion tokens. Blocked current inputs skip generation
+    in respond. Supported personal-data patterns are replaced before allowed generation. The log stores metadata rather than
+    raw prompts. The summary computes latency percentiles from allowed requests and block counts from all requests.
 
-    Expected answer: Data minimisation: timings and token counts are enough for monitoring and avoid storing personal data.
+
+    Example: Follow one recorded blocked bar and one redacted bar. The blocked request records zero model token counts, while
+    the redacted request can still generate an answer. Read the stored summary placeholder for actual results. The revised CPU
+    lab uses four invented requests and needs its own measured record.
 
 
-    Common mistake: Reading ten simulated requests as evidence of production performance.'
+    Ask: Do blocked requests enter the allowed-request p95 calculation?
+
+
+    Answer: No. They remain visible in the total request and block counts but are excluded from that percentile.
+
+
+    Watch out: The historical per-request chart has its own sample size; do not label it as the new four-request CPU run.'
+  caption: Qwen2.5-0.5B-Instruct · GTX 1650 · 9 Oct 2026
 - type: flow
   title: Guardrails in layers
   steps:
-  - label: Input
-    sub: Check size, identity, content
-  - label: Model / tools
-    sub: Restrict permissions
-  - label: Output
-    sub: Check schema and policy
-    highlight: true
-  - label: Oversight
-    sub: Escalate uncertain cases
+  - label: Validate
+    sub: Input
+    role: tool
+  - label: Generate
+    sub: Fixed weights
+    role: model
+  - label: Check
+    sub: Output
+    role: tool
+  - label: Escalate
+    sub: Uncertainty
+    role: tool
   - label: Monitor
-    sub: Test misses and false alarms
-  callout: Apply controls to every reachable route; pattern rules catch only some cases.
-  notes: 'Guardrails work in layers because each layer can be bypassed. Input checks enforce length and rate limits, redact
-    personal data and filter known injection patterns. The model setup limits damage: least-privilege tools mean an injected
-    instruction cannot do much. Output checks run moderation classifiers, validate structured outputs and check for leaked secrets
-    or policy violations. Humans handle sensitive or uncertain cases. Monitoring and red-teaming find new attacks. The lab''s
-    regex guardrails are deliberately simple; students discuss how to bypass them in question two.
+    sub: Outcomes
+    role: metric
+  callout: Apply controls on every route.
+  notes: 'In short: Controls belong on every request route and should be evaluated for misses and false alarms.
 
 
-    Ask students: An injected instruction slips past the input filter. Which layer limits the damage?
+    Explain: Input checks inspect request size, identity and permitted content. Restricting model tools limits the actions a
+    compromised workflow can perform. Output checks validate fields and relevant policies. Human oversight handles uncertain
+    or consequential cases under defined rules. Monitoring provides evidence for repeated improvement of those controls.
 
-    Expected answer: The model and tools layer: least-privilege tools cannot perform harmful actions.
+
+    Example: A literal injection pattern is blocked, but a paraphrase can avoid the same regular expression. The code still
+    needs least-privilege design and task-specific checks. Follow the labelled route from input to checked answer; monitoring
+    feedback returns test cases rather than training gradients.
 
 
-    Common mistake: Relying on regular expressions alone.'
+    Ask: What should happen after discovering a missed attack?
+
+
+    Answer: Add a representative regression case, inspect the relevant control and retest both unwanted and harmless examples.
+
+
+    Watch out: Pattern detection is a demonstration with known gaps; it does not guarantee safe behaviour for arbitrary inputs
+    or model outputs.'
+  arrows:
+  - request
+  - answer
+  - checked answer
+  - case record
 - type: bullets
   title: 'LLMOps tooling: tracing and evaluation'
-  icon: fa:FaSearch
+  notes: 'In short: Tracing links request operations, while LLMOps combines versions, testing, releases and monitoring.
+
+
+    Explain: A trace records the operations involved in one request. Timing and token fields help identify costly or slow steps.
+    LLMOps means operating language-model applications through a repeatable lifecycle. Telemetry tools can collect traces and
+    operational measurements. Their usefulness depends on what the application records and who can access it.
+
+
+    Example: A retrieved answer takes too long. A trace can separate retrieval wait, prompt preparation and model completion.
+    OpenTelemetry, Langfuse, LangSmith and MLflow are examples to investigate for appropriate recording. Choosing one tool does
+    not supply missing evaluation cases or justify storing personal conversations.
+
+
+    Ask: How does a trace differ from one total-duration field?
+
+
+    Answer: It links the request''s individual operations, making the location of time or failure easier to inspect.
+
+
+    Watch out: Instrument only needed fields, restrict access and retention, and avoid recording keys or raw personal data in
+    debug output.'
+  visual:
+    type: example_strip
+    items:
+    - label: Request trace
+      text: Retrieval → prompt → generation
+    - label: Inspect
+      text: Timing + tokens + errors
+    - label: Operate
+      text: Versions + tests + releases
+    caption: 'Examples: OpenTelemetry, Langfuse, LangSmith, MLflow.'
   bullets:
-  - '**Tracing:** record steps, timing and token use.'
-  - 'Examples: OpenTelemetry, Langfuse, LangSmith, MLflow.'
-  - '**LLMOps:** versions, tests, deployment and monitoring.'
-  - Repeat evaluations and review sampled answers.
-  notes: 'Tracing is essential once an application has several steps, as RAG and agent systems do next week: a trace shows which
-    retrieval, prompt, tool call or model call caused a bad answer or a slow response. OpenTelemetry is the open standard; Langfuse
-    is an open-source LLM observability platform; LangSmith integrates with LangChain; MLflow tracks experiments and traces;
-    and cloud platforms such as Microsoft Foundry (formerly Azure AI Foundry) and Google''s Gemini Enterprise Agent Platform (formerly Vertex AI) include monitoring and evaluation dashboards. Guardrail libraries
-    and safety classifiers provide more robust checks than hand-written rules.
-
-
-    Ask students: What does a trace show that a single log line does not?
-
-    Expected answer: The chain of steps (retrieval, prompts, tool and model calls) with timings, so you can find the step that
-    caused a slow or bad answer.
-
-
-    Common mistake: Treating tracing as a replacement for evaluation.'
+  - Inspect every reachable request route.
 - type: table
   title: 'Comparison: choosing a deployment for a student project'
   header:
   - Need
-  - Good choice
-  - Why
-  - Check
+  - Route
+  - Verify
   rows:
-  - - Quick prototype
-    - Hosted API + Gradio
-    - Working demo in an hour
-    - Data terms and cost
-  - - Private data, no budget
+  - - Prototype
+    - Hosted API
+    - Quality / terms
+  - - Private data
     - Local model
-    - Data stays on the device
-    - Memory and quality
-  - - Demo a fine-tuned model
-    - Hugging Face Spaces / Colab
-    - Free hosted GPU or CPU
-    - Hardware and time limits
+    - Fit / quality
+  - - Demo
+    - Gradio
+    - Hosting eligibility
   - - Many users
-    - Serving engine (vLLM)
-    - Batches concurrent requests
-    - Load-test waits
-  - - Repeatable hand-in
-    - Docker + pinned versions
-    - Same environment for markers
-    - Rebuild from scratch
-  notes: 'The descriptor asks for a comparison, so end with a practical decision table for projects. For a quick prototype,
-    compare hosted model quality, permitted data, quotas and cost, then use a Gradio interface where it fits. For private data
-    without a budget, run a local model. To demo your own fine-tuned model, use Hugging Face Spaces or Colab. For many users
-    with steady load, a serving engine on a GPU. For a reproducible hand-in, a Docker image with pinned versions.
+    - Serving engine
+    - Load / waits
+  - - Repeatable
+    - Docker
+    - Tested pins
+  notes: 'In short: A deployment recommendation should follow requirements and evidence rather than a favourite tool.
 
 
-    Ask students: Which option fits a group demo of its own fine-tuned model?
+    Explain: A prototype values quick iteration but still needs data and spending controls. Private-data tasks constrain where
+    requests and logs can travel. Many users require realistic load testing and capacity planning. Reproducible hand-ins need
+    tested environments and documented settings. Hosting availability and account conditions change, so published examples are
+    not entitlement promises.
 
-    Expected answer: Hugging Face Spaces or Colab, after checking hardware and session limits.
+
+    Example: For a fictional student project, first list the required quality, data location, peak workload and budget. Then
+    compare a local model, a hosted API and a self-hosted runtime using identical task examples. Record the assumptions that
+    could change the recommendation before making a deployment choice.
 
 
-    Common mistake: Choosing a serving engine for a prototype with five users.'
+    Ask: Does a demo hosting option guarantee free CPU or GPU access?
+
+
+    Answer: No. Check current official account conditions, hardware availability, quotas and charges.
+
+
+    Watch out: A cheap isolated request cannot establish total project cost, suitable concurrency or acceptable answer quality.'
 - type: bullets
   title: Responsible deployment checklist
-  icon: fa:FaClipboardList
+  notes: 'In short: A responsible release needs a concrete test and an accountable owner for each requirement.
+
+
+    Explain: Disclosure tells users they are interacting with an AI system. Data minimisation limits collection to what the
+    task needs. Access controls and request limits constrain who can call the application. Evaluation and escalation address
+    uncertain or consequential answers. A release record connects these decisions to tested versions and evidence.
+
+
+    Example: Before exposing an invented classroom assistant, inspect its request routes, secret handling, logs and quality
+    tests. Assign someone to respond to errors and withdraw a faulty version. A checklist becomes useful when each item names
+    a check, its result and the person responsible.
+
+
+    Ask: Does checking boxes once remove the need for monitoring?
+
+
+    Answer: No. Workloads, model releases, prompts and user behaviour can change after deployment.
+
+
+    Watch out: Use the relevant institutional and legal guidance for a real deployment; classroom pattern checks are only a
+    small technical demonstration.'
+  visual:
+    type: mini_table
+    header:
+    - Requirement
+    - Evidence
+    rows:
+    - - Transparency
+      - Clear AI notice
+    - - Data / access
+      - Minimise; restrict; expire
+    - - Quality / safety
+      - Test; monitor; escalate
+    - - Operation
+      - Owner; budget; rollback
   bullets:
-  - Disclose AI interaction as required.
-  - Minimise data; control access and retention.
-  - Protect keys and cap requests.
-  - Test, monitor and provide human escalation.
-  - Budget for the measured task.
-  notes: 'This checklist connects the week to responsible AI. Transparency is now a legal duty in the EU: users must be told
-    they are interacting with an AI system. Data protection requires knowing where prompts go and how long they are kept. Security
-    follows the OWASP Top 10 for LLM applications, which lists prompt injection, sensitive information disclosure and unbounded
-    consumption among the main risks. Oversight and evaluation continue after launch. Finally, cost and energy: smaller, well-chosen
-    models reduce both.
-
-
-    Ask students: Which OWASP risk covers a public app that runs up a large bill?
-
-    Expected answer: Unbounded consumption.
-
-
-    Common mistake: Forgetting to tell users they are interacting with an AI system.'
+  - Assign owners and test controls before release.
 - type: lab
   title: 'Lab 11: deploy, measure and monitor a generative AI app'
   steps:
-  - Measure first text and full response time.
-  - Serve locally; call SDK and framework.
-  - Estimate costs; simulate bounded retries.
-  - Compare rounding, batching and cache effects.
-  - Inspect checked Gradio logs and Docker scaffold.
-  runtime: Colab T4 GPU or CPU (slower). About 3 min on a 4 GB laptop GPU after downloads
-  deliverable: Notebook with latency, cost, quantisation, batching and monitoring tables, the app link or screenshot,
-    and three answers
-  notes: 'The lab covers both descriptor tutorials: exploring tools with local and cloud models, and building and deploying
-    a small application with a web interface, measuring latency and cost and adding logging and guardrails. Cloud API keys are
-    optional; everything else runs without accounts. Remind students to stop the public Gradio link at the end of the session
-    and never to paste keys into the notebook.
+  - Time CPU generation.
+  - Validate endpoint requests.
+  - Estimate cost; simulate retries.
+  - Probe rounding, batches and cache.
+  - Inspect monitoring and packaging.
+  runtime: 'CPU core: {{W11_CORE_TIME}}.'
+  deliverable: Tables, checks and explained decisions.
+  notes: 'In short: The lab core deploys and measures a small local model without requiring hosted spending.
 
 
-    Ask students: Which lab parts work without any API key?
+    Explain: Shared setup chooses CPU by default and provides optional provider access. The core uses real bounded generation,
+    FastAPI TestClient and synthetic monitoring traffic. Quantisation here means rounding then reconstructing floating-point
+    weights. Server launch, framework clients, Gradio and remote hosting are optional stretches. Cached local CPU waiting time
+    is measured; downloading and optional stretches need separate records.
 
-    Expected answer: All of them except the optional cloud API calls.
+
+    Example: Complete five TODOs, predict each result and use its semantic check. Compare a 24-token cap with 12 tokens using
+    an invented question. A slider inspects the setting without sending automatic model requests. Preserve your actual tables
+    rather than copying stored GPU results.
 
 
-    Common mistake: Pasting keys into the notebook instead of Colab Secrets.'
+    Ask: Are an API key or GPU required for the core?
+
+
+    Answer: No. Local CPU generation and the in-process endpoint supply the complete required path.
+
+
+    Watch out: Apply the recorded runtime only to the cached local CPU core; downloading and optional stretches need separate
+    evidence.'
 - type: summary
   points:
   - Choose model, server and application layers.
@@ -956,62 +1257,69 @@ slides:
   - Compare deployment and efficiency tradeoffs.
   - Package tested versions.
   - Check every route; monitor quality, cost and failures.
-  notes: 'Recap the six points. Students should be able to draw the architecture of a small application, estimate its cost,
-    explain where latency comes from, choose and justify a deployment option, and list what to monitor. Next week, the final
-    technical week, we connect models to knowledge and tools: retrieval-augmented generation and agents, which use everything
-    from today.
+  notes: 'In short: Operate the whole request path and justify decisions using quality, timing, cost and data evidence.
 
 
-    Ask students: Estimate a monthly bill: 100 users, 10 requests a day, 1,000 input and 200 output tokens, small-model prices.
+    Explain: The model, runtime, coordination and interface have different responsibilities. API contracts describe fields rather
+    than identical model behaviour. Efficiency changes require quality checks as well as speed measurements. Packaging records
+    tested versions, while monitoring records operational behaviour. Every reachable route needs its own validated controls
+    and failure handling.
 
-    Expected answer: 30,000 requests: 30 M input tokens cost $3 and 6 M output tokens cost $2.40, about $5.40 in total.
+
+    Example: Return to the fictional 500-student assistant. State its expected traffic, data location and quality target before
+    choosing deployment. Then inspect first text, full wait, throughput, token costs and failures. A modest working demo is
+    useful evidence, but it is not a capacity or safety guarantee.
 
 
-    Common mistake: Forgetting that output tokens cost more per token.'
+    Ask: If batching doubles throughput, must every student wait less?
+
+
+    Answer: No. Aggregate work can rise while individual requests wait longer for batching or shared capacity.
+
+
+    Watch out: Keep archived measurements labelled and replace them only through a measured export, results comparison and the
+    fill pipeline.'
 - type: resources
   items:
-  - kind: course
-    label: 'Microsoft: Generative AI for Beginners'
-    note: Lessons on building and securing apps
-    url: https://github.com/microsoft/generative-ai-for-beginners
   - kind: doc
-    label: Hugging Face Inference Providers
-    note: OpenAI-compatible router to open models
-    url: https://huggingface.co/docs/inference-providers/index
+    label: FastAPI testing
+    note: In-process requests
+    url: https://fastapi.tiangolo.com/tutorial/testing/
   - kind: doc
-    label: 'Gemini API: OpenAI compatibility'
-    note: Use Gemini with the OpenAI SDK
-    url: https://ai.google.dev/gemini-api/docs/openai
-  - kind: doc
-    label: vLLM documentation
-    note: High-throughput serving
-    url: https://docs.vllm.ai/en/latest/
-  - kind: tool
-    label: Ollama
-    note: Run open models locally
-    url: https://ollama.com/
+    label: SmolLM2 model card
+    note: Local model limits
+    url: https://huggingface.co/HuggingFaceTB/SmolLM2-135M-Instruct
   - kind: doc
     label: Gradio quickstart
-    note: Interfaces in Python
-    url: https://gradio.app/guides/quickstart
+    note: Python interface
+    url: https://www.gradio.app/guides/quickstart
   - kind: doc
-    label: FastAPI tutorial
-    note: Build APIs with Python
-    url: https://fastapi.tiangolo.com/tutorial/
-  - kind: doc
-    label: OWASP Top 10 for LLM Applications
-    note: Security risks and mitigations
-    url: https://genai.owasp.org/llm-top-10/
-  notes: 'Microsoft''s Generative AI for Beginners has lessons on building and securing applications. The Hugging Face Inference
-    Providers and Gemini compatibility pages show the OpenAI-compatible pattern with free tiers. The vLLM documentation and
-    Ollama cover self-hosted and local serving. Gradio and FastAPI tutorials cover the application layer. The OWASP Top 10 for
-    LLM applications is the standard security reference. The textbook reading is Tunstall and colleagues, chapter 8, on making
-    transformers efficient in production. All links were last checked on 9 October 2026.
+    label: Spaces conditions
+    note: Check hosting eligibility
+    url: https://huggingface.co/docs/hub/en/spaces-overview
+  - kind: video
+    label: Spaces introduction
+    note: Watch workflow; verify conditions
+    url: https://www.youtube.com/watch?v=3bSVKNKb_PY
+  notes: 'In short: Use official documentation to check interfaces and a practical video to connect them to an application.
 
 
-    Ask students: Which resource is the standard security reference?
+    Explain: The FastAPI testing guide explains synchronous in-process requests. The model card documents the selected small
+    local model and its limitations. Gradio documentation connects Python handlers to browser controls. The Spaces overview
+    states current hosting conditions. A demonstration video helps visualise the workflow, but written current conditions take
+    priority over older screen recordings.
 
-    Expected answer: The OWASP Top 10 for LLM applications.
+
+    Example: Before extending the lab, read one endpoint-testing example and explain its request and response fields. Then watch
+    the application introduction and identify which operations are local and which are hosted. Record any dated service conditions
+    needed for your project instead of assuming the video still describes them.
 
 
-    Common mistake: Copying deployment code from tutorials without pinning versions.'
+    Ask: Which source decides current hosting eligibility?
+
+
+    Answer: The official current account and hosting documentation, checked for the intended hardware and service.
+
+
+    Watch out: A working tutorial can still use outdated names or account conditions; verify the specific feature before relying
+    on it.'

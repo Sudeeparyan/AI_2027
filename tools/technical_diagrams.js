@@ -5,6 +5,9 @@ const WIDTH = 1440, HEIGHT = 820;
 const P = { ink: "1E1B4B", blue: "4F46E5", fill: "F5F3FF", teal: "0F766E", text: "1F2937" };
 const FONT_WIDTHS = require("./arial_widths.json");
 const NBSP = " ";
+// A lab symbol belongs on a block only when the author identifies that block
+// as its owner. Preserve the source code map while hiding inherited labels.
+const displayCode = step => step.code_owner === true ? String(step.code || "") : "";
 function fitLines(text,width,size,bold=false) {
   const metrics=FONT_WIDTHS[bold?"bold":"normal"], rows=[];
   const measure=s=>Array.from(s).reduce((sum,c)=>sum+(metrics[c===NBSP?" ":c]??.7)*size,0)*1.035;
@@ -71,7 +74,7 @@ function legacySvg(d) {
     out += `<rect x="${a.x}" y="${a.y}" width="${a.w}" height="${a.h}" rx="5" fill="#${P.fill}" stroke="#${P.blue}" stroke-width="2"/>`;
     out += svgText(`${a.i + 1}. ${a.title}`, a.x + a.w / 2, a.y + 33, 29, P.ink, true, 25);
     out += svgText(a.detail, a.x + a.w / 2, a.y + 125, 27, P.text, false, 27);
-    if (a.code) out += svgText(a.code, a.x + a.w / 2, a.y + 226, 22, P.teal, false, 31);
+    if (displayCode(a)) out += svgText(displayCode(a), a.x + a.w / 2, a.y + 226, 24, P.teal, false, 31);
     if (a.i < d.arrows.length) out += svgText("Output: " + d.arrows[a.i], a.x + a.w / 2, a.y + 291, 24, P.teal, false, 32);
   }
   if (d.feedback) out += svgText("Repeat: " + d.feedback, WIDTH / 2, 790, 24, P.teal, false, 112);
@@ -96,9 +99,9 @@ function legacyNative(slide, d, addText, box) {
     slide.addShape("rect", { x: a.x, y: a.y, w: a.w, h: a.h, fill: { color: P.fill }, line: { color: P.blue, width: 1.3 } });
     addText(slide, `${a.i + 1}. ${a.title}`, { x: a.x + 0.08, y: a.y, w: a.w - 0.16, h: 0.60, fontSize: 18, color: P.ink, bold: true, align: "center", valign: "middle", margin: 0 });
     addText(slide, a.detail, { x: a.x + 0.10, y: a.y + 0.60, w: a.w - 0.20, h: a.h - 0.82, fontSize: 17, color: P.text, align: "center", valign: "middle", margin: 0 });
-    if (a.code) {
-      const code = a.code.length > 32 ? a.code.replace(/\s\/\s/g, " /\n") : a.code;
-      addText(slide, code, { x: a.x + 0.06, y: a.y + a.h - 0.21, w: a.w - 0.12, h: 0.20, fontSize: 12, color: P.teal, fontFace: "Consolas", align: "center", valign: "middle", margin: 0 });
+    if (displayCode(a)) {
+      const label = displayCode(a), code = label.length > 32 ? label.replace(/\s\/\s/g, " /\n") : label;
+      addText(slide, code, { x: a.x + 0.06, y: a.y + a.h - 0.29, w: a.w - 0.12, h: 0.28, fontSize: 14, color: P.teal, fontFace: "Consolas", align: "center", valign: "middle", margin: 0 });
     }
     if (a.i < d.arrows.length) addText(slide, "Output: " + d.arrows[a.i], { x: a.x, y: a.y + a.h + 0.05, w: a.w, h: 0.48, fontSize: 15, color: P.teal, align: "center", valign: "middle", margin: 0 });
   }
@@ -111,11 +114,12 @@ function legacyNative(slide, d, addText, box) {
 // PowerPoint and SVG to wrap the same paragraph independently.
 const LINEAR_HEIGHT = 530;
 const ROLES = {
-  data: { color: "0072B2", fill: "E4F2FB", shape: "roundRect", label: "Input data" },
+  data: { color: "0072B2", fill: "E4F2FB", shape: "roundRect", label: "Data" },
   model: { color: "009E73", fill: "E5F7EF", shape: "rect", label: "Model" },
-  loss: { color: "D55E00", fill: "FFF0E6", shape: "roundRect", label: "Loss / update" },
+  loss: { color: "D55E00", fill: "FFF0E6", shape: "roundRect", label: "Loss" },
+  metric: { color: "D55E00", fill: "FFF0E6", shape: "roundRect", label: "Check" },
   output: { color: "CC79A7", fill: "F9EAF4", shape: "roundRect", label: "Output" },
-  tool: { color: "626B73", fill: "F2F4F5", shape: "rect", label: "Human / tool" },
+  tool: { color: "626B73", fill: "F2F4F5", shape: "rect", label: "Tool" },
 };
 function lines(text, chars) {
   const result = [];
@@ -137,8 +141,13 @@ const BOX_Y = 142, BOX_H = 236, LABEL_BOTTOM = 134, REPEAT_RAIL = 44, LEGEND_Y =
 const CODE_COLOR = "0F766E";
 function linearGeometry(d) {
   const count = d.steps.length, margin = 24, gap = 32;
-  const w = (WIDTH - margin * 2 - gap * (count - 1)) / count, mid = BOX_Y + BOX_H / 2;
-  const nodes = d.steps.map((s, i) => ({ ...s, i, x: margin + i * (w + gap), y: BOX_Y, w, h: BOX_H,
+  const w = (WIDTH - margin * 2 - gap * (count - 1)) / count;
+  // Lecture flows share the same scene but need no empty repetition/branch
+  // bands. Compact geometry leaves room for a short prediction or callout.
+  const longestArrow = Math.max(0, ...d.arrows.filter(Boolean).map(label => fitLines(label, Math.min(210, w + 26), 24).length * 24 * 1.16));
+  const boxY = d.compact ? Math.max(d.feedback ? BOX_Y : 56, Math.ceil(longestArrow) + 16) : BOX_Y;
+  const boxH = d.compact ? 188 : BOX_H, mid = boxY + boxH / 2;
+  const nodes = d.steps.map((s, i) => ({ ...s, i, x: margin + i * (w + gap), y: boxY, w, h: boxH,
     role: ({input:"data",human:"tool"}[s.role] || s.role) || (i === 0 ? "data" : i === count - 1 ? "output" : "model") }));
   // A null arrow means "no connector": the next block is an independent input
   // (for example random noise) that receives nothing from its left neighbour.
@@ -161,8 +170,8 @@ function linearGeometry(d) {
     list.forEach((e, j) => attachX.set(`${e.b.i}:${own}`, nodes[own].x + nodes[own].w * (j + 1) / (list.length + 1)));
   }
   const branches = raw.map(b => {
-    const rail = BOX_Y + BOX_H + 26 + railOf.get(b.i) * 40, x1 = attachX.get(`${b.i}:${b.from}`), x2 = attachX.get(`${b.i}:${b.to}`);
-    return { ...b, points: [[x1, BOX_Y + BOX_H], [x1, rail], [x2, rail], [x2, BOX_Y + BOX_H]], color: ROLES.data.color };
+    const rail = boxY + boxH + 26 + railOf.get(b.i) * 40, x1 = attachX.get(`${b.i}:${b.from}`), x2 = attachX.get(`${b.i}:${b.to}`);
+    return { ...b, points: [[x1, boxY + boxH], [x1, rail], [x2, rail], [x2, boxY + boxH]], color: ROLES.data.color };
   });
   let feedback = null;
   if (d.feedback) {
@@ -175,7 +184,9 @@ function linearGeometry(d) {
         [b.x + b.w / 2 - loopOffset, rail],
         [b.x + b.w / 2 - loopOffset, b.y]] };
   }
-  return { nodes, segments, branches, feedback, width: WIDTH, height: LINEAR_HEIGHT };
+  const legendY = d.compact ? boxY + boxH + (branches.length ? 74 + (branches.length - 1) * 40 : 32) : LEGEND_Y;
+  return { nodes, segments, branches, feedback, width: WIDTH,
+    height: d.compact ? legendY + 38 : LINEAR_HEIGHT, legendY, labelBottom: boxY - 8 };
 }
 function textWidth(content, size, bold = false) {
   return Math.max(...fitLines(content, 100000, size, bold).map(row =>
@@ -194,8 +205,8 @@ function scene(d) {
     // The label sits directly above its arrow's gap, bottom-aligned on the blocks.
     const a = g.nodes[s.from], b = g.nodes[s.to], centre = (a.x + a.w + b.x) / 2;
     const labelW = Math.min(210, a.w + 26), h = rows(s.label, labelW, 24) * 24 * 1.16;
-    if (LABEL_BOTTOM - h < (g.feedback ? REPEAT_RAIL + 4 : 8)) throw Error(`${d.id}: arrow label too long: ${s.label}`);
-    text(s.label, centre - labelW/2, LABEL_BOTTOM - h, labelW, h, 24, ROLES.data.color);
+    if (g.labelBottom - h < (g.feedback ? REPEAT_RAIL + 4 : 8)) throw Error(`${d.id}: arrow label too long: ${s.label}`);
+    text(s.label, centre - labelW/2, g.labelBottom - h, labelW, h, 24, ROLES.data.color);
   }
   for (const s of g.branches) {
     items.push({ kind: "route", ...s });
@@ -218,9 +229,10 @@ function scene(d) {
     // Title, plain-language detail and lab code name stack with clear gaps,
     // centred as one group, so no text touches another band or the outline.
     const parts = [[a.title, a.w - 16, 26, P.ink, true], [a.detail, a.w - 16, 24, P.text, false]];
-    if (a.code) parts.push([a.code, a.w - 6, 24, CODE_COLOR, false]);
+    const code = displayCode(a);
+    if (code) parts.push([code, a.w - 6, 24, CODE_COLOR, false]);
     const heights = parts.map(([t, w, size, , bold]) => rows(t, w, size, bold) * size * 1.16);
-    const total = heights.reduce((s, h) => s + h, 0) + 10 + (a.code ? 8 : 0);
+    const total = heights.reduce((s, h) => s + h, 0) + 10 + (code ? 8 : 0);
     if (total > a.h - 16) throw Error(`${d.id}: block ${a.i + 1} text is too long: ${a.title}`);
     let y = a.y + (a.h - total) / 2;
     parts.forEach(([t, w, size, color, bold], k) => {
@@ -232,20 +244,52 @@ function scene(d) {
   let x = 24;
   const used = new Set(g.nodes.map(n => n.role));
   for (const r of Object.entries(ROLES).filter(([key]) => used.has(key)).map(([, r]) => r)) {
-    items.push({kind: "block", x, y: LEGEND_Y + 3, w: 26, h: 26, ...r});
+    items.push({kind: "block", x, y: g.legendY + 3, w: 26, h: 26, ...r});
     const w = textWidth(r.label, 24) + 4;
-    text(r.label, x + 34, LEGEND_Y, w, 32, 24, P.text, false, "left");
+    text(r.label, x + 34, g.legendY, w, 32, 24, P.text, false, "left");
     x += 34 + w + 26;
   }
-  const lines = [["data flow", false, ROLES.model.color]].concat(g.feedback ? [["feedback / repeat", true, ROLES.loss.color]] : []);
+  const lines = [["Flow", false, ROLES.model.color]].concat(g.feedback ? [["Repeat", true, ROLES.loss.color]] : []);
   for (const [label, dashed, color] of lines) {
-    items.push({kind: "route", legend: true, points: [[x, LEGEND_Y + 16], [x + 44, LEGEND_Y + 16]], color, dashed});
+    items.push({kind: "route", legend: true, points: [[x, g.legendY + 16], [x + 44, g.legendY + 16]], color, dashed});
     const w = textWidth(label, 24) + 4;
-    text(label, x + 52, LEGEND_Y, w, 32, 24, P.text, false, "left");
+    text(label, x + 52, g.legendY, w, 32, 24, P.text, false, "left");
     x += 52 + w + 26;
   }
   if (x - 26 > WIDTH - 24) throw Error(`${d.id}: legend is wider than the scene`);
   return { ...g, items };
+}
+
+function flowDiagram(s, id = "lecture_flow") {
+  const fail = message => { throw Error(`${id}: ${message}`); };
+  if (!Array.isArray(s.steps) || s.steps.length < 2 || s.steps.length > 7) fail("needs 2–7 steps");
+  if (!Array.isArray(s.arrows) || s.arrows.length !== s.steps.length - 1) fail("needs n−1 arrows (null for independent inputs)");
+  if (s.arrows.some(a => a !== null && (typeof a !== "string" || !a.trim()))) fail("data arrows need nonempty labels or null");
+  const touched = new Set();
+  s.arrows.forEach((a, i) => { if (a) { touched.add(i); touched.add(i + 1); } });
+  const knownRole = role => ({input:"data",human:"tool"}[role] || role);
+  const steps = s.steps.map((step, i) => {
+    if (!step || typeof step.label !== "string" || !step.label.trim()) fail(`step ${i + 1} needs a real operation label`);
+    if (step.sub !== undefined && typeof step.sub !== "string") fail(`step ${i + 1} sub must be a string`);
+    if (typeof step.role !== "string" || !Object.hasOwn(ROLES, knownRole(step.role))) fail(`step ${i + 1} has an unknown or missing role`);
+    return {...step, title:step.label, detail:step.sub || "", role:knownRole(step.role)};
+  });
+  const endpoint = n => Number.isInteger(n) && n >= 0 && n < steps.length;
+  const branches = s.branches === undefined ? [] : s.branches;
+  if (!Array.isArray(branches)) fail("branches must be a list");
+  for (const b of branches) {
+    if (!b || !endpoint(b.from) || !endpoint(b.to)) fail("branch endpoint is outside the diagram");
+    if (b.to <= b.from) fail("data branches move forward; use feedback for repetition");
+    if (typeof b.label !== "string" || !b.label.trim()) fail("branch needs a nonempty data label");
+    touched.add(b.from); touched.add(b.to);
+  }
+  if (touched.size !== steps.length) fail("disconnected block; label its data arrow or branch");
+  if (s.feedback !== undefined) {
+    if (typeof s.feedback !== "string" || !s.feedback.trim()) fail("feedback needs a nonempty repetition label");
+    if (!endpoint(s.feedback_from ?? steps.length - 1) || !endpoint(s.feedback_to ?? 0)) fail("feedback endpoint is outside the diagram");
+  }
+  return {id, title:s.title, subtitle:"", layout:"linear", compact:true, steps, arrows:s.arrows, branches,
+    ...(s.feedback !== undefined ? {feedback:s.feedback, feedback_from:s.feedback_from, feedback_to:s.feedback_to} : {})};
 }
 function sceneSvg(d) {
   return svgScene(scene(d), d.title, d.subtitle);
@@ -310,6 +354,18 @@ function native(slide, d, addText, box) {
   return d.layout === "linear" ? sceneNative(slide, d, addText, box) : legacyNative(slide, d, addText, box);
 }
 async function main() {
+  if (process.argv[2] === "--flows") {
+    const [source, out] = process.argv.slice(3), data = JSON.parse(fs.readFileSync(source, "utf8"));
+    fs.mkdirSync(out, {recursive:true});
+    for (const entry of data.flows) {
+      if (!/^lecture_flow_\d+$/.test(entry.id)) throw Error("Invalid lecture-flow export ID");
+      const d = flowDiagram(entry.slide, entry.id), g = scene(d), xml = svgScene(g, d.title), stem = path.join(out, entry.id);
+      fs.writeFileSync(stem + ".scene.json", JSON.stringify(g));
+      fs.writeFileSync(stem + ".svg", xml);
+      await sharp(Buffer.from(xml)).resize({width:WIDTH * 1.5}).png().toFile(stem + ".png");
+    }
+    return;
+  }
   if (process.argv[2] === "--scene") {
     const source = process.argv[3], target = process.argv[4], g = JSON.parse(fs.readFileSync(source, "utf8"));
     const xml = svgScene(g, path.basename(source, ".scene.json"));
@@ -325,5 +381,5 @@ async function main() {
     await sharp(Buffer.from(text)).resize({ width: WIDTH * 1.5 }).png().toFile(stem + ".png");
   }
 }
-module.exports = { native, nativeScene, geometry, svg, svgScene, scene, flattenedScene, wrap, fitLines, textWidth, ROLES, WIDTH, HEIGHT, LINEAR_HEIGHT };
+module.exports = { native, nativeScene, geometry, svg, svgScene, scene, flowDiagram, flattenedScene, wrap, fitLines, textWidth, ROLES, WIDTH, HEIGHT, LINEAR_HEIGHT };
 if (require.main === module) main().catch(e => { console.error(e); process.exit(1); });

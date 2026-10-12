@@ -1,0 +1,20 @@
+# R4 · Week 10: multimodal tasks and verification
+
+Checked **2026-10-10**. Read: built slide titles and lab headings only. CPU budgets below are design targets, not measurements.
+
+**Explanations to adapt.**
+- A picture becomes a collection of feature tiles before a language model answers. Adapt the [SmolVLM publisher card](https://huggingface.co/HuggingFaceTB/SmolVLM-256M-Instruct) into labelled image → processor → image features → text decoder blocks. Tiles are numerical representations, not literal English words.
+- An invoice assistant needs both a reader and a calculator. [Google document understanding](https://ai.google.dev/gemini-api/docs/document-processing) motivates extracting fields; our proposed worked example separately verifies `2 × 12 + 3 × 5 = 39`. Correct arithmetic does not prove the extracted quantities were correct.
+- CLIP compares image/text representations, like placing descriptions and pictures on a shared map; the [original CLIP paper](https://arxiv.org/abs/2103.00020) supports the mechanism. Map proximity does not certify object counts, factual truth or image quality.
+
+**Five misconceptions.** (1) Every multimodal model generates images. (2) A plausible caption proves an object exists. (3) Reading an invoice guarantees correct totals. (4) A high CLIP score verifies every prompt detail. (5) Content Credentials prove the depicted event happened. Compare predicted fields with the visible source before calculating; distinguish provenance from truth.
+
+**Current practice and versions.** [`HuggingFaceTB/SmolVLM-256M-Instruct`](https://huggingface.co/HuggingFaceTB/SmolVLM-256M-Instruct) is an existing compact image-and-text-to-text model, with documented CPU selection; it does not generate images. Validate CPU precision and the processor/model class against the installed Transformers version. R0's published Colab snapshot has transformers `5.18.0`, diffusers `0.40.0`, torch `2.11.0+cpu`; it is not a tested lock. R0 recommends Gemini `gemini-3.5-flash-lite` through `google-genai`; its multimodal inputs/text outputs are separate from paid media generation. [C2PA](https://spec.c2pa.org/specifications/specifications/2.3/specs/C2PA_Specification.html) supplies tamper-evident provenance assertions, not a truth verdict. Label 2027 trends as forecasts.
+
+**Own-style visuals and beginner barriers.** Redraw an invoice → extracted line items → Python calculation → discrepancy report, with currency and units on arrows. Pair correct/incorrect captions with highlighted evidence. Show input/output modality mini-tables instead of tool logos. Titles span VLM architecture, fine-tuning, editing, speech and music rapidly; preserve depth in notes using one recurring synthetic document. Lab barriers: processor dictionaries, image size/channels, output tokens versus prompt tokens, audio sample rate, and multiple large downloads. Teach one route fully before optional media routes.
+
+**CPU core proposal, target ≤15 minutes of waiting; unmeasured.** Run capped local VLM inference on one small image, then validate synthetic invoice fields and totals with Python and inspect a chart against its data table. Use a resolution slider to display inputs or measured stored outputs, without inference in callbacks. Compare stored measured diffusion/speech examples; live synthesis/fine-tuning is stretch. Optional Gemini makes a few image/document comparisons with `USE_GEMINI=False` and a complete local route; no personal documents. R0's unresolved EEA/Swiss/UK distributed-client paid-service condition applies: no regional free-access promise, billing change or paid API substitute.
+
+**Further reading:** [SmolVLM card](https://huggingface.co/HuggingFaceTB/SmolVLM-256M-Instruct) · [Google document understanding](https://ai.google.dev/gemini-api/docs/document-processing) · [CLIP paper](https://arxiv.org/abs/2103.00020) · [C2PA specification](https://spec.c2pa.org/specifications/specifications/2.3/specs/C2PA_Specification.html) · [MIT 6.S191 2026 generative-modeling video](https://www.youtube.com/watch?v=R8V8CbuxryI).
+
+Handoff: research complete; local inference, timing, API access and widgets unverified.

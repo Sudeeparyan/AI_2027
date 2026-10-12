@@ -1,144 +1,148 @@
 # %% [markdown]
-# # Week 2 Lab: Implement and explore a Variational Autoencoder (VAE)
+# # Week 2 lab: build, train and inspect a variational autoencoder
 #
-# **Module:** Generative AI (MSc in Artificial Intelligence) · **Time:** 2 hours · **Learning outcomes:** MIMLO 1, 3, 4
+# **Generative AI, MSc · 2 hours · MIMLO 1, 3, 4**
 #
-# You will implement a VAE in **PyTorch**, train it on handwritten digits (MNIST), and use it to:
+# A digit is an image of 784 intensities. Can a model compress it into two
+# numbers, rebuild it and draw a new digit without an input image?
+# You will implement a real VAE, train it with gradients and inspect its limits.
 #
-# 1. visualise its **latent space** and decode a grid of latent points,
-# 2. **interpolate** between two digits,
-# 3. study the effect of the KL weight **β**,
-# 4. detect **unusual inputs** with reconstruction error,
-# 5. (extension) build a **conditional VAE** that draws the digit you ask for.
-#
-# | Part | Topic | Suggested time |
+# | Part | Core task | Suggested class time |
 # |---|---|---|
-# | 0 | Setup and data | 10 min |
-# | 1 | Build the VAE | 25 min |
-# | 2 | Train and monitor | 15 min |
-# | 3 | Explore the latent space | 25 min |
-# | 4 | The β trade-off | 20 min |
-# | 5 | Anomaly detection | 15 min |
-# | 6 | Extension: conditional VAE | optional |
+# | 0 | Read images and predict shapes | 10 min |
+# | 1 | Complete and check the five TODOs | 25 min |
+# | 2 | Train and inspect both costs | 20 min |
+# | 3 | Decode a grid and interpolate | 25 min |
+# | 4 | Change beta; distinguish weighting from training | 15 min |
+# | 5 | Score unusual inputs and discuss limitations | 15 min |
+# | 6 | Record evidence and answer self-checks | 10 min |
+#
+# Class time includes discussion and coding; it is not a measured compute time.
+# CPU is the default. The core trains small models on a bounded subset.
+# Longer beta comparisons and a conditional VAE are behind `RUN_STRETCH = False`.
+# Lecture figures come from archived, longer experiments; your core results can differ.
 
 # %% [markdown]
-# ## Before coding: two paths through the VAE
+# ## Before coding: reconstruction and generation are different routes
 #
-# **Reconstruction** starts with an image and asks the model to rebuild it.
-# **Generation** starts with a new random latent code and uses the trained
-# decoder. A latent code is a short numerical representation, not a digit label.
+# A **latent code** is a short hidden numerical representation. Its coordinates
+# need not mean named properties such as digit identity, slant or stroke width.
+# Reconstruction starts with an image. Generation starts with a fresh prior code.
+# A **prior** is the chosen code distribution before seeing an image.
 #
 # ![Train a VAE to rebuild digits](fig:beginner_overview)
 #
-# Follow `train_dl` → `VAE.encode` → `VAE.reparameterise` → `VAE.dec` →
-# `vae_loss` → `train`. The encoder branches into `mu` and `logvar`, and both
-# feed the sampled code. The original image also enters the reconstruction cost;
-# `mu` and `logvar` enter the KL cost directly. Weight updates repeat this path.
+# Follow pixels → encoder parameters → sampled code → decoder logits → loss → update.
+# Original pixels also enter the reconstruction loss directly. Encoder parameters
+# enter KL directly. These are separate loss inputs, even though the costs train together.
 #
 # ![Build, train, then explore the VAE](fig:beginner_lab)
 #
-# | Diagram block | Code to find | First observation |
+# | Operation | Code | Shape or observation |
 # |---|---|---|
-# | Prepare digits | `train_dl`, `x_test` | Each image is `[1, 28, 28]`; one image contains 784 pixels. |
-# | Build and check | `VAE`, `vae_loss` | The encoder has two outputs; the decoder returns pixel logits. |
-# | Train and monitor | `train`, `hist` | Reconstruction and KL are recorded separately. |
-# | Explore codes | `vae2`, `vae16`, `interpolate` | A code can come from an image or from the prior. |
-# | Compare beta | `results`, `z_fixed` | Separate models decode the same fixed codes. |
-# | Check unusual inputs | `recon_error`, `auc` | There is one reconstruction score per test image. |
+# | Prepare | `train_dl`, `x_test` | Images `[B,1,28,28]` |
+# | Encode | `VAE.encode` | Mean and log-variance `[B,d]` |
+# | Sample | `VAE.reparameterise` | Code `[B,d]` |
+# | Decode | `VAE.dec`, `VAE.decode` | Logits `[B,784]`; images `[B,28,28]` |
+# | Train | `train`, `vae_loss` | Reconstruction and KL separately |
+# | Evaluate | `recon_error` | One score per image |
 #
-# **Pause and predict:** when generating from a fresh prior code, which blocks
-# can be bypassed? Trace the input path before looking at the sample grid.
+# **Predict:** which operations can be skipped when generating a fresh prior sample?
+# Record your prediction before running the generation cell.
 
 # %% [markdown]
-# ## Part 0 · Setup and data
+# ## Part 0 · Read the data contract
 #
-# **Read:** a VAE learns a short code for an image, then rebuilds the image
-# from that code. A **batch** is a group of examples processed together; `B`
-# is its size. An **epoch** is one pass through the training dataset.
-# **Run:** complete the model and loss TODOs, then run the untrained check
-# before the training loop. That check catches wiring errors early.
-# **Change:** compare `zdim=2` with `zdim=16`, then compare the beta settings.
-# **Check:** record reconstruction and KL separately; a smaller total loss
-# with a different beta is not a fair comparison by itself.
+# **Read:** a batch groups examples; an epoch is one pass through the training subset.
+# **Predict:** what does flattening change in `[8,1,28,28]`?
+# **Core:** inspect eight images and verify their values and dimensions.
+# **Change one thing:** display six images rather than twelve.
+# **Stretch:** compare the image and flattened views using `reshape`.
+# **Common errors:** an import error usually means the wrong kernel or an incomplete
+# installation. A failed dataset download needs a working connection; rerun that cell.
 
 # %% [markdown]
-# **Purpose:** Install image and model libraries.
-# **Why now:** The notebook needs torchvision and PyTorch.
-# **Expected observation:** Package installation completes or reports an environment error.
-#
+# **What:** install the image, maths and plotting libraries.
+# **Why:** PyTorch trains the VAE; torchvision supplies public teaching datasets.
+# **Expect:** installation succeeds or reports a package/environment issue.
+# The builder supplies the dated pins and one shared setup cell after installation.
 
 # %% tags=["colab-install"]
-%pip install -q torch torchvision scikit-learn matplotlib
+%pip install -q torch torchvision scikit-learn matplotlib scipy
 
 # %% [markdown]
-# **Purpose:** Load and inspect MNIST.
-# **Why now:** Pixels and batch shape give the model’s input contract.
-# **Expected observation:** Images have one channel and 784 intensities.
-#
+# **What:** load a bounded digit subset and inspect the first batch.
+# **Why:** tensor shapes and intensity ranges define the network's input contract.
+# **Expect:** images `[8,1,28,28]`, flattened pixels `[8,784]`, and values within `[0,1]`.
+# Use the shared `DEVICE`, `SEED`, `SMOKE`, `check()` and `ask_model()` definitions.
+# Training limits below are settings to measure, not a promise about runtime or quality.
 
 # %%
-import os
-
+import math
 import matplotlib.pyplot as plt
-import numpy as np
-import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import DataLoader, Subset
 from torchvision import datasets, transforms
 
-SMOKE = os.environ.get("GENAI_LAB_SMOKE") == "1"
-torch.manual_seed(0)
-np.random.seed(0)
-DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-EPOCHS = 1 if SMOKE else 10
-print("device:", DEVICE, "| epochs:", EPOCHS)
+# This explicit switch keeps the longer experiments outside the default core.
+RUN_STRETCH = False
+TRAIN_LIMIT = 1024 if SMOKE else 12000
+TEST_LIMIT = 256 if SMOKE else 1000
+EPOCHS = 1 if SMOKE else 3
+HIDDEN = 128
+BATCH_SIZE = 128
 
-tf = transforms.ToTensor()  # pixels in [0, 1]
-train_set = datasets.MNIST("data", train=True, download=True, transform=tf)
-test_set = datasets.MNIST("data", train=False, download=True, transform=tf)
-if SMOKE:
-    train_set = Subset(train_set, range(3000))
-train_dl = DataLoader(train_set, batch_size=128, shuffle=True)
-x_test, y_test = next(iter(DataLoader(Subset(test_set, range(5000)), batch_size=5000)))
-print("train images:", len(train_set), "| image shape:", tuple(x_test.shape[1:]))
-
-plt.figure(figsize=(8, 1.2))
+tf = transforms.ToTensor()  # Convert each grayscale image to values between zero and one.
+all_train = datasets.MNIST("data", train=True, download=True, transform=tf)
+all_test = datasets.MNIST("data", train=False, download=True, transform=tf)
+train_set = Subset(all_train, range(TRAIN_LIMIT))
+train_dl = DataLoader(train_set, batch_size=BATCH_SIZE, shuffle=True,
+                      generator=torch.Generator().manual_seed(SEED))
+x_test, y_test = next(iter(DataLoader(Subset(all_test, range(TEST_LIMIT)),
+                                     batch_size=TEST_LIMIT)))
+print("Core settings:", {"device": DEVICE, "train_images": TRAIN_LIMIT,
+                          "test_images": TEST_LIMIT, "epochs": EPOCHS, "hidden": HIDDEN})
+print("Image batch:", tuple(x_test[:8].shape), "| flattened:", tuple(x_test[:8].flatten(1).shape))
+check(tuple(x_test[:8].shape) == (8, 1, 28, 28), "Input shapes match", "Inspect batch, channel, row and column dimensions.")
+check(bool((x_test >= 0).all() and (x_test <= 1).all()), "Pixels lie in [0,1]", "Use ToTensor for grayscale intensities.")
+plt.figure(figsize=(8, 1.3))
 plt.imshow(np.hstack(x_test[:12, 0].numpy()), cmap="gray_r")
 plt.axis("off")
-plt.title("Some MNIST test digits")
+plt.title("Held-out MNIST digits")
 plt.show()
 
 # %% [markdown]
-# ## Part 1 · Build the VAE
+# ## Part 1 · Build the distribution and the loss
 #
-# The encoder outputs the **mean** μ and **log-variance** log σ² of a Gaussian over the code z. The decoder turns z into 784 pixel **logits**.
+# **Read:** the encoder predicts **mean** `mu` and **log-variance** `logvar`.
+# Standard deviation is `exp(0.5 * logvar)`, so `logvar=0` gives spread one.
+# A **logit** is a raw score; sigmoid converts it to a probability.
+# **Predict:** both encoder outputs are `[B,d]`; decoder logits are `[B,784]`.
+# **Core:** implement TODOs 1–3, then use the checks before training.
+# **Change one thing:** inspect `zdim=4` in the shape check.
+# **Stretch:** explain why the KL term needs `mu` and `logvar`, rather than sampled `z`.
+# **Common errors:** `None` outputs mean TODO 1 is unfinished. Reusing `mu` as the sample
+# removes variation. Using variance where standard deviation is needed changes the Gaussian.
 #
-# **TODO 1:** in `encode`, compute `mu` and `logvar` from the hidden layer.
-# **TODO 2:** implement the **reparameterisation trick**: $z = \mu + \sigma \odot \epsilon$ with $\epsilon \sim \mathcal{N}(0, I)$ and $\sigma = \exp(\tfrac12 \log\sigma^2)$.
+# **TODO 1 hint:** apply the two output heads to the same hidden representation `h`.
+# **TODO 2 hint:** draw `torch.randn_like(std)`, then calculate centre + spread × noise.
 #
-# **Read the shapes:** for a batch of `B` images and latent size `zdim`, the
-# two encoder outputs both have shape `[B, zdim]`. `logvar` is a log-variance,
-# not a standard deviation. `forward` returns `[B, 784]` pixel logits plus both
-# encoder outputs, allowing the two loss terms to take different input paths.
+# ![Reconstruction and prior generation share one decoder](fig:lecture_flow_14)
 #
-# Read the sampling formula as "centre + spread × fresh random noise".
-# `mu` is the centre, `std` is the spread, and `eps` supplies random variation.
-# `N(0, I)` means independent bell-shaped noise values with mean 0 and
-# variance 1. The symbol `⊙` means multiply matching entries, not a matrix product.
-# A **logit** is a raw pixel score; sigmoid turns it into a value from 0 to 1.
-
-# %% [markdown]
-# **Purpose:** Implement the VAE’s two paths.
-# **Why now:** Encoding an image differs from drawing a prior code.
-# **Expected observation:** mu/logvar have latent-size shape; decoder logits have 784 entries.
+# The two sampled routes meet at the decoder; only reconstruction supplies an input image.
 #
 # ![Sample a latent code while training](fig:beginner_mechanism)
-#
+
+# %% [markdown]
+# **What:** define the VAE and run checks for its encoder and sampling method.
+# **Why:** small contract checks catch wrong outputs before a training loop hides the error.
+# **Expect:** two green checks and printed `[8,2]` parameter shapes.
+# The checks explain unfinished TODOs without requiring you to train first.
 
 # %%
 class VAE(nn.Module):
-    def __init__(self, zdim=2, hidden=400):
+    def __init__(self, zdim=2, hidden=HIDDEN):
         super().__init__()
         self.zdim = zdim
         self.enc = nn.Sequential(nn.Flatten(), nn.Linear(784, hidden), nn.ReLU())
@@ -151,7 +155,7 @@ class VAE(nn.Module):
         ### BEGIN SOLUTION
         mu, logvar = self.mu_head(h), self.logvar_head(h)
         ### END SOLUTION
-        ### STUB mu, logvar = None, None  # TODO 1
+        ### STUB mu, logvar = None, None  # TODO 1: apply both output heads to h.
         return mu, logvar
 
     def reparameterise(self, mu, logvar):
@@ -160,7 +164,7 @@ class VAE(nn.Module):
         eps = torch.randn_like(std)
         return mu + std * eps
         ### END SOLUTION
-        ### STUB return mu  # TODO 2: replace with mu + sigma * eps
+        ### STUB return mu  # TODO 2: centre + positive spread times fresh noise.
 
     def forward(self, x):
         mu, logvar = self.encode(x)
@@ -169,33 +173,63 @@ class VAE(nn.Module):
 
     @torch.no_grad()
     def decode(self, z):
-        # Display pixel probabilities; this path needs a code, not an input image.
+        # Display predicted intensities; this does not sample individual binary pixels.
         return torch.sigmoid(self.dec(z)).view(-1, 28, 28)
 
-# %% [markdown]
-# **TODO 3:** implement the **negative ELBO** (per image):
-#
-# * reconstruction: binary cross-entropy **summed over pixels** (use `F.binary_cross_entropy_with_logits`),
-# * KL: $\tfrac12\sum_j(\mu_j^2 + \sigma_j^2 - \log\sigma_j^2 - 1)$,
-# * total = reconstruction + β · KL, all divided by the batch size.
-# At β = 1 this is the standard VAE objective. For binary targets it is the literal negative ELBO; greyscale targets use a soft-target BCE surrogate. Other β values reweight KL.
-# Summing over pixels answers "how costly is one whole image?"; averaging
-# over the batch lets batches of different sizes use a comparable scale.
-#
-# **In plain language:** the reconstruction term asks "did we rebuild the
-# input pixels?" The KL term asks "how far is this image's code distribution
-# from the standard random-code distribution?" Beta controls the weight of
-# that second question. **ELBO** is the training bound these terms come from.
-# The subscript `j` selects one latent coordinate; the sum adds its cost across
-# all coordinates. We optimise the negative bound, so lower is better.
+
+def check_encoder(model):
+    try:
+        mu, logvar = model.encode(x_test[:8].to(DEVICE))
+        good = (isinstance(mu, torch.Tensor) and isinstance(logvar, torch.Tensor)
+                and tuple(mu.shape) == (8, model.zdim) and mu.shape == logvar.shape)
+        if good:
+            print("mu:", tuple(mu.shape), "| logvar:", tuple(logvar.shape))
+        return check(good, "TODO 1: both encoder heads have the right shape",
+                     "Apply mu_head and logvar_head to h; each should return [B,zdim].")
+    except Exception:
+        return check(False, "", "TODO 1: inspect the two head calls and their tensor shapes.")
+
+
+def check_sampling(model):
+    try:
+        mu = torch.zeros(2048, model.zdim, device=DEVICE)
+        logvar = torch.zeros_like(mu)
+        z1 = model.reparameterise(mu, logvar)
+        z2 = model.reparameterise(mu, logvar)
+        good = (z1.shape == mu.shape and not torch.equal(z1, z2)
+                and 0.85 < float(z1.std()) < 1.15)
+        # Additional checks preserve the random state reserved for real training.
+        with torch.random.fork_rng(devices=[torch.cuda.current_device()] if DEVICE == "cuda" else []):
+            shifted_mu = torch.full((8, model.zdim), 1.25, device=DEVICE)
+            nonunit_logvar = torch.full_like(shifted_mu, math.log(4))
+            torch.manual_seed(123)
+            known_noise = torch.randn_like(shifted_mu)
+            expected = shifted_mu + 2 * known_noise  # variance four means standard deviation two.
+            torch.manual_seed(123)
+            observed = model.reparameterise(shifted_mu, nonunit_logvar)
+        good = good and observed.shape == expected.shape and torch.allclose(observed, expected, atol=1e-6)
+        return check(good, "TODO 2: fresh samples preserve the mean and convert variance to spread",
+                     "logvar=0 needs std=1; logvar=ln(4) needs std=2. Return mu + exp(0.5*logvar) * eps.")
+    except Exception:
+        return check(False, "", "TODO 2: match the shapes of mu, std and fresh noise.")
+
+
+model_check = VAE().to(DEVICE)
+encoder_ready = check_encoder(model_check)
+sampling_ready = check_sampling(model_check)
 
 # %% [markdown]
-# **Purpose:** Implement and check both costs.
-# **Why now:** Training requires gradients from reconstruction and KL.
-# **Expected observation:** An untrained pixel cost near 784 × ln 2; finite KL.
+# **TODO 3:** implement reconstruction + beta × KL, averaged over images.
+# **Hint:** use BCE with logits and `reduction="sum"`; sum KL over images and
+# latent coordinates, then divide each term by the batch size.
+# At beta one, binary targets give the negative ELBO. Greyscale targets in this
+# lab use a conventional soft-target BCE surrogate, not a literal Bernoulli likelihood.
 #
 # ![How the two VAE costs train the model](fig:beginner_training)
 #
+# **What:** define the loss and check a one-image numerical case and gradient path.
+# **Why:** summing pixels but averaging images keeps reconstruction and KL on compatible scales.
+# **Expect:** reconstruction `784 × ln(2)`, KL `0.5`, and finite gradients in this constructed example.
 
 # %%
 def vae_loss(logits, x, mu, logvar, beta=1.0):
@@ -203,339 +237,527 @@ def vae_loss(logits, x, mu, logvar, beta=1.0):
     rec = F.binary_cross_entropy_with_logits(logits, x.view(-1, 784), reduction="sum")
     kl = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
     ### END SOLUTION
-    ### STUB rec, kl = torch.tensor(0.0), torch.tensor(0.0)  # TODO 3
+    ### STUB rec, kl = torch.tensor(0.0), torch.tensor(0.0)  # TODO 3: summed pixel and Gaussian costs.
     n = x.size(0)
     return (rec + beta * kl) / n, rec / n, kl / n
 
 
-# quick check with a random batch
-m = VAE().to(DEVICE)
-xb = x_test[:8].to(DEVICE)
-logits, mu, logvar = m(xb)
-loss, rec, kl = vae_loss(logits, xb, mu, logvar)
-print(f"untrained: loss {loss.item():.1f}, reconstruction {rec.item():.1f}, KL {kl.item():.3f}")
-assert rec.item() > 400, "An untrained decoder should reconstruct badly (BCE around 540 per image)."
+def check_loss():
+    try:
+        logits = torch.zeros(1, 784, device=DEVICE, requires_grad=True)
+        x = torch.zeros(1, 1, 28, 28, device=DEVICE)
+        mu = torch.tensor([[1.0, 0.0]], device=DEVICE, requires_grad=True)
+        logvar = torch.zeros_like(mu)
+        total, rec, kl = vae_loss(logits, x, mu, logvar, beta=4.0)
+        expected_rec = 784 * math.log(2)
+        values_ok = (abs(float(rec.detach()) - expected_rec) < 0.01
+                     and abs(float(kl.detach()) - 0.5) < 1e-5
+                     and abs(float(total.detach()) - expected_rec - 2) < 0.01)
+        if total.requires_grad:
+            total.backward()
+        gradients_ok = (logits.grad is not None and mu.grad is not None
+                        and bool(torch.isfinite(logits.grad).all()))
+        # A second case checks nonunit variance, image averaging and its gradient route.
+        batch_logits = torch.zeros(2, 784, device=DEVICE, requires_grad=True)
+        batch_x = torch.zeros(2, 1, 28, 28, device=DEVICE)
+        batch_mu = torch.tensor([[1.0,0.0],[0.0,1.0]], device=DEVICE, requires_grad=True)
+        batch_logvar = torch.tensor([[math.log(4),0.0],[0.0,math.log(0.25)]], device=DEVICE, requires_grad=True)
+        batch_total, batch_rec, batch_kl = vae_loss(batch_logits, batch_x, batch_mu, batch_logvar, beta=2.0)
+        # Summed KL is 2.125, hence mean KL is 1.0625 for these two images.
+        values_ok = values_ok and abs(float(batch_rec.detach()) - expected_rec) < 0.01
+        values_ok = values_ok and abs(float(batch_kl.detach()) - 1.0625) < 1e-5
+        values_ok = values_ok and abs(float(batch_total.detach()) - expected_rec - 2.125) < 0.01
+        if batch_total.requires_grad:
+            batch_total.backward()
+        expected_variance_grad = torch.tensor([[1.5,0.0],[0.0,-0.375]], device=DEVICE)
+        gradients_ok = gradients_ok and batch_logvar.grad is not None
+        gradients_ok = gradients_ok and torch.allclose(batch_logvar.grad, expected_variance_grad, atol=1e-6)
+        print("Constructed loss case:", {"reconstruction": round(float(rec.detach()), 3),
+                                         "KL": round(float(kl.detach()), 3)})
+        return check(values_ok and gradients_ok, "TODO 3: loss values and gradients match",
+                     "Include mean and variance in KL, average over images, and keep the log-variance gradient connected.")
+    except Exception:
+        return check(False, "", "TODO 3: check tensor devices, reductions and the sign of Gaussian KL.")
+
+
+loss_ready = check_loss()
 
 # %% [markdown]
-# ✍️ **Question 1.** Before training, the reconstruction term is about 540 nats per image and the KL is almost 0. Explain both numbers.
+# ## Part 2 · Train and monitor
 #
-# <!-- BEGIN ANSWER -->
-# An untrained decoder outputs logits near 0, i.e. probability ≈ 0.5 for every pixel, so each of the 784 pixels costs about ln 2 ≈ 0.69 nats: 784 × 0.69 ≈ 543. The untrained encoder's heads output values near 0, so μ ≈ 0 and log σ² ≈ 0 (σ ≈ 1): the encoder distribution already equals the prior N(0, I), so KL ≈ 0. Training will lower the reconstruction error and, as the codes start carrying information about each image, the KL will rise.
-# <!-- END ANSWER -->
+# **Read:** `zero_grad` clears old gradients; `backward` computes new gradients;
+# `step` changes weights. Displaying an image does none of these updates.
+# **Predict:** must reconstruction and KL both fall every epoch?
+# **Core:** train real two-dimensional and sixteen-dimensional VAEs on the bounded subset.
+# **Change one thing:** use two epochs rather than three, and describe a visible limitation.
+# **Stretch:** increase training data or epochs after timing the core.
+# **Common errors:** unfinished checks should be fixed before training. A missing gradient
+# often means a detached loss. A growing KL alone does not show failure; inspect both costs.
 
 # %% [markdown]
-# ## Part 2 · Train and monitor both terms
-#
-# Each batch follows the full training diagram. `zero_grad` clears old
-# gradients, `backward` computes the current ones, and `step` changes weights.
-# Plotting or calling `decode` does not train the model.
-
-# %% [markdown]
-# **Purpose:** Train the two-dimensional model.
-# **Why now:** Optimiser steps learn both networks.
-# **Expected observation:** Recorded reconstruction and KL change over epochs.
-#
+# **What:** train two small VAEs with Adam and record per-image reconstruction and KL.
+# **Why:** one model makes a two-dimensional map; the other provides a larger code for interpolation.
+# **Expect:** finite epoch records and two loss curves. Quality depends on your actual run.
+# Each call uses the same seeded batch order; these short runs differ from the archived lecture models.
 
 # %%
+if not (encoder_ready and sampling_ready and loss_ready):
+    raise ValueError("Finish TODOs 1–3 and rerun their checks before training.")
+
+
 def train(model, epochs=EPOCHS, beta=1.0, verbose=True):
-    # beta changes the training objective; it is not a sampling-temperature setting.
     opt = torch.optim.Adam(model.parameters(), lr=1e-3)
     history = []
+    loader = DataLoader(train_set, batch_size=BATCH_SIZE, shuffle=True,
+                        generator=torch.Generator().manual_seed(SEED))
     for ep in range(epochs):
         model.train()
-        sums, n = np.zeros(3), 0
-        for x, _ in train_dl:
+        sums = np.zeros(3)
+        images = 0
+        for x, _ in loader:
             x = x.to(DEVICE)
             logits, mu, logvar = model(x)
-            loss, rec, kl = vae_loss(logits, x, mu, logvar, beta)
+            total, rec, kl = vae_loss(logits, x, mu, logvar, beta)
             opt.zero_grad()
-            loss.backward()
+            total.backward()
             opt.step()
-            sums += [loss.item(), rec.item(), kl.item()]
-            n += 1
-        history.append(sums / n)
+            # Weight the final partial batch by its number of images.
+            sums += np.array([total.item(), rec.item(), kl.item()]) * len(x)
+            images += len(x)
+        values = sums / images
+        history.append(values)
         if verbose:
-            print(f"epoch {ep + 1:2d}: loss {sums[0] / n:6.1f} | reconstruction {sums[1] / n:6.1f} | KL {sums[2] / n:5.2f}")
-    return np.array(history)
+            print(f"epoch {ep+1}: total {values[0]:.2f} | reconstruction {values[1]:.2f} | KL {values[2]:.2f}")
+    model.eval()
+    return np.asarray(history)
 
 
 vae2 = VAE(zdim=2).to(DEVICE)
 hist = train(vae2)
-
-fig, ax = plt.subplots(1, 2, figsize=(10, 3.5))
-ax[0].plot(hist[:, 1], marker="o"); ax[0].set_title("reconstruction (BCE per image)")
-ax[1].plot(hist[:, 2], marker="o", color="tab:orange"); ax[1].set_title("KL per image (nats)")
-for a in ax:
-    a.set_xlabel("epoch")
+vae16 = VAE(zdim=16).to(DEVICE)
+hist16 = train(vae16)
+check(bool(np.isfinite(hist).all() and np.isfinite(hist16).all()),
+      "Training costs are finite", "Inspect loss scaling, learning rate and log-variance.")
+fig, axes = plt.subplots(1, 2, figsize=(10, 3.5))
+epochs = np.arange(1, len(hist) + 1)  # count epochs from 1, as printed during training
+axes[0].plot(epochs, hist[:, 1], marker="o", label="2-D")
+axes[0].plot(epochs, hist16[:, 1], marker="s", label="16-D")
+axes[0].set_title("Reconstruction per image")
+axes[1].plot(epochs, hist[:, 2], marker="o", label="2-D")
+axes[1].plot(epochs, hist16[:, 2], marker="s", label="16-D")
+axes[1].set_title("KL per image")
+for ax in axes:
+    ax.set_xticks(epochs)
+    ax.set_xlabel("Epoch")
+    ax.legend()
+plt.tight_layout()
 plt.show()
 
 # %% [markdown]
-# ## Part 3 · Explore the latent space
+# ## Part 3 · Explore the code space
 #
-# ### 3.1 Where does each digit live?
+# **Read:** digit labels colour the scatter; they were not used in this VAE's training loss.
+# A plotted encoder mean is different from a random code sampled during training.
+# **Predict:** will every point in a decoded grid look like a valid digit?
+# **Core:** inspect encoder means, prior grids, reconstruction and latent interpolation.
+# **Change one thing:** move one code coordinate using the slider, then name one changed feature.
+# **Stretch:** repeat an interpolation with another pair, reporting an unsuccessful path too.
+# **Common errors:** the decoder code size must match `model.zdim`. A CPU NumPy conversion
+# needs `.cpu()`. A smooth numerical change is not proof of a meaningful or realistic transition.
 
 # %% [markdown]
-# **Purpose:** Plot test-image encoder means.
-# **Why now:** A two-dimensional code can be viewed as a map.
-# **Expected observation:** Digit labels colour the plot; they did not train this VAE.
-#
+# **What:** encode held-out images and decode a fixed grid of two-number codes.
+# **Why:** the scatter inspects representation, while the grid tests generation without input images.
+# **Expect:** coloured means `[TEST_LIMIT,2]` and a grid with both recognisable and weak samples.
+# The grid is vectorised into one decoder call, avoiding hundreds of small calls.
 
 # %%
-vae2.eval()
 with torch.no_grad():
     mu_test, _ = vae2.encode(x_test.to(DEVICE))
-mu_test = mu_test.cpu().numpy()
-plt.figure(figsize=(6.5, 5.5))
-sc = plt.scatter(mu_test[:, 0], mu_test[:, 1], c=y_test, cmap="tab10", s=4)
-plt.colorbar(sc, ticks=range(10), label="digit")
-plt.xlabel("z₁"); plt.ylabel("z₂"); plt.title("Encoder means of 5,000 test digits")
+means = mu_test.cpu().numpy()
+print("Encoder means:", means.shape)
+plt.figure(figsize=(6.5, 4.8))
+sc = plt.scatter(means[:, 0], means[:, 1], c=y_test.numpy(), cmap="tab10", s=8)
+plt.colorbar(sc, ticks=range(10), label="digit label (inspection only)")
+plt.xlabel("First code coordinate")
+plt.ylabel("Second code coordinate")
+plt.title("Held-out encoder means")
 plt.show()
 
-# %% [markdown]
-# ### 3.2 Decode a grid of latent points
-# We space the grid using the Gaussian's quantiles so that it covers the prior evenly.
-
-# %% [markdown]
-# **Purpose:** Decode a grid of prior codes.
-# **Why now:** Generation needs codes and the decoder.
-# **Expected observation:** A grid of images; inspect recognisable digits and failures.
-#
-
-# %%
 from scipy.stats import norm
-
-n = 15
-grid = norm.ppf(np.linspace(0.03, 0.97, n))
-canvas = np.zeros((28 * n, 28 * n))
-for i, zy in enumerate(grid[::-1]):
-    for j, zx in enumerate(grid):
-        img = vae2.decode(torch.tensor([[zx, zy]], dtype=torch.float32, device=DEVICE))[0].cpu().numpy()
-        canvas[i * 28:(i + 1) * 28, j * 28:(j + 1) * 28] = img
-plt.figure(figsize=(7, 7))
+n = 10
+axis_codes = norm.ppf(np.linspace(0.03, 0.97, n))
+codes = torch.tensor([[zx, zy] for zy in axis_codes[::-1] for zx in axis_codes],
+                      dtype=torch.float32, device=DEVICE)
+grid_images = vae2.decode(codes).cpu().numpy()
+canvas = np.vstack([np.hstack(grid_images[i*n:(i+1)*n]) for i in range(n)])
+print("Prior grid codes:", tuple(codes.shape), "| decoded images:", grid_images.shape)
+plt.figure(figsize=(6, 6))
 plt.imshow(canvas, cmap="gray_r")
 plt.axis("off")
-plt.title("The learned 2-D latent space")
+plt.title("Chosen prior codes: inspect successes and failures")
 plt.show()
 
 # %% [markdown]
-# ### 3.3 Interpolation (in a 16-dimensional latent space)
-# A two-number code is easy to plot but has limited capacity. Train a 16-D
-# model, then **interpolate** between two test digits. Extra code dimensions
-# may preserve more detail; judge this from your own reconstructions.
-# Here `t=0` gives the first code, `t=1` gives the second, and values between
-# them blend the codes before decoding. The decoder is the same at every step.
-#
-# **TODO 4:** complete `interpolate(z1, z2, steps)` to return `steps` codes on the straight line from `z1` to `z2`: $z_t = (1-t)\,z_1 + t\,z_2$.
+# **What:** vary two latent coordinates with sliders while keeping decoder weights fixed.
+# **Why:** one small decoder call shows what this trained two-dimensional representation changes.
+# **Expect:** a single decoded image. Dragging stops before computation (`continuous_update=False`).
+# This optional display cell is tagged `skip-test`; the core grid above also works without widgets.
+# **Common errors:** if controls do not appear, check ipywidgets in the selected kernel and
+# display the static grid instead. Do not rerun training on each slider movement.
+
+# %% tags=["skip-test"]
+try:
+    import ipywidgets as widgets
+    from IPython.display import display
+
+    def show_latent(z1=0.0, z2=0.0):
+        code = torch.tensor([[z1, z2]], dtype=torch.float32, device=DEVICE)
+        image = vae2.decode(code)[0].cpu().numpy()
+        plt.figure(figsize=(2.8, 2.8))
+        plt.imshow(image, cmap="gray_r", vmin=0, vmax=1)
+        plt.axis("off")
+        plt.title(f"Code ({z1:.1f}, {z2:.1f}); fixed weights")
+        plt.show()
+
+    widgets.interact(show_latent,
+                     z1=widgets.FloatSlider(min=-2, max=2, step=0.2, value=0, continuous_update=False),
+                     z2=widgets.FloatSlider(min=-2, max=2, step=0.2, value=0, continuous_update=False))
+except ImportError:
+    print("Widget library unavailable. Use the static grid above; all core tasks still work.")
 
 # %% [markdown]
-# **Purpose:** Train and interpolate a larger code.
-# **Why now:** Extra latent capacity can preserve more detail.
-# **Expected observation:** Decoded latent path versus direct pixel blending.
+# **TODO 4:** return a straight line of codes from `z1` to `z2`.
+# **Hint:** the column `ts` broadcasts over coordinates in `(1-ts)*z1 + ts*z2`.
+# At `t=0`, return the first endpoint; at `t=1`, return the second.
 #
+# **What:** implement interpolation, check its endpoints and compare decoded paths with pixel blending.
+# **Why:** latent blending and direct image blending are different computations.
+# **Expect:** five toy codes with a midpoint `[1,2]`, then ten decoded images on the real path.
 
 # %%
-vae16 = VAE(zdim=16).to(DEVICE)
-_ = train(vae16, verbose=False)
-vae16.eval()
-
-
 def interpolate(z1, z2, steps=10):
     ts = torch.linspace(0, 1, steps, device=z1.device).unsqueeze(1)
     ### BEGIN SOLUTION
     return (1 - ts) * z1 + ts * z2
     ### END SOLUTION
-    ### STUB return z1.repeat(steps, 1)  # TODO 4
+    ### STUB return z1.repeat(steps, 1)  # TODO 4: blend both endpoint codes.
 
 
+def check_interpolation():
+    try:
+        a = torch.tensor([0.0, 0.0], device=DEVICE)
+        b = torch.tensor([2.0, 4.0], device=DEVICE)
+        path = interpolate(a, b, steps=5)
+        good = (tuple(path.shape) == (5, 2) and torch.allclose(path[0], a)
+                and torch.allclose(path[-1], b) and torch.allclose(path[2], b/2))
+        return check(good, "TODO 4: interpolation endpoints and midpoint match",
+                     "Use (1-ts)*z1 + ts*z2; preserve both endpoints and all coordinates.")
+    except Exception:
+        return check(False, "", "TODO 4: ts needs shape [steps,1] for coordinate broadcasting.")
+
+
+interpolation_ready = check_interpolation()
+if not interpolation_ready:
+    raise ValueError("Finish TODO 4 and rerun its check before decoding the path.")
 with torch.no_grad():
     mu16, _ = vae16.encode(x_test.to(DEVICE))
-a_idx = int((y_test == 1).nonzero()[0])
-b_idx = int((y_test == 7).nonzero()[0])
+a_idx = int((y_test == 1).nonzero(as_tuple=True)[0][0])
+b_idx = int((y_test == 7).nonzero(as_tuple=True)[0][0])
 path = interpolate(mu16[a_idx], mu16[b_idx])
-plt.figure(figsize=(10, 1.4))
-plt.imshow(np.hstack(vae16.decode(path).cpu().numpy()), cmap="gray_r")
-plt.axis("off")
-plt.title("Interpolating from a 1 to a 7")
-plt.show()
-
-# Compare with blending pixels directly
-blend = [(1 - t) * x_test[a_idx, 0] + t * x_test[b_idx, 0] for t in np.linspace(0, 1, 10)]
-plt.figure(figsize=(10, 1.4))
-plt.imshow(np.hstack([b.numpy() for b in blend]), cmap="gray_r")
-plt.axis("off")
-plt.title("Naive pixel blending (for comparison)")
-plt.show()
-
-# %% [markdown]
-# ### 3.4 Generate new digits
-# Sample codes from the prior and decode them into displayed pixel probabilities.
-# This generation path bypasses the encoder; it does not reconstruct `x_test`.
-
-# %% [markdown]
-# **Purpose:** Generate without an input image.
-# **Why now:** Fresh prior codes bypass the encoder.
-# **Expected observation:** Displayed pixel probabilities from the decoder.
-#
-# ![Generate a digit without an input image](fig:beginner_inference)
-#
-
-# %%
-z = torch.randn(24, 16, device=DEVICE)
-plt.figure(figsize=(10, 1.4))
-plt.imshow(np.hstack(vae16.decode(z)[:12].cpu().numpy()), cmap="gray_r")
-plt.axis("off")
-plt.title("New digits sampled from N(0, I)")
-plt.show()
-
-# %% [markdown]
-# ✍️ **Question 2.** Compare latent interpolation with pixel blending. What does the difference tell you about the latent space?
-#
-# <!-- BEGIN ANSWER -->
-# Pixel blending often overlays the strokes of both digits. Latent interpolation blends their codes, then lets the decoder build each image, so transitions may look more like changing handwriting. Compare the actual middle images; they may still be blurry or malformed. A smooth decoder allows smooth changes, but does not guarantee that every point between two codes is a valid digit. The result is evidence about this trained model's representation, not proof that every straight latent path follows realistic digits.
-# <!-- END ANSWER -->
-
-# %% [markdown]
-# ## Part 4 · The β trade-off
-#
-# Train three 16-D VAEs with β = 0.1, 1 and 4 (5 epochs each) and compare losses and samples.
-# **Check a fair comparison:** all three models decode `z_fixed`, the same
-# random codes. They have different random initial weights, so one run per
-# beta is illustrative; repeat with several seeds before making a firm claim.
-
-# %% [markdown]
-# **Purpose:** Compare beta using fixed codes.
-# **Why now:** Hold code inputs fixed across separately trained models.
-# **Expected observation:** Costs and sample grids; one run per beta is illustrative.
-#
-
-# %%
-results = {}
-z_fixed = torch.randn(12, 16, device=DEVICE, generator=torch.Generator(device=DEVICE).manual_seed(2))
-for beta in [0.1, 1.0, 4.0]:
-    model = VAE(zdim=16).to(DEVICE)
-    h = train(model, epochs=1 if SMOKE else 5, beta=beta, verbose=False)
-    results[beta] = {"reconstruction": h[-1, 1], "KL": h[-1, 2], "samples": model.decode(z_fixed).cpu().numpy()}
-    print(f"beta={beta:>4}: reconstruction {h[-1, 1]:6.1f}   KL {h[-1, 2]:5.2f}")
-
-fig, axes = plt.subplots(3, 1, figsize=(10, 4.2))
-for ax, (beta, r) in zip(axes, results.items()):
-    ax.imshow(np.hstack(r["samples"]), cmap="gray_r")
-    ax.set_title(f"β = {beta}", loc="left")
+print("Interpolated latent codes:", tuple(path.shape))
+decoded_path = vae16.decode(path).cpu().numpy()
+pixel_blend = [(1-t)*x_test[a_idx, 0].numpy()+t*x_test[b_idx, 0].numpy()
+               for t in np.linspace(0, 1, 10)]
+fig, axes = plt.subplots(2, 1, figsize=(10, 3))
+axes[0].imshow(np.hstack(decoded_path), cmap="gray_r")
+axes[0].set_title("Interpolate codes, then decode")
+axes[1].imshow(np.hstack(pixel_blend), cmap="gray_r")
+axes[1].set_title("Blend input pixels directly")
+for ax in axes:
     ax.axis("off")
 plt.tight_layout()
 plt.show()
 
 # %% [markdown]
-# ✍️ **Question 3.** Describe the trade-off you observe. Which β would you choose for (a) generating realistic samples, (b) anomaly detection, (c) finding interpretable latent factors? Justify each.
+# **What:** generate twelve images using only fresh prior codes and the trained decoder.
+# **Why:** this separates generation from the encoder route used for reconstruction.
+# **Expect:** codes `[12,16]` and displayed pixel probabilities `[12,28,28]`.
+# Record one recognisable sample and one failure instead of selecting only attractive examples.
 #
-# <!-- BEGIN ANSWER -->
-# Higher beta puts more pressure on code distributions to match the prior, often lowering KL while losing reconstruction detail. Lower beta often preserves more detail but may make fresh prior samples less useful. Report the numbers and pictures you observed; a high beta does not guarantee well-formed samples. (a) For generation, beta = 1 is a useful starting point, then compare sample quality and diversity. (b) For anomaly detection, choose a setting using held-out normal and unusual examples, since reconstruction quality alone is insufficient. (c) For interpretable factors, beta > 1 can encourage simpler codes, but independence or meaning of each coordinate must be tested. There is no single best beta for every purpose.
-# <!-- END ANSWER -->
-
-# %% [markdown]
-# ## Part 5 · Application: anomaly detection with reconstruction error
-#
-# The VAE has only seen digits. Test whether clothing images (Fashion-MNIST)
-# receive larger reconstruction errors; an unfamiliar image is not guaranteed
-# to receive a high score. **AUC** measures how well scores rank unusual
-# images above normal ones across thresholds: 0.5 is chance ranking, 1 is perfect.
-#
-# **TODO 5:** complete `recon_error` to return the **per-image** binary cross-entropy (sum over pixels, no averaging over images).
-
-# %% [markdown]
-# **Purpose:** Evaluate reconstruction as an anomaly score.
-# **Why now:** Use one score for each held-out image.
-# **Expected observation:** A ROC AUC and two histograms; clothing is an artificial anomaly.
-#
+# ![Generate a digit without an input image](fig:beginner_inference)
 
 # %%
-from sklearn.metrics import roc_auc_score
+prior_generator = torch.Generator(device=DEVICE).manual_seed(SEED+1)
+z_fixed = torch.randn(12, 16, device=DEVICE, generator=prior_generator)
+new_images = vae16.decode(z_fixed).cpu().numpy()
+print("Prior codes:", tuple(z_fixed.shape), "| generated images:", new_images.shape)
+check(new_images.shape == (12, 28, 28), "Generation needs no input image",
+      "Use prior codes matching zdim and run the decoder, then sigmoid and reshape.")
+plt.figure(figsize=(10, 1.8))
+plt.imshow(np.hstack(new_images), cmap="gray_r")
+plt.axis("off")
+plt.title("Fresh prior samples: report typical quality and failures")
+plt.show()
 
-fashion = datasets.FashionMNIST("data", train=False, download=True, transform=tf)
-x_fashion, _ = next(iter(DataLoader(Subset(fashion, range(2000)), batch_size=2000)))
+# %% [markdown]
+# ## Part 4 · Beta changes weighting; retraining changes weights
+#
+# **Read:** beta multiplies KL in `reconstruction + beta * KL`.
+# **Predict:** if reconstruction is 120 and KL is 3, what changes when beta rises from 1 to 4?
+# **Core:** recompute the objective for one fixed batch without retraining the model.
+# **Change one thing:** move the beta slider; explain why the images do not change.
+# **Stretch:** enable the explicit switch to train separate beta models and compare fixed-code samples.
+# **Common errors:** a cost slider is not a training experiment. Total losses with different
+# beta values are different objectives; compare both components and the intended task.
+# The measured, longer beta study remains in the lecture and Word notes, with its original settings.
 
+# %% [markdown]
+# **What:** compute reconstruction and KL for fixed model outputs, then vary only their weighting.
+# **Why:** this isolates the arithmetic role of beta before an optional training comparison.
+# **Expect:** unchanged reconstruction and KL, with a different weighted total for each beta.
+# These printed values come from this run; they do not replace the archived lecture measurements.
+# The injected setup contains `USE_GEMINI = False` and `USE_OPENAI = False`.
+# Leave both false for the complete local path. To request an optional explanation,
+# enable exactly one switch and provide that provider's key through the setup instructions.
+# This cell sends invented arithmetic only; a missing key or failed request uses the local explanation.
 
+# %%
+with torch.no_grad():
+    batch = x_test[:32].to(DEVICE)
+    fixed_logits, fixed_mu, fixed_logvar = vae16(batch)
+    _, fixed_rec, fixed_kl = vae_loss(fixed_logits, batch, fixed_mu, fixed_logvar)
+fixed_rec = float(fixed_rec)
+fixed_kl = float(fixed_kl)
+for beta in [0.1, 1.0, 4.0]:
+    print(f"Fixed weights: beta {beta:g} | rec {fixed_rec:.2f} | KL {fixed_kl:.2f} | total {fixed_rec+beta*fixed_kl:.2f}")
+check(fixed_kl >= -1e-5, "Gaussian KL is nonnegative within rounding",
+      "Inspect the KL sign and use log-variance rather than standard deviation.")
+local_interpretation = (
+    "Beta changes the weight of KL. With fixed outputs, reconstruction and KL stay unchanged; "
+    "the total changes. Training separate models can change their outputs, so compare both costs and samples."
+)
+api_interpretation = ask_model(
+    "Explain this invented VAE example in three short sentences: reconstruction cost 120, KL 3; "
+    "beta 1 gives total 123 and beta 4 gives total 132. State that recomputing this total "
+    "does not retrain a model or establish sample quality."
+)
+print("Optional explanation:", api_interpretation if api_interpretation is not None else local_interpretation)
+
+# %% [markdown]
+# **What:** use a beta slider for the same frozen batch outputs.
+# **Why:** see the objective change instantly without expensive training or API calls.
+# **Expect:** three costs and an explicit reminder that the model weights stay fixed.
+# This `skip-test` display is optional; the printed beta table above is the complete local fallback.
+
+# %% tags=["skip-test"]
+try:
+    import ipywidgets as widgets
+
+    def show_beta(beta=1.0):
+        print(f"Reconstruction {fixed_rec:.2f}; KL {fixed_kl:.2f}; weighted total {fixed_rec+beta*fixed_kl:.2f}")
+        print("Weights and outputs are fixed. This slider does not train a new beta-VAE.")
+
+    widgets.interact(show_beta,
+                     beta=widgets.FloatSlider(min=0, max=4, step=0.1, value=1, continuous_update=False))
+except ImportError:
+    print("Use the fixed-output beta table above if widgets are unavailable.")
+
+# %% [markdown]
+# ## Part 5 · Reconstruction as an anomaly score
+#
+# **Read:** a score ranks inputs; choosing a decision threshold is a separate task.
+# ROC AUC compares rankings across possible thresholds. It is not classification accuracy.
+# **Predict:** why might clothing versus digits be easier than finding a scratch on a digit-like image?
+# **Core:** implement TODO 5 and compare held-out digits with clothing.
+# **Change one thing:** limit the display to 200 images per dataset; discuss uncertainty.
+# **Stretch:** evaluate realistic corruptions with settings chosen on development data.
+# **Common errors:** one scalar for the whole batch cannot rank images. Do not change a
+# threshold using final test outcomes. High AUC on a different dataset does not establish real-world defect detection.
+#
+# **TODO 5 hint:** request `reduction="none"`, sum pixel costs with `dim=1`, and preserve the image dimension.
+# This score decodes the encoder mean for reproducibility rather than resampling a code on every call.
+
+# %% [markdown]
+# **What:** implement a deterministic per-image reconstruction score and check its reduction.
+# **Why:** ranking anomalies needs one score per input, with a clear scoring convention.
+# **Expect:** three finite costs near `784 × ln(2)` from a constructed constant-logit model.
+# The constructed test checks arithmetic; it does not evaluate trained-model quality.
+
+# %%
 @torch.no_grad()
 def recon_error(model, x):
-    # Keep one score per image: this evaluation does not include the KL term.
+    model.eval()
     x = x.to(DEVICE)
-    logits, _, _ = model(x)
+    mu, _ = model.encode(x)
+    logits = model.dec(mu)  # Fix the scoring path: decode the encoder mean.
     ### BEGIN SOLUTION
     return F.binary_cross_entropy_with_logits(logits, x.view(-1, 784), reduction="none").sum(dim=1).cpu().numpy()
     ### END SOLUTION
-    ### STUB return np.zeros(len(x))  # TODO 5
+    ### STUB return np.zeros(len(x))  # TODO 5: one summed pixel cost per image.
 
 
-e_digits = recon_error(vae16, x_test[:2000])
+def check_reconstruction_scores():
+    class ConstantModel(nn.Module):
+        def encode(self, x):
+            mu = torch.zeros(len(x), 2, device=x.device)
+            return mu, torch.zeros_like(mu)
+
+        def dec(self, z):
+            return torch.zeros(len(z), 784, device=z.device)
+
+    try:
+        scores = recon_error(ConstantModel(), torch.zeros(3, 1, 28, 28))
+        good = scores.shape == (3,) and np.allclose(scores, 784*math.log(2), atol=0.01)
+        return check(good, "TODO 5: one correctly summed cost per image",
+                     "Use reduction='none', sum dim=1, and return [number_of_images] scores.")
+    except Exception:
+        return check(False, "", "TODO 5: keep the image axis while summing only pixels.")
+
+
+scores_ready = check_reconstruction_scores()
+
+# %% [markdown]
+# **What:** download the public clothing test set, score both datasets and plot their distributions.
+# **Why:** an easy dataset-shift demonstration exposes the limits of reconstruction-based anomaly detection.
+# **Expect:** one measured AUC for this core model, plus overlapping or separated score histograms.
+# Report the actual number and failures; it need not match the longer archived run.
+
+# %%
+from sklearn.metrics import roc_auc_score
+if not scores_ready:
+    raise ValueError("Finish TODO 5 and rerun its score check first.")
+fashion = datasets.FashionMNIST("data", train=False, download=True, transform=tf)
+x_fashion, _ = next(iter(DataLoader(Subset(fashion, range(TEST_LIMIT)), batch_size=TEST_LIMIT)))
+e_digits = recon_error(vae16, x_test)
 e_fashion = recon_error(vae16, x_fashion)
 labels = np.r_[np.zeros(len(e_digits)), np.ones(len(e_fashion))]
 auc = roc_auc_score(labels, np.r_[e_digits, e_fashion])
+print("Score shapes:", e_digits.shape, e_fashion.shape, "| core-run ROC AUC:", round(float(auc), 4))
+check(bool(np.isfinite(e_digits).all() and np.isfinite(e_fashion).all()),
+      "Anomaly scores are finite", "Inspect logits and the per-image BCE reduction.")
 plt.figure(figsize=(8, 3.8))
-bins = np.linspace(0, np.percentile(np.r_[e_digits, e_fashion], 99), 60)
-plt.hist(e_digits, bins=bins, alpha=0.7, label="digits (normal)")
-plt.hist(e_fashion, bins=bins, alpha=0.7, label="clothing (anomaly)")
-plt.xlabel("reconstruction error"); plt.legend(); plt.title(f"ROC AUC = {auc:.4f}")  # four decimals: 0.9995 is not a perfect 1.000
+bins = np.linspace(0, np.percentile(np.r_[e_digits, e_fashion], 99), 40)
+plt.hist(e_digits, bins=bins, alpha=0.7, label="digits")
+plt.hist(e_fashion, bins=bins, alpha=0.7, label="clothing")
+plt.xlabel("Mean-code reconstruction BCE per image")
+plt.legend()
+plt.title(f"Core-run AUC = {auc:.4f}; artificial anomaly task")
 plt.show()
 
 # %% [markdown]
-# ✍️ **Question 4.** The AUC is very high. Give two reasons why this result may overstate how well the method would work for detecting defects in a real factory.
+# ## Optional stretch · train beta models and add a class request
 #
-# <!-- BEGIN ANSWER -->
-# (1) Clothing versus digits is an easy, artificial anomaly: the images differ completely. Real defects (a scratch, a missing component) change only a few pixels and may reconstruct almost perfectly, giving low errors. (2) The anomalies here come from a different dataset with different statistics (brightness, stroke vs. filled shapes), so the model may be detecting "different dataset" rather than "defect". Other valid points: the threshold must be chosen without seeing the test anomalies; class imbalance in real data means precision at low false-positive rates matters more than AUC; normal variation that is under-represented in training (a new supplier, lighting) would be flagged too.
-# <!-- END ANSWER -->
+# **Read:** a conditional VAE gives a digit label to both networks. A one-hot label
+# has ten entries; one is one and the rest zero.
+# **Predict:** does asking for a seven guarantee a convincing seven?
+# **Core:** leave `RUN_STRETCH = False`; explain how conditioning changes the input sizes.
+# **Change one thing:** after completing the core, enable the switch for this optional training.
+# **Stretch:** compare beta models using identical initial weights, batch order and prior codes;
+# then repeat several seeds before claiming a consistent effect.
+# **Common errors:** a beta comparison needs separately trained models, not only a new cost
+# multiplier. Conditional decoding must concatenate a label with the latent code. This longer
+# route is outside the measured core budget; record its own settings and elapsed time.
 
 # %% [markdown]
-# ## Part 6 · Extension: a conditional VAE (optional)
-#
-# Feed the one-hot digit label into both the encoder and the decoder. Then you can **ask** for a digit: sample z and decode it with the label you want.
-
-# %% [markdown]
-# **Purpose:** Optionally add the digit label.
-# **Why now:** Conditioning lets generation request a class.
-# **Expected observation:** Rows asking for different digit labels; success varies with training.
-#
+# **What:** define a conditional VAE and optionally train the longer comparisons.
+# **Why:** extra label inputs let the decoder receive a requested class alongside a random code.
+# **Expect:** the default prints a skipped-stretch message. Opt-in training prints beta costs
+# and displays requested digit rows; inspect errors as well as successful samples.
 
 # %%
 class CVAE(VAE):
-    def __init__(self, zdim=16, hidden=400):
+    def __init__(self, zdim=16, hidden=HIDDEN):
         super().__init__(zdim, hidden)
-        self.enc = nn.Sequential(nn.Linear(784 + 10, hidden), nn.ReLU())
-        self.dec = nn.Sequential(nn.Linear(zdim + 10, hidden), nn.ReLU(), nn.Linear(hidden, 784))
+        self.enc = nn.Sequential(nn.Linear(784+10, hidden), nn.ReLU())
+        self.dec = nn.Sequential(nn.Linear(zdim+10, hidden), nn.ReLU(), nn.Linear(hidden, 784))
 
     def forward(self, x, y):
-        y1 = F.one_hot(y, 10).float()
-        h = self.enc(torch.cat([x.view(-1, 784), y1], dim=1))
+        label = F.one_hot(y, 10).float()
+        h = self.enc(torch.cat([x.view(-1, 784), label], dim=1))
         mu, logvar = self.mu_head(h), self.logvar_head(h)
         z = self.reparameterise(mu, logvar)
-        return self.dec(torch.cat([z, y1], dim=1)), mu, logvar
+        return self.dec(torch.cat([z, label], dim=1)), mu, logvar
 
     @torch.no_grad()
-    def generate(self, digit, n=10):
+    def generate(self, digit, n=8):
         z = torch.randn(n, self.zdim, device=DEVICE)
-        y1 = F.one_hot(torch.full((n,), digit, device=DEVICE), 10).float()
-        return torch.sigmoid(self.dec(torch.cat([z, y1], dim=1))).view(-1, 28, 28)
+        label = F.one_hot(torch.full((n,), digit, device=DEVICE), 10).float()
+        return torch.sigmoid(self.dec(torch.cat([z, label], dim=1))).view(-1, 28, 28)
 
 
-cvae = CVAE().to(DEVICE)
-opt = torch.optim.Adam(cvae.parameters(), lr=1e-3)
-for ep in range(1 if SMOKE else 5):
-    for x, y in train_dl:
-        x, y = x.to(DEVICE), y.to(DEVICE)
-        logits, mu, logvar = cvae(x, y)
-        loss, _, _ = vae_loss(logits, x, mu, logvar)
-        opt.zero_grad(); loss.backward(); opt.step()
-rows = [np.hstack(cvae.generate(d, 8).cpu().numpy()) for d in range(10)]
-plt.figure(figsize=(6, 7.5))
-plt.imshow(np.vstack(rows), cmap="gray_r"); plt.axis("off"); plt.title("CVAE: each row asks for one digit")
-plt.show()
+if RUN_STRETCH and not SMOKE:
+    results = {}
+    for beta in [0.1, 1.0, 4.0]:
+        # Reset initial weights and sampling seed for a clearer controlled comparison.
+        torch.manual_seed(SEED)
+        model = VAE(zdim=16).to(DEVICE)
+        h = train(model, epochs=5, beta=beta)
+        results[beta] = {"reconstruction": float(h[-1, 1]), "KL": float(h[-1, 2]),
+                         "samples": model.decode(z_fixed).cpu().numpy()}
+    fig, axes = plt.subplots(3, 1, figsize=(10, 4.5))
+    for ax, (beta, result) in zip(axes, results.items()):
+        ax.imshow(np.hstack(result["samples"]), cmap="gray_r")
+        ax.set_title(f"beta {beta:g}: rec {result['reconstruction']:.2f}, KL {result['KL']:.2f}")
+        ax.axis("off")
+    plt.tight_layout()
+    plt.show()
+    cvae = CVAE().to(DEVICE)
+    opt = torch.optim.Adam(cvae.parameters(), lr=1e-3)
+    for epoch in range(5):
+        for x, y in train_dl:
+            x, y = x.to(DEVICE), y.to(DEVICE)
+            logits, mu, logvar = cvae(x, y)
+            total, _, _ = vae_loss(logits, x, mu, logvar)
+            opt.zero_grad()
+            total.backward()
+            opt.step()
+    cvae.eval()
+    rows = [np.hstack(cvae.generate(d).cpu().numpy()) for d in range(10)]
+    plt.figure(figsize=(6, 7))
+    plt.imshow(np.vstack(rows), cmap="gray_r")
+    plt.axis("off")
+    plt.title("Conditional VAE: each row requests a digit")
+    plt.show()
+else:
+    print("Optional stretch skipped. The CPU core is complete without this training.")
 
 # %% [markdown]
-# ## Evidence and reflection
+# ## Part 6 · Evidence and reflection
 #
-# | Experiment | Setting | Metric(s) | Observation | One improvement |
-# |---|---|---|---|---|
-# | Base VAE | z = 2 / 16, 10 epochs | final reconstruction, KL | | |
-# | β study | β = 0.1 / 1 / 4 | reconstruction, KL, samples | | |
-# | Anomaly detection | VAE-16 | ROC AUC | | |
+# **Read:** a result needs its settings, a measured observation and a limitation.
+# **Predict:** will your shorter core reproduce the archived lecture figures exactly?
+# **Core:** fill the table using your outputs, then answer the five self-checks.
+# **Change one thing:** name one next experiment and the evidence that would support it.
+# **Stretch:** compare another seed with the original seed while keeping other settings fixed.
+# **Common errors:** do not copy archived metrics into this run's table. Do not report an
+# unmeasured runtime or claim that changing beta alone guarantees better generated images.
 #
-# **Before next week:** read Foster (2023) chapter 4 (GANs) and try the PyTorch DCGAN tutorial.
+# | Experiment | Actual settings | Measured observation | Limitation |
+# |---|---|---|---|
+# | VAE training | subset, epochs, hidden size, seed | reconstruction and KL | |
+# | Generation | code size, fixed prior codes | typical success and failure | |
+# | Beta weighting | fixed outputs, beta values | weighted totals | no retraining |
+# | Anomaly score | mean-code BCE, test sizes | ROC AUC | artificial dataset shift |
+#
+# **AI assistance:** disclose tools and prompts used, the checks you performed and your own explanation.
+# Optional Gemini or OpenAI supplies a synthetic arithmetic explanation, not an evaluation of your images.
+#
+# ## Five self-checks
+#
+# 1. With mean 2, standard deviation 0.5 and noise −1, what code is sampled?
+# 2. What standard deviation does `logvar=0` represent, and why?
+# 3. Why sum BCE over pixels before averaging over images?
+# 4. Which networks are required for generation from a fresh prior code?
+# 5. What does the beta slider establish, and what can clothing-versus-digits AUC fail to establish?
+#
+# <!-- BEGIN ANSWER -->
+# 1. The code is 2 + 0.5 × (−1) = 1.5.
+# 2. Spread is one: exp(0.5 × 0) = 1. Zero log-variance does not mean no uncertainty.
+# 3. The reconstruction cost should describe one complete image, on a compatible scale with per-image KL.
+# 4. Draw the prior code and run the decoder. The encoder is used for supplied-image reconstruction, not this route.
+# 5. The slider shows the cost multiplier with fixed outputs. Retraining can change outputs but is a separate experiment.
+# A high clothing-versus-digits AUC can fail to establish reliable real-world defect detection, calibrated thresholds or low false alarms.
+# <!-- END ANSWER -->
+#
+# **Before next week:** read Foster chapter 4 and the PyTorch DCGAN tutorial; identify what a learned realism checker adds.

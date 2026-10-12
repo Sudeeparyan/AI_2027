@@ -1,6 +1,6 @@
 # Lecture plan at a glance
 
-This week moves from models to systems (MIMLO 3, 4, 5). Students should leave able to map the tool stack, use API platforms safely (keys, tokens, pricing, rate limits, streaming), compare cloud, self-hosted and local deployment, explain quantisation, batching and caching, build a small app with Gradio and FastAPI packaged in Docker, and design monitoring and guardrails. The measurements on the "real" slides come from running this week's lab in advance (`curriculum/assets/week_11/`).
+This week moves from models to systems (MIMLO 3, 4, 5). Students should leave able to map the tool stack, use API platforms safely (keys, tokens, pricing, rate limits, streaming), compare cloud, self-hosted and local deployment, explain quantisation, batching and caching, build a small app with Gradio and FastAPI packaged in Docker, and design monitoring and guardrails. The stored plots come from the archived Qwen2.5-0.5B-Instruct run on a GTX 1650 (`curriculum/assets/week_11/`), described by the existing instructor evidence. They are separate from the revised, smaller SmolLM2-135M CPU core, whose waiting time is recorded separately below.
 
 | Time | Slides | Segment | What you do |
 |---|---|---|---|
@@ -13,7 +13,7 @@ This week moves from models to systems (MIMLO 3, 4, 5). Students should leave ab
 | 93–114 min | 31–37 | 5 · Monitoring and guardrails | What to monitor; real monitoring summary; layered guardrails; LLMOps tools; comparison table; checklist. |
 | 114–120 min | 38–40 | Lab preview, summary, resources | |
 
-> **Teaching tip:** Run the lab's Gradio app with `share=True` at the start of the lecture, put the link on screen and let students use it. At the start of section five, open the log file and show their requests (latency, tokens, blocked attempts: someone always tries a prompt injection). Monitoring becomes concrete immediately.
+> **Teaching tip:** Use direct Python calls with invented requests to show the checked handler and its metadata log. The optional Gradio stretch launches locally with `share=False`. If planning a remote classroom demonstration, separately configure access, quotas and appropriate data handling before exposing it.
 
 <!-- pagebreak -->
 
@@ -41,7 +41,7 @@ Think in **layers**: hardware (cloud GPUs/TPUs, servers, laptops and phones); **
 | LangChain / LangGraph | Orchestration | Chains, tools, stateful agent graphs (week 12) |
 | LlamaIndex | Orchestration | Data connectors, indexing and retrieval for RAG (week 12) |
 
-**The OpenAI-compatible API.** Most platforms accept the OpenAI chat-completions format: Gemini's compatibility endpoint (`generativelanguage.googleapis.com/v1beta/openai/`), Hugging Face's router (`router.huggingface.co/v1`), vLLM (`http://<server>:8000/v1`), Ollama (`http://localhost:11434/v1`), and the FastAPI server students build. Basic client code can often be reused by changing `base_url`, credentials and `model`. Supported fields, streaming, tools and structured output can differ; check the chosen endpoint. This reduces lock-in and makes fair comparisons easy.
+**The OpenAI-compatible API.** Several providers and runtimes support specified parts of the OpenAI chat-completions format: Gemini's compatibility endpoint (`generativelanguage.googleapis.com/v1beta/openai/`), Hugging Face's router (`router.huggingface.co/v1`), vLLM (`http://<server>:8000/v1`), Ollama (`http://localhost:11434/v1`), and the FastAPI server students build. Basic client code can often be reused by changing `base_url`, credentials and `model`. Supported fields, streaming, tools and structured output can differ; check the chosen endpoint. This reduces lock-in and makes fair comparisons easy.
 
 ![One client, many back ends](fig:openai_compat)
 
@@ -51,7 +51,7 @@ Think in **layers**: hardware (cloud GPUs/TPUs, servers, laptops and phones); **
 
 **Start here.** An API connects programs. A request has credentials, input fields and limits; a response has answer data or an error. Streaming returns pieces before the whole answer is complete. First-token wait and total wait measure different parts. Prices, rate limits and supported fields vary by service.
 
-**Small worked example.** With TTFT = 1 second and 100 output tokens at 20 tokens/second, the rough total is 1 + 100/20 = 6 seconds. At illustrative prices $0.10 input/$0.40 output per million, 800 input and 300 output tokens cost $0.0002 per request.
+**Small worked example.** With TTFT = 1 second and 100 output tokens at 20 tokens/second, the rough total is 1 + (100 − 1)/20 = 5.95 seconds (about 6 seconds). At illustrative prices $0.10 input/$0.40 output per million, 800 input and 300 output tokens cost $0.0002 per request.
 
 | Concept | What to know |
 |---|---|
@@ -64,9 +64,9 @@ Think in **layers**: hardware (cloud GPUs/TPUs, servers, laptops and phones); **
 
 **Key safety.** Treat an access key like a password. Keep it out of code, notebooks and Git. Load it from Colab Secrets, an environment variable or a secrets manager. App browsers call your server, which holds the provider key. Use limited permissions, separate keys and spending alerts where supported. If a key leaks, revoke it first, then inspect its use.
 
-**Where the time goes.** A request travels over the network and may wait in a queue. **Prefill** processes the prompt; longer prompts generally add work. **Decoding** then produces new tokens in sequence. **TTFT** measures the wait to the first token. The formula below is a rough model of total waiting time, not a guarantee for every serving system.
+**Where the time goes.** A request travels over the network and may wait in a queue. **Prefill** processes the prompt; longer prompts generally add work. **Decoding** then produces new tokens in sequence. **TTFT** measures the wait to the first token. The formula below uses a post-first-token decoding rate. The notebook instead reports decoded output tokens divided by the whole generation duration, because a visible chunk can contain several tokens. Do not substitute that end-to-end rate into the formula.
 
-$$\text{latency} \approx \text{TTFT} + \frac{\text{output tokens}}{\text{tokens per second}}$$
+$$\text{latency} \approx \text{TTFT} + \frac{\text{output tokens} - 1}{\text{post-first-token decoding rate}}$$
 
 ![Anatomy of a request](fig:request_anatomy)
 
@@ -94,7 +94,7 @@ $$\text{latency} \approx \text{TTFT} + \frac{\text{output tokens}}{\text{tokens 
 | | Cloud API | Self-hosted (vLLM on GPUs) | Local (Ollama) |
 |---|---|---|---|
 | Models | Frontier proprietary and hosted open models | Open-weight, including your fine-tunes | Small, quantised open models |
-| Cost profile | Pay per token; no fixed cost | Fixed GPU cost; cheap per token at high, steady load | Free after hardware |
+| Cost profile | Pay per token; no fixed cost | Fixed GPU cost; cheap per token at high, steady load | Device, electricity and setup |
 | Data | Leaves your network (check terms, region) | Stays in your infrastructure | Stays on the device |
 | Operations | Provider scales and updates | You run, scale, patch, monitor | Per-device setup |
 | Risks | Price/model changes, rate limits, lock-in | Capacity planning, skills | Limited quality and speed |
@@ -124,9 +124,9 @@ Generation often spends substantial time reading model weights. **Batching** sha
 ### Caching and other savings
 
 * **KV cache** (week 5) and **prefix caching**: reuse computation for shared prompt prefixes; providers discount cached input tokens.
-* **Response caching**: identical requests answered from a cache (milliseconds instead of seconds in the lab).
+* **Response caching**: identical requests answered from a cache (reuse timings measured by the cache experiment).
 * **Speculative decoding**: a small draft model proposes tokens that the large model verifies in parallel.
-* **Right-sizing**: a fine-tuned or distilled small model is often the biggest saving.
+* **Right-sizing**: compare a fine-tuned or distilled small model on the required task and workload.
 
 **Weight storage examples.** A 0.5-billion-parameter model in 16-bit uses about 1 GB for weights. A 7–8-billion-parameter model in 4-bit uses about 3.5–4 GB before quantisation metadata. A 70-billion-parameter model in 16-bit uses about 140 GB for weights. A T4 has 16 GB of GPU memory, but fitting the weights is only the first check. Leave room for the runtime, intermediate calculations and the KV cache. Longer prompts and larger batches use more memory. Measure the complete workload before deciding that a model fits.
 
@@ -138,7 +138,7 @@ Generation often spends substantial time reading model weights. **Batching** sha
 
 ![Proposed integrated architecture of a small generative AI application](fig:app_architecture)
 
-This figure shows a proposed integrated design. In the lab the two routes are separate: Gradio calls `respond` and `generate` directly, while the SDK and LangChain call the FastAPI endpoint. The endpoint does not inherit the checks or logging in `respond`. The exported `app.py` is also a smaller packaging scaffold; it omits the notebook's personal-data redaction, output check and metadata logging.
+This figure shows a proposed integrated design. In the lab the two routes are separate: Gradio calls `respond` and `generate` directly, while the SDK and LangChain call the FastAPI endpoint. The endpoint has its own declared field validation but does not inherit the content checks or logging in `respond`. The exported `app.py` is also a smaller packaging scaffold; it omits the notebook's personal-data redaction, output check and metadata logging.
 
 * **FastAPI** turns Python functions into a web API; Pydantic validates requests; interactive docs at `/docs`. Returning the OpenAI response format (with a `usage` block) makes the server usable by the OpenAI SDK and LangChain.
 * **Gradio** builds interfaces from Python functions; `gr.ChatInterface(respond)` gives a full chat UI. `share=True` creates a temporary public link: anyone with it can use your quota. **Hugging Face Spaces** supports Gradio apps and secrets. Current compute-Space creation has plan requirements; check eligibility, hardware and quotas in the [official Spaces overview](https://huggingface.co/docs/hub/spaces-overview). Streamlit is an alternative.
@@ -170,10 +170,10 @@ This figure shows a proposed integrated design. In the lab the two routes are se
 
 | Need | Good choice | Why |
 |---|---|---|
-| Best quality, quick prototype | Cloud API (check available tier) + Gradio | No infrastructure; strongest models |
+| Best quality, quick prototype | Cloud API (check available tier) + Gradio | Provider-managed runtime; evaluate quality |
 | Private data, no budget | Ollama or Transformers locally | Data stays on the machine |
 | Fine-tuned model for a demo | Hugging Face Spaces or Colab + Gradio | Check account requirements, hardware availability and cost |
-| Many users, steady load | vLLM on a cloud GPU | Batching gives low cost per token |
+| Many users, steady load | vLLM on a cloud GPU | Measure batch capacity and operating cost |
 | Reproducible hand-in | Docker image + pinned versions | Examiners can run it |
 
 # Common misconceptions
@@ -182,9 +182,9 @@ This figure shows a proposed integrated design. In the lab the two routes are se
 |---|---|
 | "You need LangChain to build an LLM app." | Many apps need only an SDK and plain code; frameworks help with connectors, agent state and tracing. |
 | "Putting the API key in a private notebook is fine." | Notebooks get shared and committed; use secrets managers and keep keys server-side. |
-| "Input tokens and output tokens cost the same." | Output tokens are usually several times more expensive and also dominate latency. |
-| "Self-hosting is always cheaper." | Only at high, steady load; an idle GPU costs money, and operations need staff time. |
-| "Quantisation always ruins quality." | 8-bit is usually almost lossless and 4-bit with small groups often close; but always re-evaluate. |
+| "Input tokens and output tokens cost the same." | Input/output charges depend on the provider and model; lengthy generation can dominate latency. |
+| "Self-hosting is always cheaper." | Compare complete measured workloads; an idle GPU costs money, and operations need staff time. |
+| "Quantisation always ruins quality." | The effect depends on weights, scale groups, implementation and task; evaluate actual quality and memory. |
 | "Average latency is a good metric." | Averages hide slow requests; use percentiles (p95/p99) and TTFT. |
 | "Guardrails make the model safe." | They reduce risk; each layer can be bypassed, so combine layers with least privilege, monitoring and human oversight. |
 | "Log everything to debug later." | Logging raw conversations can breach data protection; log metadata, redact, limit retention. |
@@ -198,14 +198,23 @@ This figure shows a proposed integrated design. In the lab the two routes are se
 * **Fairness and quality over time:** monitor quality by user group and topic; models and data drift.
 * **Environment and cost:** right-size models, cache, batch and switch off idle resources.
 
+# Measured local CPU observations
+
+{{W11_CORE_RESULTS}}
+
 # Lab guide and answers
 
-**Runtime:** Colab T4 GPU or CPU (slower; the notebook works unchanged). On the 4 GB GTX 1650 laptop GPU used to check this pack (9 October 2026), the full notebook ran in about 3 minutes with the models and data already downloaded. Model: Qwen2.5-0.5B-Instruct (SmolLM2-135M in the automated smoke test). Cloud API keys (`GEMINI_API_KEY`, `HF_TOKEN`) are optional and read only from Colab Secrets. **Hand-in:** latency, cost, quantisation, batching and monitoring tables; app link or screenshot; three written answers.
+**CPU core:** The revised lab uses real SmolLM2-135M-Instruct with CPU selected in shared setup, 24-token generation caps, bounded batches and four synthetic monitoring requests. Its full local CPU timing is recorded below; Colab timing remains unverified. Streaming, rounding/PPL, batching, response caching and a FastAPI TestClient endpoint are real experiments. Server launch, SDK/LangChain clients, packed loading, Gradio and remote deployment are optional stretches. **Hand-in:** measured tables, endpoint checks and three explained decisions. Archived Qwen2.5-0.5B GPU plots remain separately labelled; do not substitute their numbers for the new core.
+
+The full local CPU core measured {{W11_CORE_TIME}} on {{W11_CORE_DATE}} using {{W11_CORE_THREADS}} threads; installation, downloads, widgets and optional stretch/API calls are excluded. This is not a Colab timing.
+
+
+**Optional hosted comparison:** Shared setup has `USE_GEMINI = False` and `USE_OPENAI = False`; enable exactly one deliberately. `ask_model` returns text or `None`, with bounded combined attempts and a local fallback. OpenAI API spending can be separate from ChatGPT subscriptions and is never required here. Use invented prompts only; check current provider terms and regional availability. A stored key alone enables nothing.
 
 ## TODOs
 
-* **TODO 1** in `measure`: set `ttft` at the first non-empty chunk; `tok_per_s = (n_tokens - 1) / (total - ttft)`.
-* **TODO 2** FastAPI endpoint: call `generate(req.messages, ...)` and return the OpenAI response format with `choices` and `usage`.
+* **TODO 1** in `measure`: set `ttft` at the first non-empty chunk; `tok_per_s = n_tokens / total` (re-tokenised decoded text over the whole duration, an approximate count that can differ from generated IDs and the token cap; not post-first-token decoding speed).
+* **TODO 2** FastAPI endpoint: call `generate(req.messages, ...)` and return the OpenAI response format with `choices` and `usage`. Preserve the text's termination metadata: `stop` for an end-of-sequence token, `length` for reaching the cap without that token. End-of-sequence exactly at the cap still means `stop`.
 * **TODO 3** `monthly_cost = requests × (in_tokens × price_in + out_tokens × price_out) / 1e6`.
 * **TODO 4** `fake_quantize`: per-group scale `amax / qmax`, round, clamp to ±qmax, multiply back.
 * **TODO 5** `check_input`: block > 2,000 characters and injection phrases; redact e-mails and phone numbers; return `(allowed, cleaned, reason)`.
@@ -216,17 +225,17 @@ This figure shows a proposed integrated design. In the lab the two routes are se
 
 ## Model answers to the written questions
 
-1. **Cloud API or self-hosting for 500 students?** At illustrative prices a small hosted model costs far less than an always-on GPU and needs no operations, so a hosted API is the sensible default; a frontier model costs more than the GPU. Self-hosting wins with high, steady volume (batching gives high throughput), data that must stay on premises, a fine-tuned open model, or strict latency needs. Assumptions that change the answer: volume and peaks (deadline rushes), output length, scaling the GPU to zero out of hours, current prices and free tiers, required quality, and staff time.
+1. **Cloud API or self-hosting for 500 students?** At illustrative prices a small hosted model costs far less than an always-on GPU and delegates model-serving hardware to the provider. The application still needs monitoring and controls. A frontier model costs more than the GPU. Self-hosting wins with high, steady volume (batching gives high throughput), data that must stay on premises, a fine-tuned open model, or strict latency needs. Assumptions that change the answer: volume and peaks (deadline rushes), output length, scaling the GPU to zero out of hours, current prices and free tiers, required quality, and staff time.
 2. **Guardrails.** The regex rules blocked the literal injection phrase and redacted the e-mail and phone number. They are bypassed by paraphrases, other languages, encodings, typos, indirect injection in retrieved documents and PII in unusual formats. Add trained moderation or safety classifiers on inputs and outputs, least privilege, schema validation, per-user rate limits and authentication, human escalation, red-teaming and monitoring of block rates, and AI disclosure.
 3. **Monitoring design.** Metrics: volume, latency percentiles and TTFT, errors and 429s, tokens and cost per user/day, guardrail rates, model and prompt versions, quality signals (feedback, sampled review, regression tests). Alerts: p95 above target for several minutes, error-rate spikes, daily cost above budget, sudden rise in blocks, falling feedback. Do not log raw personal data, secrets or full conversations by default; redact, restrict access, set retention and document it (GDPR).
 
 ## Troubleshooting
 
-* *Port already in use* when re-running Part 2: restart the runtime, or change `PORT`.
-* *Gradio link does not appear:* make sure the cell ran on Colab with internet access; `share=True` needs outbound connections.
+* *TestClient import error:* install `httpx`. No port is required for the core. The optional server reads its own operating-system-assigned port and has a bounded startup check.
+* *Gradio absent:* enable the optional interface flag and install Gradio. Local launch uses `share=False`; a public link is a separate deployment choice.
 * *Packed loading skipped on CPU:* this lab enables its optional route only on CUDA. Current bitsandbytes supports additional backends; check its hardware requirements.
-* *Cloud API errors:* check the key is stored as a Colab Secret with notebook access enabled; model names change, so list models with `client.models.list()`; free tiers have strict rate limits (HTTP 429).
-* *Different numbers from the slides:* latency depends on hardware and load; the patterns (TTFT ≪ total, batching gains, int8 ≈ lossless) should match.
+* *Hosted comparison returns None:* keep the local answer/rubric, or deliberately enable exactly one provider in shared setup. Check the selected service's current availability, terms and limits without printing credentials.
+* *Different numbers from the slides:* latency depends on hardware and load; compare the same model, precision, token caps, prompts, device and timing boundary before interpreting differences.
 
 # Practice questions with model answers
 
@@ -257,7 +266,7 @@ This figure shows a proposed integrated design. In the lab the two routes are se
 | API platform | Service providing model access over HTTP with keys, quotas and billing |
 | OpenAI-compatible API | Endpoint accepting the OpenAI chat-completions format |
 | TTFT | Time to first token: delay before the first output token arrives |
-| Tokens per second | Decoding speed after the first token |
+| Tokens per second | State the boundary: decoding speed or whole-request output-token rate. The CPU notebook measures the latter. |
 | Prefill / decode | Processing the prompt in parallel / generating tokens one by one |
 | Rate limit (HTTP 429) | Cap on requests or tokens per minute |
 | Exponential back-off | Retrying with waits that double each attempt, plus jitter |
@@ -304,19 +313,19 @@ The slides show one idea at a time. Use the detail below for follow-up questions
 
 ## Slide 1: Title
 
-Welcome to week 11, deployment and frameworks. So far we have used models inside notebooks. This week we turn a model into something other people can use: an application with an interface and an API, running somewhere sensible, at an acceptable cost and speed, with guardrails and monitoring. Every number on the "real" slides was measured by running this week's lab in advance, on a small open model, so students can reproduce them on Colab.
+Welcome to week 11, deployment and frameworks. So far we have used models inside notebooks. This week we turn a model into something other people can use: an application with an interface and an API, running somewhere sensible, at an acceptable cost and speed, with guardrails and monitoring. The recorded-result charts use the archived model and settings. The current SmolLM2 CPU core has separate measured results in the lab guide. Colab execution has not been timed.
 
 ## Slide 2: Outcomes
 
 Six outcomes matching the descriptor's week 11: frameworks; API platforms; deployment options; building applications and interfaces; deploying and monitoring with standard tools; and comparison. The final outcome is the one examiners and employers care about: justifying a deployment decision with evidence about latency, cost and quality rather than habit. This week practises MIMLO 5, deploying generative AI with contemporary frameworks, together with MIMLO 3 and 4.
 
-## Slide 3: Agenda
+## Slide 3: Where we are in the course
 
 The plan follows the revised descriptor. Sections two and three contain real measurements from the lab: streaming latency, quantisation and batching. Take the break after section three. Sections four and five show the code students will write in the lab and how to monitor and protect the application.
 
 ## Slide 4: Warm-up
 
-Two minutes in pairs. Collect answers under the four headings on the slide; together they are the agenda for today. Students often mention speed first. Push them on cost: a public link to a paid API with no limits can produce a large bill overnight. Push them on keys: API keys pasted into notebooks or GitHub are routinely stolen by automated scanners. And on operations: without logs you do not know that the app is failing until users complain.
+Two minutes in pairs. Collect answers to the three prompts on the slide; together they are the agenda for today. Students often mention speed first. Push them on cost: a public link to a paid API with no limits can produce a large bill overnight. Push them on keys: API keys pasted into notebooks or GitHub are routinely stolen by automated scanners. And on operations: without logs you do not know that the app is failing until users complain.
 
 - Your notebook chatbot works well for you. Tomorrow 500 students will use it. What could go wrong?
 
@@ -340,7 +349,7 @@ Think in layers. At the bottom is hardware: cloud GPUs and TPUs, servers, laptop
 
 ## Slide 7: Frameworks and platforms at a glance
 
-Walk through the table by layer. Hugging Face is the hub for open models and also offers hosted inference through partner providers. OpenAI's API and Microsoft's Azure OpenAI serve GPT models; Azure adds enterprise features such as private networking, regional data residency and compliance certifications, which matter to universities and companies. Google's Gemini API has a free tier through AI Studio, and Gemini Enterprise Agent Platform (formerly Vertex AI) is its enterprise route. vLLM is the most widely used open-source serving engine for GPUs. Ollama makes local models easy. LangChain, LangGraph and LlamaIndex are orchestration frameworks, used heavily next week.
+Walk through the table by layer. Hugging Face is the hub for open models and also offers hosted inference through partner providers. OpenAI's API and Microsoft's Azure OpenAI serve GPT models; Azure adds enterprise features such as private networking, regional data residency and compliance certifications, which matter to universities and companies. Google's Gemini API has a free tier through AI Studio, and Gemini Enterprise Agent Platform (formerly Vertex AI) is its enterprise route. vLLM is an example of a serving engine; verify its supported hardware and features for the chosen release. Ollama makes local models easy. LangChain, LangGraph and LlamaIndex are orchestration frameworks, used heavily next week.
 
 | Tool | Layer | Use it for |
 | --- | --- | --- |
@@ -404,7 +413,7 @@ Six concepts cover most API platforms. Authentication uses API keys, or for ente
 
 ## Slide 13: Keeping API keys safe
 
-Key security is a practical skill every student needs. Keys committed to public repositories are found by automated scanners very quickly and used to run up bills. Store keys in Colab Secrets, environment variables or a cloud secrets manager. Never embed a key in front-end code, because anyone can read it in the browser; the front end must call your own back end, which holds the key. Use separate keys per project with spending limits and alerts. If a key leaks, revoke it first and investigate afterwards. The lab reads keys only from Colab Secrets.
+Key security is a practical skill every student needs. Keys committed to public repositories are found by automated scanners very quickly and used to run up bills. Store keys in Colab Secrets, environment variables or a cloud secrets manager. Never embed a key in front-end code, because anyone can read it in the browser; the front end must call your own back end, which holds the key. Use separate keys per project with spending limits and alerts. If a key leaks, revoke it first and investigate afterwards. The lab reads keys from Colab Secrets or environment variables only after explicit opt-in to its optional cloud cell.
 
 - Keep access keys out of code, notebooks and Git. Treat a key like a password.
 
@@ -426,9 +435,9 @@ Break latency into parts. Network and authentication add tens of milliseconds. U
 
 - Streaming shows each part as it arrives; it does not guarantee faster model computation.
 
-## Slide 15: Measured: streaming latency of a small open model
+## Slide 15: Stored GPU run: streaming latency
 
-This is the lab's measurement for Qwen2.5-0.5B-Instruct. The dark part of each bar is time to first token, the light part the rest of the answer. The numbers are quoted in the bullet. Time to first token is a small fraction of the total, which is why streaming is standard in chat interfaces. Hosted frontier models run on far larger hardware, but they are also much larger, so the same pattern holds.
+This is the archived GPU measurement for Qwen2.5-0.5B-Instruct on 9 October 2026; it is separate from the measured smaller CPU core. The dark bar times the first decoded text chunk, an approximation to time to first token. The light bar shows the full-answer duration. The numbers are quoted in the bullet. The archived chunk-rate estimate is retained in the reference table for provenance but is not a reliable post-first-token speed measurement. Time to first token is a small fraction of the total, which is why streaming is standard in chat interfaces. Hosted frontier models run on far larger hardware, but they are also much larger, so the same pattern holds.
 
 - {{LAT_NOTES}}
 
@@ -446,8 +455,6 @@ Walk through the arithmetic. Five hundred students times twenty requests a day t
 | Self-hosted small GPU, always on | $0.60 per hour | $432 + staff time |
 
 300,000 requests × (800 input + 300 output tokens). Prices are illustrative: always check the providers' current pricing pages.
-
-Method
 
 ## Slide 17: Streaming and retries in code
 
@@ -511,15 +518,15 @@ Read the rounding example as: choose a scale from the largest absolute weight an
 | q | rounded integer stored in memory |
 | $\hat{w}$ | approximate weight reconstructed for computation |
 
-## Slide 21: Measured: size and quality after quantisation
+## Slide 21: Stored GPU run: rounding and perplexity
 
-The lab rounds weights in linear layers, excluding the output language-model head, then reconstructs floating-point values for inference. It measures perplexity on one paragraph. The displayed storage sizes are estimates of hypothetical packed weights; this demonstration does not store four-bit tensors. Compare the measured quality for eight-bit, row-scaled four-bit and grouped four-bit rounding. Separate group scales can preserve detail at additional storage cost. One paragraph is only a quick check; rerun the actual task evaluation before deployment.
+The lab rounds weights in linear layers, excluding the output language-model head, then reconstructs floating-point values for inference. It measures perplexity on one paragraph. The displayed storage sizes assume uniform packing of all parameters, although embeddings and the output head remain unchanged in the actual experiment. Grouped estimates assume two bytes per scale; real formats have their own overhead. This demonstration does not store four-bit tensors. Compare the measured quality for eight-bit, row-scaled four-bit and grouped four-bit rounding. One paragraph is only a quick check; rerun the actual task evaluation before deployment.
 
 - {{QUANT_NOTES}}
 
 - Always re-evaluate on your own task after quantising.
 
-## Slide 22: Measured: batching raises throughput
+## Slide 22: Stored GPU run: batch throughput
 
 Generating for one request at a time leaves most of a GPU idle, because decoding is limited by memory bandwidth, not arithmetic. Processing several requests together reuses each weight read for many sequences. The lab measures throughput for batch sizes one to eight; the numbers are in the bullet. Production engines go further with continuous batching, adding and removing requests at every step rather than waiting for a whole batch to finish. The trade-off: larger batches increase throughput but can increase each user's latency.
 
@@ -580,16 +587,16 @@ This is a proposed integrated design. A user interface or other client calls a b
 
 ## Slide 28: An OpenAI-compatible endpoint with FastAPI
 
-FastAPI turns a Python function into a web API. Pydantic models validate the request body automatically, rejecting malformed requests, and FastAPI generates interactive documentation. By returning the OpenAI response format, including the usage block with token counts, our server works with the OpenAI SDK and LangChain unchanged, as students verify in the lab. In production you would add authentication, request size limits, timeouts and streaming, and run the server behind a process manager.
+FastAPI turns a Python function into a web API. Pydantic models validate the request body automatically, rejecting malformed requests, and FastAPI generates interactive documentation. By returning the OpenAI response format, including the usage block with token counts, the optional server stretch can be exercised through the OpenAI SDK and LangChain. The core instead checks the endpoint with TestClient inside the process. In production you would add authentication, request size limits, timeouts and streaming, and run the server behind a process manager.
 
 ```python
 @api.post("/v1/chat/completions")
 def chat(req: ChatRequest):
     text, n_in, n_out = generate(
-        req.messages, req.max_tokens)
+        req.messages, max_new_tokens=min(req.max_tokens, CORE_TOKENS))
     return {
         "object": "chat.completion",
-        "choices": [{"index": 0, "finish_reason": "stop",
+        "choices": [{"index": 0, "finish_reason": getattr(text, "finish_reason", "stop"),
                      "message": {"role": "assistant",
                                  "content": text}}],
         "usage": {"prompt_tokens": n_in,
@@ -605,7 +612,7 @@ def chat(req: ChatRequest):
 
 ## Slide 29: A chat interface with Gradio
 
-Gradio builds a web interface from a Python function; ChatInterface provides a complete chat UI in one line. The respond function wraps the model with an input check, logging and an output check. In Colab, share equals true prints a temporary public link, useful for demonstrations but anyone with the link can use it. For longer-lived demos, Hugging Face Spaces hosts Gradio apps, with secrets for API keys. Streamlit is a popular alternative for data-oriented apps.
+Gradio builds a web interface from a Python function; ChatInterface provides a complete chat UI in one line. The respond function wraps the model with an input check, logging and an output check. The revised optional interface launches locally with share=False. A public share link is a separate decision requiring access and request controls. For longer-lived demos, Hugging Face Spaces hosts Gradio apps, with secrets for API keys. Streamlit is a popular alternative for data-oriented apps.
 
 
 Compute Spaces have account-plan requirements; limited free ZeroGPU eligibility is different from unconditional free CPU hosting. Current terms: https://huggingface.co/docs/hub/spaces-overview
@@ -622,7 +629,7 @@ def respond(message, history):
     return check_output(answer)
 
 demo = gr.ChatInterface(respond, title="Course assistant")
-demo.launch(share=True)     # temporary public link from Colab
+demo.launch(share=False)    # optional local demo; remote hosting needs separate controls
 ```
 
 - **Gradio** builds a browser interface around a Python function.
@@ -667,7 +674,7 @@ Monitoring for generative AI extends normal web monitoring. Performance uses per
 
 - **Versions:** Record which model, prompt and document index produced each answer.
 
-## Slide 33: Measured: a monitoring summary from the lab app's logs
+## Slide 33: Stored GPU run: ten-request monitoring
 
 The lab sends simulated traffic through the app, including a prompt-injection attempt and messages containing an e-mail address and a phone number. Each bar is one request: blue answered, orange answered after redacting personal data, red blocked. The dashed line marks the ninety-fifth percentile latency. The summary in the bullet is computed from the log file. Point out the design choice: logs store metadata, not message text, following GDPR data minimisation; if you need text for quality review, redact it and limit retention and access.
 
@@ -731,11 +738,11 @@ This checklist connects the week to responsible AI. Transparency is now a legal 
 
 ## Slide 38: Lab 11: deploy, measure and monitor a generative AI app
 
-The lab covers both descriptor tutorials: exploring tools with local and cloud models, and building and deploying a small application with a web interface, measuring latency and cost and adding logging and guardrails. Cloud API keys are optional; everything else runs without accounts. Remind students to stop the public Gradio link at the end of the session and never to paste keys into the notebook.
+The lab covers both descriptor tutorials: exploring tools with local and cloud models, and building and deploying a small application with a web interface, measuring latency and cost and adding logging and guardrails. Cloud API keys are optional; everything else runs without accounts. Use TestClient for the core and keep server, browser interface and remote hosting as separate optional stretches. Stop any deliberately launched server and keep credentials in shared setup.
 
 - Stream from a local model; measure TTFT and output tokens per second.
 
-- Expose a FastAPI endpoint; call it with the openai SDK and LangChain.
+- Exercise the FastAPI endpoint through TestClient; SDK and LangChain clients are optional server stretches.
 
 - Estimate monthly cost; implement capped retries with increasing delays.
 
@@ -743,13 +750,13 @@ The lab covers both descriptor tutorials: exploring tools with local and cloud m
 
 - Build a checked Gradio handler and metadata log; summarise it and write a Docker packaging example.
 
-- **Runtime:** Colab T4 GPU or CPU (slower). About 3 min on a 4 GB laptop GPU after downloads.
+- **CPU core:** The revised lab uses real SmolLM2-135M-Instruct with CPU selected in shared setup, 24-token generation caps, bounded batches and four synthetic monitoring requests. Its full local CPU timing is recorded below; Colab timing remains unverified. Streaming, rounding/PPL, batching, response caching and a FastAPI TestClient endpoint are real experiments. Server launch, SDK/LangChain clients, packed loading, Gradio and remote deployment are optional stretches. **Hand-in:** measured tables, endpoint checks and three explained decisions. Archived Qwen2.5-0.5B GPU plots remain separately labelled; do not substitute their numbers for the new core.
 
 - **Hand in:** notebook with latency, cost, quantisation, batching and monitoring tables, the app link or screenshot, and three answers.
 
-## Slide 39: Summary
+## Slide 39: Week 11: operate an application
 
-The six cards on the slide condense these eight summary points. Students should be able to draw the architecture of a small application, estimate its cost, explain where latency comes from, choose and justify a deployment option, and list what to monitor. Next week, the final technical week, we connect models to knowledge and tools: retrieval-augmented generation and agents, which use everything from today.
+The six recap cards group the detailed summary points below. Students should be able to draw the architecture of a small application, estimate its cost, explain where latency comes from, choose and justify a deployment option, and list what to monitor. Next week, the final technical week, we connect models to knowledge and tools: retrieval-augmented generation and agents, which use everything from today.
 
 - An application has a model, a server, request-handling code and an interface.
 
@@ -769,7 +776,7 @@ The six cards on the slide condense these eight summary points. Students should 
 
 ## Slide 40: Resources
 
-Microsoft's Generative AI for Beginners has lessons on building and securing applications. The Hugging Face Inference Providers and Gemini compatibility pages show the OpenAI-compatible pattern with free tiers. The vLLM documentation and Ollama cover self-hosted and local serving. Gradio and FastAPI tutorials cover the application layer. The OWASP Top 10 for LLM applications is the standard security reference. The textbook reading is Tunstall and colleagues, chapter 8, on making transformers efficient in production. See the source-verification report for the latest checks and access limitations.
+Microsoft's Generative AI for Beginners has lessons on building and securing applications. The Hugging Face Inference Providers and Gemini compatibility pages show a basic OpenAI-compatible pattern; supported features and billing differ by provider. The vLLM documentation and Ollama cover self-hosted and local serving. Gradio and FastAPI tutorials cover the application layer. The OWASP Top 10 for LLM applications is the standard security reference. The textbook reading is Tunstall and colleagues, chapter 8, on making transformers efficient in production. See the source-verification report for the latest checks and access limitations.
 
 - **Course:** [Microsoft: Generative AI for Beginners](https://github.com/microsoft/generative-ai-for-beginners). Lessons on building and securing apps.
 - **Reference:** [Hugging Face Inference Providers](https://huggingface.co/docs/inference-providers/index). OpenAI-compatible router to open models.
@@ -784,7 +791,7 @@ Microsoft's Generative AI for Beginners has lessons on building and securing app
 
 # Full lecture code examples
 
-The projected slides show short excerpts. Read these complete examples alongside the lab definitions and imports. The local lab binds port 0, lets the operating system choose a free localhost port, and reads that same server socket before configuring clients.
+The projected slides show short excerpts. Read these complete examples alongside the lab definitions and imports. The core uses TestClient inside the process and opens no port. The optional server binds port 0, lets the operating system choose a free localhost port, and reads that same server socket before configuring clients.
 
 ## Streaming and retries in code
 
@@ -793,7 +800,8 @@ import random
 import time
 
 from openai import OpenAI, RateLimitError
-client = OpenAI(base_url=BASE_URL, api_key=get_secret("API_KEY"))
+# Optional architecture example: client configured for a stream-capable endpoint.
+# Use controlled server-side credentials; the minimal local endpoint does not stream.
 
 stream = client.chat.completions.create(
     model=MODEL, messages=messages, stream=True, max_tokens=300)
@@ -812,22 +820,97 @@ def call_with_retry(fn, max_retries=5, base=0.5):
 
 ## An OpenAI-compatible endpoint with FastAPI
 
+This complete handler relies on the lab's `generate`, model identity and shared imports. Schema validation supplies HTTP 422 for unsupported fields; it supplies neither authentication nor the separate `respond` content checks.
+
 ```python
 from fastapi import FastAPI
-from pydantic import BaseModel
+from fastapi.testclient import TestClient
+from pydantic import BaseModel, Field
+from typing import Literal
+
+class ChatMessage(BaseModel):
+    role: Literal["system", "user", "assistant"]
+    content: str = Field(min_length=1, max_length=2000)
+
 
 class ChatRequest(BaseModel):
-    messages: list[dict]
-    max_tokens: int = 128
+    model: str = "local"
+    messages: list[ChatMessage] = Field(min_length=1, max_length=8)
+    max_tokens: int = Field(default=24, ge=1, le=256)
+    temperature: float = Field(default=0.0, ge=0.0, le=0.0)  # greedy-only demo; reject unsupported settings
+
 
 api = FastAPI()
 
 @api.post("/v1/chat/completions")
-def chat(req: ChatRequest):
-    text, n_in, n_out = generate(req.messages, req.max_tokens)
-    return {"object": "chat.completion",
-            "choices": [{"index": 0, "finish_reason": "stop",
-                         "message": {"role": "assistant", "content": text}}],
-            "usage": {"prompt_tokens": n_in, "completion_tokens": n_out,
-                      "total_tokens": n_in + n_out}}
+def chat_completions(req: ChatRequest):
+    text, n_in, n_out = generate(req.messages, max_new_tokens=min(req.max_tokens, CORE_TOKENS))
+    return {"id": f"chatcmpl-{int(time.time() * 1000)}", "object": "chat.completion", "created": int(time.time()), "model": MODEL_VERSION,
+            "choices": [{"index": 0, "message": {"role": "assistant", "content": text}, "finish_reason": getattr(text, "finish_reason", "stop")}],
+            "usage": {"prompt_tokens": n_in, "completion_tokens": n_out, "total_tokens": n_in + n_out}}
+
+
+test_client = TestClient(api)
 ```
+
+# Worked examples for the CPU core
+
+## Follow shapes through one endpoint request
+
+1. Start with one invented user message and an output cap of 24 tokens. JSON names fields; it is not a tensor.
+2. Validate the declared roles, non-empty text and positive cap. Invalid fields produce HTTP 422 before generation.
+3. The chat template adds role markers. Tokenisation creates `input_ids` and `attention_mask` with shape `[1,L]`: one sequence, L input tokens.
+4. Fixed-weight generation returns `[1,L+n]`, with n at most 24. Remove the first L IDs and decode only the continuation.
+5. Return `prompt_tokens=L`, `completion_tokens=n`, and their sum. Termination metadata distinguishes end-of-sequence from the cap. TestClient measures the in-process handler; it excludes network travel.
+
+## Read every quantisation symbol
+
+In the equations, the parameter count $N$ counts stored weights. The vector or tensor $w$ contains original weights. The number $b$ is the chosen bits per weight; eight bits make one byte. The scale $s$ maps the largest magnitude in a group to its permitted integer range. The integer $q$ is obtained by rounding $w/s$; the reconstructed value $\hat{w}$ is $q$ multiplied by $s$. The maximum operator selects the largest absolute group value and the rounding operator selects the nearest integer. Absolute-value bars mean magnitude, and the powers of two set the symmetric integer range.
+
+For a four-bit group with maximum magnitude 1, $q_{max}=2^{4-1}-1=7$ and $s=1/7$. For $w=0.2$, rounding $0.2/(1/7)=1.4$ gives $q=1$, so $\hat{w}=1/7\approx0.143$. Zero groups use a small scale floor to avoid division by zero. The helper returns floating-point reconstructions; it does not pack integer storage. All linear weights are restored in a finally block before later experiments.
+
+## Cost arithmetic with units
+
+For 500 fictional users, 20 daily requests and 30 days, the request count is 300,000. At 800 input and 300 output tokens each, monthly counts are 240 million input and 90 million output tokens. The illustrative input/output rates of \$0.10/\$0.40 per million give \$24+\$36=\$60. Those rates are classroom inputs, not current vendor prices. The always-on illustrative GPU row is \$0.60 × 24 × 30 = \$432 before staff and other costs. Neither calculation proves that the candidate meets quality or peak-load requirements.
+
+## Monitoring populations and limitations
+
+The revised core sends four invented requests through `respond`. The log records time, model identity, duration, block reason and separate token counts, without raw request text. All rows contribute to request/block/redaction counts; only allowed rows enter the stated p50/p95 calculation. A blocked current message skips generation and has zero model token counts. Inspect the actual log before describing a result. With only a few allowed requests, p95 is a fragile sample estimate.
+
+The archived plots instead describe Qwen2.5-0.5B-Instruct on NVIDIA GeForce GTX 1650: three streaming questions, eight requests for each batch-size experiment and ten monitoring requests. The original run settings remain in stored assets and instructor evidence; newly measured SmolLM2 tables must be compared and recorded separately. An archived model reply about FastAPI is generated text, not authoritative documentation or a correctness guarantee.
+
+# Beginner FAQ and answered self-checks
+
+| Question | Answer |
+|---|---|
+| Why does a decorator appear above a function? | It attaches that function to an endpoint; `@api.post` declares the HTTP method and route. |
+| Does JSON validation block prompt injection? | No. It checks declared fields; content checks are separate and limited. |
+| Does first decoded text equal exactly one token? | No. A chunk can contain several tokens, so this timing approximates TTFT. |
+| Does float reconstruction show real four-bit memory? | No. The size table is hypothetical; actual tensors remain floating point. |
+| Can a cached answer be wrong? | Yes. Reuse preserves mistakes as well as text; check evidence and freshness. |
+| Does a local browser demo require a public link? | No. The optional Gradio stretch uses share=False. |
+| Why are both provider switches false? | The full core is local; hosted requests require deliberate opt-in with an available service. |
+| Are TestClient timings a production load test? | No. They exclude network transport and realistic concurrent arrivals. |
+
+1. **What enters the model for one request?** Answer: a chat-template token sequence `[1,L]` and its attention mask; model weights remain fixed.
+2. **What should an invalid negative output cap do?** Answer: produce HTTP 422 before generation through the declared schema.
+3. **Why restore original weights after quantisation scoring?** Answer: so later comparisons use the same reference model rather than an accidentally modified one.
+4. **Must doubling aggregate throughput halve individual waits?** Answer: no; batching and queues can increase per-request waiting even while total work rises.
+5. **Do the checked Python handler's rules protect every endpoint?** Answer: no; the FastAPI, direct Python, browser and packaging routes must each include and test required controls.
+
+# Study route: 120 minutes
+
+| Part | Study minutes | Core / change / optional stretch |
+|---|---|---|
+| Streaming | 20 | Measure real text; halve output cap; compare larger archived model settings. |
+| Endpoint | 20 | TestClient schema and usage; alter one field; optional server/SDK/framework. |
+| Cost and retry | 15 | Unit-correct arithmetic; change output length; research dated actual rates. |
+| Efficiency | 30 | Rounding/PPL, batches and cache; change one scale group; optional packed backend. |
+| Checked handler | 15 | Synthetic input checks; try a paraphrase; optional local Gradio. |
+| Monitoring and packaging | 20 | Inspect four-request metadata; compare populations; pin and deploy separately. |
+
+These are study allocations, including reading and discussion, not measured machine waiting times. Each TODO has a hint and semantic check in the notebook. Each part states common errors, a change task and an optional stretch. The slider inspects a token budget without calling models from callbacks.
+
+# Further reading for this core
+
+[FastAPI TestClient guide](https://fastapi.tiangolo.com/tutorial/testing/) explains synchronous in-process requests. [SmolLM2-135M-Instruct model card](https://huggingface.co/HuggingFaceTB/SmolLM2-135M-Instruct) describes this small instructional model and limitations. [Gradio quickstart](https://www.gradio.app/guides/quickstart) covers local interfaces. [Spaces overview](https://huggingface.co/docs/hub/en/spaces-overview) supplies current hosting conditions. Watch the [Spaces introduction video](https://www.youtube.com/watch?v=3bSVKNKb_PY), then verify the current written conditions before choosing remote hosting.

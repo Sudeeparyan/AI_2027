@@ -1,6 +1,6 @@
 # Lecture plan at a glance
 
-GANs are the second deep generative family. Students should leave able to write the minimax objective, derive the optimal discriminator, explain the non-saturating loss, recognise the failure modes and explain FID. All sample images in the slides come from real models trained with the lab code (`curriculum/assets/make_week_03.py`).
+GANs are the second deep generative family. Students should leave able to write the minimax objective, derive the optimal discriminator, explain the non-saturating loss, recognise the failure modes and explain FID. The stored sample images come from the longer recorded lecture experiment (`curriculum/assets/make_week_03.py`), not the current bounded CPU core. Conceptual curves and feature clouds are labelled illustrations.
 
 | Time | Slides | Segment | What you do |
 |---|---|---|---|
@@ -41,7 +41,7 @@ The **discriminator** learns to separate real and generated images. The **genera
 * The **discriminator** $D$ maps a sample to the probability that it is real.
 * In this unconditional lab, G receives training feedback through D, without a paired target image for each code. Conditional variants can also use reconstruction targets.
 
-GANs are **implicit generative models**: we can sample from them, but they give no density $p(x)$. This rules out direct likelihood-based evaluation, though other GAN anomaly methods exist, and is why GAN evaluation uses sample-based metrics such as FID.
+GANs are **implicit generative models**: we can sample from them, but basic GANs do not provide a tractable explicit density $p(x)$. This rules out direct likelihood-based evaluation, though other GAN anomaly methods exist, and is why GAN evaluation uses sample-based metrics such as FID.
 
 ![GAN architecture](fig:gan_arch)
 
@@ -119,7 +119,7 @@ Reuse the same noise codes for snapshots so changes reflect training. Then check
 
 **Mode collapse** means G misses substantial parts of the data distribution. It may make sharp images of only a few digit classes. Different random codes then give similar outputs.
 
-G can exploit one pattern that currently fools D, then switch when D adapts. In the measured eight-cluster experiment, the standard GAN covered seven modes at the end while WGAN-GP covered eight. This is evidence for that run, not a universal guarantee.
+G can exploit one pattern that currently fools D, then switch when D adapts. In the measured eight-cluster experiment, the standard GAN covered {{W03_RING_STANDARD_MODES}} modes at the end while WGAN-GP covered {{W03_RING_WGAN_MODES}}. This is evidence for that run, not a universal guarantee.
 
 ![Mode collapse experiment on a ring of 8 Gaussians](fig:mode_collapse)
 
@@ -198,6 +198,8 @@ Interpolating between noise vectors can give smooth transitions; inspect the ima
 
 ## 5. Evaluation, applications and risks
 
+Generative precision and recall separate realism from coverage in the chosen feature space.
+
 ### Fréchet Inception Distance (FID)
 
 Embed real and generated images with an Inception-v3 network (2048-dimensional pool features), fit a Gaussian to each set and compute the Fréchet distance:
@@ -223,7 +225,7 @@ Lower is better. Both feature means and covariances can change with quality and 
 | KID | Kernel MMD on Inception features; unbiased estimate still has sampling uncertainty | Sampling variance and feature choices |
 | Human evaluation | Realism, preference, task fit | Needs rubrics, multiple raters, agreement statistics |
 
-### GANs in 2026
+### Published adversarial applications
 
 GAN ideas remain useful when fast generation matters. Uses include super-resolution and restoration, such as Real-ESRGAN. An **audio vocoder**, such as HiFi-GAN, turns a sound representation into a waveform.
 
@@ -264,7 +266,7 @@ Ask students to identify where their project could create synthetic media and ho
 
 # Lab guide and answers
 
-**Runtime:** Colab or a laptop CPU. On the laptop CPU used to check this pack (9 October 2026), each DCGAN epoch took about 2 minutes and the complete solution notebook about 19 minutes; other jobs were running, so treat these as upper bounds. A GPU is much faster. For a short CPU session, reduce `EPOCHS` to 3–4. **Hand-in:** samples per epoch, diagnostics, coverage histogram and Fréchet distances, ring experiment, four answers.
+**CPU core:** four epochs on 25,600 MNIST images (800 generator and discriminator updates), a classifier on 8,000 images, 512 evaluation samples and 1,000 ring steps per configuration. On the course laptop ({{W03_CORE_THREADS}} CPU threads, MNIST already downloaded) the complete core took {{W03_CORE_TIME}}, recorded on {{W03_CORE_DATE}}. A first Colab run also downloads MNIST. GPU and Gemini are optional. **Optional stretch:** `RUN_STRETCH = True` uses eight epochs, full training data, 2,000 evaluation images and 5,000 ring steps. The longer archived images are shown for discussion. **Hand-in:** update trace, fixed-code samples, diagnostics, coverage histogram, custom feature distances, toy comparison and explanations.
 
 ## TODOs
 
@@ -274,7 +276,7 @@ Ask students to identify where their project could create synthetic media and ho
 * **TODO 4:** generate, classify with `clf`, `argmax`. Compare class counts with held-out real digits and inspect images. Missing or strongly underrepresented classes suggest coverage problems; classifier errors and finite samples also affect the histogram.
 * **TODO 5:** Fréchet distance with `scipy.linalg.sqrtm`, discarding only negligible imaginary numerical round-off; large complex parts require investigation. Compare real-vs-real, final-GAN, epoch-1 and uniform-noise scores. A well-trained run may improve towards the real reference; record the actual ordering and investigate surprises.
 * **TODO 6:** `torch.autograd.grad(D(x_hat).sum(), x_hat, create_graph=True)[0]`, then `((grad.norm(dim=1) - 1)**2).mean()`.
-* **Archived lecture run:** DCGAN trained 8 epochs on CPU; ring experiment final coverage standard 7/8, WGAN-GP 8/8. These are recorded results, not targets that every run must reproduce. Students should report seeds and actual results.
+* **Archived lecture run:** DCGAN trained 8 epochs on CPU; ring experiment final coverage standard {{W03_RING_STANDARD_MODES}}/8, WGAN-GP {{W03_RING_WGAN_MODES}}/8. These are recorded results, not targets that every run must reproduce. Students should report seeds and actual results.
 
 ## Troubleshooting
 
@@ -306,23 +308,7 @@ Ask students to identify where their project could create synthetic media and ho
 
 # Glossary
 
-| Term | Meaning |
-|---|---|
-| Generator | Network mapping noise (and optionally a condition) to samples |
-| Discriminator / critic | Network judging real vs fake (probability) or scoring realism (WGAN critic) |
-| Minimax objective | The two-player value function D maximises and G minimises |
-| Non-saturating loss | Generator minimises −log D(G(z)) instead of log(1 − D(G(z))) |
-| Jensen–Shannon divergence | Symmetric divergence minimised by the ideal GAN |
-| Mode collapse | Generator produces only a subset of the data's variety |
-| Wasserstein distance | Earth-mover distance; basis of WGAN |
-| Gradient penalty | Term encouraging input-gradient norms near 1 on sampled real/fake interpolates |
-| Spectral normalisation | Normalise layer weight scale; network smoothness depends on the full design |
-| DCGAN | Convolutional GAN architecture guidelines (2015) |
-| Conditional GAN | GAN whose networks receive a condition y |
-| CycleGAN | Unpaired image translation with cycle consistency |
-| StyleGAN | Style-based generator with a mapping network |
-| FID | Fréchet Inception Distance; lower is better |
-| Truncation trick | Sampling z from a truncated distribution to trade diversity for quality |
+This week's key terms are listed in the Quick glossary at the end of the beginner walkthrough above. The complete module glossary for all twelve weeks is in Course_Glossary.docx in the 00_Course folder.
 
 # Readings, videos and further practice
 
@@ -518,15 +504,15 @@ The networks change each other's training signal. Their losses need to stay in b
 |---|---|---|
 | FID (lower is better) | Difference between real/generated feature statistics | Needs many samples. The feature network and implementation affect the result. |
 | Inception Score (higher) | Confident predictions across varied classes | Uses no real reference set. High scores can hide poor images. |
-| Precision & recall | Precision: realistic samples. Recall: coverage of real-data regions. | Both depend on features and how nearby points are defined. |
+| Precision and recall | Precision: realistic samples. Recall: coverage of real-data regions. | Both depend on features and how nearby points are defined. |
 | KID | Difference between feature distributions, with an unbiased estimator | A small sample still has uncertainty. Report sample size. |
 | Human evaluation | People judge realism, preference or task usefulness | Use clear criteria, several raters and report agreement. |
 
-## Slide 35: Where GANs are used in 2026
+## Slide 35: Published adversarial applications
 
 **Super-resolution.** Upscaling and restoring photos and video (e.g. Real-ESRGAN): one fast forward pass.
 
-**Fast diffusion.** Adversarial diffusion distillation turns 50-step diffusion into 1–4-step generators (e.g. SDXL-Turbo).
+**Fast diffusion.** Adversarial diffusion distillation can produce one-to-four-step generators, as documented in the SDXL-Turbo model card.
 
 **Sharper autoencoders.** Adversarial losses keep the VAE/VQ decoders inside latent diffusion and image tokenizers sharp.
 
@@ -562,7 +548,7 @@ The networks change each other's training signal. Their losses need to stay in b
 
 ## Slide 38: Lab 3: train and diagnose a DCGAN
 
-Google Colab or a local CPU (about 2 minutes per DCGAN epoch on the laptop CPU used to check this pack)
+Free Colab or local CPU by default; the core took {{W03_CORE_TIME}} on the course laptop.
 
 Notebook with samples per epoch, diagnostics, custom feature Fréchet distance and class histogram, ring experiment and written answers
 
@@ -595,3 +581,69 @@ Notebook with samples per epoch, diagnostics, custom feature Fréchet distance a
 - Use FID, precision/recall and human checks together.
 
 - Applications include super-resolution, fast generators and audio. Synthetic media needs consent and disclosure.
+
+
+# Worked examples to teach at the board
+
+## A batch through the generator
+
+Let B = 4 denote four examples. Each code has 64 numbers, so the input has shape [4,64]. `Generator.forward` reshapes it to [4,64,1,1]. A transposed convolution expands this to [4,128,7,7]; batch normalisation and ReLU follow. The second expansion yields [4,64,14,14]. The final expansion and tanh yield [4,1,28,28]. One is the grayscale channel count, not a batch size. D reduces each image to one source logit, shape [4]. This is a real architecture trace, not a measured runtime.
+
+## Follow one fake through both losses
+
+1. G creates `fake`, retaining the route back to its weights.
+2. D reads real images with target one and `fake.detach()` with target zero. Detach keeps pixels and cuts the G route for this operation.
+3. `opt_D.step()` changes D’s registered weights.
+4. Call D again on the original connected fake. Use target one for G’s non-saturating loss.
+5. `opt_G.step()` changes G’s registered weights. Computing gradients through D does not automatically step D.
+
+Predict before running: if fake is detached in step four, which network cannot receive its intended feedback? **Answer:** G, because its loss has no route to G’s weights.
+
+## Why the early logit derivative matters
+
+Let s be a discriminator logit and p = sigmoid(s). The minimax generator term is log(1−p), whose derivative with respect to s is −p. The non-saturating term is −log(p), with derivative p−1. At p = 0.01, these derivatives are −0.01 and −0.99. At p = 0.8, they are −0.8 and −0.2. This explains the stronger early feedback on this local logit route. The complete generator gradient also depends on D and G derivatives; the example does not guarantee useful feedback to every weight.
+
+## A one-dimensional feature-distance calculation
+
+Take real features with mean 2 and variance 4, and generated features with mean 3 and variance 9. The mean term is (2−3)² = 1. The covariance term is 4+9−2√(4×9) = 1. Total distance is 2. This is an illustrative one-dimensional calculation of the formula. In the notebook, each DigitCNN feature vector has 128 components, and means and covariances are estimated from finite samples. The custom score is not standard Inception FID.
+
+## A gradient penalty with a known answer
+
+For a two-coordinate point x, use the simple critic D(x)=x₀. Its input gradient is [1,0], with length one, so (length−1)² is zero. For D(x)=2x₀, the gradient is [2,0], giving penalty one. The notebook’s check uses these known slopes before training. It tests an input derivative, rather than changing critic weights or measuring mode coverage.
+
+# Frequently confused ideas
+
+| Student question | Explanation |
+|---|---|
+| Does fake target one mean the fake is now real? | It expresses G’s goal. The source remains generated; D still uses target zero in its own update. |
+| Does detach modify the visible image? | It disconnects a gradient route for that operation while preserving pixel values. |
+| Does D = 0.5 establish success? | Matching distributions gives one-half under ideal assumptions, but a poor discriminator can also return one-half. Inspect samples and coverage. |
+| Is WGAN’s critic score a probability? | No. It is unrestricted, and the real-versus-fake mean score difference defines the objective. |
+| Will the short core reproduce the archive? | No outcome is guaranteed. Report actual budgets, seeds and observations; the archive documents its longer run. |
+| Can custom distance and class counts disagree? | Yes. They summarise different properties using fallible classifier features and labels. Inspect held-out accuracy and images as well. |
+
+# Self-checks with answers
+
+1. What three shapes occur for B=4? **Answer:** code [4,64], image [4,1,28,28], discriminator logit [4].
+2. Where must fake remain linked to G? **Answer:** in the generator loss, through a fresh updated-D forward pass.
+3. If real density is 0.3 and generated density 0.1 at x, what is ideal D? **Answer:** 0.3/(0.3+0.1)=0.75.
+4. If both positive densities match, what is ideal D? **Answer:** one-half; outside both supports the ratio is undefined.
+5. Why report feature extractor and sample count? **Answer:** they define the comparison and its uncertainty; different custom and standard feature scores are not interchangeable.
+
+# Core, archive and optional explanation help
+
+The coverage flow is codes → G images → classifier logits → argmax labels → ten counts → threshold check. Each arrow carries the next operation’s actual input. Interpolation, custom feature distance and the toy ring are independent experiments; their outputs are not fed into this flow.
+
+The injected setup keeps `USE_GEMINI = False` and `USE_OPENAI = False`. Opt in to exactly one; enabling both returns local guidance. Optional `ask_model` selects Gemini or the OpenAI API to critique one synthetic claim; it does not train the GAN, calculate metrics or provide measurement evidence. Provider keys come from Colab Secrets or environment variables and are never printed. The shared helper limits calls and backs off on HTTP 429. Send no personal data. Gemini free-tier availability and terms vary by region; EEA/UK/Swiss API-client distribution carries paid-service conditions. Use the local checklist when the selected API is unavailable.
+
+# Focused reading and viewing
+
+Read one source to answer a specific question, then explain a worked example without copying its prose.
+
+- [Goodfellow et al.: GAN objective](https://arxiv.org/abs/1406.2661) — derive the optimal discriminator.
+- [Official PyTorch DCGAN tutorial](https://docs.pytorch.org/tutorials/beginner/dcgan_faces_tutorial.html) — trace detach and the fresh discriminator forward pass.
+- [Heusel et al.: FID and TTUR](https://arxiv.org/abs/1706.08500) — distinguish standard features from the notebook’s custom score.
+- [MIT 2026 generative-model lecture, video](https://www.youtube.com/watch?v=R8V8CbuxryI) — pause to predict a mechanism before hearing its explanation.
+- [Published SDXL-Turbo model card](https://huggingface.co/stabilityai/sdxl-turbo) — verify its documented adversarial distillation and one-to-four-step sampling; check its applicable licence.
+
+Vendor facts checked 11 October 2026. Historical papers remain historical sources, not claims about current popularity or the performance of this CPU core.

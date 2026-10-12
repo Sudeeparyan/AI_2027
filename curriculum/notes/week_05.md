@@ -176,7 +176,7 @@ Diffusion image features can similarly read prompt vectors. Multimodal systems c
 
 ## 5. Read model pictures honestly
 
-The lecture summary uses measured BERT attention. Of all 144 heads, layer {{w05_bert_layer}}, head {{w05_bert_head}} gives the largest weight from it to animal: {{w05_attention_weight}}. This is the same rule as lab TODO 5, so students should find the same head. Choosing the strongest head is part of the method: the median head gives animal only {{w05_bert_median}}, and {{w05_bert_above_half}} of 144 heads exceed 0.5.
+The lecture summary uses measured BERT attention. Of all 144 heads, layer {{w05_bert_layer}}, head {{w05_bert_head}} gives the largest weight from it to animal: {{w05_attention_weight}}. This is the same rule as optional lab TODO 5; an equivalent input, model and numerical configuration should recover that selection. Choosing the strongest head is part of the method: the median head gives animal only {{w05_bert_median}}, and {{w05_bert_above_half}} of 144 heads exceed 0.5.
 
 ![Selected measured BERT connection, summarised for readability](fig:bert_summary)
 
@@ -184,7 +184,7 @@ The full matrix is evidence to inspect, not proof of a resolved pronoun. Value v
 
 ![The selected BERT head's full table](fig:bert_matrix)
 
-GPT-2 is a causal decoder. In the measured heads below, every square above the diagonal has weight 0.0: a token never reads a later token. Different heads still behave differently. Layer 1, head 1 spreads weight over several earlier tokens; layer 5, head 12 reads the previous token.
+GPT-2 is a causal decoder. In the measured heads below, every square above the diagonal has weight {{w05_gpt2_future_weight}}: a token never reads a later token. Different heads still behave differently. Layer 1, head 1 spreads weight over several earlier tokens; layer 5, head 12 reads the previous token.
 
 ![Two measured GPT-2 heads with readable labels](fig:gpt2_causal_summary)
 
@@ -212,7 +212,7 @@ $$h=x+\mathrm{MHA}(\mathrm{LN}(x)), \qquad y=h+\mathrm{MLP}(\mathrm{LN}(h))$$
 
 x is the block input; h is its intermediate residual sum; y is output. MHA means multi-head attention; LN means layer normalisation; MLP means per-position feed-forward network. Plus signs add matching entries.
 
-The lab MLP expands width 192 to 768, applies GELU and returns to 192. GELU is nonlinear, allowing more than a linear projection. Dropout omits features randomly during training as regularisation.
+The stored longer experiment uses an MLP expanding width 192 to 768, then returning to 192. The CPU core expands width 128 to 512, then returns to 128. Both apply GELU between the linear layers. GELU is nonlinear, allowing more than a linear projection. Dropout omits features randomly during training as regularisation.
 
 Stack blocks with the same structure but separate learned weights. Final normalization and a vocabulary head produce **logits**, unnormalised scores for possible output tokens.
 
@@ -274,7 +274,7 @@ Grouped-query attention shares K/V heads across query heads. Do not quote guesse
 
 **Masked language modelling:** BERT predicts selected tokens using both sides. The original recipe selects 15% of tokens; not every selected token becomes a mask symbol.
 
-**Next-token prediction:** GPT-style training predicts each next token from its allowed prefix. CharGPT uses input cat and targets ats from cats.
+**Next-token prediction:** GPT-style training predicts each next token from its allowed prefix. CharGPT uses input cat and targets ats from cats. The local CPU core trains a smaller model on the same Tiny Shakespeare text; the longer GPU experiment is archived separately.
 
 **Span corruption:** T5 replaces spans with special markers, then trains the decoder to generate the removed text.
 
@@ -318,7 +318,7 @@ Use text kept separate from training. Compare the same tokenizer, test text and 
 | Final validation loss | {{w05_val_end}} nats per character |
 | Final validation perplexity | {{w05_ppl_end}} |
 
-These values come from the stored metrics, not a promised outcome for every runtime. A full run of the lab notebook on {{w05_lab_device}} ({{w05_lab_date}}) reached a final validation loss of {{w05_lab_val}} (perplexity {{w05_lab_ppl}}) in {{w05_lab_minutes}} minutes of training. Each check averages only {{w05_lab_batches}} random validation batches, so repeated runs differ slightly. The recorded experiment uses a four-layer model, six heads, width 192 and context 128.
+These values come from the stored metrics, not a promised outcome for every runtime. A separate, later full run of the notebook's GPU stretch configuration (four layers, six heads, width 192, context 128) on {{w05_lab_device}} ({{w05_lab_date}}) reached a final validation loss of {{w05_lab_val}} (perplexity {{w05_lab_ppl}}) in {{w05_lab_minutes}} minutes of training. The CPU core (three layers, four heads, width 128, context 64, 2,000 updates, {{w05_core_params}} parameters) reached validation loss {{w05_core_val}} (perplexity {{w05_core_ppl}}); the whole core took {{W05_CORE_TIME}} on the course laptop. Its sample at temperature 0.5 began: "{{w05_core_sample}}". Each check averages only a few random validation batches, so repeated runs differ slightly.
 
 ![Stored measured validation curve](fig:chargpt_loss)
 
@@ -414,7 +414,7 @@ Separate classroom calculations from measured results. Keep actual failures in g
 
 # Lab guide and answers
 
-**Runtime:** Free Colab T4 GPU, with a CPU fallback using fewer steps. **Downloads: Tiny Shakespeare** text and the separate BERT and GPT-2 inspection models. On the 4 GB GTX 1650 laptop GPU used to check this pack (9 October 2026), the complete notebook ran in about 10 minutes with the models and data already downloaded. Download and training time depend on network and hardware. **Hand-in:** checks, loss curve, measured perplexity, generated samples, attention plots and explanations.
+**CPU core:** the notebook trains on Tiny Shakespeare (a 1.1 MB download) with 2,000 updates, context 64, batch 32, width 128, four heads and three layers. On the course laptop ({{W05_CORE_THREADS}} CPU threads) the complete core took {{W05_CORE_TIME}}, recorded on {{W05_CORE_DATE}}. GPU is optional. Separate pretrained inspection and cache timing are optional downloads; longer training is an explicit stretch. **Hand-in:** semantic checks, actual loss curve/perplexity, samples, dataset/settings and explanations. Keep optional measurements separate.
 
 Follow **read → predict → run → change → check**. Before each cell, name inputs, expected shape, expected output and a failure check.
 
@@ -455,7 +455,7 @@ If attention weights are unavailable, load with attn_implementation="eager". Opt
 
 SDPA chooses a backend appropriate to the inputs and hardware; a fast kernel is not guaranteed for every GPU or dtype. For its dropout option, explicitly pass dropout_p=0.0 during evaluation.
 
-A repeated offline text fallback can overlap across train and validation content. Treat that run as a demonstration; its score does not establish generalisation to new text.
+Tiny Shakespeare is split by position: the last 10% is held out for validation. It is one author's dialogue, so the score cannot establish broad writing ability. Periodic validation checks support development; freeze choices before a separate final test.
 
 # Practice questions with model answers
 
@@ -481,42 +481,7 @@ A repeated offline text fallback can overlap across train and validation content
 
 # Glossary
 
-| Term | Plain meaning |
-|---|---|
-| Token | One unit the model reads. |
-| Tokenisation | Split text and assign vocabulary IDs. |
-| Embedding | A learned vector; token tables and whole-text embeddings have different roles. |
-| Vector | An ordered list of numbers. |
-| Matrix | A numerical table with row and column axes. |
-| Tensor | A numerical array with one or more axes. |
-| Shape | The length of each axis. |
-| Parameter | A learned number changed during training. |
-| Query / key / value | Matching request / matching source / transferred information. |
-| Dot product | Multiply matching entries and add their products. |
-| Softmax | Turn scores into nonnegative weights summing to one. |
-| Attention | Mix values using query-key weights. |
-| Self-attention | Q/K/V come from one sequence. |
-| Cross-attention | Queries read K/V from another sequence. |
-| Head | One set of projections and its mixture. |
-| Causal mask | Prevent a position reading later positions. |
-| Positional encoding | Information about sequence positions. |
-| RoPE | Position-dependent Q/K feature-pair rotations. |
-| Residual connection | Add a sublayer output to its input route. |
-| Layer normalisation | Adjust feature scale within a token vector. |
-| Feed-forward MLP | A learned network applied separately at each position. |
-| Logit | An unnormalised output score. |
-| Target | A known answer used to score a prediction. |
-| Cross-entropy | Loss based on probability assigned to known targets. |
-| Gradient | How a parameter change affects loss. |
-| Optimizer | A rule using gradients to update parameters. |
-| Self-supervised | Targets come from the data itself. |
-| Perplexity | exp of average negative log-probability. |
-| KV cache | Stored K/V for processed tokens. |
-| FlashAttention | Exact attention with less score-table storage and memory traffic. |
-| Mixture-of-experts | A router chooses a few feed-forward networks per token. |
-| ViT | Transformer reading image-patch vectors. |
-| Spectrogram | Sound energy across time and frequency. |
-| Ablation | Remove a component and measure its effect. |
+This week's key terms are listed in the Quick glossary at the end of the beginner walkthrough above. The complete module glossary for all twelve weeks is in Course_Glossary.docx in the 00_Course folder.
 
 # Readings, videos and further practice
 
@@ -557,3 +522,52 @@ Descriptor book reading remains Tunstall, von Werra and Wolf, Natural Language P
 Identify model roles: search representations, answer generation, image encoding or speech transcription. Draw inputs, operations and outputs before selecting a model. Record context limits, memory needs and evaluation questions for deployment and retrieval.
 
 Attention connects distant tokens directly, supporting long-range dependencies without a recurrent chain.
+
+
+# A complete classroom calculation
+
+Keep matching and carrying information separate. For cat, q=[1,0]. The supplied keys [1,0], [0,1] and [1,1] give dot products [1,0,1]. Divide by √2 to obtain approximately [0.707,0,0.707]. Exponentiating produces approximately [2.028,1,2.028]; dividing by their sum gives approximately [0.401,0.198,0.401].
+
+The supplied values are [1,0], [0,1] and [0.5,0.5]. The first output coordinate is 0.401×1 + 0.198×0 + 0.401×0.5, approximately 0.602. The second is 0.401×0 + 0.198×1 + 0.401×0.5, approximately 0.398. These manufactured inputs explain the calculation; they are not measured trained-word representations. Retain full precision and round only for display.
+
+**Predict before revealing:** change only the values. Which quantities stay fixed? **Answer:** query-key scores and attention weights stay fixed; the output mixture changes. Change a key instead, and both weights and output can change.
+
+# Follow a real training update
+
+1. `get_batch` returns input IDs [B,T] and following-character target IDs [B,T].
+2. Token and position lookup produce [B,T,d]. The targets bypass this path.
+3. Causal blocks exchange allowed information and transform each position.
+4. The vocabulary head produces [B,T,V] logits.
+5. Cross-entropy compares those logits with target IDs; it reduces the scored entries to a scalar loss.
+6. Backward computes gradients, and the optimiser changes registered weights.
+7. `val_loss` scores separate development text without an update.
+
+The lab diagram shows this training route. The worked numerical attention checks, downloaded BERT/GPT-2 inspection and cache benchmark are separate experiments. Their results do not flow into CharGPT's training examples.
+
+## Shapes through several heads
+
+For a worked input [2,10,32] and four heads, projections initially preserve the three model axes. Splitting gives [2,10,4,8]. Transpose moves the head axis to give [2,4,10,8]. Each head makes [2,4,10,10] query-source scores. Its value mixtures are [2,4,10,8]. Transpose back and merge to recover [2,10,32], then apply the learned output projection.
+
+The notebook's check compares this mixture with PyTorch and verifies the causal boundary. A tokenwise projection can pass a shape check and hide the future without implementing attention, which is why checking the actual mixture is necessary.
+
+# Reading the compact archived GPT-2 plots
+
+The diagram retains both complete measured weight matrices. Sparse numbered tick labels make them readable without repeating every token twice. L means layer and H means head. Query is the receiving position; source is the position read. In this archived tokenisation, index 8 is it, index 11 is tired and index 12 is the full stop. The full input is The animal didn't cross the street because it was too tired.
+
+Use the diagonal to identify allowed current positions. Cells above it correspond to later sources, which are blocked. Compare how the two displayed heads distribute allowed weight. Changing tired to wide cannot affect the earlier it row when the prefix through it stays identical; a later output can access the adjective.
+
+# Five self-checks with answers
+
+1. Three queries read five source keys. What is the score shape? **Answer:** [3,5]. Value width determines output features.
+2. What is mixed: keys or values? **Answer:** values; keys help determine weights.
+3. May a causal query read its current input? **Answer:** yes, while predicting the following target.
+4. Does no_grad disable dropout? **Answer:** no. Evaluation mode controls dropout; no_grad controls gradient recording.
+5. Can the strongest selected head establish pronoun understanding? **Answer:** no. Disclose selection, inspect other heads and measure controlled changes in outputs.
+
+# Local core and optional model help
+
+The core trains a real transformer with bounded settings; malformed words are useful evidence about its limited budget. It downloads only the 1.1 MB corpus and falls back to bundled text offline. `RUN_PRETRAINED` enables historical BERT/GPT-2 inspection; `RUN_CACHE_BENCHMARK` additionally enables timed generation. `RUN_STRETCH` trains a larger model for longer. State which options ran when reporting results.
+
+Injected `USE_GEMINI=False` and `USE_OPENAI=False` keep the optional API route off. Enable exactly one to select an `ask_model` explanation critique. If both are enabled, `ask_model` asks you to choose one and the local guidance is used instead. The prompt is synthetic, keys are never printed, and the local checklist is used when the helper returns None. Neither API reveals this CharGPT's internal weights or supplies measurement evidence. Gemini free-tier availability varies by region; EEA/UK/Swiss API-client distribution has paid-service conditions.
+
+Verified implementation references (11 October 2026): [PyTorch SDPA](https://docs.pytorch.org/docs/2.11/generated/torch.nn.functional.scaled_dot_product_attention.html), [BERT publisher page](https://huggingface.co/google-bert/bert-base-uncased), and [GPT-2 publisher page](https://huggingface.co/openai-community/gpt2). Both model IDs are historical inspection examples, not recommendations about current market popularity. Begin with the [3Blue1Brown attention video](https://www.youtube.com/watch?v=eMlx5fFNoYc), then verify a numerical row and a code shape yourself.

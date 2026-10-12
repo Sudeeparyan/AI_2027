@@ -42,133 +42,287 @@ coverage:
 slides:
 - type: title
   figure: cover
-  notes: 'Say: Imagine typing a message and seeing a suggested next word. Today we trace how a transformer makes that suggestion.
-    Our lab predicts characters. The cover is an illustrative attention table, not a measured experiment. Analogy: A writing
-    assistant consults the existing sentence. Ask: What helps predict a character after ROMEO and a colon? Answer: The earlier
-    characters. In the play''s layout a speaker name and colon are followed by a new line and that speaker''s words. Common
-    mistake: Treating a plausible continuation as knowledge of facts or understanding of the story.'
+  notes: 'In short: A transformer converts the existing text into predictions, and our small lab makes that route visible.
+
+    Explain: A token is one unit a model reads. Our lab uses characters, while larger models often use word pieces. A transformer
+    exchanges information between allowed token positions. Its vocabulary output gives scores for possible next tokens. Generation
+    uses those scores to extend a prefix.
+
+    Example: After ROMEO and a colon, a play often supplies a new line and dialogue. The model learns patterns rather than an
+    infallible rule. The cover is an illustrative causal attention pattern, not a measurement from the character model or evidence
+    of story understanding.
+
+    Ask: Does one plausible continuation show that the model knows the play’s facts?
+
+    Answer: No. Inspect the actual continuation and evaluate the claim separately.
+
+    Watch out: The local core trains a smaller model on Tiny Shakespeare. Stored results belong to their documented longer
+    GPU experiment.'
 - type: outcomes
-  notes: 'Say: Follow one piece of text through the model and explain each operation. We calculate attention before writing
-    its equation, then implement the same operation in Python. Analogy: Learning an engine begins with following fuel through
-    its parts. Ask: Which outcome is least familiar: vectors, attention or training? Answer: Any choice is useful; note the
-    most common one and spend extra time on it. Common mistake: Thinking that knowing a model''s name means knowing what its
-    inputs and outputs contain. We build understanding one operation at a time.'
+  notes: 'In short: Explain the complete prediction route, then use its shapes and checks to build the same mechanism.
+
+    Explain: A vector is an ordered list of numbers. Attention mixes information from allowed positions. A block combines attention
+    with feature transformations and additions. Training uses known targets to change learned weights. MIMLO means minimum intended
+    module learning outcome.
+
+    Example: Trace three input characters into three vectors before discussing a model name. Then calculate one attention row,
+    check which future positions are blocked, and identify the next-character targets. This connects numerical understanding
+    with the implemented function instead of memorising the architecture’s vocabulary.
+
+    Ask: Which outcome tests whether you can implement attention rather than merely name it?
+
+    Answer: Calculate the mixture and verify the function against its numerical and causal checks.
+
+    Watch out: Tensor axes, position rules and target alignment must remain consistent. Correct shapes alone do not establish
+    useful predictions.'
+  items:
+  - Explain attention's purpose
+  - Trace tokens to vectors
+  - Calculate attention
+  - Explain causal masks
+  - Compare architectures
+  - Train and evaluate a GPT
 - type: course_map
   title: Where we are in the course
   figure: beginner_course_map
-  notes: 'Say: We have met VAEs, GANs and diffusion. This week''s transformer connects many later topics: language models, prompting,
-    adaptation, multimodal systems, deployment, retrieval and agents. Analogy: Today''s station connects several routes on a
-    railway map. Ask: Where have we already seen a model reading a prompt? Answer: Week 1''s SmolLM2 chat lab, and Week 4, where
-    Stable Diffusion''s text encoder read the prompt. Common mistake: Treating a transformer as a chatbot or a complete application.
-    It is an architecture; later weeks combine it with data, tools and software.'
+  notes: 'In short: Transformers connect the earlier generative mechanisms with language, multimodal systems and later applications.
+
+    Explain: A VAE, or variational autoencoder, compresses and rebuilds examples. A GAN trains a generator using a discriminator’s
+    feedback. An LLM, or large language model, predicts token sequences. RAG means retrieval-augmented generation: retrieve
+    evidence before answering. A transformer is an architecture used within many of these systems.
+
+    Example: Week one used a text generator, and diffusion can use a transformer text encoder to represent a prompt. Today explains
+    the vector operations inside such components. Later weeks add training stages, prompting, adaptation, deployment and evidence
+    retrieval; those application roles are broader than one attention layer.
+
+    Ask: Is a transformer itself a complete chatbot application?
+
+    Answer: No. Applications also need data, interfaces, generation rules and checking.
+
+    Watch out: The course map previews topics in order. Explain the abbreviations without importing another module’s outcomes
+    or assessment.'
 - type: discussion
   title: Warm-up
-  icon: fa:FaComments
-  prompt: The animal avoided the street because it was tired. What does "it" refer to? Change "tired" to "wide".
+  prompt: The animal avoided the street because it was tired. Replace tired with wide.
   points:
-  - Which words changed your answer?
-  notes: 'Say: With tired, most readers choose the animal. With wide, they choose the street. Our later model inspection uses
-    a closely related sentence. Analogy: A detective gathers clues from several sentence positions. Ask: Could the representation
-    at it use an adjective that appears later? Answer: In a bidirectional encoder such as BERT, yes. In a causal decoder such
-    as GPT-2, not at the position of it. Common mistake: Reading one attention plot as proof of a coreference decision.'
+  - Predict the referent.
+  - Which position can read the adjective?
+  notes: 'In short: A pronoun example motivates context, while the architecture determines which contextual clues a position
+    may read.
+
+    Explain: Context consists of surrounding information relevant to a token. Coreference concerns which expression a pronoun
+    refers to. A bidirectional encoder can read both sides of the supplied input. A causal decoder reads its current position
+    and earlier positions. Attention weights show information mixtures, rather than an explicit pronoun answer.
+
+    Example: In the animal avoided the street because it was tired, tired suggests the animal. Replacing tired with wide suggests
+    the street. A BERT position at it can access that later adjective. GPT-2’s earlier it position cannot, even though a later
+    prediction can use the completed sentence.
+
+    Ask: Should changing the later adjective change GPT-2’s earlier it representation?
+
+    Answer: No, when its prefix through it remains identical and causality is respected.
+
+    Watch out: An unchanged earlier row is expected information access. It does not demonstrate failure to use a clue at later
+    positions.'
 - type: section
   number: 1
   title: Why transformers?
   question: How can distant words share information?
   icon: fa:FaQuestionCircle
-  notes: 'Say: An early name may matter near the end of a long sentence. Recurrent networks pass a memory state through successive
-    steps. Attention connects allowed positions directly. Analogy: Compare passing a message along a queue with consulting the
-    original speaker. Ask: Which route needs more intermediate steps when the sentence grows? Answer: The recurrent route. Information
-    passes through every state in between, while attention links any two positions directly. Common mistake: Assuming direct
-    access guarantees correct reasoning. The model must still learn useful comparisons and useful information mixtures.'
+  notes: 'In short: Attention gives distant allowed positions a direct route for information exchange instead of a recurrent
+    chain.
+
+    Explain: A recurrent network passes a hidden memory state through successive positions. Long-range dependence means an earlier
+    item matters much later. Intermediate states can lose information or weaken learning signals. Attention compares an allowed
+    source directly with a query. The model still must learn useful comparisons.
+
+    Example: Imagine an early character name influencing a later pronoun. A recurrent route carries the clue through every intervening
+    step. Attention provides a direct source-to-query route. The relay analogy explains path length, but numerical mixing is
+    not a human conversation or a guarantee of correct reasoning.
+
+    Ask: Which route adds more intermediate steps as the sentence grows?
+
+    Answer: The recurrent route between the two positions.
+
+    Watch out: Direct access has computational costs, and a model can ignore information that it is allowed to read.'
 - type: figure
   title: Recurrence vs. attention
   figure: rnn_vs_attention
-  notes: 'Say: Follow the recurrent arrows. Each hidden memory depends on the previous step, limiting parallelisation across
-    time. Information and learning signals can weaken over many steps. LSTMs help with long-term dependencies. Analogy: A recurrent
-    route is a relay; attention gives allowed destinations direct information routes. Ask: Why can transformer training process
-    many known positions together? Answer: The whole training text is known, so with a causal mask every position can be predicted
-    in one pass. Common mistake: Assuming generation is parallel too. Each new token still depends on the tokens generated before
-    it.'
+  notes: 'In short: Known training positions can be processed together, while generating unknown tokens still proceeds through
+    an expanding prefix.
+
+    Explain: Recurrence makes each state depend on the previous state. An LSTM learns mechanisms for retaining and discarding
+    information. Transformer attention removes that recurrent chain from this path. A causal mask prevents future inputs leaking
+    into predictions. It permits many known training positions to be evaluated together.
+
+    Example: For training input cat and targets ats, one masked forward pass predicts all three targets. At generation time,
+    the next unknown character must be selected before the following prediction can use it. The direct-route diagram illustrates
+    connectivity rather than claiming equal runtimes for every sequence-processing method.
+
+    Ask: Does parallel training mean the whole continuation is generated in parallel?
+
+    Answer: No. Each next prediction depends on the current prefix, including earlier generated tokens.
+
+    Watch out: LSTMs can help long-term dependencies. Their existence does not remove the sequential state dependency in the
+    recurrent path.'
 - type: compare
   title: RNN / LSTM vs. transformer
   columns:
-  - head: Recurrent network
-    icon: fa:FaLink
+  - head: Recurrent
     points:
-    - Reads one token at a time and passes a memory vector on
-    - 'Example: by "it", "animal" is five steps back and may have faded'
-    - Each step waits for the one before, even in training
-    - Generates one token at a time
+    - Passes state between positions.
+    - Training steps depend sequentially.
+    - Generation remains sequential.
   - head: Transformer
-    icon: fa:FaNetworkWired
     points:
-    - Each token looks directly at every allowed earlier token
-    - 'Example: "it" can weight "animal" highly in one step'
-    - Training scores all known positions of a text at once
-    - Still generates one token at a time
-  notes: 'Say: RNN means recurrent neural network. An LSTM learns how to keep and forget information. A transformer removes
-    recurrence from this sequence-processing path. Basic attention compares each query with each allowed key. Analogy: Replace
-    a relay with a meeting where participants exchange information. Ask: If token count doubles, how many token pairs are there?
-    Answer: Four times as many, because pairs grow with the square of the count. Common mistake: Answering twice as many. Direct
-    routes bring computational costs as well as benefits.'
+    - Direct allowed-position comparisons.
+    - Known training positions run together.
+    - Generation remains sequential.
+  notes: 'In short: Attention exchanges information directly but full pairwise comparisons grow quadratically with the sequence
+    length.
+
+    Explain: RNN means recurrent neural network. LSTM means long short-term memory, a recurrent design with learned retention
+    gates. A transformer compares queries with allowed keys. Full attention considers each query-source pair. Causal generation
+    remains sequential even when masked training processes positions together.
+
+    Example: Four positions give a four-by-four score table containing sixteen entries. Eight positions give sixty-four entries.
+    Doubling the position count therefore quadruples the table. A meeting analogy describes direct exchange, but does not remove
+    the arithmetic and storage required for all comparisons.
+
+    Ask: If the token count doubles, how does a full score table grow?
+
+    Answer: It has four times as many entries.
+
+    Watch out: The table size is not a measured runtime. Efficient implementations can avoid storing all entries, and restricted
+    attention changes the comparison pattern.'
 - type: section
   number: 2
   title: Tokens, embeddings and position
   question: How does text become a list of vectors?
   icon: fa:FaFont
-  notes: 'Say: Python strings do not enter attention directly. A tokenizer assigns vocabulary IDs. An embedding table converts
-    each ID into a vector, an ordered list of numbers. Position information tells the model where each item occurs. Analogy:
-    A catalogue number selects a record from a table. Ask: Does vocabulary ID seven mean sentence position seven? Answer: No.
-    Token identity and token position are different information, represented separately in our lab. Common mistake: Reading
-    a token''s ID as its place in the sentence.'
+  notes: 'In short: Text becomes token IDs and vectors, with position represented separately from token identity.
+
+    Explain: Tokenisation divides an input into units and assigns vocabulary IDs. An ID selects a row of an embedding table.
+    An embedding is a learned numerical vector. Position information describes where a token occurs. Identity and position answer
+    different questions.
+
+    Example: In a classroom vocabulary, cat might become IDs [1,0,3]. Those numbers identify three characters, regardless of
+    their magnitudes. Width-eight lookup gives [3,8]: three positions and eight features. The real notebook prints its own vocabulary;
+    the invented IDs explain the operation rather than reporting its measured data.
+
+    Ask: Does ID seven mean the token is at sentence position seven?
+
+    Answer: No. The vocabulary ID and the position index are separate.
+
+    Watch out: Lookup vectors are not automatically good whole-document search representations. Search embeddings require suitable
+    training and evaluation.'
 - type: bullets
   title: From text to vectors
-  icon: fa:FaTable
   bullets:
-  - '**Token:** one unit of text; one character in our lab.'
-  - '**ID:** its vocabulary number.'
-  - '**Embedding:** its learned vector.'
-  - 'Three IDs become three vectors: shape [3, 8] for width 8.'
-  notes: 'Say: Use an illustrative three-character prefix, cat. Three positions remain three positions whatever IDs the tokenizer
-    assigns. Looking up width-eight embeddings gives a three-by-eight table. The lab prints its actual vocabulary and uses a
-    wider model. Analogy: Three catalogue numbers select three table rows. Ask: Which axis counts characters, and which counts
-    features? Answer: In shape [3, 8], the first axis counts the three characters and the second counts the eight features.
-    Common mistake: Treating an ID''s numerical size as its meaning. Token lookup vectors are also not automatically good document-search
-    embeddings.'
+  - IDs select learned vectors.
+  - Identity differs from position.
+  notes: 'In short: Embedding lookup preserves the number of positions while replacing each token ID with a feature vector.
+
+    Explain: A token is one represented input unit. Our character model uses one character per token. A feature is one numerical
+    entry in its vector. The embedding table contains one learned vector per vocabulary item. Lookup selects rows without treating
+    ID magnitude as meaning.
+
+    Example: Three IDs for cat become a [3,8] vector table when width is eight. With two examples, its batch shape is [2,3,8].
+    The axes mean examples, positions and features. This catalogue analogy explains lookup, but a learned row is a numerical
+    representation rather than a human dictionary definition.
+
+    Ask: Which axis counts characters in [3,8]?
+
+    Answer: The first axis counts three positions; the second counts eight features.
+
+    Watch out: A vocabulary may use word pieces in another model. Always inspect the actual tokenizer and state what each axis
+    represents.'
+  visual:
+    type: example_strip
+    items:
+    - label: IDs
+      text: cat → three vocabulary IDs
+    - label: Lookup
+      text: Width eight → shape [3,8]
 - type: figure
   title: 'Positional encoding: sinusoidal and rotary'
   figure: positional
-  notes: 'Say: Plain unrestricted self-attention has no built-in coordinates. Shuffling input rows shuffles output rows in the
-    same way. Sinusoidal encoding adds fixed patterns. Our lab learns a vector per position. Rotary encoding rotates query and
-    key feature pairs. Analogy: Give playing cards numbered places on a table. Ask: Is RoPE added to input embeddings like learned
-    absolute positions? Answer: No. It rotates queries and keys inside attention. Common mistake: Assuming a longer context
-    setting works without suitable training and testing.'
+  notes: 'In short: Position information supplies order, but additive positions and rotary query-key transformations enter the
+    model differently.
+
+    Explain: Plain unrestricted self-attention follows a shuffle of input rows with the same shuffle of outputs. This property
+    is permutation equivariance. Sinusoidal positions add fixed patterns to input vectors. Our model adds learned absolute position
+    vectors. RoPE means rotary position embeddings and rotates query-key feature pairs.
+
+    Example: Token [1,0] plus position [0,1] gives positioned input [1,1] in an illustrative addition. RoPE instead rotates
+    comparisons inside attention. Numbered-seat and clock-hand analogies support intuition, but neither describes every learned
+    feature or proves reliable use of a longer context.
+
+    Ask: Is RoPE another position vector added to the token embedding?
+
+    Answer: No. It rotates query and key feature pairs according to position.
+
+    Watch out: Increasing a configured context limit requires suitable positions, training and evaluation. It does not by itself
+    establish reliable memory.'
 - type: section
   number: 3
   title: Attention
   question: How does one token combine information from others?
   icon: fa:FaEye
-  notes: 'Say: Attention makes a new vector at each query position by mixing information from allowed source positions. We compute
-    a small example before introducing notation. Analogy: A librarian matches your request against catalogue entries, then brings
-    relevant contents. Ask: Which part should find sources, and which should carry their information? Answer: Queries and keys
-    find sources, because their match makes the scores. Values carry the information mixed into the output. Common mistake:
-    Treating matching and transferring as one operation.'
+  notes: 'In short: One attention output mixes value information according to how its query matches the allowed keys.
+
+    Explain: A query supplies matching features for a position seeking information. A key supplies matching features for a source.
+    A value carries information into the output mixture. Learned projections create these vectors. The names describe computational
+    roles rather than literal questions or human concepts.
+
+    Example: A library request matches catalogue descriptions, then the books provide contents. Likewise, query-key comparisons
+    determine weights, while values supply what those weights mix. The analogy breaks when it suggests human intention: projections
+    and weighted sums operate on numbers learned through training.
+
+    Ask: Which vectors carry the information that is mixed into the output?
+
+    Answer: Values. Queries and keys determine the matching weights.
+
+    Watch out: Keep the value branch separate from score calculation. A bright weight alone cannot tell you the entire effect
+    on the model’s final prediction.'
 - type: figure
   title: Queries, keys and values
   figure: qkv
-  notes: 'Say: Three learned projections turn an input vector into a query, a key and a value. Queries and keys make scores.
-    The value branch bypasses score calculation and supplies the final mixture. Analogy: A request matches catalogue descriptions;
-    book contents are what you take away. Ask: Do the weights multiply keys or values to form the output? Answer: Values. Common
-    mistake: Reading queries, keys and values as literal questions, keywords or human meanings. They are learned numerical features.'
+  notes: 'In short: Three learned projections create queries, keys and values, and the value branch bypasses the score calculation.
+
+    Explain: A projection is a learned linear transformation of numerical features. The query and key projections produce matching
+    vectors. Their dot products give scores. A row softmax converts scores into weights. The value projection supplies the vectors
+    multiplied by those weights.
+
+    Example: With three positions and two query-key features, Q and K are [3,2], so Q times K-transpose is [3,3]. Values of
+    width two yield a [3,2] output. The catalogue analogy separates matching descriptions from carried contents; the vectors
+    themselves remain learned numerical features.
+
+    Ask: Do the final attention weights multiply keys or values?
+
+    Answer: Values. Keys were used to calculate scores.
+
+    Watch out: Do not connect the value branch into softmax. Its information goes directly to the weighted mixture after the
+    query-key scores determine weights.'
 - type: figure
   title: 'Worked example: three tokens, $d_k = 2$'
   figure: attn_worked
-  notes: 'Say: These are chosen classroom vectors, not trained-model measurements. Follow cat''s row first. Its query is [1,
-    0]. Scaled scores are approximately [0.71, 0, 0.71], producing weights [0.40, 0.20, 0.40]. Analogy: Weights are shares in
-    a recipe. Mixing the shown values gives approximately [0.60, 0.40]. Ask: Why does a zero score get positive weight? Answer:
-    Softmax exponentiates scores, and exp of zero is one. Common mistake: Treating a zero score as blocked. Only a masked score
-    of minus infinity gets zero weight.'
+  notes: 'In short: The supplied three-token example turns one row of dot products into a numerical mixture before introducing
+    compact notation.
+
+    Explain: A dot product multiplies matching vector entries and adds them. Scaling controls the score magnitude. Softmax exponentiates
+    a row and divides by its sum. The resulting weights sum to one. Weighted values produce one output vector per query.
+
+    Example: Cat’s query [1,0] gives scaled scores approximately [0.71,0,0.71]. The supplied weights are approximately [0.40,0.20,0.40].
+    Mixing values [1,0], [0,1] and [0.5,0.5] gives approximately [0.60,0.40]. These are chosen classroom vectors, not trained-word
+    measurements or a claim about linguistic meaning.
+
+    Ask: Why does a zero score receive positive weight?
+
+    Answer: Exponentiating zero gives one, so it remains in the row’s normalisation.
+
+    Watch out: Only a masked negative-infinity score gets zero weight. Keep full precision during calculation and round the
+    displayed result afterwards.'
 - type: equation
   title: Scaled dot-product attention
   eq: \mathrm{Attention}(Q,K,V)=\mathrm{softmax}\left(\frac{QK^{\top}}{\sqrt{d_k}}\right)V
@@ -181,33 +335,67 @@ slides:
     - 'transpose: swap axes'
   - - $d_k$
     - numbers per query/key
-  notes: 'Say: Read inside outward, following the worked example. Q times K transposed compares every query with every key.
-    Divide by the square root of query/key width. Softmax makes row weights; those weights multiply V. Analogy: The equation
-    compresses our four-step recipe. Ask: For three queries and three keys, what is the score-table shape? Answer: Three by
-    three: one score for each query and key pair. Common mistake: Using the feature width as a table dimension. The output width
-    comes from the values.'
+  notes: 'In short: The attention equation compresses comparison, scaling, row normalisation and value mixing into one expression.
+
+    Explain: Q, K and V are query, key and value tables. Transpose swaps K’s final two axes. The key width is the number of
+    features in each query and key. Softmax normalises each source-position row. Multiplication by V produces a vector at each
+    query position.
+
+    Example: For Q and K shaped [3,2], QK-transpose has shape [3,3]. With V shaped [3,5], the output is [3,5]. The score table
+    counts query-source pairs, while the output width comes from values. This extends the previous example without inventing
+    trained-model measurements.
+
+    Ask: What is the score-table shape for three queries and three keys?
+
+    Answer: [3,3], with one entry for every query-key pair.
+
+    Watch out: Do not use feature width as the token-table dimension. Query-key widths must match, but the value width can be
+    different.'
 - type: quiz
   title: Why scale the scores?
-  question: Why divide a dot product by $\sqrt{d_k}$?
+  question: Why divide dot products by $\sqrt{d_k}$?
   options:
-  - To make every attention weight equal
-  - To remove scores for future tokens
-  - To prevent overly extreme softmax weights
-  - To reduce the size of the vocabulary
+  - Force uniform attention weights.
+  - Remove future-position scores.
+  - Control extreme softmax concentration.
+  - Reduce the vocabulary size.
   answer: 2
-  notes: 'Say: Answer C. With independent, mean-zero, unit-variance entries, dot-product variance grows with d_k, the query/key
-    width. Width sixty-four gives standard deviation eight. Dividing by eight controls score scale and can prevent weak softmax
-    gradients. Analogy: Reduce volume before a sensitive amplifier. Ask: Which separate operation removes future positions?
-    Answer: The causal mask. Common mistake: Thinking scaling masks the future or forces uniform weights. Learned comparisons
-    can still produce strong preferences.'
+  notes: 'In short: Scaling controls the dot-product spread so softmax need not become excessively concentrated solely because
+    vectors are wider.
+
+    Explain: For independent, mean-zero, unit-variance entries, dot-product variance grows with query-key width. Its standard
+    deviation therefore grows with the square root of that width. Dividing by the square root controls scale. It does not remove
+    future positions. A causal mask performs that separate operation.
+
+    Example: At width sixty-four, the illustrative standard deviation is eight. Dividing scores by eight counteracts this width
+    effect. Reducing volume before a sensitive amplifier is a useful analogy, but learned vectors need not satisfy the assumed
+    random-entry conditions or produce uniform weights.
+
+    Ask: Which option states the purpose of scaling?
+
+    Answer: C: prevent overly extreme softmax weights.
+
+    Watch out: A confuses scale control with uniform weighting, B describes masking, and D concerns vocabulary size. Score preferences
+    can remain strong after scaling.'
 - type: figure
   title: 'Multi-head attention: several views at once'
   figure: multihead
-  notes: 'Say: Each head learns its own query, key and value projections in a smaller feature space. Join the head outputs,
-    then mix them with an output projection. Width thirty-two with four heads means eight features per head. Analogy: Readers
-    examine a passage through different lenses. Ask: What width returns after joining four eight-feature outputs? Answer: Thirty-two.
-    Common mistake: Answering one hundred and twenty-eight, or giving each head a tidy human job. Real heads can have mixed
-    roles.'
+  notes: 'In short: Multiple heads learn several smaller information mixtures before their outputs are joined and projected.
+
+    Explain: Each head has its own learned query, key and value projections. Its feature width is smaller than the model width.
+    Concatenation joins outputs along the feature axis. The output projection mixes their joined features. Heads need not learn
+    distinct human-recognisable jobs.
+
+    Example: Model width thirty-two split across four heads gives eight features per head. Four [T,8] outputs join into [T,32],
+    rather than [T,128]. Different-reader lenses suggest multiple learned views, but no programmer assigns one head exclusively
+    to grammar or another exclusively to names.
+
+    Ask: What width returns after joining four eight-feature head outputs?
+
+    Answer: Thirty-two. The output projection returns the model-width representation.
+
+    Watch out: Heads and layers are different axes. Naively stored attention tables grow with head count even when total model
+    width remains fixed.'
 - type: equation
   title: Multi-head attention, formally
   eq:
@@ -222,287 +410,552 @@ slides:
     - head index / count
   - - W
     - learned projection; subscript names its role
-  notes: 'Say: X is the input table. Superscript i identifies a head. W with Q, K or V names its learned projection. Concat
-    joins features; W_O mixes joined outputs. Analogy: Join specialists'' short reports, then edit one report of the original
-    width. Ask: Does a head index identify a layer? Answer: No. Heads and layers are different axes; every layer has its own
-    set of heads. Common mistake: Assuming more heads means much more matrix work. At a fixed model width the main matrix-product
-    work stays similar, while stored score-table memory grows with head count.'
+  notes: 'In short: Multi-head notation names each projection and shows the concatenation followed by the output projection.
+
+    Explain: X is the input-vector table. The superscript identifies the head, while h counts heads. Query, key and value matrices
+    are learned projections. Concat joins head features. The output matrix mixes the joined representation. Each layer owns
+    its own projection parameters.
+
+    Example: An input [2,10,32] with four heads becomes [2,4,10,8] for attention. Joining the outputs restores [2,10,32]. The
+    notation describes the same reshape and transpose route implemented in the notebook, not four full-width networks each producing
+    an extra thirty-two features.
+
+    Ask: Does the head index identify a transformer layer?
+
+    Answer: No. A layer contains its own set of heads.
+
+    Watch out: At fixed total width, main matrix-product work stays similar; score-table storage still depends on head count.
+    More heads do not guarantee better interpretations or predictions.'
 - type: figure
   title: 'Causal masking: no peeking at the future'
   figure: causal_mask
-  notes: 'Say: At position t, the model reads that input and earlier inputs. Its training target is position t plus one. Later-position
-    scores become negative infinity before softmax, giving zero future weights. Analogy: Cover tomorrow''s answers while practising
-    today''s prediction. Ask: For input cat and target ats, what may c see? Answer: Only c, not a or t. Common mistake: Blocking
-    the diagonal. The current input stays allowed because it helps predict the following token.'
+  notes: 'In short: The causal mask blocks later input positions while allowing the current input to predict its following target.
+
+    Explain: A causal rule restricts information to the present and past. The diagonal represents each input reading itself.
+    Future columns sit above the diagonal. Masked scores become negative infinity before softmax. Their exponential is zero,
+    producing zero future weight.
+
+    Example: From cats, use inputs cat and targets ats. The c position predicts a using only c. The a position may use c and
+    a to predict t. Covering future answers explains training without leakage, but does not mean the diagonal must be covered
+    too.
+
+    Ask: Which inputs may the first c position read?
+
+    Answer: Only c. The a and t inputs are future positions for that query.
+
+    Watch out: Targets are shifted, but shifting alone does not prevent later inputs leaking into predictions. Keep the causal
+    mask and the current diagonal allowed.'
 - type: compare
   title: Self-attention vs. cross-attention
   columns:
   - head: Self-attention
-    icon: fa:FaSyncAlt
     points:
-    - Queries, keys and values come from the same sequence
-    - Each word gathers context from its own sentence
-    - 'Example: "it" reads "animal" in the same sentence'
-    - Used in every encoder and decoder block
+    - 'Q/K/V: same sequence.'
+    - 'Scores: [T,T].'
+    - 'Example: sentence context.'
   - head: Cross-attention
-    icon: fa:FaExchangeAlt
     points:
-    - Queries come from one sequence; keys and values from another
-    - The output side reads the input side
-    - 'Example: while writing French, the decoder reads the English source'
-    - Stable Diffusion's image features read the prompt this way (week 4)
-  notes: 'Say: Self-attention compares positions within one sequence. Cross-attention reads another sequence through the same
-    calculation. Three translated-token queries and five source-token keys produce a three-by-five score table. Analogy: One
-    group consults a second group''s notes. Ask: Where do translation-decoder queries come from? Answer: From decoder states.
-    The encoded source states supply keys and values. Common mistake: Expecting a square score table. Cross-attention compares
-    target positions with source positions, so the lengths can differ. Diffusion image features can similarly read prompt vectors.'
+    - 'Q: target; K/V: source.'
+    - 'Scores: [T,S].'
+    - 'Example: translation or prompt-reading.'
+  notes: 'In short: Cross-attention uses queries from one sequence to read keys and values supplied by a different sequence.
+
+    Explain: Self-attention creates queries, keys and values from the same sequence. Cross-attention takes queries from one
+    sequence and key-value information from another. Encoded source states can supply that information to a translation decoder.
+    The score table need not be square. Diffusion can similarly connect image and prompt representations.
+
+    Example: Three translated-token queries and five source-token keys produce a [3,5] score table. The weighted source values
+    produce three output vectors. One group consulting another group’s notes describes the roles, but the actual transfer remains
+    a numerical mixture of learned representations.
+
+    Ask: Where do translation-decoder queries come from?
+
+    Answer: Decoder states; encoded source states provide the keys and values.
+
+    Watch out: Do not assume self-attention’s equal lengths in a cross-attention implementation. Match key and value source
+    positions while retaining the separate query length.'
 - type: figure
   title: 'A real BERT head: inspecting ''it'''
   figure: bert_summary
-  notes: 'Say: This summary uses measured attention from pretrained BERT, separate from our character model. The selected head,
-    layer {{w05_bert_layer}}, head {{w05_bert_head}}, gives animal weight {{w05_attention_weight}} from the query at it. It
-    is the strongest of all 144 heads, chosen with the same rule as lab TODO 5. Analogy: A highlighted route shows a connection,
-    not the whole journey''s purpose. Ask: Would the strongest head represent every head fairly? Answer: No. Inspect the full
-    matrices and the distribution across heads. Common mistake: Treating a bright cell as proof of a coreference decision.'
+  notes: 'In short: The archived BERT summary displays a deliberately selected head, rather than proving that the model resolved
+    the pronoun.
+
+    Explain: BERT is a bidirectional encoder with pretrained weights. An attention cell is one head’s mixing weight for one
+    input. Selecting the largest cell creates selected evidence. Other heads can behave differently. The character model and
+    the pretrained inspection model are separate systems.
+
+    Example: The archived rule selects layer {{w05_bert_layer}}, head {{w05_bert_head}}, with it-to-animal weight {{w05_attention_weight}}.
+    Inspect the full matrix and the across-head distribution before judging representativeness. The route analogy shows a connection,
+    but neither the largest cell nor the summary establishes a tested coreference decision.
+
+    Ask: Does the strongest selected head represent every head fairly?
+
+    Answer: No. Disclose the selection and inspect the wider distribution.
+
+    Watch out: Values, residual paths and other layers affect the output. The shorter local character training does not reproduce
+    BERT’s archived attention measurements.'
 - type: figure
   title: 'Measured GPT-2 heads: no weight on later tokens'
   figure: gpt2_causal_summary
-  notes: 'Say: These are measured weights from pretrained GPT-2 for our sentence. Each row is one current token; each column
-    is a token it may read. Everything above the diagonal is a later token, and its measured weight is exactly zero in all 144
-    heads. The two heads still behave differently: the left head spreads weight over several earlier tokens, while the right
-    head reads the previous token. At it, later tired or wide is blocked, so changing that adjective leaves the earlier it row
-    unchanged. Analogy: A reader stopped halfway has not seen the final clue. Ask: Where could we test use of that adjective?
-    Answer: At a later position, or in the prediction after the complete sentence. Common mistake: Reading unchanged earlier
-    attention as proof that full-sentence reasoning failed.'
+  notes: 'In short: Archived GPT-2 attention obeys the causal boundary, so a later adjective cannot change an earlier unchanged-prefix
+    row.
+
+    Explain: GPT-2 is a causal decoder with pretrained weights. A query row shows which source positions contribute within one
+    head. Positions above the diagonal are later than that query. The causal rule blocks those positions. Heads can still distribute
+    allowed weights differently.
+
+    Example: The stored example compares a spreading head with a previous-token-focused head. At it, tired or wide appears later
+    and is blocked. Therefore the earlier row remains unchanged when the prefix through it is identical. Test adjective use
+    at a later position or after the complete sentence instead.
+
+    Ask: Where could we test whether the final adjective affects a prediction?
+
+    Answer: At a later output that is allowed to read that adjective.
+
+    Watch out: The stored mask evidence is not a pronoun-resolution test. Historical measurements stay separate from optional
+    new inspection runs and the local character core.'
 - type: quiz
-  question: 'Scaled scores [2, 0, 0]: which weights does softmax produce?'
+  question: 'Scaled scores [2,0,0]: softmax weights?'
   options:
-  - '[1.00, 0.00, 0.00]'
-  - '[0.67, 0.17, 0.17]'
-  - '[0.50, 0.25, 0.25]'
-  - '[0.79, 0.11, 0.11]'
+  - '[1.00,0.00,0.00]'
+  - '[0.67,0.17,0.17]'
+  - '[0.50,0.25,0.25]'
+  - '[0.79,0.11,0.11]'
   answer: 3
-  notes: 'Say: Answer D. Exponentiating gives approximately 7.39, one and one. Divide by their sum, approximately 9.39. The
-    weights are approximately 0.79, 0.11 and 0.11. Rounded entries can total 1.01 although unrounded weights total one. Analogy:
-    Convert positive amounts into shares of their total. Ask: Why is answer A too extreme? Answer: A puts all the weight on
-    the largest score, like a hard maximum. Softmax turns each zero score into exp of zero, which is one, so each keeps about
-    0.11. Common mistake: Dividing the original scores by their sum, which skips the exponentiation and also gives answer A.'
+  notes: 'In short: Softmax converts exponentiated scores into row shares, leaving a positive share for each finite zero score.
+
+    Explain: Exponentiation makes each finite score positive. Row normalisation divides those values by their sum. Softmax is
+    a smooth weighting operation rather than a hard maximum. Unrounded entries sum to one. Displayed rounded entries can sum
+    slightly above or below one.
+
+    Example: For supplied scaled scores [2,0,0], exponentials are approximately [7.39,1,1]. Their sum is approximately 9.39,
+    giving approximately [0.79,0.11,0.11]. These are illustrative arithmetic values. The rounding explains an apparent displayed
+    total of 1.01 without changing the underlying normalised row.
+
+    Ask: Which option matches the calculation?
+
+    Answer: D. The zero scores each retain about 0.11, rather than becoming blocked.
+
+    Watch out: Do not divide raw scores by their sum. Answer A is a hard maximum, and masking requires a separate negative-infinity
+    score before normalisation.'
 - type: section
   number: 4
   title: The transformer architecture
   question: What happens around the attention operation?
   icon: fa:FaCubes
-  notes: 'Say: Attention is one operation inside a block. A complete block also transforms features at each position and preserves
-    an input route. We follow these operations before comparing complete architectures. Analogy: A workshop combines group discussion
-    with individual revision. Ask: Which stage exchanges information between positions? Answer: Attention. Common mistake: Thinking
-    the feed-forward network mixes positions. It acts on each position separately, and within one layer the same feed-forward
-    weights are used at every position.'
+  notes: 'In short: A transformer block exchanges information between positions and then transforms each position’s features.
+
+    Explain: Attention performs the exchange between allowed positions. A feed-forward network changes features separately at
+    each position. Within one layer, its weights are shared across positions. Residual addition preserves an input route. Normalisation
+    adjusts feature scale around these sublayers.
+
+    Example: Imagine group discussion followed by individual revision. The analogy separates information exchange from per-position
+    processing. A position’s feed-forward network receives its contextual vector rather than reading other positions directly.
+    Each new layer can then exchange information again using its own learned parameters.
+
+    Ask: Which stage directly mixes information across positions?
+
+    Answer: Attention. The feed-forward network acts separately at each position.
+
+    Watch out: The same block structure does not mean every layer shares weights. Also distinguish feature-axis transformations
+    from token-axis information exchange when reading a diagram.'
 - type: figure
   title: Inside one transformer block
   figure: block
-  notes: 'Say: This is our lab''s pre-norm block. Normalise features, apply attention, then add the unchanged
-    input. Next normalise, apply a per-position feed-forward network and add its input. Shapes return to the original
-    width. Analogy: Each stage proposes a correction while preserving the earlier draft. Ask: Add correction [0.3,
-    −0.1] to input [1, 2]. Answer: [1.3, 1.9]. Common mistake: thinking a residual concatenates
-    vectors or updates weights; it adds them.'
+  notes: 'In short: The pre-norm block adds each learned correction back to its matching input representation.
+
+    Explain: Pre-norm applies layer normalisation before a sublayer. Attention supplies one correction, and the feed-forward
+    network supplies another. A residual adds matching entries rather than joining feature lists. Shapes return to the model
+    width. Layer normalisation itself has learned scale and shift.
+
+    Example: Input [1,2] plus correction [0.3,−0.1] produces [1.3,1.9]. That two-number example explains addition without claiming
+    a measured activation. The lab normalises, attends and adds, then normalises, transforms and adds. Its feed-forward network
+    expands features internally before returning to the original width.
+
+    Ask: Does a residual concatenate [1,2] and [0.3,−0.1]?
+
+    Answer: No. It adds entries to produce [1.3,1.9].
+
+    Watch out: Residual addition does not update weights. Training’s optimiser is separate, and the original transformer’s post-norm
+    ordering differs from this pre-norm example.'
 - type: figure
   title: Three families of transformers
   figure: three_archs
-  notes: 'Say: Read each row from left to right. Encoder-only BERT reads both sides of the supplied input. Decoder-only GPT-2
-    uses causal self-attention, and the dashed loop shows generation repeating with the longer prefix. Encoder-decoder T5 encodes
-    a source, then generates an output using cross-attention. Analogy: An encoder annotates a document; a decoder continues
-    it; an encoder-decoder transforms a source into a new document. Ask: Which standard family predicts a missing token from
-    both neighbours? Answer: The encoder family, such as BERT. Common mistake: Using a standard BERT encoder as a chat generator.
-    Family names describe information access, not guaranteed task quality.'
+  notes: 'In short: The three standard architecture families differ in information access and the role of their outputs.
+
+    Explain: An encoder can read both sides of the supplied input. A decoder uses causal self-attention for continuation. An
+    encoder-decoder first represents a source. Its decoder uses causal and cross-attention to generate an output. Family names
+    describe access patterns rather than guaranteed task quality.
+
+    Example: BERT can predict a masked word using its neighbours. GPT-2 extends a prefix one token at a time. T5 can transform
+    an encoded source into generated text. The decoder’s dashed loop represents repeating with an extended prefix; it does not
+    mean training updates occur during generation.
+
+    Ask: Which standard family predicts a missing token from both neighbours?
+
+    Answer: An encoder family such as BERT.
+
+    Watch out: A standard BERT encoder is not a chat generator. Architecture guidance helps choose a mechanism, while actual
+    task quality still requires suitable training and evaluation.'
 - type: figure
   title: Choose an architecture for the job
   figure: architecture_comparison
-  notes: 'Say: Choose using required inputs and outputs. Complete-sentence classification suits an encoder. Extending a prefix
-    suits a decoder. Mapping a source into a generated sequence suits an encoder-decoder. Modern decoders also perform many
-    source-to-output tasks through prompting. Analogy: Choose a tool by the job before its brand. Ask: Can search and answer
-    generation use different models? Answer: Yes. Applications can combine an embedding model for search with a decoder for
-    answers. Common mistake: Treating architecture guidance as an exclusive task rule.'
+  notes: 'In short: Choose an architecture by required inputs, outputs and information access before choosing a model name.
+
+    Explain: Complete-input classification naturally suits an encoder. Prefix continuation naturally suits a decoder. Source-to-output
+    generation naturally suits an encoder-decoder. Prompted decoders can also perform translation and other mapping tasks. These
+    are useful tendencies rather than exclusive restrictions.
+
+    Example: Document search can use a trained text-embedding model, while answer generation uses a separate decoder. A tool
+    analogy explains choosing functions by the job, but model-family labels alone do not establish effective search similarity
+    or faithful answers. Inspect the exact representations and generated outputs.
+
+    Ask: Can search and answer generation use different models?
+
+    Answer: Yes. The application can combine models with distinct roles.
+
+    Watch out: Token lookup embeddings are not automatically useful document-search vectors. Train or select appropriate text
+    embeddings, and evaluate retrieval and generation separately before accepting the combined system.'
 - type: quiz
-  question: Which combination fits document search plus generated answers?
+  question: Document search plus generated answers needs?
   options:
-  - Trained text embeddings; generating decoder
-  - Decoder search; BERT chat
-  - BERT alone for everything
-  - Only encoder-decoders use attention
+  - Trained text embeddings; generating decoder.
+  - Generating decoder; standard BERT chat.
+  - Standard BERT encoder for both roles.
+  - Encoder-decoder attention as the only option.
   answer: 0
-  notes: 'Say: Answer A. A trained text-embedding model makes queries and documents comparable for search. A generating decoder
-    then writes using the retrieved material. We build this combination in week twelve. Analogy: A librarian finds books before
-    a writer composes an answer. Ask: Why does trained matter for the search component? Answer: Search needs vectors trained
-    so that related queries and documents land close together. Arbitrary token lookup vectors do not do this. Common mistake:
-    Answer D. All three transformer families use attention.'
+  notes: 'In short: Search needs trained comparable text representations, while answer generation needs an appropriate generating
+    model.
+
+    Explain: A text embedding represents a query or document as a vector. Search compares those vectors. A generating decoder
+    writes a token sequence. Retrieval can provide evidence before generation. A token lookup table serves a different representation
+    task from trained whole-text search.
+
+    Example: A librarian finds relevant books before a writer composes an answer. The numerical system similarly retrieves passages
+    using comparable text embeddings, then supplies evidence to a decoder. This role distinction previews week twelve; it does
+    not guarantee that retrieval found the required fact or that the answer used it correctly.
+
+    Ask: Which option fits document search plus generated answers?
+
+    Answer: A: trained text embeddings for search, followed by a generating decoder.
+
+    Watch out: D wrongly restricts the application to encoder–decoder attention; separate search and generation models also
+    work. B and C treat a standard BERT encoder as a chat generator without the required generation design.'
 - type: code
   title: Attention in PyTorch (what you write in the lab)
-  code: "def attention(q, k, v, causal=False):\n    scores = q @ k.transpose(-2, -1) / q.size(-1)**0.5\n    if\
-    \ causal:\n        n = q.size(-2)\n        blocked = torch.ones(n, n, dtype=torch.bool,\n                \
-    \             device=q.device).triu(1)\n        scores = scores.masked_fill(blocked, float(\"-inf\"))\n  \
-    \  weights = scores.softmax(dim=-1)\n    return weights @ v, weights"
-  notes: 'Say: This compact example matches the calculation in the lab, which passes an explicit blocked-position mask. Keep
-    the mask on q''s device for GPU tensors. Row softmax runs over source positions. Analogy: Each line implements a step in
-    our recipe. Ask: Does True mean blocked in PyTorch''s built-in scaled_dot_product_attention? Answer: No. Our custom mask
-    uses True for blocked; SDPA uses True for allowed. Common mistake: Passing the custom mask to SDPA unchanged. Use is_causal=True
-    or invert the boolean mask.'
+  code: 'scores = q @ k.transpose(-2, -1) / math.sqrt(d_k)
+
+    scores = scores.masked_fill(blocked, float("-inf"))
+
+    weights = scores.softmax(dim=-1)
+
+    return weights @ v, weights'
+  notes: 'In short: The custom function implements the same attention recipe while its Boolean mask convention differs from
+    PyTorch SDPA.
+
+    Explain: The dot product compares query and key vectors. Scaling divides by the square root of key width. A blocked mask
+    replaces future scores with negative infinity. Row softmax normalises over source positions. Multiplication by values returns
+    the mixture and the attention table.
+
+    Example: Our custom mask uses True to mean blocked. PyTorch scaled_dot_product_attention uses True to mean allowed. An otherwise
+    correctly shaped [T,T] mask can therefore reverse access if passed unchanged. Keep the mask on the query tensor’s device,
+    or use the built-in causal option where appropriate.
+
+    Ask: Does True mean blocked in the built-in scaled-dot-product attention API?
+
+    Answer: No. Its Boolean True means allowed; invert the custom mask or use its causal option.
+
+    Watch out: Do not assume all PyTorch masking interfaces use one convention. Also set attention dropout explicitly to zero
+    when evaluating an interface with a dropout argument.'
+  caption: Custom True blocks; SDPA True allows.
 - type: section
   number: 5
   title: Training, efficiency and applications
   question: How does the model learn, and what costs time or memory?
   icon: fa:FaTachometerAlt
-  notes: 'Say: Training compares model scores with known targets, then changes learned parameters to reduce prediction error.
-    Inference uses learned parameters without that update. We then consider uncertainty, memory costs and non-text inputs. Analogy:
-    Practice changes a musician''s skill; a performance uses the skill already learned. Ask: Does generating a new character
-    update our model''s weights? Answer: No. Sampling extends the prefix; only the optimizer updates parameters. Common mistake:
-    Mixing up the sampling loop and the training loop. They have different purposes.'
+  notes: 'In short: Training changes learned weights using known prediction targets, while inference uses those weights to produce
+    outputs.
+
+    Explain: A target is a known answer used to score a prediction. Cross-entropy penalises low probability for that answer.
+    Backpropagation calculates gradients of the loss. An optimiser uses gradients to change registered parameters. Inference
+    produces outputs without that training update.
+
+    Example: A musician’s practice changes skill, while a performance uses the learned skill. In our model, get_batch shifts
+    text to make next-character targets. Generation instead appends sampled characters to its prefix. The analogy distinguishes
+    updates from use, rather than attributing human understanding to the model.
+
+    Ask: Does generating a new character update the model’s weights?
+
+    Answer: No. Its sampling loop changes the prefix, while the training optimiser changes weights.
+
+    Watch out: Evaluation mode controls dropout, and no_grad controls gradient recording. They have separate purposes and neither
+    is a substitute for correct target alignment.'
 - type: compare
   title: Training objectives
   columns:
   - head: 'Masked: BERT'
-    icon: fa:FaMask
     points:
-    - Hide about 15% of tokens; predict them from both sides
-    - 'Input: The [MASK] sat on the mat'
-    - 'Target: cat'
-    - Suits search and labelling
+    - Selected tokens use both sides.
+    - The [MASK] sat → cat.
   - head: 'Next token: GPT'
-    icon: fa:FaArrowRight
     points:
-    - Predict each token from the ones before it
-    - 'Text: "cats"'
-    - 'Inputs: c, a, t'
-    - 'Targets: a, t, s'
-    - Suits generation, as in our lab
-  - head: 'Missing spans: T5'
-    icon: fa:FaExchangeAlt
+    - Allowed prefix predicts next.
+    - cat → ats from cats.
+  - head: 'Spans: T5'
     points:
-    - Replace word spans with a marker
-    - 'Input: The <X> on the mat'
-    - 'Target: <X> cat sat'
-    - The decoder writes the hidden words
-  notes: 'Say: Targets come from text itself, called self-supervised learning. BERT predicts selected tokens using both sides.
-    Our character decoder predicts the next character at every allowed position. T5 reconstructs missing spans. Analogy: Make
-    exercises from a finished worksheet by hiding different parts. Ask: In cats, what target belongs to input c? Answer: a.
-    Common mistake: Thinking shifted targets make the mask unnecessary. The causal mask must still block later inputs.'
+    - Remove spans; generate missing content.
+    - Marker → cat sat.
+  notes: 'In short: Self-supervised objectives make known targets from text itself, using different visibility rules and reconstruction
+    tasks.
+
+    Explain: Self-supervised means the data supplies its own training targets. BERT predicts selected tokens using both sides
+    of the input. A causal decoder predicts each next token from its allowed prefix. T5 reconstructs removed spans. Each objective
+    defines a different prediction task.
+
+    Example: From cats, the character decoder receives cat with targets ats. The input c predicts a. A BERT example may hide
+    cat in The cat sat, while T5 removes a span and generates its marked missing content. These supplied examples explain targets
+    without reporting a trained outcome.
+
+    Ask: Which target belongs to the input c in cats?
+
+    Answer: The next character a.
+
+    Watch out: Shifted targets do not remove the need for a causal mask. In BERT’s original selection recipe, not every selected
+    token is replaced by a mask symbol.'
 - type: bullets
   title: 'Perplexity: read the model''s uncertainty'
-  icon: fa:FaCalculator
   bullets:
-  - Test on text kept separate from training.
-  - 'Illustration: average loss = ln(4); perplexity = 4.'
-  - Think of four equally likely choices.
-  - Compare the same text and tokenizer.
-  - Lower perplexity does not prove truthfulness.
-  notes: 'Say: Perplexity is exp of average negative log-probability on separate test text. Ln of four is a classroom illustration,
-    not our measured loss. Its uncertainty equals four equally likely choices, rather than exactly four candidates everywhere.
-    Analogy: Summarise how surprising actual text was to a predictor. Ask: Can character and subword perplexities be compared
-    directly? Answer: No. Tokenization changes the prediction task. Common mistake: Applying ordinary causal perplexity to masked
-    BERT, or reading low perplexity as proof that answers are correct.'
+  - Score separate text with the same tokenizer.
+  - Lower uncertainty does not prove truth.
+  notes: 'In short: Perplexity summarises held-out prediction uncertainty for a specified tokenizer and evaluation procedure.
+
+    Explain: Negative log-probability measures surprise at the known target. Average cross-entropy uses that surprise across
+    examples. Perplexity is the exponential of this average when using natural logarithms. It can be interpreted as equivalent
+    uniform-choice uncertainty. It does not measure factual correctness.
+
+    Example: Illustrative average loss ln(4) gives perplexity four. This does not mean every position has exactly four candidate
+    tokens. A character tokenizer and a word-piece tokenizer define different prediction units, so their raw perplexities cannot
+    be directly compared even on similar writing.
+
+    Ask: Can character and word-piece perplexities be compared directly?
+
+    Answer: No. Keep tokenizer, held-out text and scoring procedure consistent, or define a common normalised measure.
+
+    Watch out: Ordinary causal perplexity is not the same task as masked BERT scoring. Freeze choices before a final test rather
+    than selecting settings on that test.'
+  visual:
+    type: example_strip
+    items:
+    - label: Illustrative loss
+      text: Average loss = ln(4).
+    - label: Perplexity
+      text: exp(ln(4)) = four equivalent choices.
 - type: figure
   title: A real small transformer, trained for this lecture
   figure: chargpt_loss
-  notes: 'Say: These values come from the stored measured experiment. Tiny Shakespeare is a small collection of Shakespeare
-    text. The curve scores separate-text character predictions, not factual understanding. Your run may differ. Analogy: A learner
-    recognises spelling and dialogue patterns while practising a narrow writing exercise. Ask: What would show whether generated
-    dialogue maintains a coherent story? Answer: Reading actual samples and noting where they succeed and fail. Lower loss alone
-    cannot show this. Common mistake: Assuming fluent samples mean understanding.'
+  notes: 'In short: The archived character-model curve measures separate-text prediction error in its documented longer experiment.
+
+    Explain: Tiny Shakespeare is a collection of Shakespeare text. Validation estimates prediction error on a separate portion.
+    A lower loss means improved predictability under that procedure. It does not directly measure coherent storytelling. The
+    current CPU core uses the same text with a smaller model and training budget.
+
+    Example: Stored measurements and samples document the longer model’s parameters, updates and device through fill placeholders
+    in the Word notes. Read actual spelling, dialogue labels and malformed fragments rather than claiming guaranteed fluency.
+    Today’s small CPU model may learn limited patterns while producing substantial nonsense.
+
+    Ask: What evidence would help evaluate whether generated dialogue maintains a coherent story?
+
+    Answer: Inspect actual continuations using a stated coherence criterion; loss alone cannot establish it.
+
+    Watch out: Keep archived and current results distinct. Repeated validation observations can guide development, but they
+    should not become an untouched final-test claim.'
 - type: figure
   title: The cost of attention grows as n squared
   figure: complexity
-  notes: 'Say: Full attention makes n squared comparisons for n positions. This plot shows theoretical one-head score-table
-    memory, not a runtime benchmark. FlashAttention avoids storing the entire table. Restricted attention changes which positions
-    interact. Analogy: Doubling a square''s side quadruples its area. Ask: Does avoiding storage remove all quadratic arithmetic?
-    Answer: No. FlashAttention still computes every score; it only avoids storing the whole table. Common mistake: Assuming
-    more available context guarantees reliable use. Grouped-query attention reduces KV storage and sliding windows restrict
-    comparisons, but long context also needs suitable positions, training and evaluation.'
+  notes: 'In short: Full attention has quadratic pairwise work, while efficient implementations can avoid storing the complete
+    score table.
+
+    Explain: For n positions, full scores have n-by-n entries. FlashAttention calculates exact attention in tiles. It avoids
+    writing the entire table to memory. Restricted attention changes which comparisons occur. Grouped-query attention shares
+    key-value heads to reduce their storage.
+
+    Example: Doubling sequence length quadruples one full score table. The plotted example assumes one head and two bytes per
+    score; it is theoretical arithmetic, not a device runtime measurement. A square-area analogy explains the growth but omits
+    other tensors, implementation choices and hardware effects.
+
+    Ask: Does FlashAttention eliminate all quadratic score arithmetic?
+
+    Answer: No. It still calculates full attention scores, while saving storage and memory traffic.
+
+    Watch out: Long context requires appropriate positions, training and evaluation. Available capacity does not guarantee reliable
+    use of every distant detail, and sliding windows restrict access.'
 - type: figure
   title: 'Faster generation: the KV cache'
   figure: kv_cache
-  notes: 'Say: Each layer stores keys and values for processed tokens. The newest known token supplies a query and new keys
-    and values. Its query reads cached and current information to predict the next token. Analogy: Keep earlier calculations
-    on a scratchpad. Ask: Does caching change the model''s learned task? Answer: No. It saves repeated work and consumes memory.
-    Common mistake: Expecting our CharGPT to use a cache. It recomputes its context; the optional GPT-2 experiment measures
-    caching separately, and timing depends on hardware.'
+  notes: 'In short: A key-value cache reuses earlier token representations during generation while the latest known token supplies
+    the current query.
+
+    Explain: KV means key and value. Each layer can store these representations for processed tokens. The newest known token
+    produces its query and new key-value entries. Its query reads earlier cached and current information. Caching uses memory
+    to avoid repeated computation.
+
+    Example: After The cat is known, sat is the latest known token for the next prediction. Its query reads stored The and cat
+    representations plus its own new entries. The unknown next token cannot supply a query. Our small CharGPT recomputes its
+    context; optional GPT-2 timing compares cache settings separately.
+
+    Ask: Does caching change the learned prediction task?
+
+    Answer: No. It changes reuse of intermediate calculations while retaining the causal task.
+
+    Watch out: Timings need the same prompt, token count, selection rule and device, with warm-up and synchronisation. Do not
+    promise a fixed speed-up from a schematic.'
 - type: figure
   title: 'Mixture-of-experts: run a few networks per token'
   figure: moe
-  notes: 'Say: A mixture-of-experts layer offers several feed-forward networks. A learned router selects a few for each token
-    vector. Routing weights combine their outputs. More total parameters need not all run for one token. Analogy: Send a case
-    to selected specialists. Ask: Do expert names guarantee recognisable human specialties? Answer: No. Roles are learned during
-    training. Common mistake: Assuming more parameters come with free computation. Every expert''s weights need storage, and
-    routing and moving them can add cost.'
+  notes: 'In short: A mixture-of-experts routes each token to selected feed-forward networks and combines their outputs.
+
+    Explain: An expert is one learned network within the layer. A router scores which experts to use. Routing weights combine
+    the selected outputs. Only selected networks run for a token. All expert weights still require storage somewhere in the
+    system.
+
+    Example: An illustrative router selects two experts for one token vector, then adds their weighted results. Sending a case
+    to specialists suggests selective work, but their learned functions need not match recognisable human specialties. Total
+    parameter count can exceed active parameters without making routing or weight movement free.
+
+    Ask: Do expert names guarantee distinct human specialisms?
+
+    Answer: No. Their roles are learned and can be mixed or unclear.
+
+    Watch out: Report storage, routing and movement costs as well as active work. Published model-size examples in Word are
+    specifications, not measurements of this lab’s CPU model.'
 - type: figure
   title: 'Beyond text: images and speech'
   figure: vit_patches
-  notes: 'Say: A Vision Transformer embeds image patches into vectors with position information. Whisper encodes audio spectrogram
-    features, then generates transcript text with a decoder. Analogy: Cut a picture into numbered tiles, then exchange information
-    between tile representations. Ask: Are patches words, or do they share a useful vector-sequence interface? Answer: They
-    are not words, but like tokens they become a sequence of vectors that the same transformer operations can process. Common
-    mistake: Assuming each modality needs a different architecture. Diffusion transformers likewise process image-latent patches,
-    and transformers also handle code and time series.'
+  notes: 'In short: Transformers process image or audio representations as vector sequences while preserving modality-specific
+    input preparation.
+
+    Explain: A Vision Transformer, or ViT, embeds image patches. Position information records their arrangement. A spectrogram
+    represents sound energy across time and frequency. Whisper encodes audio features and decodes transcript text. Diffusion
+    transformers can process patches of image-latent representations.
+
+    Example: An illustrative RGB patch of size sixteen-by-sixteen has 16×16×3, or 768, raw values before projection. Four such
+    patches from a thirty-two-by-thirty-two image become four positioned tokens. This numerical interface is shared with text
+    vectors, but patches are not words and audio preparation remains different.
+
+    Ask: Are image patches words, or do they share a vector-sequence interface?
+
+    Answer: They are not words; they become vectors that transformer operations can process.
+
+    Watch out: Patch size and model inputs are configuration-specific. Reusable sequence operations do not eliminate the need
+    to test representation choices for each modality.'
 - type: quiz
   title: What does an attention picture show?
-  question: A bright attention cell supports which claim?
+  question: A bright cell supports which claim?
   options:
-  - This head assigns that source high weight
-  - The model's answer to the question is true
-  - Every head in the model resolved the pronoun
-  - We proved how the model reasoned to its answer
+  - This head weights this source.
+  - The answer is factually true.
+  - Every head resolved the pronoun.
+  - The model's reasoning is established.
   answer: 0
-  notes: 'Say: Answer A. One cell shows a mixing weight in one head for one input. Values, residual routes and feed-forward
-    layers also affect outputs. Removing or changing a component can test its effect. Analogy: Traffic counts show a busy route,
-    not why a traveller chose a destination. Ask: What makes a displayed head a biased example? Answer: Selecting the strongest-looking
-    head without saying so. Common mistake: Reporting attention pictures but not the compute used. Also consider that token
-    costs differ between languages.'
+  notes: 'In short: An attention picture supports a routing claim for the shown head and input, rather than proving truth or
+    reasoning.
+
+    Explain: One cell displays a source’s mixing weight for one query. Other heads and layers also contribute. Values, residual
+    routes and feed-forward transformations affect the eventual output. An ablation removes a component and measures its effect.
+    Controlled interventions provide stronger causal evidence than colour alone.
+
+    Example: Traffic counts identify a busy route but do not explain a traveller’s final destination. Similarly, the strongest
+    selected BERT head is a biased example unless its selection is disclosed. Compare the histogram and test an intervention
+    rather than inferring every head resolved the pronoun.
+
+    Ask: Which option is supported by a bright attention cell?
+
+    Answer: A: this head assigns that source high weight.
+
+    Watch out: The cell does not verify an answer’s truth, every head’s behaviour or a complete reasoning explanation. Also
+    report inputs, model and computational settings when presenting evidence.'
 - type: lab
   title: 'Lab 5: build attention and a small GPT'
   steps:
   - Check attention and masks.
   - Assemble heads and blocks.
-  - Train next-character predictions.
-  - Measure loss; sample text.
-  - Inspect pretrained attention.
-  runtime: Colab T4 GPU; CPU uses fewer steps. About 10 min on a 4 GB laptop GPU after downloads
-  deliverable: Checks, loss curve, samples and explanations
-  notes: 'Say: Read, predict, run, change and check. Complete attention checks before training. Your character model is separate
-    from pretrained BERT and GPT-2 used for inspection. Record measured results from your run. Analogy: Assemble a small engine
-    before inspecting larger engines built by others. Ask: Which function creates next-character targets? Answer: get_batch,
-    by shifting the text one position. Common mistake: Copying the lecture''s measurements instead of reporting your own results,
-    or expecting smoke-run samples to show full-training quality.'
+  - Train bounded character predictions.
+  - Measure loss; inspect samples.
+  - 'Optional: inspect separate pretrained models.'
+  runtime: CPU core took {{W05_CORE_TIME}}; GPU optional
+  deliverable: Checks, curves, samples and explanations
+  notes: 'In short: The local core checks attention and trains a real character transformer before any optional downloaded-model
+    inspection.
+
+
+    Explain: A batch contains several input examples. Shifted targets contain their known following characters. The causal model
+    predicts all allowed training positions. Validation scores separate development text. Pretrained BERT and GPT-2 inspection
+    use different models and tokenizers from CharGPT.
+
+
+    Example: First verify row sums, value mixtures, future blocking and multi-head shapes. Then train for 2,000 updates on Tiny
+    Shakespeare, plot validation loss, calculate perplexity and inspect samples. On the course laptop the whole core took {{W05_CORE_TIME}}.
+
+
+    Ask: Which function supplies next-character targets?
+
+
+    Answer: get_batch, by selecting inputs and the text shifted one place ahead.
+
+
+    Watch out: Do not copy archived numbers into a current report. Optional API explanation help uses a local fallback and does
+    not expose this model''s internal attention weights.'
 - type: summary
   points:
-  - IDs become vectors with positions.
-  - Queries match keys; weights mix values.
-  - Heads offer learned views.
-  - Masks block future information.
-  - Blocks add corrections.
-  - Training updates weights; inference extends prefixes.
-  - Evaluate predictions and inspect limitations.
-  notes: 'Say: Rebuild the route aloud. IDs select vectors; positions supply order; blocks exchange and transform information.
-    A vocabulary head scores next tokens. Training checks known targets; generation samples with fixed learned weights. Analogy:
-    Reassemble an engine from input route to output route. Ask: Which operation would you explain first to someone new to transformers?
-    Answer: Any operation works if it is explained with its inputs and outputs. Common mistake: Replacing mechanisms with model
-    names. Next week connects these architectures to large language models and their training stages.'
+  - IDs and positions form vectors.
+  - Weights mix values.
+  - Masks prevent future leakage.
+  - Blocks add learned corrections.
+  - Training updates; generation extends.
+  - Evaluate evidence and limits.
+  notes: 'In short: Rebuild the mechanism from token IDs through positioned vectors, attention, blocks and next-token scores.
+
+    Explain: IDs select token vectors. Position information supplies order. Queries match keys and weights mix values. Blocks
+    combine that exchange with residual addition and per-position transformations. Training changes weights using targets, while
+    generation extends a prefix with fixed learned weights.
+
+    Example: Trace cat as inputs and ats as targets from cats. At c, future a and t inputs are blocked. After training, the
+    final current-prefix position supplies scores for an unknown next character. Explaining this route with shapes demonstrates
+    more than listing architecture or model names.
+
+    Ask: Which operation would you explain first to a beginner?
+
+    Answer: Any clear starting point works when you name its inputs, output and purpose, then connect the next operation.
+
+    Watch out: Attention pictures, low perplexity and plausible samples each have limits. Next week adds language-model training
+    stages without changing the need to check evidence.'
 - type: resources
   items:
   - kind: video
-    label: '3Blue1Brown: transformer overview'
-    url: https://www.youtube.com/watch?v=wjZofJX0v4M
-  - kind: video
-    label: '3Blue1Brown: attention step by step'
+    label: Attention step by step
     url: https://www.youtube.com/watch?v=eMlx5fFNoYc
   - kind: video
-    label: 'Karpathy: build GPT in Python'
+    label: Build GPT in Python
     url: https://www.youtube.com/watch?v=kCc8FmEb1nY
   - kind: paper
-    label: 'Vaswani: Attention Is All You Need'
+    label: Original transformer paper
     url: https://arxiv.org/abs/1706.03762
-  - kind: course
-    label: 'Hugging Face: transformer architectures'
-    url: https://huggingface.co/learn/llm-course/chapter1/6
-  notes: 'Say: Revisit the visual videos at your own pace. Use the coding lecture to practise lab shape changes. Read the original
-    paper after explaining the numerical example. Word notes include books and official API references. Analogy: Choose a suitable
-    trail through the course map. Ask: Would a visual recap or coding walkthrough help most tonight? Answer: Let the class choose,
-    then point to the matching resource. Common mistake: Watching code run instead of predicting its shapes and checks. Explain
-    one cell yourself before copying its implementation.'
+  - kind: doc
+    label: PyTorch SDPA reference
+    url: https://docs.pytorch.org/docs/stable/generated/torch.nn.functional.scaled_dot_product_attention.html
+  notes: 'In short: Use a visual explanation, numerical calculation and code trace together to check your understanding of attention.
+
+    Explain: A visual overview explains the information route. A worked example establishes the arithmetic. The original paper
+    states the architecture and equations. Official API documentation defines implementation conventions. A coding walkthrough
+    connects shapes with executable operations.
+
+    Example: A student confused by softmax can redo the supplied [2,0,0] row before watching the attention video. A student
+    confused by a mask can compare the custom blocked convention with the official SDPA allowed convention. Neither watching
+    code run nor citing a paper replaces explaining a cell’s actual inputs and outputs.
+
+    Ask: Which resource helps resolve a Boolean mask convention before implementation?
+
+    Answer: The official PyTorch attention API documentation, alongside the custom function’s definition.
+
+    Watch out: Keep historical model examples separate from current software behaviour. Predict shapes and run semantic checks
+    before copying a walkthrough or claiming equivalent results.'

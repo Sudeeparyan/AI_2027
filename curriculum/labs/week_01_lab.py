@@ -11,6 +11,10 @@
 # 4. probe **hallucination** and compare a small open model with a large hosted assistant;
 # 5. record your evidence and apply the five-step responsible-use checklist.
 #
+# CPU computation is the core route. The shared setup supplies `DEVICE`, `SEED`,
+# `SMOKE`, `check()` and `ask_model()`. Keep its optional switches off initially.
+# Complete each TODO until its check prints ✅ before running dependent cells.
+#
 # | Part | Topic | Suggested time |
 # |---|---|---|
 # | 0 | Setup | 10 min |
@@ -34,7 +38,11 @@
 # repeatedly chooses a character. The sampled character selects the next row.
 # `avg_nll` scores a supplied name instead of generating one.
 #
-# ![Follow the Week 1 experiments](fig:beginner_lab)
+# ![Score a known name using learned probabilities](fig:beginner_lab)
+#
+# This scoring flow combines a supplied name with P; it leaves P unchanged.
+# The classifier uses separate two-dimensional points, and the LLM uses separate text inputs.
+# The table below lists those additional experiments; it is not a connected data flow.
 #
 # | Diagram block | Code to find | First observation |
 # |---|---|---|
@@ -72,7 +80,15 @@
 # %% [markdown]
 # ## Part 0 · Setup
 #
-# Run the next cell once. On Google Colab most packages are already installed, so it finishes quickly.
+# Run the install cell, then the shared setup injected immediately after it.
+# Select the same notebook kernel when reopening this lab.
+#
+# > **Core:** confirm that imports and the readiness checks work.
+# > **Change one thing:** change one readiness probability, then explain its effect on the sum.
+# > **Optional stretch:** inspect the printed package versions and find one library's official documentation.
+# > **Common errors:** a missing package usually means the wrong kernel or an install cell that was skipped.
+#
+# **Predict:** which list index selects the first item, and what should the three probabilities total?
 
 # %% [markdown]
 # **Purpose:** Install the small set of lab packages.
@@ -84,35 +100,37 @@
 %pip install -q transformers accelerate scikit-learn matplotlib
 
 # %% [markdown]
-# **Purpose:** Choose device and repeatable random state.
-# **Why now:** Later experiments share this setup.
-# **Expected observation:** Printed device is CPU or CUDA; neither outcome is a conceptual result.
+# **Purpose:** Import lab-specific tools and check Python readiness.
+# **Why now:** Later cells use arrays, indexing and probability distributions.
+# **Expected observation:** A length-three array, its shape, and three ✅ checks.
 #
 
 # %%
 import math
 import os
-import random
 import urllib.request
 
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
 
-# SMOKE mode is only used by the instructor's automatic test: tiny settings so every cell runs quickly.
-SMOKE = os.environ.get("GENAI_LAB_SMOKE") == "1"
-SEED = 42
-random.seed(SEED)
-np.random.seed(SEED)
-torch.manual_seed(SEED)
-
-DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-print("PyTorch", torch.__version__, "| device:", DEVICE)
-if DEVICE == "cpu":
-    print("No GPU found. That is fine for this lab; the language model part will just be a little slower.")
+# The shared setup already chose the device and seeded these libraries.
+readiness_items = ["first", "second", "third"]
+readiness_probs = np.array([0.2, 0.3, 0.5])
+print("Readiness probabilities:", readiness_probs, "| shape:", readiness_probs.shape)
+check(readiness_items[0] == "first", "Index 0 selects the first item.", "Python indexes start at 0.")
+check(readiness_probs.shape == (3,), "The array has three entries.", "(3,) means a one-dimensional array of length 3.")
+check(np.isclose(readiness_probs.sum(), 1.0), "These probabilities sum to 1.", "Add the three probabilities; a distribution must total 1.")
 
 # %% [markdown]
 # ## Part 1 · A generative model from counts
+#
+# > **Core:** complete TODOs 1–3, then score and sample names from the learned table.
+# > **Change one thing:** change temperature; predict which next-character choices become more concentrated.
+# > **Optional stretch:** reserve some names before counting and score that separate set afterwards.
+# > **Common errors:** rows mean previous characters; columns mean next characters. Include both `.` markers.
+#
+# **Predict:** how many adjacent pairs appear in `.emma.`? Which row follows a sampled `e`?
 #
 # We model names **one character at a time**. A *bigram* model assumes each character depends only on the previous one:
 #
@@ -156,6 +174,7 @@ print(words[:10])
 # Build the vocabulary (26 letters plus `.`), then count how often each character follows each other character.
 #
 # **TODO 1:** fill the count matrix `N`, where `N[i, j]` is the number of times character `j` follows character `i`.
+# **Hint:** use `stoi[a]` for the row and `stoi[b]` for the column; increase that entry by one.
 #
 # **Read the shapes:** `N` has `V` rows and `V` columns. `stoi` translates a
 # character to its index; `itos` translates an index back to a character.
@@ -170,7 +189,8 @@ print(words[:10])
 #
 
 # %%
-chars = sorted(set("".join(words)))
+# Keep all 26 letters even when the fallback list omits a rare letter such as q.
+chars = sorted(set("".join(words)) | set("abcdefghijklmnopqrstuvwxyz"))
 stoi = {c: i + 1 for i, c in enumerate(chars)}
 stoi["."] = 0
 itos = {i: c for c, i in stoi.items()}
@@ -185,6 +205,20 @@ for w in words:
         N[stoi[a], stoi[b]] += 1
         ### END SOLUTION
 
+def check_bigrams(counts):
+    # Every name of length L contributes L + 1 neighbouring pairs.
+    expected_pairs = sum(len(word) + 1 for word in words)
+    correct = counts.shape == (V, V) and np.all(counts >= 0) and counts.sum() == expected_pairs
+    # Encode ordered pairs as flat IDs; bincount independently checks each table entry.
+    pair_ids = [stoi[a] * V + stoi[b] for word in words
+                for a, b in zip("." + word, word + ".")]
+    reference = np.bincount(pair_ids, minlength=V * V).reshape(V, V)
+    correct = correct and np.array_equal(counts, reference)
+    return check(correct, "TODO 1 counted each ordered previous/next pair exactly once.",
+                 "Rows are previous characters; columns are next characters. Include both boundary pairs.")
+
+print("N shape:", N.shape)
+assert check_bigrams(N), "Complete TODO 1 and rerun this cell before continuing."
 print("total bigrams counted:", N.sum())
 print("most common first letters:", [itos[j] for j in np.argsort(-N[0])[:5]])
 
@@ -224,17 +258,19 @@ plt.show()
 
 # %%
 P = (N + 1) / (N + 1).sum(axis=1, keepdims=True)
-print("each row sums to 1:", np.allclose(P.sum(axis=1), 1.0))
+print("P shape:", P.shape, "| row-total shape:", P.sum(axis=1, keepdims=True).shape)
+check(np.allclose(P.sum(axis=1), 1.0), "Every row of P sums to 1.", "Use axis=1 and keepdims=True when dividing by each row total.")
 print("p(next | '.') for a, e, z:", round(P[0, stoi["a"]], 3), round(P[0, stoi["e"]], 3), round(P[0, stoi["z"]], 3))
 
 # %% [markdown]
 # **TODO 2:** write `avg_nll(word, P)`, the **average negative log-likelihood per character** of a word, including the final `.`.
 # For `emma` you average over five predictions: `.→e, e→m, m→m, m→a, a→.`
+# **Hint:** take the natural log of each transition probability, average the five logs, then change the sign.
 
 # %% [markdown]
 # **Purpose:** Score supplied names.
 # **Why now:** Separate evaluating a known name from creating one.
-# **Expected observation:** A lower NLL means greater probability under this table.
+# **Expected observation:** A lower average NLL means a greater geometric-mean probability per predicted character. Whole-name likelihood also depends on name length.
 #
 
 # %%
@@ -246,6 +282,22 @@ def avg_nll(word, P):
     return -sum(logps) / len(logps)
     ### END SOLUTION
 
+def check_avg_nll(score_function):
+    # This explicit five-transition example catches a missing end marker.
+    e, m, a = stoi["e"], stoi["m"], stoi["a"]
+    expected = -(math.log(P[0, e]) + math.log(P[e, m]) + math.log(P[m, m])
+                 + math.log(P[m, a]) + math.log(P[a, 0])) / 5
+    try:
+        observed = score_function("emma", P)
+        uniform = score_function("emma", np.full((V, V), 1 / V))
+        correct = observed is not None and uniform is not None and np.isfinite(observed)
+        correct = correct and np.isclose(observed, expected) and np.isclose(uniform, math.log(V))
+    except (TypeError, ValueError, KeyError, IndexError):
+        correct = False
+    return check(correct, "TODO 2 scores all five transitions and the uniform reference correctly.",
+                 "Return a number: negative mean of the log probabilities, including a→. at the end.")
+
+assert check_avg_nll(avg_nll), "Complete TODO 2 and rerun this cell before continuing."
 
 for w in ["emma", "anna", "xqzz"]:
     print(f"{w:6s} average NLL = {avg_nll(w, P):.3f} nats  (perplexity {math.exp(avg_nll(w, P)):.1f})")
@@ -285,6 +337,7 @@ for k, v in total.items():
 # 1. take the row of probabilities for the current character,
 # 2. apply temperature: $p_i \propto p_i^{1/T}$ (this is the same as dividing log-probabilities by $T$ before the softmax),
 # 3. sample the next character, stop when you sample `.`.
+# **Hint:** divide `np.log(P[i])` by positive `T`, exponentiate after subtracting the maximum, and normalise.
 #
 # **Check one step:** use the previous character to choose a row, then draw
 # one index from that row. `T` must be positive in this function. `T=1` leaves
@@ -305,6 +358,8 @@ rng = np.random.default_rng(SEED)
 
 def sample_name(P, T=1.0, max_len=20):
     # i is the previous character's index; index 0 represents the '.' marker.
+    if T <= 0:
+        raise ValueError("T must be positive when sampling; try T=1.0.")
     out, i = [], 0
     for _ in range(max_len):
         ### BEGIN SOLUTION
@@ -318,11 +373,62 @@ def sample_name(P, T=1.0, max_len=20):
         out.append(itos[i])
     return "".join(out)
 
+def check_sample_name(sample_function):
+    # A deterministic reference table follows .→e→m→a→. exactly.
+    reference = np.eye(V)
+    route = [0, stoi["e"], stoi["m"], stoi["a"], 0]
+    for previous, following in zip(route, route[1:]):
+        reference[previous] = 0
+        reference[previous, following] = 1
+    # A check should not consume the random draws reserved for the real experiment.
+    saved_state = rng.bit_generator.state
+    try:
+        with np.errstate(divide="ignore"):
+            observed = sample_function(reference, T=1.0, max_len=20)
+        correct = observed == "ema"
+    except (TypeError, ValueError, IndexError):
+        correct = False
+    finally:
+        rng.bit_generator.state = saved_state
+    return check(correct, "TODO 3 follows the selected row and stops at the end marker.",
+                 "Update i from rng.choice(V, p=p); append itos[i] unless i is the . marker.")
+
+assert check_sample_name(sample_name), "Complete TODO 3 and rerun this cell before continuing."
 
 name_samples = {}  # keep the samples so you can compare temperatures afterwards
 for T in [0.5, 1.0, 1.5]:
     name_samples[T] = [sample_name(P, T) for _ in range(10)]
     print(f"T={T}:", ", ".join(name_samples[T]))
+
+# %% [markdown]
+# **Purpose:** Explore temperature without downloading a model or retraining.
+# **Why now:** A slider makes the change in one probability row visible.
+# **Expected observation:** A chart of first-letter probabilities and five sampled names.
+# If widgets do not display, edit the temperature argument in the preceding sampling cell.
+# Predict the effect before moving the slider. Counts and learned probabilities remain fixed.
+
+# %% tags=["skip-test"]
+try:
+    import ipywidgets as widgets
+    from IPython.display import display
+
+    def view_temperature(T):
+        logits = np.log(P[0]) / T
+        probabilities = np.exp(logits - logits.max())
+        probabilities /= probabilities.sum()
+        plt.figure(figsize=(8, 3))
+        plt.bar([itos[index] for index in range(V)], probabilities)
+        plt.xlabel("First character (or immediate end marker)")
+        plt.ylabel("Probability after temperature")
+        plt.title(f"T = {T:.1f}; the learned table is unchanged")
+        plt.show()
+        print("Sampled names:", [sample_name(P, T=T) for _ in range(5)])
+
+    slider = widgets.FloatSlider(value=1.0, min=0.2, max=2.0, step=0.1,
+                                 description="T", continuous_update=False)
+    display(widgets.interactive(view_temperature, T=slider))
+except ImportError:
+    print("Widgets unavailable. Change numeric T in sample_name(P, T=1.0) and compare the printed samples.")
 
 # %% [markdown]
 # ✍️ **Question 1.** Describe how the names change as the temperature goes from 0.5 to 1.5. Link your answer to what temperature does to the distribution.
@@ -333,6 +439,13 @@ for T in [0.5, 1.0, 1.5]:
 
 # %% [markdown]
 # ## Part 2 · Generative vs. discriminative
+#
+# > **Core:** fit both classifiers and complete TODO 4 to generate class-0 points.
+# > **Change one thing:** change one diagonal covariance entry while keeping both classifiers' training data identical.
+# > **Optional stretch:** try non-Gaussian class data and explain where QDA's assumption breaks.
+# > **Common errors:** class 0 uses `means_[0]` and `covariance_[0]`; each generated point needs two coordinates.
+#
+# **Predict:** where should new class-0 points cluster? Which fitted model describes their spread?
 #
 # We fit two classifiers to the same 2-D data:
 #
@@ -362,6 +475,7 @@ Xb = gen.multivariate_normal([1.1, -0.2], [[0.5, -0.2], [-0.2, 0.6]], 300)
 X = np.vstack([Xa, Xb])
 y = np.array([0] * 300 + [1] * 300)
 Xtr, Xte, ytr, yte = train_test_split(X, y, test_size=0.3, random_state=SEED, stratify=y)
+print("X shape:", X.shape, "| y shape:", y.shape, "| train/test:", Xtr.shape, Xte.shape)
 
 disc = LogisticRegression().fit(Xtr, ytr)
 genm = QuadraticDiscriminantAnalysis(store_covariance=True).fit(Xtr, ytr)
@@ -370,6 +484,7 @@ print(f"QDA (generative) test accuracy:     {genm.score(Xte, yte):.3f}")
 
 # %% [markdown]
 # **TODO 4:** use the fitted generative model to **create 200 new points of class 0**. QDA stores the class means in `genm.means_` and the covariance matrices in `genm.covariance_`.
+# **Hint:** call `gen.multivariate_normal` with the class-0 mean, class-0 covariance and sample count 200.
 
 # %% [markdown]
 # **Purpose:** Draw new class-0 points.
@@ -383,6 +498,14 @@ new_points = gen.multivariate_normal(genm.means_[0], genm.covariance_[0], 200)
 ### END SOLUTION
 ### STUB new_points = np.zeros((200, 2))  # replace with samples from the class-0 Gaussian
 
+def check_generated_points(points):
+    correct = points.shape == (200, 2) and np.all(np.isfinite(points))
+    correct = correct and np.all(points.var(axis=0) > 0)
+    return check(correct, "TODO 4 produced 200 varying points with two coordinates each.",
+                 "Sample from genm.means_[0] and genm.covariance_[0]; a table of zeros is not a Gaussian sample.")
+
+print("New point shape:", new_points.shape)
+assert check_generated_points(new_points), "Complete TODO 4 and rerun this cell before continuing."
 plt.figure(figsize=(6, 5))
 plt.scatter(*Xa.T, s=8, alpha=0.4, label="real class 0")
 plt.scatter(*Xb.T, s=8, alpha=0.4, label="real class 1")
@@ -392,7 +515,7 @@ plt.title("A generative classifier can also generate")
 plt.show()
 
 # %% [markdown]
-# ✍️ **Question 2.** Both classifiers have similar accuracy. Why can only one of them generate new data? When would you still prefer the discriminative model?
+# ✍️ **Question 2.** Compare the two held-out accuracies. Why can only one classifier generate new input data? When would you prefer the discriminative model?
 #
 # <!-- BEGIN ANSWER -->
 # QDA learns a full model of the inputs for each class, $p(x \mid y)$, so we can sample from it. Logistic regression learns only $p(y \mid x)$, the boundary between classes, and says nothing about where inputs lie, so there is nothing to sample from. The discriminative model is often preferred when the only goal is classification: it makes fewer assumptions (here QDA assumes Gaussian classes), needs fewer parameters, and usually performs better when the generative assumptions are wrong or the input is high-dimensional (e.g. images). Generative models are preferred when we need to create data, detect unusual inputs (low $p(x)$), handle missing inputs or learn from unlabelled data.
@@ -401,7 +524,20 @@ plt.show()
 # %% [markdown]
 # ## Part 3 · A small open LLM in action
 #
-# We load **SmolLM2**, a small open-weight model from Hugging Face. It is tiny compared with frontier assistants, which makes its behaviour (and its mistakes) easy to study. It runs on a CPU; a GPU makes it faster.
+# ![How an assistant reaches its fixed weights and application](fig:lecture_flow_18)
+#
+# This lab loads a pre-trained assistant; it does not repeat the training stages.
+#
+# > **Core:** inspect tokens, complete TODO 5 and compare short generations from SmolLM2-135M-Instruct.
+# > **Change one thing:** change temperature while keeping the question and model fixed.
+# > **Optional stretch:** try SmolLM2-360M-Instruct after completing the core, then record the changed checkpoint.
+# > **Common errors:** a download error does not describe model quality. Check the connection and checkpoint spelling.
+#
+# **Predict:** will one token always equal one word? Will changing temperature change the weights?
+#
+# We use **SmolLM2-135M-Instruct**, an open-weight model documented by Hugging Face.
+# It runs on CPU and is instruction-tuned: additional training prepared it for chat instructions.
+# It still predicts one token at a time. Small size makes this a teaching model, not a reliability benchmark.
 
 # %% [markdown]
 # **Purpose:** Load a pretrained language model.
@@ -412,7 +548,7 @@ plt.show()
 # %%
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-MODEL_ID = "HuggingFaceTB/SmolLM2-135M-Instruct" if SMOKE else "HuggingFaceTB/SmolLM2-360M-Instruct"
+MODEL_ID = "HuggingFaceTB/SmolLM2-135M-Instruct"
 tok = AutoTokenizer.from_pretrained(MODEL_ID)
 model = AutoModelForCausalLM.from_pretrained(MODEL_ID).to(DEVICE)
 model.eval()
@@ -443,13 +579,14 @@ for lang, s in sentences.items():
     ids = tok(s)["input_ids"]
     pieces = tok.convert_ids_to_tokens(ids)
     token_counts[lang] = len(ids)
-    print(f"{lang:8s} {len(ids):3d} tokens | {pieces[:12]}")
+    print(f"{lang:8s} ID shape {(len(ids),)} | {pieces[:12]}")
 
 # %% [markdown]
 # ### 3.2 Inside the model: next-token probabilities
 # The model outputs a **logit** for every token in its vocabulary. Softmax turns logits into probabilities.
 #
 # **TODO 5:** complete `next_token_probs` so it applies a temperature `T` to the logits before the softmax.
+# **Hint:** convert the final-position logits to float32, divide by positive `T`, then apply `torch.softmax(..., dim=-1)`.
 #
 # **Read the output:** model logits have batch, sequence-position, and
 # vocabulary dimensions. Selecting `[0, -1]` asks about the next token after
@@ -467,12 +604,35 @@ for lang, s in sentences.items():
 # %%
 @torch.no_grad()
 def next_token_probs(prompt, T=1.0):
+    if T <= 0:
+        raise ValueError("T must be positive for a probability distribution; try T=1.0.")
     ids = tok(prompt, return_tensors="pt").to(DEVICE)
-    logits = model(**ids).logits[0, -1]  # logits for the next position
+    all_logits = model(**ids).logits
+    print("Input ID shape:", tuple(ids["input_ids"].shape), "| logit shape:", tuple(all_logits.shape))
+    logits = all_logits[0, -1]  # One score for each vocabulary entry at the next position.
     ### BEGIN SOLUTION
-    return torch.softmax(logits / T, dim=-1)
+    # Float32 keeps probability arithmetic precise when model scores use bfloat16.
+    return torch.softmax(logits.float() / T, dim=-1)
     ### END SOLUTION
 
+def check_next_token_probs(probability_function):
+    try:
+        low = probability_function("The cat sat on the", T=0.5)
+        high = probability_function("The cat sat on the", T=1.5)
+        correct = isinstance(low, torch.Tensor) and isinstance(high, torch.Tensor)
+        correct = correct and low.shape == (model.config.vocab_size,) and high.shape == low.shape
+        if correct:
+            correct = bool(torch.isfinite(low).all() and torch.isfinite(high).all()
+                           and (low >= 0).all() and (high >= 0).all()
+                           and torch.isclose(low.sum(), torch.tensor(1.0, device=DEVICE))
+                           and torch.isclose(high.sum(), torch.tensor(1.0, device=DEVICE))
+                           and low.max() > high.max())
+    except (TypeError, ValueError, RuntimeError, AttributeError):
+        correct = False
+    return check(correct, "TODO 5 returns a distribution; lower T concentrates the strongest prediction.",
+                 "Return softmax(logits / T, dim=-1), with one probability per vocabulary entry and total 1.")
+
+assert check_next_token_probs(next_token_probs), "Complete TODO 5 and rerun this cell before continuing."
 
 prompt = "The cat sat on the"
 top_tokens = {}
@@ -496,7 +656,7 @@ for T in [0.5, 1.0, 1.5]:
 #
 
 # %%
-def chat(question, temperature=0.7, top_p=0.9, max_new_tokens=60, system=None):
+def chat(question, temperature=0.7, top_p=0.9, max_new_tokens=32, system=None):
     # The chat template adds role markers; generated output also contains the input.
     # Decoding slices off those input tokens so the returned text is only the answer.
     messages = ([{"role": "system", "content": system}] if system else []) + [{"role": "user", "content": question}]
@@ -518,6 +678,13 @@ for T in [0.2, 1.2]:
 # %% [markdown]
 # ## Part 4 · Hallucination and tool comparison
 #
+# > **Core:** compare the two local responses and separate claims from supporting evidence.
+# > **Change one thing:** add the uncertainty instruction; keep the fictional question unchanged.
+# > **Optional stretch:** choose the shared Gemini or OpenAI API switch if eligible, then compare the actual response using the same criteria.
+# > **Common errors:** fluent language and confident wording do not prove that a cited paper exists.
+#
+# **Predict:** will the model question the invented citation? How could you verify any claimed findings?
+#
 # The paper below **does not exist**. Watch what a small model does when asked about it, then see whether an instruction to admit uncertainty helps.
 
 # %% [markdown]
@@ -528,54 +695,53 @@ for T in [0.2, 1.2]:
 
 # %%
 fictional_prompt = "Summarise the main findings of the 2019 paper 'Quantum Gradient Folding for Transformers' by Smith and Okafor."
-plain_answer = chat(fictional_prompt, temperature=0.7, max_new_tokens=90)
-honest_answer = chat(fictional_prompt, temperature=0.7, max_new_tokens=90,
+plain_answer = chat(fictional_prompt, temperature=0.7, max_new_tokens=64)
+honest_answer = chat(fictional_prompt, temperature=0.7, max_new_tokens=64,
                      system="If you are not certain that a paper exists, say so clearly instead of guessing.")
 print("Plain question:\n", plain_answer)
 print("\nWith an honesty instruction:\n", honest_answer)
 
 # %% [markdown]
-# ### Optional: compare with a large hosted model (free Gemini API key)
+# ### Optional: compare with Gemini or the OpenAI API
 #
-# 1. Create a free key at **Google AI Studio** (aistudio.google.com) with your own account.
-# 2. In Colab, open 🔑 **Secrets**, add `GEMINI_API_KEY`, and allow this notebook to use it.
-# 3. Run the cell. Without a key it simply skips; you can paste the same prompt into any chat assistant instead.
+# Read the shared setup's regional and account guidance first. Free eligibility and quota are not guaranteed.
+# Gemini API-client distribution has a separate paid-service condition in the EEA, UK and Switzerland.
+# The entire local lab works without a key or billing. Keep Gemini on the eligible free route.
+#
+# Store `GEMINI_API_KEY` or `OPENAI_API_KEY` in Colab Secrets or the local environment, never in a code cell.
+# Set exactly one of `USE_GEMINI` or `USE_OPENAI` to `True` in shared setup and rerun it.
+# OpenAI API usage may incur charges, separately from ChatGPT subscriptions; the local task needs no API.
+# Only this invented paper question is sent. The helper never prints your key and makes no request by default.
 
 # %% [markdown]
 # **Purpose:** Optionally compare a hosted assistant.
 # **Why now:** Application tools and settings can change behaviour.
-# **Expected observation:** A response only if a key is configured; API availability can vary.
+# **Expected observation:** No API request by default; a response only after opting in with a configured key. API availability can vary.
 #
 
 # %%
-def get_key(name="GEMINI_API_KEY"):
-    try:
-        from google.colab import userdata  # only available on Colab
-        return userdata.get(name)
-    except Exception:
-        return os.environ.get(name)
-
-
-key = None if SMOKE else get_key()
-if not key:
-    print("No GEMINI_API_KEY found: skipping the hosted-model comparison. Use a chat assistant in your browser instead.")
+hosted_answer = ask_model(fictional_prompt, temperature=0.7, max_output_tokens=128)
+if hosted_answer is None:
+    comparison_answer = honest_answer
+    comparison_model = MODEL_ID
+    print("No hosted response: continue using the local honesty-instruction response.")
 else:
-    try:
-        from google import genai
-    except ImportError:
-        import subprocess
-        import sys
-        subprocess.check_call([sys.executable, "-m", "pip", "install", "-q", "google-genai"])
-        from google import genai
-    client = genai.Client(api_key=key)
-    resp = client.models.generate_content(model="gemini-flash-latest", contents=fictional_prompt)
-    print(resp.text)
+    comparison_answer = hosted_answer
+    comparison_model = OPENAI_MODEL if USE_OPENAI else GEMINI_MODEL
+    print("Optional hosted response:\n", comparison_answer)
+print("Comparison checkpoint:", comparison_model)
 
 # %% [markdown]
 # ✍️ **Question 3.** What did the small model do with the fictional paper? Did the honesty instruction help? How did the large hosted model (or a chat assistant) behave? Which step of the five-step checklist catches this problem?
 #
 # <!-- BEGIN ANSWER -->
-# Describe what your run did: it may invent details, admit uncertainty or refuse. If it asserts unsupported paper details, that is hallucination; plausible wording is not a source. The honesty instruction sometimes helps a little, but small models follow it unreliably. Large hosted assistants more often say they cannot find the paper, especially when they have a search tool, but they can still fabricate details, so their answer must also be checked. The **Verify** step catches it: search for the paper in Google Scholar or on the publisher's site before using any claim. Recording the model, settings and date (**Disclose & record**) lets others reproduce the test.
+# Describe what your actual responses did: they may invent details, admit uncertainty or refuse.
+# Unsupported details about this invented paper are hallucinations; plausible wording is not a source.
+# Compare the plain and honesty-instruction responses using the same evidence criterion.
+# If the selected API returned no response, record that and use the local comparison; do not claim a hosted result.
+# One question cannot establish which model family is more reliable.
+# **Verify** catches unsupported claims: check the actual publication record before using a citation.
+# **Disclose & record** stores the checkpoint, settings and date so others can understand your comparison.
 # <!-- END ANSWER -->
 
 # %% [markdown] tags=["solution-only"]
@@ -606,6 +772,15 @@ if os.environ.get("GENAI_RESULTS_PATH"):
 # %% [markdown]
 # ## Part 5 · Evidence table and reflection
 #
+# ![Trace responsible use from purpose to recorded evidence](fig:lecture_flow_41)
+#
+# > **Core:** record two experiments with the setting, observed output and a stated check.
+# > **Change one thing:** tighten one success criterion, then decide whether the same output still meets it.
+# > **Optional stretch:** reserve a new example before editing your prompt and test your final choice once.
+# > **Common errors:** report observed results; never fill the table with an expected or invented outcome.
+#
+# **Predict:** would the same output meet a stricter success criterion? State the criterion before judging it.
+#
 # Complete the table with **two** of your experiments (double-click to edit).
 #
 # | Task | Model and version | Settings (T, top-p, seed) | What happened | Correct? How did you check? | One improvement |
@@ -617,6 +792,33 @@ if os.environ.get("GENAI_RESULTS_PATH"):
 #
 # <!-- BEGIN ANSWER -->
 # Example: using a chat assistant to explain a PyTorch error in the week 2 lab. **Purpose:** allowed by the module policy for learning, not for writing assessed text. **Protect data:** the error message contains no personal data; do not paste API keys or file paths with names. **Prompt clearly:** include the error, the code line and what I expected. **Verify:** run the suggested fix and check the loss still decreases; read the PyTorch docs for the function. **Disclose & record:** note in the project log that the fix came from an assistant, with the model name and date.
+# <!-- END ANSWER -->
+#
+# ## End-of-lab self-check
+#
+# 1. For `emma`, how many bigrams include both boundary markers? What shape does `N` have?
+# <!-- BEGIN ANSWER -->
+# Five: `.→e`, `e→m`, `m→m`, `m→a` and `a→.`. N has shape (V, V), with a previous-character row and next-character column.
+# <!-- END ANSWER -->
+#
+# 2. Does changing temperature retrain `N`, `P` or the language-model weights?
+# <!-- BEGIN ANSWER -->
+# No. Temperature changes the sampling distribution derived from fixed probabilities or logits; the learned parameters remain unchanged.
+# <!-- END ANSWER -->
+#
+# 3. Why can QDA generate input points while logistic regression alone cannot?
+# <!-- BEGIN ANSWER -->
+# QDA models p(x given y), the distribution of input points in each class. Logistic regression models p(y given x), class probabilities for a supplied input.
+# <!-- END ANSWER -->
+#
+# 4. Why is a token ID neither a whole word nor a probability? What is one next-token output's shape?
+# <!-- BEGIN ANSWER -->
+# An ID is an index into the tokenizer vocabulary. Its text piece can be punctuation, part of a word or a word. One final-position distribution has one entry per vocabulary item.
+# <!-- END ANSWER -->
+#
+# 5. What evidence supports a response about a paper? What should you record if the selected API is unavailable?
+# <!-- BEGIN ANSWER -->
+# Check that the cited paper exists and that it supports the claimed findings. Record that no hosted response was obtained and identify the local checkpoint actually used. Confidence or valid wording alone is insufficient.
 # <!-- END ANSWER -->
 #
 # **Before next week:** watch the 3Blue1Brown video *Large Language Models explained briefly* and read Foster (2023), chapter 1.

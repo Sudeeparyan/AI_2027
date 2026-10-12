@@ -121,85 +121,61 @@ def trilemma(path):
 
 
 def unet_dit(path):
-    fig, axes = plt.subplots(1, 2, figsize=(13, 5.5))
-    a = axes[0]
-    a.axis("off")
-    a.set_xlim(0, 10)
-    a.set_ylim(0, 6.3)
-    a.set_title("U-Net: shrink, then expand", loc="left", fontsize=18)
-    box(a, 0.1, 5.3, 2.7, 1.0, "Noisy\ninput", fc="white", size=18)
-    box(a, 7.2, 5.3, 2.7, 1.0, "Predicted\nnoise", fc="white", size=18)
-    # The solid route carries features through every resolution level.
-    encoder = [(0.1, 3.95, 2.7, 1.05), (0.4, 2.55, 2.5, 1.05), (0.7, 1.15, 2.4, 1.05)]
-    decoder = [(7.2, 3.95, 2.7, 1.05), (7.1, 2.55, 2.5, 1.05), (6.9, 1.15, 2.4, 1.05)]
-    for nodes in (encoder, decoder):
-        for (x, y, w, h), label in zip(nodes, ["Large\nfeatures", "Medium\nfeatures", "Small\nfeatures"]):
-            box(a, x, y, w, h, label, fc=TINT, size=18)
-    box(a, 3.65, 0.3, 2.7, 0.75, "Bottleneck", fc=ORANGE, ec=ACCENT, size=18)
-    arrow(a, 1.45, 5.3, 1.45, 5.0)
-    arrow(a, 1.6, 3.95, 1.6, 3.6)
-    arrow(a, 1.85, 2.55, 1.85, 2.2)
-    arrow(a, 1.9, 1.15, 3.65, 0.675)
-    arrow(a, 6.35, 0.675, 8.1, 1.15)
-    arrow(a, 8.15, 2.2, 8.15, 2.55)
-    arrow(a, 8.4, 3.6, 8.4, 3.95)
-    arrow(a, 8.55, 5.0, 8.55, 5.3)
-    # Dashed routes copy encoder features to the matching decoder level.
-    for (x, y, w, h), (dx, _, _, _) in zip(encoder, decoder):
-        a.annotate("", xy=(dx, y + h / 2), xytext=(x + w, y + h / 2),
-                   arrowprops=dict(arrowstyle="-|>", color=TEAL, lw=1.3, ls="--"))
-    a.text(5.0, 5.8, "skip features", ha="center", va="center", color=TEAL, fontsize=18)
-    a.text(3.1, 3.78, "shrink", fontsize=18, color=MUTED, va="center")
-    a.text(6.9, 3.78, "expand", fontsize=18, color=MUTED, va="center", ha="right")
-    a.text(5.0, -0.25, "Timestep (and optional text) conditions every level", ha="center", fontsize=17, color=ACCENT)
-    b = axes[1]
-    b.axis("off")
-    b.set_xlim(0, 10)
-    b.set_ylim(0, 6.3)
-    b.set_title("DiT: process latent patches as tokens", loc="left", fontsize=18)
-    for i in range(4):
-        for j in range(4):
-            b.add_patch(plt.Rectangle((0.3 + j * 0.45, 3.4 + i * 0.45), 0.4, 0.4, fc=TINT, ec=PRIMARY))
-    b.text(1.2, 3.25, "Latent\npatches", ha="center", va="top", fontsize=18, color=TEXT)
-    b.text(4.55, 5.6, "transformer blocks", ha="center", fontsize=18, color=INK)
-    for k in range(3):
-        x = 2.6 + k * 1.4
-        box(b, x, 3.35, 1.1, 1.8, f"{k + 1}" if k < 2 else "…", size=20)
-        if k < 2:
-            arrow(b, x + 1.1, 4.25, x + 1.4, 4.25)
-    box(b, 7.05, 3.35, 2.85, 1.8, "Noise\nprediction", fc="white", size=18)
-    arrow(b, 2.05, 4.25, 2.6, 4.25)
-    arrow(b, 6.5, 4.25, 7.05, 4.25)
-    box(b, 2.6, .65, 3.9, 1.3, "Time + text\nconditioning",
-        fc=ORANGE, ec=ACCENT, size=18, weight="normal")
-    for k in range(3):
-        x = 3.15 + k * 1.4
-        arrow(b, x, 1.95, x, 3.35, color=ACCENT, lw=1.3)
-    b.text(5.0, -0.25, "Tokens → grid-shaped noise prediction", ha="center", fontsize=17, color=TEXT)
+    """Six U-Net operations and three DiT operations; solid skips carry data."""
+    fig, ax = plt.subplots(figsize=(13, 7.2))
+    ax.axis("off")
+    ax.set_xlim(-.1, 13.2); ax.set_ylim(-.7, 7.1)
+    ax.text(.1, 6.85, "U-Net: multiscale features", fontsize=20, color=INK, weight="bold")
+    nodes = [(.1, "Encode\n28 × 28"), (2.25, "Shrink\n14 × 14"),
+             (4.4, "Bottleneck\n7 × 7"), (6.55, "Expand + join\n14 × 14"),
+             (8.7, "Expand + join\n28 × 28"), (10.85, "Predict noise\n28 × 28")]
+    for x, label in nodes:
+        box(ax, x, 4.95, 1.9, 1.2, label, fc=TINT, ec=PRIMARY, size=18)
+    for (x, _), (nx, _) in zip(nodes, nodes[1:]):
+        arrow(ax, x + 1.9, 5.55, nx, 5.55)
+        ax.text((x + 1.9 + nx) / 2, 6.32, "features", ha="center", fontsize=18, color=TEXT)
+    # Nested orthogonal routes preserve the saved features at the two matching resolutions.
+    for source, target, lane, label in ((1.05, 9.65, 3.75, "saved 28 × 28 features"),
+                                       (3.2, 7.5, 4.35, "saved 14 × 14 features")):
+        ax.plot([source, source, target], [4.95, lane, lane], color=TEAL, lw=2)
+        arrow(ax, target, lane, target, 4.95, color=TEAL, lw=2)
+        ax.text((source + target) / 2, lane - .28, label, fontsize=18, color=TEAL, ha="center")
+    ax.text(.1, 2.75, "DiT: latent patches as tokens", fontsize=20, color=INK, weight="bold")
+    for x, label in ((.1, "Embed patches"), (4.4, "Transformer blocks"), (8.7, "Project + reshape")):
+        box(ax, x, .75, 3.1, 1.2, label, fc=TINT, ec=PRIMARY, size=18)
+    arrow(ax, 3.2, 1.35, 4.4, 1.35); ax.text(3.8, 1.75, "tokens", fontsize=18, ha="center", color=TEXT)
+    arrow(ax, 7.5, 1.35, 8.7, 1.35); ax.text(8.1, 1.75, "features", fontsize=18, ha="center", color=TEXT)
+    ax.text(5.95, 2.25, "time + condition", fontsize=18, color=ACCENT, ha="center")
+    arrow(ax, 5.95, 2.15, 5.95, 1.95, color=ACCENT)
+    ax.text(.1, -.05, "Blue: learned operations. Solid arrows: feature data. Both outputs match the noisy input shape.",
+            fontsize=18, color=TEXT)
     save(fig, path)
 
 
 def ldm_pipeline(path):
-    fig, ax = plt.subplots(figsize=(13, 4.6))
+    """Historical SD 1.5 inference: separate learned prediction and numerical update."""
+    fig, ax = plt.subplots(figsize=(13, 5.6))
     ax.axis("off")
-    ax.set_xlim(0, 13)
-    ax.set_ylim(0, 4.6)
-    box(ax, 0.1, 3.1, 2.2, 1.0, "A lighthouse\nat sunset", fc="white", size=18, weight="normal")
-    box(ax, 2.8, 3.1, 2.0, 1.0, "Text encoder\nCLIP (SD 1.5)", fc=TINT, size=18)
-    box(ax, 0.1, 0.7, 2.4, 1.4, "random latent\n$z_T$ ~ N(0, I)\n64 × 64 × 4", fc=ORANGE, ec=ACCENT, size=18)
-    box(ax, 3.2, 0.6, 3.6, 1.6, "U-Net + scheduler\nrepeat latent updates", fc="white", size=18)
-    box(ax, 7.4, 0.8, 1.9, 1.2, "clean latent\n$z_0$", fc=TINT, size=18)
-    box(ax, 9.8, 0.8, 1.6, 1.2, "VAE\ndecoder", fc=TINT, size=18)
-    box(ax, 11.8, 0.7, 1.15, 1.4, "image\n512²", fc="white", size=18)
-    arrow(ax, 2.3, 3.6, 2.8, 3.6)
-    ax.annotate("", xy=(5.0, 2.2), xytext=(3.8, 3.1), arrowprops=dict(arrowstyle="-|>", color=ACCENT, lw=2))
-    ax.text(4.8, 2.62, "cross-attention", color=ACCENT, fontsize=18)
-    arrow(ax, 2.5, 1.4, 3.2, 1.4)
-    arrow(ax, 6.8, 1.4, 7.4, 1.4)
-    arrow(ax, 9.3, 1.4, 9.8, 1.4)
-    arrow(ax, 11.4, 1.4, 11.8, 1.4)
-    ax.annotate("", xy=(4.5, 0.6), xytext=(5.5, 0.6), arrowprops=dict(arrowstyle="-|>", color=MUTED, lw=1.5, connectionstyle="arc3,rad=-0.9"))
-    ax.text(7.7, 3.4, "SD 1.5 example: 48× fewer latent numbers.\nRepeated denoising uses this small space;\nother models use different shapes.", fontsize=18, color=INK)
+    ax.set_xlim(-.1, 13.3); ax.set_ylim(-1.0, 4.6)
+    box(ax, .1, 1.2, 2.1, 1.2, "Draw noise\n[1, 4, 64, 64]", fc="white", ec=MUTED, size=18)
+    box(ax, 3.0, 1.2, 2.1, 1.2, "Predict noise\nU-Net", fc=TINT, ec=PRIMARY, size=18)
+    box(ax, 5.9, 1.2, 2.1, 1.2, "Update latent\nScheduler", fc=ORANGE, ec=ACCENT, size=18)
+    box(ax, 8.8, 1.2, 1.8, 1.2, "Decode\nVAE", fc=TINT, ec=PRIMARY, size=18)
+    box(ax, 11.3, 1.2, 1.8, 1.2, "View image\n512 × 512", fc="white", ec=TEAL, size=18)
+    box(ax, 3.0, 3.25, 2.1, .9, "Encode text", fc=TINT, ec=PRIMARY, size=18)
+    ax.text(.1, 3.7, "Prompt tokens", fontsize=18, color=TEXT)
+    arrow(ax, 2.2, 3.7, 3.0, 3.7)
+    arrow(ax, 4.05, 3.25, 4.05, 2.4, color=PRIMARY)
+    ax.text(4.2, 2.95, "text vectors", fontsize=18, color=PRIMARY)
+    for begin, finish, label in ((2.2, 3.0, "latent"), (5.1, 5.9, "noise"),
+                                 (8.0, 8.8, "final latent"), (10.6, 11.3, "pixels")):
+        arrow(ax, begin, 1.8, finish, 1.8)
+        ax.text((begin + finish) / 2, 2.6, label, fontsize=18, ha="center", color=TEXT)
+    ax.plot([6.95, 6.95, 4.05], [1.2, .4, .4], ls="--", lw=1.8, color=MUTED)
+    ax.annotate("", xy=(4.05, 1.2), xytext=(4.05, .4),
+                arrowprops=dict(arrowstyle="-|>", color=MUTED, lw=1.8, ls="--"))
+    ax.text(5.5, .05, "updated latent + next timestep: repeat", ha="center", fontsize=18, color=TEXT)
+    ax.text(.1, -.55, "Grey: data. Blue: learned. Orange: update rule. Teal: output.", fontsize=18, color=TEXT)
     save(fig, path)
 
 
@@ -234,21 +210,21 @@ def flow_paths(path):
         for x0, z in zip(data, noise):
             if kind == "vp":
                 ang = t * np.pi / 2
-                pts = np.cos(ang) * z + np.sin(ang) * x0
+                pts = np.cos(ang) * x0 + np.sin(ang) * z
             else:
-                pts = (1 - t) * z + t * x0
+                pts = (1 - t) * x0 + t * z
             a.plot(pts[:, 0], pts[:, 1], color=PRIMARY if kind == "vp" else TEAL, lw=1.6, alpha=0.8)
-        a.scatter(noise[:, 0], noise[:, 1], color=MUTED, s=30, label="noise sample")
-        a.scatter(data[:, 0], data[:, 1], color=ACCENT, s=40, label="data sample")
+        a.scatter(noise[:, 0], noise[:, 1], color=MUTED, s=30, label="noise: t = 1")
+        a.scatter(data[:, 0], data[:, 1], color=ACCENT, s=40, label="data: t = 0")
         a.set_title(title, loc="left")
         a.set_xticks([])
         a.set_yticks([])
         a.set_aspect("equal")
     from matplotlib.lines import Line2D
-    fig.legend(handles=[Line2D([], [], marker="o", linestyle="", color=MUTED, label="Noise sample"),
-                        Line2D([], [], marker="o", linestyle="", color=ACCENT, label="Data sample")],
+    fig.legend(handles=[Line2D([], [], marker="o", linestyle="", color=MUTED, label="Noise: t = 1"),
+                        Line2D([], [], marker="o", linestyle="", color=ACCENT, label="Data: t = 0")],
                ncol=2, loc="lower center", bbox_to_anchor=(.5, -.03), fontsize=18)
-    fig.text(0.5, -.08, "Training pairs are schematic; learned sampling paths can be curved.", ha="center", fontsize=18, color=TEXT)
+    fig.text(0.5, -.08, "Training pairs: data at 0, noise at 1. Learned sampling paths can curve.", ha="center", fontsize=18, color=TEXT)
     save(fig, path)
 
 

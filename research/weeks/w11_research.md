@@ -1,0 +1,19 @@
+# R4 · Week 11: deploy and measure a local application
+
+Checked **2026-10-10**. Read: built slide titles and lab headings only. CPU budgets below are design targets, not measurements.
+
+**Explanations to adapt.**
+- An API is a service counter: submit a structured order and receive a structured reply. Adapt [FastAPI's tutorial](https://fastapi.tiangolo.com/tutorial/) to prompt → validated request → model → response. The counter does not imply every backend supports the same options or guarantees.
+- A Gradio interface wraps a Python function, like adding controls to an appliance; [Gradio quickstart](https://www.gradio.app/guides/quickstart) shows this directly. Buttons do not add authentication, responsible logging or production reliability automatically.
+
+**Five misconceptions.** (1) Streaming makes total generation time smaller automatically. (2) OpenAI-compatible means identical model behaviour. (3) Quantised weights describe total serving memory. (4) A public demo link supplies production security. (5) Fast local inference proves good throughput under concurrent users. Separate first-token latency, completion time, throughput and answer checks.
+
+**Current practice and versions.** Existing local example: [`HuggingFaceTB/SmolLM2-135M-Instruct`](https://huggingface.co/HuggingFaceTB/SmolLM2-135M-Instruct), not a frontier-model claim. [FastAPI TestClient](https://fastapi.tiangolo.com/tutorial/testing/) exercises endpoints inside the notebook; this tests application behaviour, not real network/streaming latency. [HF Spaces overview](https://huggingface.co/docs/hub/main/en/spaces-overview) now requires paid plans to create Gradio/Docker compute Spaces, with limited ZeroGPU eligibility for free accounts: do not promise generic free CPU hosting. Keep Gradio local and hosting optional. R0's Colab snapshot records torch `2.11.0+cpu`, transformers `5.18.0`, ipywidgets `7.7.1`; E2 must validate FastAPI/Gradio/httpx versions rather than claim they are preinstalled.
+
+**Own-style visuals and beginner barriers.** Draw validation → cache lookup → generation → output checks → redacted log; label prompt/JSON/token stream explicitly. Add a timestamp strip separating queue, first token and completion. Use a small deployment comparison table with local/cloud tradeoffs and measured evidence only. Lab barriers: HTTP status codes, nested JSON, decorators, threads, ports, generators and asynchronous code. Introduce synchronous TestClient before streaming; distinguish server-side secrets from browser-visible fields. Explain that keyword guardrails are demonstrations with failure cases.
+
+**CPU core proposal, target ≤15 minutes of waiting; unmeasured.** Generate a few capped local responses, exercise valid/invalid endpoint requests with TestClient, inspect a local Gradio app, and log duration/cache outcome without keys or personal prompts. Use a generation-length slider, keeping calls outside callbacks. Check schema, blocked requests and redaction; compare cold/warm timings with stated boundaries. Docker, external hosting, GPU serving engines and extensive quantisation/batching are stretch. Optional Gemini uses `google-genai` and R0's `gemini-3.5-flash-lite`, with bounded cached calls and local fallback. Retain R0's unresolved EEA/Swiss/UK client-distribution caveat; no billing change or paid API route. Pricing calculations must use dated verified inputs, never invented current rates.
+
+**Further reading:** [FastAPI tutorial](https://fastapi.tiangolo.com/tutorial/) · [FastAPI endpoint testing](https://fastapi.tiangolo.com/tutorial/testing/) · [Gradio quickstart](https://www.gradio.app/guides/quickstart) · [Current Spaces conditions](https://huggingface.co/docs/hub/main/en/spaces-overview) · [Spaces introduction video](https://www.youtube.com/watch?v=3bSVKNKb_PY) (check today's conditions above).
+
+Handoff: research complete; API network behaviour, latency, live Gemini and widget/app rendering unverified.

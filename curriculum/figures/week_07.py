@@ -1,5 +1,5 @@
-"""Week 7 figures: prompt anatomy, context engineering, plus REAL results harvested from the executed lab notebook
-(curriculum/assets/week_07/results.json, written by the solution notebook when GENAI_RESULTS_PATH is set)."""
+"""Week 7 figures: prompt anatomy, context engineering, plus stored results from an earlier GPU run of this lab
+with Qwen2.5-1.5B-Instruct (curriculum/assets/week_07/results.json). The CPU core exports results_cpu_core.json."""
 import json
 from pathlib import Path
 
@@ -39,38 +39,40 @@ def cover(path):
 
 
 def anatomy(path):
-    fig, ax = canvas(5.8)
-    parts=[("Application rules","Task boundaries and uncertainty behaviour","tool"),
-           ("Source context","Facts and documents; label untrusted content","data"),
-           ("Worked examples","Varied input-answer pairs in the desired format","data"),
-           ("Task + audience","A clear job, constraints and intended reader","tool"),
-           ("Output contract","Shape, fields, length and application checks","output")]
+    fig, ax = canvas(5.0)
+    parts=[("Rules","Task limits; what to do when unsure","tool"),
+           ("Sources","Facts; mark untrusted text","data"),
+           ("Examples","Varied pairs in the target format","data"),
+           ("Task","Job, audience, constraints","tool"),
+           ("Format","Fields, length, checks","output")]
     for i,(title,detail,role) in enumerate(parts):
-        y=4.55-i*.82
-        role_box(ax,.2,y,3.4,.65,title,role,size=18)
-        ax.text(4,y+.325,detail,fontsize=17,color=TEXT,va="center")
-    ax.text(.2,5.5,"A prompt is a task brief; order is something to test",fontsize=19,fontweight="bold",color=INK)
+        y=4.15-i*.82
+        role_box(ax,.2,y,3.0,.65,title,role,size=19)
+        ax.text(3.6,y+.325,detail,fontsize=18,color=TEXT,va="center")
     role_legend(ax,.15,size=16)
     save(fig,path)
 
 
 def context_eng(path):
-    fig, ax = canvas(5.5)
-    sources=[("App instructions","tool"),("User question","data"),("Source documents","data"),("Selected history","data"),("Tool results","tool")]
+    fig, ax = canvas(5.2)
+    blue = "#0072B2"
+    sources=[("Instructions","tool"),("Question","data"),("Documents","data"),("History","data"),("Tool results","tool")]
     for i,(name,role) in enumerate(sources):
         y=4.35-i*.7
-        role_box(ax,.2,y,3,.5,name,role,size=17)
+        role_box(ax,.2,y,2.2,.5,name,role,size=17)
         # Separate source lanes join only at the collection bus.
-        routed_arrow(ax,[(3.2,y+.25),(3.55,y+.25),(3.55,2.8),(4,2.8)])
-    role_box(ax,4,2.1,2.3,1.4,"Select\ncompress\norder","tool",size=20)
-    role_box(ax,7.15,1.2,2.8,3.3,"","data")
-    ax.text(8.55,4.8,"Token budget",fontsize=18,ha="center",color=INK,fontweight="bold")
-    for i,(name,role) in enumerate([("Rules","tool"),("Useful sources","data"),("Recent history","data"),("Question","data"),("Output reserve","output")]):
-        role_box(ax,7.3,3.8-i*.58,2.5,.45,name,role,size=16)
-    routed_arrow(ax,[(6.3,2.8),(7.15,2.8)])
-    role_box(ax,10.6,2.1,2.2,1.4,"Fixed\nmodel","model",size=21)
-    routed_arrow(ax,[(9.95,2.8),(10.6,2.8)])
-    ax.text(.2,.75,"Select relevant evidence; extra context can distract. Validate the final reply.",fontsize=16,color=TEXT)
+        routed_arrow(ax,[(2.4,y+.25),(2.7,y+.25),(2.7,2.8),(4.4,2.8)])
+    ax.text(3.55,2.95,"candidates",fontsize=16,ha="center",va="bottom",color=blue)
+    role_box(ax,4.4,2.1,1.7,1.4,"Select\ncompress\norder","tool",size=19)
+    routed_arrow(ax,[(6.1,2.8),(7.6,2.8)])
+    ax.text(6.85,2.95,"kept items",fontsize=16,ha="center",va="bottom",color=blue)
+    role_box(ax,7.6,1.2,2.4,3.3,"","data")
+    ax.text(8.8,4.8,"Token budget",fontsize=18,ha="center",color=INK,fontweight="bold")
+    for i,(name,role) in enumerate([("Rules","tool"),("Best sources","data"),("Recent turns","data"),("Question","data"),("Answer space","output")]):
+        role_box(ax,7.72,3.8-i*.58,2.16,.45,name,role,size=16)
+    routed_arrow(ax,[(10.0,2.8),(11.1,2.8)])
+    ax.text(10.55,2.95,"context",fontsize=16,ha="center",va="bottom",color=blue)
+    role_box(ax,11.1,2.1,1.7,1.4,"Fixed\nmodel","model",size=20)
     role_legend(ax,.15,size=16)
     save(fig,path)
 
@@ -110,7 +112,7 @@ def fewshot_results(path):
         ax = ax[0]
     else:
         fig, ax = plt.subplots(figsize=(10, 4.2))
-    _bar(ax, names, acc, f"Accuracy: {r[0]['n']} messages; Wilson 95% intervals", PRIMARY, ylim=(0, 1.15), err=err)
+    _bar(ax, names, acc, f"Stored GPU run: {r[0]['n']} messages; Wilson 95% intervals", PRIMARY, ylim=(0, 1.15), err=err)
     save(fig, path)
 
 
@@ -118,7 +120,7 @@ def cot_results(path):
     r = results()["reasoning"]
     names = [x["prompt"] for x in r]
     fig, ax = plt.subplots(1, 2, figsize=(13, 4.2))
-    _bar(ax[0], names, [x["accuracy"] for x in r], f"Accuracy on {r[0]['n']} word problems", TEAL)
+    _bar(ax[0], names, [x["accuracy"] for x in r], f"Stored GPU run: accuracy on {r[0]['n']} problems", TEAL)
     toks = [x["avg_tokens"] for x in r]
     _bar(ax[1], names, toks, "Output tokens per problem (cost)", ACCENT, fmt="{:.0f}", ylim=(0, max(toks) * 1.2))
     save(fig, path)
@@ -128,7 +130,7 @@ def injection_results(path):
     r = results()["injection"]
     names = sorted(r, key=lambda k: k != "naive")  # naive prompt first, then the defended one
     fig, ax = plt.subplots(figsize=(7.5, 4))
-    _bar(ax, [f"{k} prompt" for k in names], [r[k] for k in names], "Replies flagged by keyword heuristic", "#B91C1C", ylim=(0, 1.15))
+    _bar(ax, [f"{k} prompt" for k in names], [r[k] for k in names], "Stored GPU run: keyword-flagged replies", "#B91C1C", ylim=(0, 1.15))
     ax.tick_params(axis="x", rotation=0, labelsize=18)
     save(fig, path)
 

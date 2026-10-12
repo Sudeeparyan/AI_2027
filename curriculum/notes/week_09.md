@@ -52,7 +52,7 @@ A **modality** is a type of data with its own structure: text (discrete token se
 
 **Start here.** A vector is an ordered list of numbers. Each model prepares its own input: text tokens, image patches or sound features. Projection layers make comparable vector sizes. Normalising a vector sets its length to one, so a dot product measures direction similarity rather than raw length.
 
-**Small worked example.** Stored image scores for a query are 0.2, 0.7 and 0.4. The image at 0.7 ranks first. This is a model score, not a 70% probability that every query detail is present.
+**Small worked example.** Illustrative image scores for a query are 0.2, 0.7 and 0.4. The image at 0.7 ranks first. This is a model score, not a 70% probability that every query detail is present.
 
 A **representation** is a vector describing useful input features. Pre-training within one type can use BERT for text, ViT for images or Whisper's audio encoder. Alignment across types uses matching examples, such as image/caption, video/subtitle or audio/description. Web pairs give **weak supervision**: a label-like signal that may be noisy.
 
@@ -103,7 +103,7 @@ For classification, write a description of each class, such as "a photo of a dog
 
 **Lab results (CLIP ViT-B/32, CIFAR-10):** {{ZS_NOTES}} {{PREC_NOTES}}
 
-The lab's historical `recall_at_k` function computes **precision@k**: the fraction of returned pictures belonging to the query class, averaged over class queries. This differs from recall, which measures how many of all relevant items were retrieved. The benchmark recall@k metrics below concern a separate retrieval protocol.
+The lab's `precision_at_k` function measures **precision@k**: the fraction of the top k returned pictures that belong to the query class, averaged over the ten class queries. Recall@k asks a different question: how many of all relevant pictures appear in the top k. With about 100 cats in the 1,000-image gallery, a perfect top 10 has precision@10 = 1.0 but recall@10 of only about 0.1. The benchmark recall@k metrics below use a separate protocol, where each query has one matching caption or image.
 
 ![Zero-shot accuracy by prompt template](fig:zeroshot_results)
 
@@ -193,7 +193,15 @@ The plotted spectrogram illustrates frequency content over time. Whisper interna
 
 # Lab guide and answers
 
-**Runtime:** Colab T4 GPU or CPU. On the 4 GB GTX 1650 laptop GPU used to check this pack (9 October 2026), the full notebook ran in under a minute with the models and data already downloaded; the first run also downloads CLIP, Whisper, CIFAR-10 and the audio clips. The CPU path was not timed in full. Data: CIFAR-10 test images (`uoft-cs/cifar10`), LibriSpeech sample clips (`hf-internal-testing/librispeech_asr_dummy`, decoded with `soundfile`). **Hand-in:** plots, accuracy/retrieval/loss/WER tables, three answers.
+**CPU core:** CLIP ViT-B/32 encodes 1,000 CIFAR-10 test images once, then reuses the vectors. Whisper-base transcribes ten short LibriSpeech clips. Neither model is trained. The full core measured {{W09_CORE_TIME}} on {{W09_CORE_DATE}} using {{W09_CORE_THREADS}} CPU threads on the course laptop. This excludes installation, downloads, widgets and optional API calls; it is a local measurement, not a Colab timing. Data: `uoft-cs/cifar10` and `hf-internal-testing/librispeech_asr_dummy`, with audio decoded by `soundfile`. **Hand-in:** plots, accuracy/retrieval/loss/WER tables and the five exit-check answers.
+
+**Follow the notebook:** read the purpose and expected output before each cell, predict one result, run it, change one setting, then use the named check. The first worked example has six images and six captions: two `[6, 512]` tables produce a `[6, 6]` similarity table. Normalise both tables before multiplying. The diagonal marks intended pairs; a bright off-diagonal cell needs inspection.
+
+**Class plan (120 minutes):** recall and vocabulary 10; teacher demonstration 20; guided pairs 40; individual change 25; compare and review 15; exit check 10. These are suggested learning times, separate from measured computation.
+
+**Interactive practice:** the temperature slider recomputes the contrastive loss from fixed vectors. Predict whether smaller temperature makes the score distribution sharper. It does not retrain CLIP. SigLIP is an optional stretch with another download.
+
+**Optional hosted comparison:** enable exactly one of `USE_GEMINI` or `USE_OPENAI` in the shared setup. Both begin as `False`. The caption exercise compares short invented text examples through `ask_model()` and retains a complete local fallback. Keys stay in Colab Secrets, the environment or an explicitly selected private local `.env` file. OpenAI API usage may incur charges separately from a ChatGPT subscription. The local core needs neither a key nor API spending.
 
 ## TODOs
 
@@ -211,7 +219,7 @@ The plotted spectrogram illustrates frequency content over time. Whisper interna
 
 * *Audio decoding error mentioning `torchcodec`:* the notebook reads raw bytes and decodes with `soundfile` to avoid this dependency.
 * *Slow CLIP on CPU:* reduce `N` to 300 images.
-* *Different accuracies from the slides:* hardware and library versions differ slightly; the ranking of templates should be the same.
+* *Different accuracies from the slides:* check the image count, class texts, seed and package versions first. A smaller gallery or another shuffle need not give the same values or template ranking.
 
 # Practice questions with model answers
 
@@ -272,6 +280,8 @@ The plotted spectrogram illustrates frequency content over time. Whisper interna
 * [Google ML Crash Course: Embeddings](https://developers.google.com/machine-learning/crash-course/embeddings)
 * [3Blue1Brown / Welch Labs video on AI images and videos](https://www.youtube.com/watch?v=iv-5mZ_9CPY)
 
+- [Video: Stanford CS25 — From Large Language Models to Large Multimodal Models, Ming Ding (2024)](https://www.youtube.com/watch?v=cYfKQ6YG9Qo)
+
 # Link to the group project
 
 Projects involving images, audio or documents should decide which multimodal building blocks they need: a dual encoder for search or zero-shot tagging, Whisper for speech input, or a vision-language LLM for question answering (week 10). The evaluation plan must include a modality-appropriate metric (recall@k, accuracy, WER) and a check across relevant groups or conditions (accents, image types, languages).
@@ -286,9 +296,9 @@ Welcome to week 9, the start of the multimodal part of the module. So far our mo
 
 ## Slide 2: Outcomes
 
-Six outcomes, matching the descriptor's week 9 and MIMLO 2, which asks students to analyse and apply multimodal techniques including alignment and cross-modal reasoning. The first two are vocabulary and representations. The third, contrastive learning with CLIP, is the technical core and includes a loss students should be able to write and compute. The fourth surveys architectures and vision-language transformers. The fifth adds audio with Whisper and evaluation metrics, touching MIMLO 4. The sixth is the responsible-AI lens, which is particularly important for web-scale image and audio data.
+Three slide outcomes group six syllabus objectives, matching the descriptor's week 9 and MIMLO 2, which asks students to analyse and apply multimodal techniques including alignment and cross-modal reasoning. The first two are vocabulary and representations. The third, contrastive learning with CLIP, is the technical core and includes a loss students should be able to write and compute. The fourth surveys architectures and vision-language transformers. The fifth adds audio with Whisper and evaluation metrics, touching MIMLO 4. The sixth is the responsible-AI lens, which is particularly important for web-scale image and audio data.
 
-## Slide 3: Agenda
+## Lecture plan
 
 The plan follows the descriptor: definition of modalities; key concepts and terminology; representation learning across modalities; key multimodal architectures and models; contrastive learning with CLIP; and vision-language transformers. Section three is the longest because it contains the maths and the real results from the lab, run in advance on CIFAR-10. Take the break after section three.
 
@@ -459,7 +469,7 @@ Each score is the dot product of normalised image and text vectors, divided by t
 
 ## Slide 20: The loss in numbers (from the lab)
 
-These numbers come from the lab run: six CIFAR-10 images from different classes and six matching captions, embedded with the pretrained CLIP. With the correct pairing the loss is far below the uniform-choice baseline of the log of six, about 1.79, because each image is most similar to its own caption. When the captions are shuffled the loss rises above that baseline, because the model is now confidently wrong. Students compute exactly this in part four of the lab, which makes the abstract equation concrete.
+These numbers come from the lab run: six CIFAR-10 images from different classes and six matching captions, embedded with the pretrained CLIP. The correctly ordered pairs have a lower mean loss than the uniform-choice baseline ln 6, about 1.79. This does not require every intended pair to win: the horse image scores the cat caption above its horse caption. In the recorded shuffle, the intended matches move away from their target positions and the mean loss rises but remains below the uniform-choice baseline. A new shuffle can leave some pairs unchanged. Students compute both directions in part four of the lab.
 
 - {{LOSS_NOTES}}
 
@@ -473,7 +483,7 @@ Zero-shot classification with CLIP takes no training. Write each class name into
 
 ## Slide 22: Real results: prompt templates matter for CLIP too
 
-Real results from the lab: CLIP ViT-B/32 classifying CIFAR-10 test images zero-shot, with only the text prompt changing. Here the bare class name did slightly worse than the template a photo of a, because CLIP's text encoder was trained on natural captions. Averaging several templates, including ones that mention blur and low resolution, which suits CIFAR's tiny images, helped a little more. On 1,000 images a one-point difference is ten images, so check whether such gaps hold on other data. The lesson from week 7 transfers: prompts are part of the model and must be evaluated. Chance level is ten percent, so CLIP is doing a great deal without any CIFAR training.
+Real results from the lab: CLIP ViT-B/32 classifying CIFAR-10 test images zero-shot, with only the text prompt changing. Here the bare class name did slightly worse than the template a photo of a, consistent with CLIP's training on natural captions; this small comparison does not establish the cause. Averaging several templates, including ones that mention blur and low resolution, which suits CIFAR's tiny images, helped a little more. On 1,000 images a one-point difference is ten images, so check whether such gaps hold on other data. The lesson from week 7 transfers: prompts are part of the model and must be evaluated. Chance level is ten percent, so CLIP is doing a great deal without any CIFAR training.
 
 - {{ZS_NOTES}}
 
@@ -671,9 +681,9 @@ The lab implements the descriptor's tutorial: understand modalities and embeddin
 
 - Transcribe with Whisper, calculate WER, then search images with the transcript. Optional: SigLIP.
 
-- **Runtime:** Colab T4 GPU or CPU (slower). About 1 min on a 4 GB laptop GPU after downloads.
+- **Measured CPU core:** {{W09_CORE_TIME}} on {{W09_CORE_DATE}}, with {{W09_CORE_THREADS}} threads and cached models/data. Installation, downloads, widget interaction and optional APIs were not timed.
 
-- **Hand in:** notebook with similarity plots, accuracy table, retrieval metrics, loss values, WER table and three answers.
+- **Hand in:** notebook with similarity plots, accuracy table, retrieval metrics, loss values, WER table and the five exit-check answers.
 
 ## Slide 39: Summary
 

@@ -68,7 +68,9 @@ Kaplan et al. (2020) and Hoffmann et al. (2022) found that pre-training loss fol
 
 $$L(N, D) = E + \frac{A}{N^{\alpha}} + \frac{B}{D^{\beta}}, \quad E \approx 1.69,\; A \approx 406.4,\; B \approx 410.7,\; \alpha \approx 0.34,\; \beta \approx 0.28$$
 
-**Read the scaling fit.** E is the fitted baseline loss. The next term decreases with model size N, and the last decreases with data D. Doubling N multiplies its term by 2⁻⁰·³⁴, about 0.79, while keeping D fixed. These constants describe the study’s fit.
+**Read the scaling fit.** $L$ is predicted loss, $N$ counts parameters, $D$ counts training tokens, and $E$ is the fitted baseline loss.
+
+$A$ and $B$ are fitted scale factors. The exponents $\alpha$ and $\beta$ control how their terms decrease with model size and data. Doubling N multiplies its term by 2⁻⁰·³⁴, about 0.79, while keeping D fixed. These constants describe the study’s fit.
 
 For the Chinchilla study’s setup, about **20 training tokens per parameter** gave a useful balance under a fixed compute budget. GPT-3 used about 1.7 tokens per parameter and was under-trained by that criterion.
 
@@ -196,12 +198,9 @@ print(out[0]["generated_text"][-1]["content"])
 ```
 
 ```python
-import os
-from huggingface_hub import InferenceClient
-client = InferenceClient(api_key=os.environ["HF_TOKEN"])
-resp = client.chat.completions.create(model="Qwen/Qwen2.5-7B-Instruct",
-        messages=[{"role": "user", "content": "Name three LLM families."}],
-        max_tokens=100, temperature=0.2)
+# Optional hosted route used in the lab (one provider switch enabled in setup)
+answer = ask_model("Name three LLM families.", temperature=0.2, max_output_tokens=128)
+print(answer or "No provider response; the local model still answers.")
 ```
 
 ### A selection process
@@ -220,6 +219,48 @@ Define the task → list constraints (privacy, budget, latency, hardware, licenc
 | "Reasoning models show their true reasoning." | Visible reasoning may not be faithful; check answers. |
 | "Temperature 0 makes an API perfectly reproducible." | Server-side changes and non-determinism can still alter outputs. |
 
+# Worked examples to teach at the board
+
+## Count tokens, then cost
+
+The English sentence "Large language models predict the next token. Tokenisers split text into pieces." has 12 whitespace words. Suppose a tokenizer averages 1.25 pieces per English word and 3 per Irish word (the lab measured {{W06_TPW_EN_SMOL}} and {{W06_TPW_GA_SMOL}} for SmolLM2). Then the sentence needs about 12 × 1.25 = 15 tokens, and a request budget of 4,000 tokens holds roughly 3,200 English words but only about 1,300 Irish words. Price and speed scale with tokens, not words.
+
+## Apply top-p by hand
+
+1. Scores [2, 1, 0.5, 0.1, −1] → softmax [0.56, 0.21, 0.12, 0.08, 0.03].
+2. Cumulative mass (from unrounded probabilities): 0.56, 0.76, 0.89, 0.97, 1.00.
+3. With p = 0.8, keep tokens until the total first reaches 0.8: the first three (0.89).
+4. Renormalise: 0.56/0.89 = 0.63, 0.21/0.89 = 0.23, 0.12/0.89 = 0.14.
+
+Ask before revealing step 3: does top-p always keep the same number of tokens? (No: a confident distribution keeps fewer.)
+
+## Read a perplexity
+
+Perplexity is exp(mean negative log-likelihood). A mean loss of ln(8) ≈ 2.08 nats gives perplexity 8: on average the model was as uncertain as a uniform choice among eight tokens. In the lab, the code snippet scored {{W06_PPL_CODE}} and the shuffled sentence {{W06_PPL_SHUFFLED}}. Neither number says whether the model can answer a question correctly.
+
+## Estimate training compute
+
+C ≈ 6ND. For an illustrative N = 135 million parameters (the size of the lab's SmolLM2) and D = 2 trillion tokens: 6 × 1.35 × 10⁸ × 2 × 10¹² = 1.6 × 10²¹ operations, about one fiftieth of the 7 B example on the slide (8.4 × 10²² ÷ 1.6 × 10²¹ ≈ 52, because 7 billion ÷ 135 million ≈ 52). The estimate ignores attention cost and hardware efficiency.
+
+# Frequently confused ideas
+
+| Student question | Answer |
+|---|---|
+| Is a token the same as a word? | No. A token is a vocabulary piece; one word can be several tokens, and a space can be part of a token. |
+| Does temperature 0 mean the model is always right? | No. Greedy decoding picks the most probable token; the most probable continuation can still be false. |
+| Does a larger context window mean the model reads everything equally well? | No. Long inputs cost more, and material in the middle can be used less reliably. |
+| Is lower perplexity across two models proof of a better model? | No. Different tokenizers split text differently, so the numbers are not on the same scale. |
+| Does "open-weight" mean free for any use? | No. Read the licence; some restrict users, use cases or scale. |
+| Does visible "thinking" text show how the model really reached its answer? | Not necessarily. Check the final answer; the trace is not a guaranteed explanation. |
+
+# Self-checks with answers
+
+1. **A text has 300 words and a tokenizer averages 1.4 pieces per word. Roughly how many tokens?** *Answer:* about 420.
+2. **Scores give probabilities [0.5, 0.3, 0.1, 0.1]. Which tokens does top-p with p = 0.75 keep?** *Answer:* the first two (0.5 + 0.3 = 0.8 ≥ 0.75).
+3. **Why can the shuffled sentence have a much higher perplexity than the normal one?** *Answer:* the words are the same but their order is unusual, so the model assigns low probability to each next token.
+4. **Which family suits sentence classification with labelled data: encoder, encoder–decoder or decoder?** *Answer:* usually an encoder such as BERT, used for representations and labels; generation is not needed.
+5. **Name two things to check on a model card before using a model in a project.** *Answer:* any two of: intended use, licence, training-data disclosure, evaluation settings, known limitations, context limit or chat template.
+
 # Responsible AI lens: large language models
 
 * **Data source history (provenance) and copyright:** limited disclosure of training data; ongoing litigation.
@@ -230,17 +271,17 @@ Define the task → list constraints (privacy, budget, latency, hardware, licenc
 
 # Lab guide and answers
 
-**Runtime:** a Colab T4 GPU is intended; a CPU also works. Without a GPU the notebook takes a quick path: Flan-T5-small instead of Flan-T5-base, one reasoning run per mode and short token budgets. On the laptop CPU used to check this pack (9 October 2026), that path ran end to end in about 8 minutes with the models already downloaded. The GPU path was not timed for this release. The first run downloads about 4.5 GB of weights (BERT 0.44 GB, Flan-T5-base 0.99 GB, Qwen2.5-0.5B-Instruct 0.99 GB, GPT-2 0.55 GB, Qwen3-0.6B 1.5 GB), or about 3.8 GB on the CPU path, which uses Flan-T5-small (0.31 GB). Optional keys: `HF_TOKEN`, `GEMINI_API_KEY`. **Hand-in:** tables, decoding implementation, perplexity results, API log, four answers, model-card worksheet.
+**CPU core:** one small instruction checkpoint (`HuggingFaceTB/SmolLM2-135M-Instruct`) plus the BERT tokenizer. Replies are capped at 24 new tokens, manual continuations at 16 steps, and perplexity uses four short texts. On the course laptop ({{W06_CORE_THREADS}} CPU threads, models already downloaded) the complete core took {{W06_CORE_TIME}}, recorded on {{W06_CORE_DATE}}. A first run also downloads the checkpoint. **Optional stretches:** `RUN_TOKENIZER_STRETCH`, `RUN_FAMILY_STRETCH` (BERT, Flan-T5, Qwen2.5-0.5B, GPT-2) and `RUN_REASONING_STRETCH` (Qwen3-0.6B thinking) download several more gigabytes and are timed separately. **Optional API feedback:** keep `USE_GEMINI = False` and `USE_OPENAI = False` for the local route; enable exactly one to send one invented explanation for critique. OpenAI API use is billed separately from a ChatGPT subscription. **Hand-in:** token table, task-fit notes, filter implementations and samples, perplexity table, request log, four answers and the model-card worksheet.
 
-## TODOs
+## TODOs and expected outputs
 
-* **TODO 1** `len(tok(text, add_special_tokens=False)["input_ids"])` and divide by word count. Instructor run: English 1.25–1.42 tokens per word; Irish much higher, 2.54 (BERT) to 4.23 (Flan-T5); code 1.91 (Qwen, the most efficient) to 3.36 (Flan-T5). Tokenizers are deterministic, so students should get the same table.
-* **Part 2:** BERT ranks "dublin" first for the capital (0.73); Flan-T5 gives short answers; Qwen answers fluently but may be verbose. On the CPU path Flan-T5-small answered "ireland" to the capital question, a useful example of a small model's error; Flan-T5-base answered "dublin". BERT's "The doctor said [MASK]…" predicted "he" (0.72) well ahead of "she" (0.23): a bias example.
-* **TODO 2** `kth = topk(logits, k).values[..., -1]`; `masked_fill(logits < kth, -inf)`.
-* **TODO 3** sort, cumulative softmax, remove tokens whose preceding cumulative mass is already ≥ p, scatter back. Test: 3 tokens kept for p = 0.8.
-* **TODO 4** `math.exp(loss)`. The stored instructor run found code < normal < Irish < shuffled for these four texts; new runs need checking rather than an assumed ordering. Code perplexity is extremely low for Qwen, and Irish perplexity is much higher for GPT-2 than for Qwen.
-* **Part 5:** without keys only the local row appears; with keys, compare latency and token usage.
-* **Part 6:** both modes solve the word problem, thinking with about five times as many tokens. On the scheduling puzzle the 0.6 B model rarely reaches 20 h in either mode; in thinking mode it tends to run out of budget (instructor run on a GTX 1650 GPU: 1/3 correct without thinking, 0/3 with thinking, all three out of budget). On the CPU path the budgets are 40 answer tokens and 256 thinking tokens, so in the CPU check no run finished in either mode; treat CPU results as a demonstration of the budget, not of reasoning quality. Use this to discuss when test-time compute pays off.
+* **TODO 1** `n = len(tok(text, add_special_tokens=False)["input_ids"])`, then divide by `len(text.split())`. Tokenizers are deterministic, so every student gets the same table. Course-laptop run: English {{W06_TPW_EN_SMOL}} (SmolLM2) and {{W06_TPW_EN_BERT}} (BERT) pieces per word; Irish {{W06_TPW_GA_SMOL}} and {{W06_TPW_GA_BERT}}; code {{W06_TPW_CODE_SMOL}} and {{W06_TPW_CODE_BERT}}.
+* **Part 2 (core reply):** greedy SmolLM2 replies to four tasks. In the recorded run it replied "{{W06_REPLY_QA}}" to the capital question and "{{W06_REPLY_TRANSLATE}}" when asked to translate "How old are you?" into German, which is wrong. Use the error: a fluent reply is not a verified reply. The separately recorded family table (BERT, Flan-T5, Qwen) appears in the lecture section above.
+* **TODO 2** `kth = torch.topk(logits, k).values[..., -1:]`, then `logits.masked_fill(logits < kth, float("-inf"))`. Ties at the threshold are kept.
+* **TODO 3** sort descending, take the cumulative softmax, remove a token when the mass **before** it already reaches p, then scatter back to the original positions. Check: scores [2, 1, 0.5, 0.1, −1] with p = 0.8 keep three tokens, renormalised to [0.63, 0.23, 0.14].
+* **TODO 4** `math.exp(loss)`. Course-laptop run with SmolLM2: code {{W06_PPL_CODE}}, normal sentence {{W06_PPL_NORMAL}}, Irish {{W06_PPL_IRISH}}, shuffled words {{W06_PPL_SHUFFLED}}. The shuffled sentence uses the same words in a different order, so the jump shows that the model scores word order, not only vocabulary. Compare only within one model/tokenizer pair.
+* **Part 5:** the local request row always runs and records route, model, seconds and new tokens. With both API switches false, `ask_model()` returns `None` and the local rubric prints.
+* **Part 6:** the scorer checks final numbers, a closed thinking section and budget exhaustion on synthetic replies. It tests the bookkeeping, not Qwen's reasoning accuracy; the recorded Qwen3 experiment is described in the lecture section above.
 
 # Practice questions with model answers
 
@@ -590,15 +631,15 @@ These explanations retain the detail moved off crowded slides. Read the short sl
 
 - Count tokenizer pieces for the same English text, another language and code.
 
-- Compare BERT mask filling, Flan-T5 text-to-text and decoder chat on related inputs.
+- Check one small decoder's replies on four tasks; BERT, Flan-T5 and Qwen comparisons are an optional stretch.
 
 - Implement top-k and top-p selection. Compare greedy, beam and sampled outputs.
 
 - Compare perplexity of normal, shuffled and other-language text within each model/tokenizer pair.
 
-- Call a local or hosted model. Record output tokens and elapsed time. An API key is optional.
+- Log a local request (model, seconds, new tokens). Optional Gemini or OpenAI feedback uses one switch; no key is required.
 
-- Compare thinking modes across repeated runs. Check final answers, completion, tokens and time.
+- Check a synthetic reasoning scorer for final answers, completion and budget; live thinking runs are optional.
 
 ## Slide 39: Summary
 
@@ -645,15 +686,13 @@ print(out[0]["generated_text"][-1]["content"])
 
 ## Querying a hosted model through an API
 ```python
-import os
-from huggingface_hub import InferenceClient
+# Shared lab setup: set exactly one of USE_GEMINI / USE_OPENAI to True first.
+# The key comes from Colab Secrets or an environment variable and is never printed.
+answer = ask_model("Name three LLM families in one sentence.",
+                   temperature=0.2, max_output_tokens=128)
+print(answer or "No provider response; use the local model instead.")
 
-client = InferenceClient(api_key=os.environ["HF_TOKEN"])
-resp = client.chat.completions.create(
-    model="Qwen/Qwen2.5-7B-Instruct",
-    messages=[{"role": "user",
-               "content": "Name three LLM families."}],
-    max_tokens=100, temperature=0.2)
-print(resp.choices[0].message.content)
-print(resp.usage)   # prompt and completion tokens
+# The shared helper uses google.genai.Client and models.generate_content internally.
+# Its provider switch, credential lookup, cache and retry budget control that request.
+# Keep calls through ask_model() so a stored key alone never enables network access.
 ```

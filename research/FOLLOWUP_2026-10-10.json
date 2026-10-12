@@ -1,0 +1,3180 @@
+{
+  "checked_at_utc": "2026-10-10T13:39:42.781334+00:00",
+  "scope": "10 October follow-up checks, preserving the earlier full-course visual review as historical evidence.",
+  "checks": [
+    {
+      "command": [
+        ".venv\\Scripts\\python.exe",
+        "tools/test_lab_helpers.py"
+      ],
+      "started_at_utc": "2026-10-10T08:43:41.812313+00:00",
+      "seconds": 0.42,
+      "exit_code": 0,
+      "log": "build/revision_staging/followup_check_01.log",
+      "log_sha256": "35d8eb1832e7e36c56412cc9f4afd4d75c2a00d79df38c0168e2d3004b77aeaf"
+    },
+    {
+      "command": [
+        ".venv\\Scripts\\python.exe",
+        "tools/test_lab_runtime.py"
+      ],
+      "started_at_utc": "2026-10-10T08:43:42.264506+00:00",
+      "seconds": 0.83,
+      "exit_code": 0,
+      "log": "build/revision_staging/followup_check_02.log",
+      "log_sha256": "2670fb3b7ce62edeef0f0aff466393172b049ab4d4a5a929ab408cb6fbf752b2"
+    },
+    {
+      "command": [
+        ".venv\\Scripts\\python.exe",
+        "tools/test_beginner_support.py"
+      ],
+      "started_at_utc": "2026-10-10T13:37:43.838142+00:00",
+      "seconds": 0.66,
+      "exit_code": 0,
+      "log": "build/revision_staging/followup_check_03.log",
+      "log_sha256": "5af6ad39fd7ffe7510f08a97174049adbc166c2c895f01e667768ff1926ceae2"
+    },
+    {
+      "command": [
+        ".venv\\Scripts\\python.exe",
+        "tools/test_lab_evidence.py"
+      ],
+      "started_at_utc": "2026-10-10T13:37:44.505133+00:00",
+      "seconds": 0.84,
+      "exit_code": 0,
+      "log": "build/revision_staging/followup_check_04.log",
+      "log_sha256": "3c5818ebe9f9c6614192905bfd0fbf06c5e3b4724c9c36fcd7b853a369c49eee"
+    },
+    {
+      "command": [
+        ".venv\\Scripts\\python.exe",
+        "tools/verify_beginner.py"
+      ],
+      "started_at_utc": "2026-10-10T13:37:45.360147+00:00",
+      "seconds": 3.22,
+      "exit_code": 0,
+      "log": "build/revision_staging/followup_check_05.log",
+      "log_sha256": "d55a05596061b1d0f546468e6b4fe77f63322a8f89d08c47fcb4da536cc980db"
+    },
+    {
+      "command": [
+        ".venv\\Scripts\\python.exe",
+        "tools/test_technical_figures.py"
+      ],
+      "started_at_utc": "2026-10-10T08:44:01.493836+00:00",
+      "seconds": 68.97,
+      "exit_code": 0,
+      "log": "build/revision_staging/followup_check_06.log",
+      "log_sha256": "4d37414be4e0f61ec47b365d05f4b8194c29a0580552bf716360b08c8293b736"
+    },
+    {
+      "command": [
+        ".venv\\Scripts\\python.exe",
+        "tools/audit_prose.py"
+      ],
+      "started_at_utc": "2026-10-10T13:37:48.594183+00:00",
+      "seconds": 3.2,
+      "exit_code": 0,
+      "log": "build/revision_staging/followup_check_07.log",
+      "log_sha256": "313a93ce2baff5377f2a702a730df82652109b6f01e66f200c8dffded395b6a2"
+    },
+    {
+      "command": [
+        ".venv\\Scripts\\python.exe",
+        "tools/audit_inline_math.py"
+      ],
+      "started_at_utc": "2026-10-10T13:37:51.810764+00:00",
+      "seconds": 1.06,
+      "exit_code": 0,
+      "log": "build/revision_staging/followup_check_08.log",
+      "log_sha256": "d0ab7c194dee99381468afeea09c8a8cff6f4378f5ef2a09692a92636def10b8"
+    },
+    {
+      "command": [
+        ".venv\\Scripts\\python.exe",
+        "tools/audit_flat_bullets.py"
+      ],
+      "started_at_utc": "2026-10-10T13:37:52.886745+00:00",
+      "seconds": 0.81,
+      "exit_code": 0,
+      "log": "build/revision_staging/followup_check_09.log",
+      "log_sha256": "0b3005536fc7475c0e4792282e5f2090a26f7d05b75772b2010568a6ecef3b5e"
+    },
+    {
+      "command": [
+        ".venv\\Scripts\\python.exe",
+        "tools/audit_slide_text.py"
+      ],
+      "started_at_utc": "2026-10-10T13:37:53.721218+00:00",
+      "seconds": 0.67,
+      "exit_code": 0,
+      "log": "build/revision_staging/followup_check_10.log",
+      "log_sha256": "a7db98506d23fb05dd4565fe73bb4bf2b840cef9533d70bf6eea92b4c946fff3"
+    },
+    {
+      "command": [
+        ".venv\\Scripts\\python.exe",
+        "tools/audit_coverage.py"
+      ],
+      "started_at_utc": "2026-10-10T13:37:54.409178+00:00",
+      "seconds": 1.26,
+      "exit_code": 0,
+      "log": "build/revision_staging/followup_check_11.log",
+      "log_sha256": "d2169d2f9de2544e7a2fbe65393a4b6a6ff0884ae611be75663505fef909793d"
+    },
+    {
+      "command": [
+        ".venv\\Scripts\\python.exe",
+        "tools/verify_pilot_artifacts.py"
+      ],
+      "started_at_utc": "2026-10-10T13:37:55.686877+00:00",
+      "seconds": 63.23,
+      "exit_code": 0,
+      "log": "build/revision_staging/followup_check_12.log",
+      "log_sha256": "e6f6d965809d47cab22a040063ab158fecc619dc55db243421e85fed98d77b4e"
+    },
+    {
+      "command": [
+        ".venv\\Scripts\\python.exe",
+        "tools/compare_lab_code.py"
+      ],
+      "started_at_utc": "2026-10-10T13:38:58.940181+00:00",
+      "seconds": 1.34,
+      "exit_code": 0,
+      "log": "build/revision_staging/followup_check_13.log",
+      "log_sha256": "3e3dfe549c35ee6ab38c8841d4159c0f9b893e198a071bb30f7fd5cb78db294e"
+    },
+    {
+      "command": [
+        ".venv\\Scripts\\python.exe",
+        "tools/check_links.py"
+      ],
+      "started_at_utc": "2026-10-10T08:52:03.774197+00:00",
+      "seconds": 50.45,
+      "exit_code": 0,
+      "log": "build/revision_staging/followup_check_14.log",
+      "log_sha256": "25e3c36cb086b89a183e07c4790c37ccccc8d77f8fa7020f5d0473dcb91b276d"
+    },
+    {
+      "command": [
+        "node",
+        "tools/test_technical_diagrams.js"
+      ],
+      "started_at_utc": "2026-10-10T13:39:00.288840+00:00",
+      "seconds": 1.22,
+      "exit_code": 0,
+      "log": "build/revision_staging/followup_check_15.log",
+      "log_sha256": "6adc8ab571636c96ec0bb76e4046a3743416641696cfe6b4b48d89b310a3c26b"
+    },
+    {
+      "command": [
+        "node",
+        "tools/test_teaching_notes.js"
+      ],
+      "started_at_utc": "2026-10-10T13:39:01.500398+00:00",
+      "seconds": 0.12,
+      "exit_code": 0,
+      "log": "build/revision_staging/followup_check_16.log",
+      "log_sha256": "28138dc358c90e8d1e58e6f750a9b093eb3d299eaac2339880617a8e1b254161"
+    },
+    {
+      "command": [
+        ".venv\\Scripts\\python.exe",
+        "tools/harvest_figures.py",
+        "--week",
+        "9",
+        "--dry-run"
+      ],
+      "started_at_utc": "2026-10-10T13:39:01.645316+00:00",
+      "seconds": 0.5,
+      "exit_code": 0,
+      "log": "build/revision_staging/followup_check_17.log",
+      "log_sha256": "2b5f17c37f561218b8eef94c045705706f735e1171a88b03c129a6c7e679bdf3"
+    },
+    {
+      "command": [
+        ".venv\\Scripts\\python.exe",
+        "tools/harvest_figures.py",
+        "--week",
+        "10",
+        "--dry-run"
+      ],
+      "started_at_utc": "2026-10-10T13:39:02.157696+00:00",
+      "seconds": 0.5,
+      "exit_code": 0,
+      "log": "build/revision_staging/followup_check_18.log",
+      "log_sha256": "665ceba98ef191531ac352d50d195aad09338e5ef9641a0772a2b222d7afe2bd"
+    },
+    {
+      "command": [
+        ".venv\\Scripts\\python.exe",
+        "tools/harvest_figures.py",
+        "--week",
+        "11",
+        "--dry-run"
+      ],
+      "started_at_utc": "2026-10-10T13:39:02.662253+00:00",
+      "seconds": 0.56,
+      "exit_code": 0,
+      "log": "build/revision_staging/followup_check_19.log",
+      "log_sha256": "9dd7de687079137c2bfbae2f6f890de538eea724dc14ffaffd0553823c41d9f1"
+    },
+    {
+      "command": [
+        ".venv\\Scripts\\python.exe",
+        "tools/harvest_figures.py",
+        "--week",
+        "12",
+        "--dry-run"
+      ],
+      "started_at_utc": "2026-10-10T13:39:03.220263+00:00",
+      "seconds": 0.47,
+      "exit_code": 0,
+      "log": "build/revision_staging/followup_check_20.log",
+      "log_sha256": "e76be263322d5ac9f84ac05df0023b0ca1952f60eda6f9641eaab939234dcf2d"
+    },
+    {
+      "command": [
+        ".venv\\Scripts\\python.exe",
+        "tools/test_link_checks.py"
+      ],
+      "started_at_utc": "2026-10-10T08:53:02.112772+00:00",
+      "seconds": 0.89,
+      "exit_code": 0,
+      "log": "build/revision_staging/followup_check_21.log",
+      "log_sha256": "9390bc7897d5e40e37662ab621298c441a24be5499aabedec55a36ccf0887d3d"
+    },
+    {
+      "command": [
+        ".venv\\Scripts\\python.exe",
+        "tools/build_week.py",
+        "--weeks",
+        "1-12"
+      ],
+      "started_at_utc": "2026-10-10T13:23:15.611640+00:00",
+      "seconds": 90.0,
+      "exit_code": 0,
+      "log": "build/revision_staging/followup_check_22.log",
+      "log_sha256": "8e0f9e5bac4f460bcab74e3a2af07ec75f3d757dbc47893a23963ea460232ae8"
+    },
+    {
+      "command": [
+        ".venv\\Scripts\\python.exe",
+        "tools/build_course.py"
+      ],
+      "started_at_utc": "2026-10-10T13:24:45.636470+00:00",
+      "seconds": 8.47,
+      "exit_code": 0,
+      "log": "build/revision_staging/followup_check_23.log",
+      "log_sha256": "f9c1ba9a130ea064986821be43eff8d1748108d7ab4ea1afa10c9689895fa959"
+    },
+    {
+      "command": [
+        ".venv\\Scripts\\python.exe",
+        "tools/render.py",
+        "--weeks",
+        "6-12"
+      ],
+      "started_at_utc": "2026-10-10T13:24:54.132425+00:00",
+      "seconds": 526.11,
+      "exit_code": 0,
+      "log": "build/revision_staging/followup_check_24.log",
+      "log_sha256": "4e98bde00fc34380f3260bf9b9a066a11b2e44e7068d0f7245e17c5380f4791e"
+    },
+    {
+      "command": [
+        ".venv\\Scripts\\python.exe",
+        "tools/render_course.py"
+      ],
+      "started_at_utc": "2026-10-10T13:33:40.242334+00:00",
+      "seconds": 19.38,
+      "exit_code": 0,
+      "log": "build/revision_staging/followup_check_25.log",
+      "log_sha256": "e99f1c54d3d15a4b27f1c00a16660b324703809adbabad62e01ad57ada99c6ef"
+    },
+    {
+      "command": [
+        ".venv\\Scripts\\python.exe",
+        "tools/lint_figures.py",
+        "--weeks",
+        "1-12"
+      ],
+      "started_at_utc": "2026-10-10T13:33:59.614510+00:00",
+      "seconds": 20.61,
+      "exit_code": 0,
+      "log": "build/revision_staging/followup_check_26.log",
+      "log_sha256": "f372870fb2b39bcd2c6f15c103bf0ed90df9f51ef66cdbe9a44e3d42bf0b4230"
+    },
+    {
+      "command": [
+        ".venv\\Scripts\\python.exe",
+        "tools/audit_figure_text.py",
+        "--weeks",
+        "1-12"
+      ],
+      "started_at_utc": "2026-10-10T13:34:20.232115+00:00",
+      "seconds": 21.09,
+      "exit_code": 0,
+      "log": "build/revision_staging/followup_check_27.log",
+      "log_sha256": "b47e063eddc9d998c0281fa387d8924e8f7193108e354d85bf52d166ce8fe831"
+    },
+    {
+      "command": [
+        ".venv\\Scripts\\python.exe",
+        "tools/test_output_files.py"
+      ],
+      "started_at_utc": "2026-10-10T13:34:41.346280+00:00",
+      "seconds": 0.61,
+      "exit_code": 0,
+      "log": "build/revision_staging/followup_check_28.log",
+      "log_sha256": "459e06ce4c6a0f8964037c3ca597aa84b3af760697a0fc82f404f4c94bad08a0"
+    },
+    {
+      "command": [
+        "node",
+        "tools/test_output_files.js"
+      ],
+      "started_at_utc": "2026-10-10T13:34:41.971910+00:00",
+      "seconds": 0.28,
+      "exit_code": 0,
+      "log": "build/revision_staging/followup_check_29.log",
+      "log_sha256": "209377e083b3aef9ce96edd53c081283c1654be219ca8aa78cbd3bee934fd324"
+    }
+  ],
+  "earlier_failed_attempts": [
+    {
+      "command": [
+        ".venv\\Scripts\\python.exe",
+        "tools/check_links.py"
+      ],
+      "started_at_utc": "2026-10-10T08:45:44.083180+00:00",
+      "seconds": 41.25,
+      "exit_code": 1,
+      "log": "build/revision_staging/followup_check_14_first_failed.log",
+      "log_sha256": "947a274df0d1c2e714ccfaa16bd5297bba1fd62953a1da1c46fd8040fb96e573"
+    },
+    {
+      "command": [
+        ".venv\\Scripts\\python.exe",
+        "tools/build_week.py",
+        "--weeks",
+        "1-12"
+      ],
+      "started_at_utc": "2026-10-10T13:14:09.211180+00:00",
+      "seconds": 73.59,
+      "exit_code": 1,
+      "log": "build/revision_staging/followup_check_22_first_failed.log",
+      "log_sha256": "19488f4ef59821e6d2d84e6378ac87652128786e99aa48b17c8edc2cac101efd"
+    },
+    {
+      "command": [
+        ".venv\\Scripts\\python.exe",
+        "tools/build_week.py",
+        "--weeks",
+        "1-12"
+      ],
+      "started_at_utc": "2026-10-10T13:15:59.863696+00:00",
+      "seconds": 32.06,
+      "exit_code": 1,
+      "log": "build/revision_staging/followup_check_22_failed_02.log",
+      "log_sha256": "f170146be9e0d616497cbac90be82b75de98af5fa2f4c36b5db3c191263c1fb4"
+    },
+    {
+      "command": [
+        ".venv\\Scripts\\python.exe",
+        "tools/verify_beginner.py"
+      ],
+      "started_at_utc": "2026-10-10T13:36:12.169594+00:00",
+      "seconds": 3.67,
+      "exit_code": 1,
+      "log": "build/revision_staging/followup_check_05_first_failed.log",
+      "log_sha256": "f59c43fe6b471e7ae566512db31f529ca75115c9b6e67f9de61bea241221243a"
+    }
+  ],
+  "protected_inputs": {
+    "ok": true,
+    "baseline": "build\\revision_2026_10\\protected_hashes.json",
+    "files_checked": 2633,
+    "modified": [],
+    "missing": [],
+    "added": [],
+    "nonprotected_baseline_entries_skipped": [],
+    "unchanged": true
+  },
+  "links": {
+    "checked": "2026-10-10",
+    "total": 182,
+    "reachable": 178,
+    "blocked": [
+      {
+        "id": "foster2023",
+        "url": "https://www.oreilly.com/library/view/generative-deep-learning/9781098134174/",
+        "ok": false,
+        "status": 403,
+        "title": null,
+        "attempt_count": 1,
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": 403
+          }
+        ],
+        "blocked": true,
+        "note": "blocked automated check; open manually",
+        "final_url": "https://www.oreilly.com/library/view/generative-deep-learning/9781098134174/"
+      },
+      {
+        "id": "tunstall2022",
+        "url": "https://www.oreilly.com/library/view/natural-language-processing/9781098136789/",
+        "ok": false,
+        "status": 403,
+        "title": null,
+        "attempt_count": 1,
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": 403
+          }
+        ],
+        "blocked": true,
+        "note": "blocked automated check; open manually",
+        "final_url": "https://www.oreilly.com/library/view/natural-language-processing/9781098136789/"
+      },
+      {
+        "id": "rothman2022",
+        "url": "https://www.packtpub.com/en-us/product/transformers-for-natural-language-processing-9781803247335",
+        "ok": false,
+        "status": 403,
+        "title": null,
+        "attempt_count": 1,
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": 403
+          }
+        ],
+        "blocked": true,
+        "note": "blocked automated check; open manually",
+        "final_url": "https://www.packtpub.com/en-us/product/transformers-for-natural-language-processing-9781803247335"
+      },
+      {
+        "id": "p_stochastic_parrots",
+        "url": "https://dl.acm.org/doi/10.1145/3442188.3445922",
+        "ok": false,
+        "status": 403,
+        "title": null,
+        "attempt_count": 1,
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": 403
+          }
+        ],
+        "blocked": true,
+        "note": "blocked automated check; open manually",
+        "final_url": "https://dl.acm.org/doi/10.1145/3442188.3445922"
+      }
+    ],
+    "failures": []
+  },
+  "smoke_runs": [
+    {
+      "week": 1,
+      "mode": "smoke",
+      "ok": true,
+      "error": null,
+      "started_at_utc": "2026-10-10T08:21:49.532405+00:00",
+      "timeout_per_cell": 1800,
+      "notebook_sha256": "d5b03bf2ca174bbbb39c1744e6280fa1134e478cdc5de4ea5018e046cbd0235b",
+      "runner_python": "C:\\Users\\sudee\\Downloads\\Generative_AI_2027_Teaching_Pack\\AI2027_Project\\.venv-labs\\Scripts\\python.exe",
+      "seconds": 64.1,
+      "executed_notebook_sha256": "e264b88ee5f34b65ad7537413178bfb8ae2fccf04a2d65e0077e39a36191f715",
+      "delivered_notebook_matches": true,
+      "executed_notebook_matches": true
+    },
+    {
+      "week": 2,
+      "mode": "smoke",
+      "ok": true,
+      "error": null,
+      "started_at_utc": "2026-10-10T08:43:42.878388+00:00",
+      "timeout_per_cell": 1800,
+      "notebook_sha256": "67107a9e09d74b2445e43a3aec64c36d2843442d612328d7671dc32377b40d52",
+      "runner_python": "C:\\Users\\sudee\\Downloads\\Generative_AI_2027_Teaching_Pack\\AI2027_Project\\.venv-labs\\Scripts\\python.exe",
+      "seconds": 39.8,
+      "executed_notebook_sha256": "207a43f55bdd6f52246a080e29a58f37dc01adef274dc1d868a924a02edaa09f",
+      "delivered_notebook_matches": true,
+      "executed_notebook_matches": true
+    },
+    {
+      "week": 3,
+      "mode": "smoke",
+      "ok": true,
+      "error": null,
+      "started_at_utc": "2026-10-10T08:44:23.027479+00:00",
+      "timeout_per_cell": 1800,
+      "notebook_sha256": "19b13da3ba85294383646182bc48191fcb99d6d5a3b025f4552ff3d226f1322a",
+      "runner_python": "C:\\Users\\sudee\\Downloads\\Generative_AI_2027_Teaching_Pack\\AI2027_Project\\.venv-labs\\Scripts\\python.exe",
+      "seconds": 73.7,
+      "executed_notebook_sha256": "9b85095371a1d15ac83af01d14415a0ec216c842b9814dd1918ae99db196f538",
+      "delivered_notebook_matches": true,
+      "executed_notebook_matches": true
+    },
+    {
+      "week": 4,
+      "mode": "smoke",
+      "ok": true,
+      "error": null,
+      "started_at_utc": "2026-10-10T08:45:36.866699+00:00",
+      "timeout_per_cell": 1800,
+      "notebook_sha256": "5743ed2775bef422da90462ef371eedc9afbc0001d6bd69f21f0f265b81ece30",
+      "runner_python": "C:\\Users\\sudee\\Downloads\\Generative_AI_2027_Teaching_Pack\\AI2027_Project\\.venv-labs\\Scripts\\python.exe",
+      "seconds": 135.3,
+      "executed_notebook_sha256": "dd2d626d22ab61d43a01be195973ba6f6d1aabe17f02893d5e0a101d0063a394",
+      "delivered_notebook_matches": true,
+      "executed_notebook_matches": true
+    },
+    {
+      "week": 5,
+      "mode": "smoke",
+      "ok": true,
+      "error": null,
+      "started_at_utc": "2026-10-10T08:22:53.936036+00:00",
+      "timeout_per_cell": 1800,
+      "notebook_sha256": "e050310f2d3b6961eec207652912a91ea5161e78542c305b3fb77cf3817a416a",
+      "runner_python": "C:\\Users\\sudee\\Downloads\\Generative_AI_2027_Teaching_Pack\\AI2027_Project\\.venv-labs\\Scripts\\python.exe",
+      "seconds": 53.7,
+      "executed_notebook_sha256": "c0c715caafee8d78dae806806bb067e3bb8893588d23dc010fda49431efc9616",
+      "delivered_notebook_matches": true,
+      "executed_notebook_matches": true
+    },
+    {
+      "week": 6,
+      "mode": "smoke",
+      "ok": true,
+      "error": null,
+      "started_at_utc": "2026-10-10T13:22:24.126801+00:00",
+      "timeout_per_cell": 1800,
+      "notebook_sha256": "0afcc8ba57f3cf88958a223e2d42bc781eeeffdd080f0902be5b1b955138d1c6",
+      "runner_python": "C:\\Users\\sudee\\Downloads\\Generative_AI_2027_Teaching_Pack\\AI2027_Project\\.venv-labs\\Scripts\\python.exe",
+      "seconds": 229.1,
+      "executed_notebook_sha256": "4ad6f25f1f6eacde0e8eac7e609958c18d35f4aba39595782da751ad3e3c4347",
+      "delivered_notebook_matches": true,
+      "executed_notebook_matches": true
+    },
+    {
+      "week": 7,
+      "mode": "smoke",
+      "ok": true,
+      "error": null,
+      "started_at_utc": "2026-10-10T13:22:24.246013+00:00",
+      "timeout_per_cell": 1800,
+      "notebook_sha256": "aff578316a2dd92f49328472adef437023eabfda57f25902c70451c038c39443",
+      "runner_python": "C:\\Users\\sudee\\Downloads\\Generative_AI_2027_Teaching_Pack\\AI2027_Project\\.venv-gpu\\Scripts\\python.exe",
+      "seconds": 452.7,
+      "executed_notebook_sha256": "22e28b7658df30e71e26a932e4c42b6912d5c81f23e12ce54950aeacde0c2d8c",
+      "delivered_notebook_matches": true,
+      "executed_notebook_matches": true
+    },
+    {
+      "week": 8,
+      "mode": "smoke",
+      "ok": true,
+      "error": null,
+      "started_at_utc": "2026-10-10T13:22:24.122834+00:00",
+      "timeout_per_cell": 1800,
+      "notebook_sha256": "292abbc3cc1c6988c3d86878bb4b216bc134e00b0956aaddff0479038fbd2081",
+      "runner_python": "C:\\Users\\sudee\\Downloads\\Generative_AI_2027_Teaching_Pack\\AI2027_Project\\.venv-labs\\Scripts\\python.exe",
+      "seconds": 230.7,
+      "executed_notebook_sha256": "aae4c1c287b8a89dfae9f5110203d3d7a862d279173d73acaa359763c59390ca",
+      "delivered_notebook_matches": true,
+      "executed_notebook_matches": true
+    },
+    {
+      "week": 9,
+      "mode": "smoke",
+      "ok": true,
+      "error": null,
+      "started_at_utc": "2026-10-10T13:26:13.444324+00:00",
+      "timeout_per_cell": 1800,
+      "notebook_sha256": "13ff9021b76cc327f72eaa480ac781fca1a2883a884960d4de65c6307a867335",
+      "runner_python": "C:\\Users\\sudee\\Downloads\\Generative_AI_2027_Teaching_Pack\\AI2027_Project\\.venv-labs\\Scripts\\python.exe",
+      "seconds": 79.9,
+      "executed_notebook_sha256": "d828eb141ad006c1ea65e95ac7a8b2f8ba3103fe2eda2c9065d87e9293f4998d",
+      "delivered_notebook_matches": true,
+      "executed_notebook_matches": true
+    },
+    {
+      "week": 10,
+      "mode": "smoke",
+      "ok": true,
+      "error": null,
+      "started_at_utc": "2026-10-10T13:26:15.024047+00:00",
+      "timeout_per_cell": 1800,
+      "notebook_sha256": "0a2edb61a0fcde654e8703b1df651064599a0c5c8be799428f81c4a42abd734d",
+      "runner_python": "C:\\Users\\sudee\\Downloads\\Generative_AI_2027_Teaching_Pack\\AI2027_Project\\.venv-labs\\Scripts\\python.exe",
+      "seconds": 258.7,
+      "executed_notebook_sha256": "fb3e8c5f309e7a424a33afe2670b12a1c7e5551b5f4c48c17cacae290312161d",
+      "delivered_notebook_matches": true,
+      "executed_notebook_matches": true
+    },
+    {
+      "week": 11,
+      "mode": "smoke",
+      "ok": true,
+      "error": null,
+      "started_at_utc": "2026-10-10T13:27:33.660396+00:00",
+      "timeout_per_cell": 1800,
+      "notebook_sha256": "50a1d1bd4bfff55e364202ad6c2a4f672d3de09a748a7120af918416e32401d4",
+      "runner_python": "C:\\Users\\sudee\\Downloads\\Generative_AI_2027_Teaching_Pack\\AI2027_Project\\.venv-labs\\Scripts\\python.exe",
+      "seconds": 155.7,
+      "executed_notebook_sha256": "bd74525b159ae764ecca369f6d8e9b66abcce29687a59bf1a91149aae76ef969",
+      "delivered_notebook_matches": true,
+      "executed_notebook_matches": true
+    },
+    {
+      "week": 12,
+      "mode": "smoke",
+      "ok": true,
+      "error": null,
+      "started_at_utc": "2026-10-10T13:30:33.938591+00:00",
+      "timeout_per_cell": 1800,
+      "notebook_sha256": "36286f7ff5f246265c7d4525c5f893c4c7ce591fc7769c1ec28ffb448f5237d2",
+      "runner_python": "C:\\Users\\sudee\\Downloads\\Generative_AI_2027_Teaching_Pack\\AI2027_Project\\.venv-labs\\Scripts\\python.exe",
+      "seconds": 77.7,
+      "executed_notebook_sha256": "88aecfc299f04b367b7fafb71739d161f5d45b7fd2a6b783e11c47ed6e324f8f",
+      "delivered_notebook_matches": true,
+      "executed_notebook_matches": true
+    }
+  ],
+  "follow_up_full_runs": [
+    {
+      "week": 1,
+      "mode": "full",
+      "ok": true,
+      "error": null,
+      "started_at_utc": "2026-10-10T08:23:49.787499+00:00",
+      "timeout_per_cell": 1800,
+      "notebook_sha256": "d5b03bf2ca174bbbb39c1744e6280fa1134e478cdc5de4ea5018e046cbd0235b",
+      "runner_python": "C:\\Users\\sudee\\Downloads\\Generative_AI_2027_Teaching_Pack\\AI2027_Project\\.venv-labs\\Scripts\\python.exe",
+      "seconds": 278.5,
+      "executed_notebook_sha256": "72e2bd45a68f1e869f7bccbb5385f188371829ffe74ec1ade1af09e2d349c696",
+      "delivered_notebook_matches": true,
+      "executed_notebook_matches": true,
+      "delivered_code_matches": true
+    },
+    {
+      "week": 6,
+      "mode": "full",
+      "ok": true,
+      "error": null,
+      "started_at_utc": "2026-10-10T08:21:49.551035+00:00",
+      "timeout_per_cell": 1800,
+      "notebook_sha256": "455fcca847d944e4384ae3bd62c4e5f3730f363e0e46c5f901149601379d3aee",
+      "runner_python": "C:\\Users\\sudee\\Downloads\\Generative_AI_2027_Teaching_Pack\\AI2027_Project\\.venv-labs\\Scripts\\python.exe",
+      "seconds": 803.0,
+      "executed_notebook_sha256": "093ede4d4d1a762614fc9a8860e118faa22b50bb28c9752f65963c33db99ddbd",
+      "delivered_notebook_matches": false,
+      "executed_notebook_matches": true,
+      "delivered_code_matches": true
+    },
+    {
+      "week": 11,
+      "mode": "full",
+      "ok": true,
+      "error": null,
+      "started_at_utc": "2026-10-10T08:12:46.021275+00:00",
+      "timeout_per_cell": 7200,
+      "notebook_sha256": "839eb621f094f85ea4ae80b1622c4c9fba17fe2910e1547ef24f0eabd2ece34d",
+      "runner_python": "C:\\Users\\sudee\\Downloads\\Generative_AI_2027_Teaching_Pack\\AI2027_Project\\.venv-gpu\\Scripts\\python.exe",
+      "seconds": 420.4,
+      "executed_notebook_sha256": "37f9820c08ef215466443a9922a61fff5cb938daf0e39ba0e5587f9cbe7d3fbf",
+      "delivered_notebook_matches": false,
+      "executed_notebook_matches": true,
+      "delivered_code_matches": true
+    }
+  ],
+  "visual_review": {
+    "changed_pngs": 161,
+    "new_or_without_baseline_pngs": 84,
+    "additional_week10_images_without_old_hashes": 82,
+    "individually_reviewed_current_pngs": 245,
+    "unresolved": [],
+    "removed_pngs": [],
+    "reviewed_images": [
+      {
+        "path": "build/render/week_02/notes-26.png",
+        "sha256": "9c79a228a3a8a08627ab2b8c71da2a4bf14386a54144fb52d5a08ccf52ab0c9b",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:19:03.203357+00:00",
+        "status": "pass",
+        "finding": "Individually viewed. Reconstruction cost is explicitly the negative reconstruction term; bullets consistently penalise inaccurate reconstructions. ELBO lower-bound explanation remains readable. Headings, bullets and footer fit without clipping or overlap."
+      },
+      {
+        "path": "build/render/week_02/notes-27.png",
+        "sha256": "42be829f827dd48c2dc230b1a70f2b64c9bb30f18c614042127bc3b1a4a70777",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:19:03.203357+00:00",
+        "status": "pass",
+        "finding": "Individually viewed. KL cost continues cleanly from the preceding page. Gaussian KL examples, reconstruction likelihood qualifications and reparameterisation code are legible; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_02/slides-19.png",
+        "sha256": "670e4361d53d21ad50d2d0209c0cec590caaec258dd4d3f8aa39506faef3090f",
+        "dimensions": [
+          1334,
+          750
+        ],
+        "viewed_at_utc": "2026-10-10T08:19:03.203357+00:00",
+        "status": "pass",
+        "finding": "Individually viewed. Both columns are named costs and lower values match better reconstruction or prior agreement. The unsupported code-separation guarantee is removed. Title, bullets and beta callout are clear and fit."
+      },
+      {
+        "path": "build/render/week_03/notes-10.png",
+        "sha256": "2bea7d343838531d9dbee68d92a07e305455adb8e326d446a7edf6f80413ef7b",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:19:03.203357+00:00",
+        "status": "pass",
+        "finding": "Individually viewed. Basic GANs are described as lacking a tractable explicit density, consistent with the following generated-distribution notation. Architecture diagram, minimax equation and explanatory paragraphs are intact and readable."
+      },
+      {
+        "path": "build/render/week_03/slides-42.png",
+        "sha256": "c00a7932109a43737679374247893d52dd1d68ff3bdced439164ba3e6eab75ee",
+        "dimensions": [
+          1334,
+          750
+        ],
+        "viewed_at_utc": "2026-10-10T08:19:03.203357+00:00",
+        "status": "pass",
+        "finding": "Individually viewed. GAN likelihood cell now says no tractable explicit likelihood. All comparison rows fit clearly; no text clipping, overlap or title issue."
+      },
+      {
+        "path": "build/render/week_04/slides-38.png",
+        "sha256": "4baaae17cbc8def9bf02c5fb41b97827dafa780b9c014175c75810cf30b92c32",
+        "dimensions": [
+          1334,
+          750
+        ],
+        "viewed_at_utc": "2026-10-10T08:19:03.203357+00:00",
+        "status": "pass",
+        "finding": "Individually viewed. Controls bullet clearly states negative prompts have no effect with guidance disabled and labels 512 by 512 as this example. Three image panels and headings are intact; timing bullet shows 25, 46 and 419 seconds. All text fits without clipping or overlap."
+      },
+      {
+        "path": "build/render/week_01/notes-20.png",
+        "sha256": "dd40238689fb5624f85b127f010ea2e7c9fccd5e025f00c8038ae364ae8bd3e1",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:33:30.775623+00:00",
+        "status": "pass",
+        "finding": "Individually viewed at original resolution. Before-lab guidance clearly says the Gemini cell is disabled by default, RUN_GEMINI=True is deliberate opt-in, and a saved key alone does not enable requests. Discussion box, lab guide, runtime and Part 1 bullets are intact and readable; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_01/notes-21.png",
+        "sha256": "eaf21c924eeecf046fc611d98a11c73f4480d465b6e7fc02a574ca4b2eba40c6",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:33:30.778619+00:00",
+        "status": "pass",
+        "finding": "Individually viewed at original resolution. Troubleshooting correctly couples an environment key with deliberate RUN_GEMINI=True opt-in or leaving the comparison disabled. Parts 2 to 4, code snippets and complete hallucination explanation fit cleanly; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_08/notes-14.png",
+        "sha256": "810716b0e63697259737168be4d98f76eef1be5d6c61c59c741644683dc123a2",
+        "individually_viewed": true,
+        "status": "pass",
+        "issues": []
+      },
+      {
+        "path": "build/render/week_08/notes-15.png",
+        "sha256": "aa345a79647d4213a8d4f55350599e0c99739fede33ad796e88ba6891f6cd128",
+        "individually_viewed": true,
+        "status": "pass",
+        "issues": []
+      },
+      {
+        "path": "build/render/week_08/notes-16.png",
+        "sha256": "314ab287ca0a4ffbae3faf3cc84e0c2578b7f9458c0fd3982d797c9544816055",
+        "individually_viewed": true,
+        "status": "pass",
+        "issues": []
+      },
+      {
+        "path": "build/render/week_08/notes-17.png",
+        "sha256": "9f7f7243362e309059fdafdbc864909f62e7e76a0468303647e844de3d0ce771",
+        "individually_viewed": true,
+        "status": "pass",
+        "issues": []
+      },
+      {
+        "path": "build/render/week_08/notes-18.png",
+        "sha256": "3f51e5a2751eb1e3e6c38ce0f8f4f17e97284a1f5de087360a16f1d8d0151b57",
+        "individually_viewed": true,
+        "status": "pass",
+        "issues": []
+      },
+      {
+        "path": "build/render/week_08/notes-19.png",
+        "sha256": "c5f90ecd1d543f1bc6f68b41f75c765c2188f8d2fb0c805d6aa74a71317de02c",
+        "individually_viewed": true,
+        "status": "pass",
+        "issues": []
+      },
+      {
+        "path": "build/render/week_08/notes-20.png",
+        "sha256": "667b3b94216b4c78963ba7c67403f80d40feef74ea1da507fe82731748480e55",
+        "individually_viewed": true,
+        "status": "pass",
+        "issues": []
+      },
+      {
+        "path": "build/render/week_08/notes-21.png",
+        "sha256": "00bfe66525c20ec737e0a4c8255064d2c80a4197a6b9012448bbbcf3f3f681f4",
+        "individually_viewed": true,
+        "status": "pass",
+        "issues": []
+      },
+      {
+        "path": "build/render/week_08/notes-22.png",
+        "sha256": "48df186eb3e7828266008d1e05ba19c1703c1d9ffa6353d0caf8268fa024be84",
+        "individually_viewed": true,
+        "status": "pass",
+        "issues": []
+      },
+      {
+        "path": "build/render/week_08/notes-23.png",
+        "sha256": "3af4145756de19742740ca42bed469dc8cd832af425c92d61be074d9cb507ad7",
+        "individually_viewed": true,
+        "status": "pass",
+        "issues": []
+      },
+      {
+        "path": "build/render/week_08/notes-24.png",
+        "sha256": "d6b05b1d893db752babc397aaa73174b060ebc4c7e6e45bc834da52a584b3393",
+        "individually_viewed": true,
+        "status": "pass",
+        "issues": []
+      },
+      {
+        "path": "build/render/week_08/notes-25.png",
+        "sha256": "5ad0c4a726b79b9dee65da2214b498ad04612ecc971f9dcb33cc15ed80fa7bb4",
+        "individually_viewed": true,
+        "status": "pass",
+        "issues": []
+      },
+      {
+        "path": "build/render/week_08/notes-26.png",
+        "sha256": "3acc52288a5c7f5807d8d72f602978442cf08310efa3ba6941c6dea3789da9fe",
+        "individually_viewed": true,
+        "status": "pass",
+        "issues": []
+      },
+      {
+        "path": "build/render/week_08/notes-27.png",
+        "sha256": "25726baedd49db06d1bd38c1d57240e49ef1f3a789bb1c29e38e8e0087151d05",
+        "individually_viewed": true,
+        "status": "pass",
+        "issues": []
+      },
+      {
+        "path": "build/render/week_08/slides-35.png",
+        "sha256": "576aea7e5c90b1cdefbdb1b46b45d77c55f88471ab2583558f8809f35c3624e2",
+        "individually_viewed": true,
+        "status": "pass",
+        "issues": []
+      },
+      {
+        "path": "build/render/week_05/notes-30.png",
+        "sha256": "5534f95c450ede0b91cb11a43fa800a085978eae4ed8c25ce39feba5084a96a5",
+        "individually_viewed": true,
+        "status": "pass",
+        "issues": []
+      },
+      {
+        "path": "build/render/week_05/slides-46.png",
+        "sha256": "234ad77e35b97a7dfbeffa640f7f0e5662dcdce531e12dd1d677eb377aec4453",
+        "individually_viewed": true,
+        "status": "pass",
+        "issues": []
+      },
+      {
+        "path": "build/render/week_06/notes-18.png",
+        "sha256": "06c0389a13d6d13a43db1123d408066471e19b8b5e004041c4532ab96cfb04cc",
+        "individually_viewed": true,
+        "status": "pass",
+        "issues": []
+      },
+      {
+        "path": "build/render/week_06/notes-19.png",
+        "sha256": "37aa46338907e766d5e7cfd7e87e16df45c83fe96bee5610ce004fb2389bf941",
+        "individually_viewed": true,
+        "status": "pass",
+        "issues": []
+      },
+      {
+        "path": "build/render/week_06/notes-20.png",
+        "sha256": "3d93c21eae6b46a8a2832ccb6457193d0cdd2676da953c8892f50352ec141852",
+        "individually_viewed": true,
+        "status": "pass",
+        "issues": []
+      },
+      {
+        "path": "build/render/week_06/notes-21.png",
+        "sha256": "cb0289d0de1efa417833077f1cabfdfe4ac28d07d8e756e57883e4c3c46f6dcf",
+        "individually_viewed": true,
+        "status": "pass",
+        "issues": []
+      },
+      {
+        "path": "build/render/week_06/notes-22.png",
+        "sha256": "7219c5e27a08028e57f5de3943f886c41742020974e2d2a03d558d0731f623ee",
+        "individually_viewed": true,
+        "status": "pass",
+        "issues": []
+      },
+      {
+        "path": "build/render/week_06/notes-23.png",
+        "sha256": "17464e644fd3872486f42780f868077b8d1399087b662e56061f0f558232d779",
+        "individually_viewed": true,
+        "status": "pass",
+        "issues": []
+      },
+      {
+        "path": "build/render/week_06/notes-24.png",
+        "sha256": "7f1c4c06a7684bcad153f1f581b57df2958fab7c5bb74adc7feedf0452df243d",
+        "individually_viewed": true,
+        "status": "pass",
+        "issues": []
+      },
+      {
+        "path": "build/render/week_06/notes-25.png",
+        "sha256": "5baf1d9c622bd6908e72cc14f42b169e3c3b14f4d27ef6cf6e9a0fd71aec8163",
+        "individually_viewed": true,
+        "status": "pass",
+        "issues": []
+      },
+      {
+        "path": "build/render/week_06/notes-26.png",
+        "sha256": "c1a674dd3f4511f8926e411e77f7bb3eeeefad9caaf964649f877e814ed6cad1",
+        "individually_viewed": true,
+        "status": "pass",
+        "issues": []
+      },
+      {
+        "path": "build/render/week_06/notes-27.png",
+        "sha256": "b52c496d68c709cb7a0c2b675c3e2070f801a14aa6948845f528c0c59dee8418",
+        "individually_viewed": true,
+        "status": "pass",
+        "issues": []
+      },
+      {
+        "path": "deliverables/Week_05_Transformers_and_Attention/Diagrams/beginner_recap.png",
+        "sha256": "9d5e581ed9e8f81f79b288857fce3da28780147f505b30af0de20fd06d966bd7",
+        "individually_viewed": true,
+        "status": "pass",
+        "issues": []
+      },
+      {
+        "path": "build/render/week_09/notes-27.png",
+        "sha256": "3ae46682f5757428de7c908405bc89f73b16abb9bc05f9b362fe659a2f0419d6",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:18:22.929043+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: corrected mean-loss explanation and horse/cat exception are clear; measured values 1.14, 1.99 and 1.79 match the stored results; table, headings, bullets and footer are readable without clipping or overlap."
+      },
+      {
+        "path": "build/render/week_11/notes-01.png",
+        "sha256": "71d99b5ed40aedb2d074c26c9dc5f9bfcca5d509ea6a45139d12c3401d13e015",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:23:26.295704+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: readable content, tables and diagrams; sound pagination and current 37-page footer; no clipping, overlap or missing glyphs."
+      },
+      {
+        "path": "build/render/week_11/notes-02.png",
+        "sha256": "4e9bfa9a865190d93c35e2b0397bae0032233b3fabd5692872492deec77f0862",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:23:26.297705+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: readable content, tables and diagrams; sound pagination and current 37-page footer; no clipping, overlap or missing glyphs."
+      },
+      {
+        "path": "build/render/week_11/notes-03.png",
+        "sha256": "435bbeb084bc4be400408e3ecd7c9e6383b6895722dbf480bd21083d817d92d2",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:23:26.299703+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: readable content, tables and diagrams; sound pagination and current 37-page footer; no clipping, overlap or missing glyphs."
+      },
+      {
+        "path": "build/render/week_11/notes-04.png",
+        "sha256": "eb145579c777545be250de875fe710f98b4cffacb7e1c6ede926758eb883b64b",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:23:26.300703+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: readable content, tables and diagrams; sound pagination and current 37-page footer; no clipping, overlap or missing glyphs."
+      },
+      {
+        "path": "build/render/week_11/notes-05.png",
+        "sha256": "d63727e8bcc28d011d427c8d80fc8b2c1ee26cb2a3de2c698083766dcef1927f",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:23:26.302708+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: readable content, tables and diagrams; sound pagination and current 37-page footer; no clipping, overlap or missing glyphs."
+      },
+      {
+        "path": "build/render/week_11/notes-08.png",
+        "sha256": "27bd1925523fad4a5436c09e635c62faa5e4bafa7b76148bfebb023e0681dc53",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:23:46.119907+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: readable text, continued tables, figures and equations; correct 37-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_11/notes-09.png",
+        "sha256": "5f7b7bf0136447032ba85d87db391ecfe780918f54306180223803040a00d509",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:23:46.122909+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: readable text, continued tables, figures and equations; correct 37-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_11/notes-10.png",
+        "sha256": "b499eb94db1b0e289b3db1f74f61e32ea3016ab5a1545d9bf329ebd10e92b23c",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:23:46.124908+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: readable text, continued tables, figures and equations; correct 37-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_11/notes-11.png",
+        "sha256": "3eeb24b67b4ccb8f840e062ee97b12e2654f8ff998f86d9d3659f71e1e7720c0",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:23:46.126910+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: readable text, continued tables, figures and equations; correct 37-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_11/notes-12.png",
+        "sha256": "4753acf4bae8185d1ee8761dda9b524a0f7411dd1da447d0c2f9a88560eb14bc",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:23:46.128905+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: readable text, continued tables, figures and equations; correct 37-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_11/notes-13.png",
+        "sha256": "ee804709404e05150abb101195e0d25823e977453462440684dd334daa6641d2",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:24:11.625662+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: equations, measured charts, tables and new optional-cloud billing guidance are readable; sound page breaks and 37-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_11/notes-14.png",
+        "sha256": "7917158d287e7cc5036e52b3d9875cf6ebd275b77c6c702e2e61b57bf7b73337",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:24:11.627677+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: equations, measured charts, tables and new optional-cloud billing guidance are readable; sound page breaks and 37-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_11/notes-15.png",
+        "sha256": "de9df1f75b9456ab82b9f219d24a8ee0c3fc0f13464086608afe45904b3c976d",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:24:11.631702+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: equations, measured charts, tables and new optional-cloud billing guidance are readable; sound page breaks and 37-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_11/notes-16.png",
+        "sha256": "32634e5ea8061830cdbe1d303a48d68a6faeab4402ed87d2d929877c1777cf3b",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:24:11.632712+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: equations, measured charts, tables and new optional-cloud billing guidance are readable; sound page breaks and 37-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_11/notes-17.png",
+        "sha256": "7b8e7524a2c9c37cffd523f1df2a1835abbacd45a5f79a46e12cea89786addd5",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:24:11.641659+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: equations, measured charts, tables and new optional-cloud billing guidance are readable; sound page breaks and 37-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_11/notes-18.png",
+        "sha256": "d3968721a7ca8f7ac9ed3a6a9e88a6413715e1b8510919732bf5308769b4c8d8",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:24:11.643659+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: equations, measured charts, tables and new optional-cloud billing guidance are readable; sound page breaks and 37-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_11/notes-19.png",
+        "sha256": "ec151477bf4a84195d63b2b1924b71ad0abbcdaf568354083c507beffd004940",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:24:52.786138+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: continued results, troubleshooting, quizzes, glossary and companion explanations are legible; no clipping or overlap; current 37-page footer."
+      },
+      {
+        "path": "build/render/week_11/notes-20.png",
+        "sha256": "0caa7052301093bbcebc9e796642cd5c44b1028c935240b9ca18ceb867806595",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:24:52.790014+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: continued results, troubleshooting, quizzes, glossary and companion explanations are legible; no clipping or overlap; current 37-page footer."
+      },
+      {
+        "path": "build/render/week_11/notes-21.png",
+        "sha256": "1f69e007ad9a3172b5bab234ecfec190a9cae8c5ee39dc96af70eff144e9857b",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:24:52.794543+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: continued results, troubleshooting, quizzes, glossary and companion explanations are legible; no clipping or overlap; current 37-page footer."
+      },
+      {
+        "path": "build/render/week_11/notes-22.png",
+        "sha256": "3b7965594967baaf96a79ec18cd7ae386cccafa039adfdd1efad99801b0b33f8",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:24:52.799556+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: continued results, troubleshooting, quizzes, glossary and companion explanations are legible; no clipping or overlap; current 37-page footer."
+      },
+      {
+        "path": "build/render/week_11/notes-23.png",
+        "sha256": "41b234663894cbe66a81810e645f35c4d262ee0b5012f79ed0784587a7e814f9",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:24:52.803556+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: continued results, troubleshooting, quizzes, glossary and companion explanations are legible; no clipping or overlap; current 37-page footer."
+      },
+      {
+        "path": "build/render/week_11/notes-24.png",
+        "sha256": "79533cfbb61687e74efd1ee4569092cd427afbdb9582087afd1e5c9da9a237bc",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:24:52.807556+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: continued results, troubleshooting, quizzes, glossary and companion explanations are legible; no clipping or overlap; current 37-page footer."
+      },
+      {
+        "path": "build/render/week_11/notes-25.png",
+        "sha256": "2f9fe8a8e8f293d680e1dcd998e54707d7556379d32f0c867522cdac8386bb38",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:26:12.416908+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: legible prose, code, continued tables and headings; correct 37-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_11/notes-27.png",
+        "sha256": "b3a55b4bd5014920a6b10598a75d56134d1bd065961e77f780d82a2c62747e74",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:26:12.434908+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: legible prose, code, continued tables and headings; correct 37-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_11/notes-28.png",
+        "sha256": "be6f64d730de883162a5da2ab166d3ce1caf0500e2926c741e7fb8451b2d17fd",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:26:12.439907+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: legible prose, code, continued tables and headings; correct 37-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_11/notes-29.png",
+        "sha256": "8b2e667015038b31e73587271bbc984eb73827797f5023f2ab9cd5e34dfa3842",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:26:12.442909+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: legible prose, code, continued tables and headings; correct 37-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_11/notes-30.png",
+        "sha256": "c34ddc1e9bfdca7acc3962beed85e402e703405e2211c20d356add9dde5a22ae",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:26:12.446906+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: legible prose, code, continued tables and headings; correct 37-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_11/notes-31.png",
+        "sha256": "33cab74d713cef8d102e50af6aceb7f879f2b65d120165fcaa6e2d017edfec2a",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:26:45.038353+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: readable full code, companion explanations and recap; new page 37 keeps infographic, exit question and answer together; current 37-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_11/notes-32.png",
+        "sha256": "9d8c1fba0893ebce69f71bc25f8e96f7743b6974f8a6ad85c65a86f7ee37e020",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:26:45.041361+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: readable full code, companion explanations and recap; new page 37 keeps infographic, exit question and answer together; current 37-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_11/notes-33.png",
+        "sha256": "73feb981c1f4eea0d6afe6fe3ab8a0acf978938aa30f631065dca34894c7d851",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:26:45.044360+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: readable full code, companion explanations and recap; new page 37 keeps infographic, exit question and answer together; current 37-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_11/notes-34.png",
+        "sha256": "77e0b61ae5f76fbfb0a565ead43c7c2efe8fa6e44d32eef8147ee27470eac325",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:26:45.047361+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: readable full code, companion explanations and recap; new page 37 keeps infographic, exit question and answer together; current 37-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_11/notes-35.png",
+        "sha256": "b04c8e89604d2bdd876ab22e91ab9c897294ca5fb82b4354c2dabd4860f7449b",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:26:45.050360+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: readable full code, companion explanations and recap; new page 37 keeps infographic, exit question and answer together; current 37-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_11/notes-36.png",
+        "sha256": "b008ac6aba8b501dc11b354f99df4cd7f00c21d2fbdebaa9c07edaa91f20a2f9",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:26:45.052360+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: readable full code, companion explanations and recap; new page 37 keeps infographic, exit question and answer together; current 37-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_11/notes-37.png",
+        "sha256": "05cf343330a1b003a1e146352e9b11399d297ee0d79ff80ebac325936708387c",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:26:45.054876+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: readable full code, companion explanations and recap; new page 37 keeps infographic, exit question and answer together; current 37-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_12/notes-01.png",
+        "sha256": "aba6160dc2aa9334036393b12eb2703a51f2500be952fd25842a5a35202b0419",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:27:16.048836+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: cover, plan, vocabulary and walkthrough diagrams/explanations are readable; correct current 37-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_12/notes-02.png",
+        "sha256": "e4614e0d455b49c9762f3dec855004c398517ff2a2d39bd7e395ec7e516514a6",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:27:16.050834+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: cover, plan, vocabulary and walkthrough diagrams/explanations are readable; correct current 37-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_12/notes-03.png",
+        "sha256": "7cb48deaa04f301a20eef8643560d51a4b0381137a9f30b2e2bcfc0ac5bb799f",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:27:16.053834+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: cover, plan, vocabulary and walkthrough diagrams/explanations are readable; correct current 37-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_12/notes-04.png",
+        "sha256": "1fa1423990072dadbfb52cb6c84c1d41c80ae66c7afa0d0859c125f20644b80b",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:27:16.055835+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: cover, plan, vocabulary and walkthrough diagrams/explanations are readable; correct current 37-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_12/notes-05.png",
+        "sha256": "45ff627ab02d1e84f291ad2726143145f59b230e4469f3371f65e7c30ca01349",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:27:16.058366+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: cover, plan, vocabulary and walkthrough diagrams/explanations are readable; correct current 37-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_12/notes-07.png",
+        "sha256": "bd5a469c8d0ee8f97539dc83af6c4171cc03bf350a1224ea82b6ac5a768d55f9",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:29:23.506320+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: index and agent flow, continued code table, glossary and RAG introduction all readable; 37-page footer correct; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_12/notes-08.png",
+        "sha256": "9b292c72390823638cef7991732c9ea712ead2d485613a2f10a0eaaea38fe887",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:29:23.509318+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: index and agent flow, continued code table, glossary and RAG introduction all readable; 37-page footer correct; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_12/notes-09.png",
+        "sha256": "58049f481ed52364aa9701a4c477d268fde92a696aac99a3c366c7af37a8cd92",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:29:23.512315+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: index and agent flow, continued code table, glossary and RAG introduction all readable; 37-page footer correct; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_12/notes-10.png",
+        "sha256": "fd3a6f5b834147271a43fd234320bea23258794b5a9bc4c612ac68864a258c68",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:29:23.514318+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: index and agent flow, continued code table, glossary and RAG introduction all readable; 37-page footer correct; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_12/notes-11.png",
+        "sha256": "ed764acc07f598678aa3bc765b682896811687f85e8aa5a1541897febe4de4de",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:29:39.081797+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: chunking, retrieval formula/chart, RAG evaluation table and agent loop/trajectory readable with limitations stated; current 37-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_12/notes-12.png",
+        "sha256": "4639bea35db35aba4e6ba1cdd87e3bdea650dbd03c7cf7c42711e83f23c53cfe",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:29:39.083802+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: chunking, retrieval formula/chart, RAG evaluation table and agent loop/trajectory readable with limitations stated; current 37-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_12/notes-13.png",
+        "sha256": "e490234151bc21f1c879cb4bed923c94df2ccc36a17489ca22300d5eb2a318f4",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:29:39.087328+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: chunking, retrieval formula/chart, RAG evaluation table and agent loop/trajectory readable with limitations stated; current 37-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_12/notes-14.png",
+        "sha256": "2627bfb407f15e994736b5cd7404c2e8df68687a5805623fef9b26af4439ee22",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:29:39.089332+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: chunking, retrieval formula/chart, RAG evaluation table and agent loop/trajectory readable with limitations stated; current 37-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_12/notes-15.png",
+        "sha256": "0939bc51d4fc0ddc87d22011ce60aa17fffb7328828a543057a4119d4436f0cf",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:29:56.891501+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: workflow/MCP diagrams, guardrails, continued misconceptions, runtime/simulation boundaries and measured-results tables readable; 37-page footer correct; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_12/notes-16.png",
+        "sha256": "322a93101a915ea22274d6e89088679678cb4f5a8cea4904db3add49ee38f4c5",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:29:56.894500+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: workflow/MCP diagrams, guardrails, continued misconceptions, runtime/simulation boundaries and measured-results tables readable; 37-page footer correct; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_12/notes-17.png",
+        "sha256": "1786dbeabcda07480965ab38c8533e3c2e77ee8789452a6813b57a901c2fd3a5",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:29:56.897254+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: workflow/MCP diagrams, guardrails, continued misconceptions, runtime/simulation boundaries and measured-results tables readable; 37-page footer correct; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_12/notes-18.png",
+        "sha256": "5d818bc57dd1f8929da8c286d78c644cb208d8fb564147e4fab14431abf5f140",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:29:56.898820+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: workflow/MCP diagrams, guardrails, continued misconceptions, runtime/simulation boundaries and measured-results tables readable; 37-page footer correct; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_12/notes-19.png",
+        "sha256": "594f927b338da184d78fc16dafde09300f8f3b4f818d78ece2a0e0fb0dd23479",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:30:23.834712+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: corrected fact-bearing-chunk diagnosis, written answers, practice equations, glossary and source links all readable; current 37-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_12/notes-20.png",
+        "sha256": "09cab554ca516eeb0df82576a4ea9f3c8b3265058097b5a0c2866f8be9ae05fc",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:30:23.836715+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: corrected fact-bearing-chunk diagnosis, written answers, practice equations, glossary and source links all readable; current 37-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_12/notes-21.png",
+        "sha256": "083bbc602833ed64df55f14285fdb3d5ff35beb113097e8037e7ac674bfcd70e",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:30:23.838711+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: corrected fact-bearing-chunk diagnosis, written answers, practice equations, glossary and source links all readable; current 37-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_12/notes-22.png",
+        "sha256": "dd1047b82a9133c849fd88688dc2f26338465fd0d0d006af0457245762f52997",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:30:23.841741+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: corrected fact-bearing-chunk diagnosis, written answers, practice equations, glossary and source links all readable; current 37-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_12/notes-23.png",
+        "sha256": "2257fd6818f9f71a956467ef6a9aec7da84f0c85f26ce6c593fb7dc96f71bf29",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:30:41.692902+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: detailed RAG introduction, comparison and vector-store tables, chunking and search explanations readable; current 37-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_12/notes-24.png",
+        "sha256": "379cf6c57c4d8071e8df712d7d8c718a2bbd3ea03010e93096b0934b34dbbefd",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:30:41.695907+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: detailed RAG introduction, comparison and vector-store tables, chunking and search explanations readable; current 37-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_12/notes-25.png",
+        "sha256": "0324a6fe7166cb115234f60e3a71e2e0f65d66ed4e98e70a872a0a3127bfb1ec",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:30:41.698431+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: detailed RAG introduction, comparison and vector-store tables, chunking and search explanations readable; current 37-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_12/notes-26.png",
+        "sha256": "985745f015e43f17fe580be61cddbb0e146bf12010dfcc72610f0e779234df39",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:30:41.702534+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: detailed RAG introduction, comparison and vector-store tables, chunking and search explanations readable; current 37-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_12/notes-27.png",
+        "sha256": "14181bce3925b0df159cd3c29ba9003039e295f939f663dca1e1ac1279b0aa6d",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:31:02.439166+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: retrieval metrics/symbols and evaluation tables, measured-result qualifications, continued quiz and agent explanations all readable; current 37-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_12/notes-28.png",
+        "sha256": "c8821f166edca61287281ff684b46005be8677355bda24bb59b82eeb09fedb4a",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:31:02.443179+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: retrieval metrics/symbols and evaluation tables, measured-result qualifications, continued quiz and agent explanations all readable; current 37-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_12/notes-29.png",
+        "sha256": "1db8fc29f85c4b454688561768bb398652fa2026a5cfb7258c072609dfa0238f",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:31:02.445179+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: retrieval metrics/symbols and evaluation tables, measured-result qualifications, continued quiz and agent explanations all readable; current 37-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_12/notes-30.png",
+        "sha256": "bdb53b9b777d9c80a2249c3ea248f845738f62a63d04c8c19cb1f31b16b760a3",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:31:02.448177+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: retrieval metrics/symbols and evaluation tables, measured-result qualifications, continued quiz and agent explanations all readable; current 37-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_12/notes-31.png",
+        "sha256": "21cbb9291ff79336258849771d6976c7984944924fa9656158e1fe39fc3c9c88",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:31:20.711889+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: function-call code and simulated gate, trajectory, continued framework table, injection and oversight explanations readable; current 37-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_12/notes-32.png",
+        "sha256": "98e38ad5cee0215031e27c3adc4327b251abc6486901e3d02f3c7da51aa5723f",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:31:20.712890+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: function-call code and simulated gate, trajectory, continued framework table, injection and oversight explanations readable; current 37-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_12/notes-33.png",
+        "sha256": "b271960e3a331a6cda6322bb4c62a3c6df6a67b848891a342534804ae415c8b5",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:31:20.714890+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: function-call code and simulated gate, trajectory, continued framework table, injection and oversight explanations readable; current 37-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_12/notes-34.png",
+        "sha256": "86d0f8a19ff9dc0d2bce247cbb323320874131515905948365237287d652f149",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:31:20.715890+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: function-call code and simulated gate, trajectory, continued framework table, injection and oversight explanations readable; current 37-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_12/notes-35.png",
+        "sha256": "f80b55e3b3720fe0eee498fbb7cba77d8fb6f1cdd48ecd3b3d0ba57f55aa7551",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:31:43.795823+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: final resource list, full code illustration, six-card recap infographic and new final-page exit question/answer readable; current 37-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_12/notes-36.png",
+        "sha256": "5b31eb73a24f119dc9942d067d44a0bb594a8bb0c0fa741bd58d68d9b6968d1a",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:31:43.797838+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: final resource list, full code illustration, six-card recap infographic and new final-page exit question/answer readable; current 37-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_12/notes-37.png",
+        "sha256": "3b195130d051793eabea43078c0408ae13fcb339a383110220aa11c4681ecb5d",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:31:43.797838+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: final resource list, full code illustration, six-card recap infographic and new final-page exit question/answer readable; current 37-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_11/notes-26.png",
+        "sha256": "d35515ca81ab419ba335ac6765d1e51b5d31ce0b10ec7a8debe810ff6c71e189",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:38:41.940073+00:00",
+        "status": "pass",
+        "finding": "Individually viewed after root removed the stray standalone Method source line: corrected latency/cost explanation and table fit, current 37-page footer correct, no clipping or overlap. Supersedes earlier minor defect at this path."
+      },
+      {
+        "path": "build/render/course/Course_Glossary-5.png",
+        "sha256": "b9cab77ce656896510a748160a8f64121dc3fb4f3882e545cffa1e949c0e112d",
+        "status": "pass",
+        "review": "Individually viewed at original resolution; readable tables and intact pagination, no overlap or clipping."
+      },
+      {
+        "path": "build/render/course/Course_Glossary-6.png",
+        "sha256": "849a9670c9a3f2c420fed8742a3a4af11a6e4dea1be7a37128181ddba7cc5e64",
+        "status": "pass",
+        "review": "Individually viewed at original resolution; readable tables and intact pagination, no overlap or clipping."
+      },
+      {
+        "path": "build/render/course/Instructor_Guide-3.png",
+        "sha256": "412ed4b0f573768c23b0c456b9128653b5f618ff2aa323893a74dc55ceaac767",
+        "status": "pass",
+        "review": "Individually viewed at original resolution; readable tables and intact pagination, no overlap or clipping."
+      },
+      {
+        "path": "build/render/course/Instructor_Guide-4.png",
+        "sha256": "a938a0439d5c682b9e40460bda0d91aa98d63545c506dd521f7fe5606d16c34c",
+        "status": "pass",
+        "review": "Individually viewed at original resolution; readable tables and intact pagination, no overlap or clipping."
+      },
+      {
+        "path": "build/render/course/Instructor_Guide-5.png",
+        "sha256": "50653f99615ed21f9341ce8b79ef28b6900db685a72aa49064aa0fa245de4bd3",
+        "status": "pass",
+        "review": "Individually viewed at original resolution; readable tables and intact pagination, no overlap or clipping."
+      },
+      {
+        "path": "build/render/course/Instructor_Guide-6.png",
+        "sha256": "8c1f538a8fabc09f1425fe47eac9dc38cfdae07959b9a1c8d5517c9a13688480",
+        "status": "pass",
+        "review": "Individually viewed at original resolution; readable tables and intact pagination, no overlap or clipping."
+      },
+      {
+        "path": "build/render/course/Instructor_Guide-7.png",
+        "sha256": "2b25816163620a6033c8bcd65b58420803c8b8ee4eee3372269bb47da99106ec",
+        "status": "pass",
+        "review": "Individually viewed at original resolution; readable tables and intact pagination, no overlap or clipping."
+      },
+      {
+        "path": "build/render/course/Instructor_Guide-8.png",
+        "sha256": "6b88d4aeec687ce6ccea4ddf1bcba5b11dd87912fd1ff4ce5c6ab0d2a5e627ec",
+        "status": "pass",
+        "review": "Individually re-viewed at original resolution after final paragraph correction. Sampling-repeat guidance and improvement-loop sections readable; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_03/slides-44.png",
+        "sha256": "5174323ec04d550924a2060572e2a20dd7bb2ad3ff436c43626238cb009816d6",
+        "status": "pass",
+        "viewed_at_utc": "2026-10-10T08:58:16.961202+00:00",
+        "review": "Individually viewed after the final full render. Lab steps, measured CPU runtime, time and hand-in panel are clear; no clipping, overlap or missing glyphs. No source change needed."
+      },
+      {
+        "path": "build/render/week_10/slides-01.png",
+        "sha256": "68a7db2cffbb3698d5a295a41e9962679355438fdc42714f9529605089b00fa4",
+        "dimensions": [
+          1334,
+          750
+        ],
+        "finding": "Individually viewed at original resolution. Title, subtitle and four connected modality icons are intact and legible; no clipping or overlap.",
+        "status": "pass",
+        "viewed_at_utc": "2026-10-10T08:57:28.759Z"
+      },
+      {
+        "path": "build/render/week_10/slides-02.png",
+        "sha256": "e55686265a844c8584e591abe548be4c15549907526127ef2398f78488863553",
+        "dimensions": [
+          1334,
+          750
+        ],
+        "finding": "Individually viewed at original resolution. Six learning outcomes and MIMLO panel fit cleanly; task, evaluation and responsible-use goals are clear.",
+        "status": "pass",
+        "viewed_at_utc": "2026-10-10T08:57:28.779Z"
+      },
+      {
+        "path": "build/render/week_10/slides-03.png",
+        "sha256": "6daa73095b9588b57f7dc654b096d241fdc171fcb0039b55201eacdd48dd0af1",
+        "dimensions": [
+          1334,
+          750
+        ],
+        "finding": "Individually viewed at original resolution. Twelve-week course map highlights Week 10 correctly; all boxes, arrows and labels are readable and intact.",
+        "status": "pass",
+        "viewed_at_utc": "2026-10-10T08:57:28.779Z"
+      },
+      {
+        "path": "build/render/week_10/slides-04.png",
+        "sha256": "8f3aeeab32aaa14cc64b7bf4bb06a36073c19483d18eb42386491e99d3845ffc",
+        "dimensions": [
+          1334,
+          750
+        ],
+        "finding": "Individually viewed at original resolution. Four vocabulary rows define modality, autoregressive generation, ground truth and VLM clearly; all table text fits.",
+        "status": "pass",
+        "viewed_at_utc": "2026-10-10T08:57:28.779Z"
+      },
+      {
+        "path": "build/render/week_10/slides-05.png",
+        "sha256": "fc2603e6cc8cd69bbfdc4384ff1a9492a8fa4d468d7cb9406bf27e579b6d1b3e",
+        "dimensions": [
+          1334,
+          750
+        ],
+        "finding": "Individually viewed at original resolution. Receipt warm-up separates reading, calculation and privacy; prompt and three bullets are readable and fit.",
+        "status": "pass",
+        "viewed_at_utc": "2026-10-10T08:57:49.948Z"
+      },
+      {
+        "path": "build/render/week_10/slides-06.png",
+        "sha256": "565f9b370eaf66d165ec5596c510b5c8ef4e02c175eac4cd07dd3530a1c28af8",
+        "dimensions": [
+          1334,
+          750
+        ],
+        "finding": "Individually viewed at original resolution. Section divider title and guiding question are clear with intact icon and margins.",
+        "status": "pass",
+        "viewed_at_utc": "2026-10-10T08:57:49.948Z"
+      },
+      {
+        "path": "build/render/week_10/slides-07.png",
+        "sha256": "67ea30d23d56adf66671e15a89d9d0ea483be91fa280dd167981a9ac97312c0d",
+        "dimensions": [
+          1334,
+          750
+        ],
+        "viewed_at_utc": "2026-10-10T13:35:23.803Z",
+        "status": "pass",
+        "finding": "Individually viewed at original resolution. Task-route slide now uses Measure / check for task-specific evaluation. All six blocks, arrows, code labels, legend and CLIP-versus-speech check are readable and fit.",
+        "previous_sha256": "922ec9c673b9033bce227f1707ab0306b6eef4a063876e9da64a6b30ed31a1fa"
+      },
+      {
+        "path": "build/render/week_10/slides-08.png",
+        "sha256": "9e5791ddb54db21875e400bae02de8b4aa10c1b3f353ec56a560ee3923fddf48",
+        "dimensions": [
+          1334,
+          750
+        ],
+        "finding": "Individually viewed at original resolution. Modular and joint-training diagrams are intact; model-dependent inputs/outputs are qualified and all supporting bullets fit.",
+        "status": "pass",
+        "viewed_at_utc": "2026-10-10T08:57:49.948Z"
+      },
+      {
+        "path": "build/render/week_10/slides-09.png",
+        "sha256": "a861e251ccb2d68d5e0470e3b6559affd521d64eb4ae33e9c216adb5b3eaef86",
+        "dimensions": [
+          1334,
+          750
+        ],
+        "finding": "Individually viewed at original resolution. Six application cards pair practical tasks with verification limits; icons, headings and text fit without overlap.",
+        "status": "pass",
+        "viewed_at_utc": "2026-10-10T08:58:17.751Z"
+      },
+      {
+        "path": "build/render/week_10/slides-10.png",
+        "sha256": "eba1885a3ee6df174adf0a25917f39dfcb16ea506ee9de8b922deefa0f458d81",
+        "dimensions": [
+          1334,
+          750
+        ],
+        "finding": "Individually viewed at original resolution. Model-family comparison table is legible; capabilities are identified as examples and exact-checkpoint/licence verification is explicit.",
+        "status": "pass",
+        "viewed_at_utc": "2026-10-10T08:58:17.751Z"
+      },
+      {
+        "path": "build/render/week_10/slides-11.png",
+        "sha256": "80bc39785bf56be5e81d163e8460a465aa04073a32acecef747609a8406de481",
+        "dimensions": [
+          1334,
+          750
+        ],
+        "finding": "Individually viewed at original resolution. VLM input-to-answer flow and repeated next-token prediction are legible; continuation-only decoding and check question are clear.",
+        "status": "pass",
+        "viewed_at_utc": "2026-10-10T08:58:17.751Z"
+      },
+      {
+        "path": "build/render/week_10/slides-12.png",
+        "sha256": "562b44b22dd61971d288a6e7d1b4e794d815ef28210e236902aae3b23ba43654",
+        "dimensions": [
+          1334,
+          750
+        ],
+        "finding": "Individually viewed at original resolution. Temple and flower images and measured caption excerpts are intact; verification instruction and all text fit.",
+        "status": "pass",
+        "viewed_at_utc": "2026-10-10T08:58:17.751Z"
+      },
+      {
+        "path": "build/render/week_10/slides-13.png",
+        "sha256": "bff3a3f0e85d48a4aaec84cf5bd7a91b8b53a23b3a92dc5fba3d34b691043161",
+        "dimensions": [
+          1334,
+          750
+        ],
+        "finding": "Individually viewed at original resolution. Image-patch arithmetic is correct: (336/14)^2=576; resolution/token-load caveats and exact-model checks are clear and fit.",
+        "status": "pass",
+        "viewed_at_utc": "2026-10-10T08:58:55.739Z"
+      },
+      {
+        "path": "build/render/week_10/slides-14.png",
+        "sha256": "e9f5f06da33e4df2882e02df364fa5d56db35b9f29f0859c66931714ae7db336",
+        "dimensions": [
+          1334,
+          750
+        ],
+        "viewed_at_utc": "2026-10-10T13:35:23.803Z",
+        "status": "pass",
+        "finding": "Individually viewed at original resolution. Invoice slide now uses Measure / check for comparing candidate answers with known values. Diagram and correct-addition/wrong-input check are clear without clipping or overlap.",
+        "previous_sha256": "2d0695aea44a607194b8aa1c099889a3d37b557f8915c59b3777825ee07a06c2"
+      },
+      {
+        "path": "build/render/week_10/slides-15.png",
+        "sha256": "d34414dc6110aba971e51d4fdc1000a1adddc524facd1f4b7617ee638c25aeed",
+        "dimensions": [
+          1334,
+          750
+        ],
+        "finding": "Individually viewed at original resolution. Chart and invoice are uncropped and readable; chart totals 94, invoice total 35 EUR, and the recorded wrong model answer is clearly identified as a failure.",
+        "status": "pass",
+        "viewed_at_utc": "2026-10-10T08:58:55.739Z"
+      },
+      {
+        "path": "build/render/week_10/slides-16.png",
+        "sha256": "dc4bfae1648e1df37307bb5efee0e3a66621e7cf33b52dc756d328a624c8242e",
+        "dimensions": [
+          1334,
+          750
+        ],
+        "finding": "Individually viewed at original resolution. Invoice-total quiz has four readable choices; checked extraction, code summation and printed-total comparison provide the correct route.",
+        "status": "pass",
+        "viewed_at_utc": "2026-10-10T08:58:55.739Z"
+      },
+      {
+        "path": "build/render/week_10/slides-17.png",
+        "sha256": "b52b02fdd4fc3f4127665b01fa08b0c85722fba34a31aa030e4d02d6222faf10",
+        "dimensions": [
+          1334,
+          750
+        ],
+        "finding": "Individually viewed at original resolution. Training section divider, icon and guiding question are intact with ample margins.",
+        "status": "pass",
+        "viewed_at_utc": "2026-10-10T08:59:15.937Z"
+      },
+      {
+        "path": "build/render/week_10/slides-18.png",
+        "sha256": "291785f76ce84fc51bc1565b13bff479bd3dd6dd32da2bc080abb210b34a8cdf",
+        "dimensions": [
+          1334,
+          750
+        ],
+        "viewed_at_utc": "2026-10-10T13:35:23.803Z",
+        "status": "pass",
+        "finding": "Individually viewed at original resolution. Conceptual bridge recipe now uses Measure / check for held-out testing. Diagram, conceptual-lab qualifier and check question are intact and legible.",
+        "previous_sha256": "1a3a123c7c1eb50e479caaba54b4c2a38471f53ddc9b302b395008bd0884d65b"
+      },
+      {
+        "path": "build/render/week_10/slides-19.png",
+        "sha256": "d5d44d24a526bcaa0e4bb1806ddae46553d17931847f149a84773c6cf37d64d8",
+        "dimensions": [
+          1334,
+          750
+        ],
+        "finding": "Individually viewed at original resolution. Five-stage VLM training recipe marks optional preference/domain stages and method-dependent components; arrows and four bullets are readable.",
+        "status": "pass",
+        "viewed_at_utc": "2026-10-10T08:59:15.937Z"
+      },
+      {
+        "path": "build/render/week_10/slides-20.png",
+        "sha256": "4bf5e089d0692df227f45e241b90e42b8000893a7efa31b6eb25e7beeb2ccaa0",
+        "dimensions": [
+          1334,
+          750
+        ],
+        "finding": "Individually viewed at original resolution. Training-data examples and label/licence/consent checks are clear; five bullets fit without clipping.",
+        "status": "pass",
+        "viewed_at_utc": "2026-10-10T08:59:15.937Z"
+      },
+      {
+        "path": "build/render/week_10/slides-21.png",
+        "sha256": "550e7704602daa18759785194e2b54ffc2543699b0521670d6632b438f1409b5",
+        "dimensions": [
+          1334,
+          750
+        ],
+        "finding": "Individually viewed at original resolution. Domain-adaptation bullets distinguish prompting, checked extraction, labelled adaptation and separate testing; component changes are qualified and readable.",
+        "status": "pass",
+        "viewed_at_utc": "2026-10-10T08:59:51.495Z"
+      },
+      {
+        "path": "build/render/week_10/slides-22.png",
+        "sha256": "5e44787905ff7d1a49cd959d42682e6d20560bd8e03e62ae9e89924fce08c9e8",
+        "dimensions": [
+          1334,
+          750
+        ],
+        "finding": "Individually viewed at original resolution. Generation section divider and text-to-image/speech/music/video subtitle fit with intact icon.",
+        "status": "pass",
+        "viewed_at_utc": "2026-10-10T08:59:51.495Z"
+      },
+      {
+        "path": "build/render/week_10/slides-23.png",
+        "sha256": "c6b9f48a6d3d04047aa47f245b5b38e314a603a027bc4367cf97e630e70026e5",
+        "dimensions": [
+          1334,
+          750
+        ],
+        "finding": "Individually viewed at original resolution. Six-task generation map aligns each modality task with mechanism and examples; all three columns are readable and uncropped.",
+        "status": "pass",
+        "viewed_at_utc": "2026-10-10T08:59:51.495Z"
+      },
+      {
+        "path": "build/render/week_10/notes-01.png",
+        "sha256": "421a47064565e7bf6b4915d28aefdfedfb2915f81cf8cd14b8ab2030d5037478",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "finding": "Individually viewed at original resolution. Title, descriptor table, learning outcomes and folder-content table are intact and readable; no clipped rows, overlap or footer issue.",
+        "status": "pass",
+        "viewed_at_utc": "2026-10-10T08:59:51.495Z"
+      },
+      {
+        "path": "build/render/week_10/notes-02.png",
+        "sha256": "713b30d5c6738d31764de2e995176f1509c74d5b27065d0eb3c0ac11af9766e4",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "finding": "Individually viewed at original resolution. Lecture timing table, receipt teaching tip and supporting-slide guidance are intact; row text and time ranges fit.",
+        "status": "pass",
+        "viewed_at_utc": "2026-10-10T13:11:05.612Z"
+      },
+      {
+        "path": "build/render/week_10/notes-03.png",
+        "sha256": "9b1322cd6078aa781706a68a56b3d8de1cceb65c72886454932467ca64cf9319",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "finding": "Individually viewed at original resolution. Course map, vocabulary table and four explicit check answers are readable; third-token and modality examples are correct.",
+        "status": "pass",
+        "viewed_at_utc": "2026-10-10T13:11:05.612Z"
+      },
+      {
+        "path": "build/render/week_10/notes-04.png",
+        "sha256": "cd357ac9c2521fb4bd47f0d508ab743e11964f9d24031aa456080bb68968c539",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T13:35:23.803Z",
+        "status": "pass",
+        "finding": "Individually viewed at original resolution. Task-route page now labels the orange evaluation stage Measure / check. Diagram, worked examples, CLIP-versus-speech check and complete instructor answer are readable with no clipping or overlap.",
+        "previous_sha256": "47075fbaf16c0def2a7e75b5bf3c0c406fd57d3188b02412bf99fd6f12c04bf3"
+      },
+      {
+        "path": "build/render/week_10/notes-05.png",
+        "sha256": "f19e175a87803e864a1244f6c196a13c4ba5159c98295536da16675f7ea31671",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "finding": "Individually viewed at original resolution. VLM mechanism diagram and Thursday worked example are intact; next-token generation and continuation-only decoding are explained clearly.",
+        "status": "pass",
+        "viewed_at_utc": "2026-10-10T13:12:27.514Z"
+      },
+      {
+        "path": "build/render/week_10/notes-06.png",
+        "sha256": "5cd945e60903464520e56e623462e75fa6d0bff01bfb067f98a1d6bb2b2ca241",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T13:35:23.803Z",
+        "status": "pass",
+        "finding": "Individually viewed at original resolution. Lab pipeline now labels alignment and speech round-trip stages Measure / check. The former legend issue is resolved; heuristic-score, WER and metadata caveats, worked example and instructor explanation fit cleanly.",
+        "previous_sha256": "e4be5d5fdc986f684f21be5751887388101e076644a5c3a0c6facad6d641b979"
+      },
+      {
+        "path": "build/render/week_10/notes-07.png",
+        "sha256": "92a4c5f14ed849ca6f3d22d5e9e0fab4492270eb02533921c3d2a4ae1020c4be",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T13:35:23.803Z",
+        "status": "pass",
+        "finding": "Individually viewed at original resolution. Conceptual bridge-training page labels the held-out evaluation stage Measure / check and preserves the distinction from the inference-only lab. Diagram, paragraphs and example are intact and readable.",
+        "previous_sha256": "2cf23c7477da4986bc429bb9f8a3feabc875642a2e61bdca4c8301461f16ba6a"
+      },
+      {
+        "path": "build/render/week_10/notes-08.png",
+        "sha256": "0a08b8bd7e4e8d2e52faed63fb3ac1c9da1c89103cfe3efe281f42bf7b623b80",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T13:35:23.803Z",
+        "status": "pass",
+        "finding": "Individually viewed at original resolution. Invoice-check page now uses Measure / check for candidate-value verification. Diagram, checked-arithmetic example, explicit answer and code table fit; no clipped rows or overlap.",
+        "previous_sha256": "9eab80715104e4a2ba823f846e1a3596f015d024938f87a94f98eeee80df29e8"
+      },
+      {
+        "path": "build/render/week_10/notes-09.png",
+        "sha256": "5967ae71dcde2be49c5f4e2f9d7a60718c4c3f1807cf7a2da8449e5a729b13e8",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "finding": "Individually viewed at original resolution. Continued code table, metric/provenance misconceptions and glossary are intact; lecture introduction presents verification before detailed theory.",
+        "status": "pass",
+        "viewed_at_utc": "2026-10-10T13:12:58.794Z"
+      },
+      {
+        "path": "build/render/week_10/notes-10.png",
+        "sha256": "3a75d38a8c97de07af9bd318e16b8a5ba5affa29cb90af2f781077ea5e4f7bfe",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "finding": "Individually viewed at original resolution. Worked chart arithmetic (10+20+30=60), multimodal design explanations, architecture figure and family table fit without clipping; exact-model inputs/outputs are qualified.",
+        "status": "pass",
+        "viewed_at_utc": "2026-10-10T13:12:58.794Z"
+      },
+      {
+        "path": "build/render/week_10/notes-11.png",
+        "sha256": "43fba1454f30ac4b580b81ed5c40486c563ba7518bc48c83e8598b28530fa4f4",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "finding": "Individually viewed at original resolution. Caption/patch-count explanations, chart/invoice evidence, checked-arithmetic callout and training introduction are intact; arithmetic and stage captions are readable.",
+        "status": "pass",
+        "viewed_at_utc": "2026-10-10T13:14:26.086Z"
+      },
+      {
+        "path": "build/render/week_10/notes-12.png",
+        "sha256": "e386e29d9d53c7cdc39f596cd1c00bc0208b7ed82f59efdc44c52b28510fbf51",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "finding": "Individually viewed at original resolution. Five training/adaptation steps, data/licence guidance and generation examples fit clearly; diagram and start of the generation table are intact.",
+        "status": "pass",
+        "viewed_at_utc": "2026-10-10T13:14:26.086Z"
+      },
+      {
+        "path": "build/render/week_10/notes-13.png",
+        "sha256": "d0ed152f9095e34cd0fde3f200c2bafbed63cec8ce09f92bd823df106b379697",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "finding": "Individually viewed at original resolution. Continued generation table, three generated images and original/three-strength editing strip are uncropped; strength is qualified rather than promising quality.",
+        "status": "pass",
+        "viewed_at_utc": "2026-10-10T13:14:26.086Z"
+      },
+      {
+        "path": "build/render/week_10/notes-14.png",
+        "sha256": "6e2f2c937520b7c931168c5028a9f96cade44664fb7657143fc33781fe084a43",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "finding": "Individually viewed at original resolution. Speech round-trip result and metric caveats are clear; evaluation table, CLIP-score comparison limits and hallucination probe remain readable and intact.",
+        "status": "pass",
+        "viewed_at_utc": "2026-10-10T13:15:00.065Z"
+      },
+      {
+        "path": "build/render/week_10/notes-15.png",
+        "sha256": "fd531f318df1b805ff20837c31999e260d52922e83bfcffe9f0f01fb788d3cc0",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "finding": "Individually viewed at original resolution. Human review and layered provenance explanations distinguish fragile PNG metadata from signed C2PA; diagram and table fit without clipped rows.",
+        "status": "pass",
+        "viewed_at_utc": "2026-10-10T13:15:00.065Z"
+      },
+      {
+        "path": "build/render/week_10/notes-16.png",
+        "sha256": "c941f343d9cede75c74ba6a800daee006a5055f276af252883c8266918958082",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "finding": "Individually viewed at original resolution. Article 50 timing/role qualifications, consent guidance and design pattern are readable; seven misconception corrections fit and preserve metric/provenance limits.",
+        "status": "pass",
+        "viewed_at_utc": "2026-10-10T13:15:00.065Z"
+      },
+      {
+        "path": "build/render/week_10/notes-17.png",
+        "sha256": "2033b78e4f6ad9a19203d75b971c132fa768bd97fbb0268a1617c3eb0903b80b",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "finding": "Individually viewed at original resolution. Responsible-use bullets, explicit CPU/Qwen run context and untimed GPU caveat are intact; four lab TODOs are readable and fit.",
+        "status": "pass",
+        "viewed_at_utc": "2026-10-10T13:16:06.615Z"
+      },
+      {
+        "path": "build/render/week_10/notes-18.png",
+        "sha256": "11f947d12d67634a182f965bda20c77bd2ecb61f6dcd4522b4d56b70434f4588",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "finding": "Individually viewed at original resolution. Measured QA table preserves the wrong chart-total answer and correct references; metric limits, written answers and troubleshooting are complete and readable.",
+        "status": "pass",
+        "viewed_at_utc": "2026-10-10T13:16:06.615Z"
+      },
+      {
+        "path": "build/render/week_10/slides-24.png",
+        "sha256": "3ce42ad77217a98f74a3b0660536f8f00a6a1fb8d1df3b1d5e6f161456a2416a",
+        "dimensions": [
+          1334,
+          750
+        ],
+        "viewed_at_utc": "2026-10-10T08:57:15.180110+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: measured image examples, editing-strength comparison, editing definitions and speech introduction readable; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_10/slides-25.png",
+        "sha256": "1cbfb2ab49035d2b805ea204c621d13f52cec5659aa7945580fc6898ccf206fc",
+        "dimensions": [
+          1334,
+          750
+        ],
+        "viewed_at_utc": "2026-10-10T08:57:15.182112+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: measured image examples, editing-strength comparison, editing definitions and speech introduction readable; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_10/slides-26.png",
+        "sha256": "0f4d14d9b3bc6ad950e5147061fdb4665c51b0fba21516410e9c0eb03a9e055e",
+        "dimensions": [
+          1334,
+          750
+        ],
+        "viewed_at_utc": "2026-10-10T08:57:15.183113+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: measured image examples, editing-strength comparison, editing definitions and speech introduction readable; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_10/slides-27.png",
+        "sha256": "eb55dd0f3c970007bd37602c0782daf4fe4d4e92442fbbbddaf178a83594a0e7",
+        "dimensions": [
+          1334,
+          750
+        ],
+        "viewed_at_utc": "2026-10-10T08:57:15.184112+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: measured image examples, editing-strength comparison, editing definitions and speech introduction readable; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_10/slides-28.png",
+        "sha256": "779a9531a309c9b7ad27d5d2ddc37280515761155a3c6b45ff78c313d4ed6aa7",
+        "dimensions": [
+          1334,
+          750
+        ],
+        "viewed_at_utc": "2026-10-10T08:57:37.109675+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: music/video overview, editing quiz, evaluation section and metrics table readable; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_10/slides-29.png",
+        "sha256": "e112d83d317e1d31cf43f425e079a500bdb756ac8001a9c8ec3b207831cccbcd",
+        "dimensions": [
+          1334,
+          750
+        ],
+        "viewed_at_utc": "2026-10-10T08:57:37.110672+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: music/video overview, editing quiz, evaluation section and metrics table readable; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_10/slides-30.png",
+        "sha256": "01bde3169518d5e853d8129adc7c3042e0557b776d3027d0b515aea3a533c05b",
+        "dimensions": [
+          1334,
+          750
+        ],
+        "viewed_at_utc": "2026-10-10T08:57:37.111672+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: music/video overview, editing quiz, evaluation section and metrics table readable; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_10/slides-31.png",
+        "sha256": "a71d3d69ac010d70e38c3675b4410c05b2d1cf15a123b5b0586430fb929f11b9",
+        "dimensions": [
+          1334,
+          750
+        ],
+        "viewed_at_utc": "2026-10-10T08:57:37.111672+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: music/video overview, editing quiz, evaluation section and metrics table readable; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_10/slides-32.png",
+        "sha256": "6aa10c43c18d360501c1462ff88bb51d215be3a714ad1b4b30ada10dc3f7ea31",
+        "dimensions": [
+          1334,
+          750
+        ],
+        "viewed_at_utc": "2026-10-10T08:57:55.622563+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: hallucination measurements, human evaluation, responsible-use section and synthetic-media harm cards readable; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_10/slides-33.png",
+        "sha256": "dd60dd87c263858a06f258dfe7a7c550b6a6e5ce76d66f8bd2852d59185fd21d",
+        "dimensions": [
+          1334,
+          750
+        ],
+        "viewed_at_utc": "2026-10-10T08:57:55.622563+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: hallucination measurements, human evaluation, responsible-use section and synthetic-media harm cards readable; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_10/slides-34.png",
+        "sha256": "c2a74242907664ee2d57289f23a7072acdeb61468c163352bc8f596888a44e1b",
+        "dimensions": [
+          1334,
+          750
+        ],
+        "viewed_at_utc": "2026-10-10T08:57:55.623562+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: hallucination measurements, human evaluation, responsible-use section and synthetic-media harm cards readable; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_10/slides-35.png",
+        "sha256": "68767a1fb9266c22fac08a13c640bd99527e4ee174307a5c7a7b56b277f58541",
+        "dimensions": [
+          1334,
+          750
+        ],
+        "viewed_at_utc": "2026-10-10T08:57:55.623562+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: hallucination measurements, human evaluation, responsible-use section and synthetic-media harm cards readable; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_10/slides-36.png",
+        "sha256": "b68ec60a74d5135c6aa995150d529b9fff609390f95f35df8215c95d9fe8ec24",
+        "dimensions": [
+          1334,
+          750
+        ],
+        "viewed_at_utc": "2026-10-10T08:58:15.907067+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: provenance layers and limits, label-placement discussion, consent/rights and application cards readable; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_10/slides-37.png",
+        "sha256": "f6520c6cb5834503e25f68fb88be3a2a358354c546b6ef676c753c70b576191f",
+        "dimensions": [
+          1334,
+          750
+        ],
+        "viewed_at_utc": "2026-10-10T08:58:15.908064+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: provenance layers and limits, label-placement discussion, consent/rights and application cards readable; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_10/slides-38.png",
+        "sha256": "9fdf41301d24d5daa4a5b1d2ef1470c9dad85dc59634cced7ae9a22a190e3e1a",
+        "dimensions": [
+          1334,
+          750
+        ],
+        "viewed_at_utc": "2026-10-10T08:58:15.908064+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: provenance layers and limits, label-placement discussion, consent/rights and application cards readable; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_10/slides-39.png",
+        "sha256": "53b169df43edb26c0a823c2a029583e65e2ee65ff41c70954de3916e7b8c2808",
+        "dimensions": [
+          1334,
+          750
+        ],
+        "viewed_at_utc": "2026-10-10T08:58:15.909027+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: provenance layers and limits, label-placement discussion, consent/rights and application cards readable; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_10/slides-40.png",
+        "sha256": "0b6200ce7593f35327dac45fa89ee4a4be52b87eb48a350b1504a1301545c27c",
+        "dimensions": [
+          1334,
+          750
+        ],
+        "viewed_at_utc": "2026-10-10T08:59:09.584976+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: trends, application flow and responsible-use checklist readable; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_10/slides-41.png",
+        "sha256": "a01c252ec9fe90f8b7eebe512060a01dd8c3d41c639ebeedb3f7ad4c88c975a4",
+        "dimensions": [
+          1334,
+          750
+        ],
+        "viewed_at_utc": "2026-10-10T08:59:09.585980+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: trends, application flow and responsible-use checklist readable; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_10/slides-42.png",
+        "sha256": "8e181766b1893b5ede34fc7b7de3659c3224cfe5ada87eeb19506e06ede7e6fe",
+        "dimensions": [
+          1334,
+          750
+        ],
+        "viewed_at_utc": "2026-10-10T08:59:09.585980+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: trends, application flow and responsible-use checklist readable; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_10/slides-44.png",
+        "sha256": "2fd8e91e2401547c3955a2270428db75e308534037ac68cd35a514ad42223c4a",
+        "dimensions": [
+          1334,
+          750
+        ],
+        "viewed_at_utc": "2026-10-10T08:59:52.238266+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: lab instructions/resources, six-card recap with exit question, and notes practice questions readable; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_10/slides-45.png",
+        "sha256": "5b6ffd4ac0c892627c0b47dc2ea44d144b71a7c1786d3e9b6f2fdd79f434ba6f",
+        "dimensions": [
+          1334,
+          750
+        ],
+        "viewed_at_utc": "2026-10-10T08:59:52.238266+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: lab instructions/resources, six-card recap with exit question, and notes practice questions readable; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_10/slides-46.png",
+        "sha256": "83779604080b4f498259a762e2c29051bae772d153da40e8327347c98f43a22e",
+        "dimensions": [
+          1334,
+          750
+        ],
+        "viewed_at_utc": "2026-10-10T08:59:52.238266+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: lab instructions/resources, six-card recap with exit question, and notes practice questions readable; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_10/notes-19.png",
+        "sha256": "4077a62276f116e8fd68240efecc63458760bf8f427273611f42b2271a570b93",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T08:59:52.238266+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: lab instructions/resources, six-card recap with exit question, and notes practice questions readable; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_10/notes-20.png",
+        "sha256": "2027ba27b406e89c758797f3ca714d392c70d952818c5cd51be5b7b5d5e97b05",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T13:10:48.780965+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: exam marking guide, glossary, readings, extended lecture introduction and model-family table readable; current 36-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_10/notes-21.png",
+        "sha256": "fbe739c32b0401b6d4522b3145eb5ef040f6a52c2e43b529fb8c1592e0119e92",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T13:10:48.780965+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: exam marking guide, glossary, readings, extended lecture introduction and model-family table readable; current 36-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_10/notes-22.png",
+        "sha256": "6b7d9dbb657422eecbcc7de2269e1fed0b019a15bff6f93f9181450556429d51",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T13:10:48.780965+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: exam marking guide, glossary, readings, extended lecture introduction and model-family table readable; current 36-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_10/notes-23.png",
+        "sha256": "5d85dfb3d8063206407af1932afbb35f5df1e0cc13131d67bbb08fd6d337bfc3",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T13:10:48.780965+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: exam marking guide, glossary, readings, extended lecture introduction and model-family table readable; current 36-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_10/notes-24.png",
+        "sha256": "b39e950d5d07e7afdcfa7e521ef740ec639b525a4ab665387a403242ff80cd21",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T13:11:24.368353+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: continued model-family table, captions/tokens, measured reading errors, training/adaptation and real image-generation/editing explanations readable; current 36-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_10/notes-25.png",
+        "sha256": "4c8be87383d95128e23da8334b3d10c6735907dcc78cd328a9b6b66fab73e95d",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T13:11:24.369358+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: continued model-family table, captions/tokens, measured reading errors, training/adaptation and real image-generation/editing explanations readable; current 36-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_10/notes-26.png",
+        "sha256": "0122deb3b5072f592e7bdcf52a75237b6af04e41d8ca74e61f3d5ebe117676d8",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T13:11:24.370352+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: continued model-family table, captions/tokens, measured reading errors, training/adaptation and real image-generation/editing explanations readable; current 36-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_10/notes-27.png",
+        "sha256": "b2991ce6e2183c770d340dba3bc28269b3ade6f103c65e458a60839a0cb4cc6a",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T13:11:24.371352+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: continued model-family table, captions/tokens, measured reading errors, training/adaptation and real image-generation/editing explanations readable; current 36-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_10/notes-28.png",
+        "sha256": "67fb1a995e3739ae9a5265a97def9f4d7a87c58b08876e90d78bcd3fe5f95568",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T13:12:02.237446+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: speech round-trip, video/music, quiz continuation, metric table, hallucination/human review, provenance and Article50 timing nuance readable; current 36-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_10/notes-29.png",
+        "sha256": "a8f1d190b87be0f8972d98a5e768a492d5f679ba7cccf2559b180fa93e1f51b3",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T13:12:02.238448+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: speech round-trip, video/music, quiz continuation, metric table, hallucination/human review, provenance and Article50 timing nuance readable; current 36-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_10/notes-30.png",
+        "sha256": "4090e9b9ad78109687934af35908582b25ad9d04d771911bbca9192c4db25ea1",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T13:12:02.239446+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: speech round-trip, video/music, quiz continuation, metric table, hallucination/human review, provenance and Article50 timing nuance readable; current 36-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_10/notes-31.png",
+        "sha256": "659d47147773e768092f2200a6bf9c186d1f5c8e08f6f4b49e78f09b69fb1603",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T13:12:02.239446+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: speech round-trip, video/music, quiz continuation, metric table, hallucination/human review, provenance and Article50 timing nuance readable; current 36-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_10/notes-32.png",
+        "sha256": "ba33b0d03a91ca021ae9066b87c4beba5d5d5050aec199fa7078a0d5da0a6562",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T13:12:43.554049+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: label-placement/consent, applications and design flow, lab/summary, resources/licence note, recap infographic and intact final-page exit answer readable; current 36-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_10/notes-33.png",
+        "sha256": "0f25d404965990c2e276be4e0ab9a5fcaba6975f2d655237141c7dfd235356d3",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T13:12:43.554049+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: label-placement/consent, applications and design flow, lab/summary, resources/licence note, recap infographic and intact final-page exit answer readable; current 36-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_10/notes-34.png",
+        "sha256": "0b700ce03fa62ac9973d9d96154f4329154d992398591fe6f4533f05e92024c9",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T13:12:43.554049+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: label-placement/consent, applications and design flow, lab/summary, resources/licence note, recap infographic and intact final-page exit answer readable; current 36-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_10/notes-35.png",
+        "sha256": "2a0ef0569deffa146fbd6650fe68fdd8d22904790ba2b237febe7eaeb6038f7d",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T13:12:43.554049+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: label-placement/consent, applications and design flow, lab/summary, resources/licence note, recap infographic and intact final-page exit answer readable; current 36-page footer; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_10/notes-36.png",
+        "sha256": "60c0d6518b3faf0a57ad2e945683db79cffacd1e54e891157a50d548c21c3f61",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T13:12:43.554049+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: label-placement/consent, applications and design flow, lab/summary, resources/licence note, recap infographic and intact final-page exit answer readable; current 36-page footer; no clipping or overlap."
+      },
+      {
+        "path": "deliverables/Week_06_LLMs_and_Families/Diagrams/beginner_lab.png",
+        "sha256": "6dd5b6e99defd33fe8a8eebb4053ddbbbc8e2bbb1abcbf207e74b2b7a6b485e1",
+        "status": "pass",
+        "individually_viewed": true,
+        "view_detail": "original",
+        "review": "Measure / check legend fits; predictability is a frozen-model measurement; sequence unchanged."
+      },
+      {
+        "path": "deliverables/Week_07_Prompt_Engineering_and_Evaluation/Diagrams/beginner_overview.png",
+        "sha256": "76bb7a1923e2088137f2894a0ac39a332a99f78320e136e457e5ef28240af44d",
+        "status": "pass",
+        "individually_viewed": true,
+        "view_detail": "original",
+        "review": "Measure / check legend and prompt-development feedback fit; scoring does not imply weight updates; sequence unchanged."
+      },
+      {
+        "path": "deliverables/Week_07_Prompt_Engineering_and_Evaluation/Diagrams/beginner_mechanism.png",
+        "sha256": "4a4624443af6c14138b70e02adedda729baad1fa7fc3c2a4167aedb8ea0a5a24",
+        "status": "pass",
+        "individually_viewed": true,
+        "view_detail": "original",
+        "review": "Measure / check identifies schema validation; one-retry feedback remains clear and unchanged."
+      },
+      {
+        "path": "deliverables/Week_07_Prompt_Engineering_and_Evaluation/Diagrams/beginner_lab.png",
+        "sha256": "c26116db5fd43e7af84f2bf5896dce96b27ab65c46d55c18be888ee84c4da2e8",
+        "status": "pass",
+        "individually_viewed": true,
+        "view_detail": "original",
+        "review": "Measure / check legend fits; number scoring remains an evaluation operation; sequence unchanged."
+      },
+      {
+        "path": "deliverables/Week_07_Prompt_Engineering_and_Evaluation/Diagrams/beginner_training.png",
+        "sha256": "7670643a55368c103427a6d1fdd4c99e6699865cdb86a8e11cee491ce68e4076",
+        "status": "pass",
+        "individually_viewed": true,
+        "view_detail": "original",
+        "review": "Measure / check legend fits; feedback explicitly revises prompts while weights stay fixed; sequence unchanged."
+      },
+      {
+        "path": "deliverables/Week_08_Fine_Tuning_and_Domain_Adaptation/Diagrams/beginner_overview.png",
+        "sha256": "a4c5f045551e818523fd330ea433c72bbb782ec84a5b9d230133f756bdc13076",
+        "status": "pass",
+        "individually_viewed": true,
+        "view_detail": "original",
+        "review": "Loss / update and Measure / check legends both fit; baseline measurement and answer-token training are separately labelled; sequence unchanged."
+      },
+      {
+        "path": "deliverables/Week_08_Fine_Tuning_and_Domain_Adaptation/Diagrams/beginner_lab.png",
+        "sha256": "37a31ff2d16212a33f1affc0178b4bd704d45281430139132e4fe06239911033",
+        "status": "pass",
+        "individually_viewed": true,
+        "view_detail": "original",
+        "review": "Loss / update and Measure / check legends both fit; counting trainables remains measurement and trainer remains training; sequence unchanged."
+      },
+      {
+        "path": "deliverables/Week_08_Fine_Tuning_and_Domain_Adaptation/Diagrams/beginner_training.png",
+        "sha256": "0f38a55b84652466bb44c2cfb54fa4d81eb7c186883ca364271e148575f0a9cc",
+        "status": "pass",
+        "individually_viewed": true,
+        "view_detail": "original",
+        "review": "Measure / check labels validation; training step remains explicit; sequence unchanged."
+      },
+      {
+        "path": "deliverables/Week_08_Fine_Tuning_and_Domain_Adaptation/Diagrams/beginner_inference.png",
+        "sha256": "fc5badd6e4c01e7dc56959c9f87978a72f6284870edc0549f38fe880fbce92ad",
+        "status": "pass",
+        "individually_viewed": true,
+        "view_detail": "original",
+        "review": "Measure / check legend fits; intent scoring is separate from fixed-parameter inference; sequence unchanged."
+      },
+      {
+        "path": "deliverables/Week_09_Foundations_of_Multimodal_GenAI/Diagrams/beginner_lab.png",
+        "sha256": "1bf733d20facb8883853aa137fa1288d0bd38c1c91ccefa514619b58f2b127f6",
+        "status": "pass",
+        "individually_viewed": true,
+        "view_detail": "original",
+        "review": "Measure / check legend fits; frozen objective inspection remains a measurement; sequence unchanged."
+      },
+      {
+        "path": "deliverables/Week_09_Foundations_of_Multimodal_GenAI/Diagrams/beginner_inference.png",
+        "sha256": "e51271dd63b24957160b8fad20a99e267b91ab1608edeb8cc38e32626d45fa1e",
+        "status": "pass",
+        "individually_viewed": true,
+        "view_detail": "original",
+        "review": "Measure / check legend fits; WER checks the transcript without training; sequence unchanged."
+      },
+      {
+        "path": "build/render/week_06/notes-06.png",
+        "sha256": "0a34e099c943e9ec8cac79d4426bd52d80169990fac3846e1454b62a803fb796",
+        "status": "pass",
+        "individually_viewed": true,
+        "view_detail": "original",
+        "review": "Measure / check legend fits; predictability is described as a frozen-model measurement. Diagram, body, worked example and answer are readable with no clipping or overlaps."
+      },
+      {
+        "path": "build/render/week_06/slides-43.png",
+        "sha256": "7265eb17cf5ec83563a7420421d9b56cc8e3e86f7c3b52ad543c0dd340ee1ed4",
+        "status": "pass",
+        "individually_viewed": true,
+        "view_detail": "original",
+        "review": "Measure / check legend fits; Score predictability is distinct from training. All step labels, arrows and question are readable without clipping or overlap."
+      },
+      {
+        "path": "build/render/week_07/notes-04.png",
+        "sha256": "036d6004deaff52e10c71d9fa134ebd109581dd72e2890ee560c117bb68a2e2d",
+        "status": "pass",
+        "individually_viewed": true,
+        "view_detail": "original",
+        "review": "Measure / check legend fits; score and prompt-development feedback remain readable. Body explains reference scoring and a separate final check; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_07/notes-05.png",
+        "sha256": "56f44849f4ed05c14690b2570f803dbe4277350f823fe60b9d93d961dc3c40dc",
+        "status": "pass",
+        "individually_viewed": true,
+        "view_detail": "original",
+        "review": "Measure / check identifies schema validation; parse/schema retry is distinct from later factual comparison. Diagram and complete worked example fit without overlap."
+      },
+      {
+        "path": "build/render/week_07/notes-06.png",
+        "sha256": "7e0660c9f065a83b8b3f814dea0fc878ce4cc89dd415f411def37918f6260080",
+        "status": "pass",
+        "individually_viewed": true,
+        "view_detail": "original",
+        "review": "Measure / check fits beside number scoring; keyword flags and judge verdict checks remain explicit. Diagram and explanatory paragraphs are readable without clipping."
+      },
+      {
+        "path": "build/render/week_07/notes-07.png",
+        "sha256": "976a5d49f0afe5e05ecd246225e6e77cbc5876b75811c9776139fe2adb73929f",
+        "status": "pass",
+        "individually_viewed": true,
+        "view_detail": "original",
+        "review": "Measure / check fits in prompt-development diagram; weights stay fixed and fresh final set is explicit. Second inference diagram and captions fit; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_07/slides-07.png",
+        "sha256": "3f3e1b05ec4228a9a7bd2e1e394dff01d9156b55bb45e8eb82807b3f46f07b15",
+        "status": "pass",
+        "individually_viewed": true,
+        "view_detail": "original",
+        "review": "Measure / check legend fits. Prompt-development feedback and six steps remain readable; arrows and question are clear without clipping or overlap."
+      },
+      {
+        "path": "build/render/week_07/slides-25.png",
+        "sha256": "0184c389b41744789f3a0e4e757d1f289a4a9fdea8ec32f9abe5a9555996be6b",
+        "status": "pass",
+        "individually_viewed": true,
+        "view_detail": "original",
+        "review": "Measure / check legend fits; schema retry labels and one-retry feedback remain readable. Factual check is separate in subtitle; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_07/slides-31.png",
+        "sha256": "e501f57054ef225136adc0cbbb23fa607a7d0a7407d87c6f18a6ec739e430135",
+        "status": "pass",
+        "individually_viewed": true,
+        "view_detail": "original",
+        "review": "Measure / check legend fits; feedback revises prompts while weights stay fixed. Five steps, final-set instruction and check question fit without overlap."
+      },
+      {
+        "path": "build/render/week_07/slides-43.png",
+        "sha256": "aa477fe7bde914338fb43ad89cf555be7e2acb779d3ab2b938f5df5a10447c0b",
+        "status": "pass",
+        "individually_viewed": true,
+        "view_detail": "original",
+        "review": "Measure / check legend fits; task-specific scoring, heuristic inspection and valid A/B requirement are readable. Six-step topology remains unchanged; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_08/notes-04.png",
+        "sha256": "5c25335b3866e0cac03d260a4d82bf53eab277bdc90a889eb0f38a9139cc4019",
+        "status": "pass",
+        "individually_viewed": true,
+        "view_detail": "original",
+        "review": "Loss / update and Measure / check legends both fit; baseline measurement and answer-token training remain distinct. Diagram, body and example are readable without clipping or overlap."
+      },
+      {
+        "path": "build/render/week_08/notes-06.png",
+        "sha256": "328251e51e61450a761bdea06c73f7c606314f8c374025c804cf9066180f9b88",
+        "status": "pass",
+        "individually_viewed": true,
+        "view_detail": "original",
+        "review": "Both orange-role legends fit; trainable counting is measurement and trainer is training. Body, five-step example and explicit answer fit without clipping or overlap."
+      },
+      {
+        "path": "build/render/week_08/notes-07.png",
+        "sha256": "c0d49ad0d9933cca66ced4ada8f64b9ea84779601d2873d22a97758494ca962b",
+        "status": "pass",
+        "individually_viewed": true,
+        "view_detail": "original",
+        "review": "Measure / check labels validation; actual adapter updates remain explicit in training step and body. Diagram and example fit without clipping or overlap."
+      },
+      {
+        "path": "build/render/week_08/notes-08.png",
+        "sha256": "00e883ced7182719ec7ead59bd4b9ab791a4feabd90da20d7e82fa8b20c14677",
+        "status": "pass",
+        "individually_viewed": true,
+        "view_detail": "original",
+        "review": "Measure / check fits in inference diagram; subtitle explicitly excludes gradient updates. Body and three-row code guide fit on the page without clipping or overlap."
+      },
+      {
+        "path": "build/render/week_08/slides-07.png",
+        "sha256": "0254d559022cb1e479905e718f2451a78436d7b357c6faa42abd6f2c90468917",
+        "status": "pass",
+        "individually_viewed": true,
+        "view_detail": "original",
+        "review": "Loss / update and Measure / check legends both fit; baseline and training steps are clearly named. Six-step topology, labels and question fit without clipping or overlap."
+      },
+      {
+        "path": "build/render/week_08/slides-34.png",
+        "sha256": "7a0ac55eac0769941b7202424e07d56e393df25ebacc56ae7f9911d303a6fa2c",
+        "status": "pass",
+        "individually_viewed": true,
+        "view_detail": "original",
+        "review": "Measure / check labels validation; LoRA weight updates remain explicit in adjacent model step. All labels, arrows and question fit without clipping or overlap."
+      },
+      {
+        "path": "build/render/week_08/slides-39.png",
+        "sha256": "478b2c735d4fbe91f1e490baf2fadfee0f448429f2330798e3709da7df497ac1",
+        "status": "pass",
+        "individually_viewed": true,
+        "view_detail": "original",
+        "review": "Measure / check fits; held-out scoring is distinct from fixed-weight inference. All five steps, edge labels and question are readable without clipping or overlap."
+      },
+      {
+        "path": "build/render/week_08/slides-43.png",
+        "sha256": "f95dbf0d9bbc0dfd9d43a58a9aea794af5a0b2a90c9707a369d8eb3e664cf3cb",
+        "status": "pass",
+        "individually_viewed": true,
+        "view_detail": "original",
+        "review": "Both orange-role legends fit across full legend row; counting trainables and actual training have distinct names. Six steps and check question are readable without clipping or overlap."
+      },
+      {
+        "path": "build/render/week_09/notes-06.png",
+        "sha256": "cf8782bd3751e8f0dc3f18558800c84074baf39d4a4447e79a47a0e73ddd3374",
+        "status": "pass",
+        "individually_viewed": true,
+        "view_detail": "original",
+        "review": "Measure / check legend fits; frozen objective inspection is distinct from training. Explanation and worked example identify precision@k despite historical function name; full page has no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_09/notes-07.png",
+        "sha256": "be85d83c3f3c8fbca891bbb927068a00fc82dd00ed371193d7d992974ea3ca46",
+        "status": "pass",
+        "individually_viewed": true,
+        "view_detail": "original",
+        "review": "Conceptual training diagram retains Loss / update while speech inference uses Measure / check. Both legends fit, feedback explicitly separates training from the frozen lab, and both diagrams and complete explanation fit without clipping."
+      },
+      {
+        "path": "build/render/week_09/slides-38.png",
+        "sha256": "67515f8f776c522d840205d9d7b825629873dbeee905246f76713bc0e618c115",
+        "status": "pass",
+        "individually_viewed": true,
+        "view_detail": "original",
+        "review": "Measure / check legend fits; transcript checking is distinct from encoding and ranking. Five-step topology, labels and question fit without clipping or overlap."
+      },
+      {
+        "path": "build/render/week_09/slides-43.png",
+        "sha256": "f18da83402166527ae1dbedbb894e5db3464e8520e3f02ba59aac77c658dddf4",
+        "status": "pass",
+        "individually_viewed": true,
+        "view_detail": "original",
+        "review": "Measure / check legend fits; objective inspection remains frozen measurement. Six steps, edge labels and precision question are readable without clipping or overlap."
+      },
+      {
+        "path": "deliverables/Week_10_Multimodal_GenAI_Applications/Diagrams/beginner_overview.png",
+        "sha256": "d31e61e6456feb4088193547dfc528b45a57dc3514a4e88022d18542cd43f263",
+        "dimensions": [
+          2160,
+          795
+        ],
+        "viewed_at_utc": "2026-10-10T13:23:35.409240+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: Measure / check legend fits and matches scoring, WER or held-out checking; conceptual training and invoice score/design distinction clear; arrows and labels readable without clipping/overlap."
+      },
+      {
+        "path": "deliverables/Week_10_Multimodal_GenAI_Applications/Diagrams/beginner_lab.png",
+        "sha256": "73fa79a58b7cd73e23b06d68986ea9390fe4666fa3bafeb36a819ec6814a8bac",
+        "dimensions": [
+          2160,
+          795
+        ],
+        "viewed_at_utc": "2026-10-10T13:23:35.412740+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: Measure / check legend fits and matches scoring, WER or held-out checking; conceptual training and invoice score/design distinction clear; arrows and labels readable without clipping/overlap."
+      },
+      {
+        "path": "deliverables/Week_10_Multimodal_GenAI_Applications/Diagrams/beginner_training.png",
+        "sha256": "88aa9fc93910a36ba08d12e8d4459450afe924ce5664df15d5bff6462fb713ea",
+        "dimensions": [
+          2160,
+          795
+        ],
+        "viewed_at_utc": "2026-10-10T13:23:35.415739+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: Measure / check legend fits and matches scoring, WER or held-out checking; conceptual training and invoice score/design distinction clear; arrows and labels readable without clipping/overlap."
+      },
+      {
+        "path": "deliverables/Week_10_Multimodal_GenAI_Applications/Diagrams/beginner_inference.png",
+        "sha256": "0869f4e784bb9c93d2e2c878a78cd6d76ef7950fb366724509485f75fd9f8a81",
+        "dimensions": [
+          2160,
+          795
+        ],
+        "viewed_at_utc": "2026-10-10T13:23:35.418739+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: Measure / check legend fits and matches scoring, WER or held-out checking; conceptual training and invoice score/design distinction clear; arrows and labels readable without clipping/overlap."
+      },
+      {
+        "path": "deliverables/Week_11_Deployment_and_Frameworks/Diagrams/beginner_lab.png",
+        "sha256": "21a565182fd08700d0850319174332822fa04eac2e46fa22cdb6c40c45acd215",
+        "dimensions": [
+          2160,
+          795
+        ],
+        "viewed_at_utc": "2026-10-10T13:24:19.952089+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: Measure / check legend fits; illustrative cost/baseline measurements and gold-document retrieval checks correctly distinguished from parameter updates; local API route/scaffold and agent-audit scope readable; no clipping or overlap."
+      },
+      {
+        "path": "deliverables/Week_11_Deployment_and_Frameworks/Diagrams/beginner_training.png",
+        "sha256": "c4d5ec56ceab1b70cb1d2d00a2a2882f536f93c9ad19fd540a3dae940e08134b",
+        "dimensions": [
+          2160,
+          795
+        ],
+        "viewed_at_utc": "2026-10-10T13:24:19.954091+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: Measure / check legend fits; illustrative cost/baseline measurements and gold-document retrieval checks correctly distinguished from parameter updates; local API route/scaffold and agent-audit scope readable; no clipping or overlap."
+      },
+      {
+        "path": "deliverables/Week_12_RAG_and_Agentic_AI/Diagrams/beginner_lab.png",
+        "sha256": "86a7058163c43d127f8b784a4b363436902c6cc062be2d5ba8ea079845f17f82",
+        "dimensions": [
+          2160,
+          795
+        ],
+        "viewed_at_utc": "2026-10-10T13:24:19.955093+00:00",
+        "status": "pass",
+        "finding": "Individually viewed: Measure / check legend fits; illustrative cost/baseline measurements and gold-document retrieval checks correctly distinguished from parameter updates; local API route/scaffold and agent-audit scope readable; no clipping or overlap."
+      },
+      {
+        "path": "build/render/week_10/slides-43.png",
+        "sha256": "781fdc8f50aff4aac3a5aa62db0fa07bbf1116aeee0306552387c16a2135a645",
+        "dimensions": [
+          1334,
+          750
+        ],
+        "viewed_at_utc": "2026-10-10T13:34:34.599045+00:00",
+        "status": "pass",
+        "finding": "Individually viewed final Office slide: Measure / check legend fits and correctly labels CLIP/WER measurement without implying weight updates; all diagram boxes/arrows/check question readable. Resolves old slide43 legend finding in followup_week10_last_visual.json."
+      },
+      {
+        "path": "build/render/week_11/notes-06.png",
+        "sha256": "b643c73cd7cb89c1b9f5cc41cae73a038d8de59a955584b66928a1fb5658fdac",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T13:35:29.528108+00:00",
+        "status": "pass",
+        "finding": "Individually viewed final Office image: Measure / check legend fits; baseline and cost measurements remain distinct from training; simulation, scaffold and deployment explanations/readable check questions fit without clipping or overlap."
+      },
+      {
+        "path": "build/render/week_11/notes-07.png",
+        "sha256": "890afd33cdb6cf479439e8445722cab179f926094b69538848d1bb5823228027",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T13:35:29.528108+00:00",
+        "status": "pass",
+        "finding": "Individually viewed final Office image: Measure / check legend fits; baseline and cost measurements remain distinct from training; simulation, scaffold and deployment explanations/readable check questions fit without clipping or overlap."
+      },
+      {
+        "path": "build/render/week_11/slides-33.png",
+        "sha256": "a162f0339071efae8742f427de07113cba7540f6b79dc473d4e593c2e7c5a929",
+        "dimensions": [
+          1334,
+          750
+        ],
+        "viewed_at_utc": "2026-10-10T13:35:29.528108+00:00",
+        "status": "pass",
+        "finding": "Individually viewed final Office image: Measure / check legend fits; baseline and cost measurements remain distinct from training; simulation, scaffold and deployment explanations/readable check questions fit without clipping or overlap."
+      },
+      {
+        "path": "build/render/week_11/slides-43.png",
+        "sha256": "005aa4ad0efd85a6804bc37f3e4fa549706f4d7fcb4f8b46365104097a7e1dac",
+        "dimensions": [
+          1334,
+          750
+        ],
+        "viewed_at_utc": "2026-10-10T13:36:04.490184+00:00",
+        "status": "pass",
+        "finding": "Individually viewed final Office image: Measure / check legend fits and distinguishes measurement from training; local API/scaffold or gold-document/limited-number-check scope correctly qualified; diagram and check question readable without clipping or overlap."
+      },
+      {
+        "path": "build/render/week_12/notes-06.png",
+        "sha256": "c12710213828c052e8e1c0fd5050530604b49f0aff771d9aa45d1f1f31f8225b",
+        "dimensions": [
+          827,
+          1170
+        ],
+        "viewed_at_utc": "2026-10-10T13:36:04.491185+00:00",
+        "status": "pass",
+        "finding": "Individually viewed final Office image: Measure / check legend fits and distinguishes measurement from training; local API/scaffold or gold-document/limited-number-check scope correctly qualified; diagram and check question readable without clipping or overlap."
+      },
+      {
+        "path": "build/render/week_12/slides-43.png",
+        "sha256": "262c90aeb8540770924824f9e34721dcdb60d335c06cc180c291636cc0513f3c",
+        "dimensions": [
+          1334,
+          750
+        ],
+        "viewed_at_utc": "2026-10-10T13:36:04.491185+00:00",
+        "status": "pass",
+        "finding": "Individually viewed final Office image: Measure / check legend fits and distinguishes measurement from training; local API/scaffold or gold-document/limited-number-check scope correctly qualified; diagram and check question readable without clipping or overlap."
+      }
+    ],
+    "unchanged_pngs": 818,
+    "slide_pages": 552,
+    "word_pages": 378,
+    "course_word_pages": 28,
+    "slide_layout_issues": {
+      "1": [],
+      "2": [],
+      "3": [],
+      "4": [],
+      "5": [],
+      "6": [],
+      "7": [],
+      "8": [],
+      "9": [],
+      "10": [],
+      "11": [],
+      "12": []
+    }
+  },
+  "limits": [
+    "Unchanged images rely on the prior full-course review and unchanged SHA256 hashes; this follow-up individually viewed all changed/new PNGs.",
+    "The original baseline omitted Week 10; all 82 of its current slides/Word pages were individually reviewed rather than claiming unavailable old hash matches.",
+    "9 October full runs lack executed_notebook_sha256; the new hash guard applies to new runs without retrofitting old evidence.",
+    "Full reruns occurred alongside other checks; their times do not replace the historical classroom benchmark measurements.",
+    "Hosted endpoints, clean package installation/downloads, a timed Colab T4 session and student classroom feedback were not verified."
+  ]
+}

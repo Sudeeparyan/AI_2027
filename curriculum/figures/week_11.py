@@ -33,68 +33,60 @@ def cover(path):
 
 
 def stack(path):
+    """Responsibility comparison, not a falsely connected data pipeline."""
     fig, ax = _diagram_canvas(4.5)
-    rows = [("Application", "Interface and request handling", "tool"),
-            ("Orchestration", "Connect prompts, retrieval and tools", "tool"),
-            ("Access / serving", "Hosted API, serving engine or local runner", "tool"),
-            ("Model", "Weights and generation settings", "model"),
-            ("Hardware", "Cloud, server or local device", "tool")]
+    rows = [("Application", "Receive and return requests", "tool"),
+            ("Coordination", "Connect evidence and tools", "tool"),
+            ("Serving", "Run inference for clients", "tool"),
+            ("Model", "Predict continuation tokens", "model"),
+            ("Hardware", "Execute numerical operations", "tool")]
     for i, (label, detail, role) in enumerate(rows):
-        y = 3.66 - i * 0.72
-        role_box(ax, 0.15, y, 3.35, 0.58, label, role, size=20)
-        ax.text(3.9, y + 0.29, detail, fontsize=20, color=TEXT, va="center")
-    # The boxes are layers, not pipeline roles, so a role key would mislabel them.
-    ax.text(0.15, 0.25, "Monitor quality, latency, errors and cost across every layer.", fontsize=18, color=INK)
+        y = 3.66 - i * 0.65
+        role_box(ax, 0.15, y, 3.35, 0.54, label, role, size=20)
+        ax.text(3.9, y + 0.27, detail, fontsize=20, color=TEXT, va="center")
+    ax.text(0.15, 0.54, "Roles share monitoring responsibility.", fontsize=18, color=INK)
+    role_legend(ax, 0.10, size=16)
     _diagram_finish(fig, path)
-
 
 
 def openai_compat(path):
-    fig, ax = _diagram_canvas(4.7)
-    role_box(ax, 0.15, 2.1, 3.4, 1.1, "Chat client\nmessages + model", "tool", size=20)
-    backends = [("Hosted provider", "OpenAI / Azure / Gemini"),
-                ("Inference router", "Hugging Face"),
-                ("Serving engine", "vLLM / SGLang"),
-                ("Local runner", "Ollama / llama.cpp"),
-                ("Lab endpoint", "FastAPI on localhost")]
-    for i, (label, example) in enumerate(backends):
-        y = 3.8 - i * 0.68
-        role_box(ax, 5.2, y, 3.2, 0.54, label, "tool", size=18)
-        ax.text(8.8, y + 0.27, example, fontsize=18, color=TEXT, va="center")
-        arrow(ax, 3.55, 2.65, 5.2, y + 0.27)
-    ax.text(0.15, 0.35, "Set endpoint, key and model; verify supported fields and behaviour.", fontsize=18, color=INK)
+    fig, ax = _diagram_canvas(3.6)
+    _sequence(ax, [("Messages", "data"), ("Configure endpoint", "tool"),
+                   ("Generate", "model"), ("Reply", "output")], 1.55,
+              labels=["messages", "JSON", "answer + usage"])
+    ax.text(0.15, 3.1, "Change URL, key and model; verify fields.", fontsize=18, color=INK)
+    ax.text(0.15, 0.90, "Alternatives: hosted APIs, vLLM, Ollama, FastAPI.", fontsize=16, color=TEXT)
+    role_legend(ax, 0.10, size=16)
     _diagram_finish(fig, path)
-
 
 
 def request_anatomy(path):
-    fig, ax = _diagram_canvas(2.7)
-    stages = [("Network\nand auth", 0.15, 2.1, "tool"), ("Queue", 2.45, 1.5, "tool"),
-              ("Prefill\nread prompt", 4.15, 2.5, "model"),
-              ("Decode\ngenerate remaining tokens", 6.85, 5.85, "model")]
-    for label, x, width, role in stages:
-        role_box(ax, x, 1.5, width, 0.9, label, role, size=18)
-    routed_arrow(ax, [(0.15, 1.12), (6.65, 1.12)], color=PRIMARY)
-    ax.text(3.4, 0.75, "Wait to first token (TTFT)", ha="center", fontsize=18, color=PRIMARY)
-    ax.text(7.05, 0.75, "Then continue streaming", fontsize=18, color=TEAL)
+    fig, ax = _diagram_canvas(3.1)
+    _sequence(ax, [("Network / auth", "tool"), ("Queue", "tool"),
+                   ("Prefill", "model"), ("Decode", "model")], 1.65,
+              labels=["request", "prompt", "state"])
+    # This lower strip compares elapsed intervals; it is not another data connector.
+    ax.plot([0.15, 9.45], [1.08, 1.08], color=PRIMARY, lw=2)
+    ax.plot([0.15, 0.15], [0.99, 1.17], color=PRIMARY, lw=2)
+    ax.plot([9.45, 9.45], [0.99, 1.17], color=PRIMARY, lw=2)
+    ax.text(4.8, 0.68, "TTFT: wait to first token", ha="center", fontsize=18, color=PRIMARY)
+    ax.text(10.85, 0.68, "Remaining tokens", ha="center", fontsize=18, color=TEAL)
+    role_legend(ax, 0.10, size=16)
     _diagram_finish(fig, path)
-
 
 
 def app_architecture(path):
     fig, ax = _diagram_canvas(4.1)
-    ax.text(0.15, 3.65, "Proposed integrated design; the lab tests separate routes.", fontsize=20, color=INK)
-    _sequence(ax, [("User", "data"), ("UI", "tool"), ("API", "tool"), ("Input\nchecks", "tool"),
-                   ("Model", "model"), ("Output\nchecks", "tool"), ("Answer", "output")], 2.35, height=0.9, size=18)
-    role_box(ax, 3.55, 0.9, 5.4, 0.95, "Logs, metrics and versions\nlatency / tokens / blocks", "output", size=18)
-    role_box(ax, 9.45, 0.9, 3.25, 0.95, "Dashboard\nand alerts", "tool", size=18)
-    arrow(ax, 8.95, 1.375, 9.45, 1.375)
-    for x in (4.76, 6.61, 8.45):
-        routed_arrow(ax, [(x, 2.35), (x, 1.85)], color=MUTED, dashed=True)
-    role_legend(ax, 0.08, size=16)
+    ax.text(0.15, 3.70, "Proposed integration; lab routes are separate.", fontsize=18, color=INK)
+    _sequence(ax, [("Request", "data"), ("Entry", "tool"), ("Input checks", "tool"),
+                   ("Generate", "model"), ("Output check", "tool"), ("Reply", "output")],
+              2.20, height=0.9, size=18, labels=["JSON", "fields", "clean input", "answer", "checked text"])
+    role_box(ax, 6.90, 0.83, 4.70, 0.70, "Log / inspect metadata", "tool", size=18)
+    # Solid branches carry actual records; neither is a training-gradient arrow.
+    routed_arrow(ax, [(7.52, 2.20), (7.52, 1.53)], label="tokens", label_xy=(6.85, 1.83), size=16)
+    routed_arrow(ax, [(9.65, 2.20), (9.65, 1.53)], label="outcome", label_xy=(10.35, 1.83), size=16)
+    role_legend(ax, 0.10, size=16)
     _diagram_finish(fig, path)
-
-
 
 
 def _diagram_canvas(height):
@@ -106,14 +98,17 @@ def _diagram_canvas(height):
     return fig, ax
 
 
-def _sequence(ax, labels, y, width=12.6, height=0.95, size=18):
-    gap = 0.28
-    block = (width - gap * (len(labels) - 1)) / len(labels)
-    for i, (label, role) in enumerate(labels):
+def _sequence(ax, nodes, y, width=12.6, height=0.95, size=18, labels=None):
+    assert labels is not None and len(labels) == len(nodes) - 1
+    gap = 0.48
+    block = (width - gap * (len(nodes) - 1)) / len(nodes)
+    for i, (label, role) in enumerate(nodes):
         x = 0.15 + i * (block + gap)
         role_box(ax, x, y, block, height, label, role, size=size)
-        if i < len(labels) - 1:
-            arrow(ax, x + block, y + height / 2, x + block + gap, y + height / 2)
+        if i < len(nodes) - 1:
+            arrow(ax, x + block, y + height / 2, x + block + gap, y + height / 2, color=PRIMARY)
+            ax.text(x + block + gap / 2, y + height + 0.13, labels[i],
+                    ha="center", va="bottom", fontsize=16, color=TEXT)
 
 
 def _diagram_finish(fig, path):
@@ -132,7 +127,7 @@ def latency_results(path):
     total = [row["total (s)"] for row in rows]
     first = [row["TTFT (s)"] for row in rows]
     ax.barh(y, total, color="#C7D2FE", label="Full answer")
-    ax.barh(y, first, color=PRIMARY, label="First token")
+    ax.barh(y, first, color=PRIMARY, label="First text (approx. TTFT)")
     ax.set_yticks(y, ["What is an LLM?", "Three prompt tips", "What is a rate limit?"], fontsize=18)
     ax.invert_yaxis()
     for index, (t, f) in enumerate(zip(total, first)):

@@ -11,6 +11,8 @@ import re
 import subprocess
 from pathlib import Path
 
+from output_files import atomic_text
+
 ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -21,11 +23,17 @@ def load(n: int) -> dict | None:
     data = json.loads(path.read_text(encoding="utf-8"))
     glossary = ROOT / "curriculum" / "glossary.json"
     if glossary.exists():
-        meanings = {p["term"].casefold(): p["meaning"] for p in json.loads(glossary.read_text(encoding="utf-8"))["terms"]}
+        terms = {p["term"].casefold(): p for p in json.loads(glossary.read_text(encoding="utf-8"))["terms"]}
         for item in data["prerequisites"] + data["glossary"]:
-            item["meaning"] = meanings.get(item["term"].casefold(), item["meaning"])
+            canonical = terms.get(item["term"].casefold(), {})
+            item["meaning"] = canonical.get("meaning", item["meaning"])
+            if canonical.get("short_meaning"):
+                item["short_meaning"] = canonical["short_meaning"]
     if data["week"] != n:
         raise ValueError(f"{path}: wrong week")
+    count = data.get("vocabulary_count", len(data["prerequisites"]))
+    if type(count) is not int or not 1 <= count <= len(data["prerequisites"]):
+        raise ValueError(f"{path}: vocabulary_count must select 1–{len(data['prerequisites'])} prerequisites")
     ids = [d["id"] for d in data["diagrams"]]
     if len(ids) != len(set(ids)) or not {"overview", "mechanism", "lab"}.issubset(ids):
         raise ValueError(f"{path}: unique IDs and overview, mechanism and lab diagrams are required")
@@ -33,7 +41,7 @@ def load(n: int) -> dict | None:
         if not 4 <= len(d["steps"]) <= 7 or len(d["arrows"]) != len(d["steps"]) - 1:
             raise ValueError(f"{path}: invalid steps or connectors in {d['id']}")
         for step in d["steps"]:
-            if step.get("role", "model") not in {"input", "data", "model", "loss", "output", "human", "tool"}:
+            if step.get("role", "model") not in {"input", "data", "model", "loss", "metric", "output", "human", "tool"}:
                 raise ValueError(f"{path}: unknown block role in {d['id']}")
         for branch in d.get("branches", []):
             if (not all(isinstance(branch.get(k), int) and 0 <= branch[k] < len(d["steps"]) for k in ("from", "to"))
@@ -122,6 +130,11 @@ def notes_section(data: dict) -> str:
     return "\n".join(parts) + "\n\n"
 
 
+def modern_notes(text: str) -> bool:
+    """Recognise authored modern notes; validation belongs to the week builder."""
+    return bool(re.match(r"\s*(?:\*\*)?In short:", str(text)))
+
+
 def enrich(wk: dict) -> dict:
     data = load(wk["week"])
     if not data:
@@ -133,23 +146,29 @@ def enrich(wk: dict) -> dict:
     recap_slide = None
     if data.get("recap") and recap_index is not None:
         old = original[recap_index]
+        recap_notes = data["recap"]["notes"]
+        if not modern_notes(recap_notes):
+            recap_notes += "\n\nExit question: " + data["recap"]["question"] + \
+                "\nAnswer: " + data["recap"]["answer"] + "\n\n" + old.get("notes", "")
         recap_slide = {"type": "infographic", "title": data["recap"]["title"],
                        "figure": "beginner_recap", "recap": data["recap"],
-                       "notes": data["recap"]["notes"] + "\n\nExit question: " + data["recap"]["question"] +
-                       "\nAnswer: " + data["recap"]["answer"] + "\n\n" + old.get("notes", "")}
+                       "notes": recap_notes}
         wk["notes_md"] += "\n# Class recap\n\n" + "\n".join("- " + p for p in old["points"]) + "\n\n"
-        wk["notes_md"] += f"![{data['recap']['title']}](fig:beginner_recap)\n\n"
         # The recap figure already prints the worked example and the next-week line; only the exit question is new.
         wk["notes_md"] += "**Exit question.** " + data["recap"]["question"]
-        wk["notes_md"] += "\n\n**Answer.** " + data["recap"]["answer"] + "\n"
+        wk["notes_md"] += "\n\n**Answer.** " + data["recap"]["answer"] + "\n\n"
+        wk["notes_md"] += f"![{data['recap']['title']}](fig:beginner_recap)\n\n"
     diagrams = {d["id"]: d for d in data["diagrams"]}
     def diagram(kind: str) -> dict:
         d = diagrams[kind]
+        legacy = d["explanation"] + "\n\nWorked example:\n" + "\n".join(d["trace"]) + \
+            "\n\nCheck: " + d["check_question"] + "\nAnswer: " + d["check_answer"]
         return {"type": "technical", "title": d["title"], "diagram": d, "beginner_support": True,
-                "notes": d["explanation"] + "\n\nWorked example:\n" + "\n".join(d["trace"]) +
-                "\n\nCheck: " + d["check_question"] + "\nAnswer: " + d["check_answer"]}
+                "notes": d.get("notes") or legacy}
+    displayed = data["prerequisites"][:data.get("vocabulary_count", len(data["prerequisites"]))]
+    compact = all(isinstance(p.get("short_meaning"), str) and p["short_meaning"].strip() for p in displayed)
     prereq = {"type": "table", "title": "Starting vocabulary", "header": ["Term", "Plain meaning", "Quick check"],
-              "rows": [[p["term"], p["meaning"], p["check"]] for p in data["prerequisites"]], "max_font": 20,
+              "rows": [[p["term"], p["meaning"], p["check"]] for p in displayed], "max_font": 20,
               "col_widths": [22, 39, 39], "beginner_support": True,
               "notes": "Introduce these terms before the main theory. Give pairs one minute to answer the quick "
                   "checks, then take answers. " + " ".join(
@@ -157,6 +176,11 @@ def enrich(wk: dict) -> dict:
                   for p in data["prerequisites"]) +
                   " Let students explain one example aloud, then connect their example to the next flow diagram. "
                   "Use the blocks to name the inputs and outputs before introducing notation."}
+    if compact:
+        prereq.update(header=["Term", "Meaning"], col_widths=[28, 72],
+                      rows=[[p["term"], p["short_meaning"]] for p in displayed])
+    if data.get("vocabulary_notes"):
+        prereq["notes"] = data["vocabulary_notes"]
     lab_idx = next((i for i, s in enumerate(original) if s["type"] == "lab"), len(original) - 3)
     insert = {3: [prereq]}
     if not diagrams["overview"].get("insert_before_title"):
@@ -177,8 +201,9 @@ def enrich(wk: dict) -> dict:
             continue
         if s["type"] == "agenda":
             s = {**s, "type": "course_map", "title": "Where we are in the course", "figure": "beginner_course_map"}
-            s["notes"] += "\n\nTrace the highlighted week. Earlier concepts feed later systems. " \
-                "Ask which earlier idea today needs. Common mistake: treating each week as an unrelated tool."
+            if not modern_notes(s.get("notes", "")):
+                s["notes"] = s.get("notes", "") + "\n\nTrace the highlighted week. Earlier concepts feed later systems. " \
+                    "Ask which earlier idea today needs. Common mistake: treating each week as an unrelated tool."
         slides.append(s)
     if recap_slide:
         mapping[recap_index + 1] = len(slides) + 1
@@ -223,7 +248,7 @@ def python_export(nb, path: Path) -> None:
              "# The notebook contains embedded diagrams. Standalone PNGs are in Diagrams/."]
     for c in nb.cells:
         if c.cell_type == "markdown":
-            source = re.sub(r"attachment:(beginner_[\w-]+\.png)", r"Diagrams/\1", c.source)
+            source = re.sub(r"attachment:([\w-]+\.png)", r"Diagrams/\1", c.source)
             parts += ["", "# %% [markdown]"] + ["# " + ln if ln else "#" for ln in source.splitlines()]
         else:
             lines = []
@@ -239,4 +264,4 @@ def python_export(nb, path: Path) -> None:
             parts += ["", "# %%"] + lines
     text = "\n".join(parts) + "\n"
     compile(text, str(path), "exec")
-    path.write_text(text, encoding="utf-8")
+    atomic_text(path, text)

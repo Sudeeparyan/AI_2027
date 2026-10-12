@@ -36,13 +36,13 @@ function recapScene(data) {
   return {width:W,height:612,items};
 }
 const WEEK_LABELS=[
-  "Introduction and\nresponsible AI","Variational\nautoencoders (VAEs)","Generative adversarial\nnetworks (GANs)","Diffusion\nmodels",
-  "Transformers\nand attention","Language models\nand families","Prompting\nand evaluation","Fine-tuning\nand adaptation",
-  "Multimodal\nfoundations","Multimodal\napplications","Deployment\nand frameworks","Retrieval (RAG)\nand agents",
+  "Introduction","VAEs","GANs","Diffusion",
+  "Transformers","LLMs","Prompting","Fine-tuning",
+  "Multimodal","Applications","Deployment","RAG & agents",
 ];
 function courseMapScene(week) {
   const items=[], margin=36,gap=38,cw=(W-2*margin-gap*3)/4,ch=104,inset=14;
-  const themes=["Foundations and image generators","Language models and adaptation","Multimodal applications and deployed systems"];
+  const themes=["Images","Language","Systems"];
   for(let row=0;row<3;row++) {
     const y=32+row*187;
     text(items,themes[row],margin,y,W-2*margin,36,27,true,INK);
@@ -50,7 +50,7 @@ function courseMapScene(week) {
       const i=row*4+col,x=margin+col*(cw+gap),top=y+46,current=i+1===week;
       const fill=current?"FFF0E6":"E4F2FB",color=current?"D55E00":"0072B2";
       items.push({kind:"block",shape:"roundRect",x,y:top,w:cw,h:ch,fill,color});
-      text(items,"Week "+(i+1)+(current?": you are here":""),x+inset,top+2,cw-2*inset,32,25,true,color);
+      text(items,String(i+1)+(current?": you are here":""),x+inset,top+2,cw-2*inset,32,25,true,color);
       text(items,WEEK_LABELS[i],x+inset,top+38,cw-2*inset,64,25,true,INK);
       if(col<3) items.push({kind:"route",points:[[x+cw,top+ch/2],[x+cw+gap,top+ch/2]],color:"0072B2"});
     }
@@ -60,7 +60,7 @@ function courseMapScene(week) {
       items.push({kind:"route",points:[[lastX,bottom],[lastX,rail],[margin/2,rail],[margin/2,nextMid],[margin,nextMid]],color:"0072B2"});
     }
   }
-  text(items,"Responsible use and evaluation continue throughout the course.",margin,601,W-2*margin,37,27,false,TEXT);
+  text(items,"Check evidence throughout",margin,601,W-2*margin,37,27,false,TEXT);
   return {width:W,height:658,items};
 }
 async function main() {

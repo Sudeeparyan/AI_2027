@@ -35,70 +35,74 @@ def cover(path):
 
 
 def mllm_types(path):
-    fig, ax = _diagram_canvas(2.9)
-    ax.text(0.15, 2.52, "Modular bridge", fontsize=20, fontweight="bold", color=INK)
-    ax.text(6.65, 2.52, "Joint multimodal training", fontsize=20, fontweight="bold", color=INK)
-    left = [("Image", "data"), ("Encoder", "model"), ("Bridge", "model"), ("LLM", "model")]
-    for i, (label, role) in enumerate(left):
-        x = 0.15 + i * 1.5
-        role_box(ax, x, 1.35, 1.2, 0.85, label, role, size=18)
-        if i < 3:
-            arrow(ax, x + 1.2, 1.775, x + 1.5, 1.775)
-    role_box(ax, 6.65, 1.35, 2.4, 0.85, "Supported\ninput types", "data", size=18)
-    role_box(ax, 9.45, 1.35, 3.2, 0.85, "Multimodal model", "model", size=18)
-    arrow(ax, 9.05, 1.775, 9.45, 1.775)
-    ax.text(0.15, 0.85, "LLaVA joins pretrained vision and language parts.", fontsize=16, color=TEXT)
-    ax.text(6.65, 0.85, "Inputs and outputs depend on the checkpoint.", fontsize=16, color=TEXT)
-    role_legend(ax, 0.08, size=16)
+    fig, ax = _diagram_canvas(3.1)
+    ax.text(0.15, 2.82, "Modular bridge", fontsize=20, fontweight="bold", color=INK)
+    ax.text(6.85, 2.82, "Joint multimodal training", fontsize=20, fontweight="bold", color=INK)
+    labels = [("Read\nimage", "data"), ("Encode\npixels", "model"), ("Project\nfeatures", "model"), ("Predict\nwords", "model")]
+    xs = [0.15, 1.83, 3.51, 5.19]
+    for x, (label, role) in zip(xs, labels):
+        role_box(ax, x, 1.45, 1.25, 0.9, label, role, size=18)
+    for i, label in enumerate(("pixels", "features", "embeddings")):
+        _labelled_flow(ax, xs[i]+1.25, xs[i+1], 1.9, label)
+    role_box(ax, 6.85, 1.45, 2.45, 0.9, "Read supported\nmedia", "data", size=18)
+    role_box(ax, 10.08, 1.45, 2.55, 0.9, "Generate supported\noutput", "model", size=18)
+    _labelled_flow(ax, 9.3, 10.08, 1.9, "media")
+    ax.text(0.15, 0.91, "Separate pretrained parts", fontsize=18, color=TEXT)
+    ax.text(6.85, 0.91, "Checkpoint-specific routes", fontsize=18, color=TEXT)
+    _compact_legend(ax, ("data", "model"), 0.3)
     _diagram_finish(fig, path)
 
 
 
 def generation_map(path):
     fig, ax = _diagram_canvas(4.7)
-    rows = [("Text to image", "Diffusion / flow models", "SD-Turbo, FLUX"),
-            ("Image editing", "Noise, denoise, control", "SDEdit, ControlNet"),
-            ("Text to speech", "Acoustics + waveform", "VITS / MMS"),
-            ("Speech to speech", "Listen and respond", "Voice assistants"),
-            ("Text to audio", "Diffusion or codec tokens", "MusicGen, Stable Audio"),
-            ("Text to video", "Model space and time", "Video diffusion models")]
-    # A table drawn as a diagram: column headings instead of a role key, since every box is a task.
-    for x, head in ((0.15, "Task"), (3.5, "How it works"), (8.6, "Examples")):
-        ax.text(x, 4.42, head, fontsize=18, fontweight="bold", color=INK, va="center")
-    for i, (task, how, example) in enumerate(rows):
-        y = 3.6 - i * 0.62
-        role_box(ax, 0.15, y, 3.0, 0.48, task, "data", size=18)
-        ax.text(3.5, y + 0.24, how, fontsize=18, color=TEXT, va="center")
-        ax.text(8.6, y + 0.24, example, fontsize=18, color=INK, va="center")
+    rows = [("Text→image", "Denoise image"),
+            ("Image→image", "Noise; denoise"),
+            ("Text→speech", "Generate waveform"),
+            ("Speech→speech", "Listen; reply"),
+            ("Text→music", "Generate audio"),
+            ("Text→video", "Generate spacetime")]
+    for x, heading in ((0.3, "Route"), (5.5, "Operation")):
+        ax.text(x, 4.38, heading, fontsize=20, color=INK, fontweight="bold")
+    for i, (route, operation) in enumerate(rows):
+        y=3.76-i*0.61
+        ax.axhspan(y-0.20, y+0.29, color=TINT if i%2==0 else "white", zorder=0)
+        ax.text(0.3, y, route, fontsize=20, color=INK, va="center")
+        ax.text(5.5, y, operation, fontsize=20, color=TEXT, va="center")
     _diagram_finish(fig, path)
 
 
 
 def vlm_training(path):
-    fig, ax = _diagram_canvas(2.55)
-    _sequence(ax, [("1. Pretrained\nvision + language", "model"), ("2. Train bridge\npaired captions", "loss"),
-                   ("3. Instruction\nimage questions", "loss"), ("4. Preferences\noptional", "loss"),
-                   ("5. Domain tuning\noptional", "loss")], 1.0, height=1.05, size=17)
-    ax.text(0.15, 0.62, "Illustrative recipe: check which components each method trains.", fontsize=18, color=TEXT)
-    role_legend(ax, 0.08, size=16)
+    fig, ax = _diagram_canvas(2.75)
+    labels=[("Load parts\npretrained", "model"), ("Align bridge\ncaptions", "loss"),
+            ("Tune instructions\nquestions", "loss"), ("Adapt domain\noptional", "loss")]
+    xs=[0.15, 3.39, 6.63, 9.87]
+    for x,(label,role) in zip(xs, labels):
+        role_box(ax, x, 1.15, 2.75, 1.02, label, role, size=19)
+    for i,label in enumerate(("weights", "aligned weights", "tuned weights")):
+        _labelled_flow(ax, xs[i]+2.75, xs[i+1], 1.66, label)
+    ax.text(0.15, 0.77, "Recipe varies; preference tuning optional", fontsize=18, color=TEXT)
+    _compact_legend(ax, ("model", "loss"), 0.28)
     _diagram_finish(fig, path)
 
 
 
 def provenance(path):
-    fig, ax = _diagram_canvas(3.0)
-    rows = [("Visible disclosure", "Tells the viewer", "May be cropped"),
-            ("Signed C2PA history", "Records origin and edits", "Does not prove truth"),
-            ("Invisible watermark", "Signals synthetic content", "May weaken after edits"),
-            ("Detection classifier", "Estimates synthetic origin", "Can make mistakes")]
-    for x, head in ((0.15, "Layer"), (4.1, "What it does"), (9.0, "Limit")):
-        ax.text(x, 2.72, head, fontsize=18, fontweight="bold", color=INK, va="center")
-    for i, (label, purpose, limit) in enumerate(rows):
-        y = 1.98 - i * 0.6
-        role_box(ax, 0.15, y, 3.6, 0.44, label, "tool", size=18)
-        ax.text(4.1, y + 0.22, purpose, fontsize=18, color=TEXT, va="center")
-        ax.text(9.0, y + 0.22, limit, fontsize=18, color=ACCENT, va="center")
-    _diagram_finish(fig, path)
+    fig, ax = _diagram_canvas(3.2)
+    rows=[("Disclosure", "Inform viewers", "Cropped"),
+          ("C2PA credentials", "Sign history", "Not truth"),
+          ("Watermark", "Embed signal", "Weakened"),
+          ("Detector", "Estimate origin", "Mistakes")]
+    for x,heading in ((0.3,"Layer"),(4.1,"Operation"),(9.2,"Limit")):
+        ax.text(x,2.84,heading,fontsize=20,fontweight="bold",color=INK)
+    for i,(layer,operation,limit) in enumerate(rows):
+        y=2.28-i*0.57
+        ax.axhspan(y-0.20,y+0.24,color=TINT if i%2==0 else "white",zorder=0)
+        ax.text(0.3,y,layer,fontsize=20,color=INK,va="center")
+        ax.text(4.1,y,operation,fontsize=20,color=TEXT,va="center")
+        ax.text(9.2,y,limit,fontsize=20,color=ACCENT,va="center")
+    _diagram_finish(fig,path)
 
 
 
@@ -124,6 +128,25 @@ def _sequence(ax, labels, y, width=12.6, height=0.95, size=18):
 
 def _diagram_finish(fig, path):
     save_editable_scene(fig, path)
+
+
+
+def _labelled_flow(ax, start, end, y, label):
+    """Route data above the boxes so arrow labels remain readable."""
+    routed_arrow(ax, [(start,y),(start+0.06,y),(start+0.06,y+0.54),(end-0.06,y+0.54),(end-0.06,y),(end,y)],
+                 label=label,label_xy=((start+end)/2,y+0.65),size=17)
+
+
+def _compact_legend(ax, roles, y):
+    colours={"data":"#0072B2","model":"#009E73","loss":"#D55E00"}
+    names={"data":"Data","model":"Model","loss":"Loss"}
+    for i,role in enumerate(roles):
+        x=0.2+1.6*i
+        ax.scatter([x],[y],marker="s",s=64,color=colours[role])
+        ax.text(x+0.17,y,names[role],fontsize=17,color=TEXT,va="center")
+    x=0.2+1.6*len(roles)
+    routed_arrow(ax,[(x,y),(x+0.65,y)])
+    ax.text(x+0.85,y,"Flow",fontsize=17,color=TEXT,va="center")
 
 
 FIGURES = {"cover": cover, "mllm_types": mllm_types, "generation_map": generation_map, "vlm_training": vlm_training,

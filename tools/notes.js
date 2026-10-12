@@ -8,6 +8,7 @@
 "use strict";
 
 const fs = require("fs");
+const { atomicOutput } = require("./output_files");
 const { marked } = require("marked");
 const {
   Document, Packer, Paragraph, TextRun, HeadingLevel, Table, TableRow, TableCell, WidthType,
@@ -346,8 +347,8 @@ function cover() {
   const files = [
     ["Lecture slides", `${spec.slides.length} slides with speaker notes, vocabulary and technical diagrams.`],
     ["Teaching notes", "Lecture explanations, worked examples, code maps, practice questions and readings."],
-    ["Student lab", "Notebook and Python file with TODOs. Embedded and separate diagrams accompany the lab."],
-    ["Lab solutions", "Instructor notebook and Python file with completed code and model answers."],
+    ["Student lab", "Notebook with TODOs. Embedded and separate diagrams accompany the lab."],
+    ["Lab solutions", "Instructor notebook with completed code and model answers."],
   ];
   out.push(new Table({
     width: { size: CONTENT_W, type: WidthType.DXA }, columnWidths: [w1 + 600, w2 - 600], layout: TableLayoutType.FIXED,
@@ -414,7 +415,7 @@ async function main() {
     }],
   });
   const buf = await Packer.toBuffer(doc);
-  fs.writeFileSync(outPath, buf);
+  await atomicOutput(outPath, temporary => fs.promises.writeFile(temporary, buf));
   console.log(`notes: wrote ${outPath}`);
 }
 

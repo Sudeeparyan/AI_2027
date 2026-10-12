@@ -37,74 +37,67 @@ def cover(path):
 
 
 def modalities(path):
-    fig, ax = _diagram_canvas(4.95)
-    rows = [("Text", "Subword tokens", "Text embeddings"),
-            ("Image", "Image patches", "Vision encoder"),
-            ("Audio", "Spectrogram frames\nor codec tokens", "Audio encoder"),
-            ("Video", "Frames and patches\n(+ audio)", "Video encoder")]
-    for i, (name, units, encoder) in enumerate(rows):
-        y = 3.45 - i * 0.94
-        role_box(ax, 0.15, y, 1.7, 0.75, name, "data", size=20)
-        role_box(ax, 2.15, y, 3.15, 0.75, units, "data", size=18)
-        role_box(ax, 5.6, y, 3.1, 0.75, encoder, "model", size=18)
-        arrow(ax, 1.85, y + 0.375, 2.15, y + 0.375)
-        arrow(ax, 5.3, y + 0.375, 5.6, y + 0.375)
-        arrow(ax, 8.7, y + 0.375, 9.3, 3.15 - i * 0.5)  # one entry point per modality: no stacked heads
-    role_box(ax, 9.3, 1.3, 3.45, 2.1, "Learned vectors\ncombined or\ncompared", "output", size=18)
-    ax.text(0.15, 4.5, "Different input units; learned numerical representations", fontsize=20, color=INK)
-    role_legend(ax, 0.08, size=16)
-    _diagram_finish(fig, path)
+    fig, ax = _diagram_canvas(4.8)
+    rows = [('Text\nTokens', 'IDs'), ('Image\nPatches', 'pixels'), ('Audio\nFrames', 'features'), ('Video\nFrames+time', 'sequence')]
+    for i, (label, flow) in enumerate(rows):
+        y = 3.35 - i * .88
+        role_box(ax, .15, y, 2.55, .8, label, 'data', size=19)
+        target = 3.6 - i * .63
+        routed_arrow(ax, [(2.7, y+.4),(5.05,target)], label=flow, label_xy=(3.7,y+.46), size=17)
+    role_box(ax, 5.05, 1.25, 3.0, 2.65, 'Separate\nencoders', 'model', size=21)
+    routed_arrow(ax, [(8.05,2.6),(9.4,2.6)], label='vectors',label_xy=(8.73,2.9),size=17)
+    role_box(ax,9.4,1.65,3.3,1.85,'Compare or\ncombine', 'output',size=21)
+    ax.text(.15,4.35,'Alignment makes vectors comparable',fontsize=20,color=INK)
+    role_legend(ax,.08,size=16)
+    _diagram_finish(fig,path)
+
 
 
 
 def fusion(path):
-    fig, ax = _diagram_canvas(2.9)
-    for x, title in [(0.15, "Early fusion"), (4.55, "Late fusion"), (8.95, "Cross-attention")]:
-        ax.text(x, 2.48, title, fontsize=20, fontweight="bold", color=INK)
-    for x, left, right in [(0.15, "Image tokens", "Text tokens"),
-                            (4.55, "Image encoder", "Text encoder"),
-                            (8.95, "Image K / V", "Text queries")]:
-        role_box(ax, x, 1.5, 1.8, 0.65, left, "model" if x == 4.55 else "data", size=16)
-        role_box(ax, x + 2.05, 1.5, 1.8, 0.65, right, "model" if x == 4.55 else "data", size=16)
-        arrow(ax, x + 0.9, 1.5, x + 1.25, 1.22)
-        arrow(ax, x + 2.95, 1.5, x + 2.6, 1.22)
-    for x, label in [(0.6, "Joint model"), (5.0, "Compare outputs"), (9.4, "Attention inside model")]:
-        role_box(ax, x, 0.48, 2.95, 0.74, label, "model", size=17)
-    role_legend(ax, 0.05, size=16)
-    _diagram_finish(fig, path)
+    fig, ax = _diagram_canvas(3.1)
+    for x, title in [(.15,'Early fusion'),(4.55,'Late fusion'),(8.95,'Cross-attention')]:
+        ax.text(x,2.65,title,fontsize=20,fontweight='bold',color=INK)
+    for x,left,right,flow in [(.15,'Image tokens','Text tokens','tokens'),(4.55,'Image encoder','Text encoder','vectors'),(8.95,'Image K/V','Text queries','K/V, Q')]:
+        role_box(ax,x,1.7,1.8,.65,left,'model' if x==4.55 else 'data',size=16)
+        role_box(ax,x+2.05,1.7,1.8,.65,right,'model' if x==4.55 else 'data',size=16)
+        arrow(ax,x+.9,1.7,x+1.25,1.15)
+        arrow(ax,x+2.95,1.7,x+2.6,1.15)
+        ax.text(x+1.92,1.4,flow,ha='center',fontsize=16,color=TEXT)
+    for x,label in [(.6,'Joint model'),(5.,'Compare'),(9.4,'Attention')]:
+        role_box(ax,x,.41,2.95,.74,label,'model',size=18)
+    role_legend(ax,.05,size=16)
+    _diagram_finish(fig,path)
+
 
 
 
 def architectures(path):
     fig, ax = _diagram_canvas(4.9)
-    cards = [(0.15, 2.8, "Dual encoder", "CLIP / SigLIP: compare image and text vectors", ["Image\nencoder", "Compare\nvectors", "Text\nencoder"]),
-             (6.65, 2.8, "Fusion encoder", "VisualBERT: read image and text jointly", ["Image tokens", "Text tokens", "Joint encoder"]),
-             (0.15, 0.7, "Encoder-decoder", "BLIP / Whisper: read one modality; write text", ["Input encoder", "Text decoder"]),
-             (6.65, 0.7, "Vision encoder + LLM", "LLaVA: bridge image features into a language model", ["Vision", "Bridge", "LLM"])]
-    for x, y, title, detail, labels in cards:
-        ax.text(x, y + 1.52, title, fontsize=20, fontweight="bold", color=INK)
-        ax.text(x, y + 1.1, detail, fontsize=16, color=TEXT)
-        if title == "Fusion encoder":
-            # Both modalities enter the same encoder. Neither input is
-            # processed through the other modality's input block.
-            role_box(ax, x, y + 0.42, 2.35, 0.4, "Image tokens", "data", size=16)
-            role_box(ax, x, y - 0.04, 2.35, 0.4, "Text tokens", "data", size=16)
-            role_box(ax, x + 2.95, y, 3.0, 0.75, "Joint encoder", "model", size=18)
-            arrow(ax, x + 2.35, y + 0.62, x + 2.95, y + 0.56)
-            arrow(ax, x + 2.35, y + 0.16, x + 2.95, y + 0.19)
+    panels = [(.15,2.8,'Dual encoder',['Image','Compare','Text'],'vectors'),(6.65,2.8,'Fusion encoder',['Image tokens','Text tokens','Joint encoder'],'tokens'),(.15,.7,'Encoder-decoder',['Encoder','Decoder'],'features'),(6.65,.7,'Vision + LLM',['Vision','Bridge','LLM'],'features')]
+    for x,y,title,labels,flow in panels:
+        ax.text(x,y+1.5,title,fontsize=20,fontweight='bold',color=INK)
+        if title == 'Fusion encoder':
+            role_box(ax,x,y+.43,2.1,.4,labels[0],'data',size=17)
+            role_box(ax,x,y-.07,2.1,.4,labels[1],'data',size=17)
+            role_box(ax,x+3.4,y,2.55,.8,labels[2],'model',size=18)
+            arrow(ax,x+2.1,y+.63,x+3.4,y+.6)
+            arrow(ax,x+2.1,y+.13,x+3.4,y+.2)
+            ax.text(x+2.7,y+.39,flow,ha='center',fontsize=17,color=TEXT)
             continue
-        gap = 0.3
-        width = (5.95 - gap * (len(labels) - 1)) / len(labels)
-        for i, label in enumerate(labels):
-            bx = x + i * (width + gap)
-            role_box(ax, bx, y, width, 0.75, label, "model", size=18)
-            if i < len(labels) - 1:
-                if title == "Dual encoder" and i == 1:
-                    arrow(ax, bx + width + gap, y + 0.375, bx + width, y + 0.375)
+        gap=.55
+        width=(5.95-gap*(len(labels)-1))/len(labels)
+        for i,label in enumerate(labels):
+            bx=x+i*(width+gap)
+            role_box(ax,bx,y,width,.8,label,'model',size=18)
+            if i < len(labels)-1:
+                if title == 'Dual encoder' and i == 1:
+                    arrow(ax,bx+width+gap,y+.4,bx+width,y+.4)
                 else:
-                    arrow(ax, bx + width, y + 0.375, bx + width + gap, y + 0.375)
-    role_legend(ax, 0.08, size=16)
-    _diagram_finish(fig, path)
+                    arrow(ax,bx+width,y+.4,bx+width+gap,y+.4)
+        ax.text(x+2.975,y+1.04,flow,ha='center',fontsize=17,color=TEXT)
+    _diagram_finish(fig,path)
+
 
 
 
@@ -130,13 +123,13 @@ def zeroshot_pipeline(path):
     fig, ax = _diagram_canvas(3.6)
     for y, source, encoder in [(2.25, "Class prompts\n'a photo of a cat'", "Text encoder"),
                                (0.85, "New image", "Image encoder")]:
-        role_box(ax, 0.15, y, 3.0, 0.9, source, "data", size=19)
-        role_box(ax, 3.55, y, 2.3, 0.9, encoder, "model", size=19)
-        arrow(ax, 3.15, y + 0.45, 3.55, y + 0.45)
-        arrow(ax, 5.85, y + 0.45, 6.4, 2.0)
-    role_box(ax, 6.4, 1.35, 2.7, 1.3, "Compare vectors\ncosine similarity", "model", size=19)
-    role_box(ax, 9.55, 1.35, 3.15, 1.3, "Choose highest score\nfrom given classes", "output", size=19)
-    arrow(ax, 9.1, 2.0, 9.55, 2.0)
+        role_box(ax, 0.15, y, 2.4, 0.9, source, "data", size=19)
+        role_box(ax, 3.65, y, 2.0, 0.9, encoder, "model", size=19)
+        routed_arrow(ax, [(2.55,y+.45),(3.65,y+.45)], label='text' if y==2.25 else 'pixels', label_xy=(3.10,y+1.0),size=16)
+        routed_arrow(ax, [(5.65,y+.45),(6.80,2.0)], label='vectors',label_xy=(6.22,y+.83),size=16)
+    role_box(ax, 6.8, 1.35, 2.3, 1.3, "Compare vectors\ncosine similarity", "model", size=19)
+    role_box(ax, 9.85, 1.35, 2.85, 1.3, "Choose highest score\nfrom given classes", "output", size=19)
+    routed_arrow(ax, [(9.1,2.0),(9.85,2.0)],label='scores',label_xy=(9.48,2.9),size=16)
     role_legend(ax, 0.08, size=16)
     _diagram_finish(fig, path)
 
@@ -147,6 +140,10 @@ def whisper_pipeline(path):
     _sequence(ax, [("Waveform\n16 kHz", "data"), ("Log-mel\nfeatures", "data"),
                    ("Audio\nencoder", "model"), ("Text decoder\ncross-attention", "model"),
                    ("Transcript", "output")], 0.8, height=1.0, size=18)
+    block = (12.6 - .28 * 4) / 5
+    for i, label in enumerate(['samples', 'features', 'states', 'tokens']):
+        x = .15 + i * (block + .28) + block + .14
+        ax.text(x, 1.98, label, ha='center', fontsize=16, color=TEXT)
     role_legend(ax, 0.08, size=16)
     _diagram_finish(fig, path)
 

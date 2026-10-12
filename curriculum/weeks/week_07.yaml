@@ -42,9 +42,51 @@ coverage:
 slides:
 - type: title
   figure: cover
-  notes: 'Say: Today we design instructions and test their effects. Route “Cannot sign in” to IT_ACCESS: put rules and examples into this request, generate a reply, then check it. The weights stay fixed. Analogy: a task brief guides a trained worker. Ask: what would count as an improved prompt? Common mistake: a confident or nicely formatted reply is not evidence of success.'
+  notes: 'In short: This week turns prompting from guesswork into a measured design task.
+
+
+    Explain: A prompt is the text a model receives for one request. Prompt engineering means designing that text deliberately.
+    An evaluation harness is code that runs many examples and scores them. Prompting keeps the model weights fixed. Evidence,
+    not impressions, decides whether a prompt is better.
+
+
+    Example: A student-services assistant must route "Two of my exams clash on Friday" to TIMETABLE_EXAMS. One prompt may answer
+    with a sentence; another may return the exact label. Only a test on many labelled messages shows which works better. A recipe
+    card is an analogy; clearer steps help the cook, but someone still has to taste the dish.
+
+
+    Ask: How would you know that a new prompt is better than the old one?
+
+
+    Answer: Run both on the same labelled messages with fixed settings, compare accuracy, and read the errors.
+
+
+    Watch out: One impressive reply is an anecdote, not evidence.'
 - type: outcomes
-  notes: 'Say: Start with one task, define a correct result and improve the prompt using measured failures. We will practise examples, reasoning, structured output, context and evaluation. Analogy: learn to write an exam and its marking guide together. Ask: what should your classifier do with an ambiguous message? Common mistake: changing many settings at once hides which change helped.'
+  notes: 'In short: By the end, students can write a prompt, check its structured output, and judge it with fair evidence.
+
+
+    Explain: Writing a prompt means stating rules, sources, examples, task and format. Validation checks that a reply has the
+    required fields and types. A held-out set is a group of examples kept aside for one final check. Evaluation compares prompts
+    using scores and error reading. These outcomes support MIMLOs 1, 4 and 5.
+
+
+    Example: In the lab, four routing prompts run on 20 development messages. The best one then runs once on 20 held-out messages.
+    A JSON extraction step returns six objects, each checked against a schema and against the source email. Each outcome therefore
+    produces a number you can report and question.
+
+
+    Ask: Which outcome needs more than a fluent reply?
+
+
+    Answer: All three: a fluent reply can still carry the wrong label, wrong fields or an unfair comparison.
+
+
+    Watch out: Do not confuse writing a longer prompt with writing a better one.'
+  items:
+  - Write and test prompts
+  - Validate structured replies
+  - Evaluate with held-out evidence
 - type: agenda
   icon: fa:FaRoute
   items:
@@ -62,141 +104,200 @@ slides:
     minutes: 20
   - title: Lab preview and wrap-up
     minutes: 6
-  notes: 'Say: First distinguish changing input from training weights. Then write clear briefs and examples. Handle multi-step tasks and JSON, before building the evaluation loop. Finish by testing false replies and hostile source instructions. Analogy: prepare, execute and inspect a recipe. Ask: why write criteria before trying prompt variants? Common mistake: choosing a favourite answer first can bias the marking.'
+  notes: 'In short: The session moves from what a prompt is, to techniques, to evaluation, and finally to risks and tools.
+
+
+    Explain: Section one explains why prompting needs no retraining. Section two dissects a prompt and compares example counts.
+    Section three covers reasoning, structured output and context. Section four builds evaluation methods. Section five covers
+    limits, injection and supporting tools.
+
+
+    Example: Week 6 showed how a model chooses tokens with fixed weights. This week changes only the input around those weights.
+    Week 8 then changes some weights through fine-tuning. A route map is an analogy; it shows the order of stops, but not how
+    long each conversation will take.
+
+
+    Ask: Which week changes model weights: 6, 7 or 8?
+
+
+    Answer: Week 8. Weeks 6 and 7 use fixed weights; week 8 fine-tunes small adapters.
+
+
+    Watch out: Evaluation is not an add-on at the end; it shapes every earlier section.'
 - type: discussion
   title: Warm-up
   icon: fa:FaEdit
   prompt: 'A colleague''s prompt: ''Write about AI for the website.'' What is missing? Rewrite it in pairs.'
   points:
   - Audience and purpose?
-  - Sources, length and format?
-  - Success criteria?
-  notes: 'Say: Give three minutes. Collect rewrites and look for missing elements: audience, for example prospective MSc students;
-    purpose, for example explain what the programme covers; key facts to include; tone; length, for example 150 words; format,
-    for example headline plus three bullet points; constraints, such as no unverifiable claims; and success criteria. The last
-    question is the important one: most people never define what good looks like, so they cannot tell whether a new prompt is
-    better. By the end of the lecture, that question will be answered with a test set and a rubric.
+  - Sources, length, format?
+  - How to judge success?
+  notes: 'In short: A vague request leaves the model to guess the audience, facts, format and success criteria.
 
 
-    Analogy: A vague brief to a designer, such as make a poster, returns something, but rarely what you needed.
+    Explain: Audience means the intended reader. Purpose is the job the text must do. Sources are the facts the writer may use.
+    Format fixes length and structure. Success criteria say how the result will be judged.
 
-    Ask: Which missing element makes it impossible to say whether a rewrite is better?
 
-    Answer: Success criteria. Without them there is nothing to measure.
+    Example: "Write about AI for the website" names none of these. A rewrite might read: for prospective MSc students, introduce
+    this 12-week module in three bullets under 120 words, using only the supplied course facts. Briefing a new colleague is
+    an analogy; clear instructions get better work. A colleague can ask questions; a model usually just guesses.
 
-    Common mistake: Adding more words instead of the missing facts, audience and format.'
+
+    Ask: Which missing element would you add first, and why?
+
+
+    Answer: Usually the audience and purpose, because they decide length, tone and which facts matter.
+
+
+    Watch out: Adding more words is not the goal; each added element should remove one specific guess.'
 - type: section
   number: 1
   title: The paradigm shift
   question: How can instructions change a model's answer without training it again?
   icon: fa:FaExchangeAlt
-  notes: 'Say: Section one sets prompting in context. Before about 2020, using a model for a new task meant training or fine-tuning
-    it on labelled examples. Large pre-trained models can instead be steered by the input text alone. We compare the three ways
-    of adapting a model and explain in-context learning. About ten minutes.
+  notes: 'In short: The same fixed model can perform different tasks because the prompt changes what it conditions on.
 
 
-    Analogy: A prompt is the worksheet for this attempt; training changes the learner.
+    Explain: Conditioning means the model predicts the next token given all earlier tokens. The prompt supplies those earlier
+    tokens. Different prompts therefore make different continuations likely. No weight changes during this process. This is
+    why one model can summarise, classify and translate.
 
-    Ask: Does adding an example update any stored model weight?
 
-    Answer: No. The example is part of the input for this request only.
+    Example: Give the same 0.5-billion-parameter model "Translate to French: good morning" and then "Classify: my exams clash".
+    The weights are identical in both calls. Only the input tokens differ, so the most likely continuation differs. A piano
+    is an analogy; one instrument plays different pieces from different sheet music. Unlike sheet music, a prompt does not guarantee
+    the result.
 
-    Common mistake: Calling in-context examples fine-tuning.'
+
+    Ask: If a prompt fixes an error today, will the model remember the fix tomorrow?
+
+
+    Answer: No. The fix lives in the prompt, so every future request must include it.
+
+
+    Watch out: Do not say the model learned from your prompt in the training sense.'
 - type: compare
   title: Three ways to adapt a model
   columns:
   - head: Pre-training
-    icon: fa:FaIndustry
     points:
-    - Learns general language patterns from huge text
-    - Updates every weight; weeks of GPU time
-    - 'Example: building Qwen from web text'
+    - Huge general text
+    - Updates all weights
+    - Weeks of GPU time
   - head: Fine-tuning
-    icon: fa:FaWrench
     points:
-    - Learns from your task examples
-    - Updates some or all weights
-    - 'Example: 1,000 labelled support tickets (week 8)'
+    - Your task examples
+    - Updates some weights
+    - Week 8
   - head: Prompting
-    icon: fa:FaKeyboard
     points:
-    - Supplies instructions and examples in the input
-    - Keeps every weight fixed
-    - 'Example: today''s routing prompt'
-  callout: Measure prompting; retrieve missing facts; train for persistent behaviour gaps.
-  notes: 'Say: The three columns differ in what changes and what it costs. Pre-training changes everything and costs millions.
-    Fine-tuning updates weights on your data; it is cheaper, especially with LoRA in week 8, but needs data and GPU time, and
-    it is best for consistent formats, styles or specialised domains. Prompting changes nothing in the model; iteration takes
-    minutes. The callout is the practical decision rule used by Microsoft, Google and OpenAI guidance: begin with prompting,
-    add retrieval when the problem is missing knowledge, and fine-tune only when a well-designed evaluation shows prompting
-    is insufficient.
+    - Instructions in the input
+    - Weights stay fixed
+    - Today's lab
+  callout: Prompt first; fine-tune persistent gaps.
+  notes: 'In short: Pre-training, fine-tuning and prompting adapt a model at very different costs, and only the first two change
+    weights.
 
 
-    Analogy: Pre-training is schooling, fine-tuning is job training, and prompting is today''s task sheet.
+    Explain: Pre-training learns general language from huge text collections. Fine-tuning continues training on task examples.
+    Prompting supplies instructions and examples inside the input. Weights are the learned numbers inside the model. Prompting
+    is the cheapest to try and the easiest to change.
 
-    Ask: A model keeps missing your house style despite careful prompts tested on a test set. What comes next?
 
-    Answer: Fine-tuning, because evaluation has shown prompting is not enough. If the problem were missing facts, retrieval
-    would come first.
+    Example: Pre-training a model such as Qwen uses large GPU clusters and trillions of tokens. Week 8 fine-tunes a small adapter
+    on 200 banking-support messages using CPU. Today''s routing prompt changes in seconds. A new employee is an analogy; education,
+    job training, then a daily briefing. Unlike an employee, the model forgets the briefing after each request.
 
-    Common mistake: Fine-tuning to add facts that change often. Retrieval handles changing knowledge better.'
+
+    Ask: A model keeps misusing a company term despite good prompts. What would you try next?
+
+
+    Answer: Supply the definition in the context; fine-tune only if the gap persists across many examples.
+
+
+    Watch out: Fine-tuning does not reliably add new facts; retrieval suits information that changes.'
 - type: bullets
   title: 'In-context learning: prompts as programs'
-  icon: fa:FaCode
   bullets:
-  - Rules, sources, examples and questions become input tokens.
-  - Examples guide this request; weights stay fixed.
-  - Version the prompt and test it.
-  - Message priority is not a security guarantee.
-  notes: 'Say: Help students form an accurate mental model. The model does not ''understand what you want'' in a human sense;
-    it computes the most plausible continuation of all the tokens it receives, as shaped by post-training to follow instructions.
-    Examples in the prompt shift that continuation, which is in-context learning. Treating the prompt as a program has practical
-    consequences: write it deliberately, test it on examples, keep versions, and re-test when the model changes. Modern assistants
-    are trained with an instruction hierarchy in which system or developer messages take priority over user messages, which
-    matters for security later.
+  - Instructions and examples become input tokens.
+  - Weights stay fixed.
+  - Version and test prompts.
+  notes: 'In short: In-context learning means a model follows a pattern shown in the prompt without any weight update.
 
 
-    Analogy: A prompt is source code for one request: version it, test it, and re-test it when the model changes.
+    Explain: The GPT-3 paper in 2020 popularised the term in-context learning. Instructions and examples become ordinary input
+    tokens. Attention lets later tokens use those examples. A prompt therefore behaves like a small program written in language.
+    Like code, it needs versions and tests.
 
-    Ask: The provider updates the model behind your API. What should you do with your prompt?
 
-    Answer: Re-run your test set. The same prompt can behave differently on a new model.
+    Example: Show "eduroam fails → IT_ACCESS" and "deposit receipt → FEES_FINANCE", then ask about "exam clash". The model continues
+    the pattern and often answers TIMETABLE_EXAMS. Removing examples removes their guidance, but the pretrained model may still
+    give the same answer. A worked example on a whiteboard is an analogy that breaks when the board is wiped.
 
-    Common mistake: Treating message priority as a security guarantee.'
+
+    Ask: Why must the examples be sent again with every request?
+
+
+    Answer: They exist only in that request''s input; the weights never store them.
+
+
+    Watch out: Message priority, such as system over user, is not a security boundary.'
+  visual:
+    type: example_strip
+    items:
+    - label: Examples
+      text: eduroam fails → IT_ACCESS
+    - label: New
+      text: Exam clash → ?
 - type: section
   number: 2
   title: Anatomy of a prompt and basic techniques
   question: What goes into a good prompt, and how much do examples help?
   icon: fa:FaPuzzlePiece
-  notes: 'Say: Section two covers the structure of a prompt and the basic techniques in the descriptor: zero-shot, one-shot,
-    few-shot and role-based prompting. We finish with real results from running these prompt styles on a classification task
-    with a small open model. Ask students to predict which style will win before showing the results. About twenty-five minutes.
+  notes: 'In short: This section dissects a good prompt and tests how much worked examples help.
 
 
-    Analogy: A task brief gives a worker rules, source material and an output form.
+    Explain: A prompt has parts: rules, source context, examples, task and output format. A zero-shot prompt has no examples.
+    A few-shot prompt includes several worked examples. A role prompt assigns a persona such as a triage officer. Each part
+    should be tested, not assumed.
 
-    Ask: What should a routing example teach besides its category name?
 
-    Answer: The exact output format, and where the boundary lies between similar categories.
+    Example: The routing task uses five team labels. A zero-shot prompt lists the labels and the message. A few-shot prompt
+    adds one example per label, which costs extra input tokens on every call. The lab measures whether those tokens buy accuracy.
+    A recipe is an analogy; ingredients help, but only tasting proves the dish.
 
-    Common mistake: Choosing examples only from easy, typical messages.'
+
+    Ask: Predict: will five examples always beat zero examples?
+
+
+    Answer: Not always. Examples usually fix the format, but they can also bias labels; the lab measures it.
+
+
+    Watch out: Do not add every technique at once, or you cannot tell which one helped.'
 - type: figure
   title: Anatomy of a well-structured prompt
   figure: anatomy
-  notes: 'Say: A prompt has up to five parts. The system or developer message sets the role, rules, tone and policies. Context
-    supplies what the model needs to know: documents, data, history or tool results, clearly delimited, for example with XML-style
-    tags, which the Anthropic and OpenAI guides recommend. Examples show the exact input-output format. The task states what
-    to do, for whom and with which constraints. The output format specifies length and structure, including what to do when
-    unsure. Not every prompt needs every part, but checking against this list catches most problems in the warm-up prompt.
+  notes: 'In short: A well-structured prompt reads like a task brief with five labelled parts.
 
 
-    Analogy: A recipe card says who it serves, lists the ingredients and steps, and shows how the dish should look.
+    Explain: Rules set the task boundaries and what to do when unsure. Sources supply the facts the answer may use. Examples
+    show input–answer pairs in the target format. The task names the job, audience and constraints. The format fixes fields
+    and length so code can check them.
 
-    Ask: Which part of the anatomy tells the model what to do when it is unsure?
 
-    Answer: The output format, which should say what to return when information is missing.
+    Example: For the routing assistant, the rule is "answer with exactly one label". The source is the student''s message. Five
+    examples show one message per team. The task says "classify this message", and the format is "the label only". A contractor''s
+    job brief is an analogy, although a contractor can query unclear parts and a model rarely does.
 
-    Common mistake: Mixing documents and instructions without delimiters, so the model cannot tell data from commands.'
+
+    Ask: Which part lets code check the reply automatically?
+
+
+    Answer: The output format, because a fixed shape such as one label can be parsed and scored.
+
+
+    Watch out: The best order of parts is an empirical question; test it rather than copying a template.'
 - type: table
   title: 'Worked example: rewriting the warm-up prompt'
   header:
@@ -222,762 +323,1030 @@ slides:
   - - Check
     - None
     - Claims and length
-  notes: 'Say: This is a model answer to the warm-up. Walk through each row and point out where each element of the anatomy
-    slide appears. The facts are delimited with tags so the model can distinguish data from instructions, and the rule to use
-    only those facts plus the instruction to omit missing facts reduce hallucinated claims. The format is explicit and testable.
-    The success check at the bottom is not sent to the model; it is the evaluation criterion we will use in section four. Ask
-    students which element they think makes the biggest difference: usually the context, because the model cannot invent the
-    module details correctly.
+  notes: 'In short: Rewriting the warm-up prompt shows how each added element removes one guess.
 
 
-    Ask: Which row of the table is never sent to the model?
+    Explain: The original prompt had only a vague task. The rewrite adds rules, audience, facts, task, format and a check. Supplied
+    facts mean the model need not invent them. The format limits length and structure. The check says how a reviewer will judge
+    the result.
 
-    Answer: Check. It is the evaluation criterion we apply to the reply afterwards.
 
-    Common mistake: Leaving out the facts and hoping the model knows the module details. It will invent them.'
+    Example: "Write about AI" becomes: using only the supplied facts, introduce the 12-week module to AI beginners as a headline
+    and three bullets under 120 words. The facts are 12 weeks, Python labs and a group project worth 60%. A reviewer then checks
+    every claim against those facts and counts the words.
+
+
+    Ask: Which added line most reduces the risk of invented facts?
+
+
+    Answer: "Use only the supplied facts", combined with checking each claim against them afterwards.
+
+
+    Watch out: A detailed prompt can still produce errors, so keep the final check.'
 - type: table
   title: Messages and roles in chat APIs
   header:
   - Role
-  - Typical use
+  - Use
   - Example
   rows:
   - - system / developer
-    - Application instructions
-    - Reply with one team label.
+    - App rules
+    - Reply with one label.
   - - user
-    - The request and its content
+    - Request
     - My exam timetable clashes.
   - - assistant
-    - Replies, or answers in examples
+    - Replies
     - TIMETABLE_EXAMS
   - - tool
-    - Results returned by code
-    - Timetable row for the module
-  callout: Role support and priority vary by API; enforce permissions in code.
-  notes: 'Say: Roles describe who supplied each message and its intended use. Local Qwen uses system, user and assistant through its chat template. Some APIs also support developer instructions; system and developer are distinct roles, not simply a universal rename. Tool messages come from code and may contain untrusted retrieved text. Analogy: separate a manager’s rules from a customer’s attachment. Ask: does placing a command inside a tool result authorise it? Common mistake: roles and delimiters are helpful conventions, not a hard permission boundary.'
+    - Code results
+    - Timetable row
+  callout: Enforce permissions in code.
+  notes: 'In short: Chat APIs split a request into messages with roles, and each role has a typical job.
+
+
+    Explain: A message is one turn with a role and content. The system or developer message carries application rules. The user
+    message carries the request. Assistant messages hold model replies, including example answers. Tool messages return results
+    from code, such as a database lookup.
+
+
+    Example: For routing, the system message says "Reply with one team label". The user sends "My exam timetable clashes". A
+    few-shot prompt can include earlier assistant turns answering TIMETABLE_EXAMS. A tool message might return the student''s
+    timetable row. Stage directions in a play are an analogy, but actors cannot be tricked by lines inside the script.
+
+
+    Ask: Does putting a rule in the system message guarantee it is followed?
+
+
+    Answer: No. It usually gets priority, but behaviour varies by model; enforce real permissions in code.
+
+
+    Watch out: Role names and support differ between providers, so check the documentation of the API you use.'
 - type: compare
   title: Zero-shot, one-shot, few-shot
   columns:
   - head: Zero-shot
-    icon: fa:FaCircle
     points:
-    - Instruction only, no example
+    - Instruction only
     - Shortest input
-    - 'Classify this message: ...'
+    - No format example
   - head: One-shot
-    icon: fa:FaDotCircle
     points:
-    - One input–answer pair
-    - Fixes the format, can bias the label
-    - eduroam fails → IT_ACCESS
+    - One example pair
+    - Shows the format
+    - Can bias labels
   - head: Few-shot
-    icon: fa:FaBullseye
     points:
-    - Several varied pairs, one per label
-    - Choice and order change results
-    - Five examples, one per team
-  notes: 'Say: The descriptor''s basic techniques. Zero-shot gives only the instruction. One-shot adds a single example, which
-    is very effective at fixing the output format but can bias the model towards that example''s label. Few-shot uses several
-    examples, ideally covering each class and including tricky boundary cases, which usually improves accuracy and consistency,
-    at the cost of longer prompts. Research has shown that the choice, order and even the label balance of examples can change
-    results noticeably, so few-shot prompts must be evaluated like any other design choice.
+    - One example per label
+    - Order matters
+    - More input tokens
+  notes: 'In short: Zero-, one- and few-shot prompts differ only in how many worked examples they include.
 
 
-    Analogy: One sample answer shows the format; several varied samples show the range.
+    Explain: Zero-shot gives the instruction alone. One-shot adds one input–answer pair. Few-shot adds several pairs, often
+    one per label. Examples mainly teach the output format and the boundaries between labels. Their choice and order can change
+    results.
 
-    Ask: Why can one-shot prompting bias the label?
 
-    Answer: The model may copy the single example''s label for inputs that look similar.
+    Example: Your CPU core with {{W07_CORE_MODEL}} measured {{W07_CORE_DEV}} on {{W07_CORE_DEV_N}} development messages. Read
+    the zero-shot errors table: a small model can collapse onto one favourite label. Showing one solved exercise before an exam
+    is an analogy; students may copy its shape too closely.
 
-    Common mistake: Assuming more examples always help. Their choice, order and label balance can change results.'
+
+    Ask: Why might a single example hurt accuracy?
+
+
+    Answer: It can bias the model towards that example''s label or wording instead of the task rule.
+
+
+    Watch out: Choose examples that differ from your test messages, or the score measures copying.'
 - type: code
   title: A few-shot prompt as chat messages
-  code: "messages = [\n  {\"role\": \"system\", \"content\": TASK},\n  {\"role\": \"user\", \"content\":\n    \"Message: Cannot connect to eduroam.\\n\"\n    \"Category: IT_ACCESS\\n\\n\"\n    \"Message: May I get my deposit receipt?\\n\"\n    \"Category: FEES_FINANCE\\n\\n\"\n    \"Message: Two exams clash on Friday.\\n\"\n    \"Category:\"},\n]\n"
+  code: "messages = [\n  {\"role\": \"system\", \"content\": TASK},\n  {\"role\": \"user\", \"content\":\n    \"Message: eduroam\
+    \ fails.\\nCategory: IT_ACCESS\\n\\n\"\n    \"Message: Deposit receipt?\\nCategory: FEES_FINANCE\\n\\n\"\n    \"Message:\
+    \ Two exams clash.\\nCategory:\"},\n]\n"
   bullets:
-  - Rules define allowed labels.
-  - Examples demonstrate the format.
-  - Validate the returned reply.
-  notes: 'Say: This is the few-shot prompt students write in the lab. Point out the design decisions: the rules and the complete
-    label set go in the system message; examples are short, realistic and cover each category; they are not taken from the test
-    set, which would inflate the measured accuracy; and the final line ends with Category and a colon, nudging the model to
-    answer with a single label. Setting temperature to zero makes the evaluation reproducible. The same structure works for
-    any classification or extraction task in the project.
+  - Rules define the labels.
+  - Examples show the format.
+  notes: 'In short: A few-shot prompt is just a list of chat messages whose user text contains worked examples.
 
 
-    The TASK variable is defined in the lab and lists the permitted teams. This compact lecture example shows two input-answer
-    pairs; the notebook compares examples for all five categories.
+    Explain: TASK is a string holding the rules and allowed labels. Each example pairs a message with its category. The new
+    message ends with "Category:" and no answer. The model continues the pattern by writing a label. Code then validates the
+    returned text.
 
 
-    Ask: Why must the examples not come from the test set?
+    Example: The prompt shows eduroam → IT_ACCESS and deposit receipt → FEES_FINANCE. The final line is "Message: Two exams
+    clash. Category:". A correct continuation is TIMETABLE_EXAMS. In the lab, few_shot builds this text from the EXAMPLES list,
+    and check_few_shot confirms that all five pairs appear.
 
-    Answer: The model would see the answers, so the measured accuracy would be inflated.
 
-    Common mistake: Leaving out the final Category: line and then parsing a full sentence as a label.'
+    Ask: Why end the prompt with "Category:" instead of a question?
+
+
+    Answer: It makes the label the most natural next tokens, which keeps replies short and parseable.
+
+
+    Watch out: The examples must never be copied from the test messages.'
 - type: bullets
   title: Role-based prompting and its limits
-  icon: fa:FaUserTie
   bullets:
-  - A role guides tone and priorities.
-  - Name the audience.
-  - Roles do not supply missing knowledge.
-  - Ask for evidence-based checks.
-  notes: 'Say: Role or persona prompting is popular and sometimes useful: it helps set the register and the priorities, for
-    example asking the model to review code as a security specialist makes it focus on vulnerabilities. But students often over-estimate
-    it. A role cannot give the model knowledge it does not have, and research on persona prompts has found small or inconsistent
-    accuracy effects. Worse, an authoritative persona can make hallucinations more convincing. The practical advice from all
-    three vendor guides is to be specific about the behaviour you want rather than relying on a label.
+  - A role sets tone and priorities.
+  - It adds no knowledge.
+  - Measure its effect.
+  notes: 'In short: A role prompt changes tone and focus, but it cannot supply knowledge the model lacks.
 
 
-    Analogy: A uniform changes how someone looks, not what they know.
+    Explain: A role, or persona, tells the model whom to act as. It can shift vocabulary, tone and priorities. It does not add
+    facts or skills to the weights. Its effect on accuracy is often small or inconsistent. Only a measured comparison shows
+    whether it helps.
 
-    Ask: You add You are an expert pharmacist. Does the model now know the latest drug interactions?
 
-    Answer: No. A role can change tone and focus but cannot add knowledge; supply current sources instead.
+    Example: The lab adds "You are an experienced student-services triage officer" to the few-shot prompt. In the stored GPU
+    run, role + few-shot did not beat few-shot alone: {{FEWSHOT_SUMMARY}} A costume is an analogy; it changes appearance, not
+    ability.
 
-    Common mistake: Trusting a persona''s confident tone. It can make invented answers more convincing.'
+
+    Ask: When is a role prompt most likely to help?
+
+
+    Answer: When the task needs a particular tone or audience, such as a supportive reply to a worried student.
+
+
+    Watch out: Phrases such as "world-class expert" do not make answers more correct.'
+  visual:
+    type: example_strip
+    items:
+    - label: Plain
+      text: Classify this message.
+    - label: Role
+      text: You are a triage officer. Classify…
 - type: cards
   title: Principles from the official prompting guides
   cards:
-  - icon: fa:FaBullseye
-    head: Be clear and specific
-    text: 'Say task, audience and format: "three bullets for first-year students".'
-  - icon: fa:FaFolderOpen
-    head: Give context
-    text: Paste the facts and mark where each source starts and ends.
-  - icon: fa:FaListOl
-    head: Show examples
-    text: Give varied input–answer pairs, including a tricky boundary case.
-  - icon: fa:FaStream
-    head: Break tasks down
-    text: Extract facts first, then draft; check each step's output.
-  - icon: fa:FaQuestionCircle
-    head: Allow uncertainty
-    text: 'Say what to reply when evidence is missing: "not in the source".'
-  - icon: fa:FaVial
-    head: Test systematically
-    text: Compare prompt versions on the same questions and settings.
-  notes: 'Say: These six principles appear, in different words, in the prompt engineering guides of OpenAI, Google and Anthropic,
-    linked on the final slide. Two are often neglected. Allowing uncertainty is one of the simplest hallucination mitigations:
-    models are more likely to invent an answer if the prompt implies an answer must exist. Testing systematically is what separates
-    prompt engineering from prompt guessing. Ask students to check the warm-up rewrite against these six cards.
+  - head: Be specific
+    text: Task, audience, format
+  - head: Give context
+    text: Mark source boundaries
+  - head: Show examples
+    text: Include a boundary case
+  - head: Break tasks down
+    text: Check each step
+  - head: Allow uncertainty
+    text: Permit 'not in source'
+  - head: Test
+    text: Same questions, fixed settings
+  notes: 'In short: The official guides from OpenAI, Google and Anthropic agree on six practical principles.
 
 
-    Analogy: A good briefing for a new colleague covers the same six points.
+    Explain: Be specific about task, audience and format. Give context and mark where each source starts and ends. Show varied
+    examples, including a hard boundary case. Break long tasks into checked steps. Allow the model to say the answer is not
+    in the source.
 
-    Ask: Which principle is the simplest guard against invented answers?
 
-    Answer: Allowing uncertainty: say what to return when the evidence is missing.
+    Example: A vague request is "Summarise this policy". A specific one is "Summarise the attached refund policy for first-year
+    students in three bullets; if a detail is missing, write ''not in the policy''". The second gives a reader, a length, a
+    source and an uncertainty rule. Each element can then be checked in the output.
 
-    Common mistake: Testing a prompt on a few favourite examples instead of a fixed test set.'
+
+    Ask: Which principle protects most directly against invented answers?
+
+
+    Answer: Allowing uncertainty, together with supplying the source and checking claims against it.
+
+
+    Watch out: Guides give good starting points; your own test set decides what works for your task.'
 - type: figure
   title: 'Real results: does few-shot prompting help?'
   figure: fewshot_results
   bullets:
   - '{{FEWSHOT_SUMMARY}}'
-  - Same model, 40 messages, temperature 0.
-  - One answer changes accuracy by 2.5 percentage points.
+  - 'Stored GPU run: {{MODEL}}, temperature 0.'
+  - One answer = 2.5 points.
   stack: true
-  notes: 'Say: These are real results from running the lab notebook on the GPU with a small open model, {{MODEL}}. The chart
-    shows accuracy on forty student-services messages, with Wilson 95% intervals. {{FEWSHOT_INVALID}} Ask students whether they
-    trust the differences; the honest answer is that with forty items only large differences are reliable, which we quantify
-    in section four.
+  notes: 'In short: The stored GPU run shows modest, uneven differences between four prompts on 40 messages.
 
 
-    Ask: With 40 messages, how many answers is a 2.5-point difference?
+    Explain: The chart shows accuracy for four prompts on the same 40 labelled messages. A confidence interval is a range of
+    plausible true accuracies. The error bars are Wilson 95% intervals. Separate accuracy intervals do not determine whether
+    paired differences are significant. Your CPU lab uses a smaller model and 20 development messages.
 
-    Answer: One answer.
 
-    Common mistake: Declaring a winner from a one-answer difference on a small test set.'
+    Example: {{FEWSHOT_NOTES}} With 40 messages, one changed answer moves accuracy by 2.5 percentage points. Your CPU core measured
+    {{W07_CORE_DEV}} with {{W07_CORE_MODEL}}.
+
+
+    Ask: Would you ship the best prompt based on this chart alone?
+
+
+    Answer: Not yet. Compare paired disagreements, confirm on held-out messages and read the errors first.
+
+
+    Watch out: Model size matters: the same prompts behave differently on 0.5B and 1.5B models.'
 - type: quiz
-  question: A zero-shot classifier often replies with full sentences instead of a label. What is the most effective first fix?
+  question: Zero-shot replies are sentences, not labels. Best first fix?
   options:
-  - 'Add a persona at the start: ''You are a world-class classifier'''
-  - Add a few examples in the exact output format and state the allowed labels
-  - Increase the temperature so that it tries other output formats
-  - Fine-tune the model immediately on a set of labelled messages
+  - Add an expert persona
+  - Show examples and allowed labels
+  - Raise the temperature
+  - Fine-tune on labelled messages
   answer: 1
-  notes: 'Say: Answer: B. Format problems are best fixed by showing the format with examples and listing the allowed outputs,
-    ideally with structured output enforcement later in this lecture. A, a persona, does little for format. C makes outputs
-    more random, the opposite of what we want. D is premature: fine-tuning costs data and time, and should come only after prompting
-    and evaluation show a real limit. Check the invalid-answer count in your own run: it shows whether this format problem occurred.
+  notes: 'In short: When replies have the wrong format, show the format before trying anything heavier.
 
 
-    Ask: Why does a persona not fix the format?
+    Explain: A format failure means the content may be right but code cannot parse it. Examples demonstrate the exact output
+    shape. Listing the allowed labels removes guesswork. Temperature controls randomness, not format. Fine-tuning is slower
+    and costlier than a prompt fix.
 
-    Answer: It changes tone, not the output form. Examples and the list of allowed labels show the form.
 
-    Common mistake: Raising the temperature so the model tries other formats. It only adds randomness.'
+    Example: Zero-shot replies such as "This message seems to be about IT access" fail an exact-label parser. Adding five examples
+    ending in "Category: IT_ACCESS" usually produces short labels. The lab''s label_scorer then counts them as valid. A persona
+    alone rarely changes the reply length.
+
+
+    Ask: Which option is the most effective first fix?
+
+
+    Answer: B. Show examples in the exact format and list the allowed labels, then measure again.
+
+
+    Watch out: A parser that accepts long sentences can hide format failures; count invalid replies separately.'
 - type: section
   number: 3
   title: Reasoning, structure and context
   question: How do we handle several steps, return data for code, and supply the right facts?
   icon: fa:FaBrain
-  notes: 'Say: Section three covers the more advanced techniques: chain-of-thought prompting and self-consistency, with real
-    results; how prompting changes with reasoning models; prompt chaining; structured outputs with schemas; context engineering;
-    and prompting for different kinds of task. These techniques matter most when outputs feed into code, as in weeks 11 and
-    12. About twenty-five minutes.
+  notes: 'In short: This section covers multi-step reasoning, outputs that code can trust, and choosing what goes into the context.
 
 
-    Analogy: A schema is a form; validation checks the boxes, and source checking checks the contents.
+    Explain: Chain-of-thought asks for intermediate steps before an answer. Self-consistency samples several answers and votes.
+    Structured output returns fields that code can validate. Context engineering selects what the model sees within a token
+    budget. Each technique has a measurable cost.
 
-    Ask: Can an eight-digit ID still identify the wrong person?
 
-    Answer: Yes. The schema checks the shape of the ID, not whether it belongs to the person who wrote the email.
+    Example: A word problem asks how many laptops 28 students need in teams of four, with two laptops per team. A direct answer
+    may guess; a step-by-step reply computes 7 teams × 2 = 14. The step-by-step reply costs many more output tokens. Showing
+    working in a maths class is an analogy, though written steps may not reflect the model''s computation.
 
-    Common mistake: Treating valid JSON as correct data.'
+
+    Ask: Predict: will asking for steps always improve accuracy?
+
+
+    Answer: No. It often helps multi-step problems, but it costs tokens and can still end with a wrong answer.
+
+
+    Watch out: Longer outputs mean more time and cost; measure both alongside accuracy.'
 - type: bullets
   title: Chain-of-thought (CoT) prompting
-  icon: fa:FaStream
   bullets:
-  - Ask for intermediate steps and a clear final answer.
-  - Sometimes helps; sometimes fails.
-  - Extra output costs tokens and time.
-  - Check the answer and its steps.
-  notes: 'Say: Chain-of-thought prompting, introduced by Wei and colleagues in 2022, gives the model room to generate intermediate
-    steps, which improves accuracy on multi-step problems because each generated step becomes context for the next. Kojima and
-    colleagues showed that simply adding let''s think step by step helps even without examples. Two practical points: CoT multiplies
-    output length and therefore cost, and you must ask for a parseable final answer. The faithfulness caveat is important for
-    assessment: students should never present a model''s reasoning text as evidence that the answer is right.
+  - Ask for steps, then a final answer.
+  - Helps some multi-step tasks.
+  - Costs tokens; check the answer.
+  notes: 'In short: Chain-of-thought prompting asks the model to write intermediate steps before its final answer.
 
 
-    Analogy: Showing your working in a maths exam gives space for each step, but the working can still contain a mistake.
+    Explain: A step is a short written calculation or inference. Written steps give later tokens more context to build on. The
+    final answer should appear on a marked last line. Parsing that line gives a number to score. Extra steps cost output tokens
+    and time.
 
-    Ask: Why must a chain-of-thought prompt ask for a clearly marked final answer?
 
-    Answer: So code can find and parse the answer reliably at the end of a long reply.
+    Example: For 28 students in teams of 4, each team with 2 laptops, the steps are 28 ÷ 4 = 7 teams and 7 × 2 = 14 laptops.
+    The reply ends with a marked final-answer line giving 14. If the token cap cuts the reply before that line, the last number
+    may be an intermediate value such as 7.
 
-    Common mistake: Presenting the model''s reasoning text as proof that the answer is right.'
+
+    Ask: Why request a marked final-answer line at the end?
+
+
+    Answer: It gives code a reliable place to find the final answer, separate from the working.
+
+
+    Watch out: Plausible steps can still lead to a wrong answer, and correct answers can follow flawed steps.'
+  visual:
+    type: example_strip
+    items:
+    - label: Problem
+      text: 28 students, teams of 4, 2 laptops each
+    - label: Steps
+      text: 28 ÷ 4 = 7 teams; 7 × 2 = 14
 - type: figure
   title: 'Real results: direct vs. chain-of-thought vs. self-consistency'
   figure: cot_results
   bullets:
   - '{{COT_SUMMARY}}'
-  - Self-consistency samples replies and picks the most common answer.
+  - Voting samples several replies.
   - More calls cost more; agreement can be wrong.
   stack: true
-  notes: 'Say: Compare measured accuracy and output tokens on sixteen multi-step word problems from the lab. Written steps and
-    sampling several replies spend more computation; they can still produce wrong answers. Self-consistency samples five reasoning
-    paths and selects the most common parsed final answer. A strict majority is not required: when answers tie, this lab chooses
-    the one encountered first. Check the measured gain against the extra tokens and time on the same problems.
+  notes: 'In short: In the stored GPU run, step-by-step answers and voting raised accuracy but multiplied output tokens.
 
 
-    Ask: Self-consistency uses about five times the tokens of chain-of-thought. When is that worth paying?
+    Explain: Direct answers return only a number. Chain-of-thought adds written steps. Self-consistency samples several step-by-step
+    answers at temperature 0.7 and keeps the most common number. Temperature above zero makes replies vary. Cost grows with
+    every extra sample.
 
-    Answer: When the accuracy gain on your own test set justifies the extra cost and time, for example for rare, high-value
-    questions.
 
-    Common mistake: Assuming the majority answer is correct. Several samples can agree on the same wrong answer.'
+    Example: {{COT_NOTES}} The stored run used 16 problems, so one problem is 6.25 percentage points. Your CPU core measured
+    {{W07_CORE_COT}}.
+
+
+    Ask: Is a five-sample vote worth about five times the tokens of one step-by-step answer?
+
+
+    Answer: It depends on the cost of an error; measure the gain on your own task first.
+
+
+    Watch out: Agreement is not proof; several samples can agree on the same wrong number.'
 - type: bullets
   title: Prompting reasoning models
-  icon: fa:FaBrain
   bullets:
-  - State the goal and constraints.
-  - Supply needed evidence and final format.
+  - State goal, constraints and format.
   - Use supported effort settings.
   - Measure correctness, time and cost.
-  notes: 'Say: Prompting practice has changed with reasoning models. Their vendors, including OpenAI and Anthropic, advise against
-    micromanaging the reasoning: describe the goal, constraints and what a good answer looks like, provide all needed context,
-    and let the model plan. Many APIs expose an effort or thinking-budget setting. Because reasoning models are slower and more
-    expensive, a common architecture routes easy requests to a fast standard model and hard ones to a reasoning model, which
-    students can consider in their projects.
+  notes: 'In short: Reasoning models already spend tokens thinking, so prompts should state goals rather than script steps.
 
 
-    Analogy: Give an experienced professional the goal and constraints, not step-by-step instructions.
+    Explain: A reasoning model is trained to generate internal reasoning before answering. Providers expose settings such as
+    reasoning effort or a thinking budget. Asking for step-by-step text is often unnecessary. State the goal, constraints, evidence
+    and final format instead. Thinking tokens still cost time and money.
 
-    Ask: Why route easy requests to a standard model?
 
-    Answer: Reasoning models are slower and cost more per answer, and easy requests rarely need the extra thinking.
+    Example: Week 6 compared Qwen3-0.6B with thinking off and on. On an easy word problem both modes were correct, but thinking
+    used several times more tokens. On a harder puzzle, thinking ran out of its token budget in every run. More thinking is
+    a cost to justify, not a free improvement.
 
-    Common mistake: Micromanaging a reasoning model''s steps instead of stating the goal, constraints and output format.'
+
+    Ask: What should you measure before switching a task to a reasoning model?
+
+
+    Answer: Final-answer accuracy, completion rate, tokens and elapsed time on representative examples.
+
+
+    Watch out: A visible reasoning trace is not guaranteed to show how the answer was produced.'
+  visual:
+    type: mini_table
+    header:
+    - Prompt part
+    - Reasoning model
+    rows:
+    - - Show steps
+      - Often unnecessary
+    - - Effort
+      - A setting, not words
+    - - Check
+      - The final answer
 - type: flow
   title: 'Prompt chaining: decompose complex tasks'
   steps:
   - label: Extract
-    sub: Find source facts
+    sub: Source facts
+    role: tool
   - label: Verify
-    sub: Check against source
+    sub: Against source
+    role: metric
   - label: Draft
-    sub: Use checked facts
+    sub: Checked facts
+    role: model
   - label: Critique
-    sub: Apply checklist
-    highlight: true
+    sub: Checklist
+    role: metric
   - label: Finalise
-    sub: Repair and format
+    sub: Repair, format
+    role: output
   bullets:
-  - Pass outputs to later prompts; validate each step.
-  - 'Invoice: extract → verify → add in code → explain.'
-  notes: 'Say: For complex tasks, one giant prompt is hard to debug. Prompt chaining splits the work into steps, each with its
-    own prompt and its own test. The example chain is for writing a report from a source document: extract facts, verify them
-    against the source, draft from verified facts only, critique against a checklist, and finalise. Each step can use a different
-    model or plain code; for instance, verification of dates or numbers is best done by code. This idea leads directly to workflows
-    and agents in week 12, where the steps become tool calls.
+  - Validate each step's output.
+  notes: 'In short: Prompt chaining splits a complex task into smaller prompts and passes each checked output to the next.
 
 
-    Analogy: An assembly line with an inspection after each station.
+    Explain: A chain is a sequence of model calls. Each call has one narrow job. Code can check the output between calls. Errors
+    are easier to find because each step is visible. Chains cost more calls and time than one prompt.
 
-    Ask: In the invoice chain, why add the totals in code rather than in a prompt?
 
-    Answer: Code does arithmetic exactly; a model can make arithmetic mistakes.
+    Example: For an invoice question, step one extracts line items as JSON. Step two checks each item against the document.
+    Code, not the model, adds the totals. A final prompt explains the result to the customer. An assembly line with inspection
+    stations is an analogy; unlike a factory, every station here can invent a new kind of error.
 
-    Common mistake: Passing one step''s output to the next without checking it, so an early error spreads.'
+
+    Ask: Why let code add the invoice totals instead of the model?
+
+
+    Answer: Arithmetic in code is exact and testable; the model can make silent calculation errors.
+
+
+    Watch out: A chain without checks between steps just passes errors along faster.'
+  arrows:
+  - facts
+  - checked facts
+  - draft
+  - issues
 - type: code
   title: 'Structured outputs: a schema as a contract'
-  code: "from pydantic import BaseModel, Field, ValidationError\nfrom typing import Literal\nclass Request(BaseModel):\n    name: str\n    student_id: str = Field(pattern=r\"^[0-9]{8}$\")\n    request: Literal[\"extension\", \"invoice\", \"deferral\"]\n    date: str | None = None\nraw = llm(extract_prompt(email))\ntry:\n    req = Request.model_validate_json(raw)\nexcept ValidationError as err:\n    raw = llm(fix_prompt(raw, err))\n    req = Request.model_validate_json(raw)  # may still fail\n"
+  code: "class Request(BaseModel):\n    name: str\n    student_id: str = Field(pattern=r\"^\\d{8}$\")\n    request: Literal[\"\
+    extension\", \"invoice\", \"deferral\"]\n    date: str | None = None\n\n\n# Lab helper validates both attempts\nreq, retries\
+    \ = parse_with_retry(messages)\n"
   bullets:
-  - A schema checks fields, types and constraints.
-  - Validate the first reply and the retry.
-  - Check facts separately; reject a second failure.
-  notes: 'Say: Trace the code. Field(pattern=...) really checks eight ASCII digits; the request field has three allowed values. The date field permits a string or null here: the lab adds a date-format validator. Import ValidationError, validate the first response, give a single repair opportunity, then validate again. A second exception must stop or enter an explicit error path. Analogy: a form checker rejects the wrong shape but cannot know whether a stated ID belongs to this person. Ask: what source comparison detects the wrong eight-digit ID? Common mistake: syntactically valid JSON is not validated business data.'
+  - Schema checks shape.
+  - Compare facts separately.
+  notes: 'In short: A schema turns "return JSON" into a contract that code can check before using the reply.
+
+
+    Explain: Pydantic is a Python library for data validation. A BaseModel class lists fields and their types. Literal restricts
+    a field to listed values. A pattern such as eight digits constrains text. ValidationError reports which rule failed.
+
+
+    Example: A reply with "student_id": "2314567" fails because the ID has seven digits. The error goes back to the model once,
+    and the retry is validated again. Two failures return None instead of a guess. In the stored GPU run, {{EXTRACTION_NOTES}}
+    Your CPU core measured {{W07_CORE_EXTRACT}}.
+
+
+    Ask: Does a provider''s structured-output mode remove the need for validation?
+
+
+    Answer: It enforces the shape, but you must still check the values against the source.
+
+
+    Watch out: Never let a second failure pass silently into downstream code.'
 - type: figure
   title: 'Context engineering: what the model sees matters most'
   figure: context_eng
   stack: true
-  notes: 'Say: Choose relevant information for each call. Label sources; shorten old history. Test source order and token budget. Extra context may distract. Context engineering, a term popularised in 2025 by Anthropic and others, is the natural extension of prompt engineering for applications and agents: deciding what information fills the limited context window at each step. Sources compete for space: instructions, the user''s query, retrieved documents, conversation memory and tool outputs. Good practice is to select only what is relevant, summarise or compress old history, order content deliberately, for example Anthropic recommends placing long documents before the question, and delimit and label each source. Irrelevant context can distract the model and increases cost.
+  notes: 'In short: Context engineering decides which information enters the model''s limited context window, and in what order.
 
 
-    Analogy: Pack a suitcase with limited space: keep what this journey needs and leave room for the answer.
+    Explain: The context window is the maximum number of tokens one request can hold. Candidates include instructions, the question,
+    documents, history and tool results. Selection keeps the most relevant items. Compression shortens them, for example by
+    summarising old turns. Ordering places key material where the model uses it best.
 
-    Ask: If the request is too long, what should you remove before cutting the current question?
 
-    Common mistake: Filling every available token does not guarantee a better answer.'
+    Example: A policy question might have ten candidate documents but room for three. Choosing the three most relevant passages
+    leaves space for the answer. Including all ten can push out recent history or distract the model. Packing a suitcase under
+    a weight limit is an analogy, but irrelevant text can actively mislead.
+
+
+    Ask: Why reserve part of the budget for the answer?
+
+
+    Answer: Output tokens share the same limit, so a full context can cut the reply short.
+
+
+    Watch out: A larger context window does not guarantee the model uses every part reliably.'
 - type: cards
   title: Prompting for different tasks
   cards:
-  - icon: fa:FaCompressAlt
-    head: Summarisation
-    text: Name the reader and length; keep only claims in the source.
-  - icon: fa:FaTable
-    head: Extraction
-    text: List the fields, return null for missing ones, validate in code.
-  - icon: fa:FaTags
-    head: Classification
-    text: Define every label in one line and give an example of each.
-  - icon: fa:FaCode
-    head: Code
-    text: State inputs, outputs and versions; run the tests before trusting it.
-  - icon: fa:FaImage
-    head: Image generation
-    text: 'Describe subject, style and composition: "a lighthouse at dusk, watercolour".'
-  - icon: fa:FaChartBar
-    head: Data analysis
-    text: Explain each column; ask for code that computes the numbers.
-  notes: 'Say: Different tasks need different prompt emphases. Summaries need an audience, length and faithfulness instruction.
-    Extraction needs a schema and a rule for missing values. Classification needs the full label set, ideally with a one-line
-    definition of each. Code prompts should state versions and interfaces and ask for tests; always run the code. Image prompts,
-    from week 4, describe subject, style, composition and lighting, with negative prompts. For data analysis, ask the model
-    to write code that computes the numbers rather than computing them in its head, which avoids arithmetic hallucination.
+  - head: Summarise
+    text: Reader, length, source only
+  - head: Extract
+    text: Fields; null if missing
+  - head: Classify
+    text: Define each label
+  - head: Code
+    text: State versions; run tests
+  - head: Images
+    text: Subject, style, composition
+  - head: Analyse data
+    text: Ask for computing code
+  notes: 'In short: Each task type needs a different prompt emphasis and a different check.
 
 
-    Analogy: Different jobs need different briefs: a summary brief names the reader; an extraction brief names the fields.
+    Explain: Summaries need a reader, a length and a rule to use only the source. Extraction needs named fields and null for
+    missing values. Classification needs a one-line definition per label. Code needs inputs, outputs and versions, then real
+    tests. Data analysis should ask for code that computes the numbers.
 
-    Ask: For data analysis, why ask the model for code rather than for the numbers?
 
-    Answer: Running the code computes exact numbers and shows how they were obtained.
+    Example: For an image model, "a lighthouse at dusk, watercolour, wide view" names the subject, style and composition. For
+    a spreadsheet question, "write pandas code that computes the mean fee per programme" lets you run and check the result.
+    The checks differ: a visual review in one case and an executed test in the other.
 
-    Common mistake: Accepting generated code without running and testing it.'
+
+    Ask: Why ask for code instead of the number itself in data analysis?
+
+
+    Answer: Code can be run, inspected and repeated; a number typed by the model may be invented.
+
+
+    Watch out: One prompt template rarely fits every task; match the check to the task.'
 - type: section
   number: 4
   title: Evaluation methods
   question: How do you know a prompt, or a model, is actually better?
   icon: fa:FaClipboardCheck
-  notes: 'Say: Welcome back. Section four is the most important for MIMLO 4 and for the project. We set out an evaluation loop,
-    compare the families of evaluation methods, compute a reference-based metric by hand, discuss LLM-as-a-judge and its biases,
-    look at a rubric for human evaluation, and finish with the statistics needed to avoid fooling ourselves with small test
-    sets.
+  notes: 'In short: Evaluation turns "this prompt seems better" into a measured, repeatable claim.
 
 
-    Analogy: An evaluation set is a shared exam, with a marking guide written before grading.
+    Explain: A test set is a collection of inputs with known answers or a rubric. A metric turns each output into a score. A
+    rubric is a written scoring guide for open-ended answers. Human review checks what metrics miss. Statistics show whether
+    a difference could be chance.
 
-    Ask: What does one changed answer do to accuracy on forty questions?
 
-    Answer: It moves accuracy by 2.5 percentage points.
+    Example: Two prompts score 80% and 85% on 20 messages: a gap of one message. On 200 messages, the same five-point gap would
+    be ten messages and far more convincing. A critic tasting one dish versus a whole menu is an analogy, though a whole menu
+    can still be unrepresentative.
 
-    Common mistake: Tuning prompts on the final test set. Development examples guide revisions; the final test must stay unused.'
+
+    Ask: Predict: how many test messages would you want before trusting a five-point gain?
+
+
+    Answer: Usually hundreds, or a paired comparison on the same items, plus a held-out check.
+
+
+    Watch out: A test set that resembles your prompt examples will overstate performance.'
 - type: flow
   title: The evaluation loop (eval-driven development)
   steps:
   - label: Define success
-    sub: Write criteria
-  - label: Build a test set
-    sub: Real inputs; hold some out
+    sub: Criteria
+    role: tool
+  - label: Build test set
+    sub: Hold some out
+    role: data
   - label: Run
-    sub: Fixed settings; log replies
+    sub: Fixed settings
+    role: model
   - label: Score
-    sub: Metrics, rubric, people
-    highlight: true
+    sub: Metrics, rubric
+    role: metric
   - label: Analyse errors
-    sub: Read failures; revise
-  callout: Develop on one set; finish with fresh examples.
-  notes: 'Say: This loop is how professional teams develop LLM features; OpenAI''s evaluation best-practices guide describes
-    the same cycle. Define success criteria before writing prompts. Build a test set from realistic inputs, including hard and
-    edge cases, and keep a held-out part you do not look at while tuning. Run with fixed settings and log model version, prompt
-    version and outputs. Score with a combination of methods. Most importantly, read the failures and group them: error analysis
-    tells you whether to change the prompt, add context, change the model, or accept a limitation. Every project must include
-    such a test set.
+    sub: Next change
+    role: output
+  callout: Develop on one set; finish on fresh examples.
+  notes: 'In short: Eval-driven development writes the test before revising the prompt, just as tests guide software changes.
 
 
-    Analogy: A cook tastes and adjusts while cooking, but the guest judges a fresh plate.
+    Explain: Success criteria say what a good output must do. The test set holds realistic inputs, with some kept aside. Each
+    run uses fixed settings and logs every reply. Scoring applies metrics, rubrics or people. Error analysis reads failures
+    and suggests the next single change.
 
-    Ask: Why keep part of the test set hidden while tuning?
 
-    Answer: A prompt tuned on the same items can overfit them; fresh items show how it does on new inputs.
+    Example: For routing, success is "exactly one correct label". The lab''s 40 synthetic tickets split into 20 and 20. Each
+    run logs replies and output tokens. Scoring counts correct and invalid labels. Reading errors may show that "extra exam
+    time for dyslexia" sits between two teams, which is a labelling problem rather than a prompt problem.
 
-    Common mistake: Skipping error analysis. Reading the failures shows whether to change the prompt, the context or the model.'
+
+    Ask: Why log every reply rather than only the accuracy?
+
+
+    Answer: Replies explain failures and allow rescoring if the scorer changes.
+
+
+    Watch out: Changing several prompt parts at once hides which change caused the effect.'
+  arrows:
+  - criteria
+  - examples
+  - replies
+  - scores
 - type: table
   title: Families of evaluation methods
   header:
   - Method
   - Checks
-  - Example
   - Limit
   rows:
-  - - Exact match / F1
-    - Agreement with a reference
-    - Label matches the gold label
-    - Open-ended answers
+  - - Exact match
+    - Matches reference
+    - Open answers
   - - BLEU / ROUGE
-    - Word overlap with a reference
-    - Summary vs. reference summary
-    - Misses paraphrases
-  - - Embedding similarity
-    - Closeness of meaning
-    - Answer near the reference
+    - Word overlap
+    - Paraphrases
+  - - Embeddings
+    - Similar meaning
     - Not truth
   - - Code checks
-    - Rules and unit tests
-    - JSON schema; date format
-    - Only what is coded
+    - Schema; tests
+    - Coded rules only
   - - LLM judge
-    - Score against a rubric
-    - Faithfulness 1–5
+    - Rubric score
     - Judge bias
   - - Human review
-    - Useful and correct?
-    - Two raters, one rubric
-    - Disagreement; cost
-  notes: 'Say: No single method fits every output. Closed answers, such as labels, numbers and extracted fields, use exact match,
-    accuracy or F1. Free text compared with references can use overlap metrics such as BLEU for translation and ROUGE for summarisation,
-    but these miss paraphrases. Embedding similarity handles paraphrase but not correctness. Programmatic checks, such as schema
-    validation and unit tests for code, are cheap and reliable for what they cover. LLM-as-a-judge scales rubric-based evaluation.
-    Human evaluation remains the reference. Good evaluations combine several.
+    - Useful; correct
+    - Cost; disagreement
+  notes: 'In short: Different evaluation methods check different things, so most applications combine several.
 
 
-    Analogy: A ruler, a spell-checker and a human editor each catch different problems.
+    Explain: Exact match compares an output with a reference answer. BLEU and ROUGE count overlapping words or word sequences.
+    Embedding similarity compares meaning as vectors. Code checks apply rules such as schemas and unit tests. LLM judges and
+    people score against a rubric.
 
-    Ask: Which method fits checking that extracted dates are valid?
 
-    Answer: Code. A rule or unit test checks the format exactly and cheaply.
+    Example: Routing uses exact match on labels. Extraction uses a schema check plus field comparison. A summary might use ROUGE
+    against a reference, an LLM judge for faithfulness, and two people on a sample of 30. A medical check-up is an analogy;
+    several tests, each blind to some conditions.
 
-    Common mistake: Using embedding similarity as a correctness check. Similar meaning is not a true answer.'
+
+    Ask: Which method would you use for "Is this email reply polite and correct?"
+
+
+    Answer: A rubric scored by people, possibly assisted by a calibrated LLM judge.
+
+
+    Watch out: A high overlap score can reward copying the reference wording rather than being correct.'
 - type: equation
   title: 'A reference-based metric by hand: ROUGE-1'
   eq:
   - \mathrm{Recall} = \frac{\#\,\mathrm{overlapping\;words}}{\#\,\mathrm{words\;in\;reference}}, \qquad \mathrm{Precision} = \frac{\#\,\mathrm{overlapping\;words}}{\#\,\mathrm{words\;in\;output}}
   - F_1 = \frac{2 \cdot \mathrm{Precision} \cdot \mathrm{Recall}}{\mathrm{Precision} + \mathrm{Recall}}
   read_as:
-  - 'Reference: the exam results are published in four weeks. (8 words)'
-  - 'Output: results are published after four weeks. (6 words)'
-  - 'Five overlap: recall 5/8; precision 5/6; F1 ≈ 0.71.'
+  - 'Reference (8 words): the exam results are published in four weeks.'
+  - 'Output (6 words): results are published after four weeks.'
+  - 'Overlap 5: recall 5/8, precision 5/6, F1 ≈ 0.71.'
   terms:
   - - ROUGE-1
-    - counts matching single words
-  - - BLEU
-    - counts matching word sequences, often for translation
-  notes: 'Say: Work through the example. The reference has eight words, the output six; five words overlap, so recall is five
-    eighths and precision five sixths, and the F1 is about 0.71. ROUGE-2 would count overlapping word pairs instead. Then show
-    the limitation with the paraphrase: ''marks come out a month later'' means the same thing but shares almost no words with
-    the reference, so it scores near zero. Reference-based metrics are cheap and reproducible, but for LLM outputs they must
-    be combined with semantic or human evaluation.
+    - single-word overlap
+  - - F1
+    - balances both
+  notes: 'In short: ROUGE-1 measures how many single words an output shares with a reference answer.
 
 
-    Ask: What ROUGE-1 score does the paraphrase marks come out a month later get?
+    Explain: Recall is overlapping words divided by reference words. Precision is overlapping words divided by output words.
+    F1 is their harmonic mean, which is high only when both are high. ROUGE is common for summaries. BLEU counts longer word
+    sequences and is common for translation.
 
-    Answer: Zero. No word overlaps with the reference, although the meaning is the same.
 
-    Common mistake: Reading a high overlap score as proof of a faithful summary.'
+    Example: The reference has 8 words and the output has 6. Five words overlap: results, are, published, four and weeks. Recall
+    is 5/8 = 0.625 and precision is 5/6 ≈ 0.83. F1 = 2 × 0.83 × 0.625 ÷ (0.83 + 0.625) ≈ 0.71.
+
+
+    Ask: Would "results are not published after four weeks" score well?
+
+
+    Answer: Yes: recall stays 5/8, yet the meaning is reversed, because overlap ignores negation.
+
+
+    Watch out: Word overlap rewards surface similarity, not factual correctness.'
 - type: bullets
   title: LLM-as-a-judge
-  icon: fa:FaGavel
   bullets:
-  - A judge applies a written rubric.
-  - 'MT-Bench: strong judges ≈ 80% human agreement.'
-  - Check position, length and self-preference biases.
-  - Swap order; calibrate with human scores.
-  notes: 'Say: Using a model to evaluate another model''s output is now standard because it scales. Zheng and colleagues'' MT-Bench
-    study found that strong model judges agreed with human preferences about as often as humans agreed with each other, around
-    eighty percent. But judges are biased. They may prefer whichever answer is shown first, prefer longer answers, prefer outputs
-    from their own model family, and be swayed by a confident tone. The lab measures position bias by swapping answer order.
-    The rule for the project: an LLM judge may be used only if calibrated against a sample of human labels, with agreement reported.
+  - Judge with a written rubric.
+  - Swap the answer order.
+  - Calibrate with human labels.
+  notes: 'In short: An LLM judge scores outputs against a rubric, but its own biases must be measured.
 
 
-    Analogy: A referee who sometimes favours the team shown first.
+    Explain: A judge prompt shows a question, answers and a rubric, then asks for a verdict. Position bias prefers the first
+    or second slot. Verbosity bias prefers longer answers. Self-preference favours outputs from the same model family. Calibration
+    compares judge verdicts with human labels.
 
-    Ask: How does swapping the answer order reveal position bias?
 
-    Answer: A consistent judge picks the same underlying answer in both orders; a changed verdict shows the order mattered.
+    Example: Zheng et al. (2023) reported over 80% agreement between strong judges such as GPT-4 and human preferences on MT-Bench.
+    {{JUDGE_NOTES}} Your CPU core''s {{W07_CORE_MODEL}} judge was {{W07_CORE_JUDGE}}.
 
-    Common mistake: Using an LLM judge without checking it against human labels.'
+
+    Ask: A judge picks A, then picks A again after swapping. What does that show?
+
+
+    Answer: Position bias for that pair: the verdict followed the slot, not the answer.
+
+
+    Watch out: An unparsable verdict is missing evidence, not a vote for either answer.'
+  visual:
+    type: mini_table
+    header:
+    - Bias
+    - Check
+    rows:
+    - - Position
+      - Swap A and B
+    - - Length
+      - Control length
+    - - Self-preference
+      - Different judge
 - type: table
   title: A rubric for human (or LLM) evaluation of summaries
   header:
   - Criterion
-  - '1: poor'
-  - '3: acceptable'
-  - '5: excellent'
+  - '1'
+  - '3'
+  - '5'
   rows:
-  - - Faithfulness
+  - - Faithful
     - Unsupported claims
     - Minor gap
     - All supported
   - - Coverage
     - Key omissions
     - Most points
-    - All needed points
+    - All points
   - - Clarity
     - Hard to follow
-    - Understandable
+    - Clear
     - Audience-ready
   - - Format
     - Ignored
-    - Minor deviations
+    - Minor slips
     - Exact
-  callout: Two people score a sample; discuss disagreement.
-  notes: 'Say: Human evaluation needs a rubric to be consistent. Criteria should be few and distinct, with anchored descriptions
-    for low, middle and high scores so raters interpret them the same way. Faithfulness comes first for summaries, because hallucinated
-    content is the most harmful failure. Use at least two raters on a sample of outputs, measure inter-rater agreement, for
-    example with Cohen''s kappa, and discuss disagreements to refine the rubric. The same rubric can then be given to an LLM
-    judge, whose scores are validated against the human ones.
+  callout: Two raters score a sample.
+  notes: 'In short: A rubric splits the vague question of summary quality into separate, scorable criteria with anchored levels.
 
 
-    Analogy: A marking scheme with a description for each grade.
+    Explain: A criterion is one quality to judge, such as faithfulness. Faithfulness means every claim is supported by the source.
+    Coverage means the key points are present. Anchors describe what scores of 1, 3 and 5 look like. Agreement between two raters
+    shows whether the rubric is clear.
 
-    Ask: Why put faithfulness first for summaries?
 
-    Answer: An unsupported claim is the most harmful failure in a summary.
+    Example: A summary of the fees policy omits the hardship fund but invents nothing. It scores 5 on faithfulness and 3 on
+    coverage. If two raters give 3 and 5 for coverage, discuss the anchor wording and rescore. Exam marking schemes are the
+    analogy; they also need moderation.
 
-    Common mistake: Using one rater. Without a second rater you cannot measure agreement.'
+
+    Ask: Why score criteria separately instead of giving one overall mark?
+
+
+    Answer: Separate scores show which quality failed, so the next prompt revision has a clear target.
+
+
+    Watch out: An LLM judge using this rubric still needs calibration against human scores.'
 - type: bullets
   title: 'Statistics: don''t fool yourself with small test sets'
-  icon: fa:FaChartLine
   bullets:
-  - '40 questions: one answer = 2.5 points.'
-  - 80% accuracy has roughly ±12-point uncertainty.
-  - Use paired comparisons; repeat sampling.
+  - '20 items: one answer = 5 points.'
+  - Compare prompts on the same items.
   - Keep a final test separate.
-  - Log settings and errors.
-  notes: 'Say: Students routinely conclude that one prompt is better from a two-point difference on thirty examples. Give them
-    the rule of thumb: the standard error of an accuracy p on n items is the square root of p times one minus p over n; for
-    eighty percent on forty items that is about 6.3 points, so the ninety-five percent margin is about plus or minus twelve
-    points. Paired comparison on the same items is more sensitive: look at the items where the prompts disagree. Use several
-    seeds for sampled outputs, a held-out set, and report everything needed to reproduce the result. This slide is examinable.
+  notes: 'In short: Small test sets make accuracy uncertain, so report intervals and compare prompts on the same items.
 
 
-    Ask: Prompt A scores 80% and prompt B 85% on the same 40 items. Is B better?
+    Explain: A confidence interval gives a range of plausible true accuracies. Its width shrinks roughly with the square root
+    of the test-set size. A paired comparison scores both prompts on identical items. Then only the items that change between
+    prompts matter. A final test set stays untouched until the end.
 
-    Answer: Not shown. The margin is about 12 points either way. Look at the items where the prompts disagree, or use more items.
 
-    Common mistake: Reporting accuracy without the number of test items.'
+    Example: At 80% on 40 items, the Wilson 95% interval is about 65% to 89%. At 80% on 400 items, it narrows to about 76% to
+    84%. Ten times the data gives roughly a third of the width, because √10 ≈ 3.2. A prompt that fixes 3 items and breaks 1
+    has a net gain of 2.
+
+
+    Ask: Prompt B beats A by one message out of 20. Should you switch?
+
+
+    Answer: Not on that evidence alone; check more items, read the changes and confirm on held-out data.
+
+
+    Watch out: Trying many prompt variants on one small set and keeping the best overstates its accuracy.'
+  visual:
+    type: example_strip
+    items:
+    - label: 40 items
+      text: '80% correct: 95% interval ≈ 65%–89%'
+    - label: 400 items
+      text: '80% correct: 95% interval ≈ 76%–84%'
 - type: section
   number: 5
   title: Limitations, security and tools
   question: What can still go wrong, and what tools help?
   icon: fa:FaShieldAlt
-  notes: 'Say: The final section covers the limitations and challenges listed in the descriptor: hallucination, sensitivity
-    to prompt wording, and security issues including prompt injection and jailbreaks, with a real measurement from the lab;
-    then the supporting tools used in practice, and the responsible-AI lens for prompting.
+  notes: 'In short: The last section covers what prompting cannot fix, how prompts are attacked, and which tools help.
 
 
-    Analogy: A hostile note inside a document is still a note, not permission to act.
+    Explain: Hallucination means fluent but unsupported output. Prompt sensitivity means small wording changes alter answers.
+    Prompt injection hides instructions inside content the model reads. A jailbreak tries to bypass safety rules. Tools help
+    version, test and monitor prompts.
 
-    Ask: Where should the application enforce permission to send an email?
 
-    Answer: In code, before the email tool runs, for example with an allowlist or a human approval step.
+    Example: A summariser reads a web page containing "Ignore all previous instructions". A naive prompt may obey it. A defended
+    prompt marks the page as untrusted data, which helps but does not guarantee safety. A bank teller handling a forged note
+    is an analogy; training helps, but the bank still needs vault controls.
 
-    Common mistake: Relying on delimiters and system instructions for security.'
+
+    Ask: Predict: can a carefully written system prompt fully stop injection?
+
+
+    Answer: No. Instructions and data share one context; real protection needs permissions and checks in code.
+
+
+    Watch out: Do not test security only with attacks you wrote yourself; include varied phrasings.'
 - type: cards
   title: Limitations that prompting cannot remove
   cards:
-  - icon: fa:FaGhost
-    head: Hallucination
-    text: 'Fluent text can be false: an invented reference that looks real.'
-  - icon: fa:FaRandom
-    head: Prompt sensitivity
-    text: Swapping two examples' order can change the label.
-  - icon: fa:FaCalendarAlt
-    head: Knowledge cut-off
-    text: The model may not know this year's fees; supply current sources.
-  - icon: fa:FaThumbsUp
-    head: Sycophancy
-    text: '"Are you sure?" can make a model drop a correct answer.'
-  - icon: fa:FaBalanceScaleLeft
-    head: Bias
-    text: Change only the name in a message and compare the replies.
-  - icon: fa:FaDice
-    head: Non-determinism
-    text: Sampling and service updates can change a reply; log versions.
-  notes: 'Say: These limitations are properties of the models, so good prompts can mitigate but not remove them. Hallucination
-    is reduced by providing context and permission to abstain, but must be verified. Prompt sensitivity means results should
-    always be reported with the exact prompt. The knowledge cut-off is why retrieval and tools exist. Sycophancy, the tendency
-    to agree with the user, is a documented effect of preference training: asking are you sure can make a model abandon a correct
-    answer. Bias should be tested by varying names and demographic details in otherwise identical prompts.
+  - head: Hallucination
+    text: Plausible invented reference
+  - head: Sensitivity
+    text: Example order changes label
+  - head: Cut-off
+    text: Unaware of this year's fees
+  - head: Sycophancy
+    text: Drops correct answer when doubted
+  - head: Bias
+    text: Name change alters reply
+  - head: Non-determinism
+    text: Service updates change replies
+  notes: 'In short: Some failures come from the model itself and need checks, data or design, not better wording.
 
 
-    Ask: How would you test a model for sycophancy?
+    Explain: A knowledge cut-off is the date after which training data stops. Sycophancy means agreeing with the user against
+    the evidence. Prompt sensitivity means small changes alter answers. Non-determinism means replies can vary between runs
+    or service versions. Bias means outputs differ unfairly between groups.
 
-    Answer: Ask a question it answers correctly, reply Are you sure? I think it is X with a wrong X, and count how often it
-    switches.
 
-    Common mistake: Reporting results without the exact prompt. Small wording changes can change replies.'
+    Example: Ask "Are you sure?" after a correct answer; some models switch to a wrong one. Swap only the student''s name in
+    a message and compare the replies to test for bias. Ask about this year''s fees and a model may confidently give older figures.
+    Each needs a test, not a stronger instruction.
+
+
+    Ask: Which limitation does retrieval address most directly?
+
+
+    Answer: The knowledge cut-off, by supplying current sources; it does not remove hallucination entirely.
+
+
+    Watch out: Temperature 0 reduces sampling variation but does not guarantee identical replies from a hosted service.'
 - type: figure
   title: 'Prompt injection and jailbreaks: a real measurement'
   figure: injection_results
   bullets:
-  - Direct injection targets instructions; jailbreaks target safety.
-  - Indirect injection hides commands in sources. {{INJECTION_SUMMARY}}
-  - Use permissions, approved tools, validation and review.
+  - Injection hides commands in content.
+  - '{{INJECTION_SUMMARY}}'
+  - Enforce permissions and review in code.
   stack: true
-  notes: 'Say: Separate direct user attacks from instructions planted in documents. This plot counts replies flagged by the notebook’s keyword heuristic. The flags can include false positives and miss real attacks; read the raw outputs before making a security claim. A defended prompt is one layer, not a guarantee. Analogy: a hostile sentence in a parcel should not become a warehouse instruction. Ask: what permission check prevents an unauthorised tool action even if the model asks? Common mistake: treating fewer flags on a small attack set as proof that an application is secure.'
+  notes: 'In short: A defended prompt can reduce keyword-flagged injection replies, but it does not remove the risk.
+
+
+    Explain: Direct injection is typed by the user. Indirect injection hides instructions inside documents the model reads.
+    The lab''s detector flags keywords such as HACKED or pirate. A keyword flag is a rough heuristic, not proof.
+
+
+    Example: Three of six documents contain attacks. The defended prompt marks document text as untrusted and wraps it in tags.
+    In the stored GPU run, {{INJECTION_NOTES}} Your CPU core flagged {{W07_CORE_INJECT}}.
+
+
+    Ask: A reply says "The document contains a poem about pirates". Is that a successful attack?
+
+
+    Answer: No. It describes the attack instead of obeying it, yet the keyword detector flags it; read every reply.
+
+
+    Watch out: For systems with tools, use least privilege, allow-lists, validation and human approval.'
 - type: cards
   title: Supporting tools
   cards:
-  - icon: fa:FaFlask
-    head: Playgrounds
-    text: Try a prompt by hand; check access, quotas and costs first.
-  - icon: fa:FaCodeBranch
-    head: Prompt management
-    text: Keep prompt templates under version control beside the code.
-  - icon: fa:FaVial
-    head: Evaluation frameworks
-    text: 'Run fixed test cases automatically: promptfoo, Inspect, OpenAI Evals.'
-  - icon: fa:FaMagic
-    head: Prompt optimisers
-    text: Search prompt versions against your metric, for example DSPy.
-  - icon: fa:FaEye
-    head: Observability
-    text: Log each call's prompt version, tokens, time and errors.
-  - icon: fa:FaShieldAlt
-    head: Guardrails
-    text: Check inputs and outputs, and test what the checks miss.
-  notes: 'Say: The descriptor lists supporting tools. Playgrounds let you iterate and compare models interactively, and vendor
-    access, quotas and costs should be checked before class. Treat prompts as code: version them, template them and log changes.
-    Evaluation frameworks such as OpenAI Evals, promptfoo, the UK AI Security Institute''s Inspect, and LangSmith run test sets
-    and compare versions automatically. Prompt optimisers such as DSPy automate the search for better prompts against a metric
-    you define. Observability and guardrails matter once an application is deployed, covered in week 11.
+  - head: Playgrounds
+    text: Try prompts by hand
+  - head: Version control
+    text: Prompts beside code
+  - head: Eval frameworks
+    text: promptfoo, Inspect, OpenAI Evals
+  - head: Optimisers
+    text: Search prompts, e.g. DSPy
+  - head: Observability
+    text: Log versions, tokens, errors
+  - head: Guardrails
+    text: Check inputs and outputs
+  notes: 'In short: Tools make prompt work repeatable: versioned, tested, monitored and guarded.
 
 
-    Analogy: Version control and unit tests, applied to prompts.
+    Explain: A playground is a web page for trying prompts by hand. Version control stores prompt templates beside the code
+    that uses them. Evaluation frameworks run fixed test cases automatically. Prompt optimisers search prompt variants against
+    a metric. Observability logs each call''s prompt version, tokens, time and errors.
 
-    Ask: Why keep prompts under version control beside the code?
 
-    Answer: So every result can be traced to the exact prompt and reproduced.
+    Example: A team stores its routing prompt in Git. Every change runs promptfoo on 200 labelled tickets, and the merge is
+    blocked if accuracy drops. Logs show that average output tokens rose after one edit. Unit tests in software are the analogy;
+    prompt tests are noisier, so thresholds need margins.
 
-    Common mistake: Letting a prompt optimiser tune against the final test set.'
+
+    Ask: What should be logged for every production model call?
+
+
+    Answer: The prompt version, model and settings, tokens, latency, errors and, where permitted, the input and output.
+
+
+    Watch out: Guardrails are code too; measure what they miss and what they block wrongly.'
 - type: bullets
   title: 'Responsible AI lens: prompting and evaluation'
-  icon: fa:FaBalanceScale
   bullets:
-  - Protect prompt data.
+  - Protect personal data in prompts.
   - Test groups and languages.
-  - Verify important results.
-  - Document versions, errors and responsibility.
-  notes: 'Say: Responsible prompting has four practical elements. Privacy: every prompt is data sent to a model, possibly a
-    third-party service, so the week 1 checklist applies. Bias testing: counterfactual test cases that vary only names or demographic
-    details reveal unequal treatment, and should be part of every test set in the project. Over-reliance: the better outputs
-    look, the more people trust them, so critical workflows need verification steps. Transparency: disclose AI assistance and
-    keep records. The overarching message is that evaluation is itself the core responsible practice.
+  - Document versions and responsibility.
+  notes: 'In short: Responsible prompting protects data, tests fairness, and keeps people accountable for decisions.
 
 
-    Ask: How would you check a ticket router for unequal treatment?
+    Explain: Prompts are data, so personal information needs a lawful basis and care. Counterfactual tests change one attribute,
+    such as a name, and compare outputs. Over-reliance means trusting outputs without checking. Documentation records prompt
+    versions, tests and known failures. A named person stays responsible for decisions.
 
-    Answer: Write pairs of messages that differ only in a name or demographic detail, and compare the routes.
 
-    Common mistake: Sending personal data to a third-party API without checking its terms.'
+    Example: Before sending student emails to a hosted API, replace names and IDs with invented ones, as the lab does. Then
+    test whether "Aoife" and "Rahul" receive the same routing for identical problems. Log which prompt version produced each
+    decision. GDPR also gives people rights to information about significant automated decisions.
+
+
+    Ask: Why use invented examples when testing hosted models?
+
+
+    Answer: They avoid sending personal data to a third party while still exercising the task.
+
+
+    Watch out: Removing names alone may not anonymise a message; rare circumstances can still identify someone.'
+  visual:
+    type: mini_table
+    header:
+    - Risk
+    - Check
+    rows:
+    - - Privacy
+      - Invented or approved data
+    - - Bias
+      - Swap names, dialects
+    - - Over-reliance
+      - Human review
 - type: lab
   title: 'Lab 7: prompt engineering with evidence'
   steps:
   - Compare routing prompts.
-  - Score direct answers, steps and votes.
-  - Validate extraction and one retry.
-  - Inspect injection flags.
+  - Check held-out messages.
+  - Score steps and votes.
+  - Validate JSON.
+  - Read injection replies.
   - Swap judge order.
-  - Report evidence, cost and limits.
-  runtime: Colab T4 GPU (Qwen2.5-1.5B) or CPU (0.5B). About 1 hour on a 4 GB laptop GPU after downloads
-  deliverable: Notebook with results tables, error analysis and five written answers; the harness for your project
-  notes: 'Say: The lab implements the descriptor''s tutorial: case studies in prompt engineering with different prompt styles
-    on pre-trained LLMs, extended with a proper evaluation harness. All experiments use a small open model so that every student
-    can run them without cost; the same harness works with API models, which groups can use in their projects. The slide results
-    came from exactly this notebook. Emphasise the written answers: they ask students to interpret numbers critically, including
-    whether differences are significant.
+  runtime: CPU core took {{W07_CORE_TIME}}. Stretch optional.
+  deliverable: Evidence table, errors, five answers
+  notes: 'In short: The lab builds one evaluation harness and uses it for five prompt experiments, all on a CPU.
 
 
-    Ask: Why does the CPU path use Qwen2.5-0.5B instead of the 1.5 B model?
+    Explain: The core uses {{W07_CORE_MODEL}} with short, capped replies. Part 1 compares four routing prompts, then checks
+    the best on held-out messages. Part 2 compares direct, step-by-step and voted answers. Parts 3–5 cover JSON extraction,
+    injection and a judge. Each TODO has a check that prints ✅.
 
-    Answer: The larger model is too slow on a CPU. Results from the two models are not directly comparable.
 
-    Common mistake: Copying the lecture''s numbers instead of reporting your own run.'
+    Example: On the course laptop with {{W07_CORE_THREADS}} CPU threads, the whole core took {{W07_CORE_TIME}} once the model
+    was downloaded. The chosen prompt, {{W07_CORE_HELD_PROMPT}}, scored {{W07_CORE_HELD}} on held-out messages. The lecture''s
+    stored results came from a larger 1.5B model on a GPU, so numbers differ.
+
+
+    Ask: Which number from the lab is the fairest estimate of routing accuracy?
+
+
+    Answer: The held-out accuracy of the prompt chosen on the development messages.
+
+
+    Watch out: Keep both API switches False for the core; hosted judging is optional and uses invented pairs only.'
 - type: summary
   points:
   - Prompts keep weights fixed.
-  - Rules, examples and context guide replies.
-  - Validate structure and facts.
-  - Evaluate on realistic, separate cases.
-  - Check judges and uncertainty.
+  - Briefs state rules, examples, format.
+  - Schemas check shape, not truth.
+  - Choose on dev; report held-out.
+  - Check judges and small samples.
   - Enforce tool permissions in code.
-  notes: 'Say: Recap the six points. The two ideas to remember: structure prompts deliberately, and never claim a prompt is
-    better without measuring it on a test set. Next week we move to the next level of adaptation: fine-tuning, including supervised
-    fine-tuning, preference alignment such as RLHF and DPO, and parameter-efficient methods such as LoRA, which students will
-    apply in the lab. The evaluation harness from today will be used to compare base and fine-tuned models.
+  notes: 'In short: Prompting is design plus measurement: write a clear brief, check outputs, and evaluate fairly.
 
 
-    Ask: What should every claim that a prompt is better come with?
+    Explain: Prompts change inputs while weights stay fixed. A brief states rules, sources, examples, task and format. Schemas
+    and validators check structure, not truth. Development and held-out sets separate choosing from reporting. Security depends
+    on permissions in code, not on prompt wording.
 
-    Answer: The test set it was measured on, its size and the uncertainty of the result.
 
-    Common mistake: Claiming a prompt is better without measuring it.'
+    Example: In the lab, a prompt chosen on 20 development messages is reported once on 20 held-out messages. A JSON reply that
+    passes the schema is still compared with the email. A judge verdict counts only when it survives swapping the answers.
+
+
+    Ask: What is the single most important habit from this week?
+
+
+    Answer: Compare prompts on the same labelled examples with fixed settings, and read the errors.
+
+
+    Watch out: Do not carry a prompt to a new model without re-running the evaluation.'
 - type: resources
   items:
   - kind: doc
-    label: 'OpenAI: Prompt engineering guide'
-    note: Official guidance including reasoning models
+    label: 'OpenAI: Prompt guide'
+    note: Guidance
     url: https://developers.openai.com/api/docs/guides/prompt-engineering
   - kind: doc
-    label: 'Google Gemini API: Prompt design strategies'
-    note: Official guide with examples
+    label: 'Gemini: Prompt guide'
+    note: Examples
     url: https://ai.google.dev/gemini-api/docs/prompting-strategies
   - kind: course
-    label: 'Anthropic: Interactive prompt engineering tutorial'
-    note: 9 chapters of notebooks
+    label: 'Anthropic: Prompt tutorial'
+    note: Exercises
     url: https://github.com/anthropics/prompt-eng-interactive-tutorial
   - kind: doc
-    label: 'Anthropic: Effective context engineering for AI agents'
-    note: From prompts to context
-    url: https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents
-  - kind: doc
-    label: 'OpenAI: Evaluation best practices'
-    note: Building eval sets and loops
+    label: 'OpenAI: Evaluation guide'
+    note: Test design
     url: https://developers.openai.com/api/docs/guides/evaluation-best-practices
-  - kind: doc
-    label: 'Google Gemini API: Structured output'
-    note: Schemas; values still need validation
-    url: https://ai.google.dev/gemini-api/docs/structured-output
   - kind: paper
-    label: Wei et al. (2022) Chain-of-Thought Prompting
-    note: The CoT paper
-    url: https://arxiv.org/abs/2201.11903
-  - kind: paper
-    label: Zheng et al. (2023) Judging LLM-as-a-Judge
-    note: Judge agreement and biases
+    label: 'Zheng: LLM judges (2023)'
+    note: Biases
     url: https://arxiv.org/abs/2306.05685
-  notes: 'Say: The three vendor guides from OpenAI, Google and Anthropic are the most authoritative, current references for
-    prompting; students should read at least one in full. Anthropic''s interactive tutorial is a hands-on course in notebooks.
-    The context engineering article extends prompting to agents. OpenAI''s evaluation guide describes the evaluation loop we
-    used. The chain-of-thought and LLM-as-a-judge papers are the key research references. Ozdemir''s Quick Start Guide, from
-    the descriptor reading list, also has good chapters on prompting. All links were last checked on 9 October 2026.
+  - kind: video
+    label: 'Karpathy: How I use LLMs'
+    note: Practice
+    url: https://www.youtube.com/watch?v=EWvNQjAaOHw
+  notes: 'In short: Use the official guides for current practice and the papers for the evidence behind each technique.
 
 
-    Ask: Which guide would you read in full first?
+    Explain: Provider guides describe recommended prompt structure for their models. The Anthropic tutorial offers interactive
+    notebooks. Context-engineering articles extend prompting to agents and tools. Evaluation guides explain how to build test
+    sets. Papers such as Wei et al. (2022) report the original experiments.
 
-    Answer: The guide for the model provider you plan to use in your project.
 
-    Common mistake: Copying prompt tricks without testing them on your own task.'
+    Example: Start with the Google or OpenAI prompting guide and rewrite the warm-up prompt using its checklist. Then read the
+    evaluation best-practices guide and design 30 test cases for your project. Finally, skim the chain-of-thought paper''s results
+    tables to see which tasks improved.
+
+
+    Ask: Why prefer an official guide over a viral list of prompt tricks?
+
+
+    Answer: Official guides are maintained for current models and explain their advice; viral tricks may be outdated or untested.
+
+
+    Watch out: Guides change as models change, so note the date you read them.'

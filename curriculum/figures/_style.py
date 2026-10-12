@@ -21,6 +21,8 @@ SERIES = [PRIMARY, ACCENT, TEAL, "#A21CAF", "#CA8A04", "#0369A1"]
 # Match tools/technical_diagrams.js. Role labels supplement colour.
 ROLE_COLORS = {"data": "#0072B2", "model": "#009E73", "loss": "#D55E00", "output": "#CC79A7", "tool": "#626B73"}
 ROLE_FILLS = {"data": "#E4F2FB", "model": "#E5F7EF", "loss": "#FFF0E6", "output": "#F9EAF4", "tool": "#F2F4F5"}
+ROLE_COLORS["metric"] = ROLE_COLORS["loss"]
+ROLE_FILLS["metric"] = ROLE_FILLS["loss"]
 
 _fonts = {f.name for f in font_manager.fontManager.ttflist}
 FONT = "Calibri" if "Calibri" in _fonts else "DejaVu Sans"
@@ -72,12 +74,15 @@ def arrow(ax, x1, y1, x2, y2, color=MUTED, lw=1.8):
 
 
 def role_box(ax, x, y, w, h, text, role="model", size=18, weight="bold"):
+    used_before = list(getattr(ax, "_roles_used", []))
     box(ax, x, y, w, h, text, fc=ROLE_FILLS[role], ec=ROLE_COLORS[role], size=size, weight=weight,
         radius=0.08 if role in ("data", "loss", "output") else 0)
+    # Loss and checking share a colour; retain the explicitly authored operation role.
+    ax._roles_used = used_before + ([role] if role not in used_before else [])
 
 
 def role_legend(ax, y, width=13, size=16):
-    labels = {"data": "Input data", "model": "Model", "loss": "Loss / update", "output": "Output", "tool": "Human / tool"}
+    labels = {"data": "Input data", "model": "Model", "loss": "Loss / update", "metric": "Measure / check", "output": "Output", "tool": "Human / tool"}
     # List only the roles drawn so far; a key entry with no matching box would only confuse readers.
     # A legend may sit on its own axes under several panels, so collect roles from the whole figure.
     used = {r for a in ax.figure.axes for r in getattr(a, "_roles_used", [])}

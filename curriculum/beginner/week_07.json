@@ -4,333 +4,367 @@
     {
       "term": "Prompt",
       "meaning": "Instructions and context supplied to a model for one request.",
+      "short_meaning": "Input text for one request",
       "check": "Does rewriting a prompt change the model's stored weights?",
-      "answer": "No. A prompt changes the input for one request, not the stored weights."
-    },
-    {
-      "term": "Ground truth",
-      "meaning": "A reference answer used to check a prediction.",
-      "check": "For a labelled ticket, which field supplies the expected team?",
-      "answer": "The label stored with each ticket, such as IT_ACCESS."
+      "answer": "No. It changes the input for one request; the weights stay fixed."
     },
     {
       "term": "Accuracy",
       "meaning": "The fraction of evaluated examples counted as correct.",
-      "check": "If 32 of 40 predictions are correct, what is the accuracy?",
-      "answer": "0.8, or 80%, because 32 ÷ 40 = 0.8."
-    },
-    {
-      "term": "Token",
-      "meaning": "A small piece of text counted by a model.",
-      "check": "Does a long reply usually use more output tokens?",
-      "answer": "Yes. More output text usually means more tokens, time and cost."
+      "short_meaning": "Correct ÷ all scored items",
+      "check": "If 16 of 20 labels are correct, what is the accuracy?",
+      "answer": "0.8, or 80%, because 16 ÷ 20 = 0.8."
     },
     {
       "term": "JSON",
-      "meaning": "A text format with named fields and values, read by code.",
-      "check": "Is valid JSON automatically factually correct?",
-      "answer": "No. Valid JSON only means the format can be read; the values can still be wrong."
+      "meaning": "A structured text format for exchanging fields and values, including objects and lists.",
+      "short_meaning": "Named fields code can read",
+      "check": "Is valid JSON automatically correct?",
+      "answer": "No. Code can read it, but its values can still be wrong."
     }
   ],
   "diagrams": [
     {
       "id": "overview",
       "title": "The prompt evaluation loop",
-      "subtitle": "Follow one labelled student-services ticket through the harness",
+      "subtitle": "Weights fixed",
       "steps": [
         {
-          "title": "Labelled message",
-          "detail": "Input and known correct team",
-          "code": "ticket_ds",
-          "role": "data"
+          "title": "Ticket",
+          "detail": "labelled",
+          "role": "data",
+          "code": "",
+          "code_owner": false
         },
         {
-          "title": "Build prompt",
-          "detail": "Rules, labels and examples",
-          "code": "few_shot",
-          "role": "tool"
+          "title": "Prompt",
+          "detail": "few-shot",
+          "role": "tool",
+          "code": "",
+          "code_owner": false
         },
         {
-          "title": "Generate reply",
-          "detail": "Keep model settings fixed",
+          "title": "Generate",
+          "detail": "fixed weights",
+          "role": "model",
           "code": "llm",
-          "role": "model"
+          "code_owner": true
         },
         {
-          "title": "Parse + score",
-          "detail": "Find label; compare reference",
-          "code": "label_scorer",
-          "role": "loss"
+          "title": "Score",
+          "detail": "vs label",
+          "role": "metric",
+          "code": "",
+          "code_owner": false
         },
         {
-          "title": "Collect measures",
-          "detail": "Scores, tokens and seconds",
+          "title": "Summarise",
+          "detail": "accuracy",
+          "role": "tool",
           "code": "evaluate",
-          "role": "tool"
+          "code_owner": true
         },
         {
-          "title": "Review errors",
-          "detail": "Read wrong and unparsed replies",
-          "code": "errors",
-          "role": "output"
+          "title": "Review",
+          "detail": "errors",
+          "role": "output",
+          "code": "",
+          "code_owner": false
         }
       ],
       "arrows": [
-        "message + reference",
-        "chat messages",
-        "raw reply",
-        "score + note",
-        "results table"
+        "message",
+        "messages",
+        "reply",
+        "score",
+        "summary"
       ],
-      "feedback": "Revise from development errors; keep a fresh final test separate.",
+      "feedback": "Revise",
+      "feedback_from": 5,
       "feedback_to": 1,
       "trace": [
-        "The ticket about an expired Moodle password has the reference label IT_ACCESS.",
-        "A prompt lists the five permitted teams and asks for a single label.",
-        "The scorer searches the returned text for a recognised label.",
-        "One wrong answer among 40 changes accuracy by 2.5 percentage points.",
-        "Inspect both invalid outputs and valid-but-wrong labels before changing the prompt."
+        "The development ticket \"I can't log into Moodle\" has the known label IT_ACCESS.",
+        "few_shot adds the task, the five labels and five worked examples.",
+        "llm returns a short reply with greedy decoding and an eight-token cap.",
+        "label_scorer finds IT_ACCESS and compares it with the known label.",
+        "evaluate reports accuracy, invalid replies and average output tokens for 20 messages."
       ],
-      "explanation": "The harness turns prompt design into a measurable experiment. Each item contains input text and a reference answer. A prompt function converts that item into messages, and llm returns generated text plus its output-token count. The scorer then interprets the reply and compares its label with the reference. The evaluate function stores one row per item and computes summary measures. An invalid reply and a recognised but wrong label are different failure types. Compare prompts on the same items with declared settings so that observed differences have meaning. This is a small development dataset, so repeatedly improving a prompt on these examples can overfit them. Reserve new examples for a final check. The harness stores shortened previews of text and output, so those table cells are useful summaries rather than complete records of every response.",
-      "check_question": "If a prompt improves from 32 to 34 correct answers out of 40, how many examples account for the gain?",
-      "check_answer": "Two examples. That is a five-percentage-point gain, which a small dataset alone may not establish reliably.",
-      "layout": "linear"
+      "explanation": "A labelled message goes into a prompt function, which returns chat messages. The model generates a reply with fixed settings: greedy decoding and a small token cap. A scorer reads the reply, finds a recognised label and compares it with the known answer. The evaluate function repeats this for every development message and summarises accuracy, invalid replies, average output tokens and seconds. Only the prompt changes between runs, so differences come from the prompt. Reading the failed replies explains what the number cannot: a wrong team, an invalid sentence or a genuinely ambiguous message.",
+      "check_question": "Weights change?",
+      "check_answer": "No. Only the prompt changes between runs; the model weights stay fixed.",
+      "layout": "linear",
+      "notes": "In short: The evaluation loop holds the model fixed, changes one prompt, and scores every reply against a known answer.\n\nExplain: A development set is a small labelled collection used while revising prompts. A prompt function turns one message into chat messages. The model generates a short reply with fixed settings. A scorer turns that reply into a number and a note. The harness averages scores and records output tokens.\n\nExample: The ticket \"I can't log into Moodle\" has the label IT_ACCESS. The few-shot prompt adds five worked examples. A reply of \"IT_ACCESS\" scores 1; \"IT ACCESS\" also counts. Across 20 messages, 17 correct gives 85%. A driving-test route is an analogy; one route for every candidate makes scores comparable. Unlike a test route, a prompt can be tuned to fit these particular messages.\n\nAsk: Which part changes between two runs of the loop?\n\nAnswer: Only the prompt function; the model, settings, messages and scorer stay fixed.\n\nWatch out: Reading the wrong replies matters as much as the accuracy number."
     },
     {
       "id": "mechanism",
       "insert_before_title": "Structured outputs: a schema as a contract",
       "title": "JSON extraction with a check",
-      "subtitle": "Validate structure, then check whether the values match the email",
+      "subtitle": "Shape, then facts",
       "steps": [
         {
-          "title": "Source email",
-          "detail": "Known facts to extract",
-          "code": "EMAILS",
-          "role": "data"
+          "title": "Email",
+          "detail": "source",
+          "role": "data",
+          "code": "",
+          "code_owner": false
         },
         {
-          "title": "Schema prompt",
-          "detail": "Fields and allowed categories",
-          "code": "extract_prompt",
-          "role": "tool"
+          "title": "Prompt",
+          "detail": "schema",
+          "role": "tool",
+          "code": "",
+          "code_owner": false
         },
         {
-          "title": "Model response",
-          "detail": "Propose a JSON object",
-          "code": "llm",
-          "role": "model"
+          "title": "Generate",
+          "detail": "JSON",
+          "role": "model",
+          "code": "",
+          "code_owner": false
         },
         {
-          "title": "Parse JSON",
-          "detail": "Decode the response text",
+          "title": "Parse",
+          "detail": "to dict",
+          "role": "tool",
           "code": "try_parse",
-          "role": "model"
+          "code_owner": true
         },
         {
-          "title": "Validate fields",
-          "detail": "Check types and patterns",
+          "title": "Validate",
+          "detail": "rules",
+          "role": "metric",
           "code": "Request",
-          "role": "loss"
+          "code_owner": true
         },
         {
-          "title": "Accept or repair",
-          "detail": "Compare facts; retry once",
-          "code": "parse_with_retry",
-          "role": "output"
+          "title": "Compare",
+          "detail": "gold",
+          "role": "metric",
+          "code": "",
+          "code_owner": false
         }
       ],
       "arrows": [
         "email",
-        "prompt",
-        "raw JSON text",
-        "field values",
-        "object or error"
+        "messages",
+        "text",
+        "dict",
+        "object"
       ],
-      "feedback": "Append a validation error and retry once; validate the retry too.",
-      "feedback_to": 1,
+      "feedback": "Retry once",
+      "feedback_from": 4,
+      "feedback_to": 2,
       "trace": [
         "Aoife's email supplies a name, an eight-digit ID, an extension request and a date.",
         "The prompt asks for those four fields, with null when no date is present.",
-        "Malformed JSON or a seven-digit ID triggers the error-handling branch.",
-        "A corrected response is checked once more; a second failure returns None.",
-        "A valid object is separately compared with gold values to measure correctness."
+        "Malformed JSON or a seven-digit ID triggers the error branch.",
+        "The error message goes back to the model once; a second failure returns None.",
+        "A valid object is then compared field by field with the gold values."
       ],
-      "explanation": "A schema is a contract about output structure. Here the Request model specifies fields, allowed request labels and checks for the ID and date spelling. The try_parse function first finds a JSON object and decodes it, then constructs Request to run those checks. The parse_with_retry function returns immediately when validation succeeds. If parsing or validation fails, it sends the response and error back to the model and tries once more; a second failure returns None. This is a controlled repair path rather than an unlimited loop. Validation is weaker than factual checking: a different eight-digit ID can pass while referring to the wrong student. The date validator checks a YYYY-MM-DD pattern, rather than whether that date exists in the calendar. The lab therefore also compares extracted fields with the labelled reference values.",
-      "check_question": "Would the wrong student ID pass validation if it still contained eight digits?",
-      "check_answer": "Yes. The format check would pass; comparison with the source and reference is needed to detect the wrong value.",
-      "layout": "linear"
+      "explanation": "Structured extraction asks the model for a JSON object with named fields. Parsing turns the reply text into a Python dictionary, and the Request schema checks each field: a name, an eight-digit student ID, one of three request types and an ISO date or null. When parsing or validation fails, the error message goes back to the model once and the retry is checked again. A valid object is not yet a correct one: each field must still be compared with the facts in the source email.",
+      "check_question": "Valid but wrong?",
+      "check_answer": "Yes. A wrong eight-digit ID passes the format check; only comparison with the email reveals it.",
+      "layout": "linear",
+      "notes": "In short: Structured extraction checks the shape of the reply first and the facts second.\n\nExplain: A schema lists required fields, their types and allowed values. Parsing turns JSON text into a Python dictionary. Validation checks each field against the schema rules. A retry sends the error back to the model once. Correctness compares each valid field with the source email.\n\nExample: Aoife's email gives the ID 23145678 and the date 14 March 2027. A reply containing 2314567 fails the eight-digit rule, so the error goes back once. A reply containing 23145687 passes validation but is wrong. A paper form with labelled boxes is an analogy; the boxes force the format, but cannot check what is written in them.\n\nAsk: Can a wrong eight-digit student ID pass validation?\n\nAnswer: Yes. The format rule passes; only comparing with the email reveals the wrong value.\n\nWatch out: Count valid outputs and correct outputs separately, because they measure different things."
     },
     {
       "id": "lab",
-      "title": "Five prompt experiments",
-      "subtitle": "Use a different success check for each task",
+      "title": "Choose on development; report on held-out",
+      "subtitle": "Part 1",
       "steps": [
         {
-          "title": "Route messages",
-          "detail": "Same tickets; varied prompts",
+          "title": "Dev set",
+          "detail": "20 messages",
+          "role": "data",
+          "code": "",
+          "code_owner": false
+        },
+        {
+          "title": "Run prompts",
+          "detail": "4 versions",
+          "role": "model",
           "code": "evaluate",
-          "role": "model"
+          "code_owner": true
         },
         {
-          "title": "Score numbers",
-          "detail": "Answers, steps and most votes",
-          "code": "num_scorer",
-          "role": "loss"
+          "title": "Choose",
+          "detail": "best",
+          "role": "metric",
+          "code": "",
+          "code_owner": false
         },
         {
-          "title": "Extract fields",
-          "detail": "Check format and source facts",
-          "code": "parse_with_retry",
-          "role": "model"
+          "title": "Held-out",
+          "detail": "20 new",
+          "role": "data",
+          "code": "",
+          "code_owner": false
         },
         {
-          "title": "Inspect injection",
-          "detail": "Read heuristic flags and replies",
-          "code": "hijacked",
-          "role": "tool"
+          "title": "Run once",
+          "detail": "chosen",
+          "role": "model",
+          "code": "",
+          "code_owner": false
         },
         {
-          "title": "Swap judge order",
-          "detail": "Require valid A/B choices",
-          "code": "judge",
-          "role": "tool"
-        },
-        {
-          "title": "Report evidence",
-          "detail": "Scores, costs and limitations",
-          "code": "summaries",
-          "role": "output"
+          "title": "Report",
+          "detail": "both scores",
+          "role": "output",
+          "code": "",
+          "code_owner": false
         }
       ],
       "arrows": [
-        "routing results",
-        "number scores",
-        "extraction checks",
-        "flagged reply table",
-        "judge verdicts"
+        "messages",
+        "summaries",
+        null,
+        "messages",
+        "accuracy"
+      ],
+      "branches": [
+        {
+          "from": 2,
+          "to": 4,
+          "label": "chosen prompt",
+          "lane": "bottom"
+        }
       ],
       "trace": [
-        "For ticket routing, score the permitted label rather than the confidence of the prose.",
-        "For arithmetic, extract the final number and compare it with the known answer.",
-        "For extraction, count valid output and correct fields as separate results.",
-        "For hostile documents, inspect the output as well as the keyword detector.",
-        "For judging, swap A and B and inspect invalid verdicts before reporting consistency."
+        "The 40 synthetic tickets split into 20 development and 20 held-out messages, four per team each.",
+        "Zero-shot, one-shot, few-shot and role + few-shot prompts run on the development messages.",
+        "The highest accuracy, with fewer output tokens as the tie-break, selects one prompt.",
+        "Only that prompt runs once on the held-out messages.",
+        "The evidence table reports both accuracies with the model and settings."
       ],
-      "explanation": "The lab reuses model calls but changes the success criterion for each task. Classification checks a team label; arithmetic checks the final numerical answer; extraction checks structure and values separately. Self-consistency samples several responses and selects the most common parsed answer, increasing output-token cost without guaranteeing truth. The injection experiment compares a simple summary prompt with one that explicitly treats document text as data. Its hijacked detector is a keyword heuristic, so a flagged word may appear in a harmless quotation and an attack may succeed without those words. The judge experiment swaps answer order to reveal position effects. Inspect the actual A/B verdicts and report invalid replies separately from agreement. These are separate experiments, and each metric should be read together with concrete output examples and its limitations.",
-      "check_question": "Why inspect examples even after an automatic metric has been calculated?",
-      "check_answer": "Parsers and detectors can miss failures or flag harmless outputs; examples show what the measurement actually counted.",
-      "layout": "linear"
+      "explanation": "Part 1 compares four prompts on 20 development messages, where you may read errors and revise. The best development prompt is then run once on 20 held-out messages that played no part in the choice. The held-out accuracy is the fairer estimate for new messages, because choosing a prompt on the same messages you report tends to overstate its accuracy. With 20 messages, one item moves accuracy by five percentage points, so small differences need cautious wording.",
+      "check_question": "Why held-out?",
+      "check_answer": "The prompt was chosen on the development messages, so their score overstates accuracy on new messages.",
+      "layout": "linear",
+      "notes": "In short: The lab chooses a prompt on development messages and reports it once on held-out messages.\n\nExplain: The 40 synthetic tickets are split into two halves of 20. Four prompts run on the development half. The best accuracy, with fewer tokens as a tie-break, picks the prompt. The chosen prompt then runs once on the held-out half. Both accuracies go into the evidence table.\n\nExample: Suppose few-shot scores 85% on development and 75% on held-out messages. The ten-point drop is two messages out of 20. It suggests part of the development gain fitted those particular messages. Practising on past exam papers and then sitting a new paper is an analogy; only the new paper shows what transfers.\n\nAsk: Why not report the development score as the final result?\n\nAnswer: The prompt was chosen on those messages, so their score overstates accuracy on new messages.\n\nWatch out: Never revise the prompt after reading held-out errors, or that set stops being held out."
     },
     {
       "id": "training",
-      "title": "Improve a prompt using evidence",
-      "subtitle": "This is prompt development: model weights stay fixed",
       "insert_before_title": "The evaluation loop (eval-driven development)",
+      "title": "Improve a prompt using evidence",
+      "subtitle": "Weights fixed",
       "steps": [
         {
-          "title": "Choose development set",
-          "detail": "Inputs with known answers",
-          "code": "ticket_ds",
-          "role": "data"
+          "title": "Dev set",
+          "detail": "labelled",
+          "role": "data",
+          "code": "",
+          "code_owner": false
         },
         {
-          "title": "Write two prompts",
-          "detail": "Hold model and settings fixed",
-          "code": "few_shot",
-          "role": "tool"
+          "title": "Two prompts",
+          "detail": "one change",
+          "role": "tool",
+          "code": "",
+          "code_owner": false
         },
         {
-          "title": "Run both versions",
-          "detail": "Record answers and costs",
+          "title": "Run both",
+          "detail": "same settings",
+          "role": "model",
           "code": "evaluate",
-          "role": "model"
+          "code_owner": true
         },
         {
-          "title": "Inspect differences",
-          "detail": "Wrong labels and parse failures",
-          "code": "errors",
-          "role": "loss"
+          "title": "Compare",
+          "detail": "16 vs 17",
+          "role": "metric",
+          "code": "",
+          "code_owner": false
         },
         {
-          "title": "Use fresh final set",
-          "detail": "No further prompt revisions",
-          "code": "label_scorer",
-          "role": "output"
+          "title": "Read",
+          "detail": "changed items",
+          "role": "output",
+          "code": "",
+          "code_owner": false
         }
       ],
       "arrows": [
-        "labelled examples",
-        "prompt versions",
-        "result tables",
-        "chosen prompt"
+        "messages",
+        "prompts",
+        "summaries",
+        "changes"
       ],
-      "explanation": "Prompt development changes the instructions, rather than the model weights. Begin with examples whose correct answers are known. Write a short prompt and a version with examples, then run both on the same items using the same settings. Accuracy compares the predicted labels with the reference labels; token counts measure part of the cost. Read the cases where the prompts disagree, including replies the parser cannot recognise. Use development examples to revise the prompt. A final check needs fresh examples that were not used for choosing wording. The lab supplies a small development set; adding a separate final set is a project design step, not an extra training stage.",
-      "trace": [
-        "Suppose prompt A gets 32 of 40 labels right and prompt B gets 34.",
-        "Accuracy changes from 80% to 85%; two examples produce the gain.",
-        "Read those two and any newly wrong examples before choosing B.",
-        "Run the selected version on fresh tickets before claiming a reliable improvement."
-      ],
-      "check_question": "Did the 80% to 85% improvement change any stored model weights?",
-      "check_answer": "No. Only the prompt changed; two additional examples were correct.",
-      "feedback": "Revise prompts from development errors; model weights stay fixed.",
+      "feedback": "Revise",
+      "feedback_from": 4,
       "feedback_to": 1,
+      "trace": [
+        "Suppose prompt A gets 16 of 20 development labels right and prompt B gets 17.",
+        "Accuracy changes from 80% to 85%; one message produces the gain.",
+        "Read that message and any newly wrong ones before choosing B.",
+        "Run the chosen prompt once on held-out messages before claiming an improvement."
+      ],
+      "explanation": "Prompt development changes one component at a time, such as the examples or the role, and runs both versions with the same model, messages and settings. Comparing the two summaries shows the net change in accuracy, but reading the items that changed shows why: a revision can fix two messages and break one. Model weights never change in this loop. When a prompt has been chosen, a single run on held-out messages checks whether the gain transfers.",
+      "check_question": "Weights change?",
+      "check_answer": "No. Only the prompt changed; one more message was answered correctly.",
       "layout": "linear",
-      "feedback_from": 3
+      "notes": "In short: Prompt development compares two prompt versions on the same development messages, then reads the items that changed.\n\nExplain: Prompts A and B differ in one component only. Both run with the same model, messages and settings. The comparison shows which messages changed from wrong to right, and back. A held-out set gives one final check after choosing. Model weights never change in this loop.\n\nExample: Prompt A gets 16 of 20 development labels right; prompt B gets 17. Accuracy rises from 80% to 85%, which is one message. Suppose B fixes two messages but breaks one: the net gain is still one. Editing an essay against a fixed marking guide is an analogy; you change the text, not the marker.\n\nAsk: Did the rise from 80% to 85% change any model weights?\n\nAnswer: No. Only the prompt changed; one more message was answered correctly.\n\nWatch out: A one-message gain on 20 examples is weak evidence; confirm it on held-out messages."
     },
     {
       "id": "inference",
-      "title": "Route one new message",
-      "subtitle": "Inference uses the selected prompt to make a prediction",
       "insert_before_title": "Prompting for different tasks",
+      "title": "Route one new message",
+      "subtitle": "Chosen prompt",
       "steps": [
         {
-          "title": "New message",
-          "detail": "Read one student request",
-          "code": "ticket_ds",
-          "role": "data"
+          "title": "Message",
+          "detail": "new",
+          "role": "data",
+          "code": "",
+          "code_owner": false
         },
         {
-          "title": "Add routing rules",
-          "detail": "Allowed teams and examples",
-          "code": "few_shot",
-          "role": "tool"
+          "title": "Prompt",
+          "detail": "chosen",
+          "role": "tool",
+          "code": "",
+          "code_owner": false
         },
         {
-          "title": "Call fixed model",
-          "detail": "Generate a candidate reply",
-          "code": "llm",
-          "role": "model"
+          "title": "Generate",
+          "detail": "≤ 8 tokens",
+          "role": "model",
+          "code": "",
+          "code_owner": false
         },
         {
-          "title": "Parse candidate",
-          "detail": "Find one recognised team",
+          "title": "Parse",
+          "detail": "one label",
+          "role": "metric",
           "code": "label_scorer",
-          "role": "model"
+          "code_owner": true
         },
         {
-          "title": "Check decision",
-          "detail": "Review ambiguity and failure",
-          "code": "errors",
-          "role": "output"
+          "title": "Route",
+          "detail": "IT_ACCESS",
+          "role": "output",
+          "code": "",
+          "code_owner": false
         }
       ],
       "arrows": [
-        "request text",
-        "chat messages",
-        "raw reply",
-        "label or parse failure"
+        "text",
+        "messages",
+        "reply",
+        "label"
       ],
-      "explanation": "Inference means using a trained model to make a prediction. A new message is placed into the chosen routing prompt, along with the allowed team labels and any worked examples. The model returns text, so the application must interpret it before using it. In the lab, label_scorer looks for a recognised label and compares it with a reference during evaluation. A real new request does not usually have a reference answer available. The application therefore needs a policy for unrecognised or ambiguous replies, such as asking for review. The diagram shows the code path used in the evaluation harness; operational routing and review would be added by an application.",
       "trace": [
         "New message: \"I cannot sign in to Moodle.\"",
         "The prompt lists IT_ACCESS and the other permitted teams.",
         "The model replies \"IT_ACCESS\".",
-        "The parser recognises the label; a sentence naming several teams needs inspection."
+        "The scorer recognises exactly one label; a reply naming two teams is counted as invalid."
       ],
-      "check_question": "Can a recognised label still be wrong?",
-      "check_answer": "Yes. A parser checks the form of the reply; it does not establish the correct team.",
-      "layout": "linear"
+      "explanation": "Inference uses the fixed model and the chosen prompt to answer one new message. The prompt lists the five allowed teams with one example each, generation stops after at most eight new tokens, and the scorer accepts a reply only when it names exactly one label. A recognised label is a valid routing decision, but it can still be the wrong team; only comparison with a known label, or human review in a real service, shows whether it is correct.",
+      "check_question": "Valid but wrong?",
+      "check_answer": "Yes. Parsing checks the form; only the known label shows whether the team is correct.",
+      "layout": "linear",
+      "notes": "In short: Inference applies the chosen prompt to one new message and turns the reply into one team label.\n\nExplain: Inference means using fixed weights to answer a new input. The prompt lists the five allowed teams and five examples. Generation stops after at most eight new tokens. The scorer accepts a reply naming exactly one label. A reply naming two teams counts as invalid.\n\nExample: \"I cannot sign in to Moodle\" goes into the few-shot prompt. The model replies \"IT_ACCESS\", which the scorer recognises. A reply of \"IT_ACCESS or LIBRARY\" would be invalid. A postal sorting machine is an analogy; it reads a code and picks one bin. Unlike the machine, the model can pick a valid but wrong bin.\n\nAsk: Can a recognised label still be wrong?\n\nAnswer: Yes. Parsing checks the form; only the known label shows whether the team is correct.\n\nWatch out: Never count a reply as correct because the right team appears among several named teams."
     }
   ],
   "glossary": [
@@ -357,6 +391,14 @@
     {
       "term": "Position bias",
       "meaning": "A judge's preference for an answer's placement rather than its quality."
+    },
+    {
+      "term": "Ground truth",
+      "meaning": "A reference answer or observation used to check a model output."
+    },
+    {
+      "term": "Token",
+      "meaning": "A unit processed or generated by a model; a text token can be a word, word part or character."
     }
   ],
   "pitfalls": [
@@ -368,7 +410,7 @@
     {
       "symbol": "evaluate",
       "role": "Runs a prompt against every selected example and collects scores.",
-      "inspect": "Check the number of items, fixed settings, score definition and preview truncation."
+      "inspect": "Check the number of items, fixed settings, score definition and the invalid count."
     },
     {
       "symbol": "label_scorer",
@@ -400,40 +442,42 @@
     "title": "What we learned: prompts and evidence",
     "cards": [
       {
-        "title": "Change the request",
-        "text": "Prompts guide replies while the learned model weights stay fixed.",
+        "title": "Prompts",
+        "text": "Weights fixed",
         "role": "data"
       },
       {
-        "title": "Write a clear brief",
-        "text": "Rules, sources, examples, task and format make expectations explicit.",
+        "title": "Briefs",
+        "text": "Clear parts",
         "role": "tool"
       },
       {
-        "title": "Reason and chain",
-        "text": "Check intermediate outputs; extra calls and tokens must earn their cost.",
+        "title": "Reasoning",
+        "text": "Costs tokens",
         "role": "model"
       },
       {
-        "title": "Validate the result",
-        "text": "Check JSON fields and constraints, then compare values with sources.",
-        "role": "loss"
+        "title": "Schemas",
+        "text": "Shape only",
+        "role": "metric"
       },
       {
-        "title": "Evaluate fairly",
-        "text": "Use realistic cases, references, rubrics, fresh tests and error review.",
+        "title": "Evaluation",
+        "text": "Held-out test",
         "role": "output"
       },
       {
-        "title": "Protect the application",
-        "text": "Treat source commands as untrusted; enforce tool permissions in code.",
+        "title": "Security",
+        "text": "Code permissions",
         "role": "tool"
       }
     ],
-    "example": "40 messages: one changed answer moves accuracy by 2.5 points; a valid ID can still be the wrong ID.",
-    "question": "What proves that a prompt revision helped?",
-    "answer": "A fair comparison on the same development cases, followed by a fresh final check; report costs and errors.",
-    "next": "In Week 8 we train small adapters when the best prompt leaves persistent gaps.",
-    "notes": "Say: Rebuild the loop: define success, write the brief, run the fixed model, validate, score and inspect errors. Analogy: a task brief and marking guide work together. Ask students to distinguish a wrong label from an unparsed reply, and a valid JSON object from correct extracted facts. Common mistake: generated steps or judge agreement are not independent proof. Explain why order-swapped judge choices must both be valid, and why keyword injection flags need inspection. Keep a fresh final set. Small score changes are uncertain; extra calls cost time and tokens. Enforce permissions in application code and document the tested model and settings."
-  }
+    "example": "Illustration: 17 of 20 is 85%.",
+    "question": "Valid JSON proves facts?",
+    "answer": "No; compare with the source.",
+    "next": "Next: fine-tuning.",
+    "notes": "In short: Prompting changes the input, not the model, so every claimed improvement needs a fair, measured comparison.\n\nExplain: A clear brief states rules, sources, examples, task and format. Step-by-step prompts can help multi-step problems but cost tokens. A schema checks structure; a gold comparison checks facts. Held-out messages give the fairer final estimate. Injected instructions are untrusted data, so permissions belong in code.\n\nExample: On 20 messages, one changed answer moves accuracy by five percentage points. A JSON reply with a well-formed but wrong ID still passes the schema. A judge that picks A in both orders is following position, not quality.\n\nAsk: What evidence would convince you that a prompt revision helped?\n\nAnswer: A gain on the same development messages, confirmed once on held-out messages, with costs and errors reported.\n\nWatch out: Do not mix the stored GPU results with your own CPU run without naming the model and settings."
+  },
+  "vocabulary_count": 3,
+  "vocabulary_notes": "In short: Prompts, accuracy and JSON are the three ideas needed to read every table in today's lab.\n\nExplain: A prompt is the input text for one request. Changing it changes the request, not the stored weights. Accuracy is correct items divided by all scored items. JSON is a text format with named fields that code can read. Valid JSON can still contain wrong values.\n\nExample: Suppose a prompt routes 16 of 20 development messages correctly. Its accuracy is 16 ÷ 20 = 0.8, or 80%. One more correct message gives 85%, so one item moves the score by five percentage points. A JSON reply such as {\"student_id\": \"23145678\"} parses correctly even when the email gave a different number.\n\nAsk: If 17 of 20 messages are correct, what is the accuracy?\n\nAnswer: 85%, because 17 ÷ 20 = 0.85.\n\nWatch out: On a small development set every single item counts, so do not over-read a five-point change."
 }

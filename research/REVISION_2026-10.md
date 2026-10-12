@@ -1,6 +1,6 @@
 # October 2026 beginner teaching-pack revision
 
-Status on 10 October 2026: ready for review. The audit has no open rows. Every check in the evidence table below was run on the final build of 10 October, except the full lab runs of 9 October, whose code has not changed since (see that row). The report states what each check covers and what was not checked.
+Status on 10 October 2026: ready for review after an independent follow-up. The audit has no open rows. The original revision evidence is retained separately from the follow-up checks below. Weeks 1, 6 and 11 were run again in full after their optional hosted-call code changed; other current labs match the executable code of their successful 9 October full runs. Verification limits remain explicit.
 
 ## What students now receive
 
@@ -49,7 +49,9 @@ A second pass looked at every rendered slide and Word page of all twelve weeks a
 
 New automatic checks catch these defects if they come back: `audit_prose.py` (REPEAT, LABEL, QUIZ, TAG, ARROW, APPROX, HYPHEN and others), `audit_flat_bullets.py`, `audit_inline_math.py` (now including spelled-out Greek letters before a superscript, such as "sigma²"), `audit_figure_text.py` and `lint_figures.py`. `research/REVIEW_PROCESS.md` describes how to repeat the review.
 
-## Evidence (final build, 10 October 2026)
+## Initial revision evidence (10 October checkpoint)
+
+This table preserves the first completed revision's recorded evidence. Counts and statements about unchanged code describe that checkpoint. The independent follow-up rebuilt and rendered the pack again, added two references, changed three optional hosted-call gates and repeated their full runs; its current evidence is in the next section.
 
 | Check | Observed evidence |
 |---|---|
@@ -70,6 +72,36 @@ New automatic checks catch these defects if they come back: `audit_prose.py` (RE
 
 No failed or interrupted run is counted as a pass.
 
+## Independent follow-up (10 October)
+
+The follow-up found further teaching and evidence issues despite the earlier passing checks. It corrected the sources and rebuilt all twelve weeks rather than editing generated deliverables. [The audit](AUDIT_2026-10.md#independent-follow-up-10-october) records each finding and closure evidence.
+
+- **Instructor explanations:** added 34 explicitly labelled answers to class questions in Weeks 1–4 and 6–8, and made top-p's correct definition distinct from its common misconception. Added an ANSWER prose-audit rule.
+- **Mechanisms and examples:** clarified VAE reconstruction/KL costs and negative ELBO; specified the lack of a tractable explicit GAN likelihood; corrected SD-Turbo negative-prompt guidance; labelled the attention recap as an unmasked word-token example; kept schema repair separate from factual checking.
+- **Evaluation diagrams:** separated the “Measure / check” legend from “Loss / update” in 20 evaluation-only steps across Weeks 6–12. Training objectives retain their original label. Slides, Word and notebook images rebuild from the same scene, with regression checks for frozen-model lab flows.
+- **Interpreting experiments:** removed unsupported explanations based on zero invalid replies or injection keyword flags; selected prompts on training/development examples before a final test; distinguished forgetting from overfitting, mean CLIP loss from individual scores, and a retrieved document from a chunk containing the needed fact.
+- **Optional hosted calls:** Weeks 1, 6 and 11 now require an explicit default-off switch even when credentials exist. Provider billing and endpoint compatibility are described separately. No live provider request was made during this check.
+- **Reliable evidence:** figure harvesting requires a successful mode-specific full notebook, current ordered code and a complete valid figure set before changing any asset. Ordered Python syntax-tree comparison detects reordered/duplicated cells and preserves string literals. New execution records hash their executed notebook. Twenty-two tests exercise these failure paths and cloud switches using temporary files and stubbed clients. Nine additional offline tests check bounded link retries without treating missing or blocked pages as successful.
+- **Document polish:** removed the stray Week 11 “Method” label and corrected the instructor guide's claim about repeated sampling. Every class retains its final recap infographic and the instructor's exit-question improvement loop.
+- **Rebuild reliability:** Windows file locks interrupted repeated writes to existing generated files. PowerPoint, Word, notebook and Python exports now use complete temporary files and bounded replacement retries. A failed replacement preserves the existing destination; failed build attempts remain in the evidence history.
+
+The reference ledger gained official [Hugging Face Inference Providers pricing](https://huggingface.co/docs/inference-providers/pricing) and [Gemini API pricing](https://ai.google.dev/gemini-api/docs/pricing) pages. Existing VAE and SD-Turbo primary sources supported the mechanism corrections.
+
+| Follow-up check | Actual observed evidence |
+|---|---|
+| Weekly/course build | `build_week.py --weeks 1-12` and `build_course.py` completed on the follow-up sources; every week still has 46 slides and no missing results placeholder. |
+| Lab/helper checks | 8 lab-helper, 24 runtime-helper, 4 beginner-support, 22 evidence/cloud-switch and 10 technical-figure tests passed. |
+| Output writers | Six Python and five Node tests passed: exact notebook/binary bytes, a released Windows mapped reader, bounded sharing-error retries, unchanged assets and preservation/cleanup on failure. |
+| Diagrams/notes | Node technical-diagram and teaching-note tests passed; `verify_beginner.py` passed all twelve packs, including exact shared image bytes in the notebooks/Word/slides. |
+| Text/coverage/protected inputs | Prose, inline maths and flat-bullet audits found zero problems; the slide-text audit found no text below 14 pt. Coverage remains 214/214. All seven protected-artifact checks passed, including 2,633 unchanged protected file hashes. |
+| Smoke execution | All twelve current solution notebooks passed smoke execution during this follow-up. Each successful record's notebook SHA-256 matches the final delivered solution notebook. |
+| Changed executable code | Full local reruns passed: Week 1 CPU 278.5 s; Week 6 CPU 803.0 s; Week 11 GTX 1650 420.4 s. Executed notebook hashes match the records; ordered code comparison matches the delivered notebooks after diagram-only attachment changes. Other full-run code remains unchanged by ordered comparison. |
+| Harvesting | Dry-runs for Weeks 9–12 passed against their full-mode notebooks; no measured source asset was replaced. Older full-run records lack an executed-notebook hash and retain that evidence limitation. |
+| Office/layout review | All twelve weeks were rendered; Weeks 6–12 were rendered again after the evaluation-legend correction, plus the course documents. Final totals: 552 slides, 378 weekly Word pages and 28 course Word pages. All 245 changed/new or additionally reviewed PNGs pass individual review with current hashes; zero unresolved findings. Unchanged images retain their earlier reviewed hashes. All twelve PowerPoint overflow reports are empty. |
+| Links | `check_links.py`: 178/182 URLs reachable, four publisher pages blocked, zero failures. An earlier attempt encountered two temporary GitHub 503 responses; that failure is preserved rather than counted as a pass. Bounded retries retain their attempt history. |
+
+The durable evidence record is [FOLLOWUP_2026-10-10.json](FOLLOWUP_2026-10-10.json). It distinguishes current execution records, new full runs, earlier failed attempts and individually reviewed image hashes. Failed link, Windows-lock build and intermediate schema-verification attempts are preserved; the final 29 recorded checks all passed. The metric-role verifier regression is covered by a test that also rejects unknown roles. The follow-up does **not** claim to have individually re-viewed every unchanged image. Its full-run durations were recorded while other checks were active, so they do not replace the earlier classroom timing benchmarks or stored lesson measurements.
+
 ## Measurement and verification limits
 
 Stored measurements change only when a complete new run replaces them through the results → `fill_results.py` → `fill.json` pipeline. Smoke settings check that the code runs; they do not replace lecture results. Full runs on 9 October reproduced the stored numbers of weeks 7, 9 and 12 exactly, the Week 10 answers and scores, and the Week 8 losses to six decimals. Week 5's notes now quote a full run of the notebook itself (validation loss 1.56) beside the archived experiment (1.51). Week 11's repeat GPU run measured lower throughput than the stored one (23.4 instead of 48.3 tokens/s for a batch of 4), so the stored timings are kept and the notes say that timings depend on hardware and load. Week 2's measured AUC is 0.9995; the redrawn chart prints four decimals (the old saved plot rounded it to 1.000). Week 8's stored counts, accuracies and training times are observations from recorded runs, not promises for a new student run. Week 12's stored answers come from Qwen2.5-1.5B on the GPU, while the CPU route uses the 0.5B model.
@@ -89,3 +121,53 @@ SD-Turbo guidance was checked against its [official licence file](https://huggin
 New diagrams are authored code/vector scenes. Historical result graphics retain their measured data; wrappers and legends improve readability without inventing observations. No generated bitmap artwork substitutes for technical evidence. Starting-state snapshots and protected hashes are under `build/revision_before_20261008/`; only Weeks 1–4 had fresh baseline renders before the initial Office failure at Week 5. The gallery labels other starting images as saved snapshots.
 
 No commit, push or publication was performed.
+
+## Iteration 3 — completed 12 October 2026
+
+The existing Claude sources and measured archives were continued rather than recreated. The week order, MSc outcomes and assessment are preserved; Section 7.3 coverage is100%. Modern lecture notes, beginner reference explanations, examples, FAQs, answered checks and CPU notebook practice now cover every week. The shared glossary contains 142 terms (19 merged additions); 37 named teaching references were merged. Official/vendor facts have dated checks in `weeks/platform_2026.md` and the weekly research notes (10–11 October 2026).
+
+| Week | Changes | New or corrected diagrams | Sources used |
+|---|---|---|---|
+| 01 | Readiness, corrected probability/NLL trace, API choice and stronger checks | Count→probability→sample; independent classifier/text routes | Karpathy makemore; Google MLCC; Transformers generation |
+| 02 | VAE equations retained with shape/numeric traces and diagnostic checks | Encoder→μ/σ→sample→decoder; β training/inference | VAE paper; PyTorch distributions; Hugging Face |
+| 03 | CPU GAN training retained; loss/diversity/failure interpretation and checks | Separate discriminator/generator updates; noise→samples | GAN paper; MIT deep generative modelling video |
+| 04 | Real CPU point diffusion, archived image experiments, numerical guidance | Noising/denoising; nested U-Net skips; DiT/latent scheduler | DDPM/DDIM/latent diffusion/flow matching papers; Diffusers |
+| 05 | Transformer symbols/shapes, token dependencies and hidden quiz answers | Q/K/V attention; two residual paths; next-token sampling | Attention paper; Hugging Face LLM course |
+| 06 | Model families, SFT/preferences, archive/core scope and guarded provider examples | Reasoning checks; pre-training→SFT→preference; frozen scoring | Hugging Face model cards; Chinchilla; official provider docs |
+| 07 | Held-out prompt evaluation, evidence limits, free local path and scale-qualified comparison | Prompt→response→parse→compare; instruction boundary | Self-consistency/LLM-judge papers; Google/OpenAI/Microsoft docs |
+| 08 | Real bounded CPU LoRA retained; all equation symbols and archive rank clarified | Full tuning vs LoRA; x/Wx/scaledB(Ax); train/validate/save | LoRA/QLoRA papers; TRL SFT; inventor video |
+| 09 | CLIP symmetric loss, shuffled-baseline meaning, current CPU and outcomes clarified | Independent image/text encoders; shared embedding comparison | CLIP/SigLIP papers; model cards; Stanford multimodal video |
+| 10 | Small CPU VLM, real image/score/arithmetic/WER checks; separate media archives | Image→answer→score; metadata and modality task map | SmolVLM publisher card; CLIP/Whisper/MMS/SD-Turbo docs |
+| 11 | CPU endpoint/streaming, EOS/timing scope, archived benchmarks and readable cost example | Client→validation/cache→model→text→monitor; quantisation | FastAPI/Pydantic docs; SmolLM2; Transformers streamer |
+| 12 | Passage recall/citation limits, real local RAG, safe bounded tools and disclosed fallback | Independent retrieval→fusion; permission→act→observe loop | MiniLM card; HF Agents course; MCP/Google ADK/Microsoft docs |
+
+Shared changes: strict six-label 110–180 word notes, informative visual layouts, predict-then-reveal checks, owned code labels, role legends and matching editable scenes/PNG/SVG/Word/notebook attachments. Labs have one CPU setup, pinned installation, Markdown guidance, checked TODOs, widgets and solutions separation. Optional Gemini/OpenAI access defaults off, shares a 40-attempt ceiling/cache/retries and always retains a free local completion route. No private key was read or embedded. Developer `.py` exports are under build/, never in the student pack.
+
+| Week | Full CPU core seconds | Minutes | Final smoke |
+|---|---|---|---|
+| 01 | 44.6 | 0.7 | PASS |
+| 02 | 23.8 | 0.4 | PASS |
+| 03 | 279.3 | 4.7 | PASS |
+| 04 | 39.4 | 0.7 | PASS |
+| 05 | 248.7 | 4.1 | PASS |
+| 06 | 33.0 | 0.6 | PASS |
+| 07 | 439.0 | 7.3 | PASS |
+| 08 | 797.3 | 13.3 | PASS |
+| 09 | 180.8 | 3.0 | PASS |
+| 10 | 175.4 | 2.9 | PASS |
+| 11 | 39.5 | 0.7 | PASS |
+| 12 | 114.0 | 1.9 | PASS |
+
+These are four-thread cached local CPU cores, not clean installs or Colab timings. Every core is below 900 seconds; Week 8 still performs real LoRA training. Installation, downloads, interactive cells, hosted calls and optional stretches are excluded. Stored larger/GPU results remain labelled and separate; new results reach teaching text only through measured JSON→fill_results→fill.json placeholders. Full-run hashes and environments remain in the run ledger. All 12 current executable cores match their successful full runs; later changes were prose/diagram-only, so full runs were not repeated without a code change.
+
+All 26 final release checks passed on 12 October (Python/Node writer logs retained separately), including coverage 100%, strict notes, semantic/adversarial helpers, shared geometry/attachments, body ≤ 40, fonts ≥ 14, links and ordered code provenance. The final all 12 smoke pass is retained separately from full evidence. All-week/course builds and serial Office renders completed; final review covers 552 slides, 402 weekly Word pages, 103 diagrams, 130 notebook images and 50 course Word pages. Every current layout report is []; zero open material findings. Changed images were viewed; byte-identical previously viewed images retain their view evidence.
+
+The durable current manifest is `ITERATION3_2026-10-12.json`; actual visual reports are linked there. Findings are copied to the Iteration 3 section of `AUDIT_2026-10.md`. Earlier failed/intermediate checks remain under build/first_final_release_gates and the dated week logs; they are not counted as passes. Pilot before/after review remains at `build/review_week01/index.md`. No commit or push.
+
+Not verified:
+
+- No timed Google Colab run or clean installation/download measurement.
+- No live Gemini/OpenAI call; private .env was not read. Provider tests use stubs.
+- No browser widget interaction, public Gradio/Docker deployment or optional GPU/stretch timing.
+- Four publisher links block automated checking (205/209 reachable; zero failures).
+- Student understanding and classroom effectiveness still need teaching feedback.

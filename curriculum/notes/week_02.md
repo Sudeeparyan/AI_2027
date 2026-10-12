@@ -19,6 +19,25 @@ This week introduces the first deep generative model family of the module. Stude
 
 # Lecture notes
 
+## Which experiment does each result describe?
+
+The measured lecture images and placeholders remain attached to their archived generator,
+`curriculum/assets/make_week_02.py`, rather than to the shorter core notebook. The generator
+uses CPU execution, full MNIST training data, initial PyTorch/NumPy seed 0, hidden width 400,
+batch size 128 and Adam learning rate 0.001. Its two-dimensional VAE, ordinary autoencoder
+and sixteen-dimensional VAE each train for 10 epochs. The three $\beta$ models use sixteen
+latent dimensions and 5 epochs each. The anomaly demonstration uses 2,000 test digits and
+2,000 clothing images, with one sampled encoder code per image. The stored metrics describe
+those exact experiments. No checkpoint identifier or asset run date is recorded in those files.
+
+The notebook's CPU core uses hidden width 128, a 12,000-image training subset and 3 epochs
+for each of the two VAE models. It uses the shared seed 42 and deterministic mean-code
+reconstruction for anomaly scoring. These settings and the score convention differ from the
+archive, so the core's costs, images and AUC differ too. On the course laptop ({{W02_CORE_THREADS}} CPU threads,
+MNIST already downloaded) the complete core took {{W02_CORE_TIME}} of waiting, recorded on
+{{W02_CORE_DATE}}. A first Colab run also downloads MNIST, and other machines differ.
+
+
 ## Begin with two different routes
 
 Show one digit. The reconstruction route is image → encoder mean/spread → sampled code → decoder. Then hide the digit: generation is prior code → decoder. Ask students to draw both routes before introducing q, p, $\theta$ or $\phi$.
@@ -177,11 +196,11 @@ A score-function estimator such as REINFORCE is another option, but typically ha
 
 ### A complete PyTorch model
 
-This is the lab's completed model and loss (the lab leaves TODOs in `encode`, `reparameterise` and `vae_loss`).
+This is the core lab's completed model and loss (the lab leaves TODOs in `encode`, `reparameterise` and `vae_loss`).
 
 ```python
 class VAE(nn.Module):
-    def __init__(self, zdim=2, hidden=400):
+    def __init__(self, zdim=2, hidden=128):
         super().__init__()
         self.zdim = zdim
         self.enc = nn.Sequential(nn.Flatten(), nn.Linear(784, hidden), nn.ReLU())
@@ -223,7 +242,7 @@ def vae_loss(logits, x, mu, logvar, beta=1.0):
 
 ### Training practice
 
-* Adam with learning rate 10⁻³, batch size 128 and 10 epochs. The model is small enough for a laptop CPU; a GPU is faster. Time one epoch before planning longer runs.
+* The archived lecture experiment uses Adam at 10⁻³, batch size 128 and 10 epochs. The shorter core keeps the optimiser and batch size, uses hidden width 128 and a bounded subset, and trains for 3 epochs. The whole core took {{W02_CORE_TIME}} on the course laptop's CPU.
 * **Always log reconstruction and KL separately.** Initial KL depends on the network initialisation. It can rise as codes carry more image information; a rising KL alone does not mean training has failed.
 * **Posterior collapse:** the KL falls to (almost) zero and the decoder ignores $z$. It is common when the decoder is powerful (e.g. autoregressive). Remedies: **KL warm-up** (increase β from 0 to 1 over the first epochs), **free bits** (no penalty below a minimum KL per dimension), or a less powerful decoder.
 
@@ -320,7 +339,9 @@ In our demonstration, a VAE trained only on digits separated unseen digits from 
 
 # Lab guide and answers
 
-**Runtime:** Colab or a laptop CPU. The complete solution notebook ran in about 9 minutes on the laptop CPU used to check this pack (9 October 2026); a GPU is faster. Ask students to record their own timings. MNIST and Fashion-MNIST download through torchvision. **Hand-in:** completed TODOs, figures, the β table and four written answers.
+**Core route:** Colab or local CPU, using the shared setup and explicit bounded training settings. The complete core took {{W02_CORE_TIME}} on the course laptop's CPU; record your own time and settings. Longer $\beta$ and conditional-model comparisons are opt-in stretches. MNIST and Fashion-MNIST download through torchvision. **Hand-in:** five completed TODOs, checks, typical images and failures, a cost table, and five self-check answers.
+
+**Optional explanation:** the synthetic arithmetic comparison with $\beta$ can use exactly one `USE_GEMINI` or `USE_OPENAI` switch in shared setup; both are false by default. Keys come from Colab Secrets, the environment or an explicitly selected private `.env`, never the notebook. OpenAI API charges are separate from ChatGPT subscriptions. Check provider eligibility and data-use terms before opting in; the complete local explanation requires no key or API spending.
 
 ## TODOs and expected results
 
@@ -328,9 +349,9 @@ In our demonstration, a VAE trained only on digits separated unseen digits from 
 * **TODO 2** `std = torch.exp(0.5 * logvar); return mu + std * torch.randn_like(std)`.
 * **TODO 3** BCE with logits summed over pixels; KL `-0.5 * sum(1 + logvar - mu**2 - exp(logvar))`; divide by batch size.
 * **Question 1:** if initial pixel predictions are near 0.5, reconstruction cost is approximately 784 × ln 2 ≈ 543. If μ ≈ 0 and σ ≈ 1, KL is near zero. Check actual initial predictions; these conditions depend on initialisation.
-* **Training (2-D model, 10 epochs):** reconstruction falls to about {{W02_REC2}} nats per image; the KL dips after the first epoch, then rises slowly to {{W02_KL2}} nats at epoch 10 (measured with the lecture model). Your values will differ a little.
-* **Part 3:** the scatter shows class clusters packed around the origin; the grid decodes to a smooth map of digits. **TODO 4** `(1 - ts) * z1 + ts * z2`. Latent interpolation may change strokes more coherently; inspect the actual intermediate digits and compare with pixel blending.
-* **Part 4 (β):** expect the pattern in the table above; exact values vary with seeds and epochs.
+* **Archived 2-D model, 10 epochs:** reconstruction falls to about {{W02_REC2}} nats per image; the KL dips after the first epoch, then rises slowly to {{W02_KL2}} nats at epoch 10. The bounded three-epoch core uses different settings; record its own costs and images.
+* **Part 3:** the archived lecture scatter and grid illustrate one trained model. Inspect your core model's clusters, gaps, malformed samples and ambiguous transitions rather than assuming the same quality. **TODO 4** `(1 - ts) * z1 + ts * z2`. Latent interpolation may change strokes more coherently; inspect the actual intermediate digits and compare with pixel blending.
+* **Part 4 (β):** the archived trained models show the measured table above. The current core reweights fixed outputs without retraining; its slider cannot establish new sample-quality effects. The optional trained comparison can vary with seeds and epochs.
 * **TODO 5** per-image BCE: `F.binary_cross_entropy_with_logits(logits, x.view(-1, 784), reduction="none").sum(dim=1)`. The saved digit-versus-clothing experiment had ROC AUC {{W02_AUC}} (the lab prints four decimals so it is not shown as 1.000); record your measured result and do not generalise it to realistic defects.
 * **Extension (CVAE):** each row should show the requested digit in varied styles.
 
@@ -338,7 +359,7 @@ In our demonstration, a VAE trained only on digits separated unseen digits from 
 
 * *Samples all look like the same blurry blob:* the BCE was averaged instead of summed, so the KL dominates.
 * *NaN loss:* usually `logvar` exploding; lower the learning rate or clamp `logvar` to [−10, 10].
-* *Very slow on CPU:* reduce epochs to 3 for the β study; inspect whether the observed pattern changes with shorter training.
+* *Unexpected CPU waiting:* check that the core subset and three-epoch settings are in use, and that the optional stretch remains disabled. Measure again after changing one setting.
 
 # Practice questions with model answers
 
@@ -459,13 +480,13 @@ A prior is a chosen distribution for codes. The VAE learns to reconstruct while 
 
 - $\theta$ names the decoder weights and $\phi$ the encoder weights. Both learn together.
 
-**Prior.** Draw code z from N(0, I), a Gaussian centred at zero
+**Image route.** Supply image x, flatten to [B,784], encode its mean and log-variance, then draw a code from q(z|x).
 
-**Decoder.** Predict pixel probabilities from the code z
+**Prior route.** Draw a code from N(0, I) without an input image.
 
-**Data.** Observe image x, such as a handwritten digit
+**Shared decoder.** Both routes send z [B,d] to the same decoder, which predicts p(x|z). The lab displays pixel probabilities; it does not sample independent binary pixels.
 
-**Encoder.** Estimate which codes could explain image x
+**Inspection.** Compare reconstructions and fresh prior samples separately. A good reconstruction does not establish good prior generation.
 
 ## Slide 14: Why we cannot maximise the likelihood directly
 
@@ -487,15 +508,15 @@ A prior is a chosen distribution for codes. The VAE learns to reconstruct while 
 
 The loss balances image detail with useful random codes. $\beta$ sets the KL weight.
 
-**Reconstruction term.** 
+**Reconstruction cost (negative reconstruction term).**
 
 - Keep enough image information in the code
 
-- Reward accurate reconstructions
+- Penalise inaccurate reconstructions
 
 - Use pixel cross-entropy or squared error
 
-**KL term.** 
+**KL cost.**
 
 - Keep each code distribution close to N(0, I)
 
@@ -535,7 +556,7 @@ The loss balances image detail with useful random codes. $\beta$ sets the KL wei
 
 - Reconstruction gradients can train both encoder branches. Draw fresh noise for later examples.
 
-## Slide 24: A complete VAE in PyTorch
+## Slide 24: Trace a VAE forward pass in PyTorch
 
 - The encoder predicts `mu` and `logvar`, meaning mean and log variance.
 
@@ -611,6 +632,8 @@ The loss balances image detail with useful random codes. $\beta$ sets the KL wei
 
 - Its autoencoder also uses visual and adversarial losses to help preserve detail. It differs from our simple digit VAE.
 
+**Prompt conditioning.** A text encoder produces conditioning for the denoiser. Its independent branch does not provide the random image noise.
+
 **Random latent.** Start from 64 × 64 × 4 random noise values
 
 **Diffusion model.** Remove the noise step by step, guided by the text prompt (week 4)
@@ -641,19 +664,19 @@ The loss balances image detail with useful random codes. $\beta$ sets the KL wei
 
 ## Slide 38: Lab 2: implement and explore a VAE in PyTorch
 
-Google Colab or a local CPU; timings vary with hardware
+Google Colab or a local CPU; the core took {{W02_CORE_TIME}} on the course laptop, separately from the archived lecture experiment
 
-Notebook with completed TODOs, figures, the β comparison table and four written answers
+Notebook with five completed TODOs, checks, figures, a cost table and five self-check answers
 
 - Load MNIST digit images. Implement the encoder, code sampling and decoder.
 
 - Implement reconstruction cost plus $\beta$ times KL, the usual VAE objective; a literal ELBO requires an appropriate decoder likelihood.
 
-- Train for 10 epochs and plot reconstruction and KL costs separately.
+- The current core trains the bounded models for 3 epochs and plots reconstruction and KL separately. The lecture's archived model used 10 epochs.
 
 - Plot 2-D codes. Decode a grid and points between two digit codes.
 
-- Train with $\beta$ = 0.1, 1 and 4. Compare fixed-code samples and measured losses.
+- In the core, change $\beta$ for fixed outputs and explain the arithmetic. Separate retraining at $\beta$ = 0.1, 1 and 4 is an explicit optional stretch; archived measured comparisons remain in the lecture.
 
 - Compare digit and clothing reconstruction errors. Compute ROC AUC. Optional: add a class condition.
 
@@ -679,3 +702,84 @@ Notebook with completed TODOs, figures, the β comparison table and four written
 ## Full implementation from the lecture
 
 The projected slide shows the `encode`, `reparameterise` and `forward` methods. The complete class, including the layers, `decode` and `vae_loss`, is listed in section 3 under "A complete PyTorch model" and matches the lab solution.
+
+
+# Worked checks and frequently asked questions
+
+## A complete shape trace
+
+Take eight grayscale digits. The input shape is [8,1,28,28]: eight examples, one channel,
+28 rows and 28 columns. Flattening gives [8,784], preserving each image's intensities.
+For a two-dimensional code, the encoder returns two tensors [8,2], one for means and one
+for log-variances. Independent noise also has [8,2]. Matching-entry multiplication and
+addition produce sampled codes [8,2]. The decoder returns logits [8,784]. Sigmoid and
+reshaping provide displayed probabilities [8,28,28]. The original image goes directly to
+the reconstruction comparison, while the encoder parameters go directly to KL.
+
+**Predict, then check:** changing latent size from two to sixteen changes [8,2] to [8,16].
+It does not change the image's 784 intensities or the decoder's 784 output logits.
+
+## Centre, spread and one draw
+
+Use an illustrative mean 2, variance 0.25 and noise −1. Log-variance is the natural logarithm
+of 0.25, approximately −1.386. Standard deviation is exp(0.5 × −1.386), approximately 0.5.
+The sampled code is therefore $z=2+0.5\times(-1)=1.5$. A second noise draw changes the code,
+not the encoder's parameters for this image. The Gaussian's KL to the standard prior is
+approximately 2.32 nats. These are worked calculations, not observations from training.
+
+## Two bills, and what a slider can establish
+
+Suppose reconstruction cost is 120 and KL is 3 for fixed model outputs. The weighted total
+is 123 at $\beta$ = 1, and 132 at $\beta$ = 4. Neither reconstruction nor KL changed in this arithmetic
+comparison. A slider that changes $\beta$ for fixed outputs demonstrates the objective's
+weighting, not an improvement in a trained model. Retraining separate models can change
+both costs and images. Keep initialisation, data order and sampled comparison codes controlled,
+then repeat several seeds before claiming a consistent effect.
+
+## FAQ
+
+**Does zero log-variance mean no uncertainty?** No. exp(0) gives variance one. Taking its
+square root gives standard deviation one. A deterministic code would require zero variance,
+which corresponds to log-variance tending towards negative infinity, not zero.
+
+**Why does the loss return three values?** The optimiser needs the combined objective,
+but the teacher and student need reconstruction and KL separately. A smaller total can hide
+one component becoming worse, and totals under different $\beta$ weights are different objectives.
+
+**Is a two-dimensional scatter a picture of every sampled code?** No. This plot uses encoder
+means for held-out images. Their digit labels colour the display and do not enter the ordinary
+VAE's training objective. The plot does not prove that each coordinate has an interpretable meaning.
+
+**Are prior KL and the ELBO gap the same quantity?** No. The objective's KL compares the
+encoder distribution with the chosen prior. The bound's gap compares that encoder distribution
+with the true posterior for the observed image. Confusing these two comparisons reverses the
+meaning of the ELBO identity.
+
+**Can a high clothing-versus-digits AUC establish a reliable defect detector?** No. It evaluates
+an easy dataset shift. Subtle defects may reconstruct well, ordinary cases absent from training
+may score highly, and thresholds need development data. Preserve a separate final test and
+report false alarms at the operating threshold as well as a ranking score.
+
+## Five self-checks with answers
+
+1. **With mean 2, spread 0.5 and noise −1, what is the sampled coordinate?**
+   Answer: 1.5, from centre plus spread times noise.
+2. **What spread does logvar zero represent?**
+   Answer: one, because exp(0.5 × 0) equals one.
+3. **Why add 784 pixel costs before averaging images?**
+   Answer: reconstruction should describe a whole image on a scale compatible with per-image KL.
+4. **Which route draws a new image without a supplied input?**
+   Answer: sample the prior, then run the trained decoder; the encoder is not needed for that route.
+5. **What separates cost reweighting from a trained $\beta$ comparison?**
+   Answer: reweighting leaves outputs fixed. A trained comparison updates weights separately and
+   evaluates both costs and samples under controlled settings.
+
+## Additional implementation and video
+
+- [PyTorch's VAE example](https://github.com/pytorch/examples/blob/main/vae/main.py): locate the encoder
+  heads, sampled-code calculation and pixel/KL reductions.
+- [MIT 6.S191 2026 generative-modeling video](https://www.youtube.com/watch?v=R8V8CbuxryI): pause before
+  the VAE equation and explain the two routes aloud.
+- [Diffusers AutoencoderKL](https://huggingface.co/docs/diffusers/api/models/autoencoderkl): identify the
+  encoding and decoding roles without assuming its defaults describe every VAE.
+

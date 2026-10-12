@@ -1,0 +1,20 @@
+# R1 · Week 03: GANs, feedback and diagnosis
+
+Checked **2026-10-10**. Read: built slide titles and lab headings only. Proposals below are teaching designs, not measured results.
+
+**Explanations to adapt (redraw; do not copy).**
+- A counterfeiter and an inspector improve in response to each other: the [original GAN paper](https://arxiv.org/html/1406.2661v1) uses this teaching analogy. Translate immediately into generator, discriminator and losses. Networks have no intentions; the inspector supplies differentiable scores, not human advice.
+- Freeze a camera position while comparing successive samples: the [PyTorch DCGAN tutorial](https://docs.pytorch.org/tutorials/beginner/dcgan_faces_tutorial.html) uses fixed noise to expose training progress. The camera is an analogy for keeping latent inputs unchanged; it does not keep generator weights unchanged.
+- Mode collapse resembles a shop serving one convincing item while ignoring the rest of its menu. Adapt from the GAN paper's distribution-matching goal: show a multimodal target beside repeated generated points. The analogy concerns missing diversity, not necessarily identical images.
+
+**Five misconceptions to confront.** (1) The generator directly compares its image with a matching real image. (2) The discriminator is required when generating after training. (3) Smaller GAN loss always means better samples. (4) A discriminator score of one-half proves successful learning. (5) A tiny digit-feature proxy is standard FID. Compare quality and coverage as well as loss; one-half also occurs with an ineffective discriminator.
+
+**Current practice and versions.** [NVIDIA's StyleGAN3 repository](https://github.com/NVlabs/stylegan3) implements a **2021** research model: retain it as a historical/application example. Avoid newest-model or market-share claims. [PyTorch's DCGAN tutorial](https://docs.pytorch.org/tutorials/beginner/dcgan_faces_tutorial.html) documents separate optimisers, discriminator-step detaching and fixed-noise monitoring. R0's Colab CPU snapshot is torch `2.11.0+cpu`, ipywidgets `7.7.1`; E2 must validate compatibility. [Heusel et al.](https://arxiv.org/abs/1706.08500) introduce FID; other feature extractors need the label teaching proxy. Use stored measured standard-FID evidence for costly evaluation.
+
+**Own-style visuals and beginner barriers.** Draw two update panels: real/fake batches → discriminator → discriminator loss; noise → generator → discriminator → generator loss. Label solid data flow and dashed parameter feedback; avoid crossings. Add target/generated 2-D scatter panels and a fixed-noise epoch strip. Titles introduce optimal discriminator, minimax, non-saturating loss and WGAN-GP quickly; work one score and BCE term first. Lab barriers: `detach`, gradient accumulation, two optimisers, train/eval modes, image scaling and trusting losses. Move proof and WGAN-GP implementation to deeper notes/stretch.
+
+**CPU core proposal, target ≤15 minutes of waiting; unmeasured.** Run one real, bounded GAN training job on a small digit subset; show alternating updates, shapes, fixed-noise snapshots and a compact 2-D coverage example. Use a slider to explore latent interpolation without retraining. Inspect stored measured longer-run image grids; make extended DCGAN/WGAN-GP and heavyweight FID optional. Check generated ranges, optimiser roles and sample diversity. Optional Gemini: critique a synthetic evaluation claim in a few calls, followed by students checking against images/data. Keep the local checklist complete. R0's EEA/Swiss/UK distributed-client terms caveat applies; no free-access guarantee or billing change.
+
+**Further reading:** [Original GAN paper](https://arxiv.org/abs/1406.2661) · [PyTorch DCGAN tutorial](https://docs.pytorch.org/tutorials/beginner/dcgan_faces_tutorial.html) · [FID paper](https://arxiv.org/abs/1706.08500) · [StyleGAN3 implementation](https://github.com/NVlabs/stylegan3) · [MIT 6.S191 2026 generative-modeling video](https://www.youtube.com/watch?v=R8V8CbuxryI).
+
+Handoff: research complete; no training, timing, API calls or visual tests executed.

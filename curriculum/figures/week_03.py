@@ -52,35 +52,44 @@ def mode_collapse_slide(path):
     """Keep every archived scatter panel; give enlarged headers their own space."""
     im = plt.imread(ASSETS / "mode_collapse.png")
     fig, axes = plt.subplots(2, 4, figsize=(13, 6.4), gridspec_kw={"hspace": .45, "wspace": .15})
-    for row, (y, name, covered) in enumerate([(110, "GAN", [0, 8, 7, 7]), (650, "WGAN-GP", [0, 0, 6, 8])]):
-        for ax, x, step, count in zip(axes[row], [30, 556, 1081, 1607], [0, 500, 2000, 5000], covered):
+    for row, (y, name) in enumerate([(110, "GAN"), (650, "WGAN-GP")]):
+        for ax, x, step in zip(axes[row], [30, 556, 1081, 1607], [0, 500, 2000, 5000]):
             ax.imshow(im[y:y + 439, x:x + 439])
-            ax.set_title(f"{name}: {step}\n{count}/8 modes", fontsize=20, loc="left")
+            ax.set_title(f"{name}: step {step}", fontsize=20, loc="left")
             ax.axis("off")
     save(fig, path)
 
 
+def _role_legend(ax, roles, y=.05):
+    fills={"Data":"#E6F2FF", "Model":"#DFF5E8", "Loss":"#FFF0DC"}
+    x=.2
+    for role in roles:
+        ax.add_patch(plt.Rectangle((x,y),.25,.22,facecolor=fills[role],edgecolor=PRIMARY))
+        ax.text(x+.35,y+.11,role,va="center",fontsize=18,color=TEXT)
+        x+=1.8
+    ax.plot([x,x+.4],[y+.11,y+.11],color=PRIMARY)
+    ax.text(x+.5,y+.11,"Flow",va="center",fontsize=18,color=TEXT)
+
+
 def gan_arch(path):
-    fig, ax = plt.subplots(figsize=(13, 5.2))
-    ax.axis("off")
-    ax.set_xlim(0, 13)
-    ax.set_ylim(-0.6, 4.8)
-    box(ax, 0.1, 0.5, 1.7, 1.1, "noise\nz ~ N(0, I)", fc=ORANGE, ec=ACCENT, size=18)
-    box(ax, 2.4, 0.4, 2.2, 1.3, "Generator G", fc="white", size=18)
-    box(ax, 5.2, 0.5, 1.8, 1.1, "fake image\nG(z)", size=18)
-    box(ax, 5.2, 3.0, 1.8, 1.1, "real image\nx", size=18)
-    box(ax, 7.8, 1.6, 2.3, 1.5, "Discriminator D\nP(real)", fc="white", size=18)
-    box(ax, 10.8, 1.85, 2.0, 1.0, "real or fake?", fc=TINT, size=18)
-    arrow(ax, 1.8, 1.05, 2.4, 1.05)
-    arrow(ax, 4.6, 1.05, 5.2, 1.05)
-    arrow(ax, 7.0, 1.05, 7.8, 2.0)
-    arrow(ax, 7.0, 3.55, 7.8, 2.7)
-    arrow(ax, 10.1, 2.35, 10.8, 2.35)
-    # Feedback runs under the boxes: from D back to G, crossing no box or arrow.
-    routed_arrow(ax, [(8.95, 1.6), (8.95, 0.05), (3.5, 0.05), (3.5, 0.4)], color=ACCENT, dashed=True)
-    ax.text(6.2, -0.35, "gradient from D tells G how to look more real", color=ACCENT, fontsize=18, ha="center", va="center")
-    ax.text(0.1, 4.35, "D is trained to tell real from fake; G is trained to fool D.", fontsize=18, color=INK, fontweight="bold")
-    save(fig, path)
+    fig, ax = plt.subplots(figsize=(13, 4.9))
+    ax.axis("off"); ax.set_xlim(0, 13); ax.set_ylim(0, 4.9)
+    colors = ["#E6F2FF", "#DFF5E8", "#DFF5E8", "#FFF0DC", "#DFF5E8"]
+    labels = ["Draw codes", "Generate\nG", "Score sources\nD", "Form losses", "Step weights"]
+    xs = [.1, 2.7, 5.3, 7.9, 10.5]
+    for x, label, color in zip(xs, labels, colors):
+        box(ax, x, 1.8, 2.3, 1.0, label, fc=color, size=18)
+    for left, right, label in zip(xs, xs[1:], ["z[B,64]", "fake[B,1,28,28]", "logits[B]", "gradients"]):
+        arrow(ax, left + 2.3, 2.3, right, 2.3)
+        ax.text((left + 2.3 + right)/2, 3.02, label, ha="center", va="bottom", fontsize=18, color=TEXT)
+    arrow(ax, 6.45, 4.0, 6.45, 2.8)
+    ax.text(6.45, 4.12, "real[B,1,28,28]", ha="center", fontsize=18, color=TEXT)
+    routed_arrow(ax, [(11.65,1.8),(11.65,.95),(1.25,.95),(1.25,1.8)], color=ACCENT, dashed=True)
+    ax.text(6.45,.55,"Repeat both updates",ha="center",fontsize=18,color=ACCENT)
+    _role_legend(ax,["Data","Model","Loss"])
+    ax.plot([8.3,8.7],[.16,.16],color=ACCENT,linestyle="--")
+    ax.text(8.8,.16,"Repeat",va="center",fontsize=18,color=TEXT)
+    save(fig,path)
 
 
 def optimal_d(path):
@@ -88,7 +97,7 @@ def optimal_d(path):
     pdata = 0.6 * np.exp(-(x - 0) ** 2 / 0.8) + 0.4 * np.exp(-(x - 3) ** 2 / 0.5)
     pdata /= np.trapezoid(pdata, x)
     fig, axes = plt.subplots(1, 2, figsize=(13, 4))
-    for a, (mu, s, title) in zip(axes, [(2.0, 1.6, "Early: generator far from the data"), (None, None, r"Equilibrium: $p_g = p_{\mathrm{data}}$")]):
+    for a, (mu, s, title) in zip(axes, [(2.0, 1.6, "Illustration: separated densities"), (None, None, r"Ideal: $p_g = p_{\mathrm{data}}$")]):
         pg = pdata.copy() if mu is None else np.exp(-(x - mu) ** 2 / (2 * s ** 2))
         pg /= np.trapezoid(pg, x)
         dstar = pdata / (pdata + pg + 1e-12)
@@ -115,50 +124,50 @@ def saturating(path):
     ax.plot(s, -np.logaddexp(0, s), color=MUTED, lw=2.5, label="Minimax: log(1 − D)")
     ax.plot(s, np.logaddexp(0, -s), color=ACCENT, lw=2.5, label="Non-saturating: −log D")
     ax.axvspan(-8, -2, color=ACCENT, alpha=0.08)
-    ax.text(-7.8, -1.0, "D rejects fakes:\nweak minimax slope", fontsize=18, color=TEXT, va="top")
-    ax.set_xlabel("D logit s for a generated image; probability = sigmoid(s)")
+    ax.text(-7.8, -1.0, "Weak minimax slope", fontsize=18, color=TEXT, va="top")
+    ax.set_xlabel("Generated-image logit s")
     ax.set_ylabel("generator loss")
     ax.set_ylim(-8.5, 8.5)
     ax.legend(loc="upper center", bbox_to_anchor=(.5, -.20), fontsize=18, ncol=2)
-    ax.set_title("The sigmoid path explains weak minimax gradients", loc="left")
+    ax.set_title("Illustrative loss versus logit", loc="left")
     save(fig, path)
 
 
 def dcgan_arch(path):
-    fig, ax = plt.subplots(figsize=(13, 4.2))
-    ax.axis("off")
-    ax.set_xlim(0, 13)
-    ax.set_ylim(0, 4.2)
-    specs = [(.1, 2.0, "noise z\n64 numbers", ORANGE), (3.0, 2.2, "128 × 7 × 7\nfeatures", TINT),
-             (6.6, 2.3, "64 × 14 × 14\nfeatures", TINT), (10.3, 2.5, "1 × 28 × 28\nimage", "white")]
-    for x, w, lab, fc in specs:
-        box(ax, x, 1.0, w, 1.5, lab, fc=fc, size=18)
-    for (x1, w, _, _), (x2, _, _, _) in zip(specs, specs[1:]):
-        arrow(ax, x1 + w, 1.75, x2, 1.75)
-    for x, t in ((4.1, "Transposed conv\nBatchNorm + ReLU"), (7.75, "Transposed conv\nBatchNorm + ReLU"), (11.55, "Transposed conv\ntanh output")):
-        ax.text(x, 3.05, t, ha="center", fontsize=18, color=MUTED)
-    ax.text(.1, .25, "Example DCGAN generator. Notes explain architecture and optimisation choices.", fontsize=18, color=TEXT)
-    save(fig, path)
+    fig, ax = plt.subplots(figsize=(13, 4.3))
+    ax.axis("off"); ax.set_xlim(0,13); ax.set_ylim(0,4.3)
+    xs=[1.6,5.0,8.4]
+    labels=["Transpose conv.\nNormalise; ReLU", "Transpose conv.\nNormalise; ReLU", "Transpose conv.\ntanh"]
+    for x,label in zip(xs,labels):
+        box(ax,x,1.25,2.8,1.2,label,fc="#DFF5E8",size=18)
+    arrow(ax,.15,1.85,1.6,1.85)
+    ax.text(.2,2.8,"z[B,64,1,1]",fontsize=18,color=TEXT)
+    for left,right,label in zip(xs,xs[1:],["[B,128,7,7]","[B,64,14,14]"]):
+        arrow(ax,left+2.8,1.85,right,1.85)
+        ax.text((left+2.8+right)/2,2.8,label,fontsize=18,ha="center",color=TEXT)
+    arrow(ax,11.2,1.85,12.85,1.85)
+    ax.text(11.45,2.8,"[B,1,28,28]",ha="center",fontsize=18,color=TEXT)
+    ax.text(.2,.45,"Batch B; grayscale pixels",fontsize=18,color=TEXT)
+    _role_legend(ax,["Model"])
+    save(fig,path)
 
 
 def cgan(path):
-    fig, ax = plt.subplots(figsize=(13, 3.6))
-    ax.axis("off")
-    ax.set_xlim(0, 13)
-    ax.set_ylim(0, 3.6)
-    box(ax, 0.1, 2.2, 1.6, 0.9, "noise z", fc=ORANGE, ec=ACCENT, size=18)
-    box(ax, 0.1, 0.6, 1.6, 0.9, "label y = '7'", fc=TINT, size=18)
-    box(ax, 2.5, 1.2, 2.0, 1.3, "G(z, y)", fc="white", size=18)
-    box(ax, 5.3, 1.35, 1.6, 1.0, "fake 7", size=18)
-    box(ax, 7.8, 1.2, 2.4, 1.3, "D(x, y)\nreal + matches\nthe condition?", fc="white", size=18)
-    box(ax, 5.3, 0.05, 1.6, 0.8, "label y", fc=TINT, size=18)
-    arrow(ax, 1.7, 2.65, 2.5, 2.1)
-    arrow(ax, 1.7, 1.05, 2.5, 1.55)
-    arrow(ax, 4.5, 1.85, 5.3, 1.85)
-    arrow(ax, 6.9, 1.85, 7.8, 1.85)
-    arrow(ax, 6.9, 0.45, 7.8, 1.3)
-    ax.text(10.6, 2.3, "Condition can be a class,\na text prompt, a sketch,\nor another image\n(e.g. pix2pix)", fontsize=18, color=TEXT, va="center")
-    save(fig, path)
+    fig,ax=plt.subplots(figsize=(13,4.1))
+    ax.axis("off"); ax.set_xlim(0,13); ax.set_ylim(0,4.1)
+    box(ax,1.4,1.5,2.5,1.1,"Encode condition",fc="#E6F2FF",size=18)
+    box(ax,5.2,1.5,2.5,1.1,"Generate\nG(z,y)",fc="#DFF5E8",size=18)
+    box(ax,9.0,1.5,2.8,1.1,"Score source\nD(image,y)",fc="#DFF5E8",size=18)
+    arrow(ax,.1,2.05,1.4,2.05); ax.text(.3,2.9,"label y",fontsize=18,color=TEXT)
+    arrow(ax,3.9,2.05,5.2,2.05); ax.text(4.55,2.9,"condition",ha="center",fontsize=18,color=TEXT)
+    arrow(ax,6.45,3.65,6.45,2.6); ax.text(6.45,3.8,"noise z",ha="center",fontsize=18,color=TEXT)
+    arrow(ax,7.7,2.05,9.0,2.05); ax.text(8.35,2.9,"fake image",ha="center",fontsize=18,color=TEXT)
+    routed_arrow(ax,[(2.65,1.5),(2.65,.85),(10.4,.85),(10.4,1.5)],color=PRIMARY)
+    ax.text(6.5,.47,"same condition",ha="center",fontsize=18,color=TEXT)
+    arrow(ax,10.4,3.65,10.4,2.6); ax.text(10.4,3.8,"real image",ha="center",fontsize=18,color=TEXT)
+    arrow(ax,11.8,2.05,12.9,2.05); ax.text(12.2,2.9,"logit",fontsize=18,color=TEXT)
+    _role_legend(ax,["Data","Model"],y=.01)
+    save(fig,path)
 
 
 def fid(path):
@@ -167,7 +176,7 @@ def fid(path):
     good = rng.multivariate_normal([0.2, 0.1], [[0.95, 0.25], [0.25, 0.85]], 400)
     bad = rng.multivariate_normal([1.3, 0.9], [[0.25, 0], [0, 0.2]], 400)
     fig, axes = plt.subplots(1, 2, figsize=(12, 4.6))
-    for a, fake, t in ((axes[0], good, "Low FID: similar mean and spread"), (axes[1], bad, "High FID: shifted and too narrow\n(low diversity, e.g. mode collapse)")):
+    for a, fake, t in ((axes[0], good, "Illustration: similar summaries"), (axes[1], bad, "Illustration: shifted; narrow")):
         a.scatter(real[:, 0], real[:, 1], s=8, color=TEAL, alpha=0.45, label="real images (features)")
         a.scatter(fake[:, 0], fake[:, 1], s=8, color=ACCENT, alpha=0.45, label="generated images (features)")
         a.set_title(t, loc="left")
