@@ -1,5 +1,6 @@
 """Week 11 figures: deployment diagrams plus REAL measurements harvested from the executed lab notebook."""
 import json
+from datetime import datetime
 import shutil
 from pathlib import Path
 
@@ -78,8 +79,8 @@ def request_anatomy(path):
 def app_architecture(path):
     fig, ax = _diagram_canvas(4.1)
     ax.text(0.15, 3.70, "Proposed integration; lab routes are separate.", fontsize=18, color=INK)
-    _sequence(ax, [("Request", "data"), ("Entry", "tool"), ("Input checks", "tool"),
-                   ("Generate", "model"), ("Output check", "tool"), ("Reply", "output")],
+    _sequence(ax, [("Request", "data"), ("Entry", "tool"), ("Input\nchecks", "tool"),
+                   ("Generate", "model"), ("Output\ncheck", "tool"), ("Reply", "output")],
               2.20, height=0.9, size=18, labels=["JSON", "fields", "clean input", "answer", "checked text"])
     role_box(ax, 6.90, 0.83, 4.70, 0.70, "Log / inspect metadata", "tool", size=18)
     # Solid branches carry actual records; neither is a training-gradient arrow.
@@ -116,27 +117,45 @@ def _diagram_finish(fig, path):
 
 
 def _measured_results():
+    """Retain archived non-timing measurements for the quantisation probe."""
     return json.loads((ASSETS / "results.json").read_text(encoding="utf-8"))
 
 
+def _core_measured_results():
+    """Timing plots must use the CPU core export and its genuine run record."""
+    result = json.loads((ASSETS / "results_cpu_core.json").read_text(encoding="utf-8"))
+    if result["device"] != "cpu":
+        raise ValueError("Week 11 core timing figures require a measured CPU export")
+    recorded = result.get("evidence", {}).get("started_at_utc")
+    if not recorded:
+        raise ValueError("Week 11 core timing figures require dated run evidence")
+    when = datetime.fromisoformat(recorded.replace("Z", "+00:00"))
+    model = result["model"].split("/")[-1]
+    context = f"{model} · CPU core · {when.day} {when:%b %Y}"
+    return result, context
+
+
 def latency_results(path):
-    r = _measured_results()
+    r, context = _core_measured_results()
     rows = r["latency"]
     fig, ax = plt.subplots(figsize=(13, 4.0))
     y = list(range(len(rows)))
     total = [row["total (s)"] for row in rows]
-    first = [row["TTFT (s)"] for row in rows]
+    first = [row["TTFT (s)"] if row["TTFT (s)"] is not None else float("nan") for row in rows]
     ax.barh(y, total, color="#C7D2FE", label="Full answer")
     ax.barh(y, first, color=PRIMARY, label="First text (approx. TTFT)")
-    ax.set_yticks(y, ["What is an LLM?", "Three prompt tips", "What is a rate limit?"], fontsize=18)
+    ax.set_yticks(y, ["What is an LLM?", "Three prompt tips", "What is a rate limit?"], fontsize=20)
     ax.invert_yaxis()
-    for index, (t, f) in enumerate(zip(total, first)):
-        ax.text(t + 0.1, index, f"{t:.2f} s total; {f:.3f} s first", fontsize=18, va="center", color=TEXT)
-    ax.set_xlim(0, max(total) * 1.65)
-    ax.tick_params(axis="x", labelsize=18)
+    for index, row in enumerate(rows):
+        first_text = f"{row['TTFT (s)']:.3f} s first" if row["TTFT (s)"] is not None else "first text unavailable"
+        ax.text(row["total (s)"] + 0.1, index, f"{row['total (s)']:.2f} s total; {first_text}",
+                fontsize=20, va="center", color=TEXT)
+    ax.set_xlim(0, max(total) * 1.9)
+    ax.tick_params(axis="x", labelsize=20)
     ax.set_xlabel("Seconds", fontsize=20)
     ax.grid(axis="y", visible=False)
-    ax.legend(loc="upper center", bbox_to_anchor=(0.5, 1.23), fontsize=18, ncol=2)
+    ax.legend(loc="upper center", bbox_to_anchor=(0.5, 1.25), fontsize=20, ncol=2)
+    fig.suptitle(context, fontsize=20, y=1.08)
     fig.tight_layout()
     save(fig, path)
 
@@ -161,7 +180,8 @@ def quant_results(path):
 
 
 def batch_results(path):
-    rows = _measured_results()["batch"]
+    r, context = _core_measured_results()
+    rows = r["batch"]
     fig, ax = plt.subplots(figsize=(13, 3.6))
     vals = [row["tokens/s"] for row in rows]
     bars = ax.bar(range(len(rows)), vals, color=TEAL)
@@ -169,38 +189,38 @@ def batch_results(path):
     ax.set_xticks(range(len(rows)), [row["batch size"] for row in rows], fontsize=20)
     ax.tick_params(axis="y", labelsize=18)
     ax.set_xlabel("Batch size", fontsize=20)
-    ax.set_ylabel("Generated tokens / second", fontsize=20)
+    ax.set_ylabel("Requested tokens / second", fontsize=20)
     ax.set_ylim(0, max(vals) * 1.2)
     ax.grid(axis="x", visible=False)
+    ax.set_title(context, fontsize=18, pad=14)
     fig.tight_layout()
     save(fig, path)
 
 
 def monitor_results(path):
-    """Keep the historical per-request bars, whose rows were not saved in JSON."""
-    image = plt.imread(ASSETS / "lab_monitor.png")
-    if image.shape[:2] != (310, 886):
-        raise ValueError("Recheck the historic monitoring-image crop")
-    plot = image[31:258, 49:873]
-    fig, ax = plt.subplots(figsize=(13, 4.0))
-    ax.imshow(plot, interpolation="none")
-    ax.set_xticks([67 + 76.5 * i for i in range(10)], range(1, 11), fontsize=18)
-    ax.set_yticks([226, 195, 164, 132, 101, 69, 38, 7], range(8), fontsize=18)
-    ax.set_xlabel("Request number", fontsize=20)
-    ax.set_ylabel("Latency (seconds)", fontsize=20)
-    ax.grid(False)
-    # Hide only the old small blocked/p95 labels over blank background.
-    ax.add_patch(plt.Rectangle((210, 163), 21, 64, facecolor="white", edgecolor="none"))
-    ax.add_patch(plt.Rectangle((800, 36), 22, 22, facecolor="white", edgecolor="none"))
-    ax.text(220, 206, "blocked", fontsize=18, color="#B91C1C", rotation=90, ha="center")
-    p95 = _measured_results()["monitor"]["p95 latency (s)"]
-    ax.text(775, 42, f"p95: {p95:g} s", fontsize=18, color=TEXT, ha="right", va="bottom",
-            bbox=dict(facecolor="white", edgecolor="none", pad=1.5))
-    from matplotlib.patches import Patch
-    ax.legend(handles=[Patch(color=PRIMARY, label="Answered"), Patch(color=ACCENT, label="Personal data redacted"),
-                       Patch(color="#B91C1C", label="Blocked")], fontsize=18, loc="upper center",
-              bbox_to_anchor=(0.5, 1.27), ncol=3)
-    fig.tight_layout()
+    """Plot stored aggregate evidence; do not invent missing per-request rows."""
+    r, context = _core_measured_results()
+    monitor = r["monitor"]
+    fig, axes = plt.subplots(1, 2, figsize=(13, 4.0), gridspec_kw={"width_ratios": [1.25, 1]})
+    counts = [monitor["requests"], monitor["blocked"], monitor["redacted"]]
+    bars = axes[0].bar(range(3), counts, color=[PRIMARY, "#D55E00", ACCENT])
+    axes[0].bar_label(bars, labels=[str(x) for x in counts], fontsize=19, padding=4)
+    axes[0].set_xticks(range(3), ["All requests", "Blocked", "Redacted"], fontsize=18)
+    axes[0].set_ylabel("Requests", fontsize=19)
+    axes[0].set_ylim(0, max(counts) * 1.3)
+    axes[0].set_title("Counts include all requests; categories overlap", fontsize=17, pad=12)
+    latency = [monitor["p50 latency (s)"], monitor["p95 latency (s)"]]
+    bars = axes[1].bar(range(2), latency, color=[TEAL, ACCENT])
+    axes[1].bar_label(bars, labels=[f"{x:.2f} s" for x in latency], fontsize=19, padding=4)
+    axes[1].set_xticks(range(2), ["p50", "p95"], fontsize=18)
+    axes[1].set_ylabel("Seconds", fontsize=19)
+    axes[1].set_ylim(0, max(latency) * 1.3)
+    axes[1].set_title("Allowed requests only; small sample", fontsize=18, pad=12)
+    for ax in axes:
+        ax.tick_params(axis="y", labelsize=18)
+        ax.grid(axis="x", visible=False)
+    fig.suptitle(context, fontsize=18, y=1.05)
+    fig.tight_layout(w_pad=2)
     save(fig, path)
 
 

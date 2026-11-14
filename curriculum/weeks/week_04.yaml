@@ -257,9 +257,9 @@ slides:
     target. Sampling later holds the learned weights fixed.
 
 
-    Example: With clean value 1, signal coefficient 0.64 and noise −0.5, the noisy value is 0.5. The denoiser''s target is −0.5,
-    not 1 or 0.5. These are illustrative arithmetic values, not an experimental result. Image tensors apply the calculation
-    to many entries together.
+    Example: With clean value 1, retained-signal variance coefficient 0.64 and noise −0.5, the noisy value is 0.5. The denoiser''s
+    target is −0.5, not 1 or 0.5. These are illustrative arithmetic values, not an experimental result. Image tensors apply
+    the calculation to many entries together.
 
 
     Ask: Which training value follows a separate route into the loss instead of entering the denoiser?
@@ -302,50 +302,8 @@ slides:
 
 
     Watch out: The schedule index measures corruption level; it is not the number of completed training updates.'
-- type: equation
-  title: The forward (noising) process
-  eq:
-  - q(x_t \mid x_{t-1}) = \mathcal{N}\left(\sqrt{1 - \beta_t}\, x_{t-1},\; \beta_t I\right)
-  - q(x_t \mid x_0) = \mathcal{N}\left(\sqrt{\bar{\alpha}_t}\, x_0,\; (1 - \bar{\alpha}_t) I\right), \quad \bar{\alpha}_t
-    = \prod_{s=1}^{t}(1 - \beta_s)
-  read_as:
-  - Mix scaled signal with Gaussian noise.
-  - Select a noise level directly.
-  - 'Illustration: 0.8 × 1 + 0.6 × (−0.5) = 0.5'
-  terms:
-  - - $x_0$
-    - clean data
-  - - $x_t$
-    - noisy data
-  - - $\beta_t$
-    - added noise variance
-  - - $\bar{\alpha}_t$
-    - retained signal coefficient
-  panel_h: 2.1
-  notes: 'In short: The closed-form forward rule creates a selected noise level directly from clean data and sampled noise.
-
-
-    Explain: The symbol q names the fixed forward probability distribution. The index t selects the timestep. Beta is the noise
-    variance added at one step. Alpha-bar multiplies the retained-signal factors through that step. The identity matrix gives
-    independent equal-variance noise across coordinates.
-
-
-    Example: Let alpha-bar be 0.64, clean value 1 and sampled noise −0.5. The signal weight is 0.8 and noise weight 0.6, producing
-    0.5. The square roots are coefficients of values; alpha-bar itself is a variance coefficient. These calculated values illustrate
-    the displayed Gaussian formula.
-
-
-    Ask: Must the code run all earlier noising steps to construct this training input?
-
-
-    Answer: It can use the closed form and the chosen coefficient, which makes random-timestep training practical.
-
-
-    Watch out: A schedule coefficient represents a fraction of total variance only when the clean data has suitable normalisation.'
 - type: figure
   title: The forward process on real digits
-  figure: forward_mnist_slide
-  caption: 'Stored MNIST corruption: linear schedule, 1000 entries; index 0 already adds noise.'
   notes: 'In short: The stored digit strip shows how a fixed schedule progressively reduces visible clean-image information.
 
 
@@ -368,6 +326,48 @@ slides:
 
     Watch out: Compare the actual columns; a visible pattern in one noisy draw does not quantify the schedule''s information
     loss.'
+  figure: forward_mnist_slide
+  caption: 'Stored MNIST corruption: linear schedule, 1000 entries; index 0 already adds noise.'
+- type: equation
+  title: The forward (noising) process
+  notes: 'In short: The closed-form forward rule creates a selected noise level directly from clean data and sampled noise.
+
+
+    Explain: The symbol q names the fixed forward probability distribution. The index t selects the timestep. Beta is the noise
+    variance added at one step. Alpha-bar multiplies the retained-signal factors through that step. The identity matrix gives
+    independent equal-variance noise across coordinates.
+
+
+    Example: Let alpha-bar be 0.64, clean value 1 and sampled noise −0.5. The signal weight is 0.8 and noise weight 0.6, producing
+    0.5. The square roots are coefficients of values; alpha-bar itself is a variance coefficient. These calculated values illustrate
+    the displayed Gaussian formula.
+
+
+    Ask: Must the code run all earlier noising steps to construct this training input?
+
+
+    Answer: It can use the closed form and the chosen coefficient, which makes random-timestep training practical.
+
+
+    Watch out: A schedule coefficient represents a fraction of total variance only when the clean data has suitable normalisation.'
+  terms:
+  - - $x_0$
+    - clean data
+  - - $x_t$
+    - noisy data
+  - - $\beta_t$
+    - added noise variance
+  - - $\bar{\alpha}_t$
+    - signal variance coefficient
+  read_as:
+  - Mix scaled signal with Gaussian noise.
+  - Select a noise level directly.
+  - 'Illustration: 0.8 × 1 + 0.6 × (−0.5) = 0.5'
+  eq:
+  - q(x_t \mid x_{t-1}) = \mathcal{N}\left(\sqrt{1 - \beta_t}\, x_{t-1},\; \beta_t I\right)
+  - q(x_t \mid x_0) = \mathcal{N}\left(\sqrt{\bar{\alpha}_t}\, x_0,\; (1 - \bar{\alpha}_t) I\right), \quad \bar{\alpha}_t =
+    \prod_{s=1}^{t}(1 - \beta_s)
+  panel_h: 2.1
 - type: figure
   title: Noise schedules decide how fast information is destroyed
   figure: schedules
@@ -572,7 +572,7 @@ slides:
   figure: reverse_mnist_slide
   bullets:
   - Noise becomes digit-like structure.
-  - '{{UNET_PARAMS}} parameters; {{MNIST_MIN}} min on {{MNIST_DEVICE}}.'
+  - '{{UNET_PARAMS}} parameters; {{MNIST_EPOCHS}} epochs on {{MNIST_DEVICE}}.'
   - Inspect malformed digits and variety.
   notes: 'In short: The stored MNIST run illustrates image denoising, while the required lab learns on smaller two-dimensional
     data.
@@ -583,9 +583,9 @@ slides:
     Sampling calls the trained network without further optimiser updates.
 
 
-    Example: Read the stored rows from index 999 to index 0. The measured training record supplies {{UNET_PARAMS}} parameters
-    and about {{MNIST_MIN}} minutes on {{MNIST_DEVICE}}. These values describe that recorded image run. Enabling the optional
-    MNIST stretch creates a new run whose time and quality must be recorded separately.
+    Example: Read the stored rows from index 999 to index 0. The stored experiment used {{UNET_PARAMS}} parameters and {{MNIST_EPOCHS}}
+    epochs on {{MNIST_DEVICE}}. These samples let us inspect digit structure without repeating the optional image training.
+    Enabling the optional MNIST stretch creates a new run whose time and quality must be recorded separately.
 
 
     Ask: Why should the predicted noise have the same shape as the noisy digit batch?
@@ -799,43 +799,62 @@ slides:
   bullets:
   - Fixed prompt, seed 42, guidance 7.5.
   - 'DPM-Solver++: 2, 5, 10, 25 updates.'
-  - 'CPU evidence: {{W04_T2}} s and {{W04_T25}} s at endpoints.'
+  - Compare detail and visible failures.
   caption: Separate measured image-model run; compare detail and visible failures.
   notes: 'In short: The stored SD 1.5 step sweep isolates sampling-call count while holding other image controls fixed.
 
 
     Explain: The checkpoint specifies learned model weights. DPM-Solver++ is the sampler used for this stored comparison. Guidance
-    determines how predictions use the prompt. The seed fixes its starting random draw in this run. Timing refers to the recorded
-    machine and settings.
+    determines how predictions use the prompt. The seed fixes its starting random draw in this run. Call count describes requested
+    denoising updates, rather than a universal quality guarantee.
 
 
-    Example: Compare the saved 2-, 5-, 10- and 25-step lighthouse outputs. The source evidence supplies {{W04_T2}} seconds and
-    {{W04_T25}} seconds for the two endpoints. These are recorded SD 1.5 image timings, not the new point-model runtime. Inspect
-    scene layout, detail and failures throughout the grid.
+    Example: Compare the saved 2-, 5-, 10- and 25-step lighthouse outputs. Record missing features and visible artefacts before
+    judging which setting you would choose. These images come from a separate stored model experiment, rather than the new point
+    exercise. Inspect scene layout, detail and failures throughout the grid.
 
 
-    Ask: Can the stored curve establish that extra steps improve every model at every setting?
+    Ask: Can the stored comparison establish that extra steps improve every model at every setting?
 
 
     Answer: It supports a comparison for this checkpoint and experiment. Distilled models and other tasks need their own evaluations.
 
 
     Watch out: A shorter elapsed time can accompany a poor output; report both the workload and what the samples actually show.'
+- type: figure
+  title: Stored SD 1.5 guidance comparison
+  notes: 'In short: The stored guidance sweep shows one model''s prompt-control tradeoff under a fixed prompt, seed and step
+    count.
+
+
+    Explain: Guidance strengthens the difference between conditional and reference predictions. Stronger conditioning can alter
+    colours, detail and variety. The grid uses historical SD 1.5 with 25 updates. Implementations can evaluate the two predictions
+    together as a batch. Their cost still includes both denoiser predictions.
+
+
+    Example: Inspect guidance 1, 3, 7.5 and 15 in the recorded lighthouse grid. Identify changes in colour saturation, lighthouse
+    structure and prompt details. Hold the checkpoint and sampling settings fixed before attributing differences to guidance.
+    Discuss visible prompt fit and saturation, then distinguish those measured observations from a universal recommended guidance
+    range.
+
+
+    Ask: Why might stronger guidance increase compute even if the number of scheduler steps stays fixed?
+
+
+    Answer: The guided update needs both reference and conditional predictions. Fusing them in one batch does not eliminate
+    that work.
+
+
+    Watch out: A visually striking image or higher alignment score can still contain worse artefacts or less varied samples.'
+  stack: true
+  figure: sd_guidance
+  caption: Separate measured run; guided prediction evaluates conditional and reference branches.
+  bullets:
+  - Fixed prompt, seed and 25 steps.
+  - Inspect prompt fit, saturation and artefacts.
+  - Compare conditional and reference predictions.
 - type: equation
   title: Classifier-free guidance (Ho & Salimans, 2022)
-  eq: \hat{\epsilon} = \epsilon_\theta(x_t, \varnothing) + w \cdot \left(\epsilon_\theta(x_t, c) - \epsilon_\theta(x_t,
-    \varnothing)\right)
-  read_as:
-  - Sometimes drop text during training.
-  - Combine conditional and reference predictions.
-  - 'Illustration: 0.2 + 3 × 0.3 = 1.1'
-  terms:
-  - - $c$
-    - prompt representation
-  - - $\varnothing$
-    - empty condition
-  - - $w$
-    - guidance weight; 1 gives conditional
   notes: 'In short: Classifier-free guidance combines conditional and reference predictions to increase the influence of a condition.
 
 
@@ -857,37 +876,18 @@ slides:
 
     Watch out: SD-Turbo disables this guidance mechanism in its documented usage, so its settings cannot validate an ordinary
     guidance sweep.'
-- type: figure
-  title: Stored SD 1.5 guidance comparison
-  figure: sd_guidance
-  stack: true
-  bullets:
-  - Fixed prompt, seed and 25 steps.
-  - Inspect prompt fit, saturation and artefacts.
-  - 'CPU evidence: {{W04_G1}} s at 1; {{W04_G75}} s at 7.5.'
-  notes: 'In short: The stored guidance sweep shows one model''s prompt-control tradeoff under a fixed prompt, seed and step
-    count.
-
-
-    Explain: Guidance strengthens the difference between conditional and reference predictions. Stronger conditioning can alter
-    colours, detail and variety. The grid uses historical SD 1.5 with 25 updates. Implementations can evaluate the two predictions
-    together as a batch. Their cost still includes both denoiser predictions.
-
-
-    Example: Inspect guidance 1, 3, 7.5 and 15 in the recorded lighthouse grid. The evidence supplies {{W04_G1}} seconds at
-    1 and {{W04_G75}} seconds at 7.5. Discuss visible prompt fit and saturation, then distinguish those measured observations
-    from a universal recommended guidance range.
-
-
-    Ask: Why might stronger guidance increase compute even if the number of scheduler steps stays fixed?
-
-
-    Answer: The guided update needs both reference and conditional predictions. Fusing them in one batch does not eliminate
-    that work.
-
-
-    Watch out: A visually striking image or higher alignment score can still contain worse artefacts or less varied samples.'
-  caption: Separate measured run; guided prediction evaluates conditional and reference branches.
+  terms:
+  - - $c$
+    - prompt representation
+  - - $\varnothing$
+    - empty condition
+  - - $w$
+    - guidance weight; 1 gives conditional
+  read_as:
+  - Sometimes drop text during training.
+  - Combine conditional and reference predictions.
+  - 'Illustration: 0.2 + 3 × 0.3 = 1.1'
+  eq: \hat{\epsilon} = \epsilon_\theta(x_t, \varnothing) + w \cdot \left(\epsilon_\theta(x_t, c) - \epsilon_\theta(x_t, \varnothing)\right)
 - type: figure
   title: Seeds and negative prompts
   figure: seeds_negative_slide
@@ -1013,7 +1013,7 @@ slides:
   bullets:
   - Distilled SD 2.1; guidance disabled.
   - 512 × 512 outputs at 1, 2, 4 steps.
-  - 'CPU evidence: {{W04_TURBO1}} s at 1; {{W04_TURBO4}} s at 4.'
+  - Compare specialised few-step outputs.
   notes: 'In short: SD-Turbo is a distilled historical image model with published few-step settings and guidance disabled.
 
 
@@ -1022,9 +1022,9 @@ slides:
     Ordinary classifier-free guidance and negative prompts are disabled.
 
 
-    Example: The stored grid compares 1, 2 and 4 steps at 512 × 512 pixels. Evidence supplies {{W04_TURBO1}} and {{W04_TURBO4}}
-    seconds for its endpoint settings. These recorded times differ from the required CPU point model. The model card specifies
-    the operating rules: https://huggingface.co/stabilityai/sd-turbo.
+    Example: The stored grid compares 1, 2 and 4 steps at 512 × 512 pixels. Inspect lighthouse structure, missing details and
+    visible artefacts at its endpoint settings. This specialised distilled image model differs from the required CPU point model.
+    The model card specifies the operating rules: https://huggingface.co/stabilityai/sd-turbo.
 
 
     Ask: Would increasing guidance in a wrapper that forces zero create a genuine SD-Turbo guidance experiment?

@@ -5,24 +5,24 @@
   "latency": [
     {
       "question": "What is a large language model? Answer i",
-      "TTFT (s)": 0.184,
-      "total (s)": 1.32,
+      "TTFT (s)": 0.189,
+      "total (s)": 1.43,
       "output tokens": 24,
-      "tokens/s": 18.2
+      "tokens/s": 16.8
     },
     {
       "question": "Give three tips for writing a good promp",
-      "TTFT (s)": 0.182,
-      "total (s)": 1.47,
+      "TTFT (s)": 0.173,
+      "total (s)": 1.38,
       "output tokens": 25,
-      "tokens/s": 17.0
+      "tokens/s": 18.1
     },
     {
       "question": "Explain what an API rate limit is to a n",
-      "TTFT (s)": 0.201,
-      "total (s)": 1.53,
+      "TTFT (s)": 0.165,
+      "total (s)": 1.4,
       "output tokens": 24,
-      "tokens/s": 15.7
+      "tokens/s": 17.2
     }
   ],
   "quant": [
@@ -60,20 +60,20 @@
     {
       "batch size": 1,
       "requests": 4,
-      "seconds": 1.89,
-      "tokens/s": 16.9
+      "seconds": 2.0,
+      "tokens/s": 16.0
     },
     {
       "batch size": 2,
       "requests": 4,
-      "seconds": 1.12,
-      "tokens/s": 28.5
+      "seconds": 1.29,
+      "tokens/s": 24.9
     },
     {
       "batch size": 4,
       "requests": 4,
-      "seconds": 0.68,
-      "tokens/s": 47.4
+      "seconds": 1.01,
+      "tokens/s": 31.6
     }
   ],
   "cost": [
@@ -99,8 +99,8 @@
     "requests": 4,
     "blocked": 1,
     "redacted": 1,
-    "p50 latency (s)": 1.48,
-    "p95 latency (s)": 1.79,
+    "p50 latency (s)": 1.68,
+    "p95 latency (s)": 2.02,
     "avg completion tokens": 24.0,
     "est. cost of these requests at small-model prices (USD)": 4.3e-05
   },
@@ -110,10 +110,37 @@
     "completion_tokens": 24,
     "total_tokens": 61
   },
+  "runtime": {
+    "cpu_threads": 4,
+    "device": "cpu",
+    "environment": "local",
+    "logical_cpus": 12,
+    "packages": {
+      "diffusers": "0.40.0",
+      "google-genai": "2.29.0",
+      "ipywidgets": "7.7.1",
+      "openai": "3.28.0",
+      "peft": "0.21.1",
+      "python-dotenv": "1.2.4",
+      "sentence-transformers": "5.7.0",
+      "torch": "2.11.0+cpu",
+      "transformers": "5.18.0",
+      "trl": "1.15.0"
+    },
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 158 Stepping 10, GenuineIntel",
+    "python": "3.12.10",
+    "seed": 42
+  },
   "evidence": {
-    "started_at_utc": "2026-10-11T14:10:10.074169+00:00",
-    "seconds": 39.5,
-    "notebook_sha256": "52be350922abd29c14946f53c2c6e2e1875b355f77cebadb320b410d55b504d5",
-    "executed_notebook_sha256": "833735d9134e1b27e989be82209fcc824d8902bb069081a5912410cc17027891"
+    "started_at_utc": "2026-10-13T08:21:07.465727+00:00",
+    "seconds": 38.2,
+    "notebook_sha256": "e4ff7dbd54ba8bd844c4e2927b624ee44cfe665ca7a0ae2d423ecdce33ed6feb",
+    "executed_notebook_sha256": "77bd058037a1b70f342fb54b5133c949e1a6999442cd9a14e0e17afce79aaa22",
+    "runner_python": "C:\\Users\\sudee\\Downloads\\Generative_AI_2027_Teaching_Pack\\AI2027_Project\\build\\qa_pinned_env\\Scripts\\python.exe",
+    "kernel_name": "qa-pinned-cpu",
+    "run_record": "build/retry_20261013/full_week_11.json",
+    "result_export": "build/retry_20261013/results/week_11/results_cpu_core.json",
+    "result_export_sha256": "7fda1205247165b0546d93853cbd6d8ad8b09d9d7755f8974a73d76f2713c530"
   }
 }

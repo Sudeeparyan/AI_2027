@@ -1,7 +1,8 @@
 {
+  "W03_RING_COVERAGE_TABLE": "| Training step | Standard GAN modes | WGAN-GP modes |\n|---|---|---|\n| 0 | 0/8 | 0/8 |\n| 500 | 8/8 | 0/8 |\n| 2000 | 7/8 | 6/8 |\n| 5000 | 7/8 | 8/8 |",
   "W03_RING_STANDARD_MODES": "7",
   "W03_RING_WGAN_MODES": "8",
-  "W03_CORE_TIME": "4.7 minutes",
-  "W03_CORE_DATE": "11 October 2026",
+  "W03_CORE_TIME": "4.5 minutes",
+  "W03_CORE_DATE": "13 October 2026",
   "W03_CORE_THREADS": "4"
 }

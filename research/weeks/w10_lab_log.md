@@ -15,3 +15,9 @@ Handoff: **Owned W10 lab ready for root rebuild, smoke and measured CPU core; or
 ## Final coordinator handoff — 12 October 2026
 - Latest measured cached local CPU core 175.4s (2.9min), within 900 s; final smoke PASS (160.1s), zero failed feedback checks. Recorded full-run code matches current executable core.
 - Final image review closed; canonical evidence is `research/ITERATION3_2026-10-12.json`. Earlier unmeasured/pending handoffs are historical. No timed Colab, live API, clean-install/download, browser-widget or optional-stretch verification.
+
+
+### Student-readiness correction - 13 October 2026
+
+- Core answer scoring and metadata checks now stop on unfinished TODOs. Editing and speech checks block their optional generation only when RUN_STRETCH is enabled; their unfinished stubs never block the CPU core. Completed algorithms and checker signatures are unchanged.
+- Source inspection only in this task; root coordinates rebuilt student regression, smoke and current CPU/visual evidence. No API calls, keys, commits or generated-file edits.

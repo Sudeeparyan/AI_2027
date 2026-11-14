@@ -8,7 +8,7 @@ GANs are the second deep generative family. Students should leave able to write 
 | 6–21 min | 5–9 | 1 · Why adversarial? | Learned loss for realism; architecture; roles; analogy and its limits. |
 | 21–51 min | 10–16 | 2 · The objective | Minimax, optimal D and JSD (derive on the board), non-saturating loss, training step code. Quiz. |
 | 51–58 min | – | Break | |
-| 58–80 min | 17–23 | 3 · Challenges and fixes | Real curves; mode collapse experiment; failure table; WGAN-GP; stabilisation; quiz. |
+| 58–80 min | 17–23 | 3 · Challenges and fixes | Diagnostic checks; mode collapse experiment; failure table; WGAN-GP; stabilisation; quiz. |
 | 80–102 min | 24–30 | 4 · Variants | DCGAN architecture and real samples; conditional GAN; pix2pix, CycleGAN, StyleGAN, BigGAN; cycle loss; interpolation. |
 | 102–118 min | 31–37 | 5 · Evaluation, applications, risks | FID and metrics table; GANs in 2026; deepfakes; VAE vs GAN summary. |
 | 118–120 min | 38–40 | Lab preview, summary, resources | |
@@ -53,13 +53,19 @@ Read **minimax** as two goals: the generator minimises a quantity that the discr
 
 ### The minimax game
 
-$$\min_G \max_D V(D, G) = \mathbb{E}_{x \sim p_{\mathrm{data}}}\left[\log D(x)\right] + \mathbb{E}_{z \sim p(z)}\left[\log\left(1 - D(G(z))\right)\right]$$
-
 **Read one pair.** If D(real) = 0.9 and D(fake) = 0.2, the two terms sum to ln(0.9) + ln(0.8), about −0.329. D wants this sum higher. G can affect the fake term.
+
+$$\min_G \max_D V(D, G) = \mathbb{E}_{x \sim p_{\mathrm{data}}}\left[\log D(x)\right] + \mathbb{E}_{z \sim p(z)}\left[\log\left(1 - D(G(z))\right)\right]$$
 
 For the discriminator this is (the negative of) the binary cross-entropy of a real-vs-fake classifier with labels 1 for real and 0 for fake. The generator appears only in the second term.
 
 ### The optimal discriminator (derivation)
+
+A **density** describes probability mass per unit of continuous input space. Compare the two source densities at the same location: real density divided by their total estimates the real-source probability. The constructed curves show that comparison before the general expression.
+
+**Worked example.** If $p_{\mathrm{data}}(x) = 0.3$ and $p_g(x) = 0.1$, D*(x) = 0.3/0.4 = 0.75. If both densities match, the answer is 0.5 wherever their sum is positive.
+
+![The optimal discriminator early in training and at equilibrium](fig:optimal_d)
 
 Write the expectation over fakes as an expectation over the generator's distribution $p_g$. For a fixed $G$:
 
@@ -71,8 +77,6 @@ For each $x$, the function $a \log y + b \log(1 - y)$ is maximised at $y = a/(a 
 
 $$D^{*}_G(x) = \frac{p_{\mathrm{data}}(x)}{p_{\mathrm{data}}(x) + p_g(x)}$$
 
-**Worked example.** If $p_{\mathrm{data}}(x) = 0.3$ and $p_g(x) = 0.1$, D*(x) = 0.3/0.4 = 0.75. If both densities match, the answer is 0.5 wherever their sum is positive.
-
 Substituting back gives
 
 $$V(D^{*}_G, G) = -\log 4 + 2\,\mathrm{JSD}(p_{\mathrm{data}} \,\|\, p_g)$$
@@ -80,8 +84,6 @@ $$V(D^{*}_G, G) = -\log 4 + 2\,\mathrm{JSD}(p_{\mathrm{data}} \,\|\, p_g)$$
 where the **Jensen–Shannon divergence** $\mathrm{JSD}(p\|q) = \tfrac12 D_{\mathrm{KL}}(p\|m) + \tfrac12 D_{\mathrm{KL}}(q\|m)$ with $m = \tfrac12(p + q)$ is symmetric, non-negative and zero only when $p = q$. So, with an optimal discriminator and unlimited capacity, the generator minimises the JSD, and the global optimum is $p_g = p_{\mathrm{data}}$, where $D^{*} = \tfrac12$ wherever the shared density is positive and $V = -\log 4$.
 
 **Worked example.** At JSD = 0, V = −ln(4), about −1.386. A positive JSD raises this ideal-discriminator objective, so the generator seeks matching distributions.
-
-![The optimal discriminator early in training and at equilibrium](fig:optimal_d)
 
 In practice neither network has unlimited capacity, $D$ need not be optimal, and the game is optimised with alternating stochastic gradient steps, so this is an idealisation that explains the goal rather than a guarantee.
 
@@ -113,7 +115,13 @@ GAN losses can rise and fall because each network changes the other’s task. Th
 
 Reuse the same noise codes for snapshots so changes reflect training. Then check variety and coverage with metrics and class counts. A low generator loss can coexist with repeated or poor images.
 
-![Real training curves of the lecture DCGAN](fig:losses)
+| Observation | Possible meaning | Check next |
+|---|---|---|
+| Loss changes | Changing opponent | Fixed-code samples |
+| Sharp repeats | Possible collapse | Class counts |
+| Confident source scores | Sources separate | Sample progress |
+
+Use your run’s outputs; no score proves quality. These are diagnostic scenarios, not additional measured results.
 
 ### Mode collapse
 
@@ -121,7 +129,11 @@ Reuse the same noise codes for snapshots so changes reflect training. Then check
 
 G can exploit one pattern that currently fools D, then switch when D adapts. In the measured eight-cluster experiment, the standard GAN covered {{W03_RING_STANDARD_MODES}} modes at the end while WGAN-GP covered {{W03_RING_WGAN_MODES}}. This is evidence for that run, not a universal guarantee.
 
-![Mode collapse experiment on a ring of 8 Gaussians](fig:mode_collapse)
+![Mode collapse experiment on a ring of 8 Gaussians](fig:mode_collapse_slide)
+
+**Archived figure labels.** These counts preserve the measured intermediate steps shown in the original figure. They describe this run; coverage need not increase at every step.
+
+{{W03_RING_COVERAGE_TABLE}}
 
 ### Failure modes and remedies
 
@@ -135,11 +147,13 @@ G can exploit one pattern that currently fools D, then switch when D adapts. In 
 
 ### The Wasserstein GAN with gradient penalty
 
+**Score-gap example.** If average real score = 2.0 and fake score = 0.5, the gap is 1.5. The critic increases the gap under its smoothness constraint. G tries to raise fake scores.
+
 The Wasserstein-1 (earth-mover) distance measures the minimum "work" to move probability mass from one distribution to the other. By Kantorovich–Rubinstein duality it equals $\sup_{\|f\|_L \leq 1} \mathbb{E}_{p_{\mathrm{data}}}[f(x)] - \mathbb{E}_{p_g}[f(x)]$, so a **critic** $D$ restricted to 1-Lipschitz functions can estimate it:
 
 $$\min_G \max_{\|D\|_L \leq 1} \mathbb{E}_{x \sim p_{\mathrm{data}}}[D(x)] - \mathbb{E}_{z}[D(G(z))]$$
 
-**Score-gap example.** If average real score = 2.0 and fake score = 0.5, the gap is 1.5. The critic increases the gap under its smoothness constraint. G tries to raise fake scores.
+**Penalty example.** For gradient norm 1.4 and $\lambda = 10$, the point penalty is 10 × (1.4 − 1)² = 1.6. Norm 1 gives zero. This encourages smoothness at sampled points.
 
 Unlike the JSD, it can vary usefully even when the two distributions do not overlap, giving the generator more informative directional feedback. WGAN-GP (Gulrajani et al., 2017) encourages the Lipschitz condition by adding to the critic's loss
 
@@ -147,14 +161,12 @@ $$\lambda\, \mathbb{E}_{\hat{x}}\left[\left(\|\nabla_{\hat{x}} D(\hat{x})\|_2 - 
 
 with λ = 10 and typically 5 critic steps per generator step. This encourages gradient norms near 1 on sampled interpolates; it does not guarantee a globally 1-Lipschitz critic or complete mode coverage. The critic outputs an unbounded score, not a probability.
 
-**Penalty example.** For gradient norm 1.4 and $\lambda = 10$, the point penalty is 10 × (1.4 − 1)² = 1.6. Norm 1 gives zero. This encourages smoothness at sampled points.
-
 ### Other stabilisation techniques
 
 * **Spectral normalisation** (Miyato et al., 2018): divide each discriminator layer's weight by its largest singular value, a way to control layer scale; the full-network constraint depends on layers and implementation (`torch.nn.utils.spectral_norm`).
 * **TTUR** (Heusel et al., 2017): different learning rates for D and G.
 * **EMA of generator weights:** sample from an exponential moving average of G's parameters.
-* **Adaptive discriminator augmentation (ADA):** augment images shown to D so it cannot memorise small datasets.
+* **Adaptive discriminator augmentation (ADA):** augment images shown to D to reduce discriminator overfitting on small datasets.
 * **R1 regularisation:** penalise D's gradient on real data (default in StyleGAN2).
 
 ## 4. Variants: from DCGAN to StyleGAN
@@ -167,7 +179,7 @@ The lab follows Radford et al. (2015): batch normalisation in selected layers, R
 
 ![DCGAN generator and guidelines](fig:dcgan_arch)
 
-![Real DCGAN samples across epochs](fig:epochs)
+![Real DCGAN samples across epochs](fig:epochs_slide)
 
 ### Conditional GANs and image-to-image translation
 
@@ -204,15 +216,15 @@ Generative precision and recall separate realism from coverage in the chosen fea
 
 Embed real and generated images with an Inception-v3 network (2048-dimensional pool features), fit a Gaussian to each set and compute the Fréchet distance:
 
-$$\mathrm{FID} = \|\mu_r - \mu_g\|_2^2 + \mathrm{Tr}\left(\Sigma_r + \Sigma_g - 2\left(\Sigma_r\Sigma_g\right)^{1/2}\right)$$
-
-**Read the symbols first.** $\mu$ (mu) is the average feature vector. $\Sigma$ (Sigma) is a covariance matrix describing feature variation. Tr adds diagonal entries. The one-dimensional worked example below makes the calculation smaller.
-
-Lower is better. Both feature means and covariances can change with quality and coverage; neither is a pure quality or diversity measure. Limitations: assumes Gaussian features; biased for small sample sizes (use ≥ 10,000 samples or KID); ImageNet features may not suit other domains; values are only comparable with identical feature networks, preprocessing and sample sizes.
+**Read the symbols first.** $\mu$ (mu) is the average feature vector. $\Sigma$ (Sigma) is a covariance matrix describing feature variation. Tr adds diagonal entries. The one-dimensional worked example that follows makes the calculation smaller.
 
 **Worked example (1-D intuition).** If real features have mean 0 and variance 1 and generated features have mean 0.5 and variance 0.25, then FID = 0.5² + (1 + 0.25 − 2√(1 × 0.25)) = 0.25 + (1.25 − 1) = **0.50**. A collapsed generator with variance 0.01 and mean 0 gives 0 + (1 + 0.01 − 2 × 0.1) = **0.81**, worse despite a perfect mean.
 
 ![What FID measures in feature space](fig:fid)
+
+$$\mathrm{FID} = \|\mu_r - \mu_g\|_2^2 + \mathrm{Tr}\left(\Sigma_r + \Sigma_g - 2\left(\Sigma_r\Sigma_g\right)^{1/2}\right)$$
+
+Lower is better. Both feature means and covariances can change with quality and coverage; neither is a pure quality or diversity measure. Limitations: assumes Gaussian features; biased for small sample sizes (use ≥ 10,000 samples or KID); ImageNet features may not suit other domains; values are only comparable with identical feature networks, preprocessing and sample sizes.
 
 **Lab distinction:** `frechet_distance` uses the same distribution-comparison formula with features from the lab's `DigitCNN`, not Inception-v3. Call its output a **custom feature Fréchet distance**. Its scale differs from standard Inception FID, so do not compare it with published FID values. Check the classifier's accuracy and keep its weights, preprocessing, and sample size fixed for comparisons within the lab.
 
@@ -308,7 +320,7 @@ Ask students to identify where their project could create synthetic media and ho
 
 # Glossary
 
-This week's key terms are listed in the Quick glossary at the end of the beginner walkthrough above. The complete module glossary for all twelve weeks is in Course_Glossary.docx in the 00_Course folder.
+<!-- Definitions generated from curriculum/glossary.json week_glossary. -->
 
 # Readings, videos and further practice
 
@@ -388,7 +400,7 @@ The networks change each other's training signal. Their losses need to stay in b
 
 - Update D, then update G. The expectations mean averages over real images and random codes.
 
-## Slide 12: The optimal discriminator and what G really minimises
+## Slide 13: The optimal discriminator and what G really minimises
 
 - With G fixed, the ideal D compares the real and generated densities at each point.
 
@@ -416,11 +428,11 @@ The networks change each other's training signal. Their losses need to stay in b
 
 - This example uses Adam with learning rate 0.0002 and beta1 = 0.5.
 
-## Slide 18: Real training curves: losses do not tell you quality
+## Slide 18: Read GAN diagnostics together
 
 - The losses can rise and fall as the two networks adapt.
 
-- In this run, D rates real images higher than generated images.
+- Confident source scores show what the current discriminator separates; they do not establish image quality.
 
 - Compare fixed-noise sample images over time. Check quality and variety with separate measures.
 
@@ -490,7 +502,7 @@ The networks change each other's training signal. Their losses need to stay in b
 
 - StyleGAN provides extra style controls for image editing.
 
-## Slide 32: Fréchet Inception Distance (FID)
+## Slide 33: Fréchet Inception Distance (FID)
 
 - Use the same pretrained network to turn real and generated images into feature vectors.
 

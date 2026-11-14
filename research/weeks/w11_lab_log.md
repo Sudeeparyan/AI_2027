@@ -16,3 +16,18 @@ Handoff: W11 sources ready for root serial build/smoke/full CPU. Hashes and stat
 ## Final coordinator handoff — 12 October 2026
 - Latest measured cached local CPU core 39.5s (0.7min), within 900 s; final smoke PASS (34.7s), zero failed feedback checks. Recorded full-run code matches current executable core.
 - Final image review closed; canonical evidence is `research/ITERATION3_2026-10-12.json`. Earlier unmeasured/pending handoffs are historical. No timed Colab, live API, clean-install/download, browser-widget or optional-stretch verification.
+
+## Independent audit repairs — 12 October 2026
+- A06: install cell explicitly includes torch, transformers, accelerate, numpy, pandas and matplotlib alongside FastAPI/httpx/uvicorn. Corrected setup comment: installation provides dependencies; setup configures device/seeds/provider helpers.
+- Static verification: Python AST parses with %pip removed; 6 solution blocks and CRLF retained. Root builder supplies researched exact pins and owns installation/smoke/full validation. No clean install or notebook execution performed here.
+
+## Source fallback review — 12 October 2026
+- Widget fallback correction: ipywidgets/IPython imports are inside the try block; the plain-Python budget callback remains callable without widget libraries.
+- PASS: build/review_lab_fallbacks_20261012.py ran in .venv-labs: 21 source fixtures, including unchanged/changed adapter cache tests, changed data/seed rejection, four forced missing-widget paths, and all 13 callbacks at slider boundaries. Synthetic tiny inputs only; no model download, secrets, API calls or notebook execution.
+- Result JSON: build/lab_source_regressions_20261012.json. Browser widget rendering and Colab remain unverified; root owns current rebuilt notebook smoke/full evidence.
+
+
+### Student-readiness correction - 13 October 2026
+
+- All five TODO checks now stop before timing, endpoint, cost, quantisation and guardrail results are consumed. Messages identify the TODO and require rerunning its cell. Completed algorithms and checker signatures are unchanged.
+- Source inspection only in this task; root coordinates rebuilt student regression, smoke and current CPU/visual evidence. No API calls, keys, commits or generated-file edits.

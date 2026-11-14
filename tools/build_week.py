@@ -403,17 +403,22 @@ def solution_md(lines: list[str]) -> list[str]:
 
 RUN_BANNER = """> **How to run this notebook**
 > - **Google Colab:** File ▸ Upload notebook. Keep the CPU runtime for the core path. Run cells top to bottom with Shift+Enter. Free resources vary; there is no guaranteed GPU.
-> - **Local Jupyter / VS Code:** select a Python 3.11+ kernel with the listed packages. Run the install cell once if needed.
+> - **Local Jupyter / VS Code:** select a Python 3.12+ kernel with the listed packages. Run the install cell once if needed.
 > - **Optional routes:** leave `USE_GPU`, `USE_GEMINI` and `USE_OPENAI` false for the complete local CPU lab. To compare a hosted answer, enable exactly one API switch in shared setup.
 > - **Gemini:** use synthetic prompts only. Store `GEMINI_API_KEY` in Colab Secrets or the environment. Account, age, region, quota and distribution terms affect eligibility; see the platform note. Never enable billing for this lab.
 > - **OpenAI API:** an optional paid alternative, using `OPENAI_API_KEY` from Secrets or the environment. A ChatGPT subscription does not supply API credit. Check your account's API pricing and budget first. Local users can point `LOCAL_ENV_FILE` to a private `.env`; never upload it or paste keys into notebook cells.
 > - Cells marked **TODO** are yours to complete before running dependent cells. Questions marked ✍️ need a short written answer.
+> - If a TODO check stops a cell, read its hint, complete the TODO, then rerun the cell.
 > - Read each diagram by following its numbered blocks. The solid arrows carry data to the next block. A dashed arrow shows a step that repeats."""
 
 LAB_PINS = {
     "torch": "2.11.0", "torchvision": "0.26.0", "transformers": "5.18.0", "diffusers": "0.40.0",
     "peft": "0.21.1", "sentence-transformers": "5.7.0", "ipywidgets": "7.7.1",
     "google-genai": "2.29.0", "trl": "1.15.0", "openai": "3.28.0", "python-dotenv": "1.2.4",
+    "fastapi": "0.143.0", "httpx": "0.28.1", "uvicorn": "0.54.0",
+    "accelerate": "1.15.0", "datasets": "5.1.0", "matplotlib": "3.11.2", "numpy": "2.5.2",
+    "pandas": "3.0.6", "pydantic": "2.14.1", "rank-bm25": "0.2.2", "scikit-learn": "1.9.1",
+    "scipy": "1.18.1", "soundfile": "0.14.0",
 }
 
 
@@ -453,7 +458,9 @@ def install_cell(code: str, *, first: bool) -> str:
         output.append(line)
     code = "\n".join(output)
     if first:
-        code += "\n%pip install -q google-genai==2.29.0 ipywidgets==7.7.1 openai==3.28.0 python-dotenv==1.2.4"
+        # Setup imports numpy and torch before any week's model-specific cells.
+        shared_packages = ("torch", "numpy", "google-genai", "ipywidgets", "openai", "python-dotenv")
+        code += "\n%pip install -q " + " ".join(f"{name}=={LAB_PINS[name]}" for name in shared_packages)
     return code
 
 
@@ -464,6 +471,7 @@ Expect a runtime record and no API request. `check()` prints helpful feedback.
 
 Leave `USE_GEMINI = False` and `USE_OPENAI = False` for the complete local lab.
 For an optional comparison, enable exactly one switch and rerun this setup cell.
+The combined 40-attempt budget survives setup reruns and provider changes in this kernel.
 `ask_model()` selects Gemini (`gemini-3.5-flash-lite`) or the OpenAI API (`gpt-4.1-mini`).
 Both use a bounded retry, a shared 40-attempt ceiling and a local response cache.
 Free quotas are account-specific; a failed request returns `None` for the local fallback.
@@ -473,11 +481,14 @@ API-client distribution has a separate paid-service condition. Local tasks need 
 OpenAI API usage may incur charges, separately from ChatGPT subscriptions; check
 [API pricing](https://developers.openai.com/api/docs/pricing) before opting in.
 Use `GEMINI_API_KEY` or `OPENAI_API_KEY` in Colab Secrets or your local environment.
-For local `.env` use, set `LOCAL_ENV_FILE` to that file's path. Secrets are read only after opt-in.
+`LOCAL_ENV_FILE = None` reads no local file. Select a private file explicitly by setting its path.
+Secrets are read only after API opt-in; do not upload the selected file.
 Use invented prompts only. OpenAI requests set `store=False`; this is not a promise of zero retention.
 
 **Common errors:** a missing optional key means use the local result; a package import
-error means check the selected kernel and install cell. Change only one switch at a time."""
+error means check the selected kernel and install cell. Change only one switch at a time.
+If a slider does not display, use the numeric setting in its earlier example.
+The core lab still works without widgets."""
 
 
 def build_notebooks(n: int, wk: dict, outdir: Path) -> tuple[Path, Path]:

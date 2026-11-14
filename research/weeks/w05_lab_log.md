@@ -13,3 +13,11 @@
 ## Final coordinator handoff — 12 October 2026
 - Latest measured cached local CPU core 248.7s (4.1min), within 900 s; final smoke PASS (20.2s), zero failed feedback checks. Recorded full-run code matches current executable core.
 - Final image review closed; canonical evidence is `research/ITERATION3_2026-10-12.json`. Earlier unmeasured/pending handoffs are historical. No timed Colab, live API, clean-install/download, browser-widget or optional-stretch verification.
+
+## Independent audit repairs — 12 October 2026
+- Added per-part core inspection/change/stretch/check/common-errors boxes for optional pretrained-model and key/value-cache Parts 5–6. Both remain explicitly outside the required CPU core; opt-in flags and executable code are unchanged.
+- Static review: every part has its own activity scaffold; root owns rebuilding and runtime/visual checks. No model downloads or notebook runs performed in this subtask.
+
+## Student readiness guards — 13 October 2026
+- Added an assertion to the existing optional selected-head check. A failed TODO now stops before head inspection, with completion and cell-rerun guidance.
+- Solution algorithm, check signature and markers retained; default CPU core unchanged, optional branch gains one guard. Existing line endings preserved byte-for-byte outside that replacement. No builds, notebook runs, tests, renders or API calls in this subtask; coordinator owns verification.

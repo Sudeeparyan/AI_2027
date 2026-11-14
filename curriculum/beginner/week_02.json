@@ -105,7 +105,7 @@
     },
     {
       "id": "mechanism",
-      "insert_before_title": "The reparameterisation trick",
+      "insert_before_title": "Why the trick matters for backpropagation",
       "title": "Sample a latent code while training",
       "subtitle": "Shift and scale noise",
       "steps": [

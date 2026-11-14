@@ -34,3 +34,24 @@
 - Latest successful cached local CPU full core: 797.3 s (13.3 min), recorded in `research/lab_runs_2026-10.json`; final smoke PASS (158.1 s). Current executed core code matches the successful full-run evidence.
 - All 26 current release gates passed, including coverage 100%, strict notes, body ≤ 40, fonts ≥ 14, semantic helpers and shared diagram/attachment parity. See `research/ITERATION3_2026-10-12.json`.
 - No timed Colab, clean-install/download, live-provider, browser-widget or optional GPU/stretch claim. Earlier pending handoffs above describe intermediate states.
+
+## Additional independent teaching review — 12 October 2026
+- Additional semantic review: rising validation loss suggests overfitting; it does not prove literal memorisation. Updated beginner training explanation and Answer; strict five-diagram notes PASS.
+- Handoff: root-authorised narrow source changes complete; build/render checks remain coordinated by root. No new lab logic, runtime or provider claim.
+
+
+## Runtime provenance repair — 12 October 2026
+- Removed the undated archived 76-minute claim from the stored LoRA loss-curve figure title. Losses, settings, sample count and current dated CPU fine-tuning evidence remain. Root owns timing filler removal and the corrected float32 weight-size description.
+- Source edits only; no build, render or notebook execution during active coordinated CPU runs. Coordinator must rebuild and inspect the changed charts and Word sections.
+
+## Successful clean pinned CPU retry — 12 October 2026
+- Actual full CPU core retry started 2026-10-12T22:26:04.169647+00:00, completed in 728.7s (12.15min), within the 900s budget. The coordinator/lab runner executed it; this evidence task checked the successful record, zero notebook errors and matching executed-notebook SHA256.
+- Promoted the measured staged export to curriculum/assets/week_08/results_cpu_core.json with exact run start, runtime versions and export/notebook hashes; appended the genuine retry to research/lab_runs_2026-10.json. Original failed batch/attempt evidence remains unchanged.
+- Retained archived stretch/GPU figures and non-timing metrics; no harvest mutation, build, fill, render, Colab timing, live provider or browser-widget verification performed here. Final fill/build/render review remains with Q1-V.
+
+
+### Audit correction closeout — 13 October 2026
+
+- Real portable CPU LoRA training; invented hosted examples, guarded final test, activity/check scaffolding and examples before formulas.
+- Final current artifacts rebuilt, checked and visually reviewed; no open findings. Evidence: ../AUDIT_FIXES_2026-10-12.json.
+- CPU/Office verification is local; Colab, live API and classroom limits remain documented.

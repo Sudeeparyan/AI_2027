@@ -184,11 +184,11 @@ slides:
     points:
     - Huge general text
     - Updates all weights
-    - Weeks of GPU time
+    - Compute depends on scale
   - head: Fine-tuning
     points:
     - Your task examples
-    - Updates some weights
+    - Updates selected weights
     - Week 8
   - head: Prompting
     points:
@@ -206,8 +206,8 @@ slides:
 
 
     Example: Pre-training a model such as Qwen uses large GPU clusters and trillions of tokens. Week 8 fine-tunes a small adapter
-    on 200 banking-support messages using CPU. Today''s routing prompt changes in seconds. A new employee is an analogy; education,
-    job training, then a daily briefing. Unlike an employee, the model forgets the briefing after each request.
+    on 200 banking-support messages using CPU. Today the routing prompt changes the input alone. A new employee is an analogy;
+    education, job training, then a daily briefing. Unlike an employee, the briefing must remain in the supplied context.
 
 
     Ask: A model keeps misusing a company term despite good prompts. What would you try next?
@@ -464,7 +464,7 @@ slides:
 
 
     Example: The lab adds "You are an experienced student-services triage officer" to the few-shot prompt. In the stored GPU
-    run, role + few-shot did not beat few-shot alone: {{FEWSHOT_SUMMARY}} A costume is an analogy; it changes appearance, not
+    run, role + few-shot did not beat few-shot alone. {{FEWSHOT_SUMMARY}} A costume is an analogy; it changes appearance, not
     ability.
 
 
@@ -552,26 +552,21 @@ slides:
   - Raise the temperature
   - Fine-tune on labelled messages
   answer: 1
-  notes: 'In short: When replies have the wrong format, show the format before trying anything heavier.
+  notes: 'In short: When a reply has the wrong format, show the desired format and check that requirement separately.
 
+    Explain: A format failure breaks the requested output structure. Examples demonstrate the exact output shape. Listing allowed
+    labels removes one guess. The lab scorer recognises one permitted label even inside longer prose. Its invalid count therefore
+    measures unparsed or ambiguous replies, rather than strict format compliance.
 
-    Explain: A format failure means the content may be right but code cannot parse it. Examples demonstrate the exact output
-    shape. Listing the allowed labels removes guesswork. Temperature controls randomness, not format. Fine-tuning is slower
-    and costlier than a prompt fix.
+    Example: "This concerns IT_ACCESS" contains one recognised label, so the lab can score its routing decision. It still violates
+    the instruction to return the label only. A strict label-only checker would reject that prose. These classroom replies illustrate
+    two checks; they do not replace the measured prompt results.
 
+    Ask: Which option is the best first change when sentences are returned instead of labels?
 
-    Example: Zero-shot replies such as "This message seems to be about IT access" fail an exact-label parser. Adding five examples
-    ending in "Category: IT_ACCESS" usually produces short labels. The lab''s label_scorer then counts them as valid. A persona
-    alone rarely changes the reply length.
+    Answer: B. Show examples and allowed labels, then measure routing correctness and format compliance separately.
 
-
-    Ask: Which option is the most effective first fix?
-
-
-    Answer: B. Show examples in the exact format and list the allowed labels, then measure again.
-
-
-    Watch out: A parser that accepts long sentences can hide format failures; count invalid replies separately.'
+    Watch out: A tolerant parser can hide format failures. Preserve its definition when comparing recorded scores.'
 - type: section
   number: 3
   title: Reasoning, structure and context
@@ -743,7 +738,7 @@ slides:
   title: 'Structured outputs: a schema as a contract'
   code: "class Request(BaseModel):\n    name: str\n    student_id: str = Field(pattern=r\"^\\d{8}$\")\n    request: Literal[\"\
     extension\", \"invoice\", \"deferral\"]\n    date: str | None = None\n\n\n# Lab helper validates both attempts\nreq, retries\
-    \ = parse_with_retry(messages)\n"
+    \ = parse_with_retry(email[\"text\"])\n"
   bullets:
   - Schema checks shape.
   - Compare facts separately.
@@ -972,6 +967,7 @@ slides:
 
 
     Watch out: Word overlap rewards surface similarity, not factual correctness.'
+  example_first: true
 - type: bullets
   title: LLM-as-a-judge
   bullets:
@@ -1068,7 +1064,7 @@ slides:
     prompts matter. A final test set stays untouched until the end.
 
 
-    Example: At 80% on 40 items, the Wilson 95% interval is about 65% to 89%. At 80% on 400 items, it narrows to about 76% to
+    Example: At 80% on 40 items, the Wilson 95% interval is about 65% to 90%. At 80% on 400 items, it narrows to about 76% to
     84%. Ten times the data gives roughly a third of the width, because √10 ≈ 3.2. A prompt that fixes 3 items and breaks 1
     has a net gain of 2.
 
@@ -1084,7 +1080,7 @@ slides:
     type: example_strip
     items:
     - label: 40 items
-      text: '80% correct: 95% interval ≈ 65%–89%'
+      text: '80% correct: 95% interval ≈ 65%–90%'
     - label: 400 items
       text: '80% correct: 95% interval ≈ 76%–84%'
 - type: section

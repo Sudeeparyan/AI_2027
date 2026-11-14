@@ -20,8 +20,10 @@ def audit(path):
             if not match:
                 continue
             root = ET.fromstring(archive.read(name))
-            for shape in root.findall(".//p:sp", NS):
+            for shape in root.findall(".//p:sp", NS) + root.findall(".//p:graphicFrame", NS):
                 offset = shape.find("p:spPr/a:xfrm/a:off", NS)
+                if offset is None:
+                    offset = shape.find("p:xfrm/a:off", NS)
                 y = int(offset.get("y")) / 914400 if offset is not None else 0
                 if y < .5 or y >= 7:
                     continue  # running header, course footer and page number

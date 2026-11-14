@@ -189,51 +189,61 @@
     },
     {
       "id": "training",
-      "title": "Teach a visual bridge and useful answers",
-      "subtitle": "Conceptual; not lab training",
+      "title": "Trace one visual bridge update",
+      "subtitle": "Illustrative; fixed encoder/head",
       "insert_before_title": "A typical training pipeline for a vision-language model",
       "steps": [
         {
-          "title": "Review pairs",
-          "detail": "Images; answers",
+          "title": "Read features",
+          "detail": "h [1,2]",
           "role": "data",
           "code": ""
         },
         {
-          "title": "Train bridge",
-          "detail": "Map features",
+          "title": "Project",
+          "detail": "W [2,3]",
+          "role": "model",
+          "code": ""
+        },
+        {
+          "title": "Predict",
+          "detail": "Fixed head",
+          "role": "model",
+          "code": ""
+        },
+        {
+          "title": "Loss/backprop",
+          "detail": "Red: 1.408",
           "role": "loss",
           "code": ""
         },
         {
-          "title": "Tune instructions",
-          "detail": "Visual tasks",
+          "title": "Update W",
+          "detail": "Rate 0.1",
           "role": "loss",
-          "code": ""
-        },
-        {
-          "title": "Test images",
-          "detail": "Held-out examples",
-          "role": "metric",
           "code": ""
         }
       ],
       "arrows": [
-        "pairs",
-        "aligned weights",
-        "tuned weights"
+        "h [1,2]",
+        "v [1,3]",
+        "p [1,3]",
+        "gradient [2,3]"
       ],
-      "explanation": "A modular vision-language model can start from an existing image encoder and language model. The image encoder produces visual features, but those features are not automatically in the form the language model expects. A learned bridge, often called a projector, maps them into suitable vectors. An alignment stage uses image-caption examples to train that connection. Visual instruction tuning then uses questions and desired answers about images, documents or charts. Different recipes train different components; some keep the image encoder fixed and add LoRA to the language model. Held-out images check whether the system generalises beyond its examples. This is a conceptual recipe: the lab loads pretrained models and measures inference, rather than training a VLM.",
+      "explanation": "This illustrative alignment step freezes the image encoder and language head while training their projector. A frozen encoder supplies one visual feature row h=[1,2], whose tensor shape is [1,2]. Projector weights W have shape [2,3], so hW has shape [1,3]. Starting with W rows [1,0,0] and [0,1,0] produces v=[1,2,0]. A deliberately simple fixed head treats those values as logits for red, blue and other. Softmax gives target-red probability about 0.245. Its negative natural logarithm is loss 1.408. Backpropagation gives a [2,3] weight gradient. An optimiser subtracts learning rate times gradient and supplies updated weights for the next pass. The dashed loop returns weights to Project; solid arrows carry feature, prediction or gradient data. Real VLMs include question tokens, attention and much larger vocabularies. The lab loads existing models rather than training this toy.",
       "trace": [
-        "An image of a cup is paired with \"a blue cup on a desk\".",
-        "The bridge learns to present the visual features to the language model.",
-        "An instruction example asks \"What colour is the cup?\" with answer \"blue\".",
-        "A new cup photo tests reading accuracy without appearing in training."
+        "Illustrative features h=[1,2] multiply W=[[1,0,0],[0,1,0]], giving v=[1,2,0].",
+        "The fixed head gives red probability exp(1)/(exp(1)+exp(2)+exp(0)) ≈ 0.245.",
+        "For target red, loss is −log(0.245) ≈ 1.408 using unrounded probabilities.",
+        "The first weight has gradient about −0.755; learning rate 0.1 updates it from 1 to 1.0755."
       ],
-      "check_question": "Does the lab train this?",
-      "check_answer": "No. It loads existing models; the diagram explains how such a model can be built.",
+      "check_question": "Which weights change?",
+      "check_answer": "Only W, the projector, in this toy. The feature encoder and three-word head stay frozen.",
       "layout": "linear",
-      "notes": "In short: Paired alignment and visual instructions teach different connections.\n\nExplain: A modular recipe begins with pretrained vision and language components. Alignment uses paired images and captions to train their projector. Visual instruction tuning uses image questions with desired responses. Some methods freeze components or add LoRA matrices. Held-out images test performance beyond the training examples.\n\nExample: A cup-caption pair trains alignment; a colour question with target blue trains a visual task. A new cup photograph supplies a test.\n\nAsk: Does the lab train the illustrated bridge?\n\nAnswer: No. It loads existing model weights and measures inference; this scene explains a possible training recipe.\n\nWatch out: The arrows carry examples or resulting weights, not a guarantee that all recipes update the same components."
+      "notes": "In short: The training loop changes projector weights using feedback from a target answer token.\n\nExplain: Frozen means a component's weights do not update. Visual features h have shape one by two. Projector W maps them to three language-input values v. The fixed toy head converts those values to three token probabilities p. Loss L is the negative logarithm of the red probability. Backpropagation computes a two-by-three gradient for W, and the optimiser subtracts a scaled gradient.\n\nExample: Starting features [1,2] produce [1,2,0] and red probability about 0.245. Target-red loss is 1.408. The first weight's gradient is about minus 0.755, so rate 0.1 changes it from one to 1.0755.\n\nAsk: What flows along the dashed return arrow?\n\nAnswer: Updated projector weights, which the next feature pass uses; the scalar loss is not a new image or token.\n\nWatch out: These are illustrative calculations, not measured results. Real language heads use richer structures; the lab only performs pretrained inference.",
+      "feedback": "Updated W [2,3]",
+      "feedback_from": 4,
+      "feedback_to": 1
     },
     {
       "id": "inference",

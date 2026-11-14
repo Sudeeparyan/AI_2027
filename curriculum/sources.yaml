@@ -72,7 +72,7 @@ sources:
   - {id: mcp_intro, kind: doc, label: "Model Context Protocol: Introduction", url: "https://modelcontextprotocol.io/", weeks: [12]}
   - {id: c2pa, kind: doc, label: "C2PA: Content credentials and provenance standard", url: "https://c2pa.org/", weeks: [10]}
   - {id: synthid, kind: doc, label: "Google DeepMind: SynthID watermarking", url: "https://deepmind.google/models/synthid/", weeks: [10]}
-  - {id: eu_ai_act, kind: doc, label: "EU AI Act explorer (official text, articles on transparency)", url: "https://artificialintelligenceact.eu/", weeks: [1, 10]}
+  - {id: eu_ai_act, kind: doc, label: "Future of Life Institute: EU AI Act guide (independent resource)", url: "https://artificialintelligenceact.eu/", weeks: [1, 10]}
   - {id: eu_ai_act_art50, kind: doc, label: "EU AI Act: Article 50 (duties and exceptions)", url: "https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50", weeks: [1, 3, 10, 11]}
   - {id: eu_ai_act_transition, kind: doc, label: "EU AI Act: Article 111(4), marking transition", url: "https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-111", weeks: [1, 3, 10, 11]}
   - {id: ec_transparency_guidelines, kind: doc, label: "European Commission: Guidelines on AI transparency obligations (July 2026)", url: "https://digital-strategy.ec.europa.eu/en/policies/guidelines-ai-transparency-obligations", weeks: [1, 10]}

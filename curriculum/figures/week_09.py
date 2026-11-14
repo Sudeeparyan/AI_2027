@@ -73,29 +73,49 @@ def fusion(path):
 
 
 def architectures(path):
-    fig, ax = _diagram_canvas(4.9)
-    panels = [(.15,2.8,'Dual encoder',['Image','Compare','Text'],'vectors'),(6.65,2.8,'Fusion encoder',['Image tokens','Text tokens','Joint encoder'],'tokens'),(.15,.7,'Encoder-decoder',['Encoder','Decoder'],'features'),(6.65,.7,'Vision + LLM',['Vision','Bridge','LLM'],'features')]
-    for x,y,title,labels,flow in panels:
-        ax.text(x,y+1.5,title,fontsize=20,fontweight='bold',color=INK)
-        if title == 'Fusion encoder':
-            role_box(ax,x,y+.43,2.1,.4,labels[0],'data',size=17)
-            role_box(ax,x,y-.07,2.1,.4,labels[1],'data',size=17)
-            role_box(ax,x+3.4,y,2.55,.8,labels[2],'model',size=18)
-            arrow(ax,x+2.1,y+.63,x+3.4,y+.6)
-            arrow(ax,x+2.1,y+.13,x+3.4,y+.2)
-            ax.text(x+2.7,y+.39,flow,ha='center',fontsize=17,color=TEXT)
-            continue
-        gap=.55
-        width=(5.95-gap*(len(labels)-1))/len(labels)
-        for i,label in enumerate(labels):
-            bx=x+i*(width+gap)
-            role_box(ax,bx,y,width,.8,label,'model',size=18)
-            if i < len(labels)-1:
-                if title == 'Dual encoder' and i == 1:
-                    arrow(ax,bx+width+gap,y+.4,bx+width,y+.4)
-                else:
-                    arrow(ax,bx+width,y+.4,bx+width+gap,y+.4)
-        ax.text(x+2.975,y+1.04,flow,ha='center',fontsize=17,color=TEXT)
+    # Every arrow runs left to right and carries its own label above it.
+    fig, ax = _diagram_canvas(5.4)
+    def label(x, y, text):
+        ax.text(x, y, text, ha='center', va='bottom', fontsize=17, color=TEXT)
+    def title(x, y, text):
+        ax.text(x, y+1.45, text, fontsize=20, fontweight='bold', color=INK)
+    # Dual encoder (CLIP): separate encoders meet only in a similarity score.
+    x, y = .15, 3.2
+    title(x, y, 'Dual encoder')
+    for row, (name, enc) in zip((y+.47, y-.07), (('Image', 'Image encoder'), ('Text', 'Text encoder'))):
+        role_box(ax, x, row, 1.15, .4, name, 'data', size=16)
+        role_box(ax, x+1.55, row, 2.0, .4, enc, 'model', size=16)
+        arrow(ax, x+1.15, row+.2, x+1.55, row+.2)
+        arrow(ax, x+3.55, row+.2, x+4.2, row+.2)
+    role_box(ax, x+4.2, y-.07, 1.75, .94, 'Compare', 'metric', size=18)
+    label(x+3.875, y+.92, 'vectors')
+    # Fusion encoder: both token sequences enter one joint encoder.
+    x = 6.65
+    title(x, y, 'Fusion encoder')
+    role_box(ax, x, y+.47, 2.1, .4, 'Image tokens', 'data', size=16)
+    role_box(ax, x, y-.07, 2.1, .4, 'Text tokens', 'data', size=16)
+    role_box(ax, x+3.4, y-.07, 2.55, .94, 'Joint encoder', 'model', size=18)
+    arrow(ax, x+2.1, y+.67, x+3.4, y+.67)
+    arrow(ax, x+2.1, y+.13, x+3.4, y+.13)
+    label(x+2.75, y+.92, 'tokens')
+    # Encoder-decoder (Whisper): encoded features condition a decoder.
+    x, y = .15, 1.0
+    title(x, y, 'Encoder-decoder')
+    role_box(ax, x, y, 2.7, .8, 'Encoder', 'model', size=18)
+    role_box(ax, x+3.25, y, 2.7, .8, 'Decoder', 'model', size=18)
+    arrow(ax, x+2.7, y+.4, x+3.25, y+.4)
+    label(x+2.975, y+.85, 'features')
+    # Vision + LLM (LLaVA): a bridge turns image features into LLM input tokens.
+    x = 6.65
+    title(x, y, 'Vision + LLM')
+    w, gap = 1.62, .55
+    for i, name in enumerate(('Vision', 'Bridge', 'LLM')):
+        role_box(ax, x+i*(w+gap), y, w, .8, name, 'model', size=18)
+    for i, flow in enumerate(('features', 'visual tokens')):
+        start = x+i*(w+gap)+w
+        arrow(ax, start, y+.4, start+gap, y+.4)
+        label(start+gap/2, y+.85, flow)
+    role_legend(ax, .2, size=16)
     _diagram_finish(fig,path)
 
 

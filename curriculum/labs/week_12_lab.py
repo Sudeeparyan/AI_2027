@@ -18,7 +18,7 @@
 # ## A 120-minute route
 # Setup and reading 10 min; no-retrieval baseline 10; indexing 20; retrieval 20; grounded answers 20; tools/injection 25; MCP scaffold 10; exit checks 5.
 #
-# The CPU waiting budget is a design target until the complete built notebook is measured. Default route: MiniLM vectors, NumPy exact search, BM25/RRF, bounded SmolLM2-135M generation and a controlled loop. Databases and downloaded re-ranking are optional. Every prompt and source is invented. The fictional 20-euro handbook allowance is task data, not a verified API price or a required expenditure.
+# The companion notes report the measured cached CPU core time; the final results record your own run. Default route: MiniLM vectors, NumPy exact search, BM25/RRF, bounded SmolLM2-135M generation and a controlled loop. Databases and downloaded re-ranking are optional. Every prompt and source is invented. The fictional 20-euro handbook allowance is task data, not a verified API price or a required expenditure.
 #
 # Shared setup supplies DEVICE, SEED, SMOKE and both provider opt-ins once. A fixed local policy fills missing tool proposals; trace rows label it, and its success is reported separately from model-only success. Nothing sends email. Do not turn fallback success into a model competence claim.
 
@@ -207,7 +207,7 @@ for q, pat, gold in (EVAL[:2] + EVAL[-1:] if SMOKE else EVAL):
     a = llm([{"role": "user", "content": q + " Answer in one sentence."}], 60)
     no_rag.append({"question": q, "answer": a, "answerable": gold is not None, "correct": correct(a, pat)})
 no_rag_df = pd.DataFrame(no_rag)
-print("accuracy without retrieval:", no_rag_df.correct.mean())
+print("reference-pattern score without retrieval:", no_rag_df.correct.mean())
 no_rag_df.head(6)
 
 # %% [markdown]
@@ -617,14 +617,14 @@ summary = pd.DataFrame({
 fig, ax = plt.subplots(figsize=(6, 3.2))
 bars = ax.bar(["no retrieval", "RAG"], summary["accuracy (answerable)"], color=["#94A3B8", "#4F46E5"])
 ax.bar_label(bars, labels=[f"{v:.0%}" for v in summary["accuracy (answerable)"]], padding=3)
-ax.set_ylim(0, 1.12); ax.set_ylabel("accuracy"); ax.set_title(f"Answer accuracy on handbook questions ({LLM_ID.split('/')[-1]})")
+ax.set_ylim(0, 1.12); ax.set_ylabel("reference-pattern score"); ax.set_title(f"Reference-pattern score ({LLM_ID.split('/')[-1]})")
 plt.tight_layout(); plt.show()  # RAG_FIGURE
-summary
+summary.rename(columns={"accuracy (answerable)": "reference-pattern score (answerable)"})
 
 # %% [markdown]
 # **What/why:** Display full per-question RAG diagnostic rows.
 #
-# **Predict:** Can aggregate accuracy hide one unsupported answer?
+# **Predict:** Can aggregate pattern matching hide one unsupported answer?
 #
 # **Expected output:** A question-level table; compare each answer with its retrieved evidence.
 

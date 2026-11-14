@@ -249,5 +249,61 @@ Handoff: All 12 measured CPU cores and their hashes recorded; fill/all-week buil
 Handoff: Complete 12 Oct: 26 gates PASS; 12 final smokes PASS; full CPU evidence/current-code parity PASS. Reviewed 552 slides, 402 weekly Word pages, 103 diagrams, 130 notebook images and 50 course pages with retained view hashes. All layouts []; zero open findings. Docs/audit/revision updated. Unverified: Colab, live APIs, clean install, widgets, public deployment, optional stretches and four blocked links. No commit/push.
 
 ## Intake (any time)
+**Q0 · Independent implementation audit** · owns: `research/IMPLEMENTATION_AUDIT_2026-10-12.md`, `build/implementation_audit_20261012/`, this handoff · status: done (Codex, 12 Oct)
+Handoff: Report complete: 13 open findings (3 high/8 medium/2 low), including W08 hosted dataset prompts/Trainer device, invalid W07/W08 OpenAI token caps, setup counter/file-selection guards, W11 dependencies, test reuse, archive runtime ledger and pedagogy/glossary gaps. All 29 fresh commands and 12 CPU smokes passed; coverage214/214; links205/209 with4blocked;24weekly Office files match retained render-input content. Full CPU/Colab/live-provider/widget/clean-install validation was not repeated. Teaching sources unchanged; deliverables rebuilt normally; no keys read, commits or fixes. See IMPLEMENTATION_AUDIT_2026-10-12.md for evidence and correction priorities; earlier completion claims remain historical records.
+
 **I0 · Teacher feedback → tasks.** Turn each point in `research/TEACHER_FEEDBACK.md` into a task row
 here, with ID, owned files and a "done when". Don't do the work in the same session.
+
+## Audit corrections (teacher authorised 12 October 2026)
+**Q1-E · Provider guards / regression and glossary engine** · owns: shared setup, `tools/`, course/guides and audit/evidence ledgers · status: done (13 Oct)
+Handoff: Shared guards, glossary and installation repairs complete. All 34 release gates and affected-artifact follow-up checks PASS. Clean pinned installation, pip check, SDK constructors, device selection and provider/widget/cache regressions verified. Links: 206/209 reachable, 3 blocked, 0 failed. Current evidence: AUDIT_FIXES_2026-10-12.json.
+**Q1-B · Lab corrections** · owns: lab sources W07/W08/W11 and their lab logs · status: done (13 Oct)
+Handoff: All twelve clean pinned full CPU cores and final smokes PASS; longest W08 728.7 s with real portable LoRA training. W11 and W12 output labels refreshed with new full CPU runs. Local fallbacks, invented hosted prompts, validation/final-test separation and activity support complete.
+**Q1-L · Teaching corrections** · owns: YAML/JSON/notes W01/W02/W03/W10, W10 figures and week logs · status: done (13 Oct)
+Handoff: All original teaching corrections and 20 additional confirmed visual findings closed after actual replacement review. Numerical examples precede relevant formulas; direct answers, canonical terms and matched figures preserve MSc depth and 46 slides per deck.
+**Q1-M · Glossary and archived evidence corrections** · owns: glossary, W04/W05 notes/YAML and own mapping/logs · status: done (13 Oct)
+Handoff: All successful clean CPU evidence appended with dates and hashes, including W11 and W12 chart-label reruns; measured exports and fill rebuilt. Archived runs and non-timing results preserved, including W03 original intermediate figure labels. Unsupported archive runtimes removed.
+**Q1-V · Rebuild, measured runs and independent review** · owns: build/deliverables via generators, final audit/report/board · needs: Q1-E/B/L/M · status: done (13 Oct)
+Handoff: 34 release gates and the final affected-artifact checks passed; all twelve smoke runs and clean pinned full CPU cores passed. The longest core was Week 8: 728.7 seconds (12.15 minutes), within the 15-minute budget. Visual review covers 552 slides, 412 weekly Word pages, 103 diagram PNGs, 130 notebook images and 54 course pages. All twelve slide layout reports are empty; zero open findings. Current Office render inputs, inspected image hashes and full-run executable code match the distributed artifacts. Current checks, render-input bytes, full-run code and actual-view hashes verified by closeout guard. Reports/audit/revision updated. External limits remain documented; no commit/push.
+
+
+## Verification retry (teacher requested 13 October 2026)
+
+**Q2 · Retry remaining checks** · owns: build/retry_20261013/, retry report and this handoff · status: done locally (13 Oct); external UI/API checks awaiting access
+Handoff: Nineteen student TODO checks now stop invalid dependent work; W04 torchvision and ten floating pins fixed, giving 24 tested direct pins. W12 archive/current score explanation clarified. All 50 final command groups, 9 paired student/solution cases and 12 smokes PASS. Fresh CPU W03 267.1s/W05 283.1s/W09 154.3s/W10 169.3s/W11 38.2s PASS; unchanged full-run code parity retained. Changed current images reviewed; closeout validates all current hashes, inputs and extraction inventories with 0 open findings. Python minimum and numeric-widget fallback clarified; all12 rebuilt with core parity retained. See VERIFICATION_RETRY_2026-10-13.md. Week 1 actual VS Code slider interaction PASS at T=1.0/1.7/0.4, with exact current cells and no permission setting changed by this agent. Other widget frontends, restored Colab window and explicit provider-key selection remain needed for the remaining live checks. No credentials, model API calls or commit/push by this agent.
+
+## Independent status audit (teacher requested 13 October 2026)
+
+**Q3 · Is everything implemented perfectly?** · owns: `research/IMPLEMENTATION_AUDIT_2026-10-13.md`, `build/implementation_audit_20261013/`, this handoff · status: done (audit, Codex, 13 Oct); four findings open
+Handoff: Audit complete: 29/29 fresh local command groups PASS; coverage 214/214; all twelve current core/full-run code parity checks PASS. Independent read-only review confirmed current hashes, render inputs, measured-result linkage and descriptor preservation. Four confirmed medium findings remain: W08 TODO 3/4 fail to stop dependent analysis/reporting; W09 slide 22 speaker notes misstate measured loss ordering and softmax behaviour. Exact built student/solution reproductions retained. Six contact sheets newly viewed; prior exhaustive views validated by hashes. Timed Colab, live APIs, most widget frontends and beginner usability remain unverified. See IMPLEMENTATION_AUDIT_2026-10-13.md. No teaching-source edits, rebuilds, keys, model calls or commits; earlier zero-findings claims are historical.
+
+## Final end-to-end verification (teacher requested 13 October 2026)
+
+**Q4 · Fix Q3 findings, fresh full read and visual review** · owns: all week sources needed for fixes, `research/FINAL_VERIFICATION_2026-10-13.md`, `build/final_verification_20261013/`, this handoff · status: done (Claude Code, 14 Oct)
+Done when: Q3-01..04 fixed and regression-tested; every slide title/body/note of all 12 decks read for factual, ordering and counting mistakes; every slide sheet and diagram PNG freshly viewed; findings fixed, rebuilt, re-rendered and re-viewed; full gate list, 12 smokes and affected full CPU runs PASS.
+Handoff: Done 14 Oct. Q3-01..04 and F1-F19 fixed (F7 W03 losses.png legend = archived GPU limitation); see research/FINAL_VERIFICATION_2026-10-13.md. Final: 26/26 gates PASS, 11 student-guard tests OK, 12/12 smokes PASS, W08 full CPU 695.5 s promoted, code parity 12/12, all 12 weeks re-rendered with 0 layout issues. No commit/push.
+
+## Independent student-comprehension review (teacher requested 14 October 2026)
+
+**Q5-E · End-to-end engine and verification** · owns: `tools/`, shared course/guides, `research/STUDENT_REVIEW_2026-10-14.md`, `build/student_review_20261014/`, this board · status: closed by Q6 (Codex stopped before its final checks; Q6 completed them 16 Oct)
+Done when: trace source/build/evidence paths and binding proposal distinction; run current release gates and 12 smokes; rebuild/render fixes; record fresh visual scope, findings, limits and full-run parity. Preserve existing uncommitted work; no commit/push.
+Handoff: Traced shared source/spec/Office/notebook/evidence paths and separate-proposal boundary. Initial14 engine groups and three preview-guard regressions pass; preview guard reproduces stale Instructor_Guide. Strengthened body/font audits to include native tables; three new audit regressions pass. Built all12 after shared wording fixes, plus affected follow-ups; prose0 and coverage214/214 pass. Final W01/W02 text trims, serial render,36 final groups,12 pinned CPU smokes and replacement-view closure remain. Full-run executable parity12/12 retained; assets untouched.
+
+**Q5-A · Weeks 01–04 comprehension** · owns: weekly YAML/beginner JSON/notes/figures/lab sources 01–04, `research/weeks/q5_w01_04.md`, `build/student_review_20261014/w01_04/` · status: closed by Q6 (Codex stopped before its final checks; Q6 completed them 16 Oct)
+Done when: read every slide/body/note and companion notes/lab path; freshly view current slide, Word, diagram and notebook-image contact sheets; correct confirmed beginner-facing defects, retaining evidence and 46 slides. Root serialises build/test/render.
+Handoff: Initial fresh views cover184 slides,131 Word pages,36 diagrams,56 notebook images. Five teaching mismatches corrected in W02–04; W01/W02 projected text trims being finalized against new actual-body gate. All12 initial rebuilds pass; final replacement views/checks pending.
+
+**Q5-B · Weeks 05–08 comprehension** · owns: weekly YAML/beginner JSON/notes/figures/lab sources 05–08, `research/weeks/q5_w05_08.md`, `build/student_review_20261014/w05_08/` · status: closed by Q6 (Codex stopped before its final checks; Q6 completed them 16 Oct)
+Done when: same review and correction standard as Q5-A; root serialises build/test/render.
+Handoff: Full source review complete; source freeze confirmed. W05/W08 follow-up builds pass. Initial fresh review covers184 slides,124 Word pages,33 diagrams,30 notebook images through64 recorded sheets. Corrected assumptions, actual retry/scorer behaviour, equation symbols/reference/memory/archive wording and new-intent claim. No executable lab change. Final render/view/checks pending.
+
+**Q5-C · Weeks 09–12 comprehension** · owns: weekly YAML/beginner JSON/notes/figures/lab sources 09–12, `research/weeks/q5_w09_12.md`, `build/student_review_20261014/w09_12/` · status: closed by Q6 (Codex stopped before its final checks; Q6 completed them 16 Oct)
+Done when: same review and correction standard as Q5-A; root serialises build/test/render.
+Handoff: Full source review complete; source freeze confirmed. Initial fresh views cover184 slides,157 Word pages,34 diagrams,44 notebook images through89 retained sheets. Corrected heatmap/embedding/history/metrics/vocabulary, lab path and detailed W12 retrieval contradictions. Built09–12 successfully; final body audit clear for these weeks. No executable lab change. Final render/view/checks pending.
+
+## Pre-submission end-to-end check (teacher requested 16 October 2026)
+
+**Q6 · End-to-end pre-submission check** · owns: all week sources needed for fixes, `research/E2E_REVIEW_2026-10-16.md`, `build/e2e_20261016/`, this board · status: done (Claude Code, 16 Oct)
+Done when: Q5's pending rebuild/gates/smokes/render finished; every week's slides, speaker notes, Word notes and lab read fresh for mistakes and beginner clarity; confirmed defects fixed in sources; full gate list, 12 smokes and any affected full CPU runs PASS; all 12 weeks re-rendered and contact sheets viewed; zero open findings. No commit/push.
+Handoff: Done 16 Oct. Q5 had stopped before its final checks; Q6 finished them, then reviewed all 12 weeks fresh. 18 findings (F1–F18) fixed in sources; no executable lab code, measured result file or result number changed (W07 fill.json regenerated only to drop Markdown). Final: build 12/12 OK (46 slides), 26/26 gates PASS (links 204/209, 5 publisher-blocked, 0 failures), 12/12 smokes PASS (every rebuilt lab re-run), code parity 12/12, all 12 weeks + course rendered with layout [], verify_render_inputs 29/29, all 21 changed slides/pages viewed at full size. See research/E2E_REVIEW_2026-10-16.md. No commit/push.

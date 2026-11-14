@@ -20,6 +20,20 @@ def response(status, data=None):
     return result
 
 
+def html_response(status, text):
+    result = response(status)
+    result.headers["Content-Type"] = "text/html; charset=utf-8"
+    result.encoding = "utf-8"
+    result._content = text.encode("utf-8")
+    return result
+
+
+ROBOT_CHALLENGE = """<!doctype html><html><body>
+JavaScript is disabled. Please verify that you&#39;re not a robot.
+This verification requires JavaScript.
+</body></html>"""
+
+
 class LinkChecks(unittest.TestCase):
     def check(self, outcomes, url="https://test.invalid/page"):
         with patch.object(check_links.requests, "get", side_effect=outcomes) as get, \
@@ -65,6 +79,79 @@ class LinkChecks(unittest.TestCase):
         self.assertEqual(result["status"], 403)
         self.assertEqual(get.call_count, 1)
         sleep.assert_not_called()
+
+    def test_http_200_html_robot_challenge_is_unverified(self):
+        result, get, sleep = self.check([html_response(200, ROBOT_CHALLENGE)])
+        self.assertFalse(result["ok"])
+        self.assertTrue(result["blocked"])
+        self.assertEqual(result["blocked_reason"], "html_robot_challenge")
+        self.assertEqual(result["status"], 200)
+        self.assertEqual(get.call_count, 1)
+        sleep.assert_not_called()
+
+    def test_202_explicit_aws_waf_challenge_is_unverified(self):
+        challenge = html_response(202, "")
+        challenge.headers["x-amzn-waf-action"] = "challenge"
+        result, get, sleep = self.check([challenge])
+        self.assertFalse(result["ok"])
+        self.assertTrue(result["blocked"])
+        self.assertEqual(result["blocked_reason"], "aws_waf_challenge")
+        self.assertEqual(result["status"], 202)
+        self.assertEqual(get.call_count, 1)
+        sleep.assert_not_called()
+
+    def test_ordinary_202_without_challenge_header_is_unchanged(self):
+        result, _, _ = self.check([response(202)])
+        self.assertTrue(result["ok"])
+        self.assertFalse(result.get("blocked", False))
+
+    def test_404_with_challenge_header_remains_failure(self):
+        missing = response(404)
+        missing.headers["x-amzn-waf-action"] = "challenge"
+        result, _, _ = self.check([missing])
+        self.assertFalse(result["ok"])
+        self.assertFalse(result.get("blocked", False))
+
+    def test_html_robot_challenge_without_content_type_is_unverified(self):
+        challenge = html_response(200, ROBOT_CHALLENGE)
+        challenge.headers.pop("Content-Type")
+        result, _, _ = self.check([challenge])
+        self.assertFalse(result["ok"])
+        self.assertTrue(result["blocked"])
+
+    def test_ordinary_javascript_requirement_remains_reachable(self):
+        result, _, _ = self.check([html_response(200, "<html><body>This interactive chart requires JavaScript.</body></html>")])
+        self.assertTrue(result["ok"])
+        self.assertFalse(result.get("blocked", False))
+
+    def test_hidden_script_challenge_strings_are_not_page_challenge(self):
+        page = "<html><body>Research paper<script>const disabled = \"JavaScript is disabled. Verify that you're not a robot\";</script></body></html>"
+        result, _, _ = self.check([html_response(200, page)])
+        self.assertTrue(result["ok"])
+        self.assertFalse(result.get("blocked", False))
+
+    def test_binary_pdf_is_not_challenge_html(self):
+        pdf = response(200)
+        pdf.headers["Content-Type"] = "application/pdf"
+        pdf._content = b"%PDF-1.7 JavaScript is disabled. Please verify that you're not a robot."
+        result, _, _ = self.check([pdf])
+        self.assertTrue(result["ok"])
+        self.assertFalse(result.get("blocked", False))
+
+    def test_404_with_challenge_text_remains_failure(self):
+        result, get, sleep = self.check([html_response(404, ROBOT_CHALLENGE)])
+        self.assertFalse(result["ok"])
+        self.assertFalse(result.get("blocked", False))
+        self.assertEqual(get.call_count, 1)
+        sleep.assert_not_called()
+
+    def test_exhausted_timeout_remains_failure(self):
+        result, get, sleep = self.check([requests.Timeout("timeout"), requests.Timeout("timeout")])
+        self.assertFalse(result["ok"])
+        self.assertFalse(result.get("blocked", False))
+        self.assertIsNone(result["status"])
+        self.assertEqual(get.call_count, 2)
+        sleep.assert_called_once_with(0.5)
 
     def test_transport_recovery(self):
         for error in (requests.ConnectionError("connection reset"), requests.Timeout("timeout"),

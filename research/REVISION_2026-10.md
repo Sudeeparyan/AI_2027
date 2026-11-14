@@ -171,3 +171,40 @@ Not verified:
 - No browser widget interaction, public Gradio/Docker deployment or optional GPU/stretch timing.
 - Four publisher links block automated checking (205/209 reachable; zero failures).
 - Student understanding and classroom effectiveness still need teaching feedback.
+
+
+## Iteration 3 — independent audit corrections, completed 13 October 2026
+
+34 release gates and the final affected-artifact checks passed; all twelve smoke runs and clean pinned full CPU cores passed. The longest core was Week 8: 728.7 seconds (12.15 minutes), within the 15-minute budget. Visual review covers 552 slides, 412 weekly Word pages, 103 diagram PNGs, 130 notebook images and 54 course pages. All twelve slide layout reports are empty; zero open findings. Current Office render inputs, inspected image hashes and full-run executable code match the distributed artifacts.
+
+| Week | Change |
+|---|---|
+| 01 | Concrete examples and diagrams before equations; readiness support retained. |
+| 02 | Qualified KL weighting; identical latent-space figure in slides and Word. |
+| 03 | Matching collapse/epoch figures, preserved measured intermediate counts, direct inference answer and cautious ADA explanation. |
+| 04 | Examples before equations, direct fixed-weights inference answer, variance wording and archived runtime provenance corrected. |
+| 05 | Unsupported archived runtime quotes removed; informative visuals and CPU/widget fallbacks retained. |
+| 06 | Worked n-gram/compute values above formulas, correct rounded top-p arithmetic, dated CPU timing. |
+| 07 | Worked ROUGE counts before formulas; valid optional OpenAI cap, validation/final-test separation and local fallback. |
+| 08 | Real portable CPU LoRA training; invented hosted examples, guarded final test, activity/check scaffolding and examples before formulas. |
+| 09 | CLIP numerical comparison before InfoNCE; illustrative SigLIP pair probability before loss; clearer correct-caption probability example and qualified shared-space feedback. |
+| 10 | Numerical visual-projector update, proper measured-results table and correct archived CPU label. |
+| 11 | Complete installation, measured current CPU timing, accurate requested-budget chart label, concrete rounding before formulas and honest archive labels. |
+| 12 | Concrete RRF/MRR example before formulas; consistent qualified RAG/fine-tuning/context comparison and a reference-pattern score label that states what the notebook measures. |
+
+Diagram changes: decorative badges replaced by informative visuals; Week 9 feedback labels clarified; Week 10 projector training trace added; shared figures aligned across formats. No week order or assessment changes.
+
+Sources: dated official SDK/vendor/PyPI verification in weeks/platform_2026.md and the week logs; official TRL Trainer loss extension documented in the Week 8 lab log; original measured assets and new clean CPU exports retained separately. Google ADK name rechecked against https://adk.dev/ on 13 October; no change needed.
+
+Final evidence: AUDIT_FIXES_2026-10-12.json. Earlier records and failed validation attempts remain intact.
+
+Not verified: timed free Colab, live Gemini/OpenAI, browser widget interaction, actual GPU training, public deployment, optional stretches, three publisher-blocked reading pages, and beginner/classroom effectiveness. Local timings exclude installation and downloads. A clean local pinned installation and pip check were verified separately. No credentials were read, no hosted requests were sent and no commit or push was made.
+
+
+## Iteration 3 — student-path retry, 13 October 2026
+
+The retry found additional student-facing problems that solution-only execution had missed. Nineteen TODO checks now stop unfinished code before it becomes a result, plot, training run or optional demonstration. The error identifies the TODO and tells the student to complete it and rerun. The actual model algorithms and MSc content are retained.
+
+All 50 final command groups passed, including all twelve CPU smoke runs, coverage at 100%, nine paired built-student/built-solution regression cases, shared setup checks, callbacks and SDK contracts. All five changed labs received successful new full CPU runs. The remaining seven full records retain exact current executable-code parity. The longest current core remains Week 8 at 728.7 seconds (12.15 minutes). Timings use the tested local CPU environment and cached models/data; installation, downloads, widgets and hosted routes are excluded.
+
+Current replacement review: zero open findings. Source changes, archived/current metric wording and the 24-package version verification are detailed in VERIFICATION_RETRY_2026-10-13.md. Desktop/Colab/live API/classroom limits remain explicit; no new depth or course-order changes.

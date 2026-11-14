@@ -8,21 +8,21 @@
       "gold": "tue",
       "answer": "Tue.",
       "correct": 1,
-      "seconds": 20.1
+      "seconds": 20.8
     },
     {
       "question": "How many tickets were there on Thursday? Answer with a ",
       "gold": "25",
       "answer": "29.",
       "correct": 0,
-      "seconds": 19.9
+      "seconds": 21.0
     },
     {
       "question": "What is the invoice number? Answer with the number only",
       "gold": "2027-0415",
       "answer": "2027-0415",
       "correct": 1,
-      "seconds": 21.5
+      "seconds": 22.3
     }
   ],
   "qa_accuracy": 0.6666666666666666,
@@ -49,28 +49,28 @@
   },
   "run_kind": "core",
   "runtime": {
-    "environment": "local",
-    "python": "3.12.10",
+    "cpu_threads": 4,
     "device": "cpu",
-    "seed": 42,
+    "environment": "local",
+    "logical_cpus": 12,
+    "packages": {
+      "diffusers": "0.40.0",
+      "google-genai": "2.29.0",
+      "ipywidgets": "7.7.1",
+      "openai": "3.28.0",
+      "peft": "0.21.1",
+      "python-dotenv": "1.2.4",
+      "sentence-transformers": "5.7.0",
+      "torch": "2.11.0+cpu",
+      "transformers": "5.18.0",
+      "trl": "1.15.0"
+    },
     "platform": "Windows-11-10.0.26200-SP0",
     "processor": "Intel64 Family 6 Model 158 Stepping 10, GenuineIntel",
-    "logical_cpus": 12,
-    "cpu_threads": 4,
-    "packages": {
-      "torch": "2.14.0+cpu",
-      "transformers": "5.17.0",
-      "diffusers": "0.40.0",
-      "peft": "0.21.0",
-      "trl": "1.14.0",
-      "sentence-transformers": "6.1.0",
-      "google-genai": "2.29.0",
-      "openai": "3.28.0",
-      "python-dotenv": "1.2.4",
-      "ipywidgets": "7.7.1"
-    }
+    "python": "3.12.10",
+    "seed": 42
   },
-  "model_revision": "7e3e67edbbed1bf9888184d9df282b700a323964",
+  "model_revision": null,
   "processor_class": "Idefics3Processor",
   "settings": {
     "max_image_side": 384,
@@ -88,9 +88,14 @@
     "run_stretch": false
   },
   "evidence": {
-    "started_at_utc": "2026-10-11T13:42:13.449177+00:00",
-    "seconds": 175.4,
-    "notebook_sha256": "15ae0fa9bc401308923cb734a9aa20e6980754d3195919995c50f8c5eb5e93be",
-    "executed_notebook_sha256": "4c8d38e198c3d5cc8dc0bb3e188f052674f7c3f7528718173de48f62c4bf9725"
+    "started_at_utc": "2026-10-13T08:18:15.975670+00:00",
+    "seconds": 169.3,
+    "notebook_sha256": "b7da753864e4a3b5c6d776968400ef3b51a10f89b11128450fe6803938b98c79",
+    "executed_notebook_sha256": "71ba520b3ddce8d7cd68d5213fe797ab7f6f5637a6cffd0f95b74586a44e02a2",
+    "runner_python": "C:\\Users\\sudee\\Downloads\\Generative_AI_2027_Teaching_Pack\\AI2027_Project\\build\\qa_pinned_env\\Scripts\\python.exe",
+    "kernel_name": "qa-pinned-cpu",
+    "run_record": "build/retry_20261013/full_week_10.json",
+    "result_export": "build/retry_20261013/results/week_10/results_cpu_core.json",
+    "result_export_sha256": "d91b5bd5d19dc3c803caebd5f9459a3662ede0f33ac0c251147f944318a6f73b"
   }
 }

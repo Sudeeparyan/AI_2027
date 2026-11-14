@@ -11,3 +11,7 @@
 ## Final coordinator handoff — 12 October 2026
 - Latest measured cached local CPU core 279.3s (4.7min), within 900 s; final smoke PASS (14.7s), zero failed feedback checks. Recorded full-run code matches current executable core.
 - Final image review closed; canonical evidence is `research/ITERATION3_2026-10-12.json`. Earlier unmeasured/pending handoffs are historical. No timed Colab, live API, clean-install/download, browser-widget or optional-stretch verification.
+
+## Student readiness guards — 13 October 2026
+- Added assertions to the existing slerp, classifier-label, feature-distance and gradient-penalty checks. Failed TODOs now stop before labelled plots, metric reporting or toy training, with completion and cell-rerun guidance.
+- Solution algorithms, check signatures and markers retained; W03 executable core gains four guards. Existing line endings preserved byte-for-byte outside those replacements. No builds, notebook runs, tests, renders or API calls in this subtask; coordinator owns verification.

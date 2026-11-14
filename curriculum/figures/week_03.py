@@ -33,7 +33,7 @@ def cover(path):
 def epochs_slide(path):
     """The five saved sample strips, labelled at the left so no heading covers an image."""
     im = plt.imread(ASSETS / "epochs.png")
-    stages = [("Before training", "pure noise"), ("After 1 epoch", "rough strokes"),
+    stages = [("Before training", "untrained G output"), ("After 1 epoch", "rough strokes"),
               ("After 2 epochs", "first digit shapes"), ("After 4 epochs", "many digits readable"),
               ("After 8 epochs", "sharper; some malformed")]
     fig, axes = plt.subplots(len(stages), 1, figsize=(13, 3.9))
@@ -67,7 +67,7 @@ def _role_legend(ax, roles, y=.05):
         ax.add_patch(plt.Rectangle((x,y),.25,.22,facecolor=fills[role],edgecolor=PRIMARY))
         ax.text(x+.35,y+.11,role,va="center",fontsize=18,color=TEXT)
         x+=1.8
-    ax.plot([x,x+.4],[y+.11,y+.11],color=PRIMARY)
+    ax.plot([x,x+.4],[y+.11,y+.11],color=MUTED)
     ax.text(x+.5,y+.11,"Flow",va="center",fontsize=18,color=TEXT)
 
 
@@ -162,7 +162,7 @@ def cgan(path):
     arrow(ax,3.9,2.05,5.2,2.05); ax.text(4.55,2.9,"condition",ha="center",fontsize=18,color=TEXT)
     arrow(ax,6.45,3.65,6.45,2.6); ax.text(6.45,3.8,"noise z",ha="center",fontsize=18,color=TEXT)
     arrow(ax,7.7,2.05,9.0,2.05); ax.text(8.35,2.9,"fake image",ha="center",fontsize=18,color=TEXT)
-    routed_arrow(ax,[(2.65,1.5),(2.65,.85),(10.4,.85),(10.4,1.5)],color=PRIMARY)
+    routed_arrow(ax,[(2.65,1.5),(2.65,.85),(10.4,.85),(10.4,1.5)],color=MUTED)
     ax.text(6.5,.47,"same condition",ha="center",fontsize=18,color=TEXT)
     arrow(ax,10.4,3.65,10.4,2.6); ax.text(10.4,3.8,"real image",ha="center",fontsize=18,color=TEXT)
     arrow(ax,11.8,2.05,12.9,2.05); ax.text(12.2,2.9,"logit",fontsize=18,color=TEXT)

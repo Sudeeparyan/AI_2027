@@ -115,7 +115,14 @@ def week2() -> dict:
 def week3() -> dict:
     """Keep the archived toy-ring comparison separate from bounded CPU-core runs."""
     ring = load(3, "metrics.json")["ring"]
-    return {"W03_RING_STANDARD_MODES": str(ring["vanilla_final_modes"]),
+    labels = load(3, "ring_coverage_labels.json")
+    assert labels["standard_gan_modes"][-1] == ring["vanilla_final_modes"]
+    assert labels["wgan_gp_modes"][-1] == ring["wgan_final_modes"]
+    rows = ["| Training step | Standard GAN modes | WGAN-GP modes |", "|---|---|---|"]
+    rows += [f"| {step} | {gan}/{labels['total_modes']} | {wgan}/{labels['total_modes']} |"
+             for step, gan, wgan in zip(labels["steps"], labels["standard_gan_modes"], labels["wgan_gp_modes"])]
+    return {"W03_RING_COVERAGE_TABLE": "\n".join(rows),
+            "W03_RING_STANDARD_MODES": str(ring["vanilla_final_modes"]),
             "W03_RING_WGAN_MODES": str(ring["wgan_final_modes"])}
 
 
@@ -212,7 +219,7 @@ def week6() -> dict:
         text = f"{x['correct']}/{x['n']} correct, ≈{x['mean_tokens']:,} tokens"
         if x["unfinished"]:
             text += f", {x['unfinished']} ran out of the {x['budget']:,}-token budget"
-        return text + (f", ≈{x['mean_seconds']:.0f} s each" if long else "")
+        return text
 
     short_parts, long_parts, rows = [], [], []
     for name, pr in r["problems"].items():
@@ -221,17 +228,18 @@ def week6() -> dict:
                            + (f" (thinking hit its {on['budget']:,}-token limit {'every time' if on['unfinished'] == on['n'] else str(on['unfinished']) + ' times'})"
                               if on["unfinished"] else ""))
         long_parts.append(f"**{name}** (answer {pr['correct_answer']:g}): without thinking {mode(off, True)}; with thinking {mode(on, True)}")
-        rows += [[name, "off", f"{off['correct']}/{off['n']}", f"{off['mean_tokens']:,}", f"{off['mean_seconds']:.0f}", off["unfinished"]],
-                 [name, "on", f"{on['correct']}/{on['n']}", f"{on['mean_tokens']:,}", f"{on['mean_seconds']:.0f}", on["unfinished"]]]
+        rows += [[name, "off", f"{off['correct']}/{off['n']}", f"{off['mean_tokens']:,}", off["unfinished"]],
+                 [name, "on", f"{on['correct']}/{on['n']}", f"{on['mean_tokens']:,}", on["unfinished"]]]
     notes = (f"Qwen3-0.6B on {dev}, three sampled runs per mode (the model card's settings; greedy decoding makes thinking mode loop). "
              + "; ".join(long_parts) + ".\n\n"
-             + table(["Problem", "Thinking", "Correct", "Mean tokens", "Mean seconds", "Out of budget"], rows))
+             + table(["Problem", "Thinking", "Correct", "Mean tokens", "Out of budget"], rows)
+             + "\n\nArchived per-answer runtimes are omitted because their original dated run record was not recovered.")
     nt_text = "; ".join(nt_parts) + "."
     out = {"TOKENIZER_NOTES": tok_table, "NEXT_TOKEN_NOTES": nt_text[0].upper() + nt_text[1:], "FAMILY_OUTPUTS": fam_md,
            "REASONING_NOTES": notes,
            "REASONING_RESULT": "Measured (Qwen3-0.6B, 3 runs per mode, thinking off vs on): " + "; ".join(short_parts) + "."}
     # The iteration-3 CPU core run of the lab itself (GENAI_RESULTS_PATH export), kept apart from the archive above.
-    lab = load(6, "results.json")
+    lab = load(6, "results_cpu_core.json")
     tpw, ppl = lab["tokens_per_word"], lab["perplexity"]
     for model, key in (("SmolLM2", "SMOL"), ("BERT", "BERT")):
         for text, short_key in (("English", "EN"), ("Irish", "GA"), ("Code", "CODE")):
@@ -271,10 +279,10 @@ def week7() -> dict:
                  + f"LLM-as-judge: consistent across both orders {pct(j['consistent_rate'])}, correct in both orders {pct(j['correct_both_rate'])}.")
     return {"MODEL": short(r["model"]),
             "FEWSHOT_SUMMARY": f"Accuracy on {n} messages: {few}.",
-            "FEWSHOT_NOTES": f"**Measured ({short(r['model'])}, {n} messages, temperature 0):** accuracy {few}; invalid labels {inv}.",
+            "FEWSHOT_NOTES": f"Measured ({short(r['model'])}, {n} messages, temperature 0): accuracy {few}; invalid labels {inv}.",
             "FEWSHOT_INVALID": invalid_note,
             "COT_SUMMARY": cot[:1].upper() + cot[1:] + ".",  # a bullet: "Direct 50.0% (3 tokens); ..."
-            "COT_NOTES": f"**Measured ({short(r['model'])}):** {cot}. Report accuracy together with token cost.",
+            "COT_NOTES": f"Measured ({short(r['model'])}): {cot}. Report accuracy together with token cost.",
             "EXTRACTION_NOTES": f"{pct(ex['valid_rate'], 1)} of outputs were valid JSON after at most one retry, but only {pct(ex['correct_rate'], 1)} had every field correct.",
             "INJECTION_SUMMARY": f"Keyword flags on {n_inj} injected documents: " + ", ".join(f"{k} {round(v * n_inj)} of {n_inj}" for k, v in inj.items()) + ".",
             "INJECTION_NOTES": "the keyword heuristic flagged " + " and ".join(f"{round(v * n_inj)} of {n_inj} injected-document replies with the {k} prompt" for k, v in inj.items()) + ". Inspect the actual replies before claiming instruction-following.",
@@ -312,12 +320,12 @@ def week8() -> dict:
     comp = {c["model"]: c for c in r["comparison"]}
     acc = "; ".join(f"{k.replace('base, ', 'base ')} {pct(v['accuracy'], 1)}" for k, v in comp.items())
     lora = f"LoRA (r = 16, attention projections) trains {r['trainable']:,} of {r['total']:,} parameters ({100 * r['trainable'] / r['total']:.2f}%)."
-    train = f"{r['n_train']:,} training examples, 1 epoch, {r['train_minutes']:.0f} min on {hardware(r['device'], r.get('gpu'))}"
+    train = f"{r['n_train']:,} training examples, 1 epoch on {hardware(r['device'], r.get('gpu'))}"
     rows = [[k, pct(v["accuracy"], 1), f"{v['invalid']:.1%} ({round(v['invalid'] * r['n_test'])} of {r['n_test']})"] for k, v in comp.items()]
     ft = comp["LoRA fine-tuned"]
     n_bad = round(ft["invalid"] * r["n_test"])
-    run = (f"The recorded run fine-tuned {short(r['model'])} on {r['n_train']:,} examples for one epoch in about "
-           f"{r['train_minutes']:.0f} minutes on {hardware(r['device'], r.get('gpu'))}. "
+    run = (f"The archived run fine-tuned {short(r['model'])} on {r['n_train']:,} examples for one epoch "
+           f"on {hardware(r['device'], r.get('gpu'))}. Its original dated training-time record was not recovered. "
            + (f"The LoRA model still gave {n_bad} unparsed {'reply' if n_bad == 1 else 'replies'} ({pct(ft['invalid'], 1)})."
               if n_bad else "Every LoRA reply contained a recognised intent label."))
     return {"LORA_PARAMS": lora,
@@ -436,7 +444,7 @@ def week10_core() -> dict:
     correct = sum(bool(row["correct"]) for row in c["qa"])
     count = len(c["qa"])
     rows = [[row["question"], row["gold"], row["answer"], "yes" if row["correct"] else "no"] for row in c["qa"]]
-    return {"W10_CORE_RESULTS": f"{short(c['vlm'])}: {correct}/{count} labelled questions correct. "
+    return {"W10_CORE_RESULTS": f"{short(c['vlm'])}: {correct}/{count} labelled questions correct.\n\n"
             + table(["Question", "Reference", "Answer", "Correct"], rows)
             + "\n\nTwo object probes are a small diagnostic, not a POPE benchmark. Caption fluency does not establish factual support."}
 
@@ -444,33 +452,37 @@ def week10_core() -> dict:
 # ---------------------------------------------------------------- week 11
 def week11() -> dict:
     r = load(11, "results.json")
-    hw = hardware(r["device"], r.get("gpu"))
-    lat = r["latency"]
+    c = load(11, "results_cpu_core.json")
+    hw = hardware(c["device"], c.get("gpu"))
+    lat = c["latency"]
     ttft = [x["TTFT (s)"] for x in lat]
     tot = [x["total (s)"] for x in lat]
     tps = [x["tokens/s"] for x in lat]
     def span(values, fmt):
         lo, hi = fmt.format(min(values)), fmt.format(max(values))
         return lo if lo == hi else f"{lo}–{hi}"
-    lat_note = (f"{short(r['model'])} on {hw}: TTFT {span(ttft, '{:.2f}')} s, full answers {span(tot, '{:.1f}')} s "
-                "(archived decoded-text timings).")
+    lat_note = (f"{short(c['model'])} on {hw}: first decoded text {span(ttft, '{:.2f}')} s, full answers {span(tot, '{:.1f}')} s "
+                "(measured current CPU core).")
     q = {x["scheme"]: x for x in r["quant"]}
     base = next(iter(q))
     quant_note = "Perplexity: " + "; ".join(f"{k.replace(',', '')} {v['perplexity']:.1f} (≈ {v['approx. size (MB)']:,} MB)" for k, v in q.items()) + "."
-    b = r["batch"]
-    # One decimal, as on the chart's bar labels, so the printed values give the printed ratio (86.2 / 13.2 = 6.5).
-    batch_note = (f"{b[0]['tokens/s']:.1f} tokens/s at batch 1 → {b[-1]['tokens/s']:.1f} tokens/s at batch {b[-1]['batch size']} "
+    b = c["batch"]
+    # This export divides the requested output budget by time, rather than counting generated IDs.
+    batch_note = (f"Requested output budget/s: {b[0]['tokens/s']:.1f} at batch 1 → {b[-1]['tokens/s']:.1f} at batch {b[-1]['batch size']} "
                   f"({b[-1]['tokens/s'] / b[0]['tokens/s']:.1f}× on {hw}).")
-    mon = r["monitor"]
+    mon = c["monitor"]
     mon_note = (f"{mon['requests']} requests: {mon['blocked']} blocked (injection), {mon['redacted']} with personal data redacted; "
                 f"p50 {mon['p50 latency (s)']:.2f} s, p95 {mon['p95 latency (s)']:.2f} s.")
     rows_l = [[x["question"], x["TTFT (s)"], x["total (s)"], x["output tokens"], x["tokens/s"]] for x in lat]
     rows_q = [[k, v["perplexity"], v["weight error (layer 0)"], f"{v['approx. size (MB)']:,}"] for k, v in q.items()]
     rows_b = [[x["batch size"], x["seconds"], x["tokens/s"]] for x in b]
-    notes = (f"Model {short(r['model'])} on {hw} ({base} weights).\n\n"
-             + table(["Question", "First text (s)", "Total (s)", "Decoded tokens", "Legacy chunk-rate estimate"], rows_l) + "\n\n"
-             + table(["Quantisation", "Perplexity", "Weight error (layer 0)", "Approx. size (MB)"], rows_q) + "\n\n"
-             + table(["Batch size", "Seconds for 8 requests", "Tokens/s"], rows_b) + "\n\n" + "Monitoring summary: " + mon_note)
+    day = dt.datetime.fromisoformat(c["evidence"]["started_at_utc"]).strftime("%d %B %Y").lstrip("0")
+    notes = (f"Current CPU core: {short(c['model'])} on {hw}, measured {day}.\n\n"
+             + table(["Question", "First text (s)", "Total (s)", "Decoded tokens", "Decoded tokens/s"], rows_l) + "\n\n"
+             + table(["Batch size", f"Seconds for {b[0]['requests']} requests", "Requested output budget/s"], rows_b) + "\n\n"
+             + "Monitoring summary: " + mon_note
+             + f"\n\nArchived quantisation comparison: {short(r['model'])}, {base} reference weights.\n\n"
+             + table(["Quantisation", "Perplexity", "Weight error (layer 0)", "Approx. size (MB)"], rows_q))
     return {"LAT_NOTES": lat_note, "QUANT_NOTES": quant_note, "BATCH_NOTES": batch_note, "MONITOR_NOTES": mon_note, "RESULTS_NOTES": notes, **week11_core()}
 
 

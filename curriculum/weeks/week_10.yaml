@@ -84,10 +84,10 @@ slides:
 
     Watch out: One quality score cannot cover every objective or modality.'
   items:
-  - Read media.
-  - Trace training.
-  - Generate responsibly.
-  - Evaluate tasks.
+  - Read images; check facts.
+  - Explain visual training.
+  - Generate images and speech responsibly.
+  - Evaluate the actual task.
 - type: agenda
   icon: fa:FaRoute
   items:
@@ -267,8 +267,8 @@ slides:
     selects a small image-to-text checkpoint, not an image generator.
 
 
-    Example: SmolVLM-256M is the proposed local core; the archived results used Qwen3-VL-2B. Different checkpoints can produce
-    different factual answers.
+    Example: The CPU core uses SmolVLM-256M; the archived results used Qwen3-VL-2B. Different checkpoints can produce different
+    factual answers.
 
 
     Ask: Why is a family comparison insufficient for deployment?
@@ -413,12 +413,54 @@ slides:
 
 
     Watch out: Training on a test image makes later success a weak measure of generalisation.'
+- type: table
+  title: 'Worked example: one visual bridge update'
+  notes: 'In short: Answer-token loss can teach a projector to connect visual features with language predictions.
+
+
+    Explain: A projector is a learned matrix converting visual features to language-input dimensions. Our illustrative feature
+    row has shape one by two. Its weight matrix has shape two by three. Their product has shape one by three. A fixed toy head
+    uses those three values as red, blue and other scores. Cross-entropy is the negative natural logarithm of the target token''s
+    probability.
+
+
+    Example: Features [1,2] give scores [1,2,0], red probability approximately 0.245 and loss 1.408. The first weight''s gradient
+    is approximately minus 0.755. Learning rate 0.1 changes that weight from one to 1.0755.
+
+
+    Ask: Must the image encoder change for the projector to learn?
+
+
+    Answer: No. Gradients can update the projector while the encoder and language weights remain frozen.
+
+
+    Watch out: This three-word head illustrates one answer-token step; real language models use richer attention and vocabulary
+    structures, and the lab performs inference.'
+  rows:
+  - - Features
+    - 1×2
+    - '[1,2]'
+  - - Project
+    - 2×3
+    - '[1,2,0]'
+  - - P(red)
+    - scalar
+    - '0.245'
+  - - Loss
+    - scalar
+    - '1.408'
+  - - Update W₁₁
+    - 2×3 gradient
+    - 1→1.0755
+  header:
+  - Step
+  - Shape
+  - Toy
+  callout: Fixed head; projector learns; rate=0.1.
 - type: figure
   title: A typical training pipeline for a vision-language model
-  figure: vlm_training
   bullets:
   - Conceptual recipe; lab uses pretrained weights.
-  stack: true
   notes: 'In short: A typical recipe trains the bridge before visual instruction responses.
 
 
@@ -438,44 +480,8 @@ slides:
 
 
     Watch out: The diagram is a conceptual training recipe; the lab loads pretrained models.'
-- type: bullets
-  title: Data for multimodal training
-  bullets:
-  - Review labels, licences and consent.
-  - Mixed documents preserve context.
-  notes: 'In short: Training data must represent both the media and the task.
-
-
-    Explain: Paired data connects an image with a caption or audio with a transcript. Interleaved documents contain several
-    kinds of data in context. Task labels can specify chart values, document fields or object positions. Synthetic examples
-    still require correctness checks. Permission and licence review precede training.
-
-
-    Example: A rendered chart supplies pixels, a question and an exact target of 25. A wrong label teaches the wrong association
-    despite clean pixels.
-
-
-    Ask: Why remove duplicates across train and test sets?
-
-
-    Answer: Repeated images or near-identical layouts can inflate reported performance without demonstrating useful generalisation.
-
-
-    Watch out: More examples cannot compensate for systematically wrong labels or inappropriate data use.'
-  visual:
-    type: mini_table
-    header:
-    - Input
-    - Target
-    rows:
-    - - Image
-      - Caption
-    - - Chart
-      - Known answer
-    - - Speech
-      - Transcript
-    - - Document
-      - Field
+  stack: true
+  figure: vlm_training
 - type: bullets
   title: Adapting a multimodal model to your domain
   bullets:
@@ -771,50 +777,50 @@ slides:
 
     Watch out: An impressive number is weak evidence if its task, reference set and limitations are unspecified.'
 - type: table
-  title: Metrics by task
+  title: One automatic check per task
   header:
   - Task
-  - Automatic
-  - Human
+  - Automatic check
+  - Human review
   rows:
   - - Images
-    - FID/CLIP/GenEval
+    - 'FID: distributions'
     - Defects
   - - Captions
-    - CIDEr/CLIPScore
+    - 'CIDEr: phrase overlap'
     - Facts
   - - VQA
-    - Accuracy
+    - Answer accuracy
     - Errors
   - - Speech
-    - WER
+    - 'WER: word edits'
     - Naturalness
   - - Video
-    - FVD
+    - 'FVD: distributions'
     - Continuity
   - - Hallucination
-    - POPE/CHAIR
+    - 'POPE: object probes'
     - Evidence
-  notes: 'In short: Choose task-specific metrics and a matching human rubric.
+  notes: 'In short: Every metric checks one property; combine automatic measurements with direct review of the output.
 
 
-    Explain: FID compares distributions of image features, rather than checking one image''s truth. CLIP measures image-text
-    embedding similarity. VQA accuracy compares answers with known references. WER counts word edits relative to a transcript.
-    POPE-style probes check object claims, while human review examines missed defects.
+    Explain: FID compares image-feature distributions, and FVD compares video-feature distributions. CIDEr scores weighted phrase
+    overlap with reference captions. VQA means visual question answering; accuracy compares replies with known answers. WER
+    counts word edits against reference speech text. POPE probes whether claimed objects are actually present.
 
 
-    Example: For speech, compare reference words with recognised words and listen separately. For invoices, compare each extracted
-    field with a checked source.
+    Example: An image of three red cups might match the prompt "two red cups" well in a global feature comparison. Count the
+    cups directly. A transcript can recover every word while its generated voice still sounds unnatural. Each missing property
+    needs its own check.
 
 
     Ask: What additional evaluation does low WER need?
 
 
-    Answer: Human listening for naturalness and pronunciation, plus tests covering names, numbers, accents, timing and the intended
-    users.
+    Answer: Listen for naturalness, pronunciation and timing, and test names, numbers, accents and the intended users.
 
 
-    Watch out: Benchmark names in a table do not make a small classroom sample a full benchmark.'
+    Watch out: These are examples of checks, not a complete benchmark. The Word notes explain further metrics and their limits.'
 - type: bullets
   title: Multimodal hallucination
   bullets:
@@ -1268,9 +1274,9 @@ slides:
   notes: 'In short: Use primary explanations and exact model documentation for further study.
 
 
-    Explain: The readings connect architecture, training and task evaluation. The small-model card explains the lab''s proposed
-    VLM route. Original CLIP research explains shared image-text representations. C2PA specifications define provenance assertions
-    and verification. The lecture video offers another worked explanation of generative modelling foundations.
+    Explain: The readings connect architecture, training and task evaluation. The small-model card explains the lab''s VLM route.
+    Original CLIP research explains shared image-text representations. C2PA specifications define provenance assertions and
+    verification. The lecture video offers another worked explanation of generative modelling foundations.
 
 
     Example: Read the SmolVLM card before changing checkpoints, then compare your actual inputs, output task and hardware with

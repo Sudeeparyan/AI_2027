@@ -29,3 +29,24 @@
 - Latest successful cached local CPU full core: 248.7 s (4.1 min), recorded in `research/lab_runs_2026-10.json`; final smoke PASS (20.2 s). Current executed core code matches the successful full-run evidence.
 - All 26 current release gates passed, including coverage 100%, strict notes, body ≤ 40, fonts ≥ 14, semantic helpers and shared diagram/attachment parity. See `research/ITERATION3_2026-10-12.json`.
 - No timed Colab, clean-install/download, live-provider, browser-widget or optional GPU/stretch claim. Earlier pending handoffs above describe intermediate states.
+
+## Independent-audit repair — 12 October 2026
+- A08 provenance search: stored metric JSON and original asset logs lack a genuine matching dated run record; no date or ledger entry invented.
+- Removed the unsupported 8.7-minute archive training row from Word. Separate dated GPU stretch and current CPU core evidence retained.
+- A10 canonical glossary merged and all 12 original note sections mapped in `research/fix_glossary_proposal_20261012.json`; root owns the generator migration.
+- Handoff: source repair applied; source-only schema/runtime-token checks follow. Build, audits and changed rendered-page review remain with root.
+- Source validation observed PASS: 253 unique canonical terms, 111 additions, all 146 legacy rows/12 week mappings resolve; all 40 W04 speaker notes satisfy the strict template; intended picture-before-formula order confirmed; unsupported archive runtime placeholders absent from W04/W05 lecture and notes. Root build/render still pending.
+- Handoff: canonical week_glossary lists stored beside definitions; all 253 terms represented; ownership released to root for marker migration, rebuild and rendered review.
+
+
+### Fresh CPU evidence promotion — 12 October 2026
+- Coordinator full core recorded 249.2 seconds, starting 2026-10-12T16:40:17.940714+00:00, in the clean pinned CPU kernel. Executed-notebook SHA-256 matched the successful full record; the run is within the 900-second local CPU budget.
+- Fresh results_cpu_core.json promoted with original measured values, runtime and dated evidence; historical experiment assets retained.
+- Record appended to research/lab_runs_2026-10.json. This is a local measurement; no timed Colab or live-provider claim. Filling/rebuilding/rendered review remain with the coordinator.
+
+
+### Audit correction closeout — 13 October 2026
+
+- Unsupported archived runtime quotes removed; informative visuals and CPU/widget fallbacks retained.
+- Final current artifacts rebuilt, checked and visually reviewed; no open findings. Evidence: ../AUDIT_FIXES_2026-10-12.json.
+- CPU/Office verification is local; Colab, live API and classroom limits remain documented.

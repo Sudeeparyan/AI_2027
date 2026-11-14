@@ -1,0 +1,72 @@
+{
+  "run": {
+    "checkpoint": "HuggingFaceTB/SmolLM2-135M-Instruct",
+    "device": "cpu",
+    "smoke": false,
+    "seed": 42,
+    "reply_cap": 24,
+    "manual_steps": 16,
+    "stretches": {
+      "tokenizer": false,
+      "family": false,
+      "reasoning": false
+    }
+  },
+  "tokens_per_word": {
+    "BERT": {
+      "Code": 2.73,
+      "English": 1.33,
+      "Irish": 2.54
+    },
+    "SmolLM2": {
+      "Code": 2.45,
+      "English": 1.25,
+      "Irish": 3.0
+    }
+  },
+  "perplexity": {
+    "normal": 273.556,
+    "shuffled words": 4605.366,
+    "Irish": 1030.749,
+    "code": 8.656
+  },
+  "core_replies": {
+    "QA": "The capital of Ireland is Dublin.",
+    "Translate": "Ich habe einmal 20 Jahre, um 20 Jahre zu kaufen.",
+    "Summarise": "Generative models learn distributions and sample new examples, while VAEs, GANs, diffusion models, and language",
+    "Sentiment": "This is a fictional review. The reviewer has provided a negative review, which is a subjective assessment of the product's quality"
+  },
+  "runtime": {
+    "cpu_threads": 4,
+    "device": "cpu",
+    "environment": "local",
+    "logical_cpus": 12,
+    "packages": {
+      "diffusers": "0.40.0",
+      "google-genai": "2.29.0",
+      "ipywidgets": "7.7.1",
+      "openai": "3.28.0",
+      "peft": "0.21.1",
+      "python-dotenv": "1.2.4",
+      "sentence-transformers": "5.7.0",
+      "torch": "2.11.0+cpu",
+      "transformers": "5.18.0",
+      "trl": "1.15.0"
+    },
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 158 Stepping 10, GenuineIntel",
+    "python": "3.12.10",
+    "seed": 42
+  },
+  "evidence": {
+    "started_at_utc": "2026-10-12T16:44:27.262735+00:00",
+    "seconds": 28.1,
+    "notebook_sha256": "16ba6782ed77e005f6d741421ddfb806edfefb0dc688c7bd4cd694a23ee47e59",
+    "executed_notebook_sha256": "d6f3821812fe6f51fd4b5572ca00271fd49d72a3c18413923ced47b4539ed41d",
+    "runner_python": "C:\\Users\\sudee\\Downloads\\Generative_AI_2027_Teaching_Pack\\AI2027_Project\\build\\qa_pinned_env\\Scripts\\python.exe",
+    "kernel_name": "qa-pinned-cpu",
+    "run_record": "build/audit_fixes_20261012/full_runs.json",
+    "result_export": "build/audit_fixes_20261012/results/week_06/results_cpu_core.json",
+    "result_export_sha256": "b3cb6851170b5ad2c60f37ddee8cd3b46827d0dda96f285ffff042e9247a81ff"
+  }
+}

@@ -85,13 +85,13 @@ A **representation** is a vector describing useful input features. Pre-training 
 
 With normalised embeddings $u_i$ (images) and $v_j$ (texts) and temperature $\tau$:
 
+**Worked example.** Suppose for one image the scaled similarities to three captions are [5, 1, 0] with the correct caption first. Softmax: $e^5 = 148.4$, $e^1 = 2.72$, $e^0 = 1$; probability of the correct caption $148.4 / 152.1 = 0.976$; loss contribution $-\ln 0.976 = 0.025$. If the correct match were instead the second caption, its unchanged score 1 gives $p = 2.72/152.1 = 0.018$ and the loss would be 4.0.
+
 $$s_{ij} = \frac{u_i \cdot v_j}{\tau}, \qquad \mathcal{L}_{\mathrm{img}\to\mathrm{txt}} = -\frac{1}{N}\sum_{i=1}^{N} \, \log \frac{\exp(s_{ii})}{\sum_{j} \exp(s_{ij})}$$
 
 $$\mathcal{L}_{\mathrm{CLIP}} = \frac{1}{2}\left(\mathcal{L}_{\mathrm{img}\to\mathrm{txt}} + \mathcal{L}_{\mathrm{txt}\to\mathrm{img}}\right)$$
 
 Each row turns image-caption scores into probabilities of which caption matches; each column asks the reverse question. Cross-entropy penalises low probability for the labelled match. Equal probabilities over $N$ choices give loss $\ln N$. Other items supply negative pairs, so larger batches provide more comparisons; not every comparison is necessarily a true mismatch.
-
-**Worked example.** Suppose for one image the scaled similarities to three captions are [5, 1, 0] with the correct caption first. Softmax: $e^5 = 148.4$, $e^1 = 2.72$, $e^0 = 1$; probability of the correct caption $148.4 / 152.1 = 0.976$; loss contribution $-\ln 0.976 = 0.025$. If the correct caption had scored 1 instead, $p = 2.72/152.1 = 0.018$ and the loss would be 4.0.
 
 **Lab measurement:** {{LOSS_NOTES}}
 
@@ -112,6 +112,8 @@ The lab's `precision_at_k` function measures **precision@k**: the fraction of th
 ![Retrieval example](fig:lab_retrieval)
 
 ### SigLIP
+
+**Illustrative pair example.** A matching image-caption pair has scaled score 2. The sigmoid gives about 0.88, so its negative-log loss is about 0.13. For a non-matching pair at that same score, use the negative score: the loss is about 2.13. Each pair contributes separately; these are calculated examples, not a measured training run.
 
 $$\mathcal{L}_{\mathrm{SigLIP}} = -\frac{1}{N}\sum_{i,j} \, \log \sigma\left(z_{ij}\,(t\, u_i \cdot v_j + b)\right), \qquad z_{ij} = +1 \text{ if } i = j, \text{ else } -1$$
 
@@ -195,7 +197,7 @@ The plotted spectrogram illustrates frequency content over time. Whisper interna
 
 **CPU core:** CLIP ViT-B/32 encodes 1,000 CIFAR-10 test images once, then reuses the vectors. Whisper-base transcribes ten short LibriSpeech clips. Neither model is trained. The full core measured {{W09_CORE_TIME}} on {{W09_CORE_DATE}} using {{W09_CORE_THREADS}} CPU threads on the course laptop. This excludes installation, downloads, widgets and optional API calls; it is a local measurement, not a Colab timing. Data: `uoft-cs/cifar10` and `hf-internal-testing/librispeech_asr_dummy`, with audio decoded by `soundfile`. **Hand-in:** plots, accuracy/retrieval/loss/WER tables and the five exit-check answers.
 
-**Follow the notebook:** read the purpose and expected output before each cell, predict one result, run it, change one setting, then use the named check. The first worked example has six images and six captions: two `[6, 512]` tables produce a `[6, 6]` similarity table. Normalise both tables before multiplying. The diagonal marks intended pairs; a bright off-diagonal cell needs inspection.
+**Follow the notebook:** read the purpose and expected output before each cell, predict one result, run it, change one setting, then use the named check. The first worked example has six images and six captions: two `[6, 512]` tables produce a `[6, 6]` similarity table. Normalise both tables before multiplying. The diagonal marks intended pairs; a darker off-diagonal cell needs inspection.
 
 **Class plan (120 minutes):** recall and vocabulary 10; teacher demonstration 20; guided pairs 40; individual change 25; compare and review 15; exit check 10. These are suggested learning times, separate from measured computation.
 
@@ -245,22 +247,7 @@ The plotted spectrogram illustrates frequency content over time. Whisper interna
 
 # Glossary
 
-| Term | Meaning |
-|---|---|
-| Modality | A type of data (text, image, audio, video, …) |
-| Cross-modal | Relating one modality to another |
-| Alignment | Making corresponding content across modalities match |
-| Fusion (early/late/cross-attention) | Where and how modalities are combined in a model |
-| Shared embedding space | Vector space in which several modalities can be compared |
-| Contrastive learning | Learning by pulling positives together and pushing negatives apart |
-| InfoNCE | Softmax cross-entropy contrastive loss over a batch |
-| Zero-shot classification | Classifying with class descriptions, without task-specific training |
-| Dual encoder | Separate encoders per modality compared by similarity |
-| Vision-language model (VLM) | Model processing images and text jointly |
-| Visual instruction tuning | Fine-tuning a VLM on image-based conversations |
-| Modality gap | Separation between image and text embedding regions |
-| Spectrogram | Time–frequency representation of audio |
-| Word error rate | (S + D + I) / N for speech recognition |
+<!-- Definitions generated from curriculum/glossary.json week_glossary. -->
 
 # Readings, videos and further practice
 
@@ -417,7 +404,7 @@ A shared embedding space is the direct answer to the warm-up. If a photo of a do
 
 - Train matching content, such as a dog photo and its caption, to receive a high similarity score.
 
-- The **shared embedding space** gives image and text vectors the same number of dimensions so we can compare them.
+- The **shared embedding space** gives image and text vectors compatible learned coordinates. Equal vector lengths alone do not establish that correspondence.
 
 - Use the scores for search or classification. Similarity does not prove every detail matches.
 
@@ -447,7 +434,17 @@ CLIP, by Radford and colleagues in 2021, is one of the most influential models i
 
 Picture a batch of N image-caption pairs as an N by N matrix of similarities: row i is image i, column j is caption j. The correct pairs are on the diagonal. Training increases the diagonal similarities and decreases the off-diagonal ones, treating each row as a classification problem, which caption belongs to this image, and each column as a classification problem, which image belongs to this caption. All other captions in the batch serve as negative examples for free, larger batches provide more comparisons, though ambiguous or false-negative pairs still need consideration.
 
-## Slide 19: The contrastive (InfoNCE) loss
+## Slide 19: The loss in numbers (from the lab)
+
+These numbers come from the lab run: six CIFAR-10 images from different classes and six matching captions, embedded with the pretrained CLIP. The correctly ordered pairs have a lower mean loss than the uniform-choice baseline ln 6, about 1.79. In the recorded run every image scores its own caption highest, as the lab heatmap shows; the loss stays above zero because rival captions score only slightly lower. The recorded seeded shuffle moves three captions and leaves three pairs in place, so the mean loss rises but remains below the uniform-choice baseline. Image–caption cosines also sit close together, so the moved targets still receive moderate probabilities. A different seed gives a different shuffle. Students compute both directions in part four of the lab.
+
+- {{LOSS_NOTES}}
+
+- Low loss means the labelled pair receives a high probability among the candidates.
+
+- After the seeded shuffle, three of the six diagonal targets no longer match. Inspect the measured loss against the uniform-choice value ln N.
+
+## Slide 20: The contrastive (InfoNCE) loss
 
 Write the loss on the board. The similarity s i j is the cosine similarity between image i and text j, divided by a temperature; CLIP learns the temperature and it ends up around one hundredth, which sharpens the softmax, the same temperature idea as in week 1. For each image, the softmax over all captions should put its probability on the matching caption; the loss is the negative log of that probability, a cross-entropy with the diagonal as the target. The same is done column-wise for texts, and the two directions are averaged. Uniform choice assigns probability 1/N to each caption, giving loss ln N.
 
@@ -467,16 +464,6 @@ Each score is the dot product of normalised image and text vectors, divided by t
 | $\tau$ | temperature: controls how sharply scores become probabilities |
 | N | number of image-caption pairs in the batch |
 
-## Slide 20: The loss in numbers (from the lab)
-
-These numbers come from the lab run: six CIFAR-10 images from different classes and six matching captions, embedded with the pretrained CLIP. The correctly ordered pairs have a lower mean loss than the uniform-choice baseline ln 6, about 1.79. This does not require every intended pair to win: the horse image scores the cat caption above its horse caption. In the recorded shuffle, the intended matches move away from their target positions and the mean loss rises but remains below the uniform-choice baseline. A new shuffle can leave some pairs unchanged. Students compute both directions in part four of the lab.
-
-- {{LOSS_NOTES}}
-
-- Low loss means the labelled pair receives a high probability among the candidates.
-
-- After shuffling captions, the diagonal targets no longer match. Inspect the measured loss against the uniform-choice value ln N.
-
 ## Slide 21: Zero-shot classification: describe the classes, then compare
 
 Zero-shot classification with CLIP takes no training. Write each class name into a caption template such as a photo of a cat, embed all the captions with the text encoder, embed the image with the image encoder, and predict the class whose caption is most similar. The classifier is defined entirely by text, so changing the classes means changing a list of words. This is also why prompt engineering matters for CLIP, as the next slide shows.
@@ -493,9 +480,9 @@ Real results from the lab: CLIP ViT-B/32 classifying CIFAR-10 test images zero-s
 
 ## Slide 23: Where zero-shot CLIP goes wrong (real confusion matrix)
 
-The confusion matrix from the lab run shows where the zero-shot classifier fails. The diagonal is strong, and the largest off-diagonal counts are between classes that look alike at low resolution: deer predicted as horses, dogs and frogs predicted as cats, and airplanes predicted as ships. CIFAR's thirty-two by thirty-two images are upscaled to CLIP's input size, which is a distribution shift from the web photos it was trained on. This is a good example of error analysis from week 7: the errors are understandable and suggest remedies, such as better templates, higher-resolution data or a small amount of fine-tuning.
+The confusion matrix from the lab run shows where the zero-shot classifier fails. The diagonal is strong, and the largest off-diagonal counts are between classes that look alike at low resolution: deer predicted as horses, dogs and frogs predicted as cats, then frogs predicted as birds and airplanes as ships. CIFAR's thirty-two by thirty-two images are upscaled to CLIP's input size, which is a distribution shift from the web photos it was trained on. This is a good example of error analysis from week 7: the errors are understandable and suggest remedies, such as better templates, higher-resolution data or a small amount of fine-tuning.
 
-- In this run, the largest confusions were deer → horse, dog → cat, frog → cat and airplane → ship.
+- In this run, the largest confusions were deer → horse, dog → cat and frog → cat, then frog → bird and airplane → ship (tied).
 
 - CIFAR-10 images start at 32 × 32 pixels. Resizing to 224 × 224 cannot restore detail that was absent.
 

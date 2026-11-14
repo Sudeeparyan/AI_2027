@@ -18,8 +18,8 @@ USE_GEMINI = False
 USE_OPENAI = False
 GEMINI_MODEL = "gemini-3.5-flash-lite"
 OPENAI_MODEL = "gpt-4.1-mini"
-# Local users may change this path to their private .env file; never upload that file.
-LOCAL_ENV_FILE = ".env"
+# Local users explicitly select a private file here, for example ".env"; never upload it.
+LOCAL_ENV_FILE = None
 SEED = 42
 SMOKE = os.environ.get("GENAI_LAB_SMOKE") == "1"
 try:
@@ -60,8 +60,9 @@ RUNTIME_INFO = {
 print("Runtime:", json.dumps(RUNTIME_INFO, sort_keys=True))
 print("CPU is the default. Complete the core tasks before trying optional GPU or API work.")
 
-_gemini_calls = 0
-_openai_calls = 0
+# Re-running setup or switching provider must not renew the session's request budget.
+_gemini_calls = globals().get("_gemini_calls", 0)
+_openai_calls = globals().get("_openai_calls", 0)
 _gemini_cache = Path.cwd() / ".genai_cache"
 
 def _optional_key(name):
@@ -77,7 +78,9 @@ def _optional_key(name):
     key = os.environ.get(name)
     if key or IN_COLAB:
         return key
-    # Read this one file only after explicit API opt-in. Do not change the environment.
+    # Read one explicitly selected file after API opt-in. Do not change the environment.
+    if not LOCAL_ENV_FILE:
+        return None
     try:
         from dotenv import dotenv_values
         return dotenv_values(LOCAL_ENV_FILE).get(name)
@@ -94,7 +97,7 @@ def ask_gemini(prompt, *, temperature=0.2, max_output_tokens=256):
     Actual free quotas and eligibility depend on the student's account.
     """
     global _gemini_calls
-    if not USE_GEMINI or SMOKE:
+    if not USE_GEMINI or USE_OPENAI or SMOKE:
         return None
     key = _gemini_key()
     if not key:
@@ -157,8 +160,10 @@ def ask_openai(prompt, *, temperature=0.2, max_output_tokens=256):
     The notebook ceiling counts both providers' attempts, including retries.
     """
     global _openai_calls
-    if not USE_OPENAI or SMOKE:
+    if not USE_OPENAI or USE_GEMINI or SMOKE:
         return None
+    # The Responses endpoint requires a cap of at least 16, including short labels.
+    max_output_tokens = max(16, int(max_output_tokens))
     key = _optional_key("OPENAI_API_KEY")
     if not key:
         print("OpenAI key unavailable; continue with the local result.")

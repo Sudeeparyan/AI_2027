@@ -16,6 +16,15 @@ const table={type:"bullets",title:"Compare shapes",bullets:["One vector per toke
   header:["Input","Output"],rows:[["3 IDs","[3, 8]"],["4 IDs","[4, 8]"]]}};
 const textContent=events=>events.filter(e=>e.kind==="text").flatMap(e=>Array.isArray(e.text)?e.text.map(r=>r.text):[e.text]).join(" ");
 (async()=>{
+  const equation = recorder();
+  await layouts.equation(equation.slide, {title:"A loss from one probability", example_first:true,
+    eq_assets:[{path:"equation.png",w:900,h:180}], read_as:["Probability 0.25 gives loss 1.39."],
+    terms:[["p","probability"]]});
+  const formula = equation.events.find(e=>e.kind==="image");
+  const teaching = equation.events.filter(e=>e.kind==="text" && e.options.y>=1.2);
+  assert(teaching.every(e=>e.options.y+e.options.h<formula.options.y),"Example and symbol key must precede the formula");
+  assert(textContent(equation.events).includes("Worked example"));
+  assert(teaching.every(e=>!e.options.fontSize || e.options.fontSize>=14));
   const ex=recorder(); await layouts.bullets(ex.slide,example,{assets:{figures:{}}});
   assert(!ex.events.some(e=>e.kind==="image"),"An authored example must replace the decorative icon");
   assert(textContent(ex.events).includes("[3, 8]"),"The worked tensor shape must remain editable text");
@@ -41,5 +50,16 @@ const textContent=events=>events.filter(e=>e.kind==="text").flatMap(e=>Array.isA
   assert.deepEqual(a.events,b.events,"Changing correctness/reveal metadata must never change the visible question");
   assert(!textContent(a.events).includes("Answer:"),"Instructor answer leaked onto prediction slide");
   assert(textContent(a.events).includes("[3, 8]") && textContent(a.events).includes("[8, 3]"));
+  for (const [layout, source] of [
+    ["section", {number:1,title:"Follow the data",question:"Where does the answer come from?",icon:"fa:FaChessKnight"}],
+    ["callout", {statement:"Trace the evidence before trusting the answer.",icon:"fa:FaKey"}],
+    ["compare", {title:"Compare consequences",columns:[{head:"Check",points:["Ask for supporting evidence."],icon:"fa:FaKey"}]}],
+    ["cards", {title:"Check consequences",cards:[{head:"Evidence",text:"Check the supporting source.",icon:"fa:FaKey"}]}],
+  ]) {
+    const recorded=recorder();
+    await layouts[layout](recorded.slide,source);
+    assert(!recorded.events.some(e=>e.kind==="image"),`${layout}: decorative badge survived`);
+    assert(textContent(recorded.events).length>0,`${layout}: teaching content disappeared`);
+  }
   console.log("Slide visuals: editable examples/table, body limits, bounds, fonts and answer-hidden prediction passed");
 })().catch(e=>{console.error(e);process.exitCode=1;});

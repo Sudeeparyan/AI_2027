@@ -131,6 +131,24 @@ Random sampling can give different outputs for the same prompt. Each is a possib
 
 ### The chain rule and autoregressive models
 
+### Worked example: the likelihood of a short sentence
+
+A sequence's **likelihood** is its probability under the supplied model. A **natural logarithm** turns products into sums. **Negative log-likelihood (NLL)** changes the sign to measure target surprise; a **nat** is its natural-log unit. First do the numbers, then write the general chain rule.
+
+| Step | Probability | Natural log |
+|---|---|---|
+| p(the) | 0.06 | −2.81 |
+| p(cat \| the) | 0.01 | −4.61 |
+| p(sat \| the cat) | 0.20 | −1.61 |
+| p(on \| the cat sat) | 0.55 | −0.60 |
+| **Whole sequence** | 0.06 × 0.01 × 0.20 × 0.55 = 6.6 × 10⁻⁵ | **−9.63** |
+
+* Average NLL per token = 9.63 / 4 ≈ **2.41 nats**.
+* **Perplexity** = exp(average NLL) = $e^{2.41}$ ≈ **11.1**. Interpretation: the model is as uncertain as if it were choosing uniformly among about 11 tokens at each step. Lower perplexity is better.
+* The step *cat given the* contributes most to the loss; training on sentences like this one would raise that probability.
+
+> **Teaching tip:** Ask students to check that the sum of logs equals the log of the product: ln(6.6 × 10⁻⁵) = ln 6.6 + ln 10⁻⁵ = 1.89 − 11.51 = −9.63.
+
 Any joint distribution over a sequence can be factorised exactly with the chain rule of probability:
 
 **Reading the symbols.** $T$ is the number of tokens in the sequence. $x_t$ is the token at position $t$. The vertical bar means "given the earlier tokens". The product sign $\prod$ means multiply one probability for each position. For the two-token example "the cat", multiply 0.06 by 0.01 to get 0.0006. Here $T$ means sequence length; the temperature section uses the same letter for a different setting.
@@ -186,27 +204,9 @@ The loss is the average **negative log-likelihood (NLL)**. Lower loss means the 
 
 **Simple example (MLE from counts).** If *a* is followed by *n* in 300 of 1,000 occurrences, the unsmoothed maximum-likelihood estimate of $p(n \mid a)$ is 0.3. The lab then adds one to each count before normalising: this Laplace smoothing changes the estimate and gives unseen pairs a nonzero chance.
 
-### Worked example: the likelihood of a short sentence
-
-| Step | Probability | Natural log |
-|---|---|---|
-| p(the) | 0.06 | −2.81 |
-| p(cat \| the) | 0.01 | −4.61 |
-| p(sat \| the cat) | 0.20 | −1.61 |
-| p(on \| the cat sat) | 0.55 | −0.60 |
-| **Whole sequence** | 0.06 × 0.01 × 0.20 × 0.55 = 6.6 × 10⁻⁵ | **−9.63** |
-
-* Average NLL per token = 9.63 / 4 ≈ **2.41 nats**.
-* **Perplexity** = exp(average NLL) = $e^{2.41}$ ≈ **11.1**. Interpretation: the model is as uncertain as if it were choosing uniformly among about 11 tokens at each step. Lower perplexity is better.
-* The step *cat given the* contributes most to the loss; training on sentences like this one would raise that probability.
-
-> **Teaching tip:** Ask students to check that the sum of logs equals the log of the product: ln(6.6 × 10⁻⁵) = ln 6.6 + ln 10⁻⁵ = 1.89 − 11.51 = −9.63.
-
 ### Temperature and decoding strategies
 
 The network outputs a score called a **logit** $z_i$ for each token. The softmax function turns logits into probabilities, and the **temperature** $T > 0$ rescales them first:
-
-$$p_i = \frac{\exp(z_i / T)}{\sum_j \exp(z_j / T)}$$
 
 **Worked example** with logits [2, 1, 0]:
 
@@ -218,6 +218,10 @@ $$p_i = \frac{\exp(z_i / T)}{\sum_j \exp(z_j / T)}$$
 
 These values are rounded. A displayed row may add to 1.01; the probabilities before rounding add to exactly one, up to computer precision.
 
+![The same logits at three temperatures](fig:temperature)
+
+$$p_i = \frac{\exp(z_i / T)}{\sum_j \exp(z_j / T)}$$
+
 Lower positive temperature concentrates sampling choices; higher temperature spreads them. Neither setting verifies facts. The positive-temperature formula approaches greedy choice as T → 0. In this Transformers lab use `do_sample=False` for greedy decoding; do not divide by zero. Other common controls:
 
 * **Top-k:** sample only among the k most likely tokens.
@@ -225,8 +229,6 @@ Lower positive temperature concentrates sampling choices; higher temperature spr
 * **Seed:** a seed helps repeat sampling in a fixed setup; software, hardware and model revisions can still change outputs.
 
 Decoding settings change **how we sample**, never what the model knows. Some reasoning models fix or ignore these settings, so always check the documentation. For experiments, record model, version, temperature, top-p, seed and date.
-
-![The same logits at three temperatures](fig:temperature)
 
 ### Generative versus discriminative models
 
@@ -397,27 +399,7 @@ Use this checklist in every lab and in the group project. It also works as an ex
 
 # Glossary
 
-| Term | Meaning |
-|---|---|
-| Generative model | A model of the data distribution p(x) (or p(x \| condition)) that can sample new examples |
-| Discriminative model | A model of p(y \| x) that predicts labels without modelling the inputs |
-| Foundation model | Large model trained on broad data and adapted to many tasks |
-| Parameters (weights) | The adjustable numbers inside a neural network, learned in training |
-| Token | A sub-word unit of text with an integer ID; models read and write tokens |
-| Context window | The maximum number of tokens a model can take into account at once |
-| Training / inference | Learning parameters from data / using fixed parameters to produce outputs |
-| Pre-training / post-training | Next-token learning on broad data / instruction and preference tuning into an assistant |
-| Likelihood | Probability the model assigns to observed data, as a function of the parameters |
-| Maximum likelihood (MLE) | Choosing parameters that maximise the likelihood of the training data |
-| Negative log-likelihood / cross-entropy | The training loss of LLMs; lower is better |
-| Perplexity | exp(average NLL per token); an "effective number of choices" |
-| Logit | Raw score before softmax |
-| Temperature | Divides logits before softmax; controls how spread out sampling is |
-| Top-k / top-p | Restrict sampling to the k most likely tokens / to the smallest set with total probability p |
-| Latent variable | Unobserved cause of the data; sampled then decoded |
-| Autoregressive model | Generates one element at a time, each conditioned on the previous ones |
-| Hallucination | Fluent output that is false or unsupported |
-| Open-weight model | A model whose trained weights are publicly downloadable |
+<!-- Definitions generated from curriculum/glossary.json week_glossary. -->
 
 # Readings, videos and further practice
 
@@ -599,23 +581,7 @@ Training changes learned numbers. Inference uses those numbers to produce an out
 
 - Different choices can produce different answers. Each answer still needs checking.
 
-## Slide 20: The chain rule: generating one token at a time
-
-- Multiply the probabilities of each next token to get the probability of the whole sequence.
-
-- Example: 0.5 × 0.2 × 0.1 = 0.01 for three successive choices.
-
-- Autoregressive means predicting each next item from the items already present. The chain-rule factorisation is exact.
-
-## Slide 21: Likelihood and maximum likelihood training
-
-- **Likelihood** asks how much probability the model gives the observed examples.
-
-- **Maximum likelihood training** adjusts weights to give real examples more probability.
-
-- Taking logs turns products into sums. We minimise their negative average: **negative log-likelihood**, or cross-entropy for token targets.
-
-## Slide 22: Worked example: the likelihood of a short sentence
+## Slide 20: Worked example: the likelihood of a short sentence
 
 Average negative log-likelihood = 9.63 / 4 ≈ 2.41 nats per token. Perplexity = $e^{2.41}$ ≈ 11: the model is as uncertain as choosing among ~11 equally likely tokens.
 
@@ -627,7 +593,23 @@ Average negative log-likelihood = 9.63 / 4 ≈ 2.41 nats per token. Perplexity =
 | p(on / the cat sat) | 0.55 | −0.60 |
 | Sequence | 0.06 × 0.01 × 0.20 × 0.55 = 6.6 × 10⁻⁵ | sum = −9.63 |
 
-## Slide 23: Temperature reshapes the distribution before sampling
+## Slide 21: The chain rule: generating one token at a time
+
+- Multiply the probabilities of each next token to get the probability of the whole sequence.
+
+- Example: 0.5 × 0.2 × 0.1 = 0.01 for three successive choices.
+
+- Autoregressive means predicting each next item from the items already present. The chain-rule factorisation is exact.
+
+## Slide 22: Likelihood and maximum likelihood training
+
+- **Likelihood** asks how much probability the model gives the observed examples.
+
+- **Maximum likelihood training** adjusts weights to give real examples more probability.
+
+- Taking logs turns products into sums. We minimise their negative average: **negative log-likelihood**, or cross-entropy for token targets.
+
+## Slide 24: Temperature reshapes the distribution before sampling
 
 - A **logit** is a raw score. **Softmax** converts scores into probabilities that add to 1.
 

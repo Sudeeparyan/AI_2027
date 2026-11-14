@@ -17,3 +17,21 @@
 - Latest successful cached local CPU full core: 33.0 s (0.6 min), recorded in `research/lab_runs_2026-10.json`; final smoke PASS (36.0 s). Current executed core code matches the successful full-run evidence.
 - All 26 current release gates passed, including coverage 100%, strict notes, body ≤ 40, fonts ≥ 14, semantic helpers and shared diagram/attachment parity. See `research/ITERATION3_2026-10-12.json`.
 - No timed Colab, clean-install/download, live-provider, browser-widget or optional GPU/stretch claim. Earlier pending handoffs above describe intermediate states.
+
+
+## Runtime provenance repair — 12 October 2026
+- Read-only timing audit: GPU reasoning mean seconds have no matching dated ledger provenance; root removes them from REASONING_NOTES while retaining measured correctness/token counts. No hardcoded latency remains in the W06 figure or slide source.
+- Source edits only; no build, render or notebook execution during active coordinated CPU runs. Coordinator must rebuild and inspect the changed charts and Word sections.
+
+
+### Fresh CPU evidence promotion — 12 October 2026
+- Coordinator full core recorded 28.1 seconds, starting 2026-10-12T16:44:27.262735+00:00, in the clean pinned CPU kernel. Executed-notebook SHA-256 matched the successful full record; the run is within the 900-second local CPU budget.
+- Fresh results_cpu_core.json promoted with original measured values, runtime and dated evidence; historical experiment assets retained.
+- Record appended to research/lab_runs_2026-10.json. This is a local measurement; no timed Colab or live-provider claim. Filling/rebuilding/rendered review remain with the coordinator.
+
+
+### Audit correction closeout — 13 October 2026
+
+- Worked n-gram/compute values above formulas, correct rounded top-p arithmetic, dated CPU timing.
+- Final current artifacts rebuilt, checked and visually reviewed; no open findings. Evidence: ../AUDIT_FIXES_2026-10-12.json.
+- CPU/Office verification is local; Colab, live API and classroom limits remain documented.

@@ -81,7 +81,7 @@
         "Select actual passage IDs; optional re-ranking must be labelled.",
         "Assemble numbered source text, generate an answer and inspect each citation."
       ],
-      "explanation": "Search ranks candidate passages. Selection keeps a bounded set. Assembly attaches passage numbers and the question. Generation requests a supported quote or abstention. Checking compares claims with the actual cited text. Language-model weights remain fixed.\n A GPU-hours question retrieves three passages, perhaps including the compute policy. Source number two means the second selected passage for this request. A generated statement with [2] must be checked against that passage. The open-book analogy works only when we inspect which pages were opened and what their text actually supports.",
+      "explanation": "Search ranks candidate passages. Selection keeps a bounded set. Assembly attaches passage numbers and the question. Generation requests a supported quote or abstention. Checking compares claims with the actual cited text. Language-model weights remain fixed. A GPU-hours question retrieves three passages, perhaps including the compute policy. Source number two means the second selected passage for this request. A generated statement with [2] must be checked against that passage. The open-book analogy works only when we inspect which pages were opened and what their text actually supports.",
       "check_question": "Right passage; wrong answer?",
       "check_answer": "Generation or evidence use failed; inspect the supplied passage and output before changing retrieval.",
       "layout": "linear",
@@ -145,7 +145,7 @@
         "Application code validates names, fields and permissions before invoking one tool.",
         "Append the observation and repeat within the step and time limits."
       ],
-      "explanation": "A proposal is not an action. Parsing obtains a name and argument object. Validation checks allowed names and fields. Permitted execution runs one tool. Recording adds the result or error. Repetition lets the next decision use that observation.\n The calculator receives an arithmetic expression only after search has supplied fictional assessment weights. A malformed or forbidden call returns an error observation. A local fallback may follow a predefined policy; its trace is labelled as fallback rather than model-chosen planning. Both routes pass through the same executor and budget.",
+      "explanation": "A proposal is not an action. Parsing obtains a name and argument object. Validation checks allowed names and fields. Permitted execution runs one tool. Recording adds the result or error. Repetition lets the next decision use that observation. The calculator receives an arithmetic expression only after search has supplied fictional assessment weights. A malformed or forbidden call returns an error observation. A local fallback may follow a predefined policy; its trace is labelled as fallback rather than model-chosen planning. Both routes pass through the same executor and budget.",
       "check_question": "Proposal already executed?",
       "check_answer": "No. Parsing identifies a proposal; application code must validate and permit it before execution.",
       "layout": "linear",
@@ -211,7 +211,7 @@
         "Fuse both ranked ID lists, then select the current top-k passages.",
         "Check exact annotated passages; matching their parent document alone is insufficient."
       ],
-      "explanation": "BM25 ranks word matches. Dense search ranks compatible vectors. RRF combines their positions. Selection retains the requested cutoff. IDs recover passage text. Evidence checks use labelled relevant passages rather than parent-document identity alone.\n Suppose useful passage IDs are 2 and 7, while selected IDs are 2 and 9. Passage recall is one-half. A first relevant rank of two contributes one-half to MRR. The null connector between keyword and dense operations means independent searches of the same question; their ranked lists meet at fusion.",
+      "explanation": "BM25 ranks word matches. Dense search ranks compatible vectors. RRF combines their positions. Selection retains the requested cutoff. IDs recover passage text. Evidence checks use labelled relevant passages rather than parent-document identity alone. Suppose useful passage IDs are 2 and 7, while the selected IDs, in rank order, are 2 and 9. Passage recall is one-half. Passage 2 sits at rank 1, so its reciprocal rank is 1; at rank 2 it would add only one-half to MRR. No arrow joins the keyword and dense blocks: they search the same question independently, and their ranked lists meet at fusion.",
       "check_question": "Right document enough?",
       "check_answer": "No. The returned passage must contain the labelled evidence; its parent document alone can be a false hit.",
       "layout": "linear",
@@ -223,7 +223,7 @@
           "lane": "bottom"
         }
       ],
-      "notes": "In short: Keyword and dense rankings are independent inputs to fusion, followed by selection and passage inspection.\nExplain: BM25 ranks word matches. Dense search ranks compatible vectors. RRF combines their positions. Selection retains the requested cutoff. IDs recover passage text. Evidence checks use labelled relevant passages rather than parent-document identity alone.\nExample: Suppose useful passage IDs are 2 and 7, while selected IDs are 2 and 9. Passage recall is one-half. A first relevant rank of two contributes one-half to MRR. The null connector between keyword and dense operations means independent searches of the same question; their ranked lists meet at fusion.\nAsk: Can a returned assessment passage still miss the pass-mark fact?\nAnswer: Yes. The relevant evidence span must appear in that selected passage.\nWatch out: Fusion changes order, not content. A re-ranker cannot recover a useful passage absent from its shortlist, and neither ranking score nor document hit establishes claim support."
+      "notes": "In short: Keyword and dense rankings are independent inputs to fusion, followed by selection and passage inspection.\nExplain: BM25 ranks word matches. Dense search ranks compatible vectors. RRF combines their positions. Selection retains the requested cutoff. IDs recover passage text. Evidence checks use labelled relevant passages rather than parent-document identity alone.\nExample: Suppose useful passage IDs are 2 and 7, while the selected IDs, in rank order, are 2 and 9. Passage recall is one-half. Passage 2 sits at rank 1, so its reciprocal rank is 1; at rank 2 it would add only one-half to MRR. No arrow joins the keyword and dense blocks: they search the same question independently, and their ranked lists meet at fusion.\nAsk: Can a returned assessment passage still miss the pass-mark fact?\nAnswer: Yes. The relevant evidence span must appear in that selected passage.\nWatch out: Fusion changes order, not content. A re-ranker cannot recover a useful passage absent from its shortlist, and neither ranking score nor document hit establishes claim support."
     },
     {
       "id": "training",
@@ -270,7 +270,7 @@
         "vectors[N,384]",
         "rows[N]"
       ],
-      "explanation": "Loading supplies authorised source text. Splitting creates whole-word overlapping passages. Encoding maps each passage into a vector. Storage preserves the vector table and row IDs. Checking verifies their correspondence and input lengths. This is indexing, not model training.\n Three passages encoded at width 384 give [3,384]. Row two must still identify the same text and source when search returns index two. A catalogue analogy explains reusable organisation, but a catalogue entry can be stale, mislabelled or inaccessible; a production system needs version, deletion and access enforcement.",
+      "explanation": "Loading supplies authorised source text. Splitting creates whole-word overlapping passages. Encoding maps each passage into a vector. Storage preserves the vector table and row IDs. Checking verifies their correspondence and input lengths. This is indexing, not model training. Three passages encoded at width 384 give [3,384]. Row two must still identify the same text and source when search returns index two. A catalogue analogy explains reusable organisation, but a catalogue entry can be stale, mislabelled or inaccessible; a production system needs version, deletion and access enforcement.",
       "trace": [
         "Load sources and preserve identities while splitting passages.",
         "Encode short passages into [N,384] vectors and retain aligned row metadata.",
@@ -326,7 +326,7 @@
         "permitted call",
         "result"
       ],
-      "explanation": "The input is a structured proposed operation. Parsing and validation check its object fields. A permission gate decides whether the tool may run. Execution returns a result. A rejected request returns a blocked observation directly. Application code controls both routes.\n A valid calculator expression runs bounded arithmetic. A recognised send_email request to archive@example.net fails the simulated gate. Its refusal reaches the history without sending a message. The diagram’s short bypass arrow is important: rejected input must not pass through the tool before its refusal is recorded.",
+      "explanation": "The input is a structured proposed operation. Parsing and validation check its object fields. A permission gate decides whether the tool may run. Execution returns a result. A rejected request returns a blocked observation directly. Application code controls both routes. A valid calculator expression runs bounded arithmetic. A recognised send_email request to archive@example.net fails the simulated gate. Its refusal reaches the history without sending a message. The diagram’s short bypass arrow is important: rejected input must not pass through the tool before its refusal is recorded.",
       "trace": [
         "Parse a proposed call into a named operation and fields.",
         "Reject malformed or forbidden calls before tool execution.",

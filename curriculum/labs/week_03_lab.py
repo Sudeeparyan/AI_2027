@@ -426,7 +426,7 @@ def check_slerp():
                  "Use sine weights; a straight-line midpoint has smaller norm here.")
 
 
-check_slerp()
+assert check_slerp(), "Complete TODO 3 and rerun this cell before comparing interpolation paths."
 G.eval()
 a, b = torch.randn(Z_DIM, device=DEVICE), torch.randn(Z_DIM, device=DEVICE)
 ts = torch.linspace(0, 1, 10)
@@ -538,7 +538,7 @@ def check_predictions():
                  "Use argmax over the ten class logits, not over the batch.")
 
 
-check_predictions()
+assert check_predictions(), "Complete TODO 4 and rerun this cell before counting generated classes."
 counts = np.bincount(pred, minlength=10)
 print("coverage images:", tuple(coverage_images.shape), "labels:", pred.shape, "counts:", counts.shape)
 plt.bar(range(10), counts / counts.sum())
@@ -598,7 +598,7 @@ def check_frechet_distance():
                  "Keep both terms: shifting the mean adds 13; doubling this zero-mean cloud adds 4/3.")
 
 
-check_frechet_distance()
+assert check_frechet_distance(), "Complete TODO 5 and rerun this cell before comparing feature distances."
 
 
 @torch.no_grad()
@@ -698,7 +698,7 @@ def check_gradient_penalty():
                  "Use create_graph=True: at slope two, penalty is one and its slope gradient must be two.")
 
 
-check_gradient_penalty()
+assert check_gradient_penalty(), "Complete TODO 6 and rerun this cell before training the toy GAN configurations."
 
 
 def modes_covered(pts, k=8, r=2.0, tol=0.3):

@@ -97,12 +97,14 @@ These are the mistakes found so far. Most now have an automatic check; the rest 
 | Document-level retrieval hits really include the needed fact | the right source document, but the wrong passage | inspect the actual chunks passed to the generator |
 | Counts in the notes match the slide | "Recap the eight points" on a six-point slide | reading |
 | Notes describe what the figure really shows | notes describe an invalid-answer chart the figure leaves out | reading |
+| Preview belongs to the distributed Office file | the course guide was rebuilt with a new runtime, but its PNGs still show the old table | `tools/verify_render_inputs.py` after weekly and course rendering; then actual image review |
 | Negative numbers and ranges | `-0.5` → −0.5, `5-8` → 5–8 | `audit_prose.py` (MINUS, RANGE) |
 | Maths typed as words or ASCII | `epsilon_theta`, `abar = 0.64`, `x0` | `audit_inline_math.py` |
 | Sentences that start with a lower-case code name | ". avg_nll measures" → ". The avg_nll function measures" | `audit_prose.py` (LOWER) |
 | Unmeasured runtimes and sizes | "Downloads ≈ 3 GB" (it was 4.5 GB) | reading + lab run |
 | Claims that only hold on one path | Flan-T5-small on the CPU path answers "ireland" | executed notebook |
 | Picture text smaller than 14 pt when projected | chart tick labels | `audit_figure_text.py` |
+| Too much projected text | repeated outcome descriptions and lab labels push a slide above 40 body words | `audit_body_words.py` for ordinary text shapes; inspect diagrams and image text separately |
 | Legends over data or axis labels | figure-level legends | `lint_figures.py` + eye |
 | Evaluation labelled as training | “Loss / update” beneath frozen-model scoring or validation | use `metric` (“Measure / check”) for checking; keep `loss` for a training objective/update; read the flow and run diagram tests |
 | Windows locks an output during rebuilding | WinError 1224 or an UNKNOWN open/write error | atomic output writers preserve the old file; bounded replacement retries, writer tests and a successful rebuild |
@@ -119,6 +121,12 @@ These are the mistakes found so far. Most now have an automatic check; the rest 
 | Product names that have changed | "Vertex AI" (now Gemini Enterprise Agent Platform), "Azure AI Foundry" (now Microsoft Foundry) | reading + the vendor's own page; keep the former name in brackets |
 | A rounded ratio that the printed numbers do not give | "13 → 86 tokens/s (6.5×)" | reading; print the values the ratio came from |
 | Runtimes that do not match a recorded run | "≈ 20 min on a Colab T4" with no T4 run | `research/lab_runs_2026-10.json` |
+| Markdown inside a fill value | `**Measured (…):**` shows literal asterisks in PowerPoint notes | no Markdown in `fill_results.py` strings; search built PPTX notes for `**` |
+| Internal build words in student text | "Read the result placeholder…"; "the null connector" for a missing diagram arrow | search spec and notes for `placeholder` and `null` near arrow/link/connector; reading |
+| A recap example that needs the earlier slide | "0.8 − 0.3 = 0.5" or "top-p .8 keeps three" on the final recap | reading; give the inputs in the example itself |
+| A rounded interval bound | Wilson 32/40 quoted as 65–89%; the exact upper bound 89.5% rounds to 90% | reading; recompute the bound before rounding |
+| A notes example that skips the figure's own numbers | figure shows width 12 with 3 heads; notes give only the lab's 32/4 | reading; walk the figure's numbers first |
+| A line break inside one JSON paragraph | `\n ` in a diagram explanation splits a Word paragraph | reading the Word render; search beginner JSON strings for `\n` |
 | A line that ends with a bare option label | "… (c)" with "[4, 4]" on the next line | `tools/notes.js` joins the label to its option; `pdftotext -enc UTF-8 -layout build/render/week_NN/notes.pdf - \| grep -E "\((a\|b\|c\|d)\)\s*$"` finds any left |
 
 ## Helpers
@@ -180,10 +188,41 @@ are retained in `research/FOLLOWUP_2026-10-10.json`.
 
 This table describes the earlier review; it does not certify the upgraded sources.
 
-## Iteration 3 status (completed 12 October 2026)
+## Historical Iteration 3 snapshot (12 October 2026)
 
-All 26 current release gates passed; all 12 final smoke runs and successful measured CPU cores are recorded. Current executable core code matches the full-run evidence. The strict modern note template, canonical glossary and primary/video references apply to every week.
+The prior release record reported 26 release gates, 12 final smoke runs and successful measured CPU cores, with strict modern notes, glossary and primary/video references. These claims describe the earlier snapshot in `ITERATION3_2026-10-12.json`; they do not certify corrections made after the independent implementation audit.
 
-Final rendered review covers 552 slides, 402 weekly Word pages, 103 delivered diagram PNGs,130 notebook images and 50 course pages. All 12 PowerPoint layout reports are []; zero open material findings. Changed images were viewed; unchanged images retain exact prior-view hashes. The durable evidence and actual view reports are linked in `ITERATION3_2026-10-12.json`; findings are under Iteration 3 in the audit.
+That historical record lists 552 slides, 402 weekly Word pages, 103 delivered diagram PNGs, 130 notebook images and 50 course pages, with empty PowerPoint layout reports and no open material findings at its closure. Changed images were viewed; unchanged images retained exact prior-view hashes. Preserve these counts as history rather than reusing them for the corrected build. The view reports are linked in `ITERATION3_2026-10-12.json`; findings remain under Iteration 3 in the audit.
 
-CPU measurements exclude installation/downloads, widgets, live providers and optional GPU/media stretches. Unverified: timed Colab/clean installation, live Gemini/OpenAI, browser widgets, public deployment, optional stretches, four publisher-blocked links and student feedback. Local measurements do not establish those conditions. Root serialises future builds, lab runs and Office renders and records any new findings before closing them.
+The historical CPU measurements excluded installation/downloads, widgets, live providers and optional GPU/media stretches. The clean local installation has since been verified separately, as described below.
+
+## Audit correction status (completed 13 October 2026)
+
+The current correction record is `research/AUDIT_FIXES_2026-10-12.json`, separate from the historical Iteration 3 snapshot. A clean local Python 3.12 installation and `pip check` passed for the 14 exact direct pins documented in `research/weeks/platform_2026.md`. Use the correction record for the actual clean pinned CPU runs, CUDA-available/default-CPU regression, final gates and full rendered-review scope. Keep historical counts separate from that record; later changes require new checks and current image review.
+
+Corrections preserve the shared 40-attempt provider cap including retries, explicit `.env` selection after opt-in, and local fallbacks for unavailable APIs or widgets. Week 8 develops on validation and freezes the final test; score reuse checks the actual adapter weights, training data, settings and seed. Every new result still flows through the measured asset and fill pipeline. Serialise full runs and Office renders, then record current hashes, actual views and any findings before closure.
+
+Unverified: timed Colab runs, live Gemini/OpenAI calls, browser widget rendering, public deployment, optional stretches, publisher-blocked links and student usability testing. Local installation, regression checks and CPU execution do not establish those conditions.
+
+
+34 release gates and the final affected-artifact checks passed; all twelve smoke runs and clean pinned full CPU cores passed. The longest core was Week 8: 728.7 seconds (12.15 minutes), within the 15-minute budget. Visual review covers 552 slides, 412 weekly Word pages, 103 diagram PNGs, 130 notebook images and 54 course pages. All twelve slide layout reports are empty; zero open findings. Current Office render inputs, inspected image hashes and full-run executable code match the distributed artifacts.
+
+The correction findings are closed in IMPLEMENTATION_FIXES_2026-10-12.md; AUDIT_FIXES_2026-10-12.json binds the current checks and reviewed artifacts. Not verified: timed free Colab, live Gemini/OpenAI, browser widget interaction, actual GPU training, public deployment, optional stretches, three publisher-blocked reading pages, and beginner/classroom effectiveness. Local timings exclude installation and downloads. A clean local pinned installation and pip check were verified separately. No credentials were read, no hosted requests were sent and no commit or push was made.
+
+
+## Iteration 3 — student-path retry, 13 October 2026
+
+The retry found additional student-facing problems that solution-only execution had missed. Nineteen TODO checks now stop unfinished code before it becomes a result, plot, training run or optional demonstration. The error identifies the TODO and tells the student to complete it and rerun. The actual model algorithms and MSc content are retained.
+
+All 50 final command groups passed, including all twelve CPU smoke runs, coverage at 100%, nine paired built-student/built-solution regression cases, shared setup checks, callbacks and SDK contracts. All five changed labs received successful new full CPU runs. The remaining seven full records retain exact current executable-code parity. The longest current core remains Week 8 at 728.7 seconds (12.15 minutes). Timings use the tested local CPU environment and cached models/data; installation, downloads, widgets and hosted routes are excluded.
+
+Current replacement review: zero open findings. Source changes, archived/current metric wording and the 24-package version verification are detailed in VERIFICATION_RETRY_2026-10-13.md. Desktop/Colab/live API/classroom limits remain explicit; no new depth or course-order changes.
+
+
+### VS Code widget pilot follow-up — 13 October 2026
+
+The current Week 1 temperature widget was rerun in VS Code with Python 3.12.10 and ipywidgets 7.7.1. Its visible control and chart updated at T=1.0, 1.7 and 0.4. Four exact distributed code cells used a five-name invented fixture. No permission setting was changed by the agent. This closes the local Week 1 interaction check; other frontend checks and timed Colab remain unverified. Evidence: build/retry_20261013/widget_ui_verified.json.
+
+## Pre-submission end-to-end check (Q6), 16 October 2026
+
+Q5 (14–15 Oct) stopped before its final checks; Q6 completed them and reviewed all 12 weeks again. 18 findings fixed in sources (F1–F18 in `research/E2E_REVIEW_2026-10-16.md`), with no change to executable lab code or measured results. Final: 12/12 builds, 26/26 gates (links 204/209, 5 publisher-blocked), 12/12 CPU smokes, code parity 12/12, empty layout reports, `verify_render_inputs.py` 29/29, and every changed slide and Word page viewed. Unverified: timed Colab, live APIs, Colab widgets, blocked links, classroom use.

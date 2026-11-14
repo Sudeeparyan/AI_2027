@@ -42,7 +42,23 @@ class BeginnerSupportTests(unittest.TestCase):
                 self.assertIn(key, meanings, (week, key))
                 self.assertEqual(item["meaning"], meanings[key], (week, key))
                 seen.add(key)
+            for item in beginner.weekly_glossary(week):
+                key = item["term"].casefold()
+                self.assertEqual(item["meaning"], meanings[key], (week, key))
+                seen.add(key)
         self.assertEqual(seen, set(meanings))
+
+    def test_advanced_weekly_glossary_uses_canonical_definitions(self):
+        rendered = beginner.canonical_glossary("# Glossary\n\n| Fake | Wrong meaning |\n\n# Review\nKeep this.\n", 8)
+        self.assertNotIn("Wrong meaning", rendered)
+        self.assertIn("QLoRA", rendered)
+        self.assertIn("# Review\nKeep this.", rendered)
+        for item in beginner.weekly_glossary(8):
+            self.assertIn(item["meaning"], rendered)
+
+    def test_missing_reference_glossary_is_rejected(self):
+        with self.assertRaisesRegex(ValueError, "exactly one"):
+            beginner.canonical_glossary("# Notes\nNo glossary here.", 8)
 
 
 if __name__ == "__main__":

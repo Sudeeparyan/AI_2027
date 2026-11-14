@@ -86,9 +86,9 @@ slides:
 
     Watch out: Tool familiarity is useful, but it cannot replace measurements or the requirements of the actual task.'
   items:
-  - Choose layers.
-  - Build interfaces.
-  - Measure operation.
+  - Choose a deployment.
+  - Build checked interfaces.
+  - Measure speed, cost and quality.
 - type: agenda
   icon: fa:FaRoute
   items:
@@ -453,39 +453,39 @@ slides:
     Watch out: TestClient excludes real network transport; neither its timing nor a decoded chunk is a complete production TTFT
     measurement.'
 - type: figure
-  title: 'Stored GPU run: streaming latency'
+  title: 'Recorded CPU core: streaming latency'
   figure: lab_latency
   bullets:
   - '{{LAT_NOTES}}'
   - First decoded text approximates TTFT.
   stack: true
-  notes: 'In short: Read the latency chart together with the recorded model, hardware and measurement boundary.
+  notes: 'In short: Read the latency chart together with the recorded model, device and measurement boundary.
 
 
-    Explain: The stored chart comes from the archived instructor run. First non-empty decoded text approximates time to first
-    token. Full-answer duration includes the complete observed generation. Retokenising decoded text estimates output length
-    and can differ from generated token IDs. The revised CPU lab creates its own table using a smaller bounded workload.
+    Explain: The chart uses the dated CPU core export for the smaller SmolLM2 model. First non-empty decoded text approximates
+    time to first token. Full-answer duration includes the complete observed generation. Retokenising decoded text estimates
+    output length and can differ from generated token IDs. These timings describe a cached local run rather than a Colab benchmark.
 
 
-    Example: The shorter bar marks when readable text began; the longer bar marks completion for the same question. Use the
-    stored result placeholder for the recorded values. Then compare your new table only after noting model identity, output
+    Example: The shorter bar marks when readable text began; the longer bar marks completion for the same question. Read the
+    slide bullet and caption for the measured values and date. Compare your table only after noting model identity, output
     cap, device and warm-up conditions.
 
 
-    Ask: Can the stored chart predict your exact CPU waiting time?
+    Ask: Can the recorded chart predict your exact CPU waiting time?
 
 
-    Answer: No. It records a specified earlier run; your hardware, model, workload and timing boundary may differ.
+    Answer: No. Your hardware, workload, cached files and system load may differ.
 
 
-    Watch out: Never copy archived values into a fresh table or describe an unmeasured revised path as already timed.'
-  caption: Qwen2.5-0.5B-Instruct · GTX 1650 · 9 Oct 2026
+    Watch out: Never copy recorded values into a fresh table or present a local measurement as a Colab timing.'
+  caption: CPU core · {{W11_CORE_DATE}}
 - type: table
   title: 'Estimating cost: 500 students, 20 requests a day, one month'
   header:
-  - Classroom option
-  - Input / output $/1M
-  - Monthly USD
+  - Option
+  - $/1M (in/out)
+  - USD
   rows:
   - - Small
     - 0.10 / 0.40
@@ -499,7 +499,7 @@ slides:
   - - Always-on GPU
     - 0.60/hour
     - 432 + staff
-  callout: 300,000 requests; 800 input, 300 output tokens. Illustrative rates.
+  callout: 300,000 requests; 800/300 tokens. Illustrative rates.
   callout_label: Method
   notes: 'In short: Estimate monthly cost by multiplying requests and separate token charges using consistent units.
 
@@ -627,8 +627,8 @@ slides:
   - s = \frac{\max |w|}{2^{b-1} - 1}, \qquad q = \mathrm{round}\left(\frac{w}{s}\right), \qquad \hat{w} = q \cdot
     s
   read_as:
-  - 'Weights: parameters × bits/8, before overhead.'
-  - Scale → round → reconstruct.
+  - 'Illustration: 1 B weights × 16/8 = 2 GB.'
+  - '4 bits: s = 1/7; 0.2 → integer 1 → ≈ 0.143.'
   terms:
   - - N
     - Parameter count
@@ -664,6 +664,8 @@ slides:
 
     Watch out: Weight-only arithmetic excludes scales, attention caches, intermediate tensors and runtime memory; it cannot
     guarantee that a model fits.'
+  example_first: true
+  panel_h: 1.9
 - type: figure
   title: 'Stored GPU run: rounding and perplexity'
   figure: lab_quant
@@ -681,7 +683,7 @@ slides:
 
 
     Example: Compare per-row four-bit rounding with groups of 64 weights. Each group has its own scale, so differently sized
-    values can receive different resolutions. Read the archived result placeholder for the actual recorded error and perplexity;
+    values can receive different resolutions. Read the slide bullet for the recorded perplexity and size of each setting;
     the mechanism alone cannot predict their order.
 
 
@@ -692,9 +694,9 @@ slides:
 
 
     Watch out: Do not call theoretical size a measured memory saving or treat one paragraph as a complete deployment benchmark.'
-  caption: Qwen2.5-0.5B-Instruct · GTX 1650 · 9 Oct 2026
+  caption: Archived Qwen2.5-0.5B-Instruct · GTX 1650
 - type: figure
-  title: 'Stored GPU run: batch throughput'
+  title: 'Recorded CPU core: batch throughput'
   figure: lab_batch
   bullets:
   - '{{BATCH_NOTES}}'
@@ -704,13 +706,14 @@ slides:
 
 
     Explain: Batching processes several input sequences in one model operation. Padding aligns their lengths, and an attention
-    mask identifies real tokens. Aggregate throughput counts generated tokens divided by elapsed time. The lab fixes generation
-    length for a fair workload comparison. Continuous batching can admit new work as existing requests finish.
+    mask identifies real tokens. The notebook divides the requested output-token count by elapsed time. Early stopping can make
+    that count exceed the actual generated count. Production systems may use continuous batching, admitting new requests as
+    existing ones finish.
 
 
-    Example: Four prompts with eight generated tokens each create 32 output tokens. If the measured workload takes t seconds,
-    aggregate throughput is 32 divided by t. This worked formula does not assign a value to t or claim the batch is faster on
-    every CPU.
+    Example: Four prompts requesting eight generated tokens each create a budget of 32 output tokens. If the workload takes
+    t seconds, the displayed rate is 32 divided by t. Inspect actual generated counts before comparing workloads that stop early.
+    This arithmetic does not claim every batch is faster on every CPU.
 
 
     Ask: Must a throughput improvement shorten each request''s latency?
@@ -719,9 +722,9 @@ slides:
     Answer: No. Waiting for a batch or sharing capacity can increase an individual request''s wait.
 
 
-    Watch out: Compare equal prompts and token counts; do not infer concurrent production capacity from this small sequential
-    timing experiment.'
-  caption: Qwen2.5-0.5B-Instruct · GTX 1650 · 9 Oct 2026
+    Watch out: Compare equal prompts, output budgets and measurement boundaries; record actual generated counts when early stopping
+    occurs.'
+  caption: CPU core · {{W11_CORE_DATE}}
 - type: bullets
   title: Serving engines and caching
   notes: 'In short: Distinguish reused attention computation, reused prefixes and reused complete answers.
@@ -1028,33 +1031,33 @@ slides:
     Watch out: The population matters: state whether percentiles include blocked requests, failed requests, cache hits or only
     successful generation.'
 - type: figure
-  title: 'Stored GPU run: ten-request monitoring'
+  title: 'Recorded CPU core: monitoring summary'
   figure: lab_monitor
   bullets:
   - '{{MONITOR_NOTES}}'
   - Metadata only; allowed-request percentiles.
   stack: true
-  notes: 'In short: The monitoring chart represents a recorded traffic sample with explicitly separated request outcomes.
+  notes: 'In short: Monitoring separates total request counts from the latency distribution of allowed requests.
 
 
-    Explain: Allowed requests reach generation and can consume prompt and completion tokens. Blocked current inputs skip generation
-    in respond. Supported personal-data patterns are replaced before allowed generation. The log stores metadata rather than
-    raw prompts. The summary computes latency percentiles from allowed requests and block counts from all requests.
+    Explain: The chart uses the dated CPU core export rather than historical GPU traffic. Blocked inputs skip generation in
+    respond and record zero model token counts. Supported personal-data patterns are replaced before allowed generation. The
+    log stores metadata rather than raw prompts. Latency percentiles use allowed requests; counts include every request.
 
 
-    Example: Follow one recorded blocked bar and one redacted bar. The blocked request records zero model token counts, while
-    the redacted request can still generate an answer. Read the stored summary placeholder for actual results. The revised CPU
-    lab uses four invented requests and needs its own measured record.
+    Example: The counts show all requests, blocked requests and redacted requests. These categories overlap because a redacted
+    request also belongs to the total. The second panel shows measured p50 and p95 latency, using the stored aggregate summary.
+    No individual request duration is reconstructed from those percentiles.
 
 
     Ask: Do blocked requests enter the allowed-request p95 calculation?
 
 
-    Answer: No. They remain visible in the total request and block counts but are excluded from that percentile.
+    Answer: No. They remain visible in the total request and block counts.
 
 
-    Watch out: The historical per-request chart has its own sample size; do not label it as the new four-request CPU run.'
-  caption: Qwen2.5-0.5B-Instruct · GTX 1650 · 9 Oct 2026
+    Watch out: With only a few allowed requests, p95 is a fragile sample estimate rather than a stable service guarantee.'
+  caption: CPU core · {{W11_CORE_DATE}}
 - type: flow
   title: Guardrails in layers
   steps:

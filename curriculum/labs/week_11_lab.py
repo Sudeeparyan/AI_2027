@@ -13,6 +13,19 @@
 # 6. **Monitoring:** latency percentiles, blocked requests and cost from the logs; packaging with Docker.
 #
 # **CPU core:** small real SmolLM2-135M-Instruct, capped generation and four synthetic requests. The cached local core has a measured CPU run; see the companion notes for the recorded time and hardware. Downloads and optional stretches are separate. No API spending is required.
+#
+# | Part | Activity | Suggested class time |
+# |---|---|---|
+# | Start | Setup and vocabulary recall | 10 min |
+# | 1 | A local model with streaming | 15 min |
+# | 2 | An OpenAI-compatible API with FastAPI | 20 min |
+# | 3 | Cost and rate limits | 15 min |
+# | 4 | Quantisation, batching and caching | 25 min |
+# | 5 | A web app with guardrails and logging | 15 min |
+# | 6 | Monitoring; self-checks | 20 min |
+#
+# Class time includes discussion and coding; it is not a measured compute time.
+# Optional server launch, Gradio and hosting steps are for after class.
 
 # %% [markdown]
 # ## Before running: a model is one part of the application
@@ -58,8 +71,9 @@
 # **Expected output:** Installed packages; restart only if requested.
 
 # %% tags=["colab-install"]
-%pip install -q fastapi httpx uvicorn
-# Shared setup installs the model, plotting, widget and optional provider libraries.
+%pip install -q torch transformers accelerate numpy pandas matplotlib fastapi httpx uvicorn
+# This cell installs the core; the builder adds pinned widget and optional provider packages.
+# Shared setup then configures the device, seeds and opt-in provider helpers.
 # Stretch only: %pip install -q gradio langchain-core langchain-openai bitsandbytes
 
 # %% [markdown]
@@ -214,7 +228,7 @@ def check_measure(fn):
     return check(good, "TODO 1: first text, buffered text and whole-duration rate checked", "Ignore empty chunks for TTFT; use n_tokens/total for the end-to-end rate. Empty output has no first-text timestamp.")
 
 
-check_measure(measure)
+assert check_measure(measure), "Complete TODO 1, then rerun this cell before reporting streaming timings."
 
 questions = ["What is a large language model? Answer in two sentences.",
              "Give three tips for writing a good prompt.",
@@ -231,14 +245,14 @@ lat_df
 # **Change:** select 8, 24 and 48 tokens, then explicitly run a measurement separately.
 
 # %% tags=["skip-test"]
-import ipywidgets as widgets
-from IPython.display import display
-
 def show_budget(max_tokens=24):
     print(f"Output cap: {max_tokens} tokens. Correctness still needs evaluation.")
     print(f"Ideal 4-bit weight bytes (without overhead): {N_PARAMS * 4 / 8:,.0f}")
 
+
 try:
+    import ipywidgets as widgets
+    from IPython.display import display
     display(widgets.interactive(show_budget, max_tokens=widgets.IntSlider(value=24, min=8, max=48, step=8)))
 except Exception:
     show_budget(24)  # plain Python fallback
@@ -482,7 +496,7 @@ def check_endpoint():
     return check(good, "TODO 2: forwarding, cap, termination, exact usage and independent schema refusals checked", "Call generate with the supplied messages and capped limit; return its answer/counts and termination metadata. All invalid requests must return 422 before generation.")
 
 
-check_endpoint()
+assert check_endpoint(), "Complete TODO 2, then rerun this cell before comparing or serving the endpoint."
 
 # This duration excludes network transport and is not a network load test.
 if RUN_SERVER_STRETCH and not SMOKE:
@@ -589,7 +603,7 @@ def check_monthly_cost(fn):
     return check(good, "TODO 3: cost units checked", "Charge input and output separately; divide token totals by one million exactly once.")
 
 
-check_monthly_cost(monthly_cost)
+assert check_monthly_cost(monthly_cost), "Complete TODO 3, then rerun this cell before comparing monthly costs."
 
 scenario = {"users": 500, "requests per user per day": 20, "days": 30, "input tokens": 800, "output tokens": 300}
 reqs = scenario["users"] * scenario["requests per user per day"] * scenario["days"]
@@ -697,7 +711,7 @@ def check_fake_quantize(fn):
     return check(good, "TODO 4: scales, rounding, groups and zero rows checked", "Compute absmax per row/group, divide by qmax, round and reconstruct; unchanged weights fail this probe.")
 
 
-check_fake_quantize(fake_quantize)
+assert check_fake_quantize(fake_quantize), "Complete TODO 4, then rerun this cell before reporting quantisation errors."
 
 W = model.model.layers[0].mlp.down_proj.weight.detach().float().cpu()
 schemes = {"int8, per row": (8, None), "int4, per row": (4, None), "int4, groups of 64": (4, 64)}
@@ -798,7 +812,7 @@ else:
 #
 # **Predict:** Can aggregate tokens/second rise while one request waits longer?
 #
-# **Expected output:** Batch timings and throughput plot; compare against single-request waits.
+# **Expected output:** Batch timings and requested-budget rate (requests x token cap / seconds); compare single-request waits.
 
 # %%
 tok.padding_side = "left"  # decoder-only models pad on the left for generation
@@ -827,7 +841,7 @@ batch_df = pd.DataFrame(batch_rows)
 tok.padding_side = "right"
 fig, ax = plt.subplots(figsize=(6, 3.2))
 ax.bar(batch_df["batch size"].astype(str), batch_df["tokens/s"], color="#0F766E")
-ax.set_xlabel("batch size"); ax.set_ylabel("generated tokens per second"); ax.set_title(f"Throughput vs batch size ({DEVICE.upper()})")
+ax.set_xlabel("batch size"); ax.set_ylabel("requested output budget / second"); ax.set_title(f"Throughput vs batch size ({DEVICE.upper()})")
 plt.tight_layout(); plt.show()  # BATCH_FIGURE
 batch_df
 
@@ -925,7 +939,7 @@ def check_guardrail(fn):
     return check(good, "TODO 5: length, literal injection and both redactions checked", "Block before generation; redact both patterns and return all three fields. These rules miss other attacks.")
 
 
-check_guardrail(check_input)
+assert check_guardrail(check_input), "Complete TODO 5, then rerun this cell before generating and logging traffic."
 
 def check_output(text):
     if SYSTEM[:40].lower() in text.lower():

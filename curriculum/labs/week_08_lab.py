@@ -8,7 +8,7 @@
 # and **measure** whether training beats the best prompt on the same held-out messages.
 #
 # 1. Prepare real Banking77 messages in **chat format**, with separate training, validation and test sets.
-# 2. Measure **prompting baselines** (zero-shot, few-shot) on the base model.
+# 2. Explore **prompting baselines** (zero-shot, few-shot) on validation messages, keeping the test untouched.
 # 3. Add **LoRA** adapters with Hugging Face **PEFT** and check the trainable-parameter count.
 # 4. Run **supervised fine-tuning** (SFT) with Hugging Face **TRL** on the CPU.
 # 5. Compare **base vs fine-tuned** on the same test set and read the errors.
@@ -17,10 +17,10 @@
 # **CPU core:** five intents, 200 training messages, one epoch of rank-8 LoRA, then 50 held-out test messages.
 # The teaching notes give the measured CPU time on the course laptop; the final cell prints your own.
 # **Optional stretch:** `RUN_FULL = True` runs a larger experiment like the lecture's stored run (ten intents, about
-# 1,200 training messages, rank 16, 200 test messages). It takes over an hour on a CPU, so run it before class or on a GPU.
+# 1,200 training messages, rank 16, 200 test messages). Measure it separately on your chosen hardware outside the core.
 #
 # Use the injected setup's `DEVICE`, `SMOKE`, `SEED`, `check()` and `ask_model()`. Keep `USE_GEMINI = False` and
-# `USE_OPENAI = False` for the local core. The optional hosted comparison sends five invented messages only; OpenAI API
+# `USE_OPENAI = False` for the local core. The hosted comparison sends invented demonstrations and queries only; OpenAI API
 # use is billed separately from a ChatGPT subscription.
 #
 # | Part | Activity | Suggested class time |
@@ -76,6 +76,7 @@
 # **Expected output:** Three ✅ lines and the chosen settings. Smoke mode uses tiny sizes for automated testing.
 
 # %%
+import hashlib
 import json
 import re
 import time
@@ -87,7 +88,7 @@ from datasets import Dataset, load_dataset
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 MODEL_ID = "Qwen/Qwen2.5-0.5B-Instruct"
-RUN_FULL = False            # True: a larger run like the stored one (ten intents, rank 16; over an hour on CPU)
+RUN_FULL = False            # True: a larger run like the stored one (ten intents, rank 16); measure separately
 if RUN_FULL:
     INTENTS = ["card_arrival", "lost_or_stolen_card", "exchange_rate", "top_up_failed", "pending_transfer",
                "activate_my_card", "cash_withdrawal_charge", "verify_my_identity", "age_limit", "Refund_not_showing_up"]
@@ -115,8 +116,11 @@ print("device:", DEVICE, "| model:", MODEL_ID, "| intents:", len(INTENTS), "| ra
 # Banking77 contains real customer-support messages labelled with 77 intents (licence CC-BY-4.0). We keep a few
 # intents and take **separate** training, validation and test messages for each one.
 #
+# > **Read:** training teaches the model; validation supports choices; test messages stay untouched until Part 5.
+# > **Predict:** which part of a training pair should contain the known intent?
 # > **Core:** split the data and write `to_chat`.
-# > **Change one thing:** print one training pair, then one test message, and note which one contains the answer.
+# > **Change one thing:** print one training pair, then one validation message, and note which one contains the answer.
+# > **Check:** run `check_to_chat`; confirm the three sets contain different messages.
 # > **Optional stretch:** add a sixth intent to `INTENTS` and predict how the trainable count changes (it does not).
 # > **Common errors:** `KeyError: 'label_text'` means a different dataset column name; a prompt that already
 # > contains the label lets the model copy the answer, so evaluation would be meaningless.
@@ -152,6 +156,10 @@ else:
     train_ds = Dataset.from_list([r for i, r in enumerate(pool) if i % (N_TRAIN_PER + N_VAL_PER) < N_TRAIN_PER]).shuffle(seed=0)
     val_ds = Dataset.from_list([r for i, r in enumerate(pool) if i % (N_TRAIN_PER + N_VAL_PER) >= N_TRAIN_PER])
 assert not set(train_ds["text"]) & test_texts, "A test message also appears in training."
+assert not set(val_ds["text"]) & test_texts, "A test message also appears in validation."
+assert not set(train_ds["text"]) & set(val_ds["text"]), "A validation message also appears in training."
+# One validation item per intent keeps this demonstration short; five items cannot establish a reliable ranking.
+dev_ds = Dataset.from_list([next(ex for ex in val_ds if ex["label_text"] == lab) for lab in INTENTS])
 print(f"train {len(train_ds)} | validation {len(val_ds)} | test {len(test_ds)}")
 pd.Series(train_ds["label_text"]).value_counts()
 
@@ -203,11 +211,16 @@ print(sft_train[0])
 # %% [markdown]
 # ## Part 2 · Baselines: prompting the base model
 #
-# We reuse last week's harness idea: fixed model, greedy decoding, exact-label accuracy on the held-out test set.
-# The zero-shot and few-shot prompts below are fixed in advance; their examples come from the training data.
+# We reuse last week's harness idea: fixed model, greedy decoding and parsed-label accuracy. Here we explore
+# one validation message per intent, so scores are teaching observations, not reliable rankings. The test stays closed.
+# The few-shot demonstrations come from training messages and are used only by the local model.
 #
-# > **Core:** run both baselines and read their raw replies.
-# > **Change one thing:** after training, rerun the few-shot baseline with a different example per intent.
+# > **Read:** development examples let you compare choices without looking at the final test.
+# > **Predict:** will few-shot change a label or only the reply format?
+# > **Core:** run both baselines on `dev_ds` and read their raw replies.
+# > **Change one thing:** select a different training example per intent, rebuild `SHOTS` and rerun on `dev_ds`.
+# > **Check:** confirm every scored message comes from validation; inspect invalid replies as well as accuracy.
+# > **Optional stretch:** score the complete `val_ds` before freezing choices; report its size with each metric.
 # > **Common errors:** a reply such as "The intent is age limit" still counts, because the parser accepts spaces
 # > for underscores; a reply naming two intents counts the first one mentioned; a reply cut off by the
 # > token cap before any intent counts as invalid.
@@ -218,12 +231,12 @@ print(sft_train[0])
 #
 # ![One test, three models](fig:beginner_lab)
 #
-# Every row of the final table follows this path: the same test message, the same prompt format, a model,
-# the same parser and the same comparison with the reference label.
+# The same harness first scores development messages. After choices are frozen, the final table uses
+# the same test messages for all three rows, the same parser and the same comparison with the reference label.
 
 # %% [markdown]
-# **Purpose:** Load the base model, define a lenient label parser and measure both prompting baselines.
-# **Why now:** Fine-tuning is only worth its cost if it beats the best prompt on the same messages.
+# **Purpose:** Load the base model, define a lenient label parser and explore both validation baselines.
+# **Why now:** We inspect prompting before training while reserving the test for the final comparison.
 # **Expected output:** Two lines with accuracy, invalid rate and seconds.
 
 # %%
@@ -249,7 +262,8 @@ def normalise(text):
     return min(hits)[1] if hits else None
 
 
-def evaluate(model, make_messages, ds=test_ds, name=""):
+def evaluate(model, make_messages, ds, name=""):
+    # Always name the scored split explicitly; development work must never silently use the final test.
     rows, started = [], time.perf_counter()
     for ex in ds:
         reply = predict(model, make_messages(ex))
@@ -269,8 +283,8 @@ for ex in train_ds:
 SHOTS = "\n".join(f"Message: {t}\nIntent: {lab}" for lab, t in shots.items())
 few = lambda ex: [{"role": "user", "content": f"{INSTRUCTION}\n\nExamples:\n{SHOTS}\n\nMessage: {ex['text']}\nIntent:"}]  # noqa: E731
 
-df_zero = evaluate(base, zero, name="base, zero-shot")
-df_few = evaluate(base, few, name="base, few-shot")
+df_zero_dev = evaluate(base, zero, dev_ds, name="dev, zero-shot")
+df_few_dev = evaluate(base, few, dev_ds, name="dev, few-shot")
 
 # %% [markdown]
 # **Purpose:** Read what the base model actually wrote.
@@ -278,10 +292,18 @@ df_few = evaluate(base, few, name="base, few-shot")
 # **Expected output:** Up to four rows per prompt with the reference, the raw reply and the parsed label.
 
 # %%
-pd.concat([df_zero.assign(prompt="zero-shot"), df_few.assign(prompt="few-shot")]).groupby("prompt").head(4)[["prompt", "gold", "raw", "pred"]]
+pd.concat([df_zero_dev.assign(prompt="zero-shot"), df_few_dev.assign(prompt="few-shot")]).groupby("prompt").head(4)[["prompt", "gold", "raw", "pred"]]
 
 # %% [markdown]
 # ## Part 3 · Add LoRA adapters
+#
+# > **Read:** the base weights stay fixed; the optimiser learns only the added matrices.
+# > **Predict:** will doubling rank double the adapter count?
+# > **Core:** complete TODO 2, then count trainable weights.
+# > **Change one thing:** move the rank slider without training.
+# > **Check:** run `check_lora` and compare the count with the hand calculation.
+# > **Optional stretch:** calculate the adapter count for one feed-forward projection using its input/output sizes.
+# > **Common errors:** target module names must match actual layers; `qproj` is different from `q_proj`.
 #
 # LoRA freezes the pretrained weight $W$ and learns a low-rank update $\Delta W = \frac{\alpha}{r} B A$ with
 # $B \in \mathbb{R}^{d \times r}$ and $A \in \mathbb{R}^{r \times k}$. $W$ maps $k$ input features to $d$ outputs;
@@ -354,15 +376,16 @@ lora_ready = check_lora(lora_config, trainable)
 # skip this cell.
 
 # %% tags=["skip-test"]
+per_rank = expected // RANK          # numbers added per unit of rank across all adapted projections
+base_count = sum(p.numel() for p in base.parameters())
+
+
+def show_rank(r=RANK):
+    print(f"rank {r}: {r * per_rank:,} trainable numbers ({100 * r * per_rank / base_count:.2f}% of the base model)")
+
+
 try:
     import ipywidgets as widgets
-
-    per_rank = expected // RANK          # numbers added per unit of rank across all adapted projections
-    base_count = sum(p.numel() for p in base.parameters())
-
-    def show_rank(r=RANK):
-        print(f"rank {r}: {r * per_rank:,} trainable numbers ({100 * r * per_rank / base_count:.2f}% of the base model)")
-
     widgets.interact(show_rank, r=widgets.IntSlider(min=1, max=64, step=1, value=RANK, continuous_update=False))
 except ImportError:
     print("ipywidgets is not available; call show_rank(4), show_rank(16) … instead.")
@@ -374,8 +397,11 @@ except ImportError:
 # updates, not examples: with batch size 8, 200 messages give 25 steps in one epoch. Training and validation losses
 # appear on different rows because they are measured at different times.
 #
-# > **Core:** train for one epoch and plot both losses.
-# > **Change one thing:** set the learning rate to `2e-3` and compare the loss curve (rerun Parts 4–5 only).
+# > **Read:** answer-token loss teaches the label; validation loss checks separate messages.
+# > **Predict:** what might a rising validation loss mean when training loss falls?
+# > **Core:** train for one epoch, plot both losses and score the small development subset.
+# > **Change one thing:** set the learning rate to `2e-3` and rerun Part 4 only; compare validation loss and replies.
+# > **Check:** confirm the trainer uses the shared device and compare `df_tuned_dev` with the development baselines.
 # > **Optional stretch:** set `RUN_FULL = True` at the top and rerun the notebook before class.
 # > **Common errors:** an `SFTConfig` argument error usually means a different TRL version; compare with the
 # > installed version's documentation.
@@ -400,14 +426,46 @@ except ImportError:
 # **Purpose:** Train the adapter on the answer tokens and monitor validation loss.
 # **Why now:** This is the real fine-tuning job; it takes several minutes on a CPU.
 # **Expected output:** The training time in minutes and a plot of training and validation loss.
+# The default TRL loss needs an optional kernel unavailable on this Windows CPU installation.
+# Our trainer uses ordinary PyTorch cross-entropy on the same answer tokens, with the same adapter gradients.
+# It projects only scored positions into vocabulary scores, keeping memory small; all prompt positions still
+# pass through the model as context. The next-token targets are shifted by one position before masking.
+#
+# **Worked shape example:** one five-token sequence gives four next-token positions. Suppose its labels are
+# `[-100, -100, -100, 4, 5]`: the prompt positions use the ignore marker `-100`. Shifting gives
+# `[-100, -100, 4, 5]`, so only two positions contribute to loss. Their hidden vectors have shape `[2, d]`,
+# where `d` is the model's feature width. The vocabulary head produces `[2, V]` scores, where `V` is the
+# vocabulary size. Prompt and padding labels are ignored, while prompt tokens still supply context.
+# This trainer class is supplied support code, not a TODO. Your experiment changes the LoRA and SFT arguments below.
 
 # %%
 from trl import SFTConfig, SFTTrainer
+from transformers.modeling_outputs import CausalLMOutput
+
+
+class PortableSFTTrainer(SFTTrainer):
+    def compute_loss(self, model, inputs, return_outputs=False, num_items_in_batch=None):
+        # Keep TRL's chat preparation and masks, while using a loss available on every CPU platform.
+        adapted = self.accelerator.unwrap_model(model)
+        causal = adapted.get_base_model() if hasattr(adapted, "get_base_model") else adapted
+        context = {key: value for key, value in inputs.items() if key != "labels"}
+        context.update(use_cache=False, return_dict=True)
+        hidden = causal.base_model(**context).last_hidden_state[:, :-1]
+        targets = inputs["labels"][:, 1:]       # Position t predicts the token at t + 1.
+        scored = targets != -100               # Ignore prompt and padding labels supplied by TRL.
+        logits = causal.get_output_embeddings()(hidden[scored]).float()
+        token_count = scored.sum() if num_items_in_batch is None else num_items_in_batch
+        denominator = torch.as_tensor(token_count, device=logits.device).clamp(min=1)
+        loss = torch.nn.functional.cross_entropy(logits, targets[scored], reduction="sum") / denominator
+        outputs = CausalLMOutput(loss=loss, logits=logits)
+        return (loss, outputs) if return_outputs else loss
+
 
 assert lora_ready, "Complete TODO 2 before training."
 steps_per_epoch = -(-len(sft_train) // (2 if SMOKE else 8))
 args = SFTConfig(
     output_dir="banking-lora",
+    use_cpu=(DEVICE == "cpu"),  # Trainer must obey the shared CPU default even when a GPU is available.
     num_train_epochs=1,
     max_steps=2 if SMOKE else -1,
     per_device_train_batch_size=2 if SMOKE else 8,
@@ -427,8 +485,9 @@ args = SFTConfig(
     seed=SEED,
 )
 ft_model = AutoModelForCausalLM.from_pretrained(MODEL_ID, dtype=torch.float32)
-trainer = SFTTrainer(model=ft_model, args=args, train_dataset=sft_train, eval_dataset=None if SMOKE else sft_val,
+trainer = PortableSFTTrainer(model=ft_model, args=args, train_dataset=sft_train, eval_dataset=None if SMOKE else sft_val,
                      peft_config=lora_config, processing_class=tok)
+assert next(trainer.model.parameters()).device.type == DEVICE, "Trainer did not use the selected shared device."
 started = time.perf_counter()
 trainer.train()
 train_minutes = (time.perf_counter() - started) / 60
@@ -443,11 +502,31 @@ plt.xlabel("optimiser step"); plt.ylabel("loss (answer tokens)"); plt.legend(); 
 plt.show()
 
 # %% [markdown]
-# ## Part 5 · Base vs fine-tuned on the same held-out test set
+# **Purpose:** Inspect adapted replies on the same small validation subset used by the baselines.
+# **Why now:** Any learning-rate or prompt changes belong here, before viewing the test.
+# **Expected output:** A validation accuracy line and up to five raw replies; these few items do not establish superiority.
+
+# %%
+df_tuned_dev = evaluate(trainer.model.eval(), zero, dev_ds, name="dev, LoRA")
+display(df_tuned_dev[["gold", "raw", "pred"]].head())
+
+# %% [markdown]
+# ## Part 5 · Freeze choices, then compare on the final test
 #
-# **TODO 3:** evaluate the fine-tuned model with the **zero-shot** prompt (the format it was trained on) and build a
-# `comparison` table with one row per model and the columns `model`, `accuracy` and `invalid`.
-# **Hint:** `pd.DataFrame([{"model": "base, zero-shot", "accuracy": df_zero.correct.mean(), "invalid": df_zero.pred.isna().mean()}, ...])`.
+# > **Read:** a final test estimates new-message performance after prompt and training choices are frozen.
+# > **Predict:** why would choosing a learning rate from the test make its score optimistic?
+# > **Core:** freeze choices, score all three models once and inspect their errors.
+# > **Change one thing:** tighten a reporting claim after inspecting an error; keep model and prompt settings frozen.
+# > **Check:** run `check_comparison`; all three rows must use the same test messages and parser.
+# > **Optional stretch:** collect a genuinely new test set for another period or channel after further development.
+# > **Common errors:** do not rerun this test to choose a setting; return to validation before the final comparison.
+#
+# **TODO 3:** after choosing settings on validation, evaluate both base prompts and the fine-tuned model on `test_ds`.
+# The fine-tuned model uses the **zero-shot** format it learned. Build `comparison` with `model`, `accuracy` and `invalid`.
+# **Hint:** use `evaluate(base, zero, test_ds)`, `evaluate(base, few, test_ds)` and `evaluate(tuned, zero, test_ds)`,
+# then `pd.DataFrame([{"model": "base, zero-shot", "accuracy": df_zero.correct.mean(), "invalid": df_zero.pred.isna().mean()}, ...])`.
+# Freeze settings before running. Saved checksums identify the actual adapter weights, training data and configuration.
+# An unchanged model reuses saved predictions; a changed model or training setup requires a new final test.
 #
 # ### Use and check the adapted classifier
 #
@@ -467,33 +546,71 @@ plt.show()
 # %% [markdown]
 # **Purpose:** Evaluate the adapter on the same test messages and build the comparison table.
 # **Why now:** The same messages, parser and decoding make the three rows comparable.
-# **Expected output:** One accuracy line, a three-row table and one ✅ line.
+# **Expected output:** Three accuracy lines (or cached predictions), a three-row table and one ✅ line.
 
 # %%
 tuned = trainer.model.eval()
+
+
+def adapter_fingerprint(model):
+    # A fingerprint is a short checksum: changing any trained adapter value changes this record.
+    digest = hashlib.sha256()
+    for name, parameter in sorted(model.named_parameters()):
+        if parameter.requires_grad:  # Read only the small adapter; do not copy the frozen base model.
+            description = (name, str(parameter.dtype), tuple(parameter.shape))
+            digest.update(json.dumps(description).encode("utf-8"))
+            values = parameter.detach().cpu().contiguous().view(torch.uint8)
+            digest.update(values.numpy().tobytes())
+    return digest.hexdigest()
+
+
+# Store choices before revealing any final score. The synthetic probe and local demonstrations stay local.
+# The second checksum also records training messages, seed and configuration; it never leaves the notebook.
+training_fingerprint = hashlib.sha256(json.dumps(
+    {"examples": list(train_ds), "configuration": args.to_dict()},
+    sort_keys=True, ensure_ascii=False, default=str).encode("utf-8")).hexdigest()
+final_settings = {"model": MODEL_ID, "intents": tuple(INTENTS), "rank": RANK,
+                  "learning_rate": args.learning_rate, "seed": args.seed, "steps": trainer.state.global_step,
+                  "adapter_fingerprint": adapter_fingerprint(tuned), "training_fingerprint": training_fingerprint,
+                  "zero_template": zero({"text": "FROZEN_TEMPLATE", "label_text": INTENTS[0]}),
+                  "few_template": few({"text": "FROZEN_TEMPLATE"}),
+                  "parser": {lab: pattern.pattern for lab, pattern in LABEL_RE.items()}}
 ### BEGIN SOLUTION
-df_tuned = evaluate(tuned, zero, name="LoRA fine-tuned")
+if "_W08_FINAL_TEST" in globals():
+    if _W08_FINAL_TEST["settings"] != final_settings:
+        raise RuntimeError("Final test already viewed. Develop on validation and reserve a new final test after changing settings.")
+    print("Reusing the saved final-test predictions; no test messages are scored again.")
+    df_zero, df_few, df_tuned = (_W08_FINAL_TEST[k] for k in ("zero", "few", "tuned"))
+else:
+    df_zero = evaluate(base, zero, test_ds, name="base, zero-shot")
+    df_few = evaluate(base, few, test_ds, name="base, few-shot")
+    df_tuned = evaluate(tuned, zero, test_ds, name="LoRA fine-tuned")
+    _W08_FINAL_TEST = {"settings": final_settings, "zero": df_zero, "few": df_few, "tuned": df_tuned}
 comparison = pd.DataFrame([
     {"model": "base, zero-shot", "accuracy": df_zero.correct.mean(), "invalid": df_zero.pred.isna().mean()},
     {"model": "base, few-shot", "accuracy": df_few.correct.mean(), "invalid": df_few.pred.isna().mean()},
     {"model": "LoRA fine-tuned", "accuracy": df_tuned.correct.mean(), "invalid": df_tuned.pred.isna().mean()},
 ])
 ### END SOLUTION
-### STUB df_tuned, comparison = df_zero, pd.DataFrame()  # TODO 3: evaluate `tuned` and build the three-row table
+### STUB df_zero, df_few, df_tuned, comparison = df_zero_dev, df_few_dev, df_zero_dev, pd.DataFrame()  # TODO 3: freeze settings, score test_ds once and build the table
 
 
 def check_comparison(table, tuned_df):
     try:
+        frames = (df_zero, df_few, tuned_df)
         ok = (list(table["model"]) == ["base, zero-shot", "base, few-shot", "LoRA fine-tuned"]
-              and abs(float(table["accuracy"].iloc[2]) - float(tuned_df.correct.mean())) < 1e-9
-              and tuned_df is not df_zero and len(tuned_df) == len(test_ds))
+              and tuned_df is not df_zero
+              and all(list(frame["text"]) == list(test_ds["text"]) for frame in frames)
+              and all(abs(float(table["accuracy"].iloc[i]) - float(frame.correct.mean())) < 1e-9
+                      and abs(float(table["invalid"].iloc[i]) - float(frame.pred.isna().mean())) < 1e-9
+                      for i, frame in enumerate(frames)))
     except (KeyError, IndexError, AttributeError, TypeError):
         ok = False
     return check(ok, "TODO 3: three rows on the same test messages, with the adapter's own accuracy.",
-                 "Evaluate `tuned` with the zero-shot prompt, then list base zero-shot, base few-shot and LoRA rows.")
+                 "Score all three models on test_ds once, then compute each row from its own accuracy and invalid rate.")
 
 
-check_comparison(comparison, df_tuned)
+assert check_comparison(comparison, df_tuned), "Complete TODO 3, then rerun this cell before reading errors or reporting results."
 comparison
 
 # %% [markdown]
@@ -521,8 +638,12 @@ pd.crosstab(df_tuned.gold, df_tuned.pred.fillna("INVALID"))
 # LoRA keeps the base weights frozen, so the adapter can be **switched off**. One general question illustrates
 # possible specialisation; it is not a broad test of earlier abilities.
 #
+# > **Read:** disabling LoRA removes the added correction and restores the frozen base path.
+# > **Predict:** does disabling the adapter change the base weights?
 # > **Core:** ask the same question with the adapter on and off; save the adapter and measure it.
 # > **Change one thing:** ask a banking question with the adapter off and compare the reply.
+# > **Check:** compare file sizes with parameter counts and explain both answers.
+# > **Optional stretch:** design a separate general-question set to measure forgetting; label its sources and limitations.
 # > **Common errors:** an adapter loaded onto a different base model fails or behaves unpredictably.
 
 # %% [markdown]
@@ -553,11 +674,18 @@ adapter_mb = sum(f.stat().st_size for f in Path("banking-lora-adapter").iterdir(
 model_mb = sum(p.numel() * p.element_size() for p in base.parameters()) / 1e6
 ### END SOLUTION
 ### STUB adapter_mb, model_mb = 0.0, 0.0  # TODO 4: measure the adapter files and the base parameters
+
+
+def check_sizes(adapter_size, base_size):
+    expected_adapter = trainable * 4 / 1e6  # 4 bytes per trainable fp32 number
+    ok = (abs(adapter_size - expected_adapter) < 0.15 * expected_adapter + 0.05
+          and abs(base_size - (total - trainable) * 4 / 1e6) < 1)
+    return check(ok, "TODO 4: the adapter holds about 4 bytes per trainable number; the base holds 4 bytes per weight.",
+                 "Add up the file sizes in the adapter folder; multiply each base parameter count by its element size.")
+
+
+assert check_sizes(adapter_mb, model_mb), "Complete TODO 4, then rerun this cell before comparing or reporting sizes."
 print(f"adapter: {adapter_mb:.1f} MB | base model weights (fp32): {model_mb:,.0f} MB")
-size_ok = check(abs(adapter_mb - trainable * 4 / 1e6) < 0.15 * trainable * 4 / 1e6 + 0.05
-      and abs(model_mb - (total - trainable) * 4 / 1e6) < 1,
-      "TODO 4: the adapter holds about 4 bytes per trainable number; the base holds 4 bytes per weight.",
-      "Add up the file sizes in the adapter folder; multiply each base parameter count by its element size.")
 
 # %% [markdown]
 # ✍️ **Question 2.** What did the model do with the general question, with the adapter on and off, and why? How does
@@ -570,12 +698,27 @@ size_ok = check(abs(adapter_mb - trainable * 4 / 1e6) < 0.15 * trainable * 4 / 1
 # %% [markdown]
 # ### Optional: compare with a hosted model
 #
-# **Purpose:** Ask one hosted model to classify five invented messages with the few-shot prompt (five calls at most).
+# **Purpose:** Ask one hosted model to classify invented queries using separate invented demonstrations (five calls at most).
 # **Why now:** A large hosted model is a realistic alternative to fine-tuning; compare it on the same invented items.
 # **Expected output:** With both switches False (default), a message that the local results stand. With one switch
-# enabled and a key available, a table of hosted and local predictions. Only the invented messages below are sent.
+# enabled and a key available, a table of hosted and local predictions. Both demonstrations and queries are invented;
+# no Banking77 text or local `SHOTS` is sent to either provider.
 
 # %%
+# Hosted demonstrations are written for this exercise; never reuse the dataset-backed local SHOTS.
+HOSTED_EXAMPLES = [("I ordered a replacement card last week and it has not reached me.", "card_arrival"),
+                   ("My debit card was stolen from my bag yesterday.", "lost_or_stolen_card"),
+                   ("How many pounds will I receive for twenty euros?", "exchange_rate"),
+                   ("My attempt to load funds onto the account failed.", "top_up_failed"),
+                   ("Can a sixteen-year-old open this type of account?", "age_limit")]
+
+
+def hosted_prompt(text):
+    examples = "\n".join(f"Message: {message}\nIntent: {label}"
+                         for message, label in HOSTED_EXAMPLES if label in INTENTS)
+    return f"{INSTRUCTION}\n\nInvented examples:\n{examples}\n\nMessage: {text}\nIntent:"
+
+
 INVENTED = [("My new card still hasn't turned up after ten days.", "card_arrival"),
             ("Someone took my wallet with my card in it.", "lost_or_stolen_card"),
             ("What rate do you use to convert euro to dollars?", "exchange_rate"),
@@ -585,7 +728,7 @@ hosted_rows = []
 for text, gold in INVENTED[: 1 if SMOKE else None]:
     if gold not in INTENTS:
         continue
-    reply = ask_model(few({"text": text})[0]["content"], temperature=0.0, max_output_tokens=12)
+    reply = ask_model(hosted_prompt(text), temperature=0.0, max_output_tokens=16)
     if reply is None:
         break
     hosted_rows.append({"text": text, "gold": gold, "hosted": normalise(reply),

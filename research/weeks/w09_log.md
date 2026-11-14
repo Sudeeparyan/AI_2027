@@ -33,3 +33,10 @@ Handoff: final Office render and full image review are next. Colab timing, fresh
 - Latest successful cached local CPU full core: 180.8 s (3.0 min), recorded in `research/lab_runs_2026-10.json`; final smoke PASS (48.6 s). Current executed core code matches the successful full-run evidence.
 - All 26 current release gates passed, including coverage 100%, strict notes, body ≤ 40, fonts ≥ 14, semantic helpers and shared diagram/attachment parity. See `research/ITERATION3_2026-10-12.json`.
 - No timed Colab, clean-install/download, live-provider, browser-widget or optional GPU/stretch claim. Earlier pending handoffs above describe intermediate states.
+
+
+### Audit correction closeout — 13 October 2026
+
+- CLIP numerical comparison before InfoNCE; illustrative SigLIP pair probability before loss; clearer correct-caption probability example and qualified shared-space feedback.
+- Final current artifacts rebuilt, checked and visually reviewed; no open findings. Evidence: ../AUDIT_FIXES_2026-10-12.json.
+- CPU/Office verification is local; Colab, live API and classroom limits remain documented.

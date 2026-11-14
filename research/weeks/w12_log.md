@@ -23,3 +23,16 @@ Primary pages checked: [MiniLM](https://huggingface.co/sentence-transformers/all
 - Latest successful cached local CPU full core: 114.0 s (1.9 min), recorded in `research/lab_runs_2026-10.json`; final smoke PASS (40.5 s). Current executed core code matches the successful full-run evidence.
 - All 26 current release gates passed, including coverage 100%, strict notes, body ≤ 40, fonts ≥ 14, semantic helpers and shared diagram/attachment parity. See `research/ITERATION3_2026-10-12.json`.
 - No timed Colab, clean-install/download, live-provider, browser-widget or optional GPU/stretch claim. Earlier pending handoffs above describe intermediate states.
+
+## Additional independent teaching review — 12 October 2026
+- Additional evidence review: removed unsupported hardcoded one-in-twelve prompt comparison and universal nearby-attention claim from Word Slide20 detail. Retained matched development comparison, accuracy/support/abstention measurements and separate final test.
+- Handoff: root-authorised narrow source changes complete; build/render checks remain coordinated by root. No new lab logic, runtime or provider claim.
+
+- 12 Oct 2026 follow-up: core slide 20 and grounded-generation Word prose now describe matched development tests for rule placement; no unsupported archived placement-comparison claim remains. Slide 20 strict speaker-note template validated; root rebuild/render pending.
+
+
+### Audit correction closeout — 13 October 2026
+
+- Concrete RRF/MRR example before formulas; consistent qualified RAG/fine-tuning/context comparison and a reference-pattern score label that states what the notebook measures.
+- Final current artifacts rebuilt, checked and visually reviewed; no open findings. Evidence: ../AUDIT_FIXES_2026-10-12.json.
+- CPU/Office verification is local; Colab, live API and classroom limits remain documented.

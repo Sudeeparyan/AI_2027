@@ -1,0 +1,25 @@
+{
+  "source_image": "curriculum/assets/week_03/mode_collapse.png",
+  "source_sha256": "ed6778b14a464a6e89407b8211b619d3597621f5e9243f503b505fda065165d3",
+  "provenance": "Labels transcribed after visual inspection of the archived measured figure; no new run.",
+  "checked_on": "2026-10-13",
+  "steps": [
+    0,
+    500,
+    2000,
+    5000
+  ],
+  "standard_gan_modes": [
+    0,
+    8,
+    7,
+    7
+  ],
+  "wgan_gp_modes": [
+    0,
+    0,
+    6,
+    8
+  ],
+  "total_modes": 8
+}

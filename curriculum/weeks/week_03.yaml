@@ -300,39 +300,8 @@ slides:
 
     Watch out: The lab uses stable binary cross-entropy on logits. Do not apply sigmoid twice before BCEWithLogitsLoss or confuse
     a logit with probability.'
-- type: equation
-  title: The optimal discriminator and what G really minimises
-  eq:
-  - D^{*}_G(x) = \dfrac{p_{\mathrm{data}}(x)}{p_{\mathrm{data}}(x) + p_g(x)}
-  - V(D^{*}_G, G) = -\log 4 + 2\, \mathrm{JSD}\left(p_{\mathrm{data}} \,\|\, p_g\right)
-  read_as:
-  - Fix G; compare densities.
-  - Equal positive densities give one-half.
-  terms:
-  - - $p_g$
-    - generated distribution
-  - - JSD
-    - Jensen–Shannon divergence
-  - - D*
-    - ideal discriminator
-  notes: 'In short: For a fixed generator, the ideal discriminator compares the real and generated densities at the same input.
-
-    Explain: A density describes probability mass per unit of input space. The star marks an optimal discriminator for the fixed
-    G. The denominator adds the two source densities. JSD means Jensen–Shannon divergence, a symmetric measure of distribution
-    difference. The ideal value equals minus log four plus twice that divergence.
-
-    Example: If the real density is 0.3 and generated density is 0.1, D* is 0.3/(0.3+0.1)=0.75. Matching positive densities
-    give one-half. At zero JSD the ideal value is −ln(4), approximately −1.386; the full derivation is in the Word notes.
-
-    Ask: Is D* defined by this ratio where both densities are zero?
-
-    Answer: No. The zero denominator lies outside their positive support and needs separate treatment.
-
-    Watch out: The result assumes an optimal discriminator and sufficient model capacity; finite alternating training does not
-    guarantee the ideal distribution match.'
 - type: figure
   title: The optimal discriminator in pictures
-  figure: optimal_d
   notes: 'In short: The density picture explains the ideal source comparison without turning its shape into a convergence guarantee.
 
     Explain: The teal distribution represents real examples. The orange distribution represents generated examples. The dashed
@@ -349,6 +318,37 @@ slides:
 
     Watch out: The ideal-density argument explains a target. It does not prove that every finite discriminator slope supplies
     useful generator-weight gradients.'
+  figure: optimal_d
+- type: equation
+  title: The optimal discriminator and what G really minimises
+  notes: 'In short: For a fixed generator, the ideal discriminator compares the real and generated densities at the same input.
+
+    Explain: A density describes probability mass per unit of input space. The star marks an optimal discriminator for the fixed
+    G. The denominator adds the two source densities. JSD means Jensen–Shannon divergence, a symmetric measure of distribution
+    difference. The ideal value equals minus log four plus twice that divergence.
+
+    Example: If the real density is 0.3 and generated density is 0.1, D* is 0.3/(0.3+0.1)=0.75. Matching positive densities
+    give one-half. At zero JSD the ideal value is −ln(4), approximately −1.386; the full derivation is in the Word notes.
+
+    Ask: Is D* defined by this ratio where both densities are zero?
+
+    Answer: No. The zero denominator lies outside their positive support and needs separate treatment.
+
+    Watch out: The result assumes an optimal discriminator and sufficient model capacity; finite alternating training does not
+    guarantee the ideal distribution match.'
+  eq:
+  - D^{*}_G(x) = \dfrac{p_{\mathrm{data}}(x)}{p_{\mathrm{data}}(x) + p_g(x)}
+  - V(D^{*}_G, G) = -\log 4 + 2\, \mathrm{JSD}\left(p_{\mathrm{data}} \,\|\, p_g\right)
+  terms:
+  - - $p_g$
+    - generated distribution
+  - - JSD
+    - Jensen–Shannon divergence
+  - - D*
+    - ideal discriminator
+  read_as:
+  - Fix G; compare densities.
+  - Equal positive densities give one-half.
 - type: figure
   title: Why practitioners use the non-saturating generator loss
   figure: saturating
@@ -446,27 +446,44 @@ slides:
     Answer: A class histogram or sample inspection showing that several digit types are absent.
 
     Watch out: A single run cannot isolate a cause when loss, learning rates, architecture and update frequency all change together.'
-- type: figure
-  title: 'Real training curves: losses do not tell you quality'
-  figure: losses
-  notes: 'In short: The archived curves show a changing game, so inspect progress with samples and independent checks alongside
-    losses.
+- type: table
+  title: Read GAN diagnostics together
+  notes: 'In short: Read losses, source scores and sample coverage together because no single diagnostic establishes GAN quality.
 
-    Explain: A loss measures the current training objective. Each opponent update changes that objective’s context. D(real)
-    and D(fake) are average diagnostic probabilities. A fixed-noise snapshot reuses identical latent inputs. Quality asks whether
-    samples fit the task, while coverage asks whether varied target regions appear.
 
-    Example: These curves belong to the archived lecture DCGAN, rather than today’s bounded CPU core. D(fake) near zero says
-    the checker rejects generated examples. Under a non-saturating loss it does not, by itself, prove that every generator gradient
-    vanished.
+    Explain: A loss measures the current training objective. Updating either opponent changes the other network''s task. Source
+    scores describe how D separates real and generated inputs. Fixed-code snapshots hold the generator''s random inputs constant.
+    A class histogram counts predicted digit labels across many samples.
+
+
+    Example: Suppose sharp outputs repeatedly show only ones and sevens. The pictures suggest realism for those examples, while
+    missing classes suggest possible collapse. Check a larger sample and the classifier''s reliability before concluding that
+    modes are absent. This is a diagnostic scenario, not a new measured run.
+
 
     Ask: What would you inspect before deciding that a fluctuating generator loss means training failed?
 
-    Answer: Fixed-code sample changes, coverage and appropriate independent measurements.
 
-    Watch out: A supervised classifier’s steadily falling training loss is not a template that the two adapting GAN networks
-    must reproduce.'
-  caption: Archived eight-epoch DCGAN. Losses alone do not establish quality.
+    Answer: Fixed-code sample changes, class coverage and appropriate independent measurements.
+
+
+    Watch out: A confident discriminator or a low generator loss can coexist with poor samples; compare the evidence for each
+    claim.'
+  header:
+  - Observation
+  - Possible meaning
+  - Check next
+  rows:
+  - - Loss changes
+    - Changing opponent
+    - Fixed-code samples
+  - - Sharp repeats
+    - Possible collapse
+    - Class counts
+  - - Confident source scores
+    - Sources separate
+    - Sample progress
+  callout: Use your run’s outputs; no score proves quality.
 - type: figure
   title: Mode collapse, seen in a real experiment
   figure: mode_collapse_slide
@@ -801,19 +818,27 @@ slides:
 
     Watch out: Standard FID and the lab’s custom digit-feature distance use different representations and must not share an
     unqualified numerical scale.'
+- type: figure
+  title: What FID measures, in feature space
+  notes: 'In short: The feature-space sketch shows how shifted centres and altered spread affect a Gaussian-summary distance.
+
+    Explain: An embedding maps an image into a feature vector. The mean locates the average vector. Covariance describes its
+    spread and relationships between coordinates. The constructed panels use only two feature coordinates for visibility. Real
+    FID compares much higher-dimensional representations.
+
+    Example: The first generated cloud resembles the supplied reference centre and spread. The second is shifted and narrow.
+    Both effects can raise the distance, but neither term is a pure quality or diversity measurement. These constructed points
+    illustrate the formula rather than measured GAN feature statistics.
+
+    Ask: What must remain fixed before comparing two reported feature distances?
+
+    Answer: The feature network, preprocessing, sampling protocol and number of examples.
+
+    Watch out: A visual two-dimensional projection can hide differences in other dimensions; do not equate a similar-looking
+    scatter plot with complete distribution matching.'
+  figure: fid
 - type: equation
   title: Fréchet Inception Distance (FID)
-  eq: \mathrm{FID} = \|\mu_r - \mu_g\|_2^2 + \mathrm{Tr}\left(\Sigma_r + \Sigma_g - 2\left(\Sigma_r \Sigma_g\right)^{1/2}\right)
-  read_as:
-  - Compare feature means and covariances.
-  - Lower distance needs context.
-  terms:
-  - - $\mu_r, \mu_g$
-    - feature means
-  - - $\Sigma_r, \Sigma_g$
-    - feature covariances
-  - - Tr
-    - sum of diagonal entries
   notes: 'In short: FID compares Gaussian summaries of real and generated features, rather than verifying each image or its
     factual correctness.
 
@@ -831,25 +856,17 @@ slides:
 
     Watch out: Keep feature network, preprocessing and sample count fixed for comparisons, and label the custom lab distance
     explicitly.'
-- type: figure
-  title: What FID measures, in feature space
-  figure: fid
-  notes: 'In short: The feature-space sketch shows how shifted centres and altered spread affect a Gaussian-summary distance.
-
-    Explain: An embedding maps an image into a feature vector. The mean locates the average vector. Covariance describes its
-    spread and relationships between coordinates. The constructed panels use only two feature coordinates for visibility. Real
-    FID compares much higher-dimensional representations.
-
-    Example: The first generated cloud resembles the supplied reference centre and spread. The second is shifted and narrow.
-    Both effects can raise the distance, but neither term is a pure quality or diversity measurement. These constructed points
-    illustrate the formula rather than measured GAN feature statistics.
-
-    Ask: What must remain fixed before comparing two reported feature distances?
-
-    Answer: The feature network, preprocessing, sampling protocol and number of examples.
-
-    Watch out: A visual two-dimensional projection can hide differences in other dimensions; do not equate a similar-looking
-    scatter plot with complete distribution matching.'
+  eq: \mathrm{FID} = \|\mu_r - \mu_g\|_2^2 + \mathrm{Tr}\left(\Sigma_r + \Sigma_g - 2\left(\Sigma_r \Sigma_g\right)^{1/2}\right)
+  terms:
+  - - $\mu_r, \mu_g$
+    - feature means
+  - - $\Sigma_r, \Sigma_g$
+    - feature covariances
+  - - Tr
+    - sum of diagonal entries
+  read_as:
+  - Compare feature means and covariances.
+  - Lower distance needs context.
 - type: table
   title: 'Evaluating GANs: the main tools'
   header:

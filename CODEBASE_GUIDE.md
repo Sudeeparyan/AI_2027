@@ -52,7 +52,7 @@ flowchart TD
 
 ## Beginner diagram contract
 
-Block roles distinguish training losses/updates (`loss`) from evaluation, validation and checking (`metric`). Both use the orange objective palette, with explicit legends “Loss / update” and “Measure / check”. Measuring a frozen model does not change its weights. The diagram tests guard this distinction in frozen-model lab flows.
+Block roles distinguish training losses/updates (`loss`) from evaluation, validation and checking (`metric`). Both use the orange objective palette. The legend says “Loss” or “Check”, or “Loss / Check” when both appear; the operation label explains whether weights change. Measuring a frozen model does not change its weights. The diagram tests guard this distinction in frozen-model lab flows.
 
 Each week defines `overview`, `mechanism`, `training`, `inference` and `lab` diagrams with four to seven numbered blocks. The `training` and `inference` IDs also cover preparing and using systems such as prompt tests, deployment and RAG. Each block names an operation, explains it in plain language and can name a real lab symbol. `arrows` contains one output label for each connection. An optional feedback route names the operation to repeat and `feedback_from` and `feedback_to` give its zero-based source and target. `insert_before_title` anchors each detailed diagram beside an exact existing slide title. IDs must be unique. The builder computes the final slide count from the authored diagrams.
 
@@ -64,7 +64,7 @@ The recap replaces the original summary and moves to the last slide, keeping 46 
 
 `### BEGIN SOLUTION` and `### END SOLUTION` enclose instructor code. `### STUB` supplies the student's starter code. Markdown answer blocks use `<!-- BEGIN ANSWER -->` and `<!-- END ANSWER -->`. Cells tagged `solution-only` are omitted from student notebooks. Preserve these markers when explaining or editing code.
 
-Distribute the `.ipynb` notebooks. Developer Python exports live in `build/week_XX/`, retain the same TODOs or solutions, and translate `%pip` into subprocess calls for syntax and code comparisons. The builder injects `curriculum/labs/_setup.py` once after installation. It supplies `DEVICE` and `SMOKE`, defaults to CPU, fixes seeds, prints versions and provides `check()` and optional `ask_model()`. `USE_GEMINI = False` and `USE_OPENAI = False` prevent provider access. Enable exactly one for a synthetic comparison; unavailable requests return `None` for the local fallback. Week sources add targeted semantic `check_…()` helpers after TODOs and keep widget cells tagged `skip-test`. Install cells use the dated pins in `research/weeks/platform_2026.md`; local tests skip installation and record their actual versions.
+Distribute the `.ipynb` notebooks. Developer Python exports live in `build/week_XX/`, retain the same TODOs or solutions, and translate `%pip` into subprocess calls for syntax and code comparisons. The builder injects `curriculum/labs/_setup.py` once after installation. It supplies `DEVICE` and `SMOKE`, defaults to CPU, fixes seeds, prints versions and provides `check()` and optional `ask_model()`. `USE_GEMINI = False` and `USE_OPENAI = False` prevent provider access. Enable exactly one for a synthetic comparison; unavailable requests return `None` for the local fallback. Week sources add targeted semantic `check_…()` helpers after TODOs and keep widget cells tagged `skip-test`. Install cells use the 24 exact direct pins in `tools/build_week.py:LAB_PINS`, verified against publisher release metadata and recorded in `research/weeks/platform_2026.md`. A clean local Python 3.12 installation and `pip check` passed on 12 October 2026. The 13 October retry froze ten additional packages at their already-tested installed versions; all 24 direct pins match that environment and offline pip resolution passes. Use the notebook's relevant pinned subset; the ordinary runner skips installation and records its actual versions. Select `--kernel qa-pinned-cpu` when reproducing the clean pinned environment. This local evidence does not establish a Colab installation or run.
 
 ## Measured results
 
@@ -105,6 +105,8 @@ Speaker notes require exactly one ordered `In short:`, `Explain:`, `Example:`, `
 .venv/Scripts/python.exe tools/test_link_checks.py
 .venv/Scripts/python.exe tools/test_output_files.py
 node tools/test_output_files.js
+.venv/Scripts/python.exe tools/test_render_inputs.py
+.venv/Scripts/python.exe tools/test_slide_audits.py
 .venv/Scripts/python.exe tools/test_beginner_support.py
 .venv/Scripts/python.exe tools/test_technical_figures.py
 node tools/test_teaching_notes.js
@@ -112,6 +114,7 @@ node tools/test_technical_diagrams.js
 .venv/Scripts/python.exe tools/audit_inline_math.py
 .venv/Scripts/python.exe tools/audit_coverage.py
 .venv/Scripts/python.exe tools/audit_slide_text.py
+.venv/Scripts/python.exe tools/audit_body_words.py
 .venv/Scripts/python.exe tools/audit_prose.py
 .venv/Scripts/python.exe tools/audit_flat_bullets.py
 .venv/Scripts/python.exe tools/lint_figures.py --weeks 1-12
@@ -120,14 +123,20 @@ node tools/test_technical_diagrams.js
 .venv/Scripts/python.exe tools/check_links.py
 .venv-labs/Scripts/python.exe tools/test_labs.py --weeks 1-12
 .venv/Scripts/python.exe tools/render.py --weeks 1-12
+.venv/Scripts/python.exe tools/render_course.py
+.venv/Scripts/python.exe tools/verify_render_inputs.py
 .venv/Scripts/python.exe tools/build_revision_review.py
 ```
 
 Use `--weeks 12` for an individual week, or `--labs-only` to rebuild notebooks and developer exports after a lab-only edit. After changing executable lab logic, execute the affected solution notebook with `tools/test_labs.py --weeks N --full --device cpu`. The runner owns `build/.busy` until it finishes, records the runtime environment and preserves mode-specific executed notebooks. Do not build or render the same week during execution. Rendering requires the local Microsoft Office installation and Poppler used by this repository.
 
-Iteration 3 closure (12 October 2026): all 26 release gates, all 12 final smoke runs, all 12 measured CPU cores and complete rendered review passed for the recorded release. `research/ITERATION3_2026-10-12.json` binds the actual checks and views to current artifacts. A later source change needs the relevant rebuild, checks and changed-output review; prior evidence cannot certify new content.
+The latest review is `research/E2E_REVIEW_2026-10-16.md`, which also completes the final checks left pending by `research/STUDENT_REVIEW_2026-10-14.md`. Earlier evidence remains in `research/ITERATION3_2026-10-12.json`, `research/AUDIT_FIXES_2026-10-12.json` and the subsequent retry/verification reports. Their checks and views describe those releases. Use `research/lab_runs_2026-10.json` for measured CPU runs, and confirm executable-code parity before reusing them. Rebuild affected outputs and bind checks and image review to the current sources before distributing a later update.
+
+The correction retains the shared 40-attempt provider budget, explicit private `.env` selection after opt-in, complete local API and missing-widget fallbacks, and Week 8's validation/final-test separation. Final-test reuse checks actual adapter weights, training data, settings and seed. Timed Colab runs, live APIs, browser widgets, public deployment, optional stretches, publisher-blocked links and student usability testing remain unverified.
 
 The renderer also writes `slides.layout.json` with text boxes that exceed PowerPoint's measured text bounds. Review those boxes and the rendered images before distributing a rebuild. Structural checks confirm correct attachments and editable objects; visual review checks the actual page layout.
+
+After rendering weekly and course files, `verify_render_inputs.py` compares each distributed Office file with the copy used for its preview. It ignores package timestamps and random relationship IDs while retaining instructional XML, relationships and image bytes. A stale preview fails even if its layout report is empty. This provenance check does not establish that someone viewed the images.
 
 Generated PowerPoint, Word, notebook and Python exports are written to unique adjacent temporary files, then replaced when complete. Bounded retries allow brief Windows reader locks to clear; an exhausted retry fails the build and preserves the previous destination. Atomic-writer tests cover replacement, temporary locks and failure preservation.
 

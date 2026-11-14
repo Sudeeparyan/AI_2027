@@ -118,7 +118,7 @@ print("device:", DEVICE, "| CLIP parameters:", f"{sum(p.numel() for p in clip.pa
 # %% [markdown]
 # **Purpose:** Load the gallery, encode images and captions, check the norms and show the similarity table.
 # **Why now:** Every later experiment compares these vectors.
-# **Expected output:** Shapes, one ✅ line and a heatmap whose diagonal should be bright.
+# **Expected output:** Shapes, one ✅ line and a heatmap whose diagonal should be dark purple (larger similarity).
 
 # %%
 cifar = load_dataset("uoft-cs/cifar10", split="test")
@@ -162,12 +162,12 @@ captions = ["a photo of a red car", "a small bird on a branch", "a cat sleeping"
 txt_emb = embed_texts(captions)
 print("text embeddings", tuple(txt_emb.shape))
 def check_embeddings():
-    check(torch.allclose(img_emb.norm(dim=-1), torch.ones(len(img_emb)), atol=1e-4)
+    return check(torch.allclose(img_emb.norm(dim=-1), torch.ones(len(img_emb)), atol=1e-4)
           and torch.allclose(txt_emb.norm(dim=-1), torch.ones(len(txt_emb)), atol=1e-4),
           "TODO 1: every image and caption vector has length 1, so dot products are cosine similarities.",
           "Apply F.normalize(feats, dim=-1) in both functions before returning.")
 
-check_embeddings()
+assert check_embeddings(), "Complete TODO 1, then rerun this cell before interpreting embedding similarities."
 
 show_idx = [int(np.where(labels == CLASSES.index(c))[0][0]) for c in ["automobile", "bird", "cat", "ship", "horse", "airplane"]]
 sim = img_emb[show_idx] @ txt_emb.T
@@ -227,21 +227,22 @@ results = {}
 for name, templates in TEMPLATES.items():
     acc, pred = zero_shot_accuracy(templates)
     results[name] = acc
-    print(f"{name:28s} accuracy = {acc:.3f}")
 last_pred = pred
 def check_zero_shot():
     expected_classes = torch.stack([F.normalize(embed_texts([t.format(c) for t in TEMPLATES["ensemble of 5 templates"]]).mean(dim=0), dim=-1) for c in CLASSES])
     expected_predictions = (img_emb @ expected_classes.T).argmax(dim=1).numpy()
-    check(pred.shape == labels.shape and np.array_equal(pred, expected_predictions) and abs(acc - float((pred == labels).mean())) < 1e-9 and acc > 0.5,
+    return check(pred.shape == labels.shape and np.array_equal(pred, expected_predictions) and abs(acc - float((pred == labels).mean())) < 1e-9 and acc > 0.5,
           "TODO 2: one prediction per image, and accuracy is the fraction matching the labels.",
           "Return (accuracy, predictions); predictions come from argmax over the class-text similarities.")
 
-check_zero_shot()
+assert check_zero_shot(), "Complete TODO 2, then rerun this cell before comparing classification results."
+for name, measured_accuracy in results.items():
+    print(f"{name:28s} accuracy = {measured_accuracy:.3f}")
 
 # %% [markdown]
 # **Purpose:** Compare predicted and reference classes.
 # **Why now:** An average accuracy hides which classes are confused.
-# **Expected output:** A 10 × 10 confusion matrix; read the bright off-diagonal cells.
+# **Expected output:** A 10 × 10 confusion matrix; read the darker off-diagonal cells (larger confusion counts).
 
 # %%
 from sklearn.metrics import confusion_matrix
@@ -292,11 +293,11 @@ def precision_at_k(scores, gallery_labels, k=10):
 
 toy_scores = torch.tensor([[0.9, 0.1, 0.8, 0.2], [0.1, 0.9, 0.3, 0.7]])
 def check_precision():
-    check(abs(precision_at_k(toy_scores, np.array([0, 1, 1, 1]), k=2) - 0.75) < 1e-9,
+    return check(abs(precision_at_k(toy_scores, np.array([0, 1, 1, 1]), k=2) - 0.75) < 1e-9,
           "TODO 3: on the toy table, query 0 gets 1 of 2 relevant and query 1 gets 2 of 2, so precision@2 = 0.75.",
           "Use scores.topk(k, dim=1).indices, then compare gallery_labels at those indices with the row number.")
 
-check_precision()
+assert check_precision(), "Complete TODO 3, then rerun this cell before measuring retrieval precision."
 
 class_queries = embed_texts([f"a photo of a {c}." for c in CLASSES])
 query_scores = class_queries @ img_emb.T      # [10 queries, N images]
@@ -362,11 +363,11 @@ def check_contrastive_loss():
     probe_scores = probe_u @ probe_v.T / .3
     targets = torch.arange(3)
     expected = .5 * (F.cross_entropy(probe_scores, targets) + F.cross_entropy(probe_scores.T, targets))
-    check(torch.allclose(clip_loss(probe_u, probe_v, tau=.3), expected) and abs(float(clip_loss(torch.eye(3), torch.eye(3), tau=1.0)) - (np.log(np.e + 2) - 1)) < 1e-5,
+    return check(torch.allclose(clip_loss(probe_u, probe_v, tau=.3), expected) and abs(float(clip_loss(torch.eye(3), torch.eye(3), tau=1.0)) - (np.log(np.e + 2) - 1)) < 1e-5,
           "TODO 4: three orthogonal pairs at tau = 1 give ln(e + 2) − 1 ≈ 0.551.",
           "Divide the score table by tau, then average F.cross_entropy over rows (logits) and columns (logits.T).")
 
-check_contrastive_loss()
+assert check_contrastive_loss(), "Complete TODO 4, then rerun this cell before comparing paired and shuffled losses."
 
 u, v = embed_images([images[i] for i in show_idx]), embed_texts(captions)
 shuffle = torch.randperm(len(v), generator=torch.Generator().manual_seed(SEED))
@@ -383,20 +384,20 @@ print(f"loss of a uniform guess = ln(N) = {np.log(len(u)):.3f}")
 # **Expected output:** A slider; moving it prints the six probabilities for the car image. Automated runs skip this cell.
 
 # %% tags=["skip-test"]
+def show_temperature(tau=0.07):
+    probs = torch.softmax(sim[0] / tau, dim=0).numpy()
+    print(f"tau = {tau:.3f}: " + ", ".join(f"{c[:12]} {p:.2f}" for c, p in zip(captions, probs)))
+
+
 try:
     import ipywidgets as widgets
-
-    def show_temperature(tau=0.07):
-        probs = torch.softmax(sim[0] / tau, dim=0).numpy()
-        print(f"tau = {tau:.3f}: " + ", ".join(f"{c[:12]} {p:.2f}" for c, p in zip(captions, probs)))
-
     widgets.interact(show_temperature, tau=widgets.FloatLogSlider(value=0.07, base=10, min=-2.5, max=0, step=0.1,
                                                                   continuous_update=False))
 except ImportError:
     print("ipywidgets is not available; call show_temperature(0.01) … show_temperature(1.0) instead.")
 
 # %% [markdown]
-# ✍️ **Question 2.** Why is the loss low for correct pairs and high for shuffled pairs? What role do the other captions
+# ✍️ **Question 2.** Why is the loss lower for correct pairs than for shuffled pairs? What role do the other captions
 # in the batch play, and why did CLIP train with very large batches (32,768)?
 #
 # <!-- BEGIN ANSWER -->
@@ -490,12 +491,12 @@ def wer(reference, hypothesis):
 
 
 def check_wer():
-    check(abs(wer("a red car", "a blue car") - 1 / 3) < 1e-9 and abs(wer("the cat sat", "the cat sat down") - 1 / 3) < 1e-9
+    return check(abs(wer("a red car", "a blue car") - 1 / 3) < 1e-9 and abs(wer("the cat sat", "the cat sat down") - 1 / 3) < 1e-9
           and wer("a b c", "") == 1.0,
           "TODO 5: one substitution, one insertion and three deletions give WER 1/3, 1/3 and 1.",
           "Initialise the first row and column with 0, 1, 2, …, then take the cheapest of delete, insert or substitute.")
 
-check_wer()
+assert check_wer(), "Complete TODO 5, then rerun this cell before transcribing and measuring word errors."
 
 rows, started = [], time.perf_counter()
 for ex in speech.select(range(3 if SMOKE else 10)):

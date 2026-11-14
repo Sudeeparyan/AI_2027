@@ -381,7 +381,7 @@ slides:
   title: Every modality as a sequence of tokens
   cards:
   - head: Images
-    text: 224 × 224 → 49 patches
+    text: 224 × 224; 32 × 32 patches → 49
   - head: Audio
     text: Spectrogram frames
   - head: Video
@@ -545,25 +545,41 @@ slides:
 
 
     Watch out: A row can be right while its column is wrong; that is why both directions count.'
+- type: bullets
+  title: The loss in numbers (from the lab)
+  notes: 'In short: On six real image–caption pairs, correct pairs give the lowest loss; shuffling raises it, but it stays below
+    ln 6.
+
+
+    Explain: The lab encodes six images and six captions with frozen CLIP. It computes the symmetric loss for the correct order,
+    then after a seeded caption shuffle. A uniform guess would give ln 6 ≈ 1.79. No optimiser runs, so the weights never change.
+
+
+    Example: {{LOSS_NOTES}} The seeded shuffle moves three captions and keeps three pairs in place. Image–caption cosines sit
+    close together (lab mean {{W09_CORE_COS_IT}}).
+
+
+    Ask: Why does the shuffled loss stay below ln 6?
+
+
+    Answer: Half the targets are still correct, and close scores give the moved targets moderate probabilities, so their −ln
+    p stays moderate.
+
+
+    Watch out: Positive probabilities do not cap the loss; a target scored far below the rest gives a large −ln p. Compute it
+    with F.cross_entropy, not the log of a softmax, which can underflow.'
+  bullets:
+  - '{{LOSS_NOTES}}'
+  - 'Shuffled: below ln N.'
+  visual:
+    type: example_strip
+    items:
+    - label: Correct
+      text: Every true pair wins → lowest loss
+    - label: Shuffled
+      text: 3 of 6 targets moved → higher loss
 - type: equation
   title: The contrastive (InfoNCE) loss
-  eq:
-  - \mathcal{L}_{\mathrm{img}\to\mathrm{txt}} = -\dfrac{1}{N}\sum_{i=1}^{N} \left[ s_{ii} - \log \sum_{j=1}^{N}
-    \exp(s_{ij}) \right]
-  - s_{ij} = \dfrac{u_i \cdot v_j}{\tau}, \qquad \mathcal{L}_{\mathrm{CLIP}} = \frac{1}{2}\left(\mathcal{L}_{\mathrm{img}\to\mathrm{txt}}
-    + \mathcal{L}_{\mathrm{txt}\to\mathrm{img}}\right)
-  read_as:
-  - Normalise vectors; divide dot products by temperature $\tau$.
-  - Softmax turns scores into caption-choice probabilities.
-  - Cross-entropy penalises wrong choices; average both directions.
-  terms:
-  - - u / v
-    - Image / text vectors
-  - - $\tau$
-    - Temperature
-  - - N
-    - Pairs in this batch
-  panel_h: 2.2
   notes: 'In short: The CLIP loss is cross-entropy over each row and column of the scaled score table, averaged over both directions.
 
 
@@ -583,38 +599,23 @@ slides:
 
 
     Watch out: τ is learned during CLIP training; a fixed value in the lab only illustrates its effect.'
-- type: bullets
-  title: The loss in numbers (from the lab)
-  bullets:
-  - '{{LOSS_NOTES}}'
-  - 'Uniform choice: ln N.'
-  notes: 'In short: On six real image–caption pairs, the measured loss is lowest for correct pairs and highest for shuffled
-    ones.
-
-
-    Explain: The lab encodes six images and six captions with frozen CLIP. It computes the symmetric loss for the correct order.
-    It repeats the calculation with the captions shuffled. A uniform guess would give ln 6 ≈ 1.79. No optimiser runs, so the
-    weights never change.
-
-
-    Example: {{LOSS_NOTES}} Correct pairs score below the uniform baseline because most diagonal entries win. Shuffled pairs
-    score above it because the targets now point at wrong captions.
-
-
-    Ask: Why is the shuffled loss finite rather than enormous?
-
-
-    Answer: Softmax probabilities never reach zero, and some shuffled captions may still partly match.
-
-
-    Watch out: Six pairs illustrate the objective; they do not measure CLIP''s overall quality.'
-  visual:
-    type: example_strip
-    items:
-    - label: Correct
-      text: Diagonal wins → low loss
-    - label: Shuffled
-      text: Wrong targets → high loss
+  read_as:
+  - Normalise vectors; divide dot products by temperature $\tau$.
+  - Softmax turns scores into caption-choice probabilities.
+  - Cross-entropy penalises wrong choices; average both directions.
+  eq:
+  - \mathcal{L}_{\mathrm{img}\to\mathrm{txt}} = -\dfrac{1}{N}\sum_{i=1}^{N} \left[ s_{ii} - \log \sum_{j=1}^{N} \exp(s_{ij})
+    \right]
+  - s_{ij} = \dfrac{u_i \cdot v_j}{\tau}, \qquad \mathcal{L}_{\mathrm{CLIP}} = \frac{1}{2}\left(\mathcal{L}_{\mathrm{img}\to\mathrm{txt}}
+    + \mathcal{L}_{\mathrm{txt}\to\mathrm{img}}\right)
+  terms:
+  - - u / v
+    - Image / text vectors
+  - - $\tau$
+    - Temperature
+  - - N
+    - Pairs in this batch
+  panel_h: 2.2
 - type: figure
   title: 'Zero-shot classification: describe the classes, then compare'
   figure: zeroshot_pipeline
@@ -673,7 +674,7 @@ slides:
 
 
     Explain: Each row is a true class and each column a predicted class. Diagonal cells count correct predictions. Off-diagonal
-    cells count specific confusions. Bright off-diagonal cells reveal systematic errors. CIFAR images are only 32 × 32 pixels,
+    cells count specific confusions. Darker off-diagonal cells reveal systematic errors. CIFAR images are only 32 × 32 pixels,
     upscaled to 224 × 224.
 
 
@@ -681,7 +682,7 @@ slides:
     100 images and 80 on the diagonal has 80% accuracy for that class.
 
 
-    Ask: What does a bright cell in row cat, column dog mean?
+    Ask: What does a dark cell in row cat, column dog mean?
 
 
     Answer: Many cat images were predicted as dogs.
@@ -718,8 +719,8 @@ slides:
   eq: \mathcal{L}_{\mathrm{SigLIP}} = -\frac{1}{N}\sum_{i=1}^{N} \;\; \sum_{j=1}^{N} \, \log \sigma\left(z_{ij}\left(t\, u_i
     \cdot v_j + b\right)\right), \qquad z_{ij} = +1 \ \mathrm{if}\ i = j,\ \mathrm{else}\ -1
   read_as:
-  - Independent pairs.
-  - Average losses.
+  - 'Score 2: P(match) ≈ 0.88; loss ≈ 0.13.'
+  - 'Non-match: loss ≈ 2.13.'
   terms:
   - - N,i,j
     - Batch size; image/text indices
@@ -749,6 +750,7 @@ slides:
 
 
     Watch out: Sigmoid scores are still not calibrated probabilities that a caption is true.'
+  example_first: true
 - type: figure
   title: The modality gap (real embeddings from the lab)
   figure: lab_modality_gap
@@ -850,9 +852,9 @@ slides:
 - type: bullets
   title: 'Vision-language transformers: a short history'
   bullets:
-  - Dual encoders came first.
-  - LLM connectors came next.
-  - Week 10 builds applications.
+  - '2019: joint image–text encoders.'
+  - '2021: separate encoders at scale.'
+  - '2023: bridges into LLMs.'
   notes: 'In short: Vision-language models moved from joint region–text encoders to dual encoders, then to models that connect
     vision to large language models.
 
@@ -1034,9 +1036,9 @@ slides:
   title: Word error rate (WER)
   eq: \mathrm{WER} = \frac{S + D + I}{N}
   read_as:
-  - Count substitutions, deletions and insertions.
-  - Divide by the reference word count.
-  - 'One missing word among six: 1/6.'
+  - 'Illustration: one missing word among six → 1/6.'
+  - Count changed, missing and extra words.
+  - Divide by reference word count.
   terms:
   - - S / D / I
     - Changed / missing / extra words
@@ -1060,6 +1062,7 @@ slides:
 
 
     Watch out: WER treats every word equally; a wrong name can matter far more than a wrong "the".'
+  example_first: true
 - type: table
   title: How multimodal models are evaluated
   header:

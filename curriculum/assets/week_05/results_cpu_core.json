@@ -1,11 +1,11 @@
 {
   "week": 5,
   "mode": "core",
-  "recorded_at_utc": "2026-10-11T02:02:30.472861+00:00",
+  "recorded_at_utc": "2026-10-13T08:14:14.589397+00:00",
   "seed": 42,
   "libraries": {
-    "torch": "2.14.0+cpu",
-    "transformers": "5.17.0"
+    "torch": "2.11.0+cpu",
+    "transformers": "5.18.0"
   },
   "device": "cpu",
   "device_name": "CPU",
@@ -25,7 +25,7 @@
     "layers": 3,
     "updates": 2000,
     "validation_batches_per_check": 8,
-    "seconds_including_validation": 230.8879697000084,
+    "seconds_including_validation": 248.42374110000674,
     "validation_curve": [
       [
         0,
@@ -82,10 +82,43 @@
   },
   "bert_selected_head": null,
   "gpt2_cache_benchmark": null,
-  "core_elapsed_seconds": 242.41789389998303,
+  "core_elapsed_seconds": 276.85793840000406,
   "optional": {
     "pretrained": false,
     "cache": false,
     "stretch": false
+  },
+  "runtime": {
+    "cpu_threads": 4,
+    "device": "cpu",
+    "environment": "local",
+    "logical_cpus": 12,
+    "packages": {
+      "diffusers": "0.40.0",
+      "google-genai": "2.29.0",
+      "ipywidgets": "7.7.1",
+      "openai": "3.28.0",
+      "peft": "0.21.1",
+      "python-dotenv": "1.2.4",
+      "sentence-transformers": "5.7.0",
+      "torch": "2.11.0+cpu",
+      "transformers": "5.18.0",
+      "trl": "1.15.0"
+    },
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 158 Stepping 10, GenuineIntel",
+    "python": "3.12.10",
+    "seed": 42
+  },
+  "evidence": {
+    "started_at_utc": "2026-10-13T08:09:32.326072+00:00",
+    "seconds": 283.1,
+    "notebook_sha256": "df034f50c37b9a8af7174438f17e7c9836aaf0f5139be819cc665ad4abe6da15",
+    "executed_notebook_sha256": "52147a5bfcaa4678ce0978fa46fed78d1457809d93b9c1193d01cfa71cca6d05",
+    "runner_python": "C:\\Users\\sudee\\Downloads\\Generative_AI_2027_Teaching_Pack\\AI2027_Project\\build\\qa_pinned_env\\Scripts\\python.exe",
+    "kernel_name": "qa-pinned-cpu",
+    "run_record": "build/retry_20261013/full_week_05.json",
+    "result_export": "build/retry_20261013/results/week_05/results_cpu_core.json",
+    "result_export_sha256": "8cb7c405c8ef8d69b1a3096c0141e32f5004adf23fcbb1405f675dcd0dedb668"
   }
 }

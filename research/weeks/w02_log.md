@@ -42,3 +42,17 @@ Handoff: sources activated; root owns build/eight audits/actual PPT word invento
 - Latest successful cached local CPU full core: 23.8 s (0.4 min), recorded in `research/lab_runs_2026-10.json`; final smoke PASS (14.2 s). Current executed core code matches the successful full-run evidence.
 - All 26 current release gates passed, including coverage 100%, strict notes, body ≤ 40, fonts ≥ 14, semantic helpers and shared diagram/attachment parity. See `research/ITERATION3_2026-10-12.json`.
 - No timed Colab, clean-install/download, live-provider, browser-widget or optional GPU/stretch claim. Earlier pending handoffs above describe intermediate states.
+
+## Independent-audit repair — 12 October 2026
+- A09: two-force example precedes ELBO; Gaussian examples precede KL; sampling pictures precede formula. A13: relative-weight advice no longer guarantees blurry collapse.
+- Used `yaml_edit.edit_slides`; all 40 core slides retained. Detailed Word slide headings move with source slots; title-based insertion anchors remain truthful.
+- This subtask ran strict authored-note checks and source invariants only. Root coordinates builds, audits, resolved counts, Office renders and visual inspection; no rendered-output pass claimed here.
+- Handoff: source corrections ready; root verification pending. No lab, shared-engine, canonical-glossary or protected-source edit.
+- Final source handoff: resolved enrichment retains 46 slides; strict resolved notes, moved-heading title parity and scoped prose/inline-math checks PASS. W10 projector arithmetic and shared-scene geometry PASS. Main Word examples/figures now precede the affected formulas. Evidence: build/lecture_repairs_20261012_precheck.json. Root build/render/visual checks pending; no new rendered-output claim.
+
+
+### Audit correction closeout — 13 October 2026
+
+- Qualified KL weighting; identical latent-space figure in slides and Word.
+- Final current artifacts rebuilt, checked and visually reviewed; no open findings. Evidence: ../AUDIT_FIXES_2026-10-12.json.
+- CPU/Office verification is local; Colab, live API and classroom limits remain documented.

@@ -6,7 +6,7 @@ This week turns last week's multimodal foundations into applications (MIMLO 2, 3
 |---|---|---|---|
 | 0–5 min | 1–4 | Warm-up | Receipt photo: reading, reasoning and privacy risks. |
 | 5–30 min | 5–12 | 1 · Multimodal LLMs | Two designs; capabilities; families; real captions; visual tokens; real chart/document QA; quiz. |
-| 30–43 min | 13–16 | 2 · Training and fine-tuning | Training pipeline; data; adapting with LoRA. |
+| 30–43 min | 13–16 | 2 · Training and fine-tuning | Worked bridge update; training pipeline and data; adapting with LoRA. |
 | 43–68 min | 17–24 | 3 · Generation across modalities | Map; real text→image and image→image; editing and control; speech; music and video; quiz. |
 | 68–75 min | – | Break | |
 | 75–92 min | 25–28 | 4 · Evaluation | Metrics by task; multimodal hallucination (real probe); human evaluation. |
@@ -61,7 +61,33 @@ A **multimodal large language model (MLLM)** processes text alongside other supp
 
 **Start here.** A training example pairs an image with a caption or a question and desired answer. A bridge can first learn alignment; instruction examples then teach useful visual responses. The lab uses pretrained models. A project considering adaptation needs enough representative images, data permission and a separate final test.
 
-**Small worked example.** An image-caption example says "a red cup". A visual instruction example asks "What colour is the cup?" and answers "red". A new photo of a red cup should appear only in evaluation if it is meant to test generalisation.
+### Worked example: from visual features to one answer-token update
+
+An image-caption example says "a red cup". An instruction example asks "What colour is the cup?" with target "red". To inspect what bridge training actually changes, use the following **illustrative toy**, rather than a measured model result. Freeze the encoder and language head; train only the projector.
+
+1. **Read features.** A frozen encoder supplies the row `[1,2]`, with tensor shape `[1,2]`: one example and two visual features. The feature values do not literally mean colour coordinates.
+2. **Project.** Start with weight rows `[1,0,0]` and `[0,1,0]`, a matrix of shape `[2,3]`. Multiply `[1,2]` by those rows to obtain `[1,2,0]`, shape `[1,3]`. The first output is `1×1 + 2×0 = 1`; the second is `1×0 + 2×1 = 2`.
+3. **Predict.** Our fixed toy head treats the three outputs as scores for red, blue and other. Exponentials are about `[2.718,7.389,1]`, summing to 11.107. Dividing each by that total gives probabilities about `[0.245,0.665,0.090]`. Red is the target even though blue currently has the highest probability.
+4. **Score the target.** Negative natural log of red's unrounded probability gives loss 1.408. This is one target-token cross-entropy; a longer answer sums or averages several such terms according to the chosen reduction.
+5. **Find the gradient.** For this fixed head, subtract the target vector `[1,0,0]` from the probabilities. This gives approximately `[−0.755,0.665,0.090]`. Multiply that row by each input feature to obtain the weight-gradient rows `[−0.755,0.665,0.090]` and `[−1.511,1.330,0.180]`, shape `[2,3]`.
+6. **Update.** Learning rate 0.1 subtracts one-tenth of every gradient entry. The first weight changes from `1` to `1 − 0.1×(−0.755) ≈ 1.0755`. All six projector entries update; the frozen encoder and head do not. Test generalisation on a separate image after choosing settings on development examples.
+
+![One illustrative visual bridge update](fig:beginner_training)
+
+The diagram's solid arrows carry features, projected values, probabilities and gradients. Its dashed arrow supplies the updated projector to the next pass. A **projector** is a learned mapping between feature spaces; **cross-entropy** is the target-token prediction cost. The toy deliberately omits question-token attention, image patches and the full vocabulary. It isolates the bridge update, rather than claiming to reproduce a complete VLM.
+
+Now write those operations precisely:
+
+$$v=hW,\qquad p=\mathrm{softmax}(v),\qquad L=-\log p_{\mathrm{red}}$$
+
+Here h is the `[1,2]` feature row; W is the `[2,3]` learned projector; v is its `[1,3]` output. The probability row p has one entry for each of our three candidate tokens. L is a scalar loss, log is the natural logarithm, and the subscript red selects the target token. Softmax exponentiates each score and divides by their sum.
+
+$$\frac{\partial L}{\partial W}=h^{\mathsf{T}}(p-y),\qquad W_{\mathrm{new}}=W-\eta\frac{\partial L}{\partial W}$$
+
+The one-hot target row y is `[1,0,0]`. The superscript T transposes the feature row into a `[2,1]` column. The partial derivative is the `[2,3]` weight gradient: sensitivity of loss to each weight. Eta is the learning rate, here 0.1. W-new names the updated projector. Real VLM training uses the chain rule through a larger frozen or trainable language model; it is not generally the identity-head gradient used in this toy.
+
+**Check.** Does a frozen encoder prevent projector learning? **Answer.** No. Its numerical features can still feed a trainable projector. Freezing one component blocks its own weight updates, not the entire downstream loss calculation.
+
 
 ![A typical VLM training pipeline](fig:vlm_training)
 
@@ -114,7 +140,7 @@ A **multimodal large language model (MLLM)** processes text alongside other supp
 
 | Task | Automatic metrics | Human evaluation |
 |---|---|---|
-| Text → image | FID (realism), CLIP score (alignment), GenEval (composition) | Side-by-side human preference; rubric for alignment and artefacts |
+| Text → image | FID (image-feature distributions), CLIP score (alignment), GenEval (composition) | Side-by-side human preference; rubric for alignment and artefacts |
 | Image → text (captions) | CIDEr, BLEU, CLIPScore | Correctness, completeness, invented details |
 | VQA, charts, documents | Accuracy against ground truth | Error analysis by question type |
 | Text → speech | WER via ASR, speaker similarity | Mean Opinion Score (naturalness), intelligibility |
@@ -189,7 +215,9 @@ A **multimodal large language model (MLLM)** processes text alongside other supp
 
 **Current CPU core:** SmolVLM-256M-Instruct; float32; maximum input side 384 pixels; at most 32 generated tokens per answer; two captions, three reading questions and two yes/no probes. It also computes known totals, runs semantic TODO probes, executes the real word-edit WER algorithm and resaves honest metadata. The design target is at most 15 minutes of cached CPU waiting. Initial installs and checkpoint downloads are additional.
 
-**Measured local core:** {{W10_CORE_TIME}} on {{W10_CORE_DATE}}, using {{W10_CORE_THREADS}} CPU threads. Installation, downloads, widgets and optional stretch/API calls are excluded. This is a local run, not a timed Colab run. {{W10_CORE_RESULTS}}
+**Measured local core:** {{W10_CORE_TIME}} on {{W10_CORE_DATE}}, using {{W10_CORE_THREADS}} CPU threads. Installation, downloads, widgets and optional stretch/API calls are excluded. This is a local run, not a timed Colab run.
+
+{{W10_CORE_RESULTS}}
 
 
 **Optional extensions:** `RUN_STRETCH = False` keeps SD-Turbo generation/editing, CLIP inference and MMS-TTS/Whisper inference disabled. Their original implementations remain available behind that switch. The core inspects stored image strips and transcript examples. `GENAI_VLM` is an instructor override: changing it changes the experiment and requires separate recording and timing. A GPU may help extensions, but is optional; the current core does not choose it automatically.
@@ -299,28 +327,7 @@ A **multimodal large language model (MLLM)** processes text alongside other supp
 
 # Glossary
 
-| Term | Meaning |
-|---|---|
-| Multimodal LLM (MLLM) | LLM that accepts (and possibly generates) images, audio, video or documents |
-| Vision-language model (VLM) | Model processing images and text jointly |
-| Natively multimodal ("omni") | Model trained from the start on interleaved multimodal tokens |
-| Projector | Small network mapping encoder features into the LLM's embedding space |
-| Visual tokens | Image patches passed to the LLM as embeddings |
-| Visual instruction tuning | Fine-tuning a VLM on image-based conversations and tasks |
-| Visual question answering (VQA) | Answering questions about an image |
-| Image-to-image (SDEdit) | Editing by noising an image partially and denoising with a new prompt |
-| Strength | Fraction of the noise schedule applied in image-to-image |
-| Inpainting / outpainting | Regenerating a masked region / extending the canvas |
-| ControlNet | Adapter that conditions diffusion on edges, depth, pose, etc. |
-| Text-to-speech (TTS) | Generating speech audio from text |
-| Voice cloning | TTS imitating a specific speaker from sample audio |
-| CLIP score | 100 × cosine similarity of CLIP image and text embeddings |
-| POPE / CHAIR | Benchmarks for object hallucination in MLLMs |
-| Mean Opinion Score (MOS) | Average human rating (e.g. 1–5) of speech naturalness |
-| Deepfake | Realistic synthetic media depicting real people or events falsely |
-| C2PA | Standard for cryptographically signed content credentials |
-| Watermark (SynthID) | Invisible signal embedded in generated content for detection |
-| Liar's dividend | Dismissing genuine evidence as fake because fakes exist |
+<!-- Definitions generated from curriculum/glossary.json week_glossary. -->
 
 # Readings, videos and further practice
 
@@ -417,7 +424,7 @@ Multimodal LLMs have a wide range of capabilities. Describing and answering ques
 
 ## Slide 8: Multimodal model families (examples, 2026)
 
-A snapshot of families, without version numbers, which change monthly. The proprietary families from OpenAI, Google and Anthropic all accept images and documents; OpenAI and Google also handle audio natively, and Gemini is notable for very long video and document contexts. Among open-weight models, the Qwen vision-language and omni families are strong on documents and charts; LLaVA is the research reference; small models such as SmolVLM run on laptops. The current CPU core uses SmolVLM-256M-Instruct. Archived Qwen3-VL-2B GPU results remain a separately labelled comparison.
+A snapshot of families, without version numbers, which change monthly. The proprietary families from OpenAI, Google and Anthropic all accept images and documents; OpenAI and Google also handle audio natively, and Gemini is notable for very long video and document contexts. Among open-weight models, the Qwen vision-language and omni families are strong on documents and charts; LLaVA is the research reference; small models such as SmolVLM run on laptops. The current CPU core uses SmolVLM-256M-Instruct. Archived Qwen3-VL-2B CPU results remain a separately labelled comparison.
 
 | Family | Access | Inputs | Notes |
 | --- | --- | --- | --- |
@@ -477,9 +484,13 @@ Section two briefly explains how multimodal LLMs are trained, which the descript
 
 - How are these models built, and how can you adapt one?
 
-## Slide 14: A typical training pipeline for a vision-language model
+## Slide 14: Worked example: one visual bridge update
 
-Walk through the stages. The vision encoder, typically CLIP or SigLIP, and the LLM are pretrained separately at great cost. Alignment trains the projector on image-caption pairs so that visual features land in the LLM's input space. Visual instruction tuning, introduced by LLaVA, fine-tunes on conversations about images, now including charts, documents, OCR and grounding tasks, often generated synthetically with the help of stronger models. Preference tuning or reinforcement learning, as in week 8, reduces hallucination and improves helpfulness. Finally, users can adapt the model to their domain with LoRA.
+Trace the six steps in the section 2 worked example. The table starts with one feature row `[1,2]`, maps it through `[2,3]` projector weights and scores target red. The numerical values are illustrative arithmetic, not results from the inference lab. Show the first weight update on the board, then trace the full gradient shape in the notes. The encoder and toy language head remain frozen; every projector entry receives its own gradient.
+
+## Slide 15: A typical training pipeline for a vision-language model
+
+Walk through the stages. The vision encoder, typically CLIP or SigLIP, and the LLM are pretrained separately at great cost. Alignment trains the projector on image-caption pairs so that visual features land in the LLM's input space. Visual instruction tuning, introduced by LLaVA, fine-tunes on conversations about images, now including charts, documents, OCR and grounding tasks, often generated synthetically with the help of stronger models. Preference tuning or reinforcement learning, as in week 8, aims to improve helpfulness and reduce unsupported answers; measure both on held-out examples. Finally, users can adapt the model to their domain with LoRA.
 
 - Begin with an existing image encoder and language model; train the connection between them.
 
@@ -487,7 +498,7 @@ Walk through the stages. The vision encoder, typically CLIP or SigLIP, and the L
 
 - Costs depend on which components are trained, the data size and the image resolution.
 
-## Slide 15: Data for multimodal training
+### Training-data detail behind the recipe
 
 Multimodal training data comes in several forms. Web image-caption pairs are plentiful but noisy, so many teams re-caption images with a strong model to get more detailed descriptions. Interleaved documents teach models to handle mixed sequences. Task-specific data, for OCR, charts, screenshots and video, is often generated synthetically, for example by rendering charts with known values, exactly what we do in the lab for evaluation. Audio data pairs speech with transcripts. Last week's LAION case showed why curation, licensing and consent are critical for images and voices.
 
@@ -535,7 +546,7 @@ Three prompts rendered by SD-Turbo with two steps in the lab run. Inspect prompt
 
 ## Slide 20: Image → image: editing with partial noise (real)
 
-Image-to-image editing, from week 4's SDEdit idea, adds noise to an existing image and denoises it with a new prompt. The strength parameter sets how far into the noise schedule we go: in the recorded run, 0.3 and 0.6 left the lighthouse painting almost unchanged, while 0.9 replaced most of it with a new coastal scene. None of the three looks like a pencil sketch: strength controls how much may change, not whether the style request is followed, so compare each result with what was asked. Inpainting restricts the change to a mask, and control methods such as ControlNet guide the preservation of edges or pose. These are the building blocks of editing features in design tools.
+Image-to-image editing, from week 4's SDEdit idea, adds noise to an existing image and denoises it with a new prompt. The strength parameter sets how far into the noise schedule we go: in the recorded run, 0.3 left the lighthouse painting almost unchanged, 0.6 kept the lighthouse but redrew the shore, and 0.9 replaced most of it with a new coastal scene. None of the three looks like a pencil sketch: strength controls how much may change, not whether the style request is followed, so compare each result with what was asked. Inpainting restricts the change to a mask, and control methods such as ControlNet guide the preservation of edges or pose. These are the building blocks of editing features in design tools.
 
 - **Editing strength** controls how much noise is added to the starting image.
 
@@ -596,9 +607,9 @@ Welcome back. Section four is about evaluation, which the descriptor lists expli
 
 - How do you measure quality, alignment and truthfulness across modalities?
 
-## Slide 26: Metrics by task
+## Slide 26: One automatic check per task
 
-This table maps each task to its usual metrics. Images reuse FID and CLIP score from week 4, plus compositional benchmarks. Captions use CIDEr and CLIPScore. Question answering uses accuracy, which requires ground truth, which is why generating our own chart and invoice was useful. Speech uses word error rate through a recogniser and human Mean Opinion Scores for naturalness. Video uses Fréchet Video Distance and human rating. For multimodal LLMs, hallucination has its own benchmarks: POPE asks yes/no questions about objects, and CHAIR counts objects mentioned in captions that are not in the image.
+The slide gives one automatic check per task; this reference section keeps the wider set. FID means Fréchet Inception Distance and compares image-feature distributions. FVD means Fréchet Video Distance and compares video-feature distributions. CIDEr scores weighted phrase overlap with reference captions. These distribution and overlap measures do not verify every individual claim. Images reuse FID and CLIP score from week 4, plus compositional benchmarks. Captions use CIDEr and CLIPScore. Question answering uses accuracy, which requires ground truth, which is why generating our own chart and invoice was useful. Speech uses word error rate through a recogniser and human Mean Opinion Scores for naturalness. Video uses Fréchet Video Distance and human rating. For multimodal LLMs, hallucination has its own benchmarks: POPE asks yes/no questions about objects, and CHAIR counts objects mentioned in captions that are not in the image.
 
 | Task | Automatic metrics | Human evaluation |
 | --- | --- | --- |
@@ -750,17 +761,17 @@ This adapts the five-step checklist from week 1 to multimodal work. Purpose incl
 
 ## Slide 38: Lab 10: multimodal generative tasks, measured
 
-The lab covers the descriptor's list of multimodal generative tasks: image to text, cross-modal reasoning, text to image, image to image, text to audio and speech to text, with text to video discussed rather than run because of cost. Every part has a measurement, so students practise evaluation as well as generation. The provenance exercise makes the fragility of metadata concrete. Remind students of the licence restrictions of SD-Turbo (conditional Community License) and MMS-TTS (non-commercial).
+The required CPU core runs image-to-text reading, known-answer checks, code totals and metadata inspection. Students inspect stored image and speech experiments. Fresh text-to-image generation, image editing, CLIP scoring and speech generation/recognition remain optional extensions. Text-to-video is discussed through examples. Keep every fresh result separate from its stored comparison. The provenance exercise makes the fragility of metadata concrete. Remind students of the licence restrictions of SD-Turbo (conditional Community License) and MMS-TTS (non-commercial).
 
 - Use a **VLM** to describe photos and answer image questions.
 
 - Check answers about a chart and invoice against known values; test present and absent objects.
 
-- Generate with SD-Turbo; edit an image at several strengths.
+- **Optional extension:** generate with SD-Turbo; edit an image at several strengths.
 
-- Compare the generated images with the prompt using CLIP similarity and visual review.
+- **Core:** inspect stored prompt/image comparisons. **Optional extension:** score freshly generated images with CLIP and inspect them.
 
-- Generate speech with MMS-TTS; transcribe with Whisper and calculate WER.
+- **Optional extension:** generate speech with MMS-TTS and transcribe with Whisper. **Core:** implement WER and inspect the stored round trip.
 
 - Add illustrative metadata to an image and observe what survives re-saving; this is not signed C2PA.
 

@@ -29,13 +29,13 @@ Start with the vocabulary and overall flow. For each section below, read the sim
 
 A language model may lack current facts or private documents, produce unsupported claims and omit usable evidence links. **Retrieval-augmented generation (RAG)** (Lewis et al., 2020) searches relevant sources when a question arrives and includes them with the prompt. An application can then attach citations. Retrieval can reduce unsupported answers, but the selected sources and each answer claim still need checking.
 
-| | RAG | Fine-tuning (week 8) | Long context |
-|---|---|---|---|
-| Adds knowledge | Yes, updated by re-indexing | Poorly; hard to update | Yes, for what fits |
-| Citations | Yes | No | Possible, harder to check |
-| Cost per query | Low (top-k passages) | Low once trained | High (every token every time) |
-| Access control | Per document at retrieval | Mixed into weights | Per request |
-| Best for | Large, changing knowledge bases | Behaviour, format, style | A few long documents |
+|  | RAG | Fine-tuning (week 8) | Long context |
+| --- | --- | --- | --- |
+| How information enters | Search for passages and add them | Learn patterns through weight updates | Put documents directly in the prompt |
+| Evidence links | Attach source IDs and verify citations | Not guaranteed by weight training | Possible if sources are labelled and checked |
+| Per-question work | Search plus selected passages | Model generation after training | Read every included token |
+| Permissions | Filter documents before retrieval | Training data can be mixed into weights | Check all supplied documents |
+| Useful when | Many documents or changing facts | Behaviour, style or skills need adaptation | A small document set fits the context |
 
 ![The RAG pipeline](fig:rag_pipeline)
 
@@ -57,8 +57,8 @@ A language model may lack current facts or private documents, produce unsupporte
 
 | Option | Type | Typical use |
 |---|---|---|
-| FAISS | Library | Fast in-process search (lab) |
-| Chroma | Lightweight vector database | Local apps with metadata filters (lab) |
+| FAISS | Library | In-process search (optional lab stretch) |
+| Chroma | Lightweight vector database | Metadata filters (optional lab stretch) |
 | pgvector | PostgreSQL extension | Vectors next to business data |
 | Qdrant, Weaviate, Milvus, Pinecone | Dedicated vector databases | Scale, hybrid search, multi-tenant |
 | Azure AI Search, Google Vector Search (formerly Vertex AI Vector Search) | Managed cloud search | Enterprise RAG with security integration |
@@ -69,7 +69,7 @@ A language model may lack current facts or private documents, produce unsupporte
 
 **Start here.** Dense search uses vector meaning; BM25 uses words; hybrid search combines their rankings. A cross-encoder reads question and passage together to re-rank a smaller candidate set. Evaluate whether evidence was found separately from whether the model used it correctly. Archived hits are checked by known source-document ID. The current core labels specific evidence spans and measures passage recall.
 
-**Small worked example.** First relevant results for three questions are at ranks 1, 2 and absent. MRR = (1 + 1/2 + 0)/3 = 0.5. Two have evidence in the first three results, so the archived document-hit@3 definition gives 2/3. Passage recall instead counts retrieved relevant passages divided by all labelled relevant passages. These scores do not check the generated answer.
+**Small worked example.** For fusion, a chunk ranked 1 by BM25 and 5 by dense search gets 1/61 + 1/65 ≈ 0.03178. These are illustrative ranks. First relevant results for three questions are at ranks 1, 2 and absent. MRR = (1 + 1/2 + 0)/3 = 0.5. Two have evidence in the first three results, so the archived document-hit@3 definition gives 2/3. Passage recall instead counts retrieved relevant passages divided by all labelled relevant passages. These scores do not check the generated answer.
 
 **Dense vs keyword.** Dense retrieval matches meaning (paraphrases); **BM25** matches words weighted by rarity (codes, names, rare terms). **Hybrid** search combines them, usually with **reciprocal rank fusion**:
 
@@ -89,7 +89,7 @@ A question with no relevant result in the returned list contributes zero to MRR.
 
 ![Retrieval quality by method (lab)](fig:lab_retrieval)
 
-**Grounded generation.** Label each source and request an answer supported by it, with citations and a missing-evidence reply when needed. Tell the model to treat source text as data. Check whether the cited passage supports each claim; a citation number alone is not enough. In the archived run, moving rules after the sources helped the 1.5 B model. This is one measured prompt-placement result, not a general security guarantee.
+**Grounded generation.** Label each source and request an answer supported by it, with citations and a missing-evidence reply when needed. Tell the model to treat source text as data. Check whether the cited passage supports each claim; a citation number alone is not enough. Test rule placement on matched development examples; effects depend on the model, template and task. Treat prompts as guidance while enforcing permissions and evidence checks in code.
 
 **Lab measurement (RAG vs no retrieval):** {{RAG_NOTES}}
 
@@ -181,7 +181,7 @@ An **agent** is an LLM that uses **tools** in a **loop** to achieve a goal, with
 |---|---|
 | "RAG eliminates hallucination." | It reduces it; models can still misread, mix or ignore sources. Measure faithfulness. |
 | "Bigger chunks give the model more context, so they are better." | Large chunks dilute embeddings and waste context; tune size and overlap on your data. |
-| "Embeddings beat keyword search." | BM25 wins on exact codes and names; hybrid search is usually best. |
+| "Embeddings beat keyword search." | Keyword and dense search favour different evidence. Neither always wins; compare methods on labelled relevant passages. |
 | "If the answer is wrong, use a bigger LLM." | First check retrieval: if the evidence was not retrieved, no model can answer faithfully. |
 | "An agent is just a chatbot with a longer prompt." | An agent runs a loop and takes actions through tools, which changes the risk profile. |
 | "Always use an agent framework / multi-agent system." | Most tasks are best served by simple workflows; agents add cost and unpredictability. |
@@ -250,7 +250,7 @@ An **agent** is an LLM that uses **tools** in a **loop** to achieve a goal, with
 
 # Glossary
 
-Use the Quick glossary in the beginner walkthrough for this week's terms. Definitions come from the shared course glossary; `00_Course/Course_Glossary.docx` collects all module terms.
+<!-- Definitions generated from curriculum/glossary.json week_glossary. -->
 
 # Readings, videos and further practice
 
@@ -324,7 +324,7 @@ Four limitations. Static knowledge: a model knows only what was in its training 
 
 ## Slide 7: RAG, fine-tuning or long context?
 
-Compare the three ways of giving a model knowledge. RAG adds knowledge that can be updated by re-indexing and supports citations and per-document access control, at low cost per query because only the top passages are sent. Fine-tuning, as week 8 showed, is good for behaviour and format but a poor way to add facts that change. Long-context models can read whole documents, which is excellent for a few long files, but sending hundreds of thousands of tokens with every question is slow and expensive, and quality can drop for information in the middle. Real systems combine them.
+Compare how each approach supplies information. RAG searches permitted sources and adds selected passages with source IDs. Fine-tuning changes learned patterns, so it suits behaviour and format; changing facts are harder to maintain in weights. Long context places documents directly in the prompt. Its work depends on how much text is included, and relevant information can still be missed. Compare measured quality, runtime and cost for the same questions. Real systems combine these approaches.
 
 |  | RAG | Fine-tuning (week 8) | Long context |
 | --- | --- | --- | --- |
@@ -369,7 +369,7 @@ Embeddings connect back to week 9's contrastive learning. A retrieval embedding 
 
 ## Slide 12: Chunking: splitting documents into retrievable pieces
 
-Documents are split into chunks because embeddings of long texts become vague and prompts have limited space. Overlap ensures a sentence cut at a boundary appears in two chunks. There is no universal best size: typical values are a few hundred to a thousand tokens with ten to twenty percent overlap, and structure-aware splitting at headings and paragraphs usually beats fixed windows. Keep metadata with each chunk: source document, section, date and access level, which enable citations and filtering. In the lab, students implement a word-boundary chunker with overlap.
+Documents are split into chunks because embeddings of long texts become vague and prompts have limited space. Overlap repeats nearby words, but a long sentence can still be split; inspect the actual evidence boundaries. There is no universal best size: typical values are a few hundred to a thousand tokens with ten to twenty percent overlap, and structure-aware splitting at headings and paragraphs usually beats fixed windows. Keep metadata with each chunk: source document, section, date and access level, which enable citations and filtering. In the lab, students implement a word-boundary chunker with overlap.
 
 - A **chunk** is one searchable piece of a document. Large pieces may add irrelevant text; tiny pieces may lose meaning.
 
@@ -379,7 +379,7 @@ Documents are split into chunks because embeddings of long texts become vague an
 
 ## Slide 13: Where to store vectors
 
-FAISS, from Meta, is a library: very fast, but you manage persistence yourself. Chroma is a simple vector database with metadata, used in the lab. pgvector adds vector search to PostgreSQL, often the pragmatic choice when data already lives there. Dedicated vector databases such as Qdrant, Weaviate, Milvus and Pinecone add scale, hybrid search and multi-tenancy. Cloud search services from Microsoft and Google integrate with enterprise security and identity. For student projects, FAISS or Chroma are enough.
+The CPU core uses a small exact NumPy index. FAISS is an optional in-process search library; persistence needs explicit handling. Chroma adds a database interface and metadata filters in an optional stretch. The demonstrated ephemeral client keeps data only for its process. pgvector adds vector search to PostgreSQL, often the pragmatic choice when data already lives there. Dedicated vector databases such as Qdrant, Weaviate, Milvus and Pinecone add scale, hybrid search and multi-tenancy. Cloud search services from Microsoft and Google integrate with enterprise security and identity. For student projects, FAISS or Chroma are enough.
 
 | Option | Type | Typical use |
 | --- | --- | --- |
@@ -391,7 +391,7 @@ FAISS, from Meta, is a library: very fast, but you manage persistence yourself. 
 
 ## Slide 14: Searching millions of vectors quickly
 
-Exact nearest-neighbour search compares the question with every stored vector, which is fine for the lab's handful of chunks and even for a few hundred thousand, but too slow at web scale. Approximate indexes such as HNSW, a navigable graph, IVF, which searches only the nearest clusters, and product quantisation, which compresses vectors, give large speed-ups with a small loss in recall. Metadata filters limit results to allowed documents; enforcing access control at retrieval time is essential, because anything retrieved can appear in the answer.
+Exact search compares a query with every stored vector; the CPU core uses this approach for its small collection. Approximate indexes reduce comparisons or storage: HNSW navigates linked neighbours, IVF searches selected clusters, and product quantisation compresses vector parts. Their speed and missed-evidence trade-off depend on the collection and settings. Measure both. Permission filtering must happen before any restricted passage enters the model prompt.
 
 - Exact search compares the question with every stored vector; cost grows with the collection.
 
@@ -409,7 +409,7 @@ Section three is the core of RAG quality: dense, keyword and hybrid retrieval; r
 
 ## Slide 16: Dense vs. keyword retrieval
 
-Dense and keyword retrieval fail in complementary ways. Dense retrieval matches meaning, so a question about handing work in after the deadline finds the late-submission policy even without shared words. BM25, the classic keyword ranking function, weights matching words by rarity and excels at exact identifiers such as module codes or product numbers, which embeddings often blur. Hybrid search runs both and fuses the results, which is why it is the default in production systems and in the lab.
+Dense and keyword retrieval use different signals. Dense retrieval can match a question about handing work in after the deadline to a late-submission policy. BM25 weights word matches using collection statistics and can help with exact identifiers such as module codes. Neither route guarantees useful evidence. Hybrid search runs both and fuses their ranked results. Compare all three on the same labelled passages before choosing a method.
 
 | Dense (embeddings) | Keyword (BM25) |
 |---|---|
@@ -421,11 +421,11 @@ Dense and keyword retrieval fail in complementary ways. Dense retrieval matches 
 
 ## Slide 17: Fusing rankings and measuring retrieval
 
-Reciprocal rank fusion combines ranked lists: each retriever contributes one over sixty plus the rank. A chunk ranked first by one retriever and fifth by the other scores well. RRF needs only ranks, which is convenient because BM25 scores and cosine similarities are on different scales. To measure retrieval, recall at k asks whether any relevant chunk made it into the top k, and mean reciprocal rank rewards putting it first. In the lab students implement RRF and compute both metrics.
+Reciprocal rank fusion combines ranked lists: each retriever contributes one divided by sixty plus the rank. RRF uses positions because BM25 and cosine scores have different scales. The archived chart counts questions with any hit from the target document. The current core instead measures the fraction of labelled relevant passages returned, averaged across questions. MRR rewards the first relevant passage's rank; missing relevant results contribute zero. These checks measure evidence selection, not answer correctness.
 
 Read reciprocal rank fusion (RRF) as: for each document, add one contribution from each ranking list. Each contribution is one divided by 60 plus that document's rank. The complete equation appears in Section 3 above.
 
-Read the lab's gold-document hit rate as: questions whose identified source appears in the top K results, divided by all questions. Read mean reciprocal rank (MRR) as: average one divided by the first relevant result's rank. A missing relevant result contributes zero. These checks do not establish exhaustive passage recall or answer support.
+Read the archived gold-document hit rate as: answerable questions whose identified source appears in the top K results, divided by all answerable questions. Read mean reciprocal rank (MRR) as: average one divided by the first relevant result's rank. A missing relevant result contributes zero. These checks do not establish exhaustive passage recall or answer support.
 
 - **RRF** adds 1/(c + rank) from each search list. A passage ranked highly in both lists gets a high combined score.
 
@@ -442,7 +442,7 @@ Read the lab's gold-document hit rate as: questions whose identified source appe
 
 ## Slide 18: Re-ranking: a second, more careful look
 
-Retrieval usually has two stages. The first is fast and aims for recall: embeddings or BM25 retrieve many candidates. The second, re-ranking, uses a cross-encoder that reads the question and each candidate passage together through a transformer, so it can judge relevance far more precisely, but it is too slow to run on the whole collection. Keeping only the top few re-ranked passages shortens prompts, reduces cost and gives the LLM fewer distracting passages. The lab uses a small open cross-encoder trained on the MS MARCO dataset.
+A two-stage design retrieves candidates first, then reorders them. A cross-encoder reads the question and each candidate passage together to score relevance. This adds work for every pair, so compare its evidence-finding benefit with its added time. Selecting fewer passages can shorten the answer prompt but may also discard needed evidence. The CPU core compares BM25, dense search and RRF without downloaded re-ranking. A small MS MARCO-trained cross-encoder is an optional stretch; the archived GPU chart preserves its original re-ranking experiment.
 
 - First retrieve a larger set quickly, for example 20–100 passages; this aims to avoid missing evidence.
 
@@ -454,21 +454,21 @@ Retrieval usually has two stages. The first is fast and aims for recall: embeddi
 
 ## Slide 19: Measured: retrieval quality on the handbook questions
 
-These are the lab's measured retrieval results on twelve answerable questions about the handbook. The values are in the bullet. The collection is tiny, so all methods reach the right document within the top three; the differences appear at rank one, which matters because the first passage has the most influence. Hybrid fusion and re-ranking typically lift recall at one and MRR. On real collections with thousands of similar documents, the gaps between methods are much larger, which is why students must measure on their own data.
+The chart preserves the archived GPU retrieval run on twelve answerable handbook questions. Its displayed values use target-document hits, rather than the current CPU core's passage labels. Read the measured values before comparing methods. A small collection can hide retrieval weaknesses, while overlapping passages can share a document without containing the needed fact. Larger collections need their own evaluation; neither a wider method gap nor a particular winner is guaranteed.
 
 - {{RETRIEVAL_NOTES}}
 
-- Small collection: real systems show larger gaps, so measure on your own data.
+- Small collection: measure on your own data; method gaps and winners can change.
 
 ## Slide 20: Measured: RAG vs. no retrieval
 
-The lab compares the same open model answering handbook questions without retrieval and with RAG. Without retrieval it can only guess, so accuracy is near zero, while RAG answers most questions correctly. The bullet reports the measured accuracy, whether numbers in answers are supported by the sources, whether the model cited the right document, and whether it abstained on the unanswerable question about the external examiner. One prompt-design lesson came from building this lab. With the answering rules only in the system message, the small model cited the right document for just one question in twelve and said I don't know more often. Moving the same rules to the end of the user message, after the sources and next to the question, fixed both. Small models attend most to nearby text, so put instructions where they will be read, and still check citations in code.
+This slide preserves an archived Qwen2.5-1.5B comparison on the same handbook questions, with and without retrieval. Its answer score checks reference patterns, rather than general semantic correctness. The bullet also reports whether answer numbers occur in the supplied sources, whether a citation names the expected document, and whether the model abstained on the missing external-examiner answer. These checks can disagree and do not establish complete answer support. The current CPU core uses a different generator; its separately labelled reference-pattern score and cited-segment support appear under Measured local CPU observations. Inspect each answer and its particular cited passage before claiming correctness. Prompt placement is another setting to test. Compare the same rules in the system message and near the question, using matched examples and generation settings. Record reference-pattern matches, cited-text support and appropriate abstention before choosing on development data. Effects depend on the model, template and task; still check citations in code.
 
 - {{RAG_NOTES}}
 
 - Number the sources. Ask for an answer supported by them, a citation [n], or "I do not know" when evidence is missing.
 
-- In this small-model run, placing rules after the sources helped; test placement rather than assuming it generalises.
+- Test rule placement on development examples; keep the final test separate and check citations in each full answer.
 
 ## Slide 21: Advanced RAG techniques
 
@@ -537,7 +537,7 @@ The ReAct pattern, from Yao and colleagues in 2022, interleaves reasoning and ac
 
 ## Slide 27: Function calling: tools are described, the model proposes, your code executes
 
-Function calling is supported by many endpoints and open-model chat templates; check the exact model and endpoint. You describe each tool with a name, a description and a JSON schema of its arguments; here the schema is generated from the Python type hints and docstring. The model replies either with text or with a structured call. Your code parses the call, checks it against an allowlist, requires argument validation and approval for consequential actions before executing; the lab illustrates an allowlist and simulated gate, then runs the permitted tool and appends the result as a tool message. This short loop illustrates tool selection and observations; production frameworks add their own state and execution controls.
+Function calling is supported by many endpoints and open-model chat templates; check the exact model and endpoint. You describe a tool's name, purpose and argument fields. Compatible templates can generate schemas from Python type hints and docstrings. The current CPU loop instead describes the tools and requested JSON format in its prompt; the shorter code illustration below shows the schema-based pattern. The model replies either with text or with a structured call. Your code parses the call, checks it against an allowlist, requires argument validation and approval for consequential actions before executing; the lab illustrates an allowlist and simulated gate, then runs the permitted tool and appends the result as a tool message. This short loop illustrates tool selection and observations; production frameworks add their own state and execution controls.
 
 ```python
 for step in range(MAX_STEPS):
@@ -559,7 +559,7 @@ for step in range(MAX_STEPS):
 
 ## Slide 28: Measured: a real agent trajectory from the lab
 
-This is the actual trajectory of the lab agent, an open 1.5-billion-parameter model, on the task "what is my final mark?". Walk through each step: which tool it called with which arguments, what came back, and the final answer. The correct answer is 68.8, from sixty percent of 72 plus forty percent of 64. Small models sometimes skip a tool or make arithmetic errors, which is why the lab checks the answer and why the calculator tool exists at all: arithmetic belongs in code.
+This is the archived trajectory of the lab agent, an open 1.5-billion-parameter model, on the task "what is my final mark?". Walk through each step: which tool it called with which arguments, what came back, and the final answer. The correct answer is 68.8, from sixty percent of 72 plus forty percent of 64. Small models sometimes skip a tool or make arithmetic errors, which is why the lab checks the answer and why the calculator tool exists at all: arithmetic belongs in code.
 
 - {{AGENT_NOTES}}
 

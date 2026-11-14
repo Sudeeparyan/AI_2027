@@ -90,7 +90,7 @@
       "check_question": "Which messages train?",
       "check_answer": "Only the training split; the test messages are used once, at the end.",
       "layout": "linear",
-      "notes": "In short: The lab separates the data, trains a small adapter on the training messages, and compares it fairly on unseen test messages.\n\nExplain: A split divides labelled messages into training, validation and test sets. Formatting turns each message and label into a chat pair. LoRA adds small trainable matrices beside frozen weights. Training lowers the loss on the answer tokens. The test uses the same parser as the prompting baselines.\n\nExample: The CPU core keeps five intents, 200 training messages and 50 test messages. Rank-8 LoRA trains about one million numbers for one epoch of 25 optimiser steps. The adapter's test accuracy then sits in one table beside zero-shot and few-shot prompting. A driving instructor and an examiner are the analogy; they should never be the same route.\n\nAsk: Why does the test branch skip the training blocks?\n\nAnswer: Test messages must never influence training, so they go straight to the final evaluation.\n\nWatch out: Comparing the adapter with a weak baseline makes any training look impressive."
+      "notes": "In short: The lab separates the data, trains a small adapter on the training messages, and compares it fairly on unseen test messages.\n\nExplain: A split divides labelled messages into training, validation and test sets. Formatting turns each message and label into a chat pair. LoRA adds small trainable matrices beside frozen weights. Training lowers the loss on the answer tokens. The test uses the same parser as the prompting baselines.\n\nExample: The CPU core keeps five intents, 200 training messages and 50 test messages. Rank-8 LoRA trains about one million numbers for one epoch of 25 optimiser steps. The adapter's test accuracy then sits in one table beside zero-shot and few-shot prompting. A driving instructor and an examiner are the analogy; they should never be the same route.\n\nAsk: Which messages are used to train the adapter?\n\nAnswer: Only training messages. Validation guides development; the final test is reserved for the end.\n\nWatch out: Comparing the adapter with a weak baseline makes any training look impressive."
     },
     {
       "id": "mechanism",
@@ -162,7 +162,7 @@
       "check_question": "Does W change?",
       "check_answer": "No. Gradients update only A and B; W keeps its pretrained values.",
       "layout": "linear",
-      "notes": "In short: LoRA trains two small matrices beside a frozen weight, using answer-token loss.\n\nExplain: The same input x reaches the frozen weight W and the adapter matrices A then B. A shrinks the input to r numbers; B expands it back. Scale the adapter output by alpha divided by rank, then add it to W x. Loss compares answer scores with the known label. Gradients update A and B only.\n\nExample: For an 8-input, 8-output projection, W has 64 entries. At rank 2, A is [2, 8] and B is [8, 2]: 32 trainable numbers. With alpha 4, the correction is multiplied by 2. B starts at zero, preserving the initial output. A clip-on lens is an analogy; adapters change learned numbers, not optics.\n\nAsk: Does the adapter receive W x or x?\n\nAnswer: The same x as W; the two contributions are added.\n\nWatch out: The dashed arrow repeats the next batch; W stays frozen."
+      "notes": "In short: LoRA trains two small matrices beside a frozen weight, using answer-token loss.\n\nExplain: The same input x reaches the frozen weight W and the adapter matrices A then B. A shrinks the input to r numbers; B expands it back. Scale the adapter output by alpha divided by rank, then add it to W x. Loss compares answer scores with the known label. Gradients update A and B only.\n\nExample: For an 8-input, 8-output projection, W has 64 entries. At rank 2, A is [2, 8] and B is [8, 2]: 32 trainable numbers. With alpha 4, the correction is multiplied by 2. B starts at zero, preserving the initial output. A clip-on lens is an analogy; adapters change learned numbers, not optics.\n\nAsk: Does the frozen weight W change during LoRA training?\n\nAnswer: No. Gradients update only A and B; W keeps its pretrained values.\n\nWatch out: The dashed arrow repeats the next batch; W stays frozen."
     },
     {
       "id": "lab",
@@ -261,7 +261,7 @@
         },
         {
           "title": "Validate",
-          "detail": "loss on new",
+          "detail": "held-out loss",
           "role": "metric",
           "code": "",
           "code_owner": false
@@ -287,11 +287,11 @@
         "Validation loss on separate messages shows whether learning transfers.",
         "The adapter is saved with its base-model identity and settings."
       ],
-      "explanation": "Training uses only the training split. Each message becomes a prompt and an answer, and the trainer updates the adapter to raise the probability of the answer tokens. Validation loss is measured on separate messages without updates; if it rises while training loss falls, the adapter is memorising. The saved adapter holds the small A and B matrices plus a configuration file naming the base model, so the same base must be loaded to use it.",
+      "explanation": "Training uses only the training split. Each message becomes a prompt and an answer, and the trainer updates the adapter to raise the probability of the answer tokens. Validation loss is measured on separate messages without updates; if it rises while training loss falls, the adapter may be overfitting. The saved adapter holds the small A and B matrices plus a configuration file naming the base model, so the same base must be loaded to use it.",
       "check_question": "Is the base saved?",
       "check_answer": "No. The adapter folder holds only the added weights and configuration; load the base model too.",
       "layout": "linear",
-      "notes": "In short: Training turns labelled messages into an adapter, checks it on validation messages, and saves only the small added weights.\n\nExplain: The training split holds labelled messages used for learning. Formatting turns each one into a prompt and an answer. The trainer updates the adapter to lower the answer-token loss. Validation loss uses separate messages without updates. Saving writes the adapter weights and a configuration file.\n\nExample: In the CPU core, 200 messages in batches of 8 give 25 optimiser steps. Validation loss on 30 other messages is checked twice during training. The saved rank-8 adapter holds about one million 32-bit numbers, so its file is roughly 4 MB. A recipe card is the analogy; it is small, but useless without the kitchen it was written for.\n\nAsk: What does a rising validation loss with a falling training loss suggest?\n\nAnswer: The adapter is memorising its training messages rather than learning what transfers.\n\nWatch out: Keep the base model's exact name with the adapter, or it cannot be used later."
+      "notes": "In short: Training turns labelled messages into an adapter, checks it on validation messages, and saves only the small added weights.\n\nExplain: The training split holds labelled messages used for learning. Formatting turns each one into a prompt and an answer. The trainer updates the adapter to lower the answer-token loss. Validation loss uses separate messages without updates. Saving writes the adapter weights and a configuration file.\n\nExample: In the CPU core, 200 messages in batches of 8 give 25 optimiser steps. Validation loss on 30 other messages is checked twice during training. The saved rank-8 adapter holds about one million 32-bit numbers, so its file is roughly 4 MB. A recipe card is the analogy; it is small, but useless without the kitchen it was written for.\n\nAsk: Does the saved adapter folder contain the full base model?\n\nAnswer: No. It contains the added weights and configuration; inference also needs the matching base model.\n\nWatch out: Keep the base model's exact name with the adapter, or it cannot be used later."
     },
     {
       "id": "inference",
@@ -351,7 +351,7 @@
       "check_question": "Same template?",
       "check_answer": "Yes. Use the training template, or the adapter meets an unfamiliar format.",
       "layout": "linear",
-      "notes": "In short: Inference with the adapter formats a new message exactly as in training, runs the adapted model, and parses one intent.\n\nExplain: Inference means using fixed weights to answer a new input. The template must match training, including the instruction and intent list. The adapter adds its learned corrections to the frozen base outputs. Greedy decoding gives a short, repeatable reply. The parser turns it into one intent.\n\nExample: \"My card still hasn't arrived\" becomes the zero-shot training prompt. The adapted model replies card_arrival, which the parser accepts. If the intent list in the prompt were reordered or missing, replies could drift. A key cut for one lock is the analogy; it works only with that lock.\n\nAsk: Do any weights change while the adapter answers?\n\nAnswer: No. Inference only reads the base weights and the adapter.\n\nWatch out: A new intent added later needs new training data; the adapter cannot route to labels it never learned."
+      "notes": "In short: Inference with the adapter formats a new message exactly as in training, runs the adapted model, and parses one intent.\n\nExplain: Inference means using fixed weights to answer a new input. The template must match training, including the instruction and intent list. The adapter adds its learned corrections to the frozen base outputs. Greedy decoding gives a short, repeatable reply. The parser turns it into one intent.\n\nExample: \"My card still hasn't arrived\" becomes the zero-shot training prompt. The adapted model replies card_arrival, which the parser accepts. If the intent list in the prompt were reordered or missing, replies could drift. A key cut for one lock is the analogy; it works only with that lock.\n\nAsk: Should inference use the same template as training?\n\nAnswer: Yes. The adapter learned with that format; a different template can change its behaviour.\n\nWatch out: Adding an intent changes the task. Test its examples and label format; further training may be needed."
     }
   ],
   "glossary": [
@@ -467,7 +467,7 @@
         "role": "output"
       }
     ],
-    "example": "Illustration: r(d + k) = 131,072.",
+    "example": "Rank 16 on 4096×4096: 16 × (4096 + 4096) = 131,072.",
     "question": "Lower loss proves better?",
     "answer": "No; test on held-out data.",
     "next": "Next: multimodal models.",

@@ -129,6 +129,33 @@ class SharedSetupTests(unittest.TestCase):
         self.assertIn("torch==2.11.0 torchvision==0.26.0 transformers==5.18.0 peft[extra]==0.21.1", text)
         self.assertIn("google-genai==2.29.0 ipywidgets==7.7.1", text)
 
+    def test_first_install_supplies_shared_setup_imports_without_model_packages(self):
+        from build_week import install_cell
+        text = install_cell("%pip install -q fastapi httpx uvicorn", first=True)
+        self.assertIn("torch==2.11.0 numpy", text)
+        self.assertIn("google-genai==2.29.0", text)
+
+    def test_all_lab_install_dependencies_are_pinned(self):
+        from build_week import CUR, LAB_PINS, install_cell
+        import re
+        for path in sorted((CUR / "labs").glob("week_*_lab.py")):
+            for line in path.read_text(encoding="utf-8").splitlines():
+                if not line.startswith("%pip install "):
+                    continue
+                with self.subTest(week=path.name):
+                    pinned = install_cell(line, first=True)
+                    for name in re.findall(r"(?<!\S)([A-Za-z][A-Za-z0-9_.-]*)(?:\[[^\]]+\])?(?=\s|$)", line)[2:]:
+                        normalised = name.lower().replace("_", "-").replace(".", "-")
+                        self.assertIn(normalised, LAB_PINS)
+                        self.assertIn(name + "==" + LAB_PINS[normalised], pinned)
+                    self.assertIn("numpy==" + LAB_PINS["numpy"], pinned)
+
+    def test_diffusion_optional_image_training_dependency_is_installed(self):
+        from build_week import CUR, install_cell
+        source = (CUR / "labs" / "week_04_lab.py").read_text(encoding="utf-8")
+        install = next(line for line in source.splitlines() if line.startswith("%pip install "))
+        self.assertIn("torchvision==0.26.0", install_cell(install, first=True))
+
     def test_install_pins_preserve_flags_urls_and_comments(self):
         from build_week import install_cell
         original = '%pip install -q transformers>=4.5,<5 --index-url https://example.org/torch/simple --no-binary torch # peft'
@@ -182,6 +209,46 @@ class SharedSetupTests(unittest.TestCase):
         self.dotenv.assert_not_called()
         for file in Path(self.temp.name).glob("*.json"):
             self.assertNotIn("test-secret-never-print", file.read_text(encoding="utf-8"))
+
+    def test_openai_short_classification_caps_meet_endpoint_minimum(self):
+        self.enable_openai()
+        for requested in (8, 12):
+            with self.subTest(requested=requested):
+                self.assertEqual(self.ns["ask_model"]("Invent a label.", max_output_tokens=requested),
+                                 "OpenAI synthetic answer")
+        self.openai_generate.assert_called_once_with(model="gpt-4.1-mini", input="Invent a label.",
+            temperature=0.2, max_output_tokens=16, store=False)
+
+    def test_setup_rerun_preserves_exhausted_budget_across_provider_change(self):
+        tree = ast.parse((ROOT / "curriculum/labs/_setup.py").read_text(encoding="utf-8"))
+        counters = [node for node in tree.body if isinstance(node, ast.Assign) and any(
+            isinstance(target, ast.Name) and target.id in {"_gemini_calls", "_openai_calls"}
+            for target in node.targets)]
+        self.ns.update(_gemini_calls=39, _openai_calls=1)
+        exec(compile(ast.Module(body=counters, type_ignores=[]), "setup-rerun", "exec"), self.ns)
+        self.assertEqual((self.ns["_gemini_calls"], self.ns["_openai_calls"]), (39, 1))
+        self.enable_openai()
+        self.assertIsNone(self.ask_selected())
+        self.openai_generate.assert_not_called()
+        self.ns.update(USE_OPENAI=False, USE_GEMINI=True,
+                       os=SimpleNamespace(environ={"GEMINI_API_KEY": "test-secret-never-print"}))
+        self.assertIsNone(self.ask_selected())
+        self.generate.assert_not_called()
+
+    def test_local_file_must_be_explicitly_selected(self):
+        self.ns.update(USE_OPENAI=True, LOCAL_ENV_FILE=None, os=SimpleNamespace(environ={}))
+        self.dotenv.return_value = {"OPENAI_API_KEY": "test-secret-never-print"}
+        self.assertIsNone(self.ask_selected())
+        self.dotenv.assert_not_called()
+        self.openai_sdk.assert_not_called()
+
+    def test_direct_provider_helpers_reject_conflicting_switches(self):
+        self.ns.update(USE_GEMINI=True, USE_OPENAI=True, IN_COLAB=True)
+        self.assertIsNone(self.ns["ask_gemini"]("Invent a label."))
+        self.assertIsNone(self.ns["ask_openai"]("Invent a label."))
+        self.secret.assert_not_called()
+        self.sdk.assert_not_called()
+        self.openai_sdk.assert_not_called()
 
     def test_openai_429_retries_are_bounded_and_private(self):
         self.enable_openai()

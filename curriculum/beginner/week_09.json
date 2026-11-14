@@ -277,7 +277,7 @@
         "scores",
         "loss"
       ],
-      "feedback": "Gradients",
+      "feedback": "Weights",
       "feedback_from": 4,
       "feedback_to": 1,
       "trace": [

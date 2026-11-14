@@ -216,8 +216,8 @@ slides:
   eq: p(w_t \mid w_{t-n+1}, \ldots, w_{t-1}) \approx \frac{\mathrm{count}(w_{t-n+1}, \ldots, w_{t-1}, w_t)}{\mathrm{count}(w_{t-n+1},
     \ldots, w_{t-1})}
   read_as:
-  - 'Trigram: two preceding words.'
   - 'Illustration: 6 continuations / 10 contexts = 0.6.'
+  - 'Trigram: two preceding words.'
   - Unseen contexts need smoothing.
   terms:
   - - p
@@ -248,6 +248,7 @@ slides:
 
 
     Watch out: Here n counts words including the predicted word, so a trigram uses two preceding words.'
+  example_first: true
 - type: table
   title: Each generation fixed a limitation of the last
   header:
@@ -364,8 +365,8 @@ slides:
   title: How much compute does pre-training need?
   eq: C \approx 6\, N\, D
   read_as:
-  - Rough dense training estimate.
   - 'Illustration: 6 × 7 B × 2 T = 8.4 × 10²² operations.'
+  - Rough dense training estimate.
   terms:
   - - C
     - operations
@@ -394,6 +395,7 @@ slides:
 
 
     Watch out: Do not present a hypothetical compute-to-time conversion as an observed runtime or hardware benchmark.'
+  example_first: true
 - type: figure
   title: 'Scaling laws: loss is predictable from size and data'
   figure: scaling

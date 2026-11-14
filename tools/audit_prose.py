@@ -77,6 +77,9 @@ def blank(match):
 def clean(text, keep_tags=False):
     """Blank out code, maths, URLs and link targets (and <tags> unless kept), keeping offsets and line numbers."""
     text = re.sub(r"(```|~~~).*?\1", blank, text, flags=re.S)
+    # A question followed by the next blockquote line is ordinary Markdown,
+    # not a damaged greater-than symbol. Preserve line numbers and offsets.
+    text = re.sub(r"(?m)^[ \t]*>[ \t]?", blank, text)
     tags = "" if keep_tags else r"|<[^>\n]+>"
     return re.sub(r"\$\$.+?\$\$|\$[^$\n]+\$|`[^`\n]*`|https?://\S+|\]\([^)]*\)" + tags, blank, text, flags=re.S)
 
@@ -118,6 +121,11 @@ def sources():
     for p in sorted((ROOT / "beginner").glob("week_*.json")):
         for key, value in walk(json.loads(p.read_text(encoding="utf-8"))):
             yield f"{p.relative_to(ROOT.parent).as_posix()} [{key}]", value, False
+    glossary = ROOT / "glossary.json"
+    for item in json.loads(glossary.read_text(encoding="utf-8"))["terms"]:
+        for key in ("term", "meaning", "short_meaning"):
+            if item.get(key):
+                yield f"curriculum/glossary.json [{item['term']} / {key}]", item[key], False
 
 
 def problems():

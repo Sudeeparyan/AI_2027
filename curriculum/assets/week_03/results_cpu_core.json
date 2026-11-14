@@ -1,0 +1,72 @@
+{
+  "dcgan": {
+    "epochs": 4,
+    "final_loss_D": 0.9084252715110779,
+    "final_loss_G": 1.4178332090377808,
+    "final_D_real": 0.6612191200256348,
+    "final_D_fake": 0.2505444288253784
+  },
+  "ring": {
+    "vanilla_final_modes": 8,
+    "wgan_final_modes": 0
+  },
+  "run": {
+    "seed": 42,
+    "device": "cpu",
+    "smoke": false,
+    "stretch": false,
+    "gan_images": 25600,
+    "classifier_images": 8000,
+    "evaluation_images": 512,
+    "toy_steps": 1000,
+    "elapsed_seconds": 260.54026670003077
+  },
+  "evaluation": {
+    "classifier_accuracy": 0.859375,
+    "predicted_class_counts": [
+      72,
+      37,
+      52,
+      56,
+      64,
+      19,
+      51,
+      35,
+      48,
+      78
+    ]
+  },
+  "runtime": {
+    "cpu_threads": 4,
+    "device": "cpu",
+    "environment": "local",
+    "logical_cpus": 12,
+    "packages": {
+      "diffusers": "0.40.0",
+      "google-genai": "2.29.0",
+      "ipywidgets": "7.7.1",
+      "openai": "3.28.0",
+      "peft": "0.21.1",
+      "python-dotenv": "1.2.4",
+      "sentence-transformers": "5.7.0",
+      "torch": "2.11.0+cpu",
+      "transformers": "5.18.0",
+      "trl": "1.15.0"
+    },
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 158 Stepping 10, GenuineIntel",
+    "python": "3.12.10",
+    "seed": 42
+  },
+  "evidence": {
+    "started_at_utc": "2026-10-13T08:05:02.961250+00:00",
+    "seconds": 267.1,
+    "notebook_sha256": "8523be6a19bf22500da7337541f16ab216b044de59af7e56cfc047f99ae1ce98",
+    "executed_notebook_sha256": "a3749221a8ff688e5147ffee9ba0c2b8555d3eb435a762b46bd04ff608496abe",
+    "runner_python": "C:\\Users\\sudee\\Downloads\\Generative_AI_2027_Teaching_Pack\\AI2027_Project\\build\\qa_pinned_env\\Scripts\\python.exe",
+    "kernel_name": "qa-pinned-cpu",
+    "run_record": "build/retry_20261013/full_week_03.json",
+    "result_export": "build/retry_20261013/results/week_03/results_cpu_core.json",
+    "result_export_sha256": "ef0a8ed2d680853b3586c871d30c02b13ddf78f76cd38cf7abccbd1801215603"
+  }
+}

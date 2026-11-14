@@ -38,11 +38,11 @@ const CONTENT_TOP = 1.62, CONTENT_BOTTOM = 6.9;
 const CW = W - 2 * MX;
 
 const MIMLO_SHORT = {
-  1: "Explain core concepts, maths and model families",
-  2: "Analyse and apply multimodal generative AI",
-  3: "Design, implement and fine-tune models",
-  4: "Critically evaluate outputs: metrics, humans, ethics",
-  5: "Deploy models; build RAG and agentic systems",
+  1: "Explain models and maths",
+  2: "Apply multimodal models",
+  3: "Implement and fine-tune models",
+  4: "Evaluate outputs and ethics",
+  5: "Deploy retrieval and agents",
 };
 
 // ---------- Helpers ----------
@@ -377,7 +377,6 @@ L.agenda = async (slide, s) => {
     addText(slide, runs(t, { fontSize: 19, bold: true, color: C.ink }), { x: x + 0.7, y, w: colW - 2.0, h: rowH - 0.12, valign: "middle" });
     if (it.minutes) addText(slide, `${it.minutes} min`, { x: x + colW - 1.3, y, w: 1.15, h: rowH - 0.12, fontSize: 14, color: C.primary, bold: true, align: "right", valign: "middle" });
   });
-  if (s.icon && cols === 1) await iconCircle(slide, s.icon, 10.7, 2.6, 1.9, C.tint, C.primary);
 };
 
 L.section = async (slide, s) => {
@@ -386,7 +385,6 @@ L.section = async (slide, s) => {
   const pt = fitSize([s.title], 11.5, 1.6, 42, 30, { bold: true });
   addText(slide, s.title, { x: 0.8, y: 3.35, w: 11.5, h: 1.6, fontSize: pt, bold: true, color: C.white, margin: 0 });
   if (s.question) addText(slide, s.question, { x: 0.8, y: 5.05, w: 11.5, h: 1.2, fontSize: 22, italic: true, color: C.lav, margin: 0 });
-  if (s.icon) await iconCircle(slide, s.icon, 10.6, 1.2, 1.7, C.primary, C.white);
 };
 
 L.bullets = async (slide, s, spec) => {
@@ -430,21 +428,19 @@ L.cards = async (slide, s) => {
   const gap = 0.3;
   const cw = (CW - gap * (cols - 1)) / cols;
   const ch = (bottom - CONTENT_TOP - gap * (rowsN - 1)) / rowsN;
-  const horizontal = rowsN > 1; // compact: icon left of heading
+  const horizontal = rowsN > 1;
   const pt = Math.min(...cards.map((c) => fitSize([c.text], cw - 0.4,
-    horizontal ? ch - 0.95 : ch - (c.icon ? 1.75 : .95), 22, 14)));
+    ch - 0.95, 22, 14)));
   for (let i = 0; i < n; i++) {
     const c = cards[i];
     const x = MX + (i % cols) * (cw + gap), y = CONTENT_TOP + Math.floor(i / cols) * (ch + gap);
     slide.addShape("roundRect", { x, y, w: cw, h: ch, fill: { color: i % 2 ? C.tint2 : C.tint }, line: { color: C.tint }, rectRadius: 0.12 });
     if (horizontal) {
-      if (c.icon) await iconCircle(slide, c.icon, x + 0.2, y + 0.2, 0.6);
-      const inset = c.icon ? .9 : .2;
+      const inset = .2;
       addText(slide, runs(c.head, { fontSize: 21, bold: true, color: C.ink }), { x: x + inset, y: y + 0.18, w: cw - inset - .15, h: 0.65, valign: "middle" });
       addText(slide, runs(c.text, { fontSize: pt }), { x: x + 0.2, y: y + 0.9, w: cw - 0.4, h: ch - 0.95 });
     } else {
-      if (c.icon) await iconCircle(slide, c.icon, x + 0.25, y + 0.25, 0.75);
-      const headY = c.icon ? 1.1 : .3, textY = c.icon ? 1.7 : .9;
+      const headY = .3, textY = .9;
       addText(slide, runs(c.head, { fontSize: 21, bold: true, color: C.ink }), { x: x + 0.2, y: y + headY, w: cw - 0.4, h: 0.6, valign: "middle" });
       addText(slide, runs(c.text, { fontSize: pt }), { x: x + 0.2, y: y + textY, w: cw - 0.4, h: ch - textY - .05 });
     }
@@ -467,8 +463,7 @@ L.compare = async (slide, s) => {
     const c = cols[i];
     const x = MX + i * (cw + gap);
     slide.addShape("roundRect", { x, y: CONTENT_TOP, w: cw, h: 0.62, fill: { color: fills[i % 3] }, line: { color: fills[i % 3] }, rectRadius: 0.1 });
-    if (c.icon) slide.addImage({ data: await icon(c.icon, C.white), x: x + 0.18, y: CONTENT_TOP + 0.12, w: 0.38, h: 0.38 });
-    addText(slide, runs(c.head, { fontSize: 18, bold: true, color: C.white }), { x: x + (c.icon ? 0.65 : 0.2), y: CONTENT_TOP, w: cw - (c.icon ? 0.8 : 0.4), h: 0.62, valign: "middle" });
+    addText(slide, runs(c.head, { fontSize: 18, bold: true, color: C.white }), { x: x + 0.2, y: CONTENT_TOP, w: cw - 0.4, h: 0.62, valign: "middle" });
     slide.addShape("roundRect", { x, y: CONTENT_TOP + 0.75, w: cw, h: bodyH, fill: { color: tints[i % 3] }, line: { color: tints[i % 3] }, rectRadius: 0.1 });
     addText(slide, bulletParas(c.points, pt).arr, { x: x + 0.12, y: CONTENT_TOP + 0.85, w: cw - 0.24, h: bodyH - 0.15 });
   }
@@ -615,7 +610,9 @@ L.equation = async (slide, s, spec) => {
   title(slide, s.title);
   const eqs = s.eq_assets || [];
   const panelH = s.panel_h || Math.min(2.4, 0.95 * eqs.length + 0.5);
-  slide.addShape("roundRect", { x: MX, y: CONTENT_TOP, w: CW, h: panelH, fill: { color: C.tint }, line: { color: C.tint }, rectRadius: 0.12 });
+  const contentBottom = s.callout ? CONTENT_BOTTOM - 1.05 : CONTENT_BOTTOM;
+  const panelTop = s.example_first ? contentBottom - panelH : CONTENT_TOP;
+  slide.addShape("roundRect", { x: MX, y: panelTop, w: CW, h: panelH, fill: { color: C.tint }, line: { color: C.tint }, rectRadius: 0.12 });
   // Equations are rendered at a fixed point size (300 dpi, 1 in = 300 px). Rows get heights in proportion to each
   // equation's natural height, so a tall line (fractions, sums) is not squeezed and all lines share one type size
   // unless a line is too wide for the panel.
@@ -625,7 +622,7 @@ L.equation = async (slide, s, spec) => {
   const kH = Math.min(1.0, avail / Math.max(0.01, natHs.reduce((x, y) => x + y, 0)));
   const used = natHs.reduce((x, y) => x + y * kH, 0) + gap * Math.max(0, eqs.length - 1);
   const pad = Math.max(0, panelH - 0.3 - used) / (eqs.length + 1);  // spread spare height evenly around the lines
-  let y = CONTENT_TOP + 0.15 + pad;
+  let y = panelTop + 0.15 + pad;
   eqs.forEach((a) => {
     const natW = a.w / 300, natH = a.h / 300;
     const rowH = natH * kH;
@@ -634,12 +631,12 @@ L.equation = async (slide, s, spec) => {
     slide.addImage({ path: a.path, x: MX + (CW - iw) / 2, y: y + (rowH - ih) / 2, w: iw, h: ih });
     y += rowH + gap + pad;
   });
-  const top = CONTENT_TOP + panelH + 0.25;
-  const bottom = s.callout ? CONTENT_BOTTOM - 1.05 : CONTENT_BOTTOM;
+  const top = s.example_first ? CONTENT_TOP : CONTENT_TOP + panelH + 0.25;
+  const bottom = s.example_first ? panelTop - 0.25 : contentBottom;
   const hasTerms = s.terms && s.terms.length;
   const lw = hasTerms ? 6.6 : CW;
   if (s.read_as) {
-    addText(slide, "Read it as", { x: MX, y: top, w: lw, h: 0.4, fontSize: 15, bold: true, color: C.primary });
+    addText(slide, s.example_first ? "Worked example" : "Read it as", { x: MX, y: top, w: lw, h: 0.4, fontSize: 15, bold: true, color: C.primary });
     const readItems = Array.isArray(s.read_as) ? s.read_as : [s.read_as];
     const { paras } = bulletParas(readItems, 17);
     const pt = fitSize(paras, lw, bottom - top - 0.45, 20, 12, { paraGap: 8, indent: 0.3 });
@@ -726,14 +723,13 @@ L.quiz = async (slide, s) => {
     numberCircle(slide, "ABCDEF"[i], x + 0.18, y + (oh - 0.5) / 2, 0.5);
     addText(slide, runs(o, { fontSize: pt }), { x: x + 0.85, y, w: ow - 1.0, h: oh, valign: "middle" });
   });
-  addText(slide, s.prompt || "Vote, then convince your neighbour (1 minute).", { x: MX, y: CONTENT_BOTTOM - 0.4, w: CW, h: 0.4, fontSize: 14, italic: true, color: C.muted });
+  addText(slide, s.prompt || "Vote, then explain your choice.", { x: MX, y: CONTENT_BOTTOM - 0.4, w: CW, h: 0.4, fontSize: 14, italic: true, color: C.muted });
 };
 
 L.callout = async (slide, s) => {
   slide.background = { color: C.white };
   slide.addShape("roundRect", { x: 0.9, y: 1.1, w: W - 1.8, h: 5.3, fill: { color: C.tint }, line: { color: C.tint }, rectRadius: 0.2 });
-  await iconCircle(slide, s.icon || "fa:FaKey", 1.4, 1.6, 0.9, C.accent);
-  addText(slide, (s.label || "Key idea").toUpperCase(), { x: 2.5, y: 1.75, w: 8, h: 0.6, fontSize: 16, bold: true, color: C.accent, charSpacing: 2, valign: "middle" });
+  addText(slide, (s.label || "Key idea").toUpperCase(), { x: 1.5, y: 1.75, w: 9, h: 0.6, fontSize: 16, bold: true, color: C.accent, charSpacing: 2, valign: "middle" });
   const pt = fitSize([s.statement], W - 3.2, 2.6, 34, 22, { bold: true });
   addText(slide, runs(s.statement, { fontSize: pt, bold: true, color: C.ink }), { x: 1.5, y: 2.6, w: W - 3.0, h: 2.6, valign: "middle" });
   if (s.sub) addText(slide, runs(s.sub, { fontSize: 18, color: C.text }), { x: 1.5, y: 5.2, w: W - 3.0, h: 1.0, valign: "top" });
@@ -773,8 +769,7 @@ L.lab = async (slide, s) => {
   slide.addShape("roundRect", { x: cx, y: CONTENT_TOP, w: cw, h: CONTENT_BOTTOM - CONTENT_TOP, fill: { color: C.tealTint }, line: { color: C.tealTint }, rectRadius: 0.12 });
   const facts = [
     ["fa:FaLaptopCode", "Runtime", s.runtime || "Google Colab (free T4 GPU) or local Jupyter"],
-    ["fa:FaClock", "Time", s.time || "2-hour lab"],
-    ["fa:FaClipboardCheck", "Hand in", s.deliverable || "Completed notebook with answers"],
+    ["fa:FaClipboardCheck", "Submit", s.deliverable || "Completed notebook with answers"],
   ];
   let y = CONTENT_TOP + 0.2;
   const fh = (CONTENT_BOTTOM - CONTENT_TOP - 0.3) / facts.length;

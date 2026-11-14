@@ -16,6 +16,32 @@ from output_files import atomic_text
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def weekly_glossary(n: int) -> list[dict]:
+    """Resolve the complete weekly reference glossary from one canonical source."""
+    source = json.loads((ROOT / "curriculum" / "glossary.json").read_text(encoding="utf-8"))
+    terms = {item["term"].casefold(): item for item in source["terms"]}
+    keys = source["week_glossary"][f"{n:02d}"]
+    if not keys or len(keys) != len(set(key.casefold() for key in keys)):
+        raise ValueError(f"Week {n}: canonical glossary keys must be nonempty and unique")
+    return [terms[key.casefold()] for key in keys]
+
+
+def glossary_section(n: int) -> str:
+    def escape(value):
+        return value.replace("|", "\\|").replace("\n", " ")
+    rows = ["# Glossary", "", "| Term | Meaning |", "|---|---|"]
+    rows += [f"| {escape(item['term'])} | {escape(item['meaning'])} |" for item in weekly_glossary(n)]
+    return "\n".join(rows) + "\n\n"
+
+
+def canonical_glossary(md: str, n: int) -> str:
+    pattern = r"(?ms)^# Glossary\s*\n.*?(?=^# [^#]|\Z)"
+    result, count = re.subn(pattern, lambda _: glossary_section(n), md)
+    if count != 1:
+        raise ValueError(f"Week {n}: exactly one reference glossary section is required")
+    return result
+
+
 def load(n: int) -> dict | None:
     path = ROOT / "curriculum" / "beginner" / f"week_{n:02d}.json"
     if not path.exists():
@@ -226,6 +252,7 @@ def enrich(wk: dict) -> dict:
     pos = md.find("<!-- pagebreak -->")
     if pos >= 0:
         md = md[:pos] + plan_note + md[pos:]
+    md = canonical_glossary(md, wk["week"])
     wk["notes_md"] = md.replace("# Lecture notes", notes_section(data) + "# Lecture notes", 1)
     return wk
 

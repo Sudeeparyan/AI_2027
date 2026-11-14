@@ -239,3 +239,89 @@ for package in (
 - PASS observed: 22 network-free setup regressions cover selection, conflicting switches, Secrets,
   private `.env` access, shared attempt ceiling, cache, retries and local fallback. Live API access,
   account quotas and a timed Colab run remain unverified. No private-key API call was needed.
+
+
+### Vendor and clean-install verification addendum (checked 2026-10-12)
+
+Publisher release pages and their version-specific PyPI JSON metadata were rechecked on
+**2026-10-12**. All 14 exact direct pins in `tools/build_week.py:LAB_PINS` have published releases;
+this is a version-existence check, not a claim that each is the newest release.
+
+| Notebook package | Verified exact pin and publisher release |
+|---|---|
+| torch | [2.11.0](https://pypi.org/project/torch/2.11.0/) |
+| torchvision | [0.26.0](https://pypi.org/project/torchvision/0.26.0/) |
+| transformers | [5.18.0](https://pypi.org/project/transformers/5.18.0/) |
+| diffusers | [0.40.0](https://pypi.org/project/diffusers/0.40.0/) |
+| peft | [0.21.1](https://pypi.org/project/peft/0.21.1/) |
+| sentence-transformers | [5.7.0](https://pypi.org/project/sentence-transformers/5.7.0/) |
+| ipywidgets | [7.7.1](https://pypi.org/project/ipywidgets/7.7.1/) |
+| google-genai | [2.29.0](https://pypi.org/project/google-genai/2.29.0/) |
+| trl | [1.15.0](https://pypi.org/project/trl/1.15.0/) |
+| openai | [3.28.0](https://pypi.org/project/openai/3.28.0/) |
+| python-dotenv | [1.2.4](https://pypi.org/project/python-dotenv/1.2.4/) |
+
+The official CPU wheel indexes publish the selected Windows CPython 3.12 builds:
+[torch 2.11.0+cpu](https://download.pytorch.org/whl/cpu/torch/) and
+[torchvision 0.26.0+cpu](https://download.pytorch.org/whl/cpu/torchvision/).
+Those exact build tags appear in the successful local torch installation log.
+
+The deployment dependencies below are also exact direct pins, matching the versions
+resolved in the clean installation. The coordinator added them to `LAB_PINS`; the final
+rebuild applies these deployment pins to generated installation cells.
+
+| Deployment package | Exact pin, observed clean-install version and publisher release |
+|---|---|
+| FastAPI | [0.143.0](https://pypi.org/project/fastapi/0.143.0/) |
+| httpx | [0.28.1](https://pypi.org/project/httpx/0.28.1/) |
+| uvicorn | [0.54.0](https://pypi.org/project/uvicorn/0.54.0/) |
+
+**Local evidence:** the coordinator observed clean pip installation **PASS** and
+`pip check` **PASS** in `build/qa_pinned_env` (Windows, CPython 3.12.10).
+The [pip installation report](../../build/qa_pinned_install_core_report.json) records
+resolved versions, download origins and hashes; installation logs are
+`build/qa_pinned_install_torch.log` and `build/qa_pinned_install_core.log`.
+Full CPU core reruns were still in progress when this addendum was written; installation
+and dependency checks alone do not establish that every notebook executes successfully.
+
+The dated [Gemini model catalogue](https://ai.google.dev/gemini-api/docs/models) and
+[standard pricing](https://ai.google.dev/gemini-api/docs/pricing) still support the four
+stable IDs recorded above. The [GPT-4.1 mini page](https://developers.openai.com/api/docs/models/gpt-4.1-mini)
+lists Responses support; the [Responses creation reference](https://developers.openai.com/api/reference/python/resources/responses/methods/create)
+specifies a minimum `max_output_tokens` of 16. These are documentation checks, not live calls.
+
+**Still unverified:** live Colab installation, allocated package inventory and timing;
+live provider access, quotas and optional routes; browser widget rendering; and the
+EEA/Swiss/UK Gemini client-distribution condition described above. No API key was read,
+no hosted request was made, and no billing was enabled for this verification.
+
+### Student installation retry — checked 13 October 2026
+
+Ten existing direct dependencies were still floating in student installation cells. Their exact versions already exist in the tested clean CPU environment. Each version-specific publisher PyPI release page was checked on 13 October; the builder now freezes these versions alongside the previous fourteen pins. Week 4 also installs torchvision for its optional MNIST section.
+
+| Package | Tested exact version and checked release page |
+|---|---|
+| accelerate | [1.15.0](https://pypi.org/project/accelerate/1.15.0/) |
+| datasets | [5.1.0](https://pypi.org/project/datasets/5.1.0/) |
+| matplotlib | [3.11.2](https://pypi.org/project/matplotlib/3.11.2/) |
+| numpy | [2.5.2](https://pypi.org/project/numpy/2.5.2/) |
+| pandas | [3.0.6](https://pypi.org/project/pandas/3.0.6/) |
+| pydantic | [2.14.1](https://pypi.org/project/pydantic/2.14.1/) |
+| rank-bm25 | [0.2.2](https://pypi.org/project/rank-bm25/0.2.2/) |
+| scikit-learn | [1.9.1](https://pypi.org/project/scikit-learn/1.9.1/) |
+| scipy | [1.18.1](https://pypi.org/project/scipy/1.18.1/) |
+| soundfile | [0.14.0](https://pypi.org/project/soundfile/0.14.0/) |
+
+This freezes the tested direct packages; it does not freeze every transitive dependency or establish a timed Colab installation. Local dependency and notebook retry evidence is recorded separately in build/retry_20261013/.
+
+
+### Runtime and widget retry observations — 13 October 2026
+
+The pinned [NumPy 2.5.2 metadata](https://pypi.org/pypi/numpy/2.5.2/json) and [SciPy 1.18.1 metadata](https://pypi.org/pypi/scipy/1.18.1/json) require Python 3.12 or newer, also confirmed from the installed distributions. The notebook banner now specifies Python 3.12+. The local tested interpreter remains 3.12.10.
+
+Native browser access opened the uploaded Week 1 solution notebook in Colab. Its visible release notes mention Python 3.13.5; this was not an allocated-runtime inventory. No Colab runtime was connected or timed because browser control was interrupted. Actual Week 1 widget code was executed locally in VS Code with the tested NumPy, matplotlib and ipywidgets versions, but its renderer requested third-party widget support files. No download-permission setting was changed. Students can use the numeric settings when a slider cannot display; all core paths remain available. UI observations are retained in build/retry_20261013/ui_observations.json.
+
+
+### VS Code widget pilot follow-up — 13 October 2026
+
+The current Week 1 temperature widget was rerun in VS Code with Python 3.12.10 and ipywidgets 7.7.1. Its visible control and chart updated at T=1.0, 1.7 and 0.4. Four exact distributed code cells used a five-name invented fixture. No permission setting was changed by the agent. This closes the local Week 1 interaction check; other frontend checks and timed Colab remain unverified. Evidence: build/retry_20261013/widget_ui_verified.json.

@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import concurrent.futures as cf
 import datetime as dt
+import html
 import json
 import re
 import sys
@@ -24,6 +25,23 @@ ROOT = Path(__file__).resolve().parents[1]
 UA = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) teaching-pack-link-check/1.0"}
 TRANSIENT_STATUSES = {500, 502, 503, 504}
 TRANSPORT_ERRORS = (requests.ConnectionError, requests.Timeout, requests.exceptions.ChunkedEncodingError)
+
+
+def is_html_robot_challenge(response: requests.Response) -> bool:
+    """Recognise explicit challenge text, not generic JavaScript requirements."""
+    content_type = response.headers.get("Content-Type", "").split(";", 1)[0].strip().lower()
+    prefix = response.content[:65536]
+    looks_html = prefix.lstrip().lower().startswith((b"<!doctype html", b"<html"))
+    if content_type not in {"text/html", "application/xhtml+xml"} and not looks_html:
+        return False
+    page = prefix.decode(response.encoding or "utf-8", errors="replace")
+    page = re.sub(r"<(?:script|style)\b[^>]*>.*?</(?:script|style)\s*>|<!--.*?-->", " ", page,
+                  flags=re.IGNORECASE | re.DOTALL)
+    visible = html.unescape(re.sub(r"<[^>]*>", " ", page)).replace("\u2019", "'")
+    visible = re.sub(r"\s+", " ", visible).lower()
+    requires_js = re.search(r"\b(?:javascript is disabled|requires javascript|enable javascript)\b", visible)
+    verifies_person = re.search(r"\bverify (?:that )?(?:you're|you are) (?:not a robot|a human|human)\b", visible)
+    return bool(requires_js and verifies_person)
 
 
 def get_with_retry(url: str, *, timeout: int) -> tuple[requests.Response | None, list[dict]]:
@@ -60,10 +78,24 @@ def check(src: dict) -> dict:
             out["error"] = attempts[-1]["error"]
             return out
         out["status"] = r.status_code
+        out["final_url"] = r.url
         # A blocked request is unverified, not evidence of a reachable page.
         if r.status_code in (403, 429):
             out["blocked"] = True
             out["note"] = "blocked automated check; open manually"
+            return out
+        # AWS documents this exact pair as a challenge that blocks the destination.
+        # https://docs.aws.amazon.com/waf/latest/APIReference/API_ChallengeAction.html
+        if r.status_code == 202 and r.headers.get("x-amzn-waf-action", "").lower() == "challenge":
+            out["blocked"] = True
+            out["blocked_reason"] = "aws_waf_challenge"
+            out["note"] = "AWS WAF JavaScript challenge; page contents unverified; open manually"
+            return out
+        if r.status_code < 400 and is_html_robot_challenge(r):
+            out["blocked"] = True
+            out["blocked_reason"] = "html_robot_challenge"
+            out["note"] = "HTML JavaScript/robot challenge; page contents unverified; open manually"
+            return out
         if is_video:
             if r.ok:
                 data = r.json()
@@ -71,7 +103,6 @@ def check(src: dict) -> dict:
                 out["author"] = data.get("author_name")
                 out["ok"] = True
             return out
-        out["final_url"] = r.url
         out["ok"] = r.status_code < 400
     except Exception as e:  # noqa: BLE001
         out["error"] = str(e)[:200]

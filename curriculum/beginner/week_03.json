@@ -178,7 +178,7 @@
       ],
       "explanation": "The important distinction is between a tensor's values and its gradient connection. The call fake.detach() supplies the same image values to D while cutting the route back to G for that operation. This lets the discriminator learn from generated images without updating the generator from the discriminator's loss. The original fake tensor remains connected to G. After opt_D changes D's weights, g_loss_fn sends that original tensor through D and asks for the real label. This non-saturating generator objective rewards fakes that D accepts. Backpropagation follows the chain from the loss through D's operations, through the fake image, and into G's weights. The optimiser step then changes only the parameters registered with opt_G. The labels therefore serve different purposes in the two updates: fake means 0 when training D, but G's desired target is 1. Repeat this sequence for each training batch.",
       "check_question": "Why keep fake linked?",
-      "check_answer": "It would cut the gradient path from the generator loss back to G's weights.",
+      "check_answer": "To let gradients from the generator loss reach G's weights. Detaching the fake image would cut that path.",
       "layout": "linear",
       "feedback_from": 4,
       "branches": [
@@ -246,7 +246,7 @@
       "trace": [
         "Reuse z_fixed across epoch snapshots so image changes reflect training rather than new noise inputs.",
         "Compare lerp and slerp images and midpoint norms; neither path guarantees valid digits.",
-        "Check the classifier's test accuracy before trusting its histogram of 2,000 generated digits.",
+        "Check the classifier's test accuracy before trusting its histogram of 512 generated digits (2,000 in the stretch).",
         "Compare real-versus-real, epoch-1, final, and uniform-noise feature distances using the same clf.",
         "On the eight-cluster ring, inspect both the scatter plots and modes_covered for each trained system."
       ],
@@ -371,7 +371,7 @@
         "Count predicted classes over a larger batch to look for missing digits."
       ],
       "check_question": "Does inference update weights?",
-      "check_answer": "The trained generator G. D is used for learning feedback, while separate evaluation checks can measure the resulting samples.",
+      "check_answer": "No. Inference runs the trained generator G without a loss, backward pass or optimiser step, so its weights stay fixed.",
       "layout": "linear",
       "notes": "In short: A trained generator converts fresh codes into images without running the discriminator.\nExplain: Inference means using learned weights to produce outputs. Evaluation mode uses stored batch-normalisation statistics. A forward pass applies the learned operations once. A Gaussian code contains random values drawn from a normal distribution. Display scaling converts pixel values into a plotting range.\nExample: Sixteen codes of length 64 form [16,64]. G returns [16,1,28,28], where one is the grayscale channel count. Mapping the output from negative-one-to-one into zero-to-one changes display values without updating learned weights. Reuse the same codes when comparing saved generators to isolate training changes.\nAsk: Must D run to generate a new digit?\nAnswer: No. G generates; a separate classifier or human review can evaluate the result.\nWatch out: Evaluation mode does not guarantee good images, and disabling gradients does not itself switch batch-normalisation behaviour."
     }

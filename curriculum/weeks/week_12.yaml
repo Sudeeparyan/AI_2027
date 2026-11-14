@@ -258,15 +258,15 @@ slides:
     source trail.
 
     Example: Monthly HR updates can replace one versioned policy and refresh its index. A fixed final question set then checks
-    both the answer and its cited passage. Pasting every policy may suit a tiny authorised collection, but each request carries
-    that text. The library analogy explains locating current editions, not automatic interpretation or permission enforcement.
+    both the answer and its cited passage. Pasting every policy may suit a tiny authorised collection, but every request then
+    carries every policy''s tokens.
 
-    Ask: Why is option B potentially expensive as the collection grows?
+    Ask: Which option should you try first for changing policies that need exact source links?
 
-    Answer: D. Every request includes every policy’s tokens, and per-document access must still be enforced.
+    Answer: D. Refresh the RAG index when policies change, then verify that each cited passage supports the answer.
 
-    Watch out: D is the intended answer. A cannot guarantee evidence links, and general training knowledge cannot establish
-    the current internal policy.'
+    Watch out: A cannot guarantee evidence links, B grows expensive as the collection grows, and C cannot establish the current
+    internal policy.'
 - type: section
   number: 2
   title: Embeddings, chunking and vector databases
@@ -462,22 +462,22 @@ slides:
   - \text{lab hit@}K = \frac{\#\text{questions with a gold-document hit in top }K}{\#\text{answerable questions}},\qquad \mathrm{MRR}=\dfrac{1}{|Q|}\sum_q
     \dfrac{1}{\mathrm{rank}_q}
   read_as:
-  - Fuse rank positions, not score scales.
-  - 'Archive: document hit@K and MRR.'
-  - 'Core: labelled-passage recall@K.'
+  - Ranks 1,5 → 1/61 + 1/65 ≈ 0.03178.
+  - 'MRR: ranks 1,2,absent → 0.5.'
+  - 'Document hits: 2/3; core: passage recall.'
   terms:
   - - c
-    - Fusion smoothing
+    - Smoothing
   - - K
-    - Result cutoff
+    - Cutoff
   - - $\mathrm{rank}_q$
-    - First relevant rank
+    - First-relevant rank
   - - d
     - Passage
   - - r
     - Retriever
   - - Q
-    - Question set
+    - Questions
   notes: 'In short: Fusion combines rank evidence; distinguish the archived document-hit equation from current passage-level
     recall.
 
@@ -496,6 +496,8 @@ slides:
 
     Watch out: Define relevance and denominators explicitly. Keep the historical document-hit metric labelled, and use exact
     passage evidence for the new core.'
+  example_first: true
+  panel_h: 1.9
 - type: bullets
   title: 'Re-ranking: a second, more careful look'
   bullets:
@@ -570,7 +572,7 @@ slides:
 
     Answer: It checks whether the system declines missing evidence instead of inventing a fact.
 
-    Watch out: Prompt placement affected the recorded run, not every model. Report actual inputs, model and check definitions;
+    Watch out: Compare prompt placement on matched development examples. Report actual inputs, model and check definitions;
     neither a citation marker nor matching digits proves complete semantic support.'
 - type: cards
   title: Advanced RAG techniques
@@ -655,15 +657,15 @@ slides:
     supplied.
 
     Example: A relevant passage at rank twelve is excluded when only three reach the model. A larger generator may guess the
-    right fact, but the evidence route still failed. The open-book analogy requires the right page to be open. Compare selected
-    passage IDs and text, not merely whether search somewhere found the correct document.
+    right fact, but the evidence route still failed. Compare selected passage IDs and text, not merely whether search somewhere
+    found the correct document.
 
-    Ask: What should be measured after changing retrieval?
+    Ask: Useful evidence ranks twelfth, but only three passages reach the prompt. What should you improve?
 
-    Answer: A. Passage recall at the supplied cutoff, then correctness and support of the resulting answers.
+    Answer: A. Improve retrieval or chunking, then measure passage recall at the cutoff and the support of the new answers.
 
-    Watch out: A is correct. Temperature and an accuracy instruction do not supply the missing passage. Recheck evidence before
-    attributing an answer improvement to better grounding.'
+    Watch out: B, C and D change the generator, not the evidence it receives; temperature and an accuracy instruction cannot
+    supply the missing passage.'
 - type: section
   number: 4
   title: Agentic AI
@@ -755,7 +757,10 @@ slides:
 
     Watch out: The email operation and domain gate are simulated. Real consequential actions need actual review mechanisms;
     generated arguments alone never supply that review.'
-  caption: Proposal → checked execution → observation.
+  bullets:
+  - Parse one proposal.
+  - Check, then execute.
+  - Record the observation.
 - type: figure
   title: 'Measured: a real agent trajectory from the lab'
   figure: agent_trace
@@ -834,7 +839,7 @@ slides:
   figure: mcp
   bullets:
   - Host clients discover server capabilities.
-  - Compatibility does not grant trust.
+  - The host still checks each call's permissions.
   stack: true
   notes: 'In short: MCP standardises capability discovery and calls while the host remains responsible for trust and permissions.
 
@@ -898,19 +903,18 @@ slides:
   notes: 'In short: A fixed RAG workflow is a sensible first design for factual questions over an authorised handbook.
 
     Explain: The source collection defines available evidence. Retrieval supplies selected passages. Generation answers or abstains.
-    The workflow’s order is known in advance. Additional autonomous steps need a reason supported by evaluation.
+    The workflow''s order is known in advance. Additional autonomous steps need a reason supported by evaluation.
 
-    Example: A deadline question usually needs one evidence search and a cited response. An autonomous email agent introduces
-    unrelated write capability. Three cooperating agents add calls without necessarily adding useful evidence. A service-desk
-    checklist explains a known route, but it still needs up-to-date sources, error checks and a human escalation path when information
-    is absent.
+    Example: A deadline question usually needs one evidence search and a cited response. An autonomous web and email agent adds
+    an unneeded write capability and reads pages that can carry hostile instructions. Three cooperating agents add calls without
+    necessarily adding useful evidence.
 
-    Ask: Why is option B risky for this initial task?
+    Ask: Which initial design suits questions about handbook deadlines and rules?
 
-    Answer: C. Email is an unnecessary side effect, and external pages can contain unreliable or hostile content.
+    Answer: C. A RAG workflow with cited sources and abstention, because the route is known and the evidence must be checkable.
 
-    Watch out: C is correct for the initial design. A new task may justify tools later; test that need instead of expanding
-    authority by default.'
+    Watch out: A adds calls without better evidence, B adds risky email and web access, and D trains without evidence. Test
+    any later need for tools instead of expanding authority by default.'
 - type: section
   number: 5
   title: Risks and guardrails
@@ -1048,9 +1052,10 @@ slides:
     routes. A small pretrained local generator receives numbered evidence. A bounded executor runs validated tools. Optional
     APIs compare synthetic explanations while keeping a local route.
 
-    Example: Inspect one [N,384] passage table, one cited answer and one search-to-calculator trace. The complete CPU time target
-    awaits measurement. Database and re-ranking demonstrations remain optional. Archived GPU figures use their original models
-    and metric definitions, so current outputs must be reported from their own actual run.
+    Example: Inspect one [N,384] passage table, one cited answer and one search-to-calculator trace. On the course laptop, the
+    whole core took {{W12_CORE_TIME}} after models and data were downloaded. Database and re-ranking demonstrations remain optional.
+    Archived GPU figures use their original models and metric definitions, so current outputs must be reported from their own
+    actual run.
 
     Ask: What establishes that a claimed answer is supported?
 

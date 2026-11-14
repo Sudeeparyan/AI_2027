@@ -1,6 +1,6 @@
 # Lecture plan at a glance
 
-This week moves from models to systems (MIMLO 3, 4, 5). Students should leave able to map the tool stack, use API platforms safely (keys, tokens, pricing, rate limits, streaming), compare cloud, self-hosted and local deployment, explain quantisation, batching and caching, build a small app with Gradio and FastAPI packaged in Docker, and design monitoring and guardrails. The stored plots come from the archived Qwen2.5-0.5B-Instruct run on a GTX 1650 (`curriculum/assets/week_11/`), described by the existing instructor evidence. They are separate from the revised, smaller SmolLM2-135M CPU core, whose waiting time is recorded separately below.
+This week moves from models to systems (MIMLO 3, 4, 5). Students should leave able to map the tool stack, use API platforms safely (keys, tokens, pricing, rate limits, streaming), compare cloud, self-hosted and local deployment, explain quantisation, batching and caching, build a small app with Gradio and FastAPI packaged in Docker, and design monitoring and guardrails. The latency, batching and monitoring plots use the recorded SmolLM2-135M CPU core (`curriculum/assets/week_11/results_cpu_core.json`). Their date and local measurement boundary appear below. The archived Qwen2.5-0.5B-Instruct quantisation probe remains a separate non-timing experiment.
 
 | Time | Slides | Segment | What you do |
 |---|---|---|---|
@@ -70,7 +70,7 @@ $$\text{latency} \approx \text{TTFT} + \frac{\text{output tokens} - 1}{\text{pos
 
 ![Anatomy of a request](fig:request_anatomy)
 
-**Lab measurement:** {{LAT_NOTES}}
+**Recorded CPU core ({{W11_CORE_DATE}}):** {{LAT_NOTES}}
 
 **Cost estimate.** For $R$ requests with $n_{in}$ input and $n_{out}$ output tokens at prices $p_{in}$ and $p_{out}$ per million tokens: cost $= R\,(n_{in} p_{in} + n_{out} p_{out}) / 10^6$. For 500 students × 20 requests a day × 30 days = 300,000 requests with 800 input and 300 output tokens, illustrative prices give:
 
@@ -103,6 +103,8 @@ Hybrids are common: a small local or self-hosted model for routine requests, a c
 
 ### Quantisation
 
+**Worked rounding example (illustrative).** A group has maximum absolute weight 1. With 4 bits, its scale is 1/7. For weight 0.2, divide by the scale to get 1.4, round to integer 1, then multiply by the scale to reconstruct about 0.143. The difference from 0.2 is the rounding error. For storage, 1 billion weights at 16 bits use 2 GB before scales and runtime overhead.
+
 $$\text{memory} \approx N_{\text{params}} \times \frac{\text{bits}}{8}\ \text{bytes}$$
 
 $$s = \frac{\max |w|}{2^{b-1} - 1}, \qquad q = \mathrm{round}\left(\frac{w}{s}\right), \qquad \hat{w} = q \cdot s$$
@@ -117,7 +119,7 @@ For 7 B weights, ideal storage is about 14 GB at 16 bits, 7 GB at 8 bits or 3.5 
 
 Generation often spends substantial time reading model weights. **Batching** shares those reads across several sequences. **Continuous batching** lets new requests join as others finish. vLLM's **PagedAttention** (Kwon et al., 2023) manages attention-cache memory in pages, reducing wasted space. Measure aggregate throughput and individual waiting time: a larger batch can improve one while worsening the other.
 
-**Lab measurement:** {{BATCH_NOTES}}
+**Recorded CPU core ({{W11_CORE_DATE}}):** {{BATCH_NOTES}}
 
 ![Throughput vs batch size (lab)](fig:lab_batch)
 
@@ -160,9 +162,9 @@ This figure shows a proposed integrated design. In the lab the two routes are se
 | Safety | Guardrail blocks, redactions, flagged outputs, injection attempts |
 | Versions | Model, prompt and index behind each answer |
 
-**Lab measurement:** {{MONITOR_NOTES}}
+**Recorded CPU core ({{W11_CORE_DATE}}):** {{MONITOR_NOTES}}
 
-![Monitoring summary from the lab app's logs](fig:lab_monitor)
+![Recorded CPU core: request counts and allowed-request latency percentiles](fig:lab_monitor)
 
 **Guardrails in layers:** check input length and permissions; redact supported personal-data patterns; restrict tool access; validate output fields and apply relevant safety checks; send uncertain or consequential cases to a person; log and retest. Simple regular expressions miss varied attacks and data forms. Safety classifiers and libraries such as NeMo Guardrails or Guardrails AI add checks, but also need task-specific evaluation.
 
@@ -204,7 +206,7 @@ This figure shows a proposed integrated design. In the lab the two routes are se
 
 # Lab guide and answers
 
-**CPU core:** The revised lab uses real SmolLM2-135M-Instruct with CPU selected in shared setup, 24-token generation caps, bounded batches and four synthetic monitoring requests. Its full local CPU timing is recorded below; Colab timing remains unverified. Streaming, rounding/PPL, batching, response caching and a FastAPI TestClient endpoint are real experiments. Server launch, SDK/LangChain clients, packed loading, Gradio and remote deployment are optional stretches. **Hand-in:** measured tables, endpoint checks and three explained decisions. Archived Qwen2.5-0.5B GPU plots remain separately labelled; do not substitute their numbers for the new core.
+**CPU core:** The revised lab uses real SmolLM2-135M-Instruct with CPU selected in shared setup, 24-token generation caps, bounded batches and four synthetic monitoring requests. Its full local CPU timing is recorded below; Colab timing remains unverified. Streaming, rounding/PPL, batching, response caching and a FastAPI TestClient endpoint are real experiments. Server launch, SDK/LangChain clients, packed loading, Gradio and remote deployment are optional stretches. **Hand-in:** measured tables, endpoint checks and three explained decisions. The archived Qwen2.5-0.5B quantisation plot remains a separate non-timing experiment; do not substitute its results for the current core.
 
 The full local CPU core measured {{W11_CORE_TIME}} on {{W11_CORE_DATE}} using {{W11_CORE_THREADS}} threads; installation, downloads, widgets and optional stretch/API calls are excluded. This is not a Colab timing.
 
@@ -219,7 +221,7 @@ The full local CPU core measured {{W11_CORE_TIME}} on {{W11_CORE_DATE}} using {{
 * **TODO 4** `fake_quantize`: per-group scale `amax / qmax`, round, clamp to ±qmax, multiply back.
 * **TODO 5** `check_input`: block > 2,000 characters and injection phrases; redact e-mails and phone numbers; return `(allowed, cleaned, reason)`.
 
-## Measured results (instructor run)
+## Recorded CPU core and separate archived quantisation probe
 
 {{RESULTS_NOTES}}
 
@@ -261,26 +263,7 @@ The full local CPU core measured {{W11_CORE_TIME}} on {{W11_CORE_DATE}} using {{
 
 # Glossary
 
-| Term | Meaning |
-|---|---|
-| API platform | Service providing model access over HTTP with keys, quotas and billing |
-| OpenAI-compatible API | Endpoint accepting the OpenAI chat-completions format |
-| TTFT | Time to first token: delay before the first output token arrives |
-| Tokens per second | State the boundary: decoding speed or whole-request output-token rate. The CPU notebook measures the latter. |
-| Prefill / decode | Processing the prompt in parallel / generating tokens one by one |
-| Rate limit (HTTP 429) | Cap on requests or tokens per minute |
-| Exponential back-off | Retrying with waits that double each attempt, plus jitter |
-| Quantisation | Storing weights with fewer bits (int8, int4) |
-| Absmax / group-wise | Scaling by the largest magnitude, per group of weights |
-| Continuous batching | Adding and removing requests at every decoding step |
-| PagedAttention | vLLM's paged management of the KV cache |
-| Prefix (prompt) caching | Reusing computation for repeated prompt beginnings |
-| Speculative decoding | Draft model proposes tokens, large model verifies |
-| Gradio / FastAPI | Python libraries for web interfaces / web APIs |
-| Docker image | Packaged application with dependencies |
-| Tracing | Recording each step of a request with timings |
-| Guardrail | Check that blocks or modifies unsafe inputs or outputs |
-| p95 latency | Latency below which 95% of requests complete |
+<!-- Definitions generated from curriculum/glossary.json week_glossary. -->
 
 # Readings, videos and further practice
 
@@ -313,7 +296,7 @@ The slides show one idea at a time. Use the detail below for follow-up questions
 
 ## Slide 1: Title
 
-Welcome to week 11, deployment and frameworks. So far we have used models inside notebooks. This week we turn a model into something other people can use: an application with an interface and an API, running somewhere sensible, at an acceptable cost and speed, with guardrails and monitoring. The recorded-result charts use the archived model and settings. The current SmolLM2 CPU core has separate measured results in the lab guide. Colab execution has not been timed.
+Welcome to week 11, deployment and frameworks. So far we have used models inside notebooks. This week we turn a model into something other people can use: an application with an interface and an API, running somewhere sensible, at an acceptable cost and speed, with guardrails and monitoring. The timing charts use the dated current SmolLM2 CPU core. The quantisation chart preserves the separate archived rounding-and-perplexity experiment. Colab execution has not been timed.
 
 ## Slide 2: Outcomes
 
@@ -435,9 +418,9 @@ Break latency into parts. Network and authentication add tens of milliseconds. U
 
 - Streaming shows each part as it arrives; it does not guarantee faster model computation.
 
-## Slide 15: Stored GPU run: streaming latency
+## Slide 15: Recorded CPU core: streaming latency
 
-This is the archived GPU measurement for Qwen2.5-0.5B-Instruct on 9 October 2026; it is separate from the measured smaller CPU core. The dark bar times the first decoded text chunk, an approximation to time to first token. The light bar shows the full-answer duration. The numbers are quoted in the bullet. The archived chunk-rate estimate is retained in the reference table for provenance but is not a reliable post-first-token speed measurement. Time to first token is a small fraction of the total, which is why streaming is standard in chat interfaces. Hosted frontier models run on far larger hardware, but they are also much larger, so the same pattern holds.
+The chart uses the smaller SmolLM2-135M CPU core recorded on {{W11_CORE_DATE}}. The dark bar times the first non-empty decoded text chunk, an approximation to time to first token. The light bar shows the full-answer duration. The bullet below gives the measured values. Retokenised decoded text provides an approximate output count; it can differ from generated token IDs. The reported token rate divides that count by the whole duration rather than only the time after first text. Streaming lets students read while generation continues, but its timing benefit depends on the request and hardware. Compare identical prompts, caps, model precision and warm-up conditions before comparing two runs.
 
 - {{LAT_NOTES}}
 
@@ -526,9 +509,9 @@ The lab rounds weights in linear layers, excluding the output language-model hea
 
 - Always re-evaluate on your own task after quantising.
 
-## Slide 22: Stored GPU run: batch throughput
+## Slide 22: Recorded CPU core: batch throughput
 
-Generating for one request at a time leaves most of a GPU idle, because decoding is limited by memory bandwidth, not arithmetic. Processing several requests together reuses each weight read for many sequences. The lab measures throughput for batch sizes one to eight; the numbers are in the bullet. Production engines go further with continuous batching, adding and removing requests at every step rather than waiting for a whole batch to finish. The trade-off: larger batches increase throughput but can increase each user's latency.
+The chart records the CPU core's fixed-length workload on {{W11_CORE_DATE}}. Batching processes several requests together and can reuse weight reads across sequences. The stored rows state each batch size, total request count and elapsed time. Throughput here divides the requested output-token budget across all requests by elapsed time; inspect actual generated token counts if early stopping changes that workload. Production engines may use continuous batching, adding and removing requests at each generation step. A higher aggregate rate does not guarantee a shorter wait for each student: queueing and shared resources also affect latency. Compare equal prompts, caps, precision and measurement boundaries.
 
 - {{BATCH_NOTES}}
 
@@ -674,9 +657,9 @@ Monitoring for generative AI extends normal web monitoring. Performance uses per
 
 - **Versions:** Record which model, prompt and document index produced each answer.
 
-## Slide 33: Stored GPU run: ten-request monitoring
+## Slide 33: Recorded CPU core: monitoring summary
 
-The lab sends simulated traffic through the app, including a prompt-injection attempt and messages containing an e-mail address and a phone number. Each bar is one request: blue answered, orange answered after redacting personal data, red blocked. The dashed line marks the ninety-fifth percentile latency. The summary in the bullet is computed from the log file. Point out the design choice: logs store metadata, not message text, following GDPR data minimisation; if you need text for quality review, redact it and limit retention and access.
+The chart uses the CPU core aggregate summary recorded on {{W11_CORE_DATE}}. Its first panel shows request, block and redaction counts. These categories overlap: every blocked or redacted request is also included in the total. Its second panel shows p50 and p95 for allowed requests only. A blocked input skips generation and records zero model token counts. Redaction replaces the supported personal-data pattern before generation but is not a complete privacy detector. The original per-request durations were not exported in this summary, so the chart does not reconstruct individual bars. With only a few allowed requests, a high percentile is a fragile sample estimate, not a production service guarantee.
 
 - {{MONITOR_NOTES}}
 
@@ -750,7 +733,7 @@ The lab covers both descriptor tutorials: exploring tools with local and cloud m
 
 - Build a checked Gradio handler and metadata log; summarise it and write a Docker packaging example.
 
-- **CPU core:** The revised lab uses real SmolLM2-135M-Instruct with CPU selected in shared setup, 24-token generation caps, bounded batches and four synthetic monitoring requests. Its full local CPU timing is recorded below; Colab timing remains unverified. Streaming, rounding/PPL, batching, response caching and a FastAPI TestClient endpoint are real experiments. Server launch, SDK/LangChain clients, packed loading, Gradio and remote deployment are optional stretches. **Hand-in:** measured tables, endpoint checks and three explained decisions. Archived Qwen2.5-0.5B GPU plots remain separately labelled; do not substitute their numbers for the new core.
+- **CPU core:** The revised lab uses real SmolLM2-135M-Instruct with CPU selected in shared setup, 24-token generation caps, bounded batches and four synthetic monitoring requests. Its full local CPU timing is recorded below; Colab timing remains unverified. Streaming, rounding/PPL, batching, response caching and a FastAPI TestClient endpoint are real experiments. Server launch, SDK/LangChain clients, packed loading, Gradio and remote deployment are optional stretches. **Hand-in:** measured tables, endpoint checks and three explained decisions. The archived Qwen2.5-0.5B quantisation plot remains a separate non-timing experiment; do not substitute its results for the current core.
 
 - **Hand in:** notebook with latency, cost, quantisation, batching and monitoring tables, the app link or screenshot, and three answers.
 
@@ -877,7 +860,7 @@ For 500 fictional users, 20 daily requests and 30 days, the request count is 300
 
 The revised core sends four invented requests through `respond`. The log records time, model identity, duration, block reason and separate token counts, without raw request text. All rows contribute to request/block/redaction counts; only allowed rows enter the stated p50/p95 calculation. A blocked current message skips generation and has zero model token counts. Inspect the actual log before describing a result. With only a few allowed requests, p95 is a fragile sample estimate.
 
-The archived plots instead describe Qwen2.5-0.5B-Instruct on NVIDIA GeForce GTX 1650: three streaming questions, eight requests for each batch-size experiment and ten monitoring requests. The original run settings remain in stored assets and instructor evidence; newly measured SmolLM2 tables must be compared and recorded separately. An archived model reply about FastAPI is generated text, not authoritative documentation or a correctness guarantee.
+The published timing plots and tables use the same recorded CPU core export. Its date is {{W11_CORE_DATE}}; the archived Qwen2.5-0.5B-Instruct timings are omitted because matching dated provenance is unavailable. The separate archived rounding-and-perplexity probe retains its original measured non-timing values. An archived model reply about FastAPI is generated text, not authoritative documentation or a correctness guarantee.
 
 # Beginner FAQ and answered self-checks
 

@@ -14,7 +14,7 @@
   "W01_RUNNERS_UP": "*windows*, *couch*, *so* and *chair*",
   "W01_FICTION_PLAIN": "The 2019 paper 'Quantum Gradient Folding for Transformers' by Smith and Okafor, published by Hugging Face, focuses on the development of quantum…",
   "W01_FICTION_HONEST": "The 2019 paper 'Quantum Gradient Folding for Transformers' by Smith and Okafor provides a new approach to train neural networks with high accuracy…",
-  "W01_CORE_TIME": "45 seconds",
-  "W01_CORE_DATE": "11 October 2026",
+  "W01_CORE_TIME": "4.9 minutes",
+  "W01_CORE_DATE": "12 October 2026",
   "W01_CORE_THREADS": "4"
 }

@@ -33,7 +33,7 @@ The table illustrates large-model practice, not minimum requirements. Small mode
 |---|---|---|---|
 | What changes | All weights | Some or all weights | Nothing in the model |
 | Data needed | Frontier scale: trillions of tokens | Hundreds–thousands of examples | A few examples, or none |
-| Cost | Large compute budget; varies by scale | Compute time (often lower with LoRA) | Local compute or provider usage; minutes to iterate |
+| Cost | Large compute budget; varies by scale | Compute time (often lower with LoRA) | Local compute or provider usage; measure each run |
 | Best for | General capability | Consistent format/style/domain | First approach to any task |
 
 **Decision rule** (consistent with Microsoft, Google and OpenAI guidance): start with prompting; add retrieval when knowledge is missing (week 12); fine-tune only when a well-designed evaluation shows prompting cannot meet the quality bar (week 8).
@@ -197,11 +197,11 @@ Use at least two raters on a sample and measure agreement (e.g. Cohen's kappa).
 
 ### Statistics
 
-The standard error of an accuracy $p$ on $n$ items is
+The observed accuracy $p$ is correct items divided by all $n$ scored items. The standard error, SE, estimates its sampling uncertainty:
 
 $$\mathrm{SE} = \sqrt{\frac{p(1-p)}{n}}$$
 
-For $p = 0.8$, $n = 40$: SE ≈ 0.063, so the 95% margin is about ±12 points. The Wilson interval used in the charts gives about 65%–89% for 32 correct out of 40. Compare prompts on the same items (paired), run several seeds for sampled outputs, keep a held-out set, and report model, version, date, settings, $n$ and failure examples.
+For $p = 0.8$, $n = 40$: SE ≈ 0.063, so the 95% margin is about ±12 points. The Wilson interval used in the charts gives about 65%–90% for 32 correct out of 40. Compare prompts on the same items (paired), run several seeds for sampled outputs, keep a held-out set, and report model, version, date, settings, $n$ and failure examples.
 
 ## 5. Limitations, security and tools
 
@@ -343,22 +343,7 @@ This instructor run used {{MODEL}} on a 4 GB GTX 1650 laptop GPU, with all 40 ro
 
 # Glossary
 
-| Term | Meaning |
-|---|---|
-| In-context learning | Learning a task from examples in the prompt without weight updates |
-| System/developer message | Application-level instructions with priority over user messages |
-| Zero/one/few-shot | Prompting with no, one or several examples |
-| Role (persona) prompting | Assigning the model a role to shape tone and priorities |
-| Chain-of-thought | Prompting the model to write intermediate reasoning steps |
-| Self-consistency | Majority vote over several sampled reasoning paths |
-| Prompt chaining | Splitting a task into a sequence of prompts |
-| Structured output | Output constrained to a schema (e.g. JSON) |
-| Context engineering | Selecting, compressing and ordering what enters the context window |
-| ROUGE / BLEU | Word-overlap metrics against references (summarisation / translation) |
-| LLM-as-a-judge | Using an LLM to score outputs with a rubric |
-| Sycophancy | Tendency to agree with the user's stated view |
-| Prompt injection | Malicious instructions that override intended behaviour |
-| Jailbreak | Prompting that bypasses safety rules |
+<!-- Definitions generated from curriculum/glossary.json week_glossary. -->
 
 # Readings, videos and further practice
 

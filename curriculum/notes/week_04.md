@@ -6,14 +6,14 @@ Diffusion models are the backbone of today's image, video and audio generators. 
 |---|---|---|---|
 | 0–5 min | 1–4 | Warm-up | Restoring a photo from static: small steps, random start, a description helps. |
 | 5–17 min | 5–8 | 1 · Why diffusion? | Limitations of VAEs and GANs; the trilemma; the core idea in one slide. |
-| 17–50 min | 9–19 | 2 · Forward and reverse | Forward process and closed form; real noising; schedules; reverse process; noise-prediction loss; code; score view; real 2-D and MNIST results. Quiz. |
+| 17–50 min | 9–19 | 2 · Forward and reverse | Real noising; forward process and closed form; schedules; reverse process; noise-prediction loss; code; score view; real 2-D and MNIST results. Quiz. |
 | 50–57 min | – | Break | |
 | 57–74 min | 20–23 | 3 · Architecture | U-Net vs DiT; latent diffusion pipeline; role of each component. |
 | 74–97 min | 24–29 | 4 · Sampling and guidance | Samplers; steps; classifier-free guidance; guidance scale; seeds and negative prompts. |
 | 97–118 min | 30–37 | 5 · Variants, evaluation, responsibility | Flow matching; distillation; variants; evaluation; family comparison; responsible AI. |
 | 118–120 min | 38–40 | Lab preview, summary, resources | |
 
-> **Teaching tip:** Write the closed-form forward process on the board early and point out that it is the reparameterisation trick from week 2. Students who see this link find the rest of the lecture much easier.
+> **Teaching tip:** After inspecting the noised digits, write the closed-form forward process on the board and point out that it is the reparameterisation trick from week 2. Students who see this link find the rest of the lecture much easier.
 
 <!-- pagebreak -->
 
@@ -84,21 +84,21 @@ Keep three quantities separate: $x_0$ is clean data, $x_t$ is noisy data at time
 
 With a small noise schedule $\beta_1, \ldots, \beta_T$ (DDPM: linear from $10^{-4}$ to $0.02$, $T = 1000$):
 
+**One-number example.** With $\beta_t = 0.1$ and previous value 1, the next-state Gaussian has mean $\sqrt{0.9}$, about 0.949, and variance 0.1. A sampled next value need not equal the mean.
+
+![The forward process on real digits](fig:forward_mnist_slide)
+
 $$q(x_t \mid x_{t-1}) = \mathcal{N}\left(\sqrt{1 - \beta_t}\, x_{t-1},\; \beta_t I\right)$$
 
-**One-number example.** With $\beta_t = 0.1$ and previous value 1, the next-state Gaussian has mean $\sqrt{0.9}$, about 0.949, and variance 0.1. A sampled next value need not equal the mean.
+**Worked example.** Let $x_0 = 1$, $\epsilon = -0.5$ and $\bar{\alpha}_t = 0.64$. Then $x_t$ = 0.8 × 1 + 0.6 × (−0.5) = 0.5. The target noise remains −0.5.
+
+**Worked example.** For a pixel with clean value $x_0 = 0.8$, at a step where $\bar{\alpha}_t = 0.36$ and with sampled noise $\epsilon = -0.5$: $x_t = \sqrt{0.36}(0.8) + \sqrt{0.64}(-0.5) = 0.6 \times 0.8 - 0.8 \times 0.5 = 0.48 - 0.40 = 0.08$.
 
 Define $\alpha_t = 1 - \beta_t$ and $\bar{\alpha}_t = \prod_{s=1}^{t} \alpha_s$. Because Gaussians compose, we can jump directly to any step:
 
 $$q(x_t \mid x_0) = \mathcal{N}\left(\sqrt{\bar{\alpha}_t}\, x_0,\; (1 - \bar{\alpha}_t) I\right) \quad\Leftrightarrow\quad x_t = \sqrt{\bar{\alpha}_t}\, x_0 + \sqrt{1 - \bar{\alpha}_t}\, \epsilon$$
 
-**Worked example.** Let $x_0 = 1$, $\epsilon = -0.5$ and $\bar{\alpha}_t = 0.64$. Then $x_t$ = 0.8 × 1 + 0.6 × (−0.5) = 0.5. The target noise remains −0.5.
-
 This is the reparameterisation trick from week 2. For initially unit-variance data the scaling keeps marginal variance at one. In general the variance is $\bar{\alpha}_t$ times the data variance plus $1 - \bar{\alpha}_t$, tending towards one. At $t = T$, $\bar{\alpha}_T \approx 4 \times 10^{-5}$: essentially pure noise.
-
-**Worked example.** For a pixel with clean value $x_0 = 0.8$, at a step where $\bar{\alpha}_t = 0.36$ and with sampled noise $\epsilon = -0.5$: $x_t = \sqrt{0.36}(0.8) + \sqrt{0.64}(-0.5) = 0.6 \times 0.8 - 0.8 \times 0.5 = 0.48 - 0.40 = 0.08$.
-
-![The forward process on real digits](fig:forward_mnist_slide)
 
 ### Noise schedules
 
@@ -110,19 +110,19 @@ The **signal-to-noise ratio** compares signal variance with noise variance. For 
 
 ### The reverse process
 
+**Reverse-mean example.** Let $x_t = 0.5$, $\beta_t = 0.1$, $\alpha_t = 0.9$, $\bar{\alpha}_t = 0.81$ and predicted noise = 0.2. The resulting mean is approximately 0.479. DDPM may add sampling noise after this calculation.
+
 For small $\beta_t$ the reverse step is approximately Gaussian, so it is modelled as
 
 $$p_\theta(x_{t-1} \mid x_t) = \mathcal{N}\left(\mu_\theta(x_t, t),\, \sigma_t^2 I\right), \qquad \mu_\theta(x_t, t) = \frac{1}{\sqrt{\alpha_t}}\left(x_t - \frac{\beta_t}{\sqrt{1 - \bar{\alpha}_t}}\,\epsilon_\theta(x_t, t)\right)$$
 
 with $\sigma_t^2 = \beta_t$ in the simplest DDPM. One network $\epsilon_\theta$, shared over all steps, receives the timestep through a sinusoidal embedding.
 
-**Reverse-mean example.** Let $x_t = 0.5$, $\beta_t = 0.1$, $\alpha_t = 0.9$, $\bar{\alpha}_t = 0.81$ and predicted noise = 0.2. The displayed mean is approximately 0.479. DDPM may add sampling noise after this calculation.
-
 ### The training objective
 
-$$\mathcal{L}_{\mathrm{simple}}(\theta) = \mathbb{E}_{x_0,\, t,\, \epsilon}\left[\left\|\epsilon - \epsilon_\theta\left(\sqrt{\bar{\alpha}_t}\, x_0 + \sqrt{1 - \bar{\alpha}_t}\, \epsilon,\; t\right)\right\|^2\right]$$
-
 **Squared-error example.** If one true noise value is −0.5 and the prediction is −0.3, its squared error is (−0.5 + 0.3)² = 0.04. Average these errors over the tensor and examples.
+
+$$\mathcal{L}_{\mathrm{simple}}(\theta) = \mathbb{E}_{x_0,\, t,\, \epsilon}\left[\left\|\epsilon - \epsilon_\theta\left(\sqrt{\bar{\alpha}_t}\, x_0 + \sqrt{1 - \bar{\alpha}_t}\, \epsilon,\; t\right)\right\|^2\right]$$
 
 1. Sample a training image $x_0$, a timestep $t \sim U\{1, \ldots, T\}$ and noise $\epsilon \sim \mathcal{N}(0, I)$.
 2. Form $x_t$ with the closed form.
@@ -150,7 +150,7 @@ A **stochastic differential equation (SDE)** describes a continuous path with ra
 
 ### Stored measured results
 
-The stored MLP run on a 2-D swiss roll shows noise developing spiral structure, with uneven coverage visible near the inner end. This figure uses its recorded training settings, rather than the shorter new lab configuration. The separate stored U-Net run has {{UNET_PARAMS}} parameters and used {{MNIST_EPOCHS}} MNIST epochs on {{MNIST_DEVICE}}, taking about {{MNIST_MIN}} minutes. Inspect its recognisable digits, malformed outputs and variety together. That measured training time describes the stored image experiment, not the required CPU point lab.
+The stored MLP run on a 2-D swiss roll shows noise developing spiral structure, with uneven coverage visible near the inner end. This figure uses its recorded training settings, rather than the shorter new lab configuration. The separate stored U-Net run has {{UNET_PARAMS}} parameters and used {{MNIST_EPOCHS}} MNIST epochs on {{MNIST_DEVICE}}. Inspect its recognisable digits, malformed outputs and variety together. These stored image samples illustrate a different model from the required CPU point lab.
 
 ![Reverse process on 2-D data](fig:reverse_2d_slide)
 
@@ -193,11 +193,11 @@ Each downloaded component has its own parameter count; count the active checkpoi
 | DPM-Solver++, Euler, Heun | ODE solvers; Euler is first order | 15–30 |
 | Distilled (consistency models, adversarial diffusion distillation) | Student model trained to jump far | 1–4 |
 
+**DDIM example.** With $x_t = 0.5$, $\bar{\alpha}_t = 0.64$ and predicted noise −0.5, $\hat{x}_0 = (0.5 - 0.6 \times (-0.5))/0.8 = 1$. At the final clean coefficient $\bar{\alpha} = 1$, the deterministic update returns 1.
+
 **DDIM update.** From the noise prediction $\hat\epsilon$ at step $t$, estimate the clean image and jump to an earlier step $t'$:
 
 $$\hat{x}_0 = \frac{x_t - \sqrt{1-\bar{\alpha}_t}\,\hat\epsilon}{\sqrt{\bar{\alpha}_t}}, \qquad x_{t'} = \sqrt{\bar{\alpha}_{t'}}\,\hat{x}_0 + \sqrt{1-\bar{\alpha}_{t'}}\,\hat\epsilon$$
-
-**DDIM example.** With $x_t = 0.5$, $\bar{\alpha}_t = 0.64$ and predicted noise −0.5, $\hat{x}_0 = (0.5 - 0.6 \times (-0.5))/0.8 = 1$. At the final clean coefficient $\bar{\alpha} = 1$, the deterministic update returns 1.
 
 The same trained network is used; only the sampling procedure changes.
 
@@ -209,9 +209,9 @@ The same trained network is used; only the sampling procedure changes.
 
 During training the condition is sometimes dropped; the chosen dropout rate depends on the model. One network learns both $\epsilon_\theta(x_t, c)$ and $\epsilon_\theta(x_t, \varnothing)$. At sampling:
 
-$$\hat{\epsilon} = \epsilon_\theta(x_t, \varnothing) + w\left(\epsilon_\theta(x_t, c) - \epsilon_\theta(x_t, \varnothing)\right)$$
-
 **Guidance example.** For one predicted noise value, let unconditioned = 0.2, conditioned = 0.1 and w = 3. The guided prediction is 0.2 + 3 × (0.1 − 0.2) = −0.1. Guidance can extrapolate beyond either prediction.
+
+$$\hat{\epsilon} = \epsilon_\theta(x_t, \varnothing) + w\left(\epsilon_\theta(x_t, c) - \epsilon_\theta(x_t, \varnothing)\right)$$
 
 $w = 1$ gives the plain conditional prediction in this formula. The stored SD 1.5 grid tests a particular set of guidance values; choose settings using the actual model's documented operating range. Very large $w$ can over-saturate colours and reduce variety. Active CFG uses conditional and reference predictions, often batched together. Some pipelines skip the reference evaluation when CFG is disabled; the lab's SD-Turbo path forces guidance to zero.
 
@@ -225,7 +225,7 @@ A **seed** sets the random-number sequence used for starting and sampling noise.
 
 ![Seeds and negative prompts](fig:seeds_negative_slide)
 
-**Stored SD 1.5 timings** on the lecture machine ({{SD_DEVICE}}): {{SD_TIMES}}. These describe the recorded image pipeline, not the CPU point exercise. The stored step sweep fixes the prompt, seed 42, guidance 7.5 and DPM-Solver++. The guidance sweep fixes the prompt, seed and 25 steps. Report all settings alongside timings.
+**Stored SD 1.5 comparisons:** these image samples come from the separate lecture experiment, rather than the CPU point exercise. The stored step sweep fixes the prompt, seed 42, guidance 7.5 and DPM-Solver++. The guidance sweep fixes the prompt, seed and 25 steps. Record all settings before comparing the visible outputs.
 
 ## 5. Variants, evaluation and responsible use
 
@@ -233,9 +233,9 @@ A **seed** sets the random-number sequence used for starting and sampling noise.
 
 Flow matching (Lipman et al., 2022) and rectified flow (Liu et al., 2022) learn a **velocity field** from selected training paths. This illustration uses straight paths between paired data and noise points:
 
-$$x_t = (1 - t)\, x_0 + t\, \epsilon, \qquad \mathcal{L}_{\mathrm{FM}} = \mathbb{E}\left[\left\| v_\theta(x_t, t) - (\epsilon - x_0) \right\|^2\right]$$
-
 **Flow example.** Let $x_0 = 0.8$, $\epsilon = -0.2$ and $t = 0.25$. The mixed value is 0.55, and target velocity is −1.0. A backward time step uses that velocity to move towards the data end.
+
+$$x_t = (1 - t)\, x_0 + t\, \epsilon, \qquad \mathcal{L}_{\mathrm{FM}} = \mathbb{E}\left[\left\| v_\theta(x_t, t) - (\epsilon - x_0) \right\|^2\right]$$
 
 Sampling integrates the learned ODE from noise ($t = 1$) to data ($t = 0$). Simpler training paths can help sampling efficiency, but learned marginal trajectories need not be straight and accurate few-step generation is not automatic; Stable Diffusion 3 and FLUX are architectural examples using flow-based generation with transformer backbones. Conventions for the direction of time differ between papers.
 
@@ -348,24 +348,7 @@ Sampling integrates the learned ODE from noise ($t = 1$) to data ($t = 0$). Simp
 
 # Glossary
 
-| Term | Meaning |
-|---|---|
-| Forward process | Fixed Markov chain that gradually adds Gaussian noise |
-| Noise schedule | Sequence $\beta_t$ controlling how much noise is added per step |
-| $\bar{\alpha}_t$ | Product of $(1 - \beta_s)$ for $s = 1, \ldots, t$; fraction of original signal variance remaining |
-| Reverse process | Learned chain that removes noise step by step |
-| Noise prediction $\epsilon_\theta$ | Network output: the noise present in $x_t$ |
-| Score | Gradient of the log density; equivalent (up to scale) to noise prediction |
-| DDPM / DDIM | Stochastic reverse chain / selected-step sampler, deterministic when η = 0 |
-| U-Net | Convolutional encoder–decoder with skip connections |
-| Diffusion transformer (DiT) | Transformer over latent patches used as the denoiser |
-| Latent diffusion | Diffusion in a VAE's latent space |
-| Cross-attention | Mechanism letting image features attend to text tokens |
-| Classifier-free guidance | Extrapolating conditional vs unconditional predictions by w |
-| Negative prompt | Prompt whose direction guidance moves away from |
-| Flow matching / rectified flow | Learn velocity targets from selected paired paths; sampling trajectories can curve |
-| Distillation | Training a few-step student to mimic a many-step sampler |
-| CLIP score | Cosine similarity between CLIP embeddings of image and prompt |
+<!-- Definitions generated from curriculum/glossary.json week_glossary. -->
 
 # Readings, videos and further practice
 
@@ -433,7 +416,7 @@ The lecture shows the essential idea first. These fuller explanations retain the
 
 Training knows the noise target. Generation reuses the trained predictor at many noise levels.
 
-## Slide 10: The forward (noising) process
+## Slide 11: The forward (noising) process
 
 - At each forward step, keep some signal and add Gaussian noise. $\beta_t$ controls the noise amount.
 
@@ -553,15 +536,7 @@ Training knows the noise target. Generation reuses the trained predictor at many
 
 - Measure any change in detail, variety and prompt fit
 
-## Slide 27: Classifier-free guidance (Ho & Salimans, 2022)
-
-- During training, sometimes drop the text condition. One model learns prompted and unprompted predictions.
-
-- During generation, calculate both predictions. Guidance weight w strengthens their difference.
-
-- With this convention, w = 1 is the conditional prediction. Large w can reduce naturalness and variety. Useful ranges depend on the model.
-
-## Slide 28: Stored SD 1.5 guidance comparison
+## Slide 27: Stored SD 1.5 guidance comparison
 
 - The grid holds the prompt and seed fixed and changes guidance w.
 
@@ -570,6 +545,14 @@ Training knows the noise target. Generation reuses the trained predictor at many
 - Describe the balance visible in this stored grid; useful settings depend on the model and task.
 
 - Very high guidance can reduce naturalness and variety.
+
+## Slide 28: Classifier-free guidance (Ho & Salimans, 2022)
+
+- During training, sometimes drop the text condition. One model learns prompted and unprompted predictions.
+
+- During generation, calculate both predictions. Guidance weight w strengthens their difference.
+
+- With this convention, w = 1 is the conditional prediction. Large w can reduce naturalness and variety. Useful ranges depend on the model.
 
 ## Slide 29: Seeds and negative prompts
 
@@ -644,7 +627,7 @@ Training knows the noise target. Generation reuses the trained predictor at many
 
 ## Slide 38: Lab 4: diffusion on the CPU
 
-The required path runs a real point diffusion model with shared CPU setup. On the course laptop the complete core took {{W04_CORE_TIME}}; do not treat the stored image-model timings as this core's runtime.
+The required path runs a real point diffusion model with shared CPU setup. On the course laptop the complete core took {{W04_CORE_TIME}}; keep its runtime separate from the stored image comparisons.
 
 1. Implement noising for points and image-shaped arrays, then inspect a fixed-noise slider.
 2. Check the noise objective and reverse update before training the point denoiser.
@@ -732,7 +715,7 @@ For vectors [1, 0] and [3, 0], the dot product is 3 and the lengths are 1 and 3.
 
 # Five self-checks with answers
 
-1. **What are the noisy input and target for clean 1, coefficient 0.64 and noise −0.5?** Answer: input 0.5; target −0.5.
+1. **What are the noisy input and target for clean 1, retained-signal variance coefficient 0.64 and noise −0.5?** Answer: input 0.5; target −0.5.
 2. **Which tensor enters the model: true noise or corrupted data?** Answer: corrupted data and timestep enter; true noise remains a separate target.
 3. **What stays fixed in 40-step DDIM?** Answer: the learned weights; state and selected timestep change.
 4. **Why does an SD-Turbo guidance sweep not test ordinary guidance?** Answer: its documented use disables that control.

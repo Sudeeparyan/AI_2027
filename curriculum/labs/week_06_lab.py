@@ -33,6 +33,19 @@
 # Predict the output before running each part. Change one setting at a time.
 # Stop after a TODO until its targeted check succeeds. Model replies may be
 # wrong: observed output and verified task quality are separate records.
+#
+# | Part | Activity | Suggested class time |
+# |---|---|---|
+# | Start | Setup and vocabulary recall | 10 min |
+# | 1 | Token pieces and whitespace words | 15 min |
+# | 2 | Match the architecture to the job | 20 min |
+# | 3 | Scores, filters and sampling | 25 min |
+# | 4 | Perplexity within one model | 15 min |
+# | 5 | Local request log | 10 min |
+# | 6 | Check reasoning answers; self-checks | 25 min |
+#
+# Class time includes discussion and coding; it is not a measured compute time.
+# Optional family and reasoning-model downloads are for after class.
 
 # %% [markdown]
 # **Purpose:** Install the model and table libraries in Colab.

@@ -1,0 +1,1557 @@
+{
+  "schema_version": 1,
+  "checked_on": "2026-10-12",
+  "canonical_source": "curriculum/glossary.json",
+  "lookup_key": "term (exact canonical spelling)",
+  "original_terms": 142,
+  "canonical_terms": 253,
+  "added_terms": [
+    "Absmax quantisation",
+    "Alignment",
+    "API platform",
+    "Autoencoder",
+    "Beam search",
+    "BLEU",
+    "C2PA",
+    "Catastrophic forgetting",
+    "Chain-of-thought",
+    "CHAIR",
+    "Compute-optimal training",
+    "Contamination",
+    "Context engineering",
+    "Context window",
+    "Continuous batching",
+    "Contrastive learning",
+    "ControlNet",
+    "Cross-attention",
+    "Cross-entropy",
+    "Cross-modal",
+    "Cumulative signal fraction",
+    "DDIM",
+    "DDPM",
+    "Decoding",
+    "Deepfake",
+    "Diffusion transformer",
+    "Discriminative model",
+    "Distillation",
+    "Docker image",
+    "DPO",
+    "Dual encoder",
+    "Exponential backoff",
+    "FastAPI",
+    "Flow matching",
+    "Foundation model",
+    "Full fine-tuning",
+    "Generative model",
+    "Gradio",
+    "Group-wise quantisation",
+    "GRPO",
+    "Guardrail",
+    "HTTP 429",
+    "Image-to-image editing",
+    "In-context learning",
+    "InfoNCE",
+    "Inpainting",
+    "Instruction message",
+    "Instruction tuning",
+    "Jailbreak",
+    "Latent interpolation",
+    "Latent space",
+    "Latent variable",
+    "Liar's dividend",
+    "Likelihood",
+    "LLM-as-a-judge",
+    "Maximum likelihood",
+    "Mean opinion score",
+    "Modality gap",
+    "Model card",
+    "Multimodal fusion",
+    "Multimodal language model",
+    "n-gram model",
+    "Natively multimodal",
+    "Negative prompt",
+    "Noise prediction",
+    "One-shot",
+    "Open-weight model",
+    "OpenAI-compatible API",
+    "Outpainting",
+    "PagedAttention",
+    "POPE",
+    "Post-training",
+    "Posterior collapse",
+    "PPO",
+    "Pre-training",
+    "Prefill",
+    "Prefix caching",
+    "Prefix tuning",
+    "Prompt chaining",
+    "Prompt tuning",
+    "QLoRA",
+    "Rate limit",
+    "Reasoning model",
+    "Rectified flow",
+    "Reverse process",
+    "Reward hacking",
+    "Reward model",
+    "RLHF",
+    "RLVR",
+    "Role prompting",
+    "ROUGE",
+    "Scaling law",
+    "Score",
+    "Self-consistency",
+    "Small language model",
+    "Spectrogram",
+    "Speculative decoding",
+    "Structured output",
+    "Sycophancy",
+    "SynthID",
+    "Test-time compute",
+    "Token output rate",
+    "Top-k sampling",
+    "Tracing",
+    "Visual instruction tuning",
+    "Visual question answering",
+    "Visual tokens",
+    "Voice cloning",
+    "VQ-VAE",
+    "Watermark",
+    "β-VAE"
+  ],
+  "weeks": {
+    "01": {
+      "source": "curriculum/notes/week_01.md",
+      "section_heading": "# Glossary",
+      "reference_only": false,
+      "original_rows": [
+        {
+          "original_term": "Generative model",
+          "original_meaning": "A model of the data distribution p(x) (or p(x \\| condition)) that can sample new examples",
+          "term_keys": [
+            "Generative model"
+          ]
+        },
+        {
+          "original_term": "Discriminative model",
+          "original_meaning": "A model of p(y \\| x) that predicts labels without modelling the inputs",
+          "term_keys": [
+            "Discriminative model"
+          ]
+        },
+        {
+          "original_term": "Foundation model",
+          "original_meaning": "Large model trained on broad data and adapted to many tasks",
+          "term_keys": [
+            "Foundation model"
+          ]
+        },
+        {
+          "original_term": "Parameters (weights)",
+          "original_meaning": "The adjustable numbers inside a neural network, learned in training",
+          "term_keys": [
+            "Model weight"
+          ]
+        },
+        {
+          "original_term": "Token",
+          "original_meaning": "A sub-word unit of text with an integer ID; models read and write tokens",
+          "term_keys": [
+            "Token"
+          ]
+        },
+        {
+          "original_term": "Context window",
+          "original_meaning": "The maximum number of tokens a model can take into account at once",
+          "term_keys": [
+            "Context window"
+          ]
+        },
+        {
+          "original_term": "Training / inference",
+          "original_meaning": "Learning parameters from data / using fixed parameters to produce outputs",
+          "term_keys": [
+            "Training",
+            "Inference"
+          ]
+        },
+        {
+          "original_term": "Pre-training / post-training",
+          "original_meaning": "Next-token learning on broad data / instruction and preference tuning into an assistant",
+          "term_keys": [
+            "Pre-training",
+            "Post-training"
+          ]
+        },
+        {
+          "original_term": "Likelihood",
+          "original_meaning": "Probability the model assigns to observed data, as a function of the parameters",
+          "term_keys": [
+            "Likelihood"
+          ]
+        },
+        {
+          "original_term": "Maximum likelihood (MLE)",
+          "original_meaning": "Choosing parameters that maximise the likelihood of the training data",
+          "term_keys": [
+            "Maximum likelihood"
+          ]
+        },
+        {
+          "original_term": "Negative log-likelihood / cross-entropy",
+          "original_meaning": "The training loss of LLMs; lower is better",
+          "term_keys": [
+            "Negative log-likelihood",
+            "Cross-entropy"
+          ]
+        },
+        {
+          "original_term": "Perplexity",
+          "original_meaning": "exp(average NLL per token); an \"effective number of choices\"",
+          "term_keys": [
+            "Perplexity"
+          ]
+        },
+        {
+          "original_term": "Logit",
+          "original_meaning": "Raw score before softmax",
+          "term_keys": [
+            "Logit"
+          ]
+        },
+        {
+          "original_term": "Temperature",
+          "original_meaning": "Divides logits before softmax; controls how spread out sampling is",
+          "term_keys": [
+            "Temperature"
+          ]
+        },
+        {
+          "original_term": "Top-k / top-p",
+          "original_meaning": "Restrict sampling to the k most likely tokens / to the smallest set with total probability p",
+          "term_keys": [
+            "Top-k sampling",
+            "Nucleus"
+          ]
+        },
+        {
+          "original_term": "Latent variable",
+          "original_meaning": "Unobserved cause of the data; sampled then decoded",
+          "term_keys": [
+            "Latent variable"
+          ]
+        },
+        {
+          "original_term": "Autoregressive model",
+          "original_meaning": "Generates one element at a time, each conditioned on the previous ones",
+          "term_keys": [
+            "Autoregressive generation"
+          ]
+        },
+        {
+          "original_term": "Hallucination",
+          "original_meaning": "Fluent output that is false or unsupported",
+          "term_keys": [
+            "Hallucination"
+          ]
+        },
+        {
+          "original_term": "Open-weight model",
+          "original_meaning": "A model whose trained weights are publicly downloadable",
+          "term_keys": [
+            "Open-weight model"
+          ]
+        }
+      ],
+      "term_keys": [
+        "Generative model",
+        "Discriminative model",
+        "Foundation model",
+        "Model weight",
+        "Token",
+        "Context window",
+        "Training",
+        "Inference",
+        "Pre-training",
+        "Post-training",
+        "Likelihood",
+        "Maximum likelihood",
+        "Negative log-likelihood",
+        "Cross-entropy",
+        "Perplexity",
+        "Logit",
+        "Temperature",
+        "Top-k sampling",
+        "Nucleus",
+        "Latent variable",
+        "Autoregressive generation",
+        "Hallucination",
+        "Open-weight model",
+        "Probability",
+        "Array index",
+        "Loop",
+        "Bigram",
+        "Sampling",
+        "Conditional probability",
+        "Training target"
+      ]
+    },
+    "02": {
+      "source": "curriculum/notes/week_02.md",
+      "section_heading": "# Glossary",
+      "reference_only": false,
+      "original_rows": [
+        {
+          "original_term": "Autoencoder",
+          "original_meaning": "Encoder–decoder network trained to reconstruct its input through a bottleneck",
+          "term_keys": [
+            "Autoencoder"
+          ]
+        },
+        {
+          "original_term": "Latent space",
+          "original_meaning": "The space of codes z; in a VAE, shaped to match the prior",
+          "term_keys": [
+            "Latent space"
+          ]
+        },
+        {
+          "original_term": "Prior p(z)",
+          "original_meaning": "Fixed distribution over codes, usually N(0, I)",
+          "term_keys": [
+            "Prior"
+          ]
+        },
+        {
+          "original_term": "Encoder $q_\\phi(z \\mid x)$",
+          "original_meaning": "Network outputting a Gaussian over codes for an input; approximates the posterior",
+          "term_keys": [
+            "Encoder"
+          ]
+        },
+        {
+          "original_term": "Decoder $p_\\theta(x \\mid z)$",
+          "original_meaning": "Network mapping a code to a distribution over data",
+          "term_keys": [
+            "Decoder"
+          ]
+        },
+        {
+          "original_term": "ELBO",
+          "original_meaning": "Evidence lower bound: reconstruction term minus KL; maximised in training",
+          "term_keys": [
+            "ELBO"
+          ]
+        },
+        {
+          "original_term": "KL divergence",
+          "original_meaning": "Non-negative, asymmetric measure of difference between distributions",
+          "term_keys": [
+            "KL divergence"
+          ]
+        },
+        {
+          "original_term": "Reparameterisation trick",
+          "original_meaning": "Writing z = μ + σ ⊙ ε so sampling becomes differentiable",
+          "term_keys": [
+            "Reparameterisation"
+          ]
+        },
+        {
+          "original_term": "Posterior collapse",
+          "original_meaning": "Failure where KL → 0 and the decoder ignores the code",
+          "term_keys": [
+            "Posterior collapse"
+          ]
+        },
+        {
+          "original_term": "β-VAE",
+          "original_meaning": "VAE with the KL weighted by β, trading reconstruction for structure",
+          "term_keys": [
+            "β-VAE"
+          ]
+        },
+        {
+          "original_term": "VQ-VAE",
+          "original_meaning": "VAE with a discrete codebook of latent vectors (image/audio tokens)",
+          "term_keys": [
+            "VQ-VAE"
+          ]
+        },
+        {
+          "original_term": "Latent interpolation",
+          "original_meaning": "Decoding points on a path between two codes",
+          "term_keys": [
+            "Latent interpolation"
+          ]
+        },
+        {
+          "original_term": "Latent diffusion",
+          "original_meaning": "Diffusion model operating in a VAE's latent space",
+          "term_keys": [
+            "Latent diffusion"
+          ]
+        }
+      ],
+      "term_keys": [
+        "Autoencoder",
+        "Latent space",
+        "Prior",
+        "Encoder",
+        "Decoder",
+        "ELBO",
+        "KL divergence",
+        "Reparameterisation",
+        "Posterior collapse",
+        "β-VAE",
+        "VQ-VAE",
+        "Latent interpolation",
+        "Latent diffusion",
+        "Image tensor",
+        "Mean and standard deviation",
+        "Training loss",
+        "Latent code",
+        "Epoch",
+        "Training target"
+      ]
+    },
+    "03": {
+      "source": "curriculum/notes/week_03.md",
+      "section_heading": "# Glossary",
+      "reference_only": true,
+      "original_rows": [],
+      "term_keys": [
+        "Neural-network weights",
+        "Binary classification",
+        "Gradient",
+        "Generator",
+        "Discriminator",
+        "Detach",
+        "Logit",
+        "Non-saturating loss",
+        "Mode collapse",
+        "Feature vector",
+        "Gradient penalty",
+        "ADA",
+        "Critic",
+        "EMA",
+        "Generative precision",
+        "Generative recall",
+        "KID",
+        "TTUR"
+      ]
+    },
+    "04": {
+      "source": "curriculum/notes/week_04.md",
+      "section_heading": "# Glossary",
+      "reference_only": false,
+      "original_rows": [
+        {
+          "original_term": "Forward process",
+          "original_meaning": "Fixed Markov chain that gradually adds Gaussian noise",
+          "term_keys": [
+            "Forward process"
+          ]
+        },
+        {
+          "original_term": "Noise schedule",
+          "original_meaning": "Sequence $\\beta_t$ controlling how much noise is added per step",
+          "term_keys": [
+            "Noise schedule"
+          ]
+        },
+        {
+          "original_term": "$\\bar{\\alpha}_t$",
+          "original_meaning": "Product of $(1 - \\beta_s)$ for $s = 1, \\ldots, t$; fraction of original signal variance remaining",
+          "term_keys": [
+            "Cumulative signal fraction"
+          ]
+        },
+        {
+          "original_term": "Reverse process",
+          "original_meaning": "Learned chain that removes noise step by step",
+          "term_keys": [
+            "Reverse process"
+          ]
+        },
+        {
+          "original_term": "Noise prediction $\\epsilon_\\theta$",
+          "original_meaning": "Network output: the noise present in $x_t$",
+          "term_keys": [
+            "Noise prediction"
+          ]
+        },
+        {
+          "original_term": "Score",
+          "original_meaning": "Gradient of the log density; equivalent (up to scale) to noise prediction",
+          "term_keys": [
+            "Score"
+          ]
+        },
+        {
+          "original_term": "DDPM / DDIM",
+          "original_meaning": "Stochastic reverse chain / selected-step sampler, deterministic when η = 0",
+          "term_keys": [
+            "DDPM",
+            "DDIM"
+          ]
+        },
+        {
+          "original_term": "U-Net",
+          "original_meaning": "Convolutional encoder–decoder with skip connections",
+          "term_keys": [
+            "U-Net"
+          ]
+        },
+        {
+          "original_term": "Diffusion transformer (DiT)",
+          "original_meaning": "Transformer over latent patches used as the denoiser",
+          "term_keys": [
+            "Diffusion transformer"
+          ]
+        },
+        {
+          "original_term": "Latent diffusion",
+          "original_meaning": "Diffusion in a VAE's latent space",
+          "term_keys": [
+            "Latent diffusion"
+          ]
+        },
+        {
+          "original_term": "Cross-attention",
+          "original_meaning": "Mechanism letting image features attend to text tokens",
+          "term_keys": [
+            "Cross-attention"
+          ]
+        },
+        {
+          "original_term": "Classifier-free guidance",
+          "original_meaning": "Extrapolating conditional vs unconditional predictions by w",
+          "term_keys": [
+            "Guidance"
+          ]
+        },
+        {
+          "original_term": "Negative prompt",
+          "original_meaning": "Prompt whose direction guidance moves away from",
+          "term_keys": [
+            "Negative prompt"
+          ]
+        },
+        {
+          "original_term": "Flow matching / rectified flow",
+          "original_meaning": "Learn velocity targets from selected paired paths; sampling trajectories can curve",
+          "term_keys": [
+            "Flow matching",
+            "Rectified flow"
+          ]
+        },
+        {
+          "original_term": "Distillation",
+          "original_meaning": "Training a few-step student to mimic a many-step sampler",
+          "term_keys": [
+            "Distillation"
+          ]
+        },
+        {
+          "original_term": "CLIP score",
+          "original_meaning": "Cosine similarity between CLIP embeddings of image and prompt",
+          "term_keys": [
+            "CLIP score"
+          ]
+        }
+      ],
+      "term_keys": [
+        "Forward process",
+        "Noise schedule",
+        "Cumulative signal fraction",
+        "Reverse process",
+        "Noise prediction",
+        "Score",
+        "DDPM",
+        "DDIM",
+        "U-Net",
+        "Diffusion transformer",
+        "Latent diffusion",
+        "Cross-attention",
+        "Guidance",
+        "Negative prompt",
+        "Flow matching",
+        "Rectified flow",
+        "Distillation",
+        "CLIP score",
+        "Gaussian noise",
+        "Regression",
+        "Tensor shape",
+        "Denoiser",
+        "Mean squared error",
+        "Sampler"
+      ]
+    },
+    "05": {
+      "source": "curriculum/notes/week_05.md",
+      "section_heading": "# Glossary",
+      "reference_only": true,
+      "original_rows": [],
+      "term_keys": [
+        "Vector",
+        "Matrix shape",
+        "Training target",
+        "Embedding",
+        "Causal mask",
+        "Softmax",
+        "Attention head",
+        "Residual connection",
+        "Logit",
+        "Perplexity",
+        "Feed-forward network (MLP)",
+        "Tensor",
+        "Query, key and value",
+        "Attention mask"
+      ]
+    },
+    "06": {
+      "source": "curriculum/notes/week_06.md",
+      "section_heading": "# Glossary",
+      "reference_only": false,
+      "original_rows": [
+        {
+          "original_term": "n-gram model",
+          "original_meaning": "Predicts the next word from the previous n − 1 words by counting",
+          "term_keys": [
+            "n-gram model"
+          ]
+        },
+        {
+          "original_term": "Word embedding",
+          "original_meaning": "Dense learned vector per word",
+          "term_keys": [
+            "Embedding"
+          ]
+        },
+        {
+          "original_term": "Pre-training",
+          "original_meaning": "Self-supervised training on large unlabelled text",
+          "term_keys": [
+            "Pre-training"
+          ]
+        },
+        {
+          "original_term": "Scaling law",
+          "original_meaning": "Empirical power law relating loss to parameters, data and compute",
+          "term_keys": [
+            "Scaling law"
+          ]
+        },
+        {
+          "original_term": "Chinchilla optimum",
+          "original_meaning": "≈ 20 training tokens per parameter for fixed compute",
+          "term_keys": [
+            "Compute-optimal training"
+          ]
+        },
+        {
+          "original_term": "In-context learning",
+          "original_meaning": "Performing a task from examples in the prompt without weight updates",
+          "term_keys": [
+            "In-context learning"
+          ]
+        },
+        {
+          "original_term": "Context window",
+          "original_meaning": "Maximum tokens the model can attend to in one call",
+          "term_keys": [
+            "Context window"
+          ]
+        },
+        {
+          "original_term": "Beam search",
+          "original_meaning": "Decoding that keeps the k most probable partial sequences",
+          "term_keys": [
+            "Beam search"
+          ]
+        },
+        {
+          "original_term": "Top-p (nucleus)",
+          "original_meaning": "Sampling from the smallest set of tokens with cumulative probability ≥ p",
+          "term_keys": [
+            "Nucleus"
+          ]
+        },
+        {
+          "original_term": "Open-weight model",
+          "original_meaning": "Model whose weights are downloadable under a licence",
+          "term_keys": [
+            "Open-weight model"
+          ]
+        },
+        {
+          "original_term": "Small language model",
+          "original_meaning": "Model of roughly ≤ 8 B parameters for local or device use",
+          "term_keys": [
+            "Small language model"
+          ]
+        },
+        {
+          "original_term": "Reasoning model",
+          "original_meaning": "Model trained to generate extended reasoning before answering",
+          "term_keys": [
+            "Reasoning model"
+          ]
+        },
+        {
+          "original_term": "Test-time compute",
+          "original_meaning": "Extra inference computation (e.g. thinking tokens) to improve answers",
+          "term_keys": [
+            "Test-time compute"
+          ]
+        },
+        {
+          "original_term": "Model card",
+          "original_meaning": "Documentation of a model's intended use, data, evaluation, limits and licence",
+          "term_keys": [
+            "Model card"
+          ]
+        },
+        {
+          "original_term": "Contamination",
+          "original_meaning": "Benchmark test data appearing in training data",
+          "term_keys": [
+            "Contamination"
+          ]
+        }
+      ],
+      "term_keys": [
+        "n-gram model",
+        "Embedding",
+        "Pre-training",
+        "Scaling law",
+        "Compute-optimal training",
+        "In-context learning",
+        "Context window",
+        "Beam search",
+        "Nucleus",
+        "Open-weight model",
+        "Small language model",
+        "Reasoning model",
+        "Test-time compute",
+        "Model card",
+        "Contamination",
+        "Token ID",
+        "Probability distribution",
+        "Causal language model",
+        "Encoder",
+        "Decoder",
+        "Chat template",
+        "Temperature",
+        "Latency",
+        "Attention mask",
+        "Training target"
+      ]
+    },
+    "07": {
+      "source": "curriculum/notes/week_07.md",
+      "section_heading": "# Glossary",
+      "reference_only": false,
+      "original_rows": [
+        {
+          "original_term": "In-context learning",
+          "original_meaning": "Learning a task from examples in the prompt without weight updates",
+          "term_keys": [
+            "In-context learning"
+          ]
+        },
+        {
+          "original_term": "System/developer message",
+          "original_meaning": "Application-level instructions with priority over user messages",
+          "term_keys": [
+            "Instruction message"
+          ]
+        },
+        {
+          "original_term": "Zero/one/few-shot",
+          "original_meaning": "Prompting with no, one or several examples",
+          "term_keys": [
+            "Zero-shot",
+            "One-shot",
+            "Few-shot"
+          ]
+        },
+        {
+          "original_term": "Role (persona) prompting",
+          "original_meaning": "Assigning the model a role to shape tone and priorities",
+          "term_keys": [
+            "Role prompting"
+          ]
+        },
+        {
+          "original_term": "Chain-of-thought",
+          "original_meaning": "Prompting the model to write intermediate reasoning steps",
+          "term_keys": [
+            "Chain-of-thought"
+          ]
+        },
+        {
+          "original_term": "Self-consistency",
+          "original_meaning": "Majority vote over several sampled reasoning paths",
+          "term_keys": [
+            "Self-consistency"
+          ]
+        },
+        {
+          "original_term": "Prompt chaining",
+          "original_meaning": "Splitting a task into a sequence of prompts",
+          "term_keys": [
+            "Prompt chaining"
+          ]
+        },
+        {
+          "original_term": "Structured output",
+          "original_meaning": "Output constrained to a schema (e.g. JSON)",
+          "term_keys": [
+            "Structured output"
+          ]
+        },
+        {
+          "original_term": "Context engineering",
+          "original_meaning": "Selecting, compressing and ordering what enters the context window",
+          "term_keys": [
+            "Context engineering"
+          ]
+        },
+        {
+          "original_term": "ROUGE / BLEU",
+          "original_meaning": "Word-overlap metrics against references (summarisation / translation)",
+          "term_keys": [
+            "ROUGE",
+            "BLEU"
+          ]
+        },
+        {
+          "original_term": "LLM-as-a-judge",
+          "original_meaning": "Using an LLM to score outputs with a rubric",
+          "term_keys": [
+            "LLM-as-a-judge"
+          ]
+        },
+        {
+          "original_term": "Sycophancy",
+          "original_meaning": "Tendency to agree with the user's stated view",
+          "term_keys": [
+            "Sycophancy"
+          ]
+        },
+        {
+          "original_term": "Prompt injection",
+          "original_meaning": "Malicious instructions that override intended behaviour",
+          "term_keys": [
+            "Prompt injection"
+          ]
+        },
+        {
+          "original_term": "Jailbreak",
+          "original_meaning": "Prompting that bypasses safety rules",
+          "term_keys": [
+            "Jailbreak"
+          ]
+        }
+      ],
+      "term_keys": [
+        "In-context learning",
+        "Instruction message",
+        "Zero-shot",
+        "One-shot",
+        "Few-shot",
+        "Role prompting",
+        "Chain-of-thought",
+        "Self-consistency",
+        "Prompt chaining",
+        "Structured output",
+        "Context engineering",
+        "ROUGE",
+        "BLEU",
+        "LLM-as-a-judge",
+        "Sycophancy",
+        "Prompt injection",
+        "Jailbreak",
+        "Prompt",
+        "Accuracy",
+        "JSON",
+        "Evaluation harness",
+        "Schema",
+        "Position bias",
+        "Ground truth",
+        "Token"
+      ]
+    },
+    "08": {
+      "source": "curriculum/notes/week_08.md",
+      "section_heading": "# Glossary",
+      "reference_only": false,
+      "original_rows": [
+        {
+          "original_term": "Full fine-tuning",
+          "original_meaning": "Updating all model weights",
+          "term_keys": [
+            "Full fine-tuning"
+          ]
+        },
+        {
+          "original_term": "SFT",
+          "original_meaning": "Supervised fine-tuning on prompt–response pairs",
+          "term_keys": [
+            "Supervised fine-tuning"
+          ]
+        },
+        {
+          "original_term": "Instruction tuning",
+          "original_meaning": "SFT on many instruction-formatted tasks",
+          "term_keys": [
+            "Instruction tuning"
+          ]
+        },
+        {
+          "original_term": "Chat template",
+          "original_meaning": "Model-specific special-token format for messages",
+          "term_keys": [
+            "Chat template"
+          ]
+        },
+        {
+          "original_term": "RLHF",
+          "original_meaning": "Reinforcement learning from human feedback (reward model + PPO)",
+          "term_keys": [
+            "RLHF"
+          ]
+        },
+        {
+          "original_term": "Reward model",
+          "original_meaning": "Model predicting which response humans prefer",
+          "term_keys": [
+            "Reward model"
+          ]
+        },
+        {
+          "original_term": "PPO",
+          "original_meaning": "Proximal Policy Optimisation, the RL algorithm used in RLHF",
+          "term_keys": [
+            "PPO"
+          ]
+        },
+        {
+          "original_term": "DPO",
+          "original_meaning": "Direct Preference Optimisation: preference loss without RL",
+          "term_keys": [
+            "DPO"
+          ]
+        },
+        {
+          "original_term": "GRPO / RLVR",
+          "original_meaning": "Group relative policy optimisation / RL with verifiable rewards",
+          "term_keys": [
+            "GRPO",
+            "RLVR"
+          ]
+        },
+        {
+          "original_term": "Reward hacking",
+          "original_meaning": "Exploiting flaws in a reward signal",
+          "term_keys": [
+            "Reward hacking"
+          ]
+        },
+        {
+          "original_term": "LoRA",
+          "original_meaning": "Low-rank adaptation: trainable low-rank update to frozen weights",
+          "term_keys": [
+            "LoRA adapter"
+          ]
+        },
+        {
+          "original_term": "QLoRA",
+          "original_meaning": "LoRA on a 4-bit quantised base model",
+          "term_keys": [
+            "QLoRA"
+          ]
+        },
+        {
+          "original_term": "Adapter",
+          "original_meaning": "Small trainable module inserted into a frozen network",
+          "term_keys": [
+            "Adapter"
+          ]
+        },
+        {
+          "original_term": "Prompt tuning",
+          "original_meaning": "Learning soft vectors at the input",
+          "term_keys": [
+            "Prompt tuning"
+          ]
+        },
+        {
+          "original_term": "Prefix tuning",
+          "original_meaning": "Learning key/value prefixes at transformer layers",
+          "term_keys": [
+            "Prefix tuning"
+          ]
+        },
+        {
+          "original_term": "Distillation",
+          "original_meaning": "Training a student model to imitate a teacher",
+          "term_keys": [
+            "Distillation"
+          ]
+        },
+        {
+          "original_term": "Catastrophic forgetting",
+          "original_meaning": "Loss of prior abilities after fine-tuning",
+          "term_keys": [
+            "Catastrophic forgetting"
+          ]
+        }
+      ],
+      "term_keys": [
+        "Full fine-tuning",
+        "Supervised fine-tuning",
+        "Instruction tuning",
+        "Chat template",
+        "RLHF",
+        "Reward model",
+        "PPO",
+        "DPO",
+        "GRPO",
+        "RLVR",
+        "Reward hacking",
+        "LoRA adapter",
+        "QLoRA",
+        "Adapter",
+        "Prompt tuning",
+        "Prefix tuning",
+        "Distillation",
+        "Catastrophic forgetting",
+        "Model weight",
+        "Train/test split",
+        "Loss",
+        "Intent",
+        "Frozen parameter",
+        "Rank",
+        "Overfitting",
+        "Matrix projection",
+        "Train / validation / test",
+        "Training target"
+      ]
+    },
+    "09": {
+      "source": "curriculum/notes/week_09.md",
+      "section_heading": "# Glossary",
+      "reference_only": false,
+      "original_rows": [
+        {
+          "original_term": "Modality",
+          "original_meaning": "A type of data (text, image, audio, video, …)",
+          "term_keys": [
+            "Modality"
+          ]
+        },
+        {
+          "original_term": "Cross-modal",
+          "original_meaning": "Relating one modality to another",
+          "term_keys": [
+            "Cross-modal"
+          ]
+        },
+        {
+          "original_term": "Alignment",
+          "original_meaning": "Making corresponding content across modalities match",
+          "term_keys": [
+            "Alignment"
+          ]
+        },
+        {
+          "original_term": "Fusion (early/late/cross-attention)",
+          "original_meaning": "Where and how modalities are combined in a model",
+          "term_keys": [
+            "Multimodal fusion"
+          ]
+        },
+        {
+          "original_term": "Shared embedding space",
+          "original_meaning": "Vector space in which several modalities can be compared",
+          "term_keys": [
+            "Shared space"
+          ]
+        },
+        {
+          "original_term": "Contrastive learning",
+          "original_meaning": "Learning by pulling positives together and pushing negatives apart",
+          "term_keys": [
+            "Contrastive learning"
+          ]
+        },
+        {
+          "original_term": "InfoNCE",
+          "original_meaning": "Softmax cross-entropy contrastive loss over a batch",
+          "term_keys": [
+            "InfoNCE"
+          ]
+        },
+        {
+          "original_term": "Zero-shot classification",
+          "original_meaning": "Classifying with class descriptions, without task-specific training",
+          "term_keys": [
+            "Zero-shot classification"
+          ]
+        },
+        {
+          "original_term": "Dual encoder",
+          "original_meaning": "Separate encoders per modality compared by similarity",
+          "term_keys": [
+            "Dual encoder"
+          ]
+        },
+        {
+          "original_term": "Vision-language model (VLM)",
+          "original_meaning": "Model processing images and text jointly",
+          "term_keys": [
+            "VLM"
+          ]
+        },
+        {
+          "original_term": "Visual instruction tuning",
+          "original_meaning": "Fine-tuning a VLM on image-based conversations",
+          "term_keys": [
+            "Visual instruction tuning"
+          ]
+        },
+        {
+          "original_term": "Modality gap",
+          "original_meaning": "Separation between image and text embedding regions",
+          "term_keys": [
+            "Modality gap"
+          ]
+        },
+        {
+          "original_term": "Spectrogram",
+          "original_meaning": "Time–frequency representation of audio",
+          "term_keys": [
+            "Spectrogram"
+          ]
+        },
+        {
+          "original_term": "Word error rate",
+          "original_meaning": "(S + D + I) / N for speech recognition",
+          "term_keys": [
+            "Word error rate"
+          ]
+        }
+      ],
+      "term_keys": [
+        "Modality",
+        "Cross-modal",
+        "Alignment",
+        "Multimodal fusion",
+        "Shared space",
+        "Contrastive learning",
+        "InfoNCE",
+        "Zero-shot classification",
+        "Dual encoder",
+        "VLM",
+        "Visual instruction tuning",
+        "Modality gap",
+        "Spectrogram",
+        "Word error rate",
+        "Vector",
+        "Encoder",
+        "Cosine similarity",
+        "Embedding",
+        "Precision@k",
+        "PCA",
+        "Inference",
+        "Pair",
+        "Similarity"
+      ]
+    },
+    "10": {
+      "source": "curriculum/notes/week_10.md",
+      "section_heading": "# Glossary",
+      "reference_only": false,
+      "original_rows": [
+        {
+          "original_term": "Multimodal LLM (MLLM)",
+          "original_meaning": "LLM that accepts (and possibly generates) images, audio, video or documents",
+          "term_keys": [
+            "Multimodal language model"
+          ]
+        },
+        {
+          "original_term": "Vision-language model (VLM)",
+          "original_meaning": "Model processing images and text jointly",
+          "term_keys": [
+            "VLM"
+          ]
+        },
+        {
+          "original_term": "Natively multimodal (\"omni\")",
+          "original_meaning": "Model trained from the start on interleaved multimodal tokens",
+          "term_keys": [
+            "Natively multimodal"
+          ]
+        },
+        {
+          "original_term": "Projector",
+          "original_meaning": "Small network mapping encoder features into the LLM's embedding space",
+          "term_keys": [
+            "Projector"
+          ]
+        },
+        {
+          "original_term": "Visual tokens",
+          "original_meaning": "Image patches passed to the LLM as embeddings",
+          "term_keys": [
+            "Visual tokens"
+          ]
+        },
+        {
+          "original_term": "Visual instruction tuning",
+          "original_meaning": "Fine-tuning a VLM on image-based conversations and tasks",
+          "term_keys": [
+            "Visual instruction tuning"
+          ]
+        },
+        {
+          "original_term": "Visual question answering (VQA)",
+          "original_meaning": "Answering questions about an image",
+          "term_keys": [
+            "Visual question answering"
+          ]
+        },
+        {
+          "original_term": "Image-to-image (SDEdit)",
+          "original_meaning": "Editing by noising an image partially and denoising with a new prompt",
+          "term_keys": [
+            "Image-to-image editing"
+          ]
+        },
+        {
+          "original_term": "Strength",
+          "original_meaning": "Fraction of the noise schedule applied in image-to-image",
+          "term_keys": [
+            "Editing strength"
+          ]
+        },
+        {
+          "original_term": "Inpainting / outpainting",
+          "original_meaning": "Regenerating a masked region / extending the canvas",
+          "term_keys": [
+            "Inpainting",
+            "Outpainting"
+          ]
+        },
+        {
+          "original_term": "ControlNet",
+          "original_meaning": "Adapter that conditions diffusion on edges, depth, pose, etc.",
+          "term_keys": [
+            "ControlNet"
+          ]
+        },
+        {
+          "original_term": "Text-to-speech (TTS)",
+          "original_meaning": "Generating speech audio from text",
+          "term_keys": [
+            "TTS"
+          ]
+        },
+        {
+          "original_term": "Voice cloning",
+          "original_meaning": "TTS imitating a specific speaker from sample audio",
+          "term_keys": [
+            "Voice cloning"
+          ]
+        },
+        {
+          "original_term": "CLIP score",
+          "original_meaning": "100 × cosine similarity of CLIP image and text embeddings",
+          "term_keys": [
+            "CLIP score"
+          ]
+        },
+        {
+          "original_term": "POPE / CHAIR",
+          "original_meaning": "Benchmarks for object hallucination in MLLMs",
+          "term_keys": [
+            "POPE",
+            "CHAIR"
+          ]
+        },
+        {
+          "original_term": "Mean Opinion Score (MOS)",
+          "original_meaning": "Average human rating (e.g. 1–5) of speech naturalness",
+          "term_keys": [
+            "Mean opinion score"
+          ]
+        },
+        {
+          "original_term": "Deepfake",
+          "original_meaning": "Realistic synthetic media depicting real people or events falsely",
+          "term_keys": [
+            "Deepfake"
+          ]
+        },
+        {
+          "original_term": "C2PA",
+          "original_meaning": "Standard for cryptographically signed content credentials",
+          "term_keys": [
+            "C2PA"
+          ]
+        },
+        {
+          "original_term": "Watermark (SynthID)",
+          "original_meaning": "Invisible signal embedded in generated content for detection",
+          "term_keys": [
+            "Watermark",
+            "SynthID"
+          ]
+        },
+        {
+          "original_term": "Liar's dividend",
+          "original_meaning": "Dismissing genuine evidence as fake because fakes exist",
+          "term_keys": [
+            "Liar's dividend"
+          ]
+        }
+      ],
+      "term_keys": [
+        "Multimodal language model",
+        "VLM",
+        "Natively multimodal",
+        "Projector",
+        "Visual tokens",
+        "Visual instruction tuning",
+        "Visual question answering",
+        "Image-to-image editing",
+        "Editing strength",
+        "Inpainting",
+        "Outpainting",
+        "ControlNet",
+        "TTS",
+        "Voice cloning",
+        "CLIP score",
+        "POPE",
+        "CHAIR",
+        "Mean opinion score",
+        "Deepfake",
+        "C2PA",
+        "Watermark",
+        "SynthID",
+        "Liar's dividend",
+        "Modality",
+        "Autoregressive generation",
+        "Ground truth",
+        "Hallucination",
+        "Diffusion",
+        "ASR",
+        "Provenance"
+      ]
+    },
+    "11": {
+      "source": "curriculum/notes/week_11.md",
+      "section_heading": "# Glossary",
+      "reference_only": false,
+      "original_rows": [
+        {
+          "original_term": "API platform",
+          "original_meaning": "Service providing model access over HTTP with keys, quotas and billing",
+          "term_keys": [
+            "API platform"
+          ]
+        },
+        {
+          "original_term": "OpenAI-compatible API",
+          "original_meaning": "Endpoint accepting the OpenAI chat-completions format",
+          "term_keys": [
+            "OpenAI-compatible API"
+          ]
+        },
+        {
+          "original_term": "TTFT",
+          "original_meaning": "Time to first token: delay before the first output token arrives",
+          "term_keys": [
+            "TTFT"
+          ]
+        },
+        {
+          "original_term": "Tokens per second",
+          "original_meaning": "State the boundary: decoding speed or whole-request output-token rate. The CPU notebook measures the latter.",
+          "term_keys": [
+            "Token output rate"
+          ]
+        },
+        {
+          "original_term": "Prefill / decode",
+          "original_meaning": "Processing the prompt in parallel / generating tokens one by one",
+          "term_keys": [
+            "Prefill",
+            "Decoding"
+          ]
+        },
+        {
+          "original_term": "Rate limit (HTTP 429)",
+          "original_meaning": "Cap on requests or tokens per minute",
+          "term_keys": [
+            "Rate limit",
+            "HTTP 429"
+          ]
+        },
+        {
+          "original_term": "Exponential back-off",
+          "original_meaning": "Retrying with waits that double each attempt, plus jitter",
+          "term_keys": [
+            "Exponential backoff"
+          ]
+        },
+        {
+          "original_term": "Quantisation",
+          "original_meaning": "Storing weights with fewer bits (int8, int4)",
+          "term_keys": [
+            "Quantisation"
+          ]
+        },
+        {
+          "original_term": "Absmax / group-wise",
+          "original_meaning": "Scaling by the largest magnitude, per group of weights",
+          "term_keys": [
+            "Absmax quantisation",
+            "Group-wise quantisation"
+          ]
+        },
+        {
+          "original_term": "Continuous batching",
+          "original_meaning": "Adding and removing requests at every decoding step",
+          "term_keys": [
+            "Continuous batching"
+          ]
+        },
+        {
+          "original_term": "PagedAttention",
+          "original_meaning": "vLLM's paged management of the KV cache",
+          "term_keys": [
+            "PagedAttention"
+          ]
+        },
+        {
+          "original_term": "Prefix (prompt) caching",
+          "original_meaning": "Reusing computation for repeated prompt beginnings",
+          "term_keys": [
+            "Prefix caching"
+          ]
+        },
+        {
+          "original_term": "Speculative decoding",
+          "original_meaning": "Draft model proposes tokens, large model verifies",
+          "term_keys": [
+            "Speculative decoding"
+          ]
+        },
+        {
+          "original_term": "Gradio / FastAPI",
+          "original_meaning": "Python libraries for web interfaces / web APIs",
+          "term_keys": [
+            "Gradio",
+            "FastAPI"
+          ]
+        },
+        {
+          "original_term": "Docker image",
+          "original_meaning": "Packaged application with dependencies",
+          "term_keys": [
+            "Docker image"
+          ]
+        },
+        {
+          "original_term": "Tracing",
+          "original_meaning": "Recording each step of a request with timings",
+          "term_keys": [
+            "Tracing"
+          ]
+        },
+        {
+          "original_term": "Guardrail",
+          "original_meaning": "Check that blocks or modifies unsafe inputs or outputs",
+          "term_keys": [
+            "Guardrail"
+          ]
+        },
+        {
+          "original_term": "p95 latency",
+          "original_meaning": "Latency below which 95% of requests complete",
+          "term_keys": [
+            "p95 latency"
+          ]
+        }
+      ],
+      "term_keys": [
+        "API platform",
+        "OpenAI-compatible API",
+        "TTFT",
+        "Token output rate",
+        "Prefill",
+        "Decoding",
+        "Rate limit",
+        "HTTP 429",
+        "Exponential backoff",
+        "Quantisation",
+        "Absmax quantisation",
+        "Group-wise quantisation",
+        "Continuous batching",
+        "PagedAttention",
+        "Prefix caching",
+        "Speculative decoding",
+        "Gradio",
+        "FastAPI",
+        "Docker image",
+        "Tracing",
+        "Guardrail",
+        "p95 latency",
+        "Token",
+        "Function",
+        "JSON",
+        "API",
+        "Latency",
+        "Endpoint",
+        "Throughput",
+        "Batching",
+        "Cache",
+        "Cold measurement",
+        "HTTP 422",
+        "Response cache",
+        "Synthetic traffic",
+        "TestClient",
+        "Warm measurement"
+      ]
+    },
+    "12": {
+      "source": "curriculum/notes/week_12.md",
+      "section_heading": "# Glossary",
+      "reference_only": true,
+      "original_rows": [],
+      "term_keys": [
+        "Embedding",
+        "Context",
+        "Tool call",
+        "Chunk",
+        "Dense retrieval",
+        "BM25",
+        "RRF",
+        "Re-ranker",
+        "MRR",
+        "Abstention",
+        "Indirect prompt injection",
+        "MCP",
+        "Tool",
+        "Cited-quote support",
+        "Passage recall",
+        "Permission gate",
+        "Policy fallback"
+      ]
+    }
+  }
+}

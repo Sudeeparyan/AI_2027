@@ -26,3 +26,10 @@
 - Latest successful cached local CPU full core: 439.0 s (7.3 min), recorded in `research/lab_runs_2026-10.json`; final smoke PASS (96.5 s). Current executed core code matches the successful full-run evidence.
 - All 26 current release gates passed, including coverage 100%, strict notes, body ≤ 40, fonts ≥ 14, semantic helpers and shared diagram/attachment parity. See `research/ITERATION3_2026-10-12.json`.
 - No timed Colab, clean-install/download, live-provider, browser-widget or optional GPU/stretch claim. Earlier pending handoffs above describe intermediate states.
+
+
+### Audit correction closeout — 13 October 2026
+
+- Worked ROUGE counts before formulas; valid optional OpenAI cap, validation/final-test separation and local fallback.
+- Final current artifacts rebuilt, checked and visually reviewed; no open findings. Evidence: ../AUDIT_FIXES_2026-10-12.json.
+- CPU/Office verification is local; Colab, live API and classroom limits remain documented.

@@ -488,7 +488,7 @@
         "role": "tool"
       }
     ],
-    "example": "Illustration: top-p .8 keeps three.",
+    "example": "Top-p 0.8 on [0.56, 0.21, 0.12, 0.08, 0.03] keeps three.",
     "question": "Longer thinking proves correctness?",
     "answer": "No; check final answers.",
     "next": "Next: evaluate prompt changes.",

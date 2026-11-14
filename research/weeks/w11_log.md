@@ -26,3 +26,25 @@ Handoff: all five owned sources ready for root build, audits, smoke/full CPU and
 - Latest successful cached local CPU full core: 39.5 s (0.7 min), recorded in `research/lab_runs_2026-10.json`; final smoke PASS (34.7 s). Current executed core code matches the successful full-run evidence.
 - All 26 current release gates passed, including coverage 100%, strict notes, body ≤ 40, fonts ≥ 14, semantic helpers and shared diagram/attachment parity. See `research/ITERATION3_2026-10-12.json`.
 - No timed Colab, clean-install/download, live-provider, browser-widget or optional GPU/stretch claim. Earlier pending handoffs above describe intermediate states.
+
+
+## Runtime provenance repair — 12 October 2026
+- Latency, batching and monitoring figure sources now read results_cpu_core.json and require its real evidence.started_at_utc. Captions/companion sections use W11_CORE_DATE; source core titles 15/22/33 updated together.
+- Monitoring now plots recorded aggregates and counts rather than reconstructing per-request durations from the archived image. Percentiles use allowed requests; count categories overlap. Archived quantisation values remain separate; its unsupported 9 Oct date was removed.
+- Existing archived GPU timings do not match the dated 10 Oct follow-up export; surviving executed full notebook is the 11 Oct CPU core, not that archive. No inferred date or new run record was added.
+- Source edits only; no build, render or notebook execution during active coordinated CPU runs. Coordinator must rebuild and inspect the changed charts and Word sections.
+
+- Source-only inspection observed notes at core15/22/33: 155/164/152 whitespace-separated words; each has five Explain sentences, all 7?13 words. No build or notebook execution was run.
+
+
+### Fresh CPU evidence promotion — 12 October 2026
+- Coordinator full core recorded 33.2 seconds, starting 2026-10-12T16:57:54.084537+00:00, in the clean pinned CPU kernel. Executed-notebook SHA-256 matched the successful full record; the run is within the 900-second local CPU budget.
+- Fresh results_cpu_core.json promoted with original measured values, runtime and dated evidence; historical experiment assets retained.
+- Record appended to research/lab_runs_2026-10.json. This is a local measurement; no timed Colab or live-provider claim. Filling/rebuilding/rendered review remain with the coordinator.
+
+
+### Audit correction closeout — 13 October 2026
+
+- Complete installation, measured current CPU timing, accurate requested-budget chart label, concrete rounding before formulas and honest archive labels.
+- Final current artifacts rebuilt, checked and visually reviewed; no open findings. Evidence: ../AUDIT_FIXES_2026-10-12.json.
+- CPU/Office verification is local; Colab, live API and classroom limits remain documented.

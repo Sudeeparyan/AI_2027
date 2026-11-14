@@ -52,18 +52,18 @@ def runtime_environment(full: bool, device: str):
                 os.environ[key] = value
 
 
-def run(week: int, full: bool, timeout: int, device: str = "cpu", progress: bool = False) -> dict:
+def run(week: int, full: bool, timeout: int, device: str = "cpu", progress: bool = False, kernel: str = "python3") -> dict:
     with runtime_environment(full, device):
-        return execute_lab(week, full, timeout, device, progress)
+        return execute_lab(week, full, timeout, device, progress, kernel)
 
 
-def execute_lab(week: int, full: bool, timeout: int, device: str, progress: bool) -> dict:
+def execute_lab(week: int, full: bool, timeout: int, device: str, progress: bool, kernel: str = "python3") -> dict:
     src = next((ROOT / "deliverables").glob(f"Week_{week:02d}_*")) / f"Week_{week:02d}_Lab_Solutions.ipynb"
     nb = nbformat.read(str(src), as_version=4)
     nb.cells = [c for c in nb.cells if not SKIP_TAGS & set(c.get("metadata", {}).get("tags", []))]
     workdir = ROOT / "build" / f"week_{week:02d}" / "lab_run"
     workdir.mkdir(parents=True, exist_ok=True)
-    client = NotebookClient(nb, timeout=timeout, kernel_name="python3", resources={"metadata": {"path": str(workdir)}})
+    client = NotebookClient(nb, timeout=timeout, kernel_name=kernel, resources={"metadata": {"path": str(workdir)}})
     if progress:
         def report_cell(cell, cell_index):
             if cell.cell_type == "code":
@@ -74,7 +74,7 @@ def execute_lab(week: int, full: bool, timeout: int, device: str, progress: bool
     result = {"week": week, "mode": mode, "ok": True, "error": None,
               "started_at_utc": dt.datetime.now(dt.timezone.utc).isoformat(),
               "timeout_per_cell": timeout, "notebook_sha256": hashlib.sha256(src.read_bytes()).hexdigest(),
-              "runner_python": sys.executable, "requested_device": device, "path": "core" if full else "smoke"}
+              "runner_python": sys.executable, "kernel_name": kernel, "requested_device": device, "path": "core" if full else "smoke"}
     try:
         client.execute()
     except CellExecutionError as e:
@@ -112,6 +112,7 @@ def main() -> int:
     ap.add_argument("--timeout", type=int, default=1800, help="seconds per cell")
     ap.add_argument("--device", choices=["cpu", "cuda"], default="cpu")
     ap.add_argument("--progress", action="store_true", help="show code-cell progress without printing source or secrets")
+    ap.add_argument("--kernel", default="python3", help="registered Jupyter kernel for an isolated validation environment")
     a = ap.parse_args()
     weeks = sorted({w for part in a.weeks.split(",") for w in (range(1, 13) if part == "all" else range(int(part.split("-")[0]), int(part.split("-")[-1]) + 1))})
     bad = 0
@@ -124,7 +125,7 @@ def main() -> int:
         return 2
     try:
         for w in weeks:
-            r = run(w, a.full, a.timeout, a.device, a.progress)
+            r = run(w, a.full, a.timeout, a.device, a.progress, a.kernel)
             print(f"week {w:02d} lab ({r['mode']}): {'PASS' if r['ok'] else 'FAIL'} in {r['seconds']} s", flush=True)
             if not r["ok"]:
                 bad += 1

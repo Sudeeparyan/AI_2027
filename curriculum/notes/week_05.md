@@ -312,13 +312,12 @@ Use text kept separate from training. Compare the same tokenizer, test text and 
 |---|---|
 | Parameters | {{w05_params}} |
 | Training steps | {{w05_steps}} |
-| Recorded runtime | {{w05_minutes}} minutes on {{w05_device}} |
 | Vocabulary | {{w05_vocab}} characters |
 | Initial validation loss | {{w05_val_start}} nats per character |
 | Final validation loss | {{w05_val_end}} nats per character |
 | Final validation perplexity | {{w05_ppl_end}} |
 
-These values come from the stored metrics, not a promised outcome for every runtime. A separate, later full run of the notebook's GPU stretch configuration (four layers, six heads, width 192, context 128) on {{w05_lab_device}} ({{w05_lab_date}}) reached a final validation loss of {{w05_lab_val}} (perplexity {{w05_lab_ppl}}) in {{w05_lab_minutes}} minutes of training. The CPU core (three layers, four heads, width 128, context 64, 2,000 updates, {{w05_core_params}} parameters) reached validation loss {{w05_core_val}} (perplexity {{w05_core_ppl}}); the whole core took {{W05_CORE_TIME}} on the course laptop. Its sample at temperature 0.5 began: "{{w05_core_sample}}". Each check averages only a few random validation batches, so repeated runs differ slightly.
+These values come from the stored metrics, not a promised outcome for every training run. A separate, later full run of the notebook's GPU stretch configuration (four layers, six heads, width 192, context 128) on {{w05_lab_device}} ({{w05_lab_date}}) reached a final validation loss of {{w05_lab_val}} (perplexity {{w05_lab_ppl}}) in {{w05_lab_minutes}} minutes of training. The CPU core (three layers, four heads, width 128, context 64, 2,000 updates, {{w05_core_params}} parameters) reached validation loss {{w05_core_val}} (perplexity {{w05_core_ppl}}); the whole core took {{W05_CORE_TIME}} on the course laptop. Its sample at temperature 0.5 began: "{{w05_core_sample}}". Each check averages only a few random validation batches, so repeated runs differ slightly.
 
 ![Stored measured validation curve](fig:chargpt_loss)
 
@@ -481,7 +480,7 @@ Tiny Shakespeare is split by position: the last 10% is held out for validation. 
 
 # Glossary
 
-This week's key terms are listed in the Quick glossary at the end of the beginner walkthrough above. The complete module glossary for all twelve weeks is in Course_Glossary.docx in the 00_Course folder.
+<!-- Definitions generated from curriculum/glossary.json week_glossary. -->
 
 # Readings, videos and further practice
 

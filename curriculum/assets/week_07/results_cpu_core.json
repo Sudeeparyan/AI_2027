@@ -13,7 +13,7 @@
       "samples": 3,
       "problems": 1
     },
-    "elapsed_seconds": 451.033248599997
+    "elapsed_seconds": 433.5563032000209
   },
   "classification": [
     {
@@ -22,7 +22,7 @@
       "accuracy": 0.2,
       "invalid": 0,
       "avg_tokens": 6.0,
-      "seconds": 21.0
+      "seconds": 20.5
     },
     {
       "prompt": "one-shot",
@@ -30,7 +30,7 @@
       "accuracy": 0.25,
       "invalid": 0,
       "avg_tokens": 5.0,
-      "seconds": 21.6
+      "seconds": 20.8
     },
     {
       "prompt": "few-shot",
@@ -38,7 +38,7 @@
       "accuracy": 0.5,
       "invalid": 0,
       "avg_tokens": 4.8,
-      "seconds": 25.6
+      "seconds": 23.9
     },
     {
       "prompt": "role + few-shot",
@@ -46,7 +46,7 @@
       "accuracy": 0.5,
       "invalid": 0,
       "avg_tokens": 4.5,
-      "seconds": 27.3
+      "seconds": 28.2
     }
   ],
   "held_out": {
@@ -55,7 +55,7 @@
     "accuracy": 0.45,
     "invalid": 0,
     "avg_tokens": 4.0,
-    "seconds": 24.0
+    "seconds": 25.9
   },
   "reasoning": [
     {
@@ -64,7 +64,7 @@
       "accuracy": 0.333,
       "invalid": 0,
       "avg_tokens": 3.7,
-      "seconds": 4.5
+      "seconds": 4.1
     },
     {
       "prompt": "chain-of-thought",
@@ -72,7 +72,7 @@
       "accuracy": 0.5,
       "invalid": 0,
       "avg_tokens": 189.5,
-      "seconds": 151.5
+      "seconds": 139.5
     },
     {
       "prompt": "self-consistency (k=3)",
@@ -80,7 +80,7 @@
       "accuracy": 1.0,
       "invalid": 0,
       "avg_tokens": 573.0,
-      "seconds": 80.2
+      "seconds": 76.9
     }
   ],
   "extraction": {
@@ -124,5 +124,38 @@
         "consistent": false
       }
     ]
+  },
+  "runtime": {
+    "cpu_threads": 4,
+    "device": "cpu",
+    "environment": "local",
+    "logical_cpus": 12,
+    "packages": {
+      "diffusers": "0.40.0",
+      "google-genai": "2.29.0",
+      "ipywidgets": "7.7.1",
+      "openai": "3.28.0",
+      "peft": "0.21.1",
+      "python-dotenv": "1.2.4",
+      "sentence-transformers": "5.7.0",
+      "torch": "2.11.0+cpu",
+      "transformers": "5.18.0",
+      "trl": "1.15.0"
+    },
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 158 Stepping 10, GenuineIntel",
+    "python": "3.12.10",
+    "seed": 42
+  },
+  "evidence": {
+    "started_at_utc": "2026-10-12T16:44:55.510068+00:00",
+    "seconds": 445.6,
+    "notebook_sha256": "702b22ceae20b1c6c5e763c75b351e7186800b312b505ed55bdce8ae46f2c456",
+    "executed_notebook_sha256": "4ba97af841ddc44bb9bc37c212c27725f989293d9727f0b958a85f4c86a792d6",
+    "runner_python": "C:\\Users\\sudee\\Downloads\\Generative_AI_2027_Teaching_Pack\\AI2027_Project\\build\\qa_pinned_env\\Scripts\\python.exe",
+    "kernel_name": "qa-pinned-cpu",
+    "run_record": "build/audit_fixes_20261012/full_runs.json",
+    "result_export": "build/audit_fixes_20261012/results/week_07/results_cpu_core.json",
+    "result_export_sha256": "d52ae766f55e8e9ef747d8167ebe37e94fe71d593e501ceb5be320dfbc7ace57"
   }
 }

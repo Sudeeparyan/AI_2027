@@ -16,9 +16,9 @@
     "n_train": 200,
     "n_val": 30,
     "n_test": 50,
-    "train_minutes": 6.79717909333364,
+    "train_minutes": 4.972477190000003,
     "steps": 25,
-    "elapsed_seconds": 781.6666813999764
+    "elapsed_seconds": 654.1683971000002
   },
   "trainable": 1081344,
   "total": 495114112,
@@ -39,7 +39,7 @@
       "invalid": 0.0
     }
   ],
-  "adapter_mb": 4.356789,
+  "adapter_mb": 4.356803,
   "model_mb": 1976.131072,
   "loss": {
     "step": [
@@ -50,11 +50,11 @@
       25
     ],
     "loss": [
-      0.9775023460388184,
-      0.10125142335891724,
-      0.06767776608467102,
-      0.0355896532535553,
-      0.12077193260192871
+      0.9875294685363769,
+      0.10600850582122803,
+      0.06843578815460205,
+      0.03993944525718689,
+      0.11931886672973632
     ]
   },
   "eval": {
@@ -64,9 +64,42 @@
       25
     ],
     "eval_loss": [
-      0.010103928856551647,
-      0.001196312252432108,
-      0.0011967598693445325
+      0.014894166961312294,
+      0.001362472539767623,
+      0.00136304902844131
     ]
+  },
+  "runtime": {
+    "cpu_threads": 4,
+    "device": "cpu",
+    "environment": "local",
+    "logical_cpus": 12,
+    "packages": {
+      "diffusers": "0.40.0",
+      "google-genai": "2.29.0",
+      "ipywidgets": "7.7.1",
+      "openai": "3.28.0",
+      "peft": "0.21.1",
+      "python-dotenv": "1.2.4",
+      "sentence-transformers": "5.7.0",
+      "torch": "2.11.0+cpu",
+      "transformers": "5.18.0",
+      "trl": "1.15.0"
+    },
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 158 Stepping 10, GenuineIntel",
+    "python": "3.12.10",
+    "seed": 42
+  },
+  "evidence": {
+    "started_at_utc": "2026-10-14T06:55:29.555577+00:00",
+    "seconds": 695.5,
+    "notebook_sha256": "818ff16208e826b14034bd4095bce195b660f40055fe042908257ed22fa90a13",
+    "executed_notebook_sha256": "ff5be29fddbe85a13b4eb9e7b0c2edbe94623f1d5565e9c36b9fd89fd169ea87",
+    "runner_python": "C:\\Users\\sudee\\Downloads\\Generative_AI_2027_Teaching_Pack\\AI2027_Project\\build\\qa_pinned_env\\Scripts\\python.exe",
+    "kernel_name": "qa-pinned-cpu",
+    "run_record": "build/final_verification_20261013/full_w08.json",
+    "result_export": "build/final_verification_20261013/results_w08/week_08/results_cpu_core.json",
+    "result_export_sha256": "b56aed2e83c022801b2d607b89db4f732a860acb32011c605ca733a1b98788b0"
   }
 }

@@ -20,6 +20,18 @@
 # Runtime and output quality depend on your machine and settings.
 # A smoke run checks execution with very small settings; it does not measure
 # the quality of a trained language model.
+#
+# | Part | Activity | Suggested class time |
+# |---|---|---|
+# | Start | Setup and vocabulary recall | 10 min |
+# | 1 | Mix information with attention | 20 min |
+# | 2 | Hide the future; identify positions | 15 min |
+# | 3 | Heads and a transformer block | 20 min |
+# | 4 | Train a small next-character model | 35 min |
+# | End | Self-checks; compare and review | 20 min |
+#
+# Class time includes discussion and coding; it is not a measured compute time.
+# Optional Parts 5 and 6 (pretrained-model inspection and cache timing) are for after class.
 
 # %% [markdown]
 # **Core, changes and stretches:** complete Parts 1–4 locally. The core uses context 64, batch 32, width 128, four heads, three layers and 2,000 updates on Tiny Shakespeare. The model genuinely trains: expect speaker names, line breaks and word-like spellings, with many invented words.
@@ -707,6 +719,13 @@ display(widgets.interactive(show_temperature,
 # %% [markdown]
 # ## Part 5: Optional separate pretrained-model inspection
 #
+# > **Core:** keep `RUN_PRETRAINED = False`; inspect the companion notes' stored attention examples.
+# > **Change one thing:** move an adjective in the example sentence and predict which positions may use it.
+# > **Optional stretch:** after the CPU core, enable `RUN_PRETRAINED` to inspect BERT and GPT-2 attention.
+# > **Check:** compare token pieces and permitted attention positions; explain what the tables cannot prove.
+# > **Common errors:** a failed download concerns access; attention weights alone do not establish a causal explanation.
+# > This entire live-model inspection is optional and outside the measured CPU core.
+#
 # BERT is an **encoder**: each position may attend to the complete input.
 # GPT-2 is a **decoder**: a position may attend only to itself and its past.
 # These downloaded models are separate from the small model you just trained.
@@ -769,7 +788,7 @@ if RUN_PRETRAINED:
                      "Flatten layer/head scores, find argmax and recover both indices with divmod.")
 
 
-    check_selected_head()
+    assert check_selected_head(), "Complete optional TODO 5 and rerun this cell before inspecting the selected head."
     print(f"layer {layer + 1}, head {head + 1}: "
           f"it -> animal={bert_att[layer, head, i_it, i_animal]:.3f}; "
           f"it -> street={bert_att[layer, head, i_it, i_street]:.3f}")
@@ -845,6 +864,13 @@ else:
 
 # %% [markdown]
 # ## Part 6: Optional key/value-cache timing experiment
+#
+# > **Core:** keep `RUN_CACHE_BENCHMARK = False`; explain what a key/value cache reuses.
+# > **Change one thing:** predict the effect of doubling output length with the prompt and model fixed.
+# > **Optional stretch:** after enabling `RUN_PRETRAINED`, enable `RUN_CACHE_BENCHMARK` and measure both paths.
+# > **Check:** use equal tokens, warmed models and the same device; report measured times rather than a promised speed-up.
+# > **Common errors:** short CPU timings are noisy; unsynchronised GPU timers can stop before the work finishes.
+# > This entire timing experiment is optional and outside the measured CPU core.
 #
 # A **KV cache** stores earlier keys and values during generation.
 # New tokens can reuse them, instead of recalculating the whole prefix.

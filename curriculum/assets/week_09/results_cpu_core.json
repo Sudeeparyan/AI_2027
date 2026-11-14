@@ -7,7 +7,7 @@
     "seed": 42,
     "n_images": 1000,
     "n_clips": 10,
-    "elapsed_seconds": 148.982533900009
+    "elapsed_seconds": 135.82785299996613
   },
   "zero_shot": {
     "label only: '{}'": 0.872,
@@ -177,5 +177,38 @@
     "horse",
     "ship",
     "truck"
-  ]
+  ],
+  "runtime": {
+    "cpu_threads": 4,
+    "device": "cpu",
+    "environment": "local",
+    "logical_cpus": 12,
+    "packages": {
+      "diffusers": "0.40.0",
+      "google-genai": "2.29.0",
+      "ipywidgets": "7.7.1",
+      "openai": "3.28.0",
+      "peft": "0.21.1",
+      "python-dotenv": "1.2.4",
+      "sentence-transformers": "5.7.0",
+      "torch": "2.11.0+cpu",
+      "transformers": "5.18.0",
+      "trl": "1.15.0"
+    },
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 158 Stepping 10, GenuineIntel",
+    "python": "3.12.10",
+    "seed": 42
+  },
+  "evidence": {
+    "started_at_utc": "2026-10-13T08:15:38.405139+00:00",
+    "seconds": 154.3,
+    "notebook_sha256": "ad9377be3975ac7b88988c78625a5718d9c4c10d295defc4b8a1d11356b8f3da",
+    "executed_notebook_sha256": "e7b9f6ea5c865dc47dc315a9ae4a97497ab3d628f9b12cda0c9ea30f1a08b497",
+    "runner_python": "C:\\Users\\sudee\\Downloads\\Generative_AI_2027_Teaching_Pack\\AI2027_Project\\build\\qa_pinned_env\\Scripts\\python.exe",
+    "kernel_name": "qa-pinned-cpu",
+    "run_record": "build/retry_20261013/full_week_09.json",
+    "result_export": "build/retry_20261013/results/week_09/results_cpu_core.json",
+    "result_export_sha256": "9cf88b476471d50456dc445a6231fbdd48b721e3c326b8259666f5516d3fce34"
+  }
 }

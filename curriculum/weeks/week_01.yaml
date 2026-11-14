@@ -62,8 +62,6 @@ slides:
     model and observed examples. A classifier assigns labels; a generator creates possible examples. Families group similar
     generators; evaluation checks outputs against a task and evidence.
 
-
-
     Example: A complete explanation of the name model covers three operations: count pairs, make probabilities, and sample letters.
     A complete evaluation also asks whether its outputs satisfy the task. Knowing definitions alone does not perform either
     job.
@@ -534,6 +532,46 @@ slides:
     Answer: No. It appends floor, then predicts from the extended context.
 
     Watch out: A high probability measures the model’s text preference, not the truth of a claim or the reliability of a source.'
+- type: table
+  title: 'Worked example: the likelihood of a short sentence'
+  notes: 'In short: A sequence’s loss combines all its token surprises, rather than looking only at its least likely word.
+
+    Explain: The natural logarithm turns the sequence product into a sum. Negative log-probability measures how surprising a
+    target is under the model. Average negative log-likelihood divides the total surprise by the number of tokens. A nat is
+    the unit from natural logarithms. Perplexity is the exponential of that average.
+
+    Example: Multiply the four supplied probabilities to obtain 0.000066. Use unrounded logarithms: the total is about −9.63
+    and average NLL about 2.41. The table is illustrative arithmetic, not a lab measurement; rounding each displayed log can
+    slightly change the recomputed sum.
+
+    Ask: Which prediction contributes the largest positive amount to the negative log-likelihood?
+
+    Answer: Cat given the, because its probability 0.01 is the smallest.
+
+    Watch out: Compare perplexity only with compatible tokenisation and evaluation data; lower loss alone does not establish
+    a truthful answer.'
+  rows:
+  - - the
+    - '0.06'
+    - −2.81
+  - - cat
+    - '0.01'
+    - −4.61
+  - - sat
+    - '0.20'
+    - −1.61
+  - - 'on'
+    - '0.55'
+    - −0.60
+  - - Sequence
+    - 6.6×10⁻⁵
+    - −9.63
+  header:
+  - Token
+  - p(next|prefix)
+  - log p
+  callout: NLL ≈ 2.41; perplexity ≈ 11.1.
+  callout_label: Illustration
 - type: equation
   title: 'The chain rule: generating one token at a time'
   eq: p(x_1, x_2, \ldots, x_T) = \prod_{t=1}^{T} p(x_t \mid x_1, \ldots, x_{t-1})
@@ -569,32 +607,6 @@ slides:
     Watch out: Here T is sequence length; the temperature equation reuses the same letter for a different quantity.'
 - type: equation
   title: Likelihood and maximum likelihood training
-  eq:
-  - \mathcal{L}(\theta)=\sum_{i=1}^{N}\log p_\theta(x^{(i)})
-  - \theta^*=\arg\max_\theta\mathcal{L}(\theta)=\arg\min_\theta[-\mathcal{L}(\theta)/N]
-  read_as:
-  - Score observed examples.
-  - Maximise log-likelihood.
-  - Equivalently, minimise average NLL.
-  terms:
-  - - θ
-    - learned parameters
-  - - pθ
-    - model probability
-  - - x⁽ⁱ⁾
-    - example i
-  - - N
-    - example count
-  - - ℒ
-    - total log-likelihood
-  - - θ*
-    - best parameters
-  - - log
-    - natural logarithm
-  - - argmax
-    - choose maximiser
-  - - argmin
-    - choose minimiser
   notes: 'In short: Maximum likelihood chooses parameters that assign more probability to the observed training examples.
 
     Explain: Likelihood views the probability of observed data as a function of candidate parameters. Theta names learned numbers;
@@ -612,84 +624,34 @@ slides:
 
     Watch out: Likelihood measures agreement with observed data; it does not prove truth, and GAN training uses a different
     adversarial objective.'
-- type: table
-  title: 'Worked example: the likelihood of a short sentence'
-  header:
-  - Prediction
-  - p
-  - log p
-  rows:
-  - - the
-    - '0.06'
-    - −2.81
-  - - cat | the
-    - '0.01'
-    - −4.61
-  - - sat | the cat
-    - '0.20'
-    - −1.61
-  - - on | the cat sat
-    - '0.55'
-    - −0.60
-  - - Sequence
-    - 6.6×10⁻⁵
-    - −9.63
-  callout: Illustrative. Average NLL ≈ 2.41 nats/token; perplexity ≈ 11.1.
-  notes: 'In short: A sequence’s loss combines all its token surprises, rather than looking only at its least likely word.
-
-    Explain: The natural logarithm turns the sequence product into a sum. Negative log-probability measures how surprising a
-    target is under the model. Average negative log-likelihood divides the total surprise by the number of tokens. A nat is
-    the unit from natural logarithms. Perplexity is the exponential of that average.
-
-    Example: Multiply the four supplied probabilities to obtain 0.000066. Use unrounded logarithms: the total is about −9.63
-    and average NLL about 2.41. The table is illustrative arithmetic, not a lab measurement; rounding each displayed log can
-    slightly change the recomputed sum.
-
-    Ask: Which prediction contributes the largest positive amount to the negative log-likelihood?
-
-    Answer: Cat given the, because its probability 0.01 is the smallest.
-
-    Watch out: Compare perplexity only with compatible tokenisation and evaluation data; lower loss alone does not establish
-    a truthful answer.'
-- type: equation
-  title: Temperature reshapes the distribution before sampling
-  eq: p_i = \frac{\exp(z_i / T)}{\sum_j \exp(z_j / T)}
-  read_as:
-  - Softmax normalises logits.
-  - Lower T concentrates; higher T spreads.
-  - Weights stay fixed.
+  eq:
+  - \mathcal{L}(\theta)=\sum_{i=1}^{N}\log p_\theta(x^{(i)})
+  - \theta^*=\arg\max_\theta\mathcal{L}(\theta)=\arg\min_\theta[-\mathcal{L}(\theta)/N]
   terms:
-  - - zᵢ
-    - score for token i
-  - - T
-    - positive temperature
-  - - pᵢ
-    - sampling probability
-  - - exp
-    - exponential
-  - - Σⱼ
-    - sum vocabulary candidates
-  notes: 'In short: Positive temperature rescales fixed logits before softmax, changing sampling probabilities without changing
-    learned weights.
-
-    Explain: A logit is a raw next-token score. Softmax exponentiates scores and divides each value by their total. The index
-    i identifies one candidate, while j runs over all candidates. T is a positive temperature setting. Lower T emphasises score
-    differences; higher T reduces their effect.
-
-    Example: For illustrative logits [2, 1, 0] at T equal to one, exponentials are about [7.39, 2.72, 1.00]. Their probabilities
-    are about [0.67, 0.24, 0.09]. These rounded values demonstrate the calculation; they are separate from the cat-sentence
-    chart.
-
-    Ask: Does turning the temperature up train the model to know more facts?
-
-    Answer: No. It changes the probability distribution used for selecting tokens from existing scores.
-
-    Watch out: Never divide logits by zero; in this Transformers lab, use do_sample=False for greedy generation.'
+  - - θ
+    - learned parameters
+  - - pθ
+    - model probability
+  - - x⁽ⁱ⁾
+    - example i
+  - - N
+    - example count
+  - - ℒ
+    - total log-likelihood
+  - - θ*
+    - best parameters
+  - - log
+    - natural logarithm
+  - - argmax
+    - maximiser
+  - - argmin
+    - minimiser
+  read_as:
+  - Score observed examples.
+  - Maximise log-likelihood.
+  - Equivalently, minimise average NLL.
 - type: figure
   title: Temperature in pictures
-  figure: temperature
-  caption: Fixed scores.
-  callout: 'Predict: which panel samples rare tokens more often?'
   notes: 'In short: The three charts keep the starting scores fixed and show how temperature redistributes probability.
 
     Explain: Entropy, labelled H, measures uncertainty in a probability distribution. Bits are the unit when entropy uses logarithms
@@ -706,6 +668,43 @@ slides:
 
     Watch out: A few sampled outputs can obscure the trend; compare distributions first and describe observed variation without
     promising particular words.'
+  callout: 'Predict: which panel samples rare tokens more often?'
+  caption: Fixed scores.
+  figure: temperature
+- type: equation
+  title: Temperature reshapes the distribution before sampling
+  notes: 'In short: Positive temperature rescales fixed logits before softmax, changing sampling probabilities without changing
+    learned weights.
+
+    Explain: A logit is a raw next-token score. Softmax exponentiates scores and divides each value by their total. The index
+    i identifies one candidate, while j runs over all candidates. T is a positive temperature setting. Lower T emphasises score
+    differences; higher T reduces their effect.
+
+    Example: For illustrative logits [2, 1, 0] at T equal to one, exponentials are about [7.39, 2.72, 1.00]. Their probabilities
+    are about [0.67, 0.24, 0.09]. These rounded values demonstrate the calculation; they are separate from the cat-sentence
+    chart.
+
+    Ask: Does turning the temperature up train the model to know more facts?
+
+    Answer: No. It changes the probability distribution used for selecting tokens from existing scores.
+
+    Watch out: Never divide logits by zero; in this Transformers lab, use do_sample=False for greedy generation.'
+  eq: p_i = \frac{\exp(z_i / T)}{\sum_j \exp(z_j / T)}
+  terms:
+  - - zᵢ
+    - score for token i
+  - - T
+    - positive temperature
+  - - pᵢ
+    - sampling probability
+  - - exp
+    - exponential
+  - - Σⱼ
+    - sum vocabulary candidates
+  read_as:
+  - Softmax normalises logits.
+  - Lower T concentrates; higher T spreads.
+  - Weights stay fixed.
 - type: bullets
   title: 'Decoding strategies: how we pick the next token'
   bullets:
@@ -765,9 +764,9 @@ slides:
   title: Connecting the two views with Bayes' rule
   eq: p(y\mid x)=\dfrac{p(x\mid y)p(y)}{\sum_{y'}p(x\mid y')p(y')}
   read_as:
-  - 'Generative: model inputs and priors.'
-  - Normalise class scores.
-  - 'Discriminative: predict labels directly.'
+  - 'Generative: inputs and priors.'
+  - Normalise scores.
+  - 'Discriminative: label probabilities.'
   terms:
   - - p
     - probability
@@ -776,11 +775,11 @@ slides:
   - - y
     - class
   - - p(x|y)
-    - class likelihood
+    - likelihood
   - - p(y)
-    - class prior
+    - prior
   - - Σᵧ′
-    - sum all classes
+    - sum classes
   callout: 'Example: 0.12/(0.12+0.08)=0.60.'
   notes: 'In short: Bayes’ rule turns class-generating probabilities and class frequencies into a probability for the class
     given an input.

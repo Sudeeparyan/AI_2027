@@ -22,11 +22,24 @@ def authored_notes(subject):
 
 
 class VisualSupportTests(unittest.TestCase):
+    def test_word_reuses_the_slide_variant_of_shared_figures(self):
+        # Large-label variants must stay identical in both teaching documents.
+        for number in range(1, 13):
+            source = beginner.ROOT / f"curriculum/weeks/week_{number:02d}.yaml"
+            week = yaml.safe_load(source.read_text(encoding="utf-8"))
+            notes = (beginner.ROOT / f"curriculum/notes/week_{number:02d}.md").read_text(encoding="utf-8")
+            for slide in week["slides"]:
+                figure = slide.get("figure", "")
+                if figure.endswith("_slide"):
+                    with self.subTest(week=number, figure=figure):
+                        self.assertIn(f"(fig:{figure})", notes)
+                        self.assertNotIn(f"(fig:{figure[:-6]})", notes)
+
     def fixture(self):
         data = copy.deepcopy(beginner.load(1))
         week = yaml.safe_load((beginner.ROOT / "curriculum/weeks/week_01.yaml").read_text(encoding="utf-8"))
         week["week"] = 1
-        week["notes_md"] = "# Lecture notes\nRead the worked example.\n"
+        week["notes_md"] = "# Lecture notes\nRead the worked example.\n\n# Glossary\n\n<!-- Canonical weekly glossary -->\n"
         return week, data
 
     def test_modern_support_notes_pass_through_without_legacy_suffixes(self):

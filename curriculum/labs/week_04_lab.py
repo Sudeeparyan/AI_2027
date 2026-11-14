@@ -30,6 +30,18 @@
 #
 # **Image-model use:** use synthetic scenes, record the checkpoint, read its
 # model card and licence, and retain the pipeline's supplied safety components.
+#
+# | Part | Activity | Suggested class time |
+# |---|---|---|
+# | Start | Setup and vocabulary recall | 10 min |
+# | A1 | The forward process | 20 min |
+# | A2 | Train and sample a 2-D DDPM; compare DDIM | 40 min |
+# | B | Inspect the stored image evidence | 20 min |
+# | C | Similarity check | 15 min |
+# | End | Self-checks; compare and review | 15 min |
+#
+# Class time includes discussion and coding; it is not a measured compute time.
+# Optional stretches (the MNIST U-Net, Stable Diffusion, CLIP and flow matching) are for after class.
 
 # %% [markdown]
 # ## Before coding: training and generation use different loops
@@ -81,7 +93,7 @@
 #
 
 # %% tags=["colab-install"]
-%pip install -q diffusers transformers accelerate scikit-learn matplotlib
+%pip install -q diffusers transformers accelerate scikit-learn matplotlib torchvision
 
 # %% [markdown]
 # **Purpose:** Import lab tools and choose optional stretches.

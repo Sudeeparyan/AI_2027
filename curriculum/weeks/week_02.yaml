@@ -215,7 +215,7 @@ slides:
 
     Watch out: Do not interpret colour-separated groups as proof that individual coordinates have learned named digit properties.'
 - type: figure
-  title: 'Consequence: random codes decode to nonsense in an autoencoder'
+  title: 'Consequence: random codes often decode poorly in an autoencoder'
   figure: samples_ae_vs_vae
   caption: The same 16 random points z ~ N(0, I) decoded by each model.
   callout: Prior codes must reach regions the decoder learned.
@@ -333,27 +333,27 @@ slides:
 - type: flow
   title: The VAE as a probabilistic model
   steps:
-  - label: Supply image
-    sub: x [B,784]
+  - label: Read
+    sub: x
     role: data
   - label: Encode
-    sub: μ, logvar
+    sub: μ/logvar
     role: model
-  - label: Draw posterior
+  - label: Sample
     sub: q(z|x)
     role: data
-  - label: Draw prior
+  - label: Draw
     sub: N(0,I)
     role: data
   - label: Decode
     sub: p(x|z)
     role: model
-  - label: Inspect pixels
+  - label: Inspect
     sub: '[B,784]'
     role: output
   bullets:
-  - 'Reconstruct: image route'
-  - 'Generate: prior route'
+  - Reconstruction
+  - Generation
   notes: 'In short: Generation uses a prior and decoder; the encoder supplies useful codes when learning from an observed image.
 
 
@@ -376,8 +376,8 @@ slides:
 
     Watch out: The prior and encoder distribution can both be Gaussian while having different parameters and roles.'
   arrows:
-  - x [B,784]
-  - μ, logvar
+  - x[B,784]
+  - μ/logvar
   - null
   - z [B,d]
   - pixels [B,784]
@@ -448,16 +448,42 @@ slides:
 
 
     Watch out: An encoder approximation is useful, but it is not automatically equal to the true posterior.'
+- type: compare
+  title: 'Reading the ELBO: two forces in tension'
+  notes: 'In short: Reconstruction preserves useful image detail, while KL limits how far the image''s code distribution departs
+    from the prior.
+
+
+    Explain: A cost is a number that training tries to reduce. Reconstruction cost compares predicted pixels with their targets.
+    KL divergence compares probability distributions rather than individual pixels. Lower reconstruction often needs more information
+    in the code. Stronger KL pressure can remove some of that information. Beta multiplies the KL term and changes this balance.
+
+
+    Example: With illustrative reconstruction cost 120 and KL 3, beta one gives 123; beta four gives 132. Think of two bills
+    contributing to one total, but they are mathematical quantities measured in compatible loss units rather than money.
+
+
+    Ask: Can we compare total losses across beta values as if the objective were unchanged?
+
+
+    Answer: No. The multiplier changes the objective, so compare reconstruction, KL and sample behaviour separately.
+
+
+    Watch out: Driving KL close to zero is not sufficient evidence of a good generator or an informative code.'
+  callout: 'Illustrative: reconstruction 120 + KL 3 = 123; β = 4 gives 132.'
+  columns:
+  - head: Reconstruction
+    points:
+    - Retain image information
+    - Compare predicted pixels
+    - 'Lower: closer rebuild'
+  - head: KL to prior
+    points:
+    - Limit code information
+    - Compare distributions
+    - 'Lower: closer prior'
 - type: equation
   title: The evidence lower bound (ELBO)
-  eq:
-  - \log p_\theta(x) \;\geq\; \mathbb{E}_{q_\phi(z \mid x)}\left[\log p_\theta(x \mid z)\right] \;-\; D_{\mathrm{KL}}\left(q_\phi(z
-    \mid x)\,\|\,p(z)\right)
-  - \log p_\theta(x) = \mathrm{ELBO} + D_{\mathrm{KL}}\left(q_\phi(z \mid x)\,\|\,p_\theta(z \mid x)\right)
-  read_as:
-  - Reconstruction reward minus prior KL.
-  - Posterior KL is the nonnegative gap.
-  panel_h: 2.0
   notes: 'In short: The evidence lower bound rewards reconstruction and subtracts KL to the prior, while remaining below image
     log-likelihood.
 
@@ -479,54 +505,39 @@ slides:
 
 
     Watch out: Prior KL inside the objective and posterior-gap KL in the identity compare different distributions.'
-- type: compare
-  title: 'Reading the ELBO: two forces in tension'
-  columns:
-  - head: Reconstruction
-    points:
-    - Retain image information
-    - Compare predicted pixels
-    - 'Lower: closer rebuild'
-  - head: KL to prior
-    points:
-    - Limit code information
-    - Compare distributions
-    - 'Lower: closer prior'
-  callout: $\beta$ changes the KL weight.
-  notes: 'In short: Reconstruction preserves useful image detail, while KL limits how far the image''s code distribution departs
-    from the prior.
+  eq:
+  - \log p_\theta(x) \;\geq\; \mathbb{E}_{q_\phi(z \mid x)}\left[\log p_\theta(x \mid z)\right] \;-\; D_{\mathrm{KL}}\left(q_\phi(z
+    \mid x)\,\|\,p(z)\right)
+  - \log p_\theta(x) = \mathrm{ELBO} + D_{\mathrm{KL}}\left(q_\phi(z \mid x)\,\|\,p_\theta(z \mid x)\right)
+  read_as:
+  - Reconstruction reward minus prior KL.
+  - Posterior KL is the nonnegative gap.
+  panel_h: 2.0
+- type: figure
+  title: 'Worked examples: how far is the encoder from the prior?'
+  notes: 'In short: Shifting a Gaussian''s centre or changing its spread both increase KL relative to the standard prior.
 
 
-    Explain: A cost is a number that training tries to reduce. Reconstruction cost compares predicted pixels with their targets.
-    KL divergence compares probability distributions rather than individual pixels. Lower reconstruction often needs more information
-    in the code. Stronger KL pressure can remove some of that information. Beta multiplies the KL term and changes this balance.
+    Explain: The shaded prior is centred at zero with standard deviation one. The encoder curves show other means and spreads.
+    KL is zero only when these distributions match in this Gaussian example. It is nonnegative and generally asymmetric. Each
+    latent coordinate contributes its own cost to the diagonal-Gaussian sum.
 
 
-    Example: With illustrative reconstruction cost 120 and KL 3, beta one gives 123; beta four gives 132. Think of two bills
-    contributing to one total, but they are mathematical quantities measured in compatible loss units rather than money.
+    Example: A mean of one with standard deviation one costs 0.50 nats. A mean of zero with standard deviation 0.5 costs approximately
+    0.32 nats. Moving the mean to two while retaining that spread gives approximately 2.32 nats. These are illustrative Gaussian
+    calculations, not measured training values; the next slide formalises their common rule.
 
 
-    Ask: Can we compare total losses across beta values as if the objective were unchanged?
+    Ask: Which plotted change has the largest cost?
 
 
-    Answer: No. The multiplier changes the objective, so compare reconstruction, KL and sample behaviour separately.
+    Answer: The combination of a shifted centre and narrow spread at mean two, standard deviation 0.5.
 
 
-    Watch out: Driving KL close to zero is not sufficient evidence of a good generator or an informative code.'
+    Watch out: A smaller KL can mean less image information; judge it alongside reconstruction and generated samples.'
+  figure: kl_gaussians
 - type: equation
   title: KL divergence between two Gaussians has a closed form
-  eq: D_{\mathrm{KL}}\left(\mathcal{N}(\mu, \sigma^2)\,\|\,\mathcal{N}(0, 1)\right) = \frac{1}{2}\left(\mu^2 + \sigma^2
-    - \log \sigma^2 - 1\right)
-  read_as:
-  - Add coordinate costs.
-  - '$\mu=0$, $\sigma=1$: KL = 0.'
-  terms:
-  - - μ
-    - mean
-  - - σ²
-    - variance
-  - - log σ²
-    - encoder log-variance
   notes: 'In short: For Gaussian encoder codes and a standard Gaussian prior, KL has a direct formula for each coordinate.
 
 
@@ -546,29 +557,18 @@ slides:
 
 
     Watch out: Do not substitute standard deviation where the equation needs variance, or reverse the KL arguments casually.'
-- type: figure
-  title: 'Worked examples: how far is the encoder from the prior?'
-  figure: kl_gaussians
-  notes: 'In short: Shifting a Gaussian''s centre or changing its spread both increase KL relative to the standard prior.
-
-
-    Explain: The shaded prior is centred at zero with standard deviation one. The encoder curves show other means and spreads.
-    KL is zero only when these distributions match in this Gaussian example. It is nonnegative and generally asymmetric. Each
-    latent coordinate contributes its own cost to the diagonal-Gaussian sum.
-
-
-    Example: A mean of one with standard deviation one costs 0.50 nats. A mean of zero with standard deviation 0.5 costs approximately
-    0.32 nats. Moving the mean to two while retaining that spread gives approximately 2.32 nats. These values come from the
-    displayed formula rather than training.
-
-
-    Ask: Which plotted change has the largest cost?
-
-
-    Answer: The combination of a shifted centre and narrow spread at mean two, standard deviation 0.5.
-
-
-    Watch out: A smaller KL can mean less image information; judge it alongside reconstruction and generated samples.'
+  eq: D_{\mathrm{KL}}\left(\mathcal{N}(\mu, \sigma^2)\,\|\,\mathcal{N}(0, 1)\right) = \frac{1}{2}\left(\mu^2 + \sigma^2 - \log
+    \sigma^2 - 1\right)
+  terms:
+  - - μ
+    - mean
+  - - σ²
+    - variance
+  - - log σ²
+    - encoder log-variance
+  read_as:
+  - Add coordinate costs.
+  - '$\mu=0$, $\sigma=1$: KL = 0.'
 - type: equation
   title: The reconstruction term in practice
   eq: -\log p_\theta(x \mid z) = -\sum_{i=1}^{784}\left[x_i \log \hat{x}_i + (1 - x_i)\log(1 - \hat{x}_i)\right]
@@ -659,42 +659,8 @@ slides:
 
     Watch out: Other gradient estimators exist; the claim concerns this convenient Gaussian pathwise construction, not all random
     operations.'
-- type: equation
-  title: The reparameterisation trick
-  eq: z = \mu_\phi(x) + \sigma_\phi(x) \odot \epsilon, \qquad \epsilon \sim \mathcal{N}(0, I)
-  read_as:
-  - Centre + spread × independent noise.
-  - Gradients reach centre and spread.
-  terms:
-  - - μ, σ
-    - encoder centre, spread
-  - - ε
-    - standard-normal noise
-  - - ⊙
-    - matching-entry multiplication
-  notes: 'In short: Draw independent noise, then calculate centre plus spread times noise to obtain a trainable Gaussian code.
-
-
-    Explain: The decoder receives code z for image x. Learned encoder weights φ predict mean μ and positive standard deviation
-    σ. Epsilon denotes independent standard-normal noise. The circle-times symbol means multiplying matching entries, rather
-    than a matrix product. Reconstruction gradients can reach both learned encoder branches through this calculation.
-
-
-    Example: With mean one, spread 0.5 and noise minus two, z equals zero. A noise value two instead gives z equals two. The
-    same input image can therefore produce different codes; their distribution is controlled by the same learned centre and
-    spread.
-
-
-    Ask: Where does randomness enter this equation?
-
-
-    Answer: It enters through epsilon. Given epsilon, the shift and scale are ordinary differentiable arithmetic.
-
-
-    Watch out: Compute spread as exp(0.5 times logvar); using exp(logvar) scales by variance and changes the distribution.'
 - type: figure
   title: Why the trick matters for backpropagation
-  figure: reparam
   notes: 'In short: Moving randomness to an input restores the reconstruction gradient path to the encoder''s distribution parameters.
 
 
@@ -716,6 +682,40 @@ slides:
 
     Watch out: Avoid the overstatement that a random draw prevents every possible kind of learning; distinguish the two loss
     paths.'
+  figure: reparam
+- type: equation
+  title: The reparameterisation trick
+  notes: 'In short: Draw independent noise, then calculate centre plus spread times noise to obtain a trainable Gaussian code.
+
+
+    Explain: The decoder receives code z for image x. Learned encoder weights φ predict mean μ and positive standard deviation
+    σ. Epsilon denotes independent standard-normal noise. The circle-times symbol means multiplying matching entries, rather
+    than a matrix product. Reconstruction gradients can reach both learned encoder branches through this calculation.
+
+
+    Example: With mean one, spread 0.5 and noise minus two, z equals zero. A noise value two instead gives z equals two. The
+    same input image can therefore produce different codes; their distribution is controlled by the same learned centre and
+    spread.
+
+
+    Ask: Where does randomness enter this equation?
+
+
+    Answer: It enters through epsilon. Given epsilon, the shift and scale are ordinary differentiable arithmetic.
+
+
+    Watch out: Compute spread as exp(0.5 times logvar); using exp(logvar) scales by variance and changes the distribution.'
+  eq: z = \mu_\phi(x) + \sigma_\phi(x) \odot \epsilon, \qquad \epsilon \sim \mathcal{N}(0, I)
+  terms:
+  - - μ, σ
+    - encoder centre, spread
+  - - ε
+    - standard-normal noise
+  - - ⊙
+    - matching-entry multiplication
+  read_as:
+  - Centre + spread × independent noise.
+  - Gradients reach centre and spread.
 - type: code
   title: Trace a VAE forward pass in PyTorch
   code: 'mu, logvar = model.encode(x)
@@ -729,27 +729,26 @@ slides:
   - Image [B,784]
   - Code [B,d]
   - Pixel logits [B,784]
-  notes: 'In short: The PyTorch forward pass connects image encoding, Gaussian sampling and pixel-logit decoding.
+  notes: 'In short: Four lines of PyTorch take an image to a sampled code and back to pixel scores.
 
 
-    Explain: A method is a function attached to a model object. The encode method predicts mean and log-variance. Reparameterise
-    draws fresh noise and calculates a latent code. The forward method calls those operations and runs the decoder. It returns
-    logits and both distribution parameters because the reconstruction and KL costs need different inputs.
+    Explain: Line one runs the encoder, which returns a mean and log-variance per coordinate. Line two converts log-variance
+    into a positive standard deviation. Line three draws fresh standard-normal noise of the same shape and forms the code z.
+    Line four runs the decoder, which returns raw pixel scores called logits. In the lab, calling model(x) runs these same steps
+    inside the forward method. It returns logits, mu and logvar together, because the two loss terms need different inputs.
 
 
-    Example: For eight images with two-dimensional codes, unpacking returns logits [8,784], mean [8,2], and logvar [8,2]. Think
-    of three labelled output cables, but Python tuple unpacking only assigns objects; it does not itself verify their shapes
-    or mathematical meaning.
+    Example: For eight images and a two-dimensional code, x is [8,784], mu and logvar are [8,2], z is [8,2] and logits are [8,784].
+    For one coordinate with mu 1, logvar 0 and noise −0.5, std is 1 and z is 0.5.
 
 
-    Ask: Why return mu and logvar if the decoder only uses z?
+    Ask: Why does forward return mu and logvar if the decoder only uses z?
 
 
-    Answer: The KL term needs the encoder distribution parameters directly, independently of the sampled code.
+    Answer: The KL term needs the encoder''s distribution parameters directly, not the single sampled code.
 
 
-    Watch out: Do not apply sigmoid before binary_cross_entropy_with_logits; that function already handles the logit transformation
-    numerically.'
+    Watch out: Do not apply sigmoid before binary_cross_entropy_with_logits; that function already applies it stably.'
 - type: figure
   title: 'Training in practice: watch both terms'
   figure: training_curves
@@ -1012,10 +1011,10 @@ slides:
 - type: flow
   title: 'Where you meet VAEs every day: inside latent diffusion'
   steps:
-  - label: Encode prompt
+  - label: Encode
     sub: Text
     role: model
-  - label: Draw noise
+  - label: Draw
     sub: '[64,64,4]'
     role: data
   - label: Denoise
@@ -1028,8 +1027,8 @@ slides:
     sub: '[512,512,3]'
     role: output
   bullets:
-  - 'Historical design: 48× fewer latent values'
-  - Other architectures use different shapes
+  - 'Historical: 48× fewer values'
+  - Shapes vary by architecture
   notes: 'In short: Latent diffusion uses a compact image representation and decodes its final latent back into pixels.
 
 

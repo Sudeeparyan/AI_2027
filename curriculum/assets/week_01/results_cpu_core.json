@@ -1,0 +1,183 @@
+{
+  "measured_utc": "2026-10-12T16:33:44.570105+00:00",
+  "run_mode": "full",
+  "names": 32033,
+  "vocab": 27,
+  "device": "cpu",
+  "model_id": "HuggingFaceTB/SmolLM2-135M-Instruct",
+  "model_params": 134515008,
+  "name_nll": {
+    "emma": 2.5143283223514827,
+    "anna": 1.9054199254146837,
+    "xqzz": 4.886490491754225
+  },
+  "dataset_nll": {
+    "uniform": 3.295836866004329,
+    "unigram": 2.8180985284378894,
+    "bigram": 2.4605745506980163
+  },
+  "name_samples": {
+    "0.5": [
+      "mari",
+      "ton",
+      "h",
+      "shah",
+      "kan",
+      "mayna",
+      "ja",
+      "keumai",
+      "ai",
+      "kan"
+    ],
+    "1.0": [
+      "eron",
+      "maa",
+      "rinlema",
+      "mbllilicakaisa",
+      "eendoonn",
+      "a",
+      "na",
+      "kanaicie",
+      "ayriaynige",
+      "th"
+    ],
+    "1.5": [
+      "fiausomini",
+      "j",
+      "kea",
+      "maylen",
+      "yko",
+      "khvikahel",
+      "stamanannn",
+      "wa",
+      "letteyamaya",
+      "jysruumarmcardya"
+    ]
+  },
+  "accuracy": {
+    "logistic_regression": 0.9277777777777778,
+    "qda": 0.9277777777777778
+  },
+  "token_counts": {
+    "English": 11,
+    "Irish": 33,
+    "Hindi": 56
+  },
+  "top_tokens": {
+    "0.5": [
+      [
+        " window",
+        0.37616652250289917
+      ],
+      [
+        " porch",
+        0.13838393986225128
+      ],
+      [
+        " edge",
+        0.13838393986225128
+      ],
+      [
+        " bed",
+        0.08393409848213196
+      ],
+      [
+        " couch",
+        0.0396476574242115
+      ]
+    ],
+    "1.0": [
+      [
+        " window",
+        0.09482216835021973
+      ],
+      [
+        " porch",
+        0.0575125515460968
+      ],
+      [
+        " edge",
+        0.0575125515460968
+      ],
+      [
+        " bed",
+        0.04479081928730011
+      ],
+      [
+        " couch",
+        0.030784251168370247
+      ]
+    ],
+    "1.5": [
+      [
+        " window",
+        0.0251731239259243
+      ],
+      [
+        " porch",
+        0.018037335947155952
+      ],
+      [
+        " edge",
+        0.018037335947155952
+      ],
+      [
+        " bed",
+        0.015268271788954735
+      ],
+      [
+        " couch",
+        0.011890941299498081
+      ]
+    ]
+  },
+  "answers": {
+    "0.2": [
+      "Generative AI is a type of artificial intelligence that generates new, unique, and dynamic content, such as text, images, music, or videos, based",
+      "Generative AI is a type of artificial intelligence that generates new, unique, and dynamic content through patterns and relationships, often mimicking human creativity and imagination.",
+      "Generative AI is a type of artificial intelligence that generates new, unique, and complex data through a process of pattern recognition, machine learning, and statistical analysis"
+    ],
+    "1.2": [
+      "A generative AI is an artificial intelligence that creates new ideas and concepts based on available data and patterns in an environment, inspired by its own strengths and knowledge.",
+      "Generative AI is a system that uses statistical and computational techniques to create novel, complex patterns and structures from existing data and data inputs, enabling the AI to",
+      "Generative AI is a system of algorithms that generates, processes, or transforms data to mimic complex or abstract patterns."
+    ]
+  },
+  "fictional_paper": {
+    "plain": "The paper published in the journal Nature Methods describes a new technique called Quantum Gradient Folding (QGF) for training Transformer models. QGF involves a process of folding the input data to align the two input layers, creating a dense representation that can be used for classification and regression tasks. The findings suggest that QGF",
+    "honesty_instruction": "The main findings of the 2019 paper, \"Quantum Gradient Folding for Transformers,\" by Smith and Okafor, are as follows:\n\n1. The authors demonstrated that a quantum gradient folding approach could improve the performance of transformers for image classification tasks.\n\n2. Quantum gradient folding can be used"
+  },
+  "runtime": {
+    "cpu_threads": 4,
+    "device": "cpu",
+    "environment": "local",
+    "logical_cpus": 12,
+    "packages": {
+      "diffusers": "0.40.0",
+      "google-genai": "2.29.0",
+      "ipywidgets": "7.7.1",
+      "openai": "3.28.0",
+      "peft": "0.21.1",
+      "python-dotenv": "1.2.4",
+      "sentence-transformers": "5.7.0",
+      "torch": "2.11.0+cpu",
+      "transformers": "5.18.0",
+      "trl": "1.15.0"
+    },
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 158 Stepping 10, GenuineIntel",
+    "python": "3.12.10",
+    "seed": 42
+  },
+  "evidence": {
+    "started_at_utc": "2026-10-12T16:28:54.212676+00:00",
+    "seconds": 292.8,
+    "notebook_sha256": "3f123d57e5df5d972b8dd69cc4f9fdf25ad65fa97dbb9cbfad4e2c61a6ee2859",
+    "executed_notebook_sha256": "28ed64425445fe1a4b9e6d2630b4fd71e590c9427ac2d55b89a17213ee865f59",
+    "runner_python": "C:\\Users\\sudee\\Downloads\\Generative_AI_2027_Teaching_Pack\\AI2027_Project\\build\\qa_pinned_env\\Scripts\\python.exe",
+    "kernel_name": "qa-pinned-cpu",
+    "run_record": "build/audit_fixes_20261012/full_runs.json",
+    "result_export": "build/audit_fixes_20261012/results/week_01/results_cpu_core.json",
+    "result_export_sha256": "780ae009422436ab9bc43fe296d5f6ed372750ff98b7289fd61b28679c10718f"
+  }
+}

@@ -51,17 +51,27 @@ def _compact_legend(ax, roles, repeat=False, flow=True):
 
 
 def rag_pipeline(path):
-    fig,ax=_diagram_canvas(5.1)
-    top=[(.15,"Split\nKeep IDs","data"),(4.5,"Embed\nFixed model","model"),(8.85,"Store\nVectors","tool")]
-    for x,label,role in top:role_box(ax,x,3.55,2.6,.95,label,role,size=19)
-    for left,right,label in [(.15,4.5,"text"),(4.5,8.85,"vectors[N,384]")]:
-        routed_arrow(ax,[(left+2.6,4.02),(right,4.02)],label=label,label_xy=((left+2.6+right)/2,4.28),size=18)
-    low=[(.15,"Read\nQuestion","data"),(3.4,"Retrieve\nTop k","tool"),(6.65,"Generate\nCite; abstain","model"),(9.9,"Check\nQuotes","tool")]
-    for x,label,role in low:role_box(ax,x,1.7,2.6,.95,label,role,size=19)
-    for left,right,label in [(.15,3.4,"query"),(3.4,6.65,"passages"),(6.65,9.9,"answer")]:
-        routed_arrow(ax,[(left+2.6,2.17),(right,2.17)],label=label,label_xy=((left+2.6+right)/2,2.96),size=18)
-    routed_arrow(ax,[(10.15,3.55),(10.15,3.2),(4.7,3.2),(4.7,2.65)],label="index",label_xy=(7.2,3.2),size=18)
-    ax.text(.15,4.77,"Indexing",fontsize=20,color=INK)
+    # Each arrow label sits in its own gap, just above the arrow it names.
+    fig,ax=_diagram_canvas(6.0)
+    def flow(left, right, y, label):
+        routed_arrow(ax,[(left,y),(right,y)])
+        ax.text((left+right)/2,y+.1,label,ha="center",va="bottom",fontsize=18,color=TEXT)
+    ax.text(.15,5.35,"Indexing (once per source update)",fontsize=20,color=INK)
+    w,top_y=2.4,4.1
+    top=[(.15,"Split\nKeep IDs","data"),(3.85,"Embed\nFixed model","model"),(8.55,"Store\nVectors","tool")]
+    for x,label,role in top:role_box(ax,x,top_y,w,.95,label,role,size=19)
+    flow(.15+w,3.85,top_y+.475,"text")
+    flow(3.85+w,8.55,top_y+.475,"vectors[N,384]")
+    ax.text(.15,2.72,"Answering (per question)",fontsize=20,color=INK)
+    w,low_y,gap=2.1,1.5,1.4
+    low=[("Read\nQuestion","data"),("Retrieve\nTop k","tool"),("Generate\nCite; abstain","model"),("Check\nQuotes","tool")]
+    xs=[.15+i*(w+gap) for i in range(4)]
+    for x,(label,role) in zip(xs,low):role_box(ax,x,low_y,w,.95,label,role,size=19)
+    for x,label in zip(xs,("query","passages","answer")):flow(x+w,x+w+gap,low_y+.475,label)
+    # The stored index feeds retrieval; it is read, not retrained, per question.
+    store_x,retrieve_x=8.55+2.4/2,xs[1]+w/2
+    routed_arrow(ax,[(store_x,top_y),(store_x,3.4),(retrieve_x,3.4),(retrieve_x,low_y+.95)],
+                 label="index",label_xy=((store_x+retrieve_x)/2,3.4),size=18)
     _compact_legend(ax,("data","model","tool"));_diagram_finish(fig,path)
 
 

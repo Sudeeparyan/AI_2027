@@ -1,6 +1,329 @@
 {
   "title": "Generative AI course glossary",
+  "week_glossary": {
+    "01": [
+      "Generative model",
+      "Discriminative model",
+      "Foundation model",
+      "Model weight",
+      "Token",
+      "Context window",
+      "Training",
+      "Inference",
+      "Pre-training",
+      "Post-training",
+      "Likelihood",
+      "Maximum likelihood",
+      "Negative log-likelihood",
+      "Cross-entropy",
+      "Perplexity",
+      "Logit",
+      "Temperature",
+      "Top-k sampling",
+      "Nucleus",
+      "Latent variable",
+      "Autoregressive generation",
+      "Hallucination",
+      "Open-weight model",
+      "Probability",
+      "Array index",
+      "Loop",
+      "Bigram",
+      "Sampling",
+      "Conditional probability",
+      "Training target"
+    ],
+    "02": [
+      "Autoencoder",
+      "Latent space",
+      "Prior",
+      "Encoder",
+      "Decoder",
+      "ELBO",
+      "KL divergence",
+      "Reparameterisation",
+      "Posterior collapse",
+      "β-VAE",
+      "VQ-VAE",
+      "Latent interpolation",
+      "Latent diffusion",
+      "Image tensor",
+      "Mean and standard deviation",
+      "Training loss",
+      "Latent code",
+      "Epoch",
+      "Training target"
+    ],
+    "03": [
+      "Neural-network weights",
+      "Binary classification",
+      "Gradient",
+      "Generator",
+      "Discriminator",
+      "Detach",
+      "Logit",
+      "Non-saturating loss",
+      "Mode collapse",
+      "Feature vector",
+      "Gradient penalty",
+      "ADA",
+      "Critic",
+      "EMA",
+      "Generative precision",
+      "Generative recall",
+      "KID",
+      "TTUR"
+    ],
+    "04": [
+      "Forward process",
+      "Noise schedule",
+      "Cumulative signal fraction",
+      "Reverse process",
+      "Noise prediction",
+      "Score",
+      "DDPM",
+      "DDIM",
+      "U-Net",
+      "Diffusion transformer",
+      "Latent diffusion",
+      "Cross-attention",
+      "Guidance",
+      "Negative prompt",
+      "Flow matching",
+      "Rectified flow",
+      "Distillation",
+      "CLIP score",
+      "Gaussian noise",
+      "Regression",
+      "Tensor shape",
+      "Denoiser",
+      "Mean squared error",
+      "Sampler"
+    ],
+    "05": [
+      "Vector",
+      "Matrix shape",
+      "Training target",
+      "Embedding",
+      "Causal mask",
+      "Softmax",
+      "Attention head",
+      "Residual connection",
+      "Logit",
+      "Perplexity",
+      "Feed-forward network (MLP)",
+      "Tensor",
+      "Query, key and value",
+      "Attention mask"
+    ],
+    "06": [
+      "n-gram model",
+      "Embedding",
+      "Pre-training",
+      "Scaling law",
+      "Compute-optimal training",
+      "In-context learning",
+      "Context window",
+      "Beam search",
+      "Nucleus",
+      "Open-weight model",
+      "Small language model",
+      "Reasoning model",
+      "Test-time compute",
+      "Model card",
+      "Contamination",
+      "Token ID",
+      "Probability distribution",
+      "Causal language model",
+      "Encoder",
+      "Decoder",
+      "Chat template",
+      "Temperature",
+      "Latency",
+      "Attention mask",
+      "Training target"
+    ],
+    "07": [
+      "In-context learning",
+      "Instruction message",
+      "Zero-shot",
+      "One-shot",
+      "Few-shot",
+      "Role prompting",
+      "Chain-of-thought",
+      "Self-consistency",
+      "Prompt chaining",
+      "Structured output",
+      "Context engineering",
+      "ROUGE",
+      "BLEU",
+      "LLM-as-a-judge",
+      "Sycophancy",
+      "Prompt injection",
+      "Jailbreak",
+      "Prompt",
+      "Accuracy",
+      "JSON",
+      "Evaluation harness",
+      "Schema",
+      "Position bias",
+      "Ground truth",
+      "Token"
+    ],
+    "08": [
+      "Full fine-tuning",
+      "Supervised fine-tuning",
+      "Instruction tuning",
+      "Chat template",
+      "RLHF",
+      "Reward model",
+      "PPO",
+      "DPO",
+      "GRPO",
+      "RLVR",
+      "Reward hacking",
+      "LoRA adapter",
+      "QLoRA",
+      "Adapter",
+      "Prompt tuning",
+      "Prefix tuning",
+      "Distillation",
+      "Catastrophic forgetting",
+      "Model weight",
+      "Train/test split",
+      "Loss",
+      "Intent",
+      "Frozen parameter",
+      "Rank",
+      "Overfitting",
+      "Matrix projection",
+      "Train / validation / test",
+      "Training target"
+    ],
+    "09": [
+      "Modality",
+      "Cross-modal",
+      "Alignment",
+      "Multimodal fusion",
+      "Shared space",
+      "Contrastive learning",
+      "InfoNCE",
+      "Zero-shot classification",
+      "Dual encoder",
+      "VLM",
+      "Visual instruction tuning",
+      "Modality gap",
+      "Spectrogram",
+      "Word error rate",
+      "Vector",
+      "Encoder",
+      "Cosine similarity",
+      "Embedding",
+      "Precision@k",
+      "PCA",
+      "Inference",
+      "Pair",
+      "Similarity"
+    ],
+    "10": [
+      "Multimodal language model",
+      "VLM",
+      "Natively multimodal",
+      "Projector",
+      "Visual tokens",
+      "Visual instruction tuning",
+      "Visual question answering",
+      "Image-to-image editing",
+      "Editing strength",
+      "Inpainting",
+      "Outpainting",
+      "ControlNet",
+      "TTS",
+      "Voice cloning",
+      "CLIP score",
+      "POPE",
+      "CHAIR",
+      "Mean opinion score",
+      "Deepfake",
+      "C2PA",
+      "Watermark",
+      "SynthID",
+      "Liar's dividend",
+      "Modality",
+      "Autoregressive generation",
+      "Ground truth",
+      "Hallucination",
+      "Diffusion",
+      "ASR",
+      "Provenance"
+    ],
+    "11": [
+      "API platform",
+      "OpenAI-compatible API",
+      "TTFT",
+      "Token output rate",
+      "Prefill",
+      "Decoding",
+      "Rate limit",
+      "HTTP 429",
+      "Exponential backoff",
+      "Quantisation",
+      "Absmax quantisation",
+      "Group-wise quantisation",
+      "Continuous batching",
+      "PagedAttention",
+      "Prefix caching",
+      "Speculative decoding",
+      "Gradio",
+      "FastAPI",
+      "Docker image",
+      "Tracing",
+      "Guardrail",
+      "p95 latency",
+      "Token",
+      "Function",
+      "JSON",
+      "API",
+      "Latency",
+      "Endpoint",
+      "Throughput",
+      "Batching",
+      "Cache",
+      "Cold measurement",
+      "HTTP 422",
+      "Response cache",
+      "Synthetic traffic",
+      "TestClient",
+      "Warm measurement"
+    ],
+    "12": [
+      "Embedding",
+      "Context",
+      "Tool call",
+      "Chunk",
+      "Dense retrieval",
+      "BM25",
+      "RRF",
+      "Re-ranker",
+      "MRR",
+      "Abstention",
+      "Indirect prompt injection",
+      "MCP",
+      "Tool",
+      "Cited-quote support",
+      "Passage recall",
+      "Permission gate",
+      "Policy fallback"
+    ]
+  },
   "terms": [
+    {
+      "term": "Absmax quantisation",
+      "meaning": "Quantisation that uses the largest absolute value in a tensor or group to determine a scale.",
+      "weeks": [
+        11
+      ]
+    },
     {
       "term": "Abstention",
       "meaning": "Declining to supply an answer when sufficient evidence is unavailable.",
@@ -30,8 +353,22 @@
       ]
     },
     {
+      "term": "Alignment",
+      "meaning": "Making corresponding representations or outputs agree; in this week's multimodal setting, matching content across modalities.",
+      "weeks": [
+        9
+      ]
+    },
+    {
       "term": "API",
       "meaning": "An interface through which one program asks another to do work.",
+      "weeks": [
+        11
+      ]
+    },
+    {
+      "term": "API platform",
+      "meaning": "A service providing programmatic access to models, typically with authentication, quotas, monitoring and billing.",
       "weeks": [
         11
       ]
@@ -66,9 +403,17 @@
       ]
     },
     {
+      "term": "Autoencoder",
+      "meaning": "An encoder-decoder network trained to reconstruct its input through an intermediate representation.",
+      "weeks": [
+        2
+      ]
+    },
+    {
       "term": "Autoregressive generation",
       "meaning": "Generate a next token from the input and previously generated tokens.",
       "weeks": [
+        1,
         10
       ]
     },
@@ -77,6 +422,13 @@
       "meaning": "Processing several inputs together in one model operation.",
       "weeks": [
         11
+      ]
+    },
+    {
+      "term": "Beam search",
+      "meaning": "Decoding that retains a fixed number of high-scoring partial sequences as candidates at each step.",
+      "weeks": [
+        6
       ]
     },
     {
@@ -94,6 +446,13 @@
       ]
     },
     {
+      "term": "BLEU",
+      "meaning": "A reference-overlap measure using modified n-gram precision and a brevity penalty, originally developed for translation.",
+      "weeks": [
+        7
+      ]
+    },
+    {
       "term": "BM25",
       "meaning": "A keyword-ranking method based on term matches and their frequency.",
       "weeks": [
@@ -101,10 +460,24 @@
       ]
     },
     {
+      "term": "C2PA",
+      "meaning": "A technical standard for signed content-provenance records; valid credentials establish recorded claims, not the truth of depicted events.",
+      "weeks": [
+        10
+      ]
+    },
+    {
       "term": "Cache",
       "meaning": "Stored results reused when an equivalent request returns.",
       "weeks": [
         11
+      ]
+    },
+    {
+      "term": "Catastrophic forgetting",
+      "meaning": "Losing previously learned capabilities when training adapts a model to new data or tasks.",
+      "weeks": [
+        8
       ]
     },
     {
@@ -122,10 +495,25 @@
       ]
     },
     {
+      "term": "Chain-of-thought",
+      "meaning": "Intermediate reasoning steps generated before a final answer; written reasoning can be incorrect or unfaithful to internal computation.",
+      "weeks": [
+        7
+      ]
+    },
+    {
+      "term": "CHAIR",
+      "meaning": "Caption hallucination assessment with image relevance: measures mentions of objects unsupported by an image's annotated content.",
+      "weeks": [
+        10
+      ]
+    },
+    {
       "term": "Chat template",
       "meaning": "Model-specific formatting used to represent roles and messages as a token sequence.",
       "weeks": [
-        6
+        6,
+        8
       ]
     },
     {
@@ -146,7 +534,8 @@
       "term": "CLIP score",
       "meaning": "A similarity between image and text representations; it is not a complete quality measure.",
       "weeks": [
-        4
+        4,
+        10
       ]
     },
     {
@@ -157,6 +546,13 @@
       ]
     },
     {
+      "term": "Compute-optimal training",
+      "meaning": "Balancing model size and training data to minimise loss under a fixed compute budget; the balance depends on the experiment.",
+      "weeks": [
+        6
+      ]
+    },
+    {
       "term": "Conditional probability",
       "meaning": "The probability of an outcome when some other information is already given.",
       "weeks": [
@@ -164,10 +560,53 @@
       ]
     },
     {
+      "term": "Contamination",
+      "meaning": "Evaluation data appearing in training or tuning data, which can make measured performance misleading.",
+      "weeks": [
+        6
+      ]
+    },
+    {
       "term": "Context",
       "meaning": "The input text made available to a language model for a response.",
       "weeks": [
         12
+      ]
+    },
+    {
+      "term": "Context engineering",
+      "meaning": "Choosing and arranging instructions, examples, evidence and tool results within a model's available context.",
+      "weeks": [
+        7
+      ]
+    },
+    {
+      "term": "Context window",
+      "meaning": "The maximum sequence length a model can process in one call; input and generated output can share this budget.",
+      "weeks": [
+        1,
+        6
+      ]
+    },
+    {
+      "term": "Continuous batching",
+      "meaning": "Serving requests in batches whose membership can change between generation steps as requests arrive and finish.",
+      "weeks": [
+        11
+      ]
+    },
+    {
+      "term": "Contrastive learning",
+      "meaning": "Learning representations by making matched examples more similar than unmatched examples under a chosen objective.",
+      "weeks": [
+        9
+      ]
+    },
+    {
+      "term": "ControlNet",
+      "meaning": "An added conditioning network that guides diffusion generation using structural inputs such as edges, depth or pose.",
+      "weeks": [
+        10
       ]
     },
     {
@@ -185,11 +624,67 @@
       ]
     },
     {
+      "term": "Cross-attention",
+      "meaning": "Attention whose queries come from one representation and whose keys and values come from another.",
+      "weeks": [
+        4
+      ]
+    },
+    {
+      "term": "Cross-entropy",
+      "meaning": "The average negative log-probability assigned to outcomes under a target distribution; one-hot targets give negative log-likelihood.",
+      "weeks": [
+        1
+      ]
+    },
+    {
+      "term": "Cross-modal",
+      "meaning": "Relating information from different data modalities, such as an image and its caption.",
+      "weeks": [
+        9
+      ]
+    },
+    {
+      "term": "Cumulative signal fraction",
+      "meaning": "Alpha-bar at time t: the product of one minus each earlier noise variance β; it controls the retained signal term.",
+      "weeks": [
+        4
+      ]
+    },
+    {
+      "term": "DDIM",
+      "meaning": "Denoising diffusion implicit model: a sampler using selected noise levels; its usual η=0 setting is deterministic given starting noise.",
+      "weeks": [
+        4
+      ]
+    },
+    {
+      "term": "DDPM",
+      "meaning": "Denoising diffusion probabilistic model: a learned reverse process that generates data from noise, usually through stochastic updates.",
+      "weeks": [
+        4
+      ]
+    },
+    {
       "term": "Decoder",
       "meaning": "A network that turns a representation or previous outputs into predictions for the output.",
       "weeks": [
         2,
         6
+      ]
+    },
+    {
+      "term": "Decoding",
+      "meaning": "Selecting and generating output tokens using the model's predictions and a chosen generation procedure.",
+      "weeks": [
+        11
+      ]
+    },
+    {
+      "term": "Deepfake",
+      "meaning": "Synthetic or manipulated media made to convincingly depict a person or event in a way that can mislead.",
+      "weeks": [
+        10
       ]
     },
     {
@@ -221,10 +716,53 @@
       ]
     },
     {
+      "term": "Diffusion transformer",
+      "meaning": "A transformer denoiser that processes image or latent patches together with noise-level and conditioning information.",
+      "weeks": [
+        4
+      ]
+    },
+    {
+      "term": "Discriminative model",
+      "meaning": "A model that predicts a label or target from an input without modelling the input distribution.",
+      "weeks": [
+        1
+      ]
+    },
+    {
       "term": "Discriminator",
       "meaning": "A network trained to distinguish dataset examples from generated examples.",
       "weeks": [
         3
+      ]
+    },
+    {
+      "term": "Distillation",
+      "meaning": "Training a student model to imitate a teacher's outputs or behaviour, often to reduce computation.",
+      "weeks": [
+        4,
+        8
+      ]
+    },
+    {
+      "term": "Docker image",
+      "meaning": "A packaged filesystem and configuration used to create application containers with their dependencies.",
+      "weeks": [
+        11
+      ]
+    },
+    {
+      "term": "DPO",
+      "meaning": "Direct preference optimisation: train on preferred and rejected responses using a reference-relative loss, without a separate reward-model training stage or online RL loop.",
+      "weeks": [
+        8
+      ]
+    },
+    {
+      "term": "Dual encoder",
+      "meaning": "Separate encoders for two input types whose representations are compared using a similarity function.",
+      "weeks": [
+        9
       ]
     },
     {
@@ -253,6 +791,7 @@
       "meaning": "A numerical vector representing an item, often learned, for prediction or comparison.",
       "weeks": [
         5,
+        6,
         9,
         12
       ]
@@ -288,6 +827,20 @@
       ]
     },
     {
+      "term": "Exponential backoff",
+      "meaning": "Retrying with progressively longer waits, often increasing geometrically and adding random jitter.",
+      "weeks": [
+        11
+      ]
+    },
+    {
+      "term": "FastAPI",
+      "meaning": "A Python framework for implementing HTTP APIs with typed request handling and validation.",
+      "weeks": [
+        11
+      ]
+    },
+    {
       "term": "Feature vector",
       "meaning": "A numerical representation extracted from an intermediate layer of a network.",
       "weeks": [
@@ -309,6 +862,13 @@
       ]
     },
     {
+      "term": "Flow matching",
+      "meaning": "Learning a velocity field from targets defined along selected paths between distributions; generation integrates that learned field.",
+      "weeks": [
+        4
+      ]
+    },
+    {
       "term": "Forward process",
       "meaning": "A fixed procedure that progressively corrupts clean data with noise.",
       "weeks": [
@@ -316,8 +876,22 @@
       ]
     },
     {
+      "term": "Foundation model",
+      "meaning": "A model trained on broad data that can be adapted to a range of downstream tasks.",
+      "weeks": [
+        1
+      ]
+    },
+    {
       "term": "Frozen parameter",
       "meaning": "A model weight held unchanged by the optimizer during training.",
+      "weeks": [
+        8
+      ]
+    },
+    {
+      "term": "Full fine-tuning",
+      "meaning": "Updating all model weights during adaptation to new data or a task.",
       "weeks": [
         8
       ]
@@ -334,6 +908,13 @@
       "meaning": "Random numerical values drawn from a bell-shaped distribution.",
       "weeks": [
         4
+      ]
+    },
+    {
+      "term": "Generative model",
+      "meaning": "A model of how data is distributed, used to sample new examples, optionally given a condition.",
+      "weeks": [
+        1
       ]
     },
     {
@@ -372,11 +953,39 @@
       ]
     },
     {
+      "term": "Gradio",
+      "meaning": "A Python library for building interactive interfaces around models or other functions.",
+      "weeks": [
+        11
+      ]
+    },
+    {
       "term": "Ground truth",
       "meaning": "A reference answer or observation used to check a model output.",
       "weeks": [
         7,
         10
+      ]
+    },
+    {
+      "term": "Group-wise quantisation",
+      "meaning": "Quantisation using separate scales, and sometimes offsets, for groups of values instead of one scale for all values.",
+      "weeks": [
+        11
+      ]
+    },
+    {
+      "term": "GRPO",
+      "meaning": "Group relative policy optimisation: a reinforcement-learning method that estimates relative advantages from a group of sampled answers.",
+      "weeks": [
+        8
+      ]
+    },
+    {
+      "term": "Guardrail",
+      "meaning": "A rule or check that constrains inputs, outputs or actions; it can reduce risk but is not a guarantee of correctness.",
+      "weeks": [
+        11
       ]
     },
     {
@@ -402,10 +1011,32 @@
       ]
     },
     {
+      "term": "HTTP 429",
+      "meaning": "An HTTP response indicating too many requests; retries should respect the service's instructions and a bounded attempt budget.",
+      "weeks": [
+        11
+      ]
+    },
+    {
       "term": "Image tensor",
       "meaning": "A numerical array holding a batch of images, their channels, rows, and columns.",
       "weeks": [
         2
+      ]
+    },
+    {
+      "term": "Image-to-image editing",
+      "meaning": "Generating an edited image from an input image and a condition, often by adding noise and denoising with a new prompt.",
+      "weeks": [
+        10
+      ]
+    },
+    {
+      "term": "In-context learning",
+      "meaning": "Performing a task using information or examples in the prompt without updating model weights.",
+      "weeks": [
+        6,
+        7
       ]
     },
     {
@@ -424,10 +1055,45 @@
       ]
     },
     {
+      "term": "InfoNCE",
+      "meaning": "A contrastive negative-log-probability objective that distinguishes a matching example from negative examples using normalised similarity scores.",
+      "weeks": [
+        9
+      ]
+    },
+    {
+      "term": "Inpainting",
+      "meaning": "Generating content within a selected region of an image while conditioning on the surrounding content.",
+      "weeks": [
+        10
+      ]
+    },
+    {
+      "term": "Instruction message",
+      "meaning": "A message carrying application or system instructions; its role and priority depend on the model or API contract.",
+      "weeks": [
+        7
+      ]
+    },
+    {
+      "term": "Instruction tuning",
+      "meaning": "Supervised fine-tuning on examples presented as instructions and desired responses across tasks.",
+      "weeks": [
+        8
+      ]
+    },
+    {
       "term": "Intent",
       "meaning": "A category describing what a customer's message is asking about.",
       "weeks": [
         8
+      ]
+    },
+    {
+      "term": "Jailbreak",
+      "meaning": "An attempt to make a model bypass its intended safety or instruction constraints.",
+      "weeks": [
+        7
       ]
     },
     {
@@ -471,13 +1137,57 @@
       "term": "Latent diffusion",
       "meaning": "Generating in a compact image representation before a decoder converts it to pixels.",
       "weeks": [
+        2,
         4
+      ]
+    },
+    {
+      "term": "Latent interpolation",
+      "meaning": "Following a path between latent codes and decoding intermediate points to inspect how outputs change.",
+      "weeks": [
+        2
+      ]
+    },
+    {
+      "term": "Latent space",
+      "meaning": "The space of hidden codes used by a model; VAE training encourages their distribution to resemble a prior.",
+      "weeks": [
+        2
+      ]
+    },
+    {
+      "term": "Latent variable",
+      "meaning": "An unobserved variable used to explain observed data; a generative model may sample it before decoding.",
+      "weeks": [
+        1
+      ]
+    },
+    {
+      "term": "Liar's dividend",
+      "meaning": "The advantage gained by falsely dismissing authentic evidence as fabricated when convincing synthetic media is possible.",
+      "weeks": [
+        10
+      ]
+    },
+    {
+      "term": "Likelihood",
+      "meaning": "The probability or density assigned to observed data, considered as a function of model parameters.",
+      "weeks": [
+        1
+      ]
+    },
+    {
+      "term": "LLM-as-a-judge",
+      "meaning": "Using a language model to score outputs against a rubric; validate its agreement, biases and reliability.",
+      "weeks": [
+        7
       ]
     },
     {
       "term": "Logit",
       "meaning": "An unnormalised model score. Sigmoid or softmax can turn logits into probabilities.",
       "weeks": [
+        1,
         3,
         5
       ]
@@ -518,6 +1228,13 @@
       ]
     },
     {
+      "term": "Maximum likelihood",
+      "meaning": "Choosing model parameters to maximise the likelihood of the observed training data.",
+      "weeks": [
+        1
+      ]
+    },
+    {
       "term": "MCP",
       "meaning": "A protocol through which applications discover and call tools and access resources.",
       "weeks": [
@@ -529,6 +1246,13 @@
       "meaning": "The centre of a distribution and a measure of its spread.",
       "weeks": [
         2
+      ]
+    },
+    {
+      "term": "Mean opinion score",
+      "meaning": "The average of human ratings on a specified quality scale; report the scale, raters and evaluation conditions.",
+      "weeks": [
+        10
       ]
     },
     {
@@ -547,6 +1271,13 @@
       ]
     },
     {
+      "term": "Modality gap",
+      "meaning": "A separation between representation distributions for different modalities, even within a nominally shared embedding space.",
+      "weeks": [
+        9
+      ]
+    },
+    {
       "term": "Mode collapse",
       "meaning": "A generator produces only a small part of the variety present in the training distribution.",
       "weeks": [
@@ -554,9 +1285,17 @@
       ]
     },
     {
+      "term": "Model card",
+      "meaning": "Documentation describing a model's intended uses, evaluation, limitations, training information and licence.",
+      "weeks": [
+        6
+      ]
+    },
+    {
       "term": "Model weight",
       "meaning": "A learned number used by a neural network to transform its input.",
       "weeks": [
+        1,
         8
       ]
     },
@@ -568,6 +1307,34 @@
       ]
     },
     {
+      "term": "Multimodal fusion",
+      "meaning": "Combining information from different modalities, at input features, intermediate layers or output decisions.",
+      "weeks": [
+        9
+      ]
+    },
+    {
+      "term": "Multimodal language model",
+      "meaning": "A language model system that processes, and sometimes generates, multiple data modalities alongside text.",
+      "weeks": [
+        10
+      ]
+    },
+    {
+      "term": "n-gram model",
+      "meaning": "A count-based model that predicts the next symbol using the preceding n minus one symbols.",
+      "weeks": [
+        6
+      ]
+    },
+    {
+      "term": "Natively multimodal",
+      "meaning": "Trained jointly on sequences containing multiple modalities, rather than only attaching a separately trained input converter.",
+      "weeks": [
+        10
+      ]
+    },
+    {
       "term": "Negative log-likelihood",
       "meaning": "A score measuring how surprising observed data is; lower is better for those data.",
       "weeks": [
@@ -575,10 +1342,24 @@
       ]
     },
     {
+      "term": "Negative prompt",
+      "meaning": "A reference text condition used by some guidance methods to steer generation away from specified content.",
+      "weeks": [
+        4
+      ]
+    },
+    {
       "term": "Neural-network weights",
       "meaning": "Learned numbers used to transform an input into a prediction.",
       "weeks": [
         3
+      ]
+    },
+    {
+      "term": "Noise prediction",
+      "meaning": "A network's estimate of the noise added to a representation at a specified noise level.",
+      "weeks": [
+        4
       ]
     },
     {
@@ -599,7 +1380,37 @@
       "term": "Nucleus",
       "meaning": "The leading token candidates retained by a top-p cumulative-probability threshold.",
       "weeks": [
+        1,
         6
+      ]
+    },
+    {
+      "term": "One-shot",
+      "meaning": "A prompt that includes one worked input-output example of the task.",
+      "weeks": [
+        7
+      ]
+    },
+    {
+      "term": "Open-weight model",
+      "meaning": "A model with downloadable trained weights; its licence determines permitted use and does not necessarily provide training data.",
+      "weeks": [
+        1,
+        6
+      ]
+    },
+    {
+      "term": "OpenAI-compatible API",
+      "meaning": "An endpoint implementing a specified part of an OpenAI request-response format; supported routes and behaviours can differ.",
+      "weeks": [
+        11
+      ]
+    },
+    {
+      "term": "Outpainting",
+      "meaning": "Generating additional content beyond an image's original boundaries.",
+      "weeks": [
+        10
       ]
     },
     {
@@ -612,6 +1423,13 @@
     {
       "term": "p95 latency",
       "meaning": "A latency value at or below which roughly 95% of measured requests fall.",
+      "weeks": [
+        11
+      ]
+    },
+    {
+      "term": "PagedAttention",
+      "meaning": "vLLM's attention approach that manages key-value-cache storage in paged blocks to reduce memory fragmentation.",
       "weeks": [
         11
       ]
@@ -648,6 +1466,7 @@
       "term": "Perplexity",
       "meaning": "The exponential of average negative log-probability, summarising prediction uncertainty.",
       "weeks": [
+        1,
         5
       ]
     },
@@ -659,6 +1478,13 @@
       ]
     },
     {
+      "term": "POPE",
+      "meaning": "Polling-based object-hallucination evaluation that tests whether a vision-language model incorrectly claims objects are present.",
+      "weeks": [
+        10
+      ]
+    },
+    {
       "term": "Position bias",
       "meaning": "A judge's preference for an answer's placement rather than its quality.",
       "weeks": [
@@ -666,10 +1492,60 @@
       ]
     },
     {
+      "term": "Post-training",
+      "meaning": "Further training after pre-training to adapt capabilities or behaviour, such as instruction or preference tuning.",
+      "weeks": [
+        1
+      ]
+    },
+    {
+      "term": "Posterior collapse",
+      "meaning": "A failure where the decoder largely ignores the latent code and the inferred code distribution approaches the prior.",
+      "weeks": [
+        2
+      ]
+    },
+    {
+      "term": "PPO",
+      "meaning": "Proximal policy optimisation: a reinforcement-learning method that limits policy changes during reward-based updates; it is used in some RLHF pipelines.",
+      "weeks": [
+        8
+      ]
+    },
+    {
+      "term": "Pre-training",
+      "meaning": "Initial training on broad data, often using targets constructed from the data itself.",
+      "weeks": [
+        1,
+        6
+      ]
+    },
+    {
       "term": "Precision@k",
       "meaning": "The fraction of the k returned results that are relevant.",
       "weeks": [
         9
+      ]
+    },
+    {
+      "term": "Prefill",
+      "meaning": "Processing prompt tokens to initialise a model's generation state, often including its key-value cache.",
+      "weeks": [
+        11
+      ]
+    },
+    {
+      "term": "Prefix caching",
+      "meaning": "Reusing stored computation for an identical prompt prefix when the model and relevant settings permit it.",
+      "weeks": [
+        11
+      ]
+    },
+    {
+      "term": "Prefix tuning",
+      "meaning": "Learning continuous prefix representations, often attention keys and values at several layers, while keeping the base model fixed.",
+      "weeks": [
+        8
       ]
     },
     {
@@ -688,7 +1564,7 @@
     },
     {
       "term": "Probability distribution",
-      "meaning": "Nonnegative probabilities for possible outcomes, adding to one.",
+      "meaning": "A rule assigning probabilities to outcomes; discrete probability masses sum to one, while continuous densities integrate to one.",
       "weeks": [
         6
       ]
@@ -708,6 +1584,13 @@
       ]
     },
     {
+      "term": "Prompt chaining",
+      "meaning": "Passing results through a sequence of prompts, each handling a defined part of a task.",
+      "weeks": [
+        7
+      ]
+    },
+    {
       "term": "Prompt injection",
       "meaning": "Instructions inside supplied content that attempt to redirect the model's task.",
       "weeks": [
@@ -715,10 +1598,24 @@
       ]
     },
     {
+      "term": "Prompt tuning",
+      "meaning": "Learning continuous input vectors while keeping the main model weights fixed.",
+      "weeks": [
+        8
+      ]
+    },
+    {
       "term": "Provenance",
       "meaning": "Information about a media item's origin and editing history.",
       "weeks": [
         10
+      ]
+    },
+    {
+      "term": "QLoRA",
+      "meaning": "Training low-rank adapters through a frozen, typically 4-bit quantised base model to reduce fine-tuning memory.",
+      "weeks": [
+        8
       ]
     },
     {
@@ -743,10 +1640,31 @@
       ]
     },
     {
+      "term": "Rate limit",
+      "meaning": "A service-imposed cap on requests, tokens or other usage within a time interval; limits depend on the service and account.",
+      "weeks": [
+        11
+      ]
+    },
+    {
       "term": "Re-ranker",
       "meaning": "A model that reorders candidate passages by reading them with the question.",
       "weeks": [
         12
+      ]
+    },
+    {
+      "term": "Reasoning model",
+      "meaning": "A model trained to use additional intermediate computation before answering; that computation does not guarantee correctness.",
+      "weeks": [
+        6
+      ]
+    },
+    {
+      "term": "Rectified flow",
+      "meaning": "A flow-based generative approach that learns velocity targets along straight paired paths; learned sampling trajectories need not be straight.",
+      "weeks": [
+        4
       ]
     },
     {
@@ -778,6 +1696,55 @@
       ]
     },
     {
+      "term": "Reverse process",
+      "meaning": "The learned sampling process that moves a noisy representation towards data through successive denoising updates.",
+      "weeks": [
+        4
+      ]
+    },
+    {
+      "term": "Reward hacking",
+      "meaning": "Increasing a measured reward by exploiting its weaknesses while failing the intended task.",
+      "weeks": [
+        8
+      ]
+    },
+    {
+      "term": "Reward model",
+      "meaning": "A model trained to score outputs from feedback, such as human comparisons; its score approximates the desired preference.",
+      "weeks": [
+        8
+      ]
+    },
+    {
+      "term": "RLHF",
+      "meaning": "Reinforcement learning from human feedback: optimise a model using rewards derived from human judgements; a reward model and PPO are one implementation.",
+      "weeks": [
+        8
+      ]
+    },
+    {
+      "term": "RLVR",
+      "meaning": "Reinforcement learning with verifiable rewards, using outcomes that can be checked, such as tests or known answers.",
+      "weeks": [
+        8
+      ]
+    },
+    {
+      "term": "Role prompting",
+      "meaning": "Assigning a role in a prompt to influence the model's style or task framing; it does not confer expertise.",
+      "weeks": [
+        7
+      ]
+    },
+    {
+      "term": "ROUGE",
+      "meaning": "A family of reference-overlap measures often used for summarisation, including n-gram and longest-subsequence variants.",
+      "weeks": [
+        7
+      ]
+    },
+    {
       "term": "RRF",
       "meaning": "Reciprocal rank fusion: combine rankings using candidates' rank positions.",
       "weeks": [
@@ -799,8 +1766,29 @@
       ]
     },
     {
+      "term": "Scaling law",
+      "meaning": "An empirical relationship describing how quantities such as loss change with model size, data or compute.",
+      "weeks": [
+        6
+      ]
+    },
+    {
       "term": "Schema",
       "meaning": "A specification of output fields, types and allowed values.",
+      "weeks": [
+        7
+      ]
+    },
+    {
+      "term": "Score",
+      "meaning": "The gradient of log probability density with respect to the input; Gaussian diffusion connects it to scaled noise prediction.",
+      "weeks": [
+        4
+      ]
+    },
+    {
+      "term": "Self-consistency",
+      "meaning": "Sampling several reasoning paths and aggregating their final answers, often by majority vote.",
       "weeks": [
         7
       ]
@@ -820,10 +1808,38 @@
       ]
     },
     {
+      "term": "Small language model",
+      "meaning": "A comparatively compact language model; no universal parameter threshold defines the term.",
+      "weeks": [
+        6
+      ]
+    },
+    {
       "term": "Softmax",
       "meaning": "Turns a row of scores into nonnegative numbers summing to one.",
       "weeks": [
         5
+      ]
+    },
+    {
+      "term": "Spectrogram",
+      "meaning": "A time-frequency representation showing the strength of frequency components in an audio signal over time.",
+      "weeks": [
+        9
+      ]
+    },
+    {
+      "term": "Speculative decoding",
+      "meaning": "A draft model proposes output tokens and a target model verifies them; the acceptance rule determines distribution preservation.",
+      "weeks": [
+        11
+      ]
+    },
+    {
+      "term": "Structured output",
+      "meaning": "An output constrained to a specified structure or schema; valid structure does not guarantee correct content.",
+      "weeks": [
+        7
       ]
     },
     {
@@ -834,10 +1850,24 @@
       ]
     },
     {
+      "term": "Sycophancy",
+      "meaning": "Producing answers that agree with a user's stated view despite conflicting evidence or a better-supported answer.",
+      "weeks": [
+        7
+      ]
+    },
+    {
       "term": "Synthetic traffic",
       "meaning": "Invented requests used to exercise an application and its monitoring.",
       "weeks": [
         11
+      ]
+    },
+    {
+      "term": "SynthID",
+      "meaning": "Google DeepMind's family of watermarking methods for identifying supported types of AI-generated content.",
+      "weeks": [
+        10
       ]
     },
     {
@@ -863,6 +1893,13 @@
       ]
     },
     {
+      "term": "Test-time compute",
+      "meaning": "Computation spent during inference, such as longer reasoning, repeated sampling or search, rather than during training.",
+      "weeks": [
+        6
+      ]
+    },
+    {
       "term": "TestClient",
       "meaning": "An in-process HTTP request tester; its timing excludes real network transport.",
       "weeks": [
@@ -880,6 +1917,7 @@
       "term": "Token",
       "meaning": "A unit processed or generated by a model; a text token can be a word, word part or character.",
       "weeks": [
+        1,
         7,
         11
       ]
@@ -889,6 +1927,13 @@
       "meaning": "An integer identifying a text unit in one particular tokenizer's vocabulary.",
       "weeks": [
         6
+      ]
+    },
+    {
+      "term": "Token output rate",
+      "meaning": "Output-token count divided by a stated time interval; specify whether the interval covers decoding or the whole request.",
+      "weeks": [
+        11
       ]
     },
     {
@@ -903,6 +1948,20 @@
       "meaning": "A structured request for the program to run a named function.",
       "weeks": [
         12
+      ]
+    },
+    {
+      "term": "Top-k sampling",
+      "meaning": "Sampling after retaining only the k highest-probability token candidates and renormalising their probabilities.",
+      "weeks": [
+        1
+      ]
+    },
+    {
+      "term": "Tracing",
+      "meaning": "Recording linked operations in a request so their timings, dependencies and failures can be inspected.",
+      "weeks": [
+        11
       ]
     },
     {
@@ -981,10 +2040,47 @@
       ]
     },
     {
+      "term": "Visual instruction tuning",
+      "meaning": "Fine-tuning a vision-language model on image-conditioned instructions and desired answers or conversations.",
+      "weeks": [
+        9,
+        10
+      ]
+    },
+    {
+      "term": "Visual question answering",
+      "meaning": "Producing an answer to a question using information from an image.",
+      "weeks": [
+        10
+      ]
+    },
+    {
+      "term": "Visual tokens",
+      "meaning": "Vector representations of image patches or features supplied to a language model; they need not be discrete text-token IDs.",
+      "weeks": [
+        10
+      ]
+    },
+    {
       "term": "VLM",
       "meaning": "A vision-language model that processes images together with text.",
       "weeks": [
+        9,
         10
+      ]
+    },
+    {
+      "term": "Voice cloning",
+      "meaning": "Generating speech that imitates a speaker's voice from reference audio; assess consent and misuse risks.",
+      "weeks": [
+        10
+      ]
+    },
+    {
+      "term": "VQ-VAE",
+      "meaning": "A vector-quantised autoencoder that represents inputs using entries from a learned discrete codebook.",
+      "weeks": [
+        2
       ]
     },
     {
@@ -992,6 +2088,13 @@
       "meaning": "A measurement after specified initialisation or warm-up; state what work it excludes.",
       "weeks": [
         11
+      ]
+    },
+    {
+      "term": "Watermark",
+      "meaning": "A signal embedded in content to support later identification; detection can be imperfect or altered by transformations.",
+      "weeks": [
+        10
       ]
     },
     {
@@ -1013,6 +2116,13 @@
       "meaning": "Select a class by comparing descriptions, without training on that task's labels.",
       "weeks": [
         9
+      ]
+    },
+    {
+      "term": "β-VAE",
+      "meaning": "A variational autoencoder with a multiplier β on its KL penalty, changing the reconstruction-regularisation tradeoff.",
+      "weeks": [
+        2
       ]
     }
   ]

@@ -5,7 +5,7 @@
 #
 # **CPU core:** run a real local VLM on small images, verify known chart/invoice values,
 # compare a checking heuristic with source evidence, compute totals, and inspect removable metadata.
-# The bounded core is designed for at most 15 minutes of cached CPU waiting; its current runtime still needs measurement.
+# The teaching notes report the measured cached CPU core time; the final table records your own results.
 # Model installation and first downloads need network access and add separate waiting time.
 # Free Colab and local VS Code use the same shared setup; a GPU is optional.
 #
@@ -25,6 +25,18 @@
 #
 # **Licences:** the optional models have their own licence conditions.
 # SD-Turbo has conditional commercial permissions; MMS-TTS is non-commercial. Check exact model licences before project use.
+#
+# | Part | Activity | Suggested class time |
+# |---|---|---|
+# | Start | Setup and vocabulary recall | 10 min |
+# | 1 | Image → text with a vision-language model | 20 min |
+# | 2 | Charts and documents: read, then check | 30 min |
+# | 3 | Text → image and editing (stored evidence) | 20 min |
+# | 4 | Text → speech → text (stored evidence) | 15 min |
+# | 5 | Provenance; self-checks | 25 min |
+#
+# Class time includes discussion and coding; it is not a measured compute time.
+# Optional fresh image and speech generation is for after class.
 
 # %% [markdown]
 # ## Before running: choose the input-to-output route
@@ -267,7 +279,7 @@ def check_score():
     except (TypeError, ValueError, AttributeError):
         return check(False, "", "score needs strings, a numeric comparison and an explicit return value.")
 
-check_score()
+assert check_score(), "Complete TODO 1, then rerun this cell before scoring the model answers."
 
 
 rows = []
@@ -463,8 +475,9 @@ def check_edits():
                  "Call the pipeline at strengths 0.3, 0.6, 0.9 with fixed source/prompt/seed, four steps and zero guidance; return its corresponding image each time.")
 
 
-check_edits()
+edits_ready = check_edits()
 if RUN_STRETCH:
+    assert edits_ready, "Complete optional TODO 2, then rerun this cell before generating edited images."
     i2i = AutoPipelineForImage2Image.from_pipe(t2i)
     edits = make_edits(i2i, gen[0])
     fig, ax = plt.subplots(1, 4, figsize=(14, 3.8))
@@ -601,10 +614,11 @@ def check_wer():
                  "Use reference length and the minimum word-edit path; normalise punctuation and case.")
 
 
-check_speech()
+speech_ready = check_speech()
 print("worked WER: one substitution in three words =",wer("the red cup","the blue cup"))
 check_wer()
 if RUN_STRETCH:
+    assert speech_ready, "Complete optional TODO 3, then rerun this cell before synthesising and transcribing audio."
     from transformers import AutoTokenizer, VitsModel, pipeline
     tts_tok=AutoTokenizer.from_pretrained("facebook/mms-tts-eng")
     tts=VitsModel.from_pretrained("facebook/mms-tts-eng").to(DEVICE).eval()
@@ -676,7 +690,7 @@ def check_metadata():
                  "TODO 4: honest PNG labels checked; JPEG text labels absent.",
                  "Add each named text field to PngInfo; attach pnginfo during PNG save and reload both files.")
 
-check_metadata()
+assert check_metadata(), "Complete TODO 4, then rerun this cell to create and verify the PNG labels."
 
 # %% [markdown]
 # ✍️ **Question 3.** Why is metadata labelling insufficient on its own? Compare C2PA content credentials and invisible watermarks (e.g. SynthID), and state what the EU AI Act (Article 50) requires.

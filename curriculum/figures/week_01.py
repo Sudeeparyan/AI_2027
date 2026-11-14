@@ -202,20 +202,20 @@ def families(path):
     from matplotlib.lines import Line2D
     from matplotlib.patches import Patch
 
-    fig, ax = plt.subplots(figsize=(13, 6.0))
+    fig, ax = plt.subplots(figsize=(13, 6.8))
     ax.axis("off")
     ax.set_xlim(0, 13)
-    ax.set_ylim(-0.45, 6.55)
+    ax.set_ylim(-0.45, 7.35)
     rows = [
         ("Autoregressive", "context[L]", ["Score", "Select", "Append"], ["logits[V]", "ID[1]"], "context[L+1]"),
         ("VAE", "prior", ["Sample", "Decode", "Return"], ["z[d]", "image[C,H,W]"], None),
         ("GAN", "noise", ["Sample", "Generate", "Return"], ["z[d]", "image[C,H,W]"], None),
         ("Diffusion / flow", "noise", ["Sample", "Update", "Return"], ["state[C,H,W]", "image[C,H,W]"], "state"),
     ]
-    xs = [2.15, 5.75, 9.35]
+    xs = [2.45, 5.95, 9.45]  # first column clears the bold "Autoregressive" row label
     width, height = 2.25, 0.58
     for i, (family, incoming, operations, flows, repeat) in enumerate(rows):
-        y = 5.15 - 1.38 * i
+        y = 5.95 - 1.62 * i
         ax.text(0.08, y + height / 2, family.replace("Diffusion / flow", "Diffusion\n/ flow"), fontsize=18, color=INK, va="center", fontweight="bold")
         colours = [TEAL if operations[0] == "Sample" else PRIMARY, PRIMARY, ACCENT]
         for x, operation, colour in zip(xs, operations, colours):
@@ -228,7 +228,7 @@ def families(path):
         if repeat:
             source = xs[2] + width / 2 if i == 0 else xs[1] + width * 0.8
             target = xs[0] + width / 2 if i == 0 else xs[1] + width * 0.2
-            top = y + height + 0.42
+            top = y + height + 0.5  # leaves room for the label inside the loop
             ax.plot([source, source, target, target], [y+height+0.02, top, top, y+height+0.1], color=MUTED, lw=1.6, ls="--")
             ax.annotate("", xy=(target, y+height+0.02), xytext=(target, y+height+0.18), arrowprops={"arrowstyle":"-|>", "color":MUTED, "lw":1.6, "linestyle":"--"})
             ax.text((source+target)/2, y+height+0.09, repeat, fontsize=18, color=TEXT, ha="center", va="bottom")

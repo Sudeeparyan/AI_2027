@@ -51,6 +51,8 @@ Start with the vocabulary and overall flow. For each section below, read the sim
 
 $$\mathcal{L}_{\mathrm{SFT}}(\theta) = -\sum_{(x, y)} \;\; \sum_{t=1}^{|y|} \, \log p_\theta(y_t \mid x, y_{<t})$$
 
+**Read every symbol.** L with subscript SFT is the supervised fine-tuning loss. θ identifies the trained weights; x is a prompt and y its known answer. Each pair (x, y) is a training example. The outer sum adds across pairs. The inner sum visits answer-token positions t from one to |y|, the answer length. The token y with subscript t is the correct token at that position; y with subscript less than t means the earlier answer tokens. p with subscript θ is the model probability. The vertical bar means "given": read the prompt and earlier answer before scoring the next answer token. Log is the natural logarithm; the leading minus makes high probabilities produce small losses. This equation sums losses; a trainer can average over scored tokens instead.
+
 The loss counts answer tokens in this setup. **Masking** means assigning ignored labels to the prompt tokens; the model still reads them as context. TRL supports this with `prompt`/`completion` pairs and the appropriate completion-loss setting. SFT can use other masking choices, so inspect the trainer rather than assuming every SFT run masks prompts.
 
 **Instruction tuning** uses many instructions with desired replies, as in FLAN (2021) and InstructGPT (2022). It teaches general instruction-following patterns; new tasks still need evaluation. **Chat templates** add the model-specific role and end tokens. Use `tokenizer.apply_chat_template` consistently at training and prediction. LIMA (Zhou et al., 2023) reported strong results with 1,000 carefully reviewed examples; this demonstrates the value of useful data, not a universal minimum.
@@ -71,9 +73,13 @@ The loss counts answer tokens in this setup. **Masking** means assigning ignored
 
 $$\mathcal{L}_{\mathrm{RM}} = -\log \sigma\left(r_\phi(x, y_w) - r_\phi(x, y_l)\right)$$
 
-**Step 4.** Optimise the policy with RL (PPO), maximising reward while staying close to the reference model:
+**Read the reward loss.** x is the prompt; y with subscript w is the preferred answer, and y with subscript l is the rejected answer. The reward network r has learned parameters φ. It scores each prompt–answer pair. σ is sigmoid: σ(z) = 1/(1 + exp(−z)), where z is its input and exp is the exponential. Log means natural logarithm. L with subscript RM names the reward-model loss. A larger preferred-minus-rejected score makes sigmoid larger and the negative logarithm smaller.
+
+**Step 4.** Optimise the policy with RL (PPO), maximising reward while discouraging excessive change from the reference model:
 
 $$\max_{\pi_\theta} \;\; \mathbb{E}_{y \sim \pi_\theta}\left[r_\phi(x, y)\right] - \beta\, D_{\mathrm{KL}}\left(\pi_\theta \,\|\, \pi_{\mathrm{ref}}\right)$$
+
+**Read the policy objective.** π is a policy: a distribution over complete answers. θ identifies its trained weights; ref identifies the frozen reference. Each distribution is conditioned on the same prompt x. The symbol y ~ π means sample an answer y from that distribution. E means average over those sampled answers, and max asks training to increase this objective. D with subscript KL measures distribution drift; the double bar separates the two distributions. β is a nonnegative penalty coefficient. For chosen average reward 3, drift 2 and β = 0.1, the objective is 3 − 0.1 × 2 = 2.8. These are illustrative inputs, not a measured run.
 
 The KL penalty discourages large changes from the starting model. It can reduce **reward hacking** (exploiting flaws in the scoring model), but does not prevent it. In InstructGPT (Ouyang et al., 2022), people preferred a 1.3 B-parameter InstructGPT over the 175 B GPT-3.
 
@@ -82,6 +88,8 @@ The KL penalty discourages large changes from the starting model. It can reduce 
 ### Direct Preference Optimisation (DPO)
 
 $$\mathcal{L}_{\mathrm{DPO}} = -\log \sigma\left(\beta \log \frac{\pi_\theta(y_w \mid x)}{\pi_{\mathrm{ref}}(y_w \mid x)} - \beta \log \frac{\pi_\theta(y_l \mid x)}{\pi_{\mathrm{ref}}(y_l \mid x)}\right)$$
+
+**Read the DPO loss.** x, the preferred/rejected answers, the two policies, natural log and sigmoid keep their meanings above. Each fraction compares the same complete answer's probability under the trained and reference models. A log ratio is positive when that answer became more probable relative to the reference. Subtract the rejected answer's log ratio from the preferred one's, then scale by β, apply sigmoid and take negative log. The reference anchors this comparison; it does not impose a hard bound on distribution drift or establish correctness. β is inherited from the regularised objective, and also scales the displayed training signal.
 
 DPO (Rafailov et al., 2023) trains directly on preferred and rejected answers. Under the paper's assumptions it corresponds to the regularised RLHF objective, while removing separate reward-model fitting and the RL loop. It is often easier to implement, but still depends on preference quality and evaluation. Related approaches include IPO, KTO, ORPO and SimPO.
 
@@ -132,7 +140,9 @@ Store the frozen base in 4-bit NormalFloat (NF4) and train LoRA adapters in 16-b
 
 ### Memory rules of thumb (7–8 B model)
 
-Full fine-tuning with Adam in mixed precision needs roughly 16 bytes per parameter (≈ 120+ GB); LoRA with a 16-bit base ≈ 18–24 GB; QLoRA ≈ 7–12 GB. Activations depend on sequence length and batch size.
+These are illustrative planning estimates, not measured peaks. One mixed-precision Adam configuration stores two bytes for each weight, two for its gradient, eight for two 32-bit Adam moments, and four for a 32-bit master-weight copy: sixteen bytes per trainable parameter. For 7.5 billion parameters, those copies total 120 GB before activations and temporary workspaces. A configuration without master weights or with different gradient precision changes the arithmetic.
+
+LoRA keeps the base weights but trains only adapter state; QLoRA additionally compresses the base. The displayed 18–24 GB and 7–12 GB ranges are rough examples, not fit guarantees. Sequence length, batch size and implementation change peak memory. Measure your own configuration.
 
 ### Knowledge distillation
 
@@ -230,13 +240,13 @@ With β = 0.1 and log ratios 0.5 (preferred) and −0.5 (rejected), the argument
 
 # Lab guide and answers
 
-**CPU core:** {{W08_CORE_MODEL}} (about 1 GB, the same model as week 7) fine-tuned with a rank-{{W08_CORE_RANK}} LoRA adapter on the attention projections. The data are real Banking77 messages (CC-BY-4.0) for {{W08_CORE_N_INTENTS}} intents: {{W08_CORE_N_TRAIN}} training messages, a small validation set and {{W08_CORE_N_TEST}} test messages from Banking77's own test split. One epoch is {{W08_CORE_STEPS}} optimiser steps with batch size 8; training took {{W08_CORE_TRAIN_MIN}} minutes. On the course laptop ({{W08_CORE_THREADS}} CPU threads, model and data already downloaded) the complete core took {{W08_CORE_TIME}}, recorded on {{W08_CORE_DATE}}. **Optional stretch:** `RUN_FULL = True` runs a larger experiment like the stored one (ten intents, rank 16, 200 test messages); it takes over an hour on a CPU. **Optional hosted comparison:** keep `USE_GEMINI = False` and `USE_OPENAI = False` for the local route; enable exactly one in the shared setup to send five invented messages (five calls at most) to a hosted model with the few-shot prompt. OpenAI API use is billed separately from a ChatGPT subscription. **Hand-in:** the comparison table, the loss curve, the confusion table and three written answers.
+**CPU core:** {{W08_CORE_MODEL}} (about 2 GB of float32 base weights, before activations and training state) fine-tuned with a rank-{{W08_CORE_RANK}} LoRA adapter on the attention projections. The data are real Banking77 messages (CC-BY-4.0) for {{W08_CORE_N_INTENTS}} intents: {{W08_CORE_N_TRAIN}} training messages, a small validation set and {{W08_CORE_N_TEST}} test messages from Banking77's own test split. One epoch is {{W08_CORE_STEPS}} optimiser steps with batch size 8; training took {{W08_CORE_TRAIN_MIN}} minutes. On the course laptop ({{W08_CORE_THREADS}} CPU threads, model and data already downloaded) the complete core took {{W08_CORE_TIME}}, recorded on {{W08_CORE_DATE}}. **Optional stretch:** `RUN_FULL = True` runs a larger experiment like the stored one (ten intents, rank 16, 200 test messages); it requires a separate runtime measurement on the chosen hardware. **Optional hosted comparison:** keep `USE_GEMINI = False` and `USE_OPENAI = False` for the local route; enable exactly one in the shared setup to send five invented messages (five calls at most) to a hosted model with the few-shot prompt. OpenAI API use is billed separately from a ChatGPT subscription. **Hand-in:** the comparison table, the loss curve, the confusion table and three written answers.
 
 ## TODOs and expected outputs
 
 * **TODO 1** `to_chat`: `{"prompt": [{"role": "user", "content": f"{INSTRUCTION}\nMessage: {text}\nIntent:"}], "completion": [{"role": "assistant", "content": label}]}`. `check_to_chat` confirms that the label appears only in the completion.
 * **TODO 2** `LoraConfig(r=RANK, lora_alpha=2 * RANK, lora_dropout=0.05, target_modules=["q_proj", "k_proj", "v_proj", "o_proj"], bias="none", task_type="CAUSAL_LM")`. The check recomputes r × (inputs + outputs) for every adapted projection: {{W08_CORE_TRAINABLE}} trainable numbers ({{W08_CORE_TRAINABLE_PCT}} of the model) at rank {{W08_CORE_RANK}}.
-* **TODO 3** evaluate `tuned` with the zero-shot prompt and build the three-row `comparison` table.
+* **TODO 3** compare prompt and training choices on validation messages. Freeze the adapter weights, training data, settings, prompts and parser, then score the final test once and build the three-row `comparison` table. Rerunning unchanged settings reuses predictions; changed settings require a new untouched final test.
 * **TODO 4** add up the file sizes in the adapter folder and multiply base parameters by their element size. The core adapter measured {{W08_CORE_ADAPTER_MB}} MB, about 4 bytes per trainable number plus small configuration files.
 
 ## Measured CPU core (course laptop)
@@ -269,7 +279,7 @@ With 50 test messages, each message is 2 percentage points; read the error rows 
 ## Short answer
 
 1. **Compute the LoRA trainable parameters for a 2048 × 2048 matrix with rank 8, and the percentage.** (3 marks) *Model answer:* 8 × (2048 + 2048) = 32,768; 2048² = 4,194,304; 0.78%.
-2. **Explain the difference between RLHF with PPO and DPO.** (4 marks) *Model answer:* RLHF trains a reward model on preferences and optimises the policy with RL under a KL penalty; DPO optimises the same objective directly with a loss on preference pairs, needing no reward model or RL loop; DPO is simpler and more stable.
+2. **Explain the difference between RLHF with PPO and DPO.** (4 marks) *Model answer:* RLHF trains a reward model on preferences and optimises the policy with RL under a KL penalty; under the DPO paper's assumptions, its preference loss corresponds to the regularised objective without a separate reward model or online RL loop. This simplifies training; quality and stability still depend on data and settings.
 3. **Describe two signs of overfitting in fine-tuning and two remedies.** (4 marks) *Model answer:* validation loss rises while training loss falls; held-out task accuracy worsens as training fit improves; remedies: fewer epochs/early stopping, lower learning rate or rank, or more/diverse data. Loss of earlier general abilities is a separate forgetting problem and needs its own regression checks.
 4. **Why is retrieval preferred over fine-tuning for frequently changing facts?** (3 marks) *Model answer:* updates require only re-indexing; answers can cite sources; fine-tuning is slow to update, opaque and can increase hallucination on new facts.
 
@@ -281,25 +291,7 @@ With 50 test messages, each message is 2 percentage points; read the error rows 
 
 # Glossary
 
-| Term | Meaning |
-|---|---|
-| Full fine-tuning | Updating all model weights |
-| SFT | Supervised fine-tuning on prompt–response pairs |
-| Instruction tuning | SFT on many instruction-formatted tasks |
-| Chat template | Model-specific special-token format for messages |
-| RLHF | Reinforcement learning from human feedback (reward model + PPO) |
-| Reward model | Model predicting which response humans prefer |
-| PPO | Proximal Policy Optimisation, the RL algorithm used in RLHF |
-| DPO | Direct Preference Optimisation: preference loss without RL |
-| GRPO / RLVR | Group relative policy optimisation / RL with verifiable rewards |
-| Reward hacking | Exploiting flaws in a reward signal |
-| LoRA | Low-rank adaptation: trainable low-rank update to frozen weights |
-| QLoRA | LoRA on a 4-bit quantised base model |
-| Adapter | Small trainable module inserted into a frozen network |
-| Prompt tuning | Learning soft vectors at the input |
-| Prefix tuning | Learning key/value prefixes at transformer layers |
-| Distillation | Training a student model to imitate a teacher |
-| Catastrophic forgetting | Loss of prior abilities after fine-tuning |
+<!-- Definitions generated from curriculum/glossary.json week_glossary. -->
 
 # Readings, videos and further practice
 
@@ -530,7 +522,7 @@ These explanations retain the detail moved off crowded slides. Read the short sl
 
 ## Slide 28: Rough GPU memory to fine-tune a 7–8 B model
 
-| Approach | Weights | Gradients + optimizer | Rough total | Hardware |
+| Approach | Weights | Gradients + Adam + master copy | Rough total | Hardware |
 |---|---|---|---|---|
 | Full fine-tuning (16-bit, Adam) | ≈ 15 GB | ≈ 100–110 GB | ≈ 120+ GB | Multiple data-centre GPUs |
 | LoRA (16-bit base) | ≈ 15 GB | < 1 GB | ≈ 18–24 GB | One 24 GB GPU |

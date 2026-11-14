@@ -386,9 +386,9 @@ slides:
     Concatenation joins outputs along the feature axis. The output projection mixes their joined features. Heads need not learn
     distinct human-recognisable jobs.
 
-    Example: Model width thirty-two split across four heads gives eight features per head. Four [T,8] outputs join into [T,32],
-    rather than [T,128]. Different-reader lenses suggest multiple learned views, but no programmer assigns one head exclusively
-    to grammar or another exclusively to names.
+    Example: The figure uses width twelve and three heads, so each head works with four features. The lab model uses width thirty-two
+    and four heads: eight features per head. Four [T,8] outputs join into [T,32], rather than [T,128]. No programmer assigns
+    one head exclusively to grammar or names.
 
     Ask: What width returns after joining four eight-feature head outputs?
 
@@ -667,7 +667,9 @@ slides:
 
     Watch out: Do not assume all PyTorch masking interfaces use one convention. Also set attention dropout explicitly to zero
     when evaluating an interface with a dropout argument.'
-  caption: Custom True blocks; SDPA True allows.
+  bullets:
+  - 'Custom mask: True blocks.'
+  - 'SDPA mask: True allows.'
 - type: section
   number: 5
   title: Training, efficiency and applications
@@ -759,8 +761,8 @@ slides:
     A lower loss means improved predictability under that procedure. It does not directly measure coherent storytelling. The
     current CPU core uses the same text with a smaller model and training budget.
 
-    Example: Stored measurements and samples document the longer model’s parameters, updates and device through fill placeholders
-    in the Word notes. Read actual spelling, dialogue labels and malformed fragments rather than claiming guaranteed fluency.
+    Example: The Word notes record the longer model’s parameters, updates and device for these stored measurements and samples.
+    Read actual spelling, dialogue labels and malformed fragments rather than claiming guaranteed fluency.
     Today’s small CPU model may learn limited patterns while producing substantial nonsense.
 
     Ask: What evidence would help evaluate whether generated dialogue maintains a coherent story?
@@ -883,7 +885,7 @@ slides:
   - Measure loss; inspect samples.
   - 'Optional: inspect separate pretrained models.'
   runtime: CPU core took {{W05_CORE_TIME}}; GPU optional
-  deliverable: Checks, curves, samples and explanations
+  deliverable: Checks, curves, samples, explanations
   notes: 'In short: The local core checks attention and trains a real character transformer before any optional downloaded-model
     inspection.
 

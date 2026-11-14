@@ -329,9 +329,9 @@ slides:
   title: 'The SFT loss: next-token prediction on the answer'
   eq: \mathcal{L}_{\mathrm{SFT}}(\theta) = -\sum_{(x, y)} \;\; \sum_{t=1}^{|y|} \, \log p_\theta\left(y_t \mid x, y_{<t}\right)
   read_as:
-  - Read prompt x and known answer y.
-  - Raise each answer-token probability.
-  - Prompt tokens are read, not scored.
+  - 'Illustration: token probabilities 0.5, 0.8, 0.9.'
+  - 'Multiply: 0.36 → negative log ≈ 1.02.'
+  - Score answer tokens; read prompt tokens.
   terms:
   - - $\theta$
     - trained weights
@@ -341,25 +341,22 @@ slides:
     - answer token t
   - - $y_{<t}$
     - earlier answer tokens
-  notes: 'In short: SFT minimises the negative log-probability of the correct answer tokens, given the prompt and earlier answer
-    tokens.
+  notes: 'In short: SFT adds the surprise at each correct answer token while using prompt tokens as context.
 
+    Explain: θ names trained weights; x is a prompt and y its target answer. The index t counts answer tokens, and |y| is the
+    answer length. Earlier answer tokens are written y with subscript less than t. p is a predicted probability, and the vertical
+    bar means given the displayed context. The inner sum adds natural logarithms across tokens; the outer sum adds across training
+    pairs. L with subscript SFT names the loss, and the minus sign makes higher probabilities produce smaller losses.
 
-    Explain: θ is the set of trained numbers. x is the prompt and y is the known answer. y_t is the answer token at position
-    t. The log turns multiplied probabilities into added scores. The minus sign makes higher probability give lower loss.
+    Example: Chosen answer-token probabilities 0.5, 0.8 and 0.9 give −ln(0.5 × 0.8 × 0.9), approximately 1.02. These illustrate
+    one answer''s summed loss; the trainer may average scored tokens instead.
 
+    Ask: What if the first probability rises to 0.9?
 
-    Example: Suppose the answer lost_or_stolen_card is three tokens with probabilities 0.5, 0.8 and 0.9. The loss is −(ln 0.5
-    + ln 0.8 + ln 0.9) ≈ 0.69 + 0.22 + 0.11 = 1.02. Training pushes each probability towards 1, so the loss falls towards 0.
+    Answer: Its contribution shrinks, and this answer''s summed loss falls to approximately 0.43.
 
-
-    Ask: What happens to the loss if the first token''s probability rises from 0.5 to 0.9?
-
-
-    Answer: Its term drops from about 0.69 to 0.11, so the total falls to about 0.43.
-
-
-    Watch out: An answer can span several tokens even when it looks like one word.'
+    Watch out: Prompt masking excludes its labels from loss, while attention still reads the prompt.'
+  example_first: true
 - type: bullets
   title: 'Instruction tuning: from base model to assistant'
   bullets:
@@ -400,7 +397,7 @@ slides:
     \ tokenize=False))\n\n# <|im_start|>system\n# Name the intent.<|im_end|>\n# <|im_start|>user\n# Card lost!<|im_end|>\n#\
     \ <|im_start|>assistant\n# lost_or_stolen_card<|im_end|>\n"
   bullets:
-  - Serve with this template.
+  - Match training's template.
   notes: 'In short: A chat template turns role-tagged messages into one token sequence with markers the model learned in training.
 
 
@@ -513,8 +510,8 @@ slides:
   - \max_{\pi_\theta} \; \mathbb{E}_{y \sim \pi_\theta(\cdot \mid x)}\left[r_\phi(x, y)\right] - \beta\,
     D_{\mathrm{KL}}\left(\pi_\theta(\cdot \mid x) \,\|\, \pi_{\mathrm{ref}}(\cdot \mid x)\right)
   read_as:
-  - 'Reward model: score preferred answers higher.'
-  - 'Policy: maximise reward, minus a KL drift penalty.'
+  - 'Illustration: scores 2, 0; loss ≈ 0.13.'
+  - 'Objective: 3 − 0.1 × 2 = 2.8.'
   terms:
   - - $y_w$ / $y_l$
     - preferred / rejected
@@ -525,34 +522,31 @@ slides:
   - - $\beta$
     - penalty strength
   panel_h: 2.2
-  notes: 'In short: The reward model learns to score preferred answers higher, and the policy then maximises reward while staying
-    near its start.
+  notes: 'In short: Preference comparisons train a reward scorer; the policy then increases reward while paying a penalty for
+    distribution changes.
 
+    Explain: x is a prompt, and y_w and y_l are preferred and rejected answers. r with parameters φ supplies reward scores;
+    σ is sigmoid and log means natural logarithm. L_RM names the reward-model loss; θ names the policy''s trained weights. π_θ
+    and π_ref assign answer probabilities for trained and frozen reference policies, given x. E averages reward over answers
+    y sampled from π_θ; max asks training to increase the objective. KL measures distribution drift, its double bar separates
+    distributions, and β scales its penalty.
 
-    Explain: r_φ is the reward model, a network that outputs one score. σ is the sigmoid function, which maps any number to
-    between 0 and 1. The first loss is small when the preferred answer scores higher. The second line maximises expected reward.
-    The KL term measures how far the policy drifts from the reference.
+    Example: Chosen rewards 2 and 0 give sigmoid(2) ≈ 0.88 and loss ≈ 0.13. An average reward 3 with drift 2 and β = 0.1 gives
+    objective 2.8.
 
+    Ask: What does increasing β encourage?
 
-    Example: If r(x, y_w) = 2 and r(x, y_l) = 0, then σ(2) ≈ 0.88 and the loss is −ln 0.88 ≈ 0.13. If the scores were reversed,
-    σ(−2) ≈ 0.12 and the loss would be about 2.13. β then trades reward against drift.
+    Answer: Staying closer to the reference distribution, because drift is penalised more.
 
-
-    Ask: What does a larger β do?
-
-
-    Answer: It penalises drift more, so the policy stays closer to the reference model.
-
-
-    Watch out: The KL penalty limits drift; it does not guarantee safe or truthful outputs.'
+    Watch out: Neither the reward score nor the drift penalty guarantees safe or truthful outputs.'
+  example_first: true
 - type: equation
   title: Direct Preference Optimisation (DPO)
   eq: \mathcal{L}_{\mathrm{DPO}} = -\log \sigma\left(\beta \log \dfrac{\pi_\theta(y_w \mid x)}{\pi_{\mathrm{ref}}(y_w
     \mid x)} - \beta \log \dfrac{\pi_\theta(y_l \mid x)}{\pi_{\mathrm{ref}}(y_l \mid x)}\right)
   read_as:
-  - Use preferred and rejected replies to one prompt.
-  - Compare probabilities against a fixed reference.
-  - 'Train directly: no reward model, no RL loop.'
+  - 'Illustration: log ratios 0.5 and −0.5; β = 0.1.'
+  - Difference 1 → sigmoid(0.1) ≈ 0.52 → loss ≈ 0.64.
   terms:
   - - $\pi_\theta$
     - model being trained
@@ -560,27 +554,22 @@ slides:
     - fixed reference model
   - - $\beta$
     - penalty strength
-  notes: 'In short: DPO trains directly on preference pairs by raising the preferred answer''s probability relative to a fixed
-    reference model.
+  notes: 'In short: DPO favours preferred answers by comparing probability changes against a fixed reference model.
 
+    Explain: π is an answer distribution; θ identifies trained weights and ref identifies the frozen reference. x is the prompt;
+    y_w and y_l are preferred and rejected answers. The vertical bar means given x, and each fraction compares one answer under
+    both models. Log means natural logarithm; β scales the difference between log ratios. σ is sigmoid, mapping that difference
+    between zero and one. The leading minus log makes a loss to minimise.
 
-    Explain: π_θ is the model being trained. π_ref is a frozen copy of the starting model. Each log ratio measures how much
-    training has changed an answer''s probability. The loss rewards a larger ratio for the preferred answer. β is the drift-penalty
-    strength from RLHF; it scales the difference.
+    Example: Chosen log ratios 0.5 and −0.5 give a difference of one. With β = 0.1, sigmoid(0.1) ≈ 0.52, so the loss is approximately
+    0.64. These are classroom inputs, not trained results.
 
+    Ask: Why include a reference in each probability ratio?
 
-    Example: Suppose training raises the preferred answer''s log ratio to 0.5 and lowers the rejected one to −0.5. With β =
-    0.1, the inside is 0.1 × (0.5 − (−0.5)) = 0.1, σ(0.1) ≈ 0.52, and the loss is about 0.64. Larger gaps push the loss towards
-    zero.
+    Answer: It anchors the comparison to the starting model''s probabilities.
 
-
-    Ask: Why compare against a reference model instead of raw probabilities?
-
-
-    Answer: It measures change from the start, which stops the model drifting far for small gains.
-
-
-    Watch out: DPO still needs good preference data; it removes the reward model and RL loop, not the data.'
+    Watch out: This anchor is no hard drift limit. Preference quality and independent evaluation still matter.'
+  example_first: true
 - type: compare
   title: Three ways to learn from feedback
   columns:
@@ -696,9 +685,10 @@ slides:
     PEFT method.
 
 
-    Example: Full fine-tuning of a 7-billion-parameter model with Adam in 16-bit needs more than 100 GB of GPU memory. LoRA
-    on the same model can fit in about 18–24 GB, and QLoRA in about 7–12 GB. The lab''s adapter trains about {{W08_CORE_TRAINABLE_PCT}}
-    of Qwen''s weights.
+    Example: Illustrative memory accounting separates stored weights from training state. For 7.5 billion parameters, sixteen
+    bytes per parameter gives 120 GB before activations. That assumption includes higher-precision master weights as well as
+    gradients and Adam state; real implementations differ. The lab''s adapter trains about {{W08_CORE_TRAINABLE_PCT}} of Qwen''s
+    weights.
 
 
     Ask: Predict: does freezing weights reduce the memory needed for the weights themselves?
@@ -737,18 +727,21 @@ slides:
     k},\; r \ll \min(d, k)
   - '\#\mathrm{params}: \; r(d + k) \;\; \mathrm{vs.} \;\; d \cdot k'
   read_as:
-  - 'W: 4096×4096.'
-  - 'Rank 16: 131,072 weights.'
-  - 'Scale: α/r.'
+  - 'Illustration: 4×4 W = 16 weights.'
+  - Rank 1 adds 4 + 4 = 8.
   terms:
   - - h / x
     - output / input
-  - - W / A / B
-    - base / adapters
   - - d / k
-    - 'widths: output / input'
-  - - r / α
-    - rank / scale
+    - their sizes
+  - - W
+    - frozen base
+  - - A, B
+    - adapters
+  - - r
+    - rank
+  - - α / r
+    - scale
   panel_h: 2.0
   notes: 'In short: LoRA''s output is the frozen projection plus a scaled low-rank correction, and its count grows with r(d
     + k) instead of d·k.
@@ -758,8 +751,8 @@ slides:
     than d and k. The scale α/r sets how strongly the correction counts. After training, BA can be merged into W.
 
 
-    Example: For a 4096 × 4096 projection, W has 16,777,216 values. Rank 16 adds 16 × (4096 + 4096) = 131,072 values, under
-    1% of W. With α = 32 and r = 16, the scale is 2.
+    Example: A 4×4 base has 16 values; rank 1 adds 4 + 4 = 8. For a 4096 × 4096 projection, W has 16,777,216 values. Rank 16
+    adds 16 × (4096 + 4096) = 131,072 values, under 1% of W. With α = 32 and r = 16, the scale is 2.
 
 
     Ask: How many LoRA values does rank 8 add to that 4096 × 4096 projection?
@@ -769,6 +762,7 @@ slides:
 
 
     Watch out: Merging removes the adapter''s runtime cost but also its easy on and off switch.'
+  example_first: true
 - type: figure
   title: How many weights does LoRA train? (the lab model)
   figure: param_compare
@@ -811,7 +805,7 @@ slides:
     flow through the dequantised weights into the LoRA paths.
 
 
-    Example: The QLoRA paper (2023) fine-tuned a 65-billion-parameter model on one 48 GB GPU. A 7-billion-parameter model needs
+    Example: The QLoRA paper (2023) fine-tuned a 65-billion-parameter model on one 48 GB GPU. A 7.5-billion-parameter model needs
     about 4–5 GB for 4-bit weights instead of about 15 GB in 16-bit. The trade-off is extra computation to dequantise.
 
 
@@ -895,27 +889,21 @@ slides:
     - ≈ 4–5 GB
     - ≈ 7–12 GB
   callout: Illustrative; measure your setup.
-  notes: 'In short: Rough memory estimates show why LoRA and QLoRA make fine-tuning a 7–8 billion-parameter model practical
-    on one GPU.
+  notes: 'In short: Memory estimates need explicit precision and optimiser assumptions before comparing full training with adapters.
 
+    Explain: A 16-bit weight uses two bytes. In this illustration, its gradient also uses two bytes. Adam stores two 32-bit
+    moment values, adding eight bytes. A separate 32-bit master-weight copy adds four bytes. These sixteen bytes exclude activations
+    and temporary workspaces. LoRA stores training state only for adapters; QLoRA also compresses the frozen base.
 
-    Explain: Weights in 16-bit use two bytes each. Adam stores two extra numbers per trainable weight, often in 32-bit. Gradients
-    add another copy for trainable weights. LoRA keeps gradients and optimiser state only for the small adapters. QLoRA also
-    shrinks the frozen weights to about half a byte each.
+    Example: For 7.5 billion parameters, the assumed weight, gradient, moment and master copies total 120 GB in decimal units.
+    Activations add more. Implementations without the master copy need a different estimate. The LoRA and QLoRA ranges are illustrative
+    planning values, not measured lab peaks.
 
+    Ask: Does freezing the base remove its weight-storage requirement?
 
-    Example: A 7.5-billion-parameter model in 16-bit needs about 15 GB for its weights. Full fine-tuning adds gradients and
-    Adam state, passing 100 GB. LoRA needs those 15 GB plus a little for adapters and activations. QLoRA brings the weights
-    to about 4–5 GB.
+    Answer: No. It removes the base''s gradient and optimiser updates, while its stored weights remain.
 
-
-    Ask: Where does most of full fine-tuning''s memory go?
-
-
-    Answer: To gradients and optimiser state for every weight, not to the weights themselves.
-
-
-    Watch out: These are indicative; sequence length, batch size and implementation change real totals.'
+    Watch out: Sequence length, batch size, precision and implementation affect actual peak memory; measure the chosen workload.'
 - type: bullets
   title: 'Knowledge distillation: big teacher, small student'
   bullets:
@@ -1041,8 +1029,8 @@ slides:
     serving differently. A learning rate that is too high destabilises training.
 
 
-    Example: If training loss falls from 1.2 to 0.4 while validation loss rises from 0.9 to 1.3, the model is memorising. If
-    accuracy jumps to 100% on a test that shares messages with training, check for leakage before celebrating.
+    Example: If training loss falls from 1.2 to 0.4 while validation loss rises from 0.9 to 1.3, the model may be overfitting.
+    If accuracy jumps to 100% on a test that shares messages with training, check for leakage before celebrating.
 
 
     Ask: Which pitfall does an adapter on-and-off test help detect?
@@ -1233,8 +1221,8 @@ slides:
   - Train; watch the loss.
   - Test; read errors.
   - Disable adapter; save.
-  runtime: CPU core took {{W08_CORE_TIME}}. Full run optional.
-  deliverable: Comparison table, loss curve, answers
+  runtime: CPU core took {{W08_CORE_TIME}}. Stretch optional.
+  deliverable: Scores, curve, explanations
   notes: 'In short: The lab runs a real LoRA fine-tuning job on a CPU and compares it fairly with prompting.
 
 
@@ -1245,7 +1233,7 @@ slides:
 
     Example: On the course laptop with {{W08_CORE_THREADS}} CPU threads, the whole core took {{W08_CORE_TIME}} once the model
     and data were downloaded. It measured {{W08_CORE_COMPARISON}}. The optional full run uses ten intents and 1,216 training
-    messages and takes over an hour on a CPU.
+    messages and needs a separate runtime measurement on the chosen hardware.
 
 
     Ask: Which result decides whether the adapter was worth training?

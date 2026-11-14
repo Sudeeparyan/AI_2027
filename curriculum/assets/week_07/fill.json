@@ -1,10 +1,10 @@
 {
   "MODEL": "Qwen2.5-1.5B-Instruct",
   "FEWSHOT_SUMMARY": "Accuracy on 40 messages: zero-shot 70.0%, one-shot 60.0%, few-shot 72.5%, role + few-shot 67.5%.",
-  "FEWSHOT_NOTES": "**Measured (Qwen2.5-1.5B-Instruct, 40 messages, temperature 0):** accuracy zero-shot 70.0%, one-shot 60.0%, few-shot 72.5%, role + few-shot 67.5%; invalid labels zero-shot 0, one-shot 0, few-shot 0, role + few-shot 0.",
+  "FEWSHOT_NOTES": "Measured (Qwen2.5-1.5B-Instruct, 40 messages, temperature 0): accuracy zero-shot 70.0%, one-shot 60.0%, few-shot 72.5%, role + few-shot 67.5%; invalid labels zero-shot 0, one-shot 0, few-shot 0, role + few-shot 0.",
   "FEWSHOT_INVALID": "Every reply in this run contained a recognised label, so the chart shows only accuracy and the differences come from wrong labels, not from format errors.",
   "COT_SUMMARY": "Direct 50.0% (3 tokens); chain-of-thought 81.2% (189 tokens); self-consistency (k=5) 87.5% (914 tokens).",
-  "COT_NOTES": "**Measured (Qwen2.5-1.5B-Instruct):** direct 50.0% (3 tokens); chain-of-thought 81.2% (189 tokens); self-consistency (k=5) 87.5% (914 tokens). Report accuracy together with token cost.",
+  "COT_NOTES": "Measured (Qwen2.5-1.5B-Instruct): direct 50.0% (3 tokens); chain-of-thought 81.2% (189 tokens); self-consistency (k=5) 87.5% (914 tokens). Report accuracy together with token cost.",
   "EXTRACTION_NOTES": "50.0% of outputs were valid JSON after at most one retry, but only 33.3% had every field correct.",
   "INJECTION_SUMMARY": "Keyword flags on 3 injected documents: naive 3 of 3, defended 2 of 3.",
   "INJECTION_NOTES": "the keyword heuristic flagged 3 of 3 injected-document replies with the naive prompt and 2 of 3 injected-document replies with the defended prompt. Inspect the actual replies before claiming instruction-following.",
@@ -20,7 +20,7 @@
   "W07_CORE_EXTRACT": "100% valid after at most one retry, 33% with every field correct",
   "W07_CORE_INJECT": "naive prompt 2 of 3, defended prompt 2 of 3",
   "W07_CORE_JUDGE": "consistent in both orders for 0 of 4 pairs, correct in both orders for 0 of 4",
-  "W07_CORE_TIME": "7.3 minutes",
-  "W07_CORE_DATE": "11 October 2026",
+  "W07_CORE_TIME": "7.4 minutes",
+  "W07_CORE_DATE": "12 October 2026",
   "W07_CORE_THREADS": "4"
 }

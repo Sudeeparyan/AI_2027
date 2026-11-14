@@ -479,8 +479,10 @@ def readability(deck: Path, spec: dict) -> dict:
             else:
                 root = ET.fromstring(archive.read(f"ppt/slides/slide{number}.xml"))
                 texts = []
-                for shape in root.findall(".//p:sp", NS):
+                for shape in root.findall(".//p:sp", NS) + root.findall(".//p:graphicFrame", NS):
                     offset = shape.find("p:spPr/a:xfrm/a:off", NS)
+                    if offset is None:
+                        offset = shape.find("p:xfrm/a:off", NS)
                     if offset is None:
                         continue
                     top_in = int(offset.get("y", "0")) / 914400
@@ -498,7 +500,7 @@ def readability(deck: Path, spec: dict) -> dict:
                 count = word_count(sentence)
                 if count > 25:
                     sentence_warnings.append({"slide": number, "word_count": count, "sentence": sentence})
-    return {"method": "Body words counted from ordinary PowerPoint text shapes beginning 1.60-6.95 inches down; title/chrome and diagram layouts excluded. Sentence boundaries are a punctuation/newline heuristic.",
+    return {"method": "Body words counted from ordinary PowerPoint text shapes and table frames beginning 1.60-6.95 inches down; title/chrome and diagram layouts excluded. Sentence boundaries are a punctuation/newline heuristic.",
             "ordinary_slide_counts": counts, "above_40_word_slides": [row["slide"] for row in counts if row["above_40_words"]],
             "skipped_layouts": skipped, "script_sentences_above_25_words": sentence_warnings,
             "warning_only": True}

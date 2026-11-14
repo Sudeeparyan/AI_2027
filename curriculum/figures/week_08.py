@@ -73,7 +73,7 @@ def rlhf(path):
     fig, ax = canvas(4.6)
     blue = "#0072B2"
     steps=[(.1,"1. SFT","Demonstrations","model"),(3.5,"2. Compare","Ranked pairs","data"),
-           (6.9,"3. Reward\nmodel","Preference score","loss"),(10.3,"4. PPO\nupdate","Reward − KL","model")]
+           (6.9,"3. Reward\nmodel","Preference score","model"),(10.3,"4. PPO\nupdate","Reward − KL","loss")]
     for x,title,sub,role in steps:
         role_box(ax,x,2.55,2.6,1.05,title,role,size=20)
         ax.text(x+1.3,2.1,sub,ha="center",fontsize=16,color=TEXT)
@@ -151,9 +151,7 @@ def loss_curve(path):
         ax.plot(r["eval"]["step"], r["eval"]["eval_loss"], color=ACCENT, lw=2, marker="o", label="validation loss")
     ax.set_xlabel("step", fontsize=17)
     ax.set_ylabel("loss on completion tokens", fontsize=17)
-    where = "a laptop CPU" if r["device"] == "cpu" else "a GPU"
-    ax.set_title(f"LoRA SFT on {r['n_train']:,} examples ({r['train_minutes']:.0f} min on {where})", loc="left",
-                 fontsize=17)
+    ax.set_title(f"Stored LoRA SFT on {r['n_train']:,} examples", loc="left", fontsize=17)
     ax.legend(fontsize=17)
     ax.tick_params(labelsize=17)
     save(fig, path)

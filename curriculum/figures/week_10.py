@@ -43,10 +43,10 @@ def mllm_types(path):
     for x, (label, role) in zip(xs, labels):
         role_box(ax, x, 1.45, 1.25, 0.9, label, role, size=18)
     for i, label in enumerate(("pixels", "features", "embeddings")):
-        _labelled_flow(ax, xs[i]+1.25, xs[i+1], 1.9, label)
-    role_box(ax, 6.85, 1.45, 2.45, 0.9, "Read supported\nmedia", "data", size=18)
-    role_box(ax, 10.08, 1.45, 2.55, 0.9, "Generate supported\noutput", "model", size=18)
-    _labelled_flow(ax, 9.3, 10.08, 1.9, "media")
+        _labelled_flow(ax, xs[i]+1.25, xs[i+1], 1.9, label, 2.42)
+    role_box(ax, 6.85, 1.45, 2.3, 0.9, "Read supported\nmedia", "data", size=17)
+    role_box(ax, 9.9, 1.45, 2.9, 0.9, "Generate supported\noutput", "model", size=17)
+    _labelled_flow(ax, 9.15, 9.9, 1.9, "media", 2.42)
     ax.text(0.15, 0.91, "Separate pretrained parts", fontsize=18, color=TEXT)
     ax.text(6.85, 0.91, "Checkpoint-specific routes", fontsize=18, color=TEXT)
     _compact_legend(ax, ("data", "model"), 0.3)
@@ -81,7 +81,7 @@ def vlm_training(path):
     for x,(label,role) in zip(xs, labels):
         role_box(ax, x, 1.15, 2.75, 1.02, label, role, size=19)
     for i,label in enumerate(("weights", "aligned weights", "tuned weights")):
-        _labelled_flow(ax, xs[i]+2.75, xs[i+1], 1.66, label)
+        _labelled_flow(ax, xs[i]+2.75, xs[i+1], 1.66, label, 2.24)
     ax.text(0.15, 0.77, "Recipe varies; preference tuning optional", fontsize=18, color=TEXT)
     _compact_legend(ax, ("model", "loss"), 0.28)
     _diagram_finish(fig, path)
@@ -131,20 +131,20 @@ def _diagram_finish(fig, path):
 
 
 
-def _labelled_flow(ax, start, end, y, label):
-    """Route data above the boxes so arrow labels remain readable."""
-    routed_arrow(ax, [(start,y),(start+0.06,y),(start+0.06,y+0.54),(end-0.06,y+0.54),(end-0.06,y),(end,y)],
-                 label=label,label_xy=((start+end)/2,y+0.65),size=17)
+def _labelled_flow(ax, start, end, y, label, label_y):
+    """Straight arrow between box edges; its label sits just above the box tops."""
+    routed_arrow(ax, [(start, y), (end, y)])
+    ax.text((start+end)/2, label_y, label, ha="center", va="bottom", fontsize=17, color=TEXT)
 
 
 def _compact_legend(ax, roles, y):
-    colours={"data":"#0072B2","model":"#009E73","loss":"#D55E00"}
-    names={"data":"Data","model":"Model","loss":"Loss"}
-    for i,role in enumerate(roles):
-        x=0.2+1.6*i
-        ax.scatter([x],[y],marker="s",s=64,color=colours[role])
-        ax.text(x+0.17,y,names[role],fontsize=17,color=TEXT,va="center")
-    x=0.2+1.6*len(roles)
+    # Box swatches (not scatter markers) so the editable scene keeps the key.
+    names={"data":"Data","model":"Model","loss":"Loss / update"}
+    x=0.2
+    for role in roles:
+        role_box(ax, x, y-0.11, 0.22, 0.22, "", role)
+        ax.text(x+0.34, y, names[role], fontsize=17, color=TEXT, va="center")
+        x += 0.34 + 0.13*len(names[role]) + 0.45
     routed_arrow(ax,[(x,y),(x+0.65,y)])
     ax.text(x+0.85,y,"Flow",fontsize=17,color=TEXT,va="center")
 

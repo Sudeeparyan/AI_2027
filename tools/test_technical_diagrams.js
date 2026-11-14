@@ -88,8 +88,10 @@ for(const filename of fs.readdirSync(path.join(__dirname,"../curriculum/beginner
       // The key lists exactly the block roles drawn, so no entry describes a block that is not there.
       const roleLabels={data:"Data",model:"Model",loss:"Loss",metric:"Check",output:"Output",tool:"Tool"};
       const used=new Set(g.nodes.map(n=>n.role));
+      // Identically drawn roles share one entry, e.g. "Loss / Check".
+      const keyNames=layout.items.filter(i=>i.kind==="text"&&i.y===layout.legendY).flatMap(i=>i.text.split(" / "));
       for(const [role,legend] of Object.entries(roleLabels))
-        assert.equal(layout.items.some(i=>i.kind==="text"&&i.y===layout.legendY&&i.text===legend),used.has(role),`${d.id}: legend entry ${legend}`);
+        assert.equal(keyNames.includes(legend),used.has(role),`${d.id}: legend entry ${legend}`);
       assert(layout.items.some(i=>i.kind==="text"&&i.text==="Flow"),`${d.id}: missing solid-flow legend`);
       assert.equal(layout.items.some(i=>i.kind==="text"&&i.text==="Repeat"),Boolean(g.feedback),`${d.id}: repeat legend`);
       // No connector passes through any text (routes are horizontal or vertical segments).

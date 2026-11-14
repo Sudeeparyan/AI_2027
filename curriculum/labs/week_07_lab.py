@@ -390,17 +390,17 @@ prompts_ready = check_few_shot(few_shot) & check_role_few_shot(role_few_shot)
 # **Expected output:** A slider; moving it prints the prompt and its token count. Automated runs skip this cell.
 
 # %% tags=["skip-test"]
+def show_prompt(n_examples=5):
+    shots = "\n\n".join(f"Message: {m}\nCategory: {c}" for m, c in EXAMPLES[:n_examples])
+    content = f"{TASK}\n\nExamples:\n{shots}\n\nMessage: {dev_ds[0]['text']}\nCategory:" if n_examples else zero_shot(dev_ds[0])[0]["content"]
+    ids = tok.apply_chat_template([{"role": "user", "content": content}], add_generation_prompt=True,
+                                  return_dict=True)["input_ids"]
+    n_input = len(ids)
+    print(f"{n_examples} examples → {n_input} input tokens\n\n{content}")
+
+
 try:
     import ipywidgets as widgets
-
-    def show_prompt(n_examples=5):
-        shots = "\n\n".join(f"Message: {m}\nCategory: {c}" for m, c in EXAMPLES[:n_examples])
-        content = f"{TASK}\n\nExamples:\n{shots}\n\nMessage: {dev_ds[0]['text']}\nCategory:" if n_examples else zero_shot(dev_ds[0])[0]["content"]
-        ids = tok.apply_chat_template([{"role": "user", "content": content}], add_generation_prompt=True,
-                                      return_dict=True)["input_ids"]
-        n_input = len(ids)
-        print(f"{n_examples} examples → {n_input} input tokens\n\n{content}")
-
     widgets.interact(show_prompt, n_examples=widgets.IntSlider(min=0, max=5, step=1, value=5, continuous_update=False))
 except ImportError:
     print("ipywidgets is not available; call show_prompt(0) … show_prompt(5) instead.")
@@ -876,7 +876,7 @@ hosted_rows = []
 for q, good, bad in PAIRS[: 1 if SMOKE else None]:
     verdicts = []
     for a, b in ((good, bad), (bad, good)):
-        reply = ask_model(judge_prompt(q, a, b)[0]["content"], temperature=0.0, max_output_tokens=8)
+        reply = ask_model(judge_prompt(q, a, b)[0]["content"], temperature=0.0, max_output_tokens=16)
         verdicts.append(parse_verdict(reply) if reply else None)
     if None in verdicts:
         break

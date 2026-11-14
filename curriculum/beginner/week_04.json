@@ -144,9 +144,9 @@
         "Each changed state enters the same trained network at the next lower index.",
         "The core DDIM comparison visits 40 selected levels spanning the same schedule; image sampling is an optional stretch."
       ],
-      "explanation": "Generation uses the trained denoiser repeatedly, but it does not train the network again. At the start, the image tensor contains random Gaussian values. A timestep embedding turns the timestep number into features the denoiser can use. TinyUNet processes the image at several resolutions and combines saved features through skip connections, returning a noise prediction with the same shape as the image. The reverse-step formula uses that prediction and the fixed schedule to compute the next state. This lab's DDPM sampler also adds fresh noise except at the final step. Each new state goes back through the same denoiser at a lower timestep until an image is produced. DDIM uses a different update to jump between selected noise levels. Reducing sample_ddpm's steps simply starts at a lower index and truncates its chain; use sample_ddim to study proper timestep skipping across the full schedule.",
+      "explanation": "Generation uses the trained point denoiser repeatedly, without training the network again. The starting tensor contains random Gaussian points, each with two coordinates. EpsMLP receives the noisy coordinates and a scaled timestep, then predicts two noise values per point. The reverse-step formula combines that prediction with the fixed schedule to calculate the next state. DDPM also adds fresh noise except at the final step. Each new state returns to the same network at a lower timestep until the point sample is complete. DDIM uses a different update to jump between selected noise levels. Reducing sample_ddpm’s steps starts at a lower index and truncates its chain; use sample_ddim for schedule-spanning jumps. The optional image stretch uses TinyUNet on image-shaped tensors, with the same distinction between training and generation.",
       "check_question": "Are weights updated?",
-      "check_answer": "One fixed denoiser handles all selected noise levels; only its numerical update rule changes.",
+      "check_answer": "No. The same trained denoiser is reused at every noise level; only the noisy representation is updated during inference.",
       "layout": "linear",
       "feedback_from": 3,
       "notes": "In short: Generation repeats a reverse state update while reusing fixed weights and decreasing the schedule index.\n\nExplain: Starting noise has the required output shape. The denoiser estimates noise using the current state and timestep. The sampler calculates a reverse mean with schedule coefficients. DDPM adds fresh noise before the final step. The updated state becomes the next input. DDPM means denoising diffusion probabilistic model, while DDIM means denoising diffusion implicit model.\n\nExample: The CPU core starts with [512, 2] points and visits indices 199 down to 0. The optional image sampler uses [16, 1, 28, 28] and a 1000-entry schedule. Shapes change between these workloads, but the noise-prediction and reverse-update roles remain distinct. There is no known clean generation target.\n\nAsk: Does the dashed repetition arrow require an optimiser step before the next denoiser call?\n\nAnswer: It repeats sampling with a changed state and lower timestep. The trained parameters remain unchanged.\n\nWatch out: A lower number of DDPM iterations truncates the lab image chain; selected-level jumps need the DDIM formula."
@@ -221,7 +221,7 @@
         "The report combines point observations, cosine calculation, settings and measured time through the labelled routes.",
         "Stored image grids and optional image stretches remain separately labelled evidence in the lab and Word notes."
       ],
-      "explanation": "The required core trains a point denoiser, generates points with fixed weights and inspects coverage. A separate input supplies synthetic embedding vectors for a cosine calculation. The null incoming link marks that independent data input; it is not produced by the point sampler. Both observations flow into the report through labelled data routes. Image-model experiments are separate optional stretches or labelled stored figures; they do not arise from the point-model weights.",
+      "explanation": "The required core trains a point denoiser, generates points with fixed weights and inspects coverage. A separate input supplies synthetic embedding vectors for a cosine calculation. No arrow enters Draw vectors: it is independent data, not something the point sampler produces. Both observations flow into the report through labelled data routes. Image-model experiments are separate optional stretches or labelled stored figures; they do not arise from the point-model weights.",
       "check_question": "Cosine checks what?",
       "check_answer": "It checks vector-direction arithmetic; it does not measure a pretrained image model's prompt fit.",
       "layout": "linear",
@@ -503,7 +503,7 @@
         "role": "output"
       }
     ],
-    "example": "Illustration: 0.8 − 0.3 = 0.5.",
+    "example": "Noisy input: 0.8×1 + 0.6×(−0.5) = 0.5.",
     "question": "Does DDIM retrain?",
     "answer": "No; one fixed denoiser.",
     "next": "Next: attention reads token representations.",

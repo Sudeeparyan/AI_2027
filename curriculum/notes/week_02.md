@@ -5,7 +5,7 @@ This week introduces the first deep generative model family of the module. Stude
 | Time | Slides | Segment | What you do |
 |---|---|---|---|
 | 0–7 min | 1–4 | Warm-up | "Describe a face with 32 numbers": motivates codes, generation and gaps. |
-| 7–27 min | 5–10 | 1 · From autoencoders to VAEs | Autoencoder recap; real latent plots; random codes decode to nonsense; AE vs. VAE. Quiz. |
+| 7–27 min | 5–10 | 1 · From autoencoders to VAEs | Autoencoder recap; real latent plots; random codes often decode poorly; AE vs. VAE. Quiz. |
 | 27–60 min | 11–20 | 2 · Model and ELBO | Probabilistic model; architecture; a likelihood that is difficult to calculate exactly; ELBO; KL closed form with worked numbers; reconstruction term. Quiz. |
 | 60–67 min | – | Break | |
 | 67–84 min | 21–25 | 3 · Reparameterisation | The trick, why it matters, the PyTorch model, training curves and posterior collapse. |
@@ -21,8 +21,8 @@ This week introduces the first deep generative model family of the module. Stude
 
 ## Which experiment does each result describe?
 
-The measured lecture images and placeholders remain attached to their archived generator,
-`curriculum/assets/make_week_02.py`, rather than to the shorter core notebook. The generator
+The measured lecture images and numbers come from their archived generator,
+`curriculum/assets/make_week_02.py`, rather than from the shorter core notebook. The generator
 uses CPU execution, full MNIST training data, initial PyTorch/NumPy seed 0, hidden width 400,
 batch size 128 and Adam learning rate 0.001. Its two-dimensional VAE, ordinary autoencoder
 and sixteen-dimensional VAE each train for 10 epochs. The three $\beta$ models use sixteen
@@ -64,7 +64,7 @@ Autoencoders are useful for **compression**, **denoising** (train to reconstruct
 
 The decoder learns from codes supplied by the encoder. Ordinary reconstruction training does not specify where those codes should lie or what scale they should use. A random code drawn from a standard Gaussian may land in a region the decoder has rarely seen. It can then produce a poor image. The VAE adds a known sampling distribution and a penalty that encourages encoder codes to match it.
 
-![Real latent spaces of an autoencoder and a VAE with 2-D codes](fig:latent_ae_vs_vae)
+![Real latent spaces of an autoencoder and a VAE with 2-D codes](fig:latent_ae_vs_vae_slide)
 
 ![The same random codes decoded by each model](fig:samples_ae_vs_vae)
 
@@ -99,11 +99,20 @@ A **prior** is the code distribution we choose before seeing an image. A **poste
 
 The likelihood of an image is an average of the decoder over all codes:
 
-$$p_\theta(x) = \int p_\theta(x \mid z)\, p(z)\, dz$$
-
 **Read the integral.** Imagine only two possible codes, each with prior probability 0.5. If their likelihoods for x are 0.2 and 0.6, their weighted sum is 0.4. The continuous model uses an integral instead of this sum.
 
+$$p_\theta(x) = \int p_\theta(x \mid z)\, p(z)\, dz$$
+
 For a neural decoder, the integral has no convenient exact formula. Sampling codes from the prior is inefficient for explaining one specific image: most samples give it little probability. The exact posterior uses the same difficult denominator $p_\theta(x)$. The encoder instead learns a useful approximation, and we train with a computable lower bound.
+
+### Reading the ELBO: two forces
+
+Think of two bills: rebuilding the image and keeping codes compatible with generation. **KL divergence** measures a difference between distributions; it is nonnegative and generally asymmetric. For illustrative reconstruction cost 120 and prior KL 3, their total cost is 123. Four times the KL gives 132. These values explain a trade-off rather than report a training run.
+
+* **Reconstruction term** $\mathbb{E}_q[\log p_\theta(x \mid z)]$: codes drawn from the encoder must let the decoder rebuild $x$. Without KL pressure, the model has no reason to match the chosen prior; learned variances may shrink.
+* **KL term** $D_{\mathrm{KL}}(q_\phi(z \mid x)\,\Vert\,p(z))$: every image's code distribution should resemble the prior. Alone, it makes the code distribution ignore the input.
+
+Training seeks a compromise between preserving input information and matching the prior. It does not guarantee that every prior code decodes well. Basic pixel losses can favour average intensities where the code leaves image details uncertain, contributing to **blur**.
 
 ### Deriving the evidence lower bound (ELBO)
 
@@ -113,42 +122,25 @@ $$\log p_\theta(x) = \log \mathbb{E}_{q_\phi(z \mid x)}\left[\frac{p_\theta(x \m
 
 **Read the inequality.** The expectation means an average under the encoder distribution. Jensen’s inequality moves log inside that average and gives a lower value. This is the mathematical step that makes a usable training bound.
 
+**Worked example.** If expected reconstruction log-probability is −120 and KL is 3, ELBO is −123. The loss we minimise is 123. These are illustrative values, not a measured run.
+
 Splitting the logarithm gives the familiar form:
 
 $$\mathrm{ELBO}(\theta, \phi; x) = \mathbb{E}_{q_\phi(z \mid x)}\left[\log p_\theta(x \mid z)\right] - D_{\mathrm{KL}}\left(q_\phi(z \mid x)\,\Vert\,p(z)\right)$$
 
-**Worked example.** If expected reconstruction log-probability is −120 and KL is 3, ELBO is −123. The loss we minimise is 123. These are illustrative values, not a measured run.
+**Worked example.** If ELBO = −123 and the posterior KL gap is 2, then log p(x) = −121. Adding a nonnegative gap explains the lower-bound direction.
 
 An exact identity shows what the bound loses:
 
 $$\log p_\theta(x) = \mathrm{ELBO}(\theta, \phi; x) + D_{\mathrm{KL}}\left(q_\phi(z \mid x)\,\Vert\,p_\theta(z \mid x)\right)$$
 
-**Worked example.** If ELBO = −123 and the posterior KL gap is 2, then log p(x) = −121. Adding a nonnegative gap explains the lower-bound direction.
-
 **KL divergence** measures a difference between distributions. It cannot be negative, although it is not a symmetric distance. The equation shows that log likelihood equals ELBO plus KL to the true posterior. Therefore ELBO cannot exceed log likelihood.
 
 In code, minimise **negative ELBO**, averaged over the image batch. This jointly trains the encoder and decoder. Improving a lower bound is useful, but does not guarantee every optimisation step raises the exact likelihood.
 
-### Reading the ELBO: two forces
-
-* **Reconstruction term** $\mathbb{E}_q[\log p_\theta(x \mid z)]$: codes drawn from the encoder must let the decoder rebuild $x$. Without KL pressure, the model has no reason to match the chosen prior; learned variances may shrink.
-* **KL term** $D_{\mathrm{KL}}(q_\phi(z \mid x)\,\Vert\,p(z))$: every image's code distribution should resemble the prior. Alone, it makes the code distribution ignore the input.
-
-Training seeks a compromise between preserving input information and matching the prior. It does not guarantee that every prior code decodes well. Basic pixel losses can favour average intensities where the code leaves image details uncertain, contributing to **blur**.
-
 ### The KL divergence between Gaussians
 
-For a one-dimensional Gaussian encoder and a standard normal prior:
-
-$$D_{\mathrm{KL}}\left(\mathcal{N}(\mu, \sigma^2)\,\Vert\,\mathcal{N}(0, 1)\right) = \frac{1}{2}\left(\mu^2 + \sigma^2 - \log \sigma^2 - 1\right)$$
-
-**Start with a zero-cost case.** Mean 0 and standard deviation 1 give 0.5 × (0 + 1 − log 1 − 1) = 0. Work the shifted and narrowed cases below next.
-
-For a $d$-dimensional diagonal Gaussian, sum over dimensions. In PyTorch, with the network outputting `logvar` $= \log\sigma^2$:
-
-```python
-kl = -0.5 * torch.sum(1 + logvar - mu**2 - logvar.exp())
-```
+In the table, μ names the encoder distribution's mean and σ its standard deviation. The prior has mean zero and standard deviation one. A natural log uses base e; nats name its units. Inspect the distribution pictures before generalising the calculations.
 
 **Worked examples** (natural logs; ln 0.25 = −1.386, ln 4 = 1.386):
 
@@ -164,21 +156,33 @@ Moving the mean away from zero and making the distribution either too narrow or 
 
 ![KL divergence for the worked examples](fig:kl_gaussians)
 
+For a one-dimensional Gaussian encoder and a standard normal prior:
+
+$$D_{\mathrm{KL}}\left(\mathcal{N}(\mu, \sigma^2)\,\Vert\,\mathcal{N}(0, 1)\right) = \frac{1}{2}\left(\mu^2 + \sigma^2 - \log \sigma^2 - 1\right)$$
+
+**Start with a zero-cost case.** Mean 0 and standard deviation 1 give 0.5 × (0 + 1 − log 1 − 1) = 0. Compare the shifted and narrowed cases already traced above.
+
+For a $d$-dimensional diagonal Gaussian, sum over dimensions. In PyTorch, with the network outputting `logvar` $= \log\sigma^2$:
+
+```python
+kl = -0.5 * torch.sum(1 + logvar - mu**2 - logvar.exp())
+```
+
 ### The reconstruction term
 
 The reconstruction term becomes a standard loss once we choose the decoder distribution:
 
 * **Bernoulli decoder** (binary pixels): negative log-likelihood is binary cross-entropy summed over pixels. Our lab keeps greyscale MNIST intensities and uses the same formula as a conventional soft-target reconstruction surrogate; the literal Bernoulli ELBO interpretation requires binary observations:
 
-$$-\log p_\theta(x \mid z) = -\sum_{i=1}^{784}\left[x_i \log \hat{x}_i + (1 - x_i)\log(1 - \hat{x}_i)\right]$$
-
 **One-pixel example.** A target pixel of 1 predicted as 0.8 costs −ln(0.8), about 0.223. Predicting 0.2 costs about 1.609. Add the costs over all pixels.
+
+$$-\log p_\theta(x \mid z) = -\sum_{i=1}^{784}\left[x_i \log \hat{x}_i + (1 - x_i)\log(1 - \hat{x}_i)\right]$$
 
 * **Gaussian decoder** with fixed variance $\sigma^2_x$ (real-valued data): negative log-likelihood = $\Vert x - \hat{x}\Vert^2 / (2\sigma^2_x)$ + constant, i.e. **squared error**. The choice of $\sigma^2_x$ implicitly sets the balance with the KL term.
 
 The expectation over $q$ is estimated with **one sampled code** per image per step (a Monte Carlo estimate); across many steps the noise averages out.
 
-> **Common mistake:** averaging the BCE over pixels (PyTorch's default `reduction="mean"`) while summing the KL over dimensions. The KL term then dominates by a factor of 784 and every sample looks like an average blurry digit. Sum over pixels, then divide the total by the batch size.
+> **Common mistake:** averaging BCE over pixels (PyTorch's default `reduction="mean"`) while summing KL over dimensions increases the relative KL weight by a factor of 784. This can encourage uninformative codes or poor reconstructions; the outcome also depends on the term magnitudes, β and training. Sum over pixels, then divide the total by the batch size.
 
 ## 3. Training: the reparameterisation trick
 
@@ -327,7 +331,7 @@ In our demonstration, a VAE trained only on digits separated unseen digits from 
 | "Lower KL is always better." | KL = 0 means the code carries no information about the input; the balance with reconstruction matters. |
 | "Blurry samples mean a bug." | Some blur is expected (overlapping codes, pixel-wise likelihood). Severe blur often means the loss terms are mis-scaled (mean vs. sum). |
 | "The encoder is needed to generate." | Generation uses only the prior and the decoder; the encoder is used in training and for encoding real images. |
-| "Interpolation that looks good proves the model is good." | carefully selected best pairs can mislead; evaluate quantitatively and show failures. |
+| "Interpolation that looks good proves the model is good." | Carefully selected best pairs can mislead; evaluate quantitatively and show failures. |
 | "VAEs are obsolete." | Their autoencoders power latent diffusion; VQ-VAE ideas power image and audio tokenizers. |
 
 # Responsible AI lens: VAEs and synthetic data
@@ -357,7 +361,7 @@ In our demonstration, a VAE trained only on digits separated unseen digits from 
 
 ## Troubleshooting
 
-* *Samples all look like the same blurry blob:* the BCE was averaged instead of summed, so the KL dominates.
+* *Samples all look like the same blurry blob:* check whether BCE was averaged over pixels while KL was summed. That mismatch increases relative KL weight by 784 and can contribute to collapse; also inspect β, term magnitudes and training.
 * *NaN loss:* usually `logvar` exploding; lower the learning rate or clamp `logvar` to [−10, 10].
 * *Unexpected CPU waiting:* check that the core subset and three-epoch settings are in use, and that the optional stretch remains disabled. Measure again after changing one setting.
 
@@ -385,21 +389,7 @@ In our demonstration, a VAE trained only on digits separated unseen digits from 
 
 # Glossary
 
-| Term | Meaning |
-|---|---|
-| Autoencoder | Encoder–decoder network trained to reconstruct its input through a bottleneck |
-| Latent space | The space of codes z; in a VAE, shaped to match the prior |
-| Prior p(z) | Fixed distribution over codes, usually N(0, I) |
-| Encoder $q_\phi(z \mid x)$ | Network outputting a Gaussian over codes for an input; approximates the posterior |
-| Decoder $p_\theta(x \mid z)$ | Network mapping a code to a distribution over data |
-| ELBO | Evidence lower bound: reconstruction term minus KL; maximised in training |
-| KL divergence | Non-negative, asymmetric measure of difference between distributions |
-| Reparameterisation trick | Writing z = μ + σ ⊙ ε so sampling becomes differentiable |
-| Posterior collapse | Failure where KL → 0 and the decoder ignores the code |
-| β-VAE | VAE with the KL weighted by β, trading reconstruction for structure |
-| VQ-VAE | VAE with a discrete codebook of latent vectors (image/audio tokens) |
-| Latent interpolation | Decoding points on a path between two codes |
-| Latent diffusion | Diffusion model operating in a VAE's latent space |
+<!-- Definitions generated from curriculum/glossary.json week_glossary. -->
 
 # Readings, videos and further practice
 
@@ -438,7 +428,7 @@ The lecture shows the essential idea first. These fuller explanations retain the
 
 - Uses include compression, removing noise and learning useful features.
 
-## Slide 8: Consequence: random codes decode to nonsense in an autoencoder
+## Slide 8: Consequence: random codes often decode poorly in an autoencoder
 
 The same 16 random points z ~ N(0, I) decoded by each model.
 
@@ -496,15 +486,7 @@ A prior is a chosen distribution for codes. The VAE learns to reconstruct while 
 
 - The encoder q(z | x) estimates the posterior. We maximise a quantity below log p(x): a **lower bound**.
 
-## Slide 15: The evidence lower bound (ELBO)
-
-- Reconstruction reward: sampled codes should help the decoder rebuild the input.
-
-- KL penalty: keep encoder distributions near the prior N(0, I). KL measures a difference between distributions.
-
-- The gap is a nonnegative KL, so ELBO cannot exceed log p(x). Minimise negative ELBO to train.
-
-## Slide 16: Reading the ELBO: two forces in tension
+## Slide 15: Reading the ELBO: two forces in tension
 
 The loss balances image detail with useful random codes. $\beta$ sets the KL weight.
 
@@ -524,21 +506,29 @@ The loss balances image detail with useful random codes. $\beta$ sets the KL wei
 
 - Too much pressure can make the decoder ignore the input
 
-## Slide 17: KL divergence between two Gaussians has a closed form
+## Slide 16: The evidence lower bound (ELBO)
 
-- Calculate this cost for each code dimension, then add the costs.
+- Reconstruction reward: sampled codes should help the decoder rebuild the input.
 
-- For $\mu$ = 0 and $\sigma$ = 1, the encoder matches the prior and KL = 0.
+- KL penalty: keep encoder distributions near the prior N(0, I). KL measures a difference between distributions.
 
-- Lab code: `kl = -0.5 * sum(1 + logvar - mu**2 - logvar.exp())`. Here logvar means log variance.
+- The gap is a nonnegative KL, so ELBO cannot exceed log p(x). Minimise negative ELBO to train.
 
-## Slide 18: Worked examples: how far is the encoder from the prior?
+## Slide 17: Worked examples: how far is the encoder from the prior?
 
 - Shift the centre: $\mu$ = 1, $\sigma$ = 1 gives KL = 0.5 × (1 + 1 − 0 − 1) = 0.50.
 
 - Shrink the spread: $\mu$ = 0, $\sigma$ = 0.5 gives KL about 0.32.
 
 - Do both: $\mu$ = 2, $\sigma$ = 0.5 gives KL about 2.32. Add the penalties across dimensions.
+
+## Slide 18: KL divergence between two Gaussians has a closed form
+
+- Calculate this cost for each code dimension, then add the costs.
+
+- For $\mu$ = 0 and $\sigma$ = 1, the encoder matches the prior and KL = 0.
+
+- Lab code: `kl = -0.5 * sum(1 + logvar - mu**2 - logvar.exp())`. Here logvar means log variance.
 
 ## Slide 19: The reconstruction term in practice
 
@@ -548,7 +538,7 @@ The loss balances image detail with useful random codes. $\beta$ sets the KL wei
 
 - Use one sampled code per image in each step to estimate the reconstruction expectation.
 
-## Slide 22: The reparameterisation trick
+## Slide 23: The reparameterisation trick
 
 - Draw fresh standard-normal noise $\epsilon$, then set z = $\mu$ + $\sigma$ × $\epsilon$.
 
@@ -701,7 +691,7 @@ Notebook with five completed TODOs, checks, figures, a cost table and five self-
 
 ## Full implementation from the lecture
 
-The projected slide shows the `encode`, `reparameterise` and `forward` methods. The complete class, including the layers, `decode` and `vae_loss`, is listed in section 3 under "A complete PyTorch model" and matches the lab solution.
+The projected slide traces four operations: encode the image, convert log-variance to spread, sample a code and decode logits. The complete class, including `forward`, `decode` and `vae_loss`, is listed in section 3 under "A complete PyTorch model" and matches the lab solution.
 
 
 # Worked checks and frequently asked questions

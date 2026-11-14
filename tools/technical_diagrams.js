@@ -243,7 +243,14 @@ function scene(d) {
   // Legend: colour key for the block roles this diagram uses, then its line styles.
   let x = 24;
   const used = new Set(g.nodes.map(n => n.role));
+  // Roles drawn identically (loss and metric) share one key entry, so the key never
+  // shows two names for one swatch.
+  const keyed = new Map();
   for (const r of Object.entries(ROLES).filter(([key]) => used.has(key)).map(([, r]) => r)) {
+    const look = `${r.color}|${r.fill}|${r.shape}`;
+    keyed.set(look, keyed.has(look) ? {...keyed.get(look), label: `${keyed.get(look).label} / ${r.label}`} : r);
+  }
+  for (const r of keyed.values()) {
     items.push({kind: "block", x, y: g.legendY + 3, w: 26, h: 26, ...r});
     const w = textWidth(r.label, 24) + 4;
     text(r.label, x + 34, g.legendY, w, 32, 24, P.text, false, "left");

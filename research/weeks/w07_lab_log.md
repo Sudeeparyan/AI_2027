@@ -11,3 +11,12 @@
 ## Final coordinator handoff — 12 October 2026
 - Latest measured cached local CPU core 439.0s (7.3min), within 900 s; final smoke PASS (96.5s), zero failed feedback checks. Recorded full-run code matches current executable core.
 - Final image review closed; canonical evidence is `research/ITERATION3_2026-10-12.json`. Earlier unmeasured/pending handoffs are historical. No timed Colab, live API, clean-install/download, browser-widget or optional-stretch verification.
+
+## Independent audit repairs — 12 October 2026
+- A03: optional hosted judge cap raised from 8 to 16 tokens, valid for both provider helpers.
+- Static verification: stripped notebook magic then parsed Python AST; 7 solution blocks and CRLF retained. Root owns rebuild, regressions and fresh CPU evidence. No live provider request.
+
+## Source fallback review — 12 October 2026
+- Widget fallback correction: `show_prompt` is defined before the optional ipywidgets import, so the suggested plain-Python call exists when widgets are absent.
+- PASS: build/review_lab_fallbacks_20261012.py ran in .venv-labs: 21 source fixtures, including unchanged/changed adapter cache tests, changed data/seed rejection, four forced missing-widget paths, and all 13 callbacks at slider boundaries. Synthetic tiny inputs only; no model download, secrets, API calls or notebook execution.
+- Result JSON: build/lab_source_regressions_20261012.json. Browser widget rendering and Colab remain unverified; root owns current rebuilt notebook smoke/full evidence.

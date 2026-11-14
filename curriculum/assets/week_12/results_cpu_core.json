@@ -752,7 +752,7 @@
       "tasks": 2,
       "successes": 2,
       "success_rate": 1.0,
-      "seconds_per_success": 10.56641524999577,
+      "seconds_per_success": 7.6440271500032395,
       "model_calls_per_success": 2.5,
       "tool_calls_per_success": 1.5
     },
@@ -760,7 +760,7 @@
       "tasks": 2,
       "successes": 2,
       "success_rate": 1.0,
-      "seconds_per_success": 10.56641524999577,
+      "seconds_per_success": 7.6440271500032395,
       "model_calls_per_success": 2.5,
       "tool_calls_per_success": 1.5
     }
@@ -772,7 +772,7 @@
       "success": true,
       "answer_match": true,
       "required_tool_evidence": true,
-      "seconds": 14.58739699999569,
+      "seconds": 9.895417499996256,
       "model_calls": 3,
       "tool_calls": 2
     },
@@ -782,7 +782,7 @@
       "success": true,
       "answer_match": true,
       "required_tool_evidence": true,
-      "seconds": 6.545433499995852,
+      "seconds": 5.392636800010223,
       "model_calls": 2,
       "tool_calls": 1
     }
@@ -791,9 +791,9 @@
     "calls": 31,
     "input_tokens": 5108,
     "output_tokens": 1291,
-    "seconds": 90.00001929994323
+    "seconds": 76.52315280004404
   },
-  "core_elapsed_seconds": 99.187477999978,
+  "core_elapsed_seconds": 79.0818949000095,
   "retrieval_definition": "macro passage recall over exact evidence-span labels",
   "support_definition": "conservative verbatim segment equality against the cited passage; not sentence completeness or general entailment",
   "optional": {
@@ -801,12 +801,39 @@
     "reranking": false,
     "model_agent": true
   },
-  "measured_utc": "2026-10-11T13:41:19.234492+00:00",
+  "measured_utc": "2026-10-13T07:17:41.116745+00:00",
   "mode": "core",
+  "runtime": {
+    "cpu_threads": 4,
+    "device": "cpu",
+    "environment": "local",
+    "logical_cpus": 12,
+    "packages": {
+      "diffusers": "0.40.0",
+      "google-genai": "2.29.0",
+      "ipywidgets": "7.7.1",
+      "openai": "3.28.0",
+      "peft": "0.21.1",
+      "python-dotenv": "1.2.4",
+      "sentence-transformers": "5.7.0",
+      "torch": "2.11.0+cpu",
+      "transformers": "5.18.0",
+      "trl": "1.15.0"
+    },
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 158 Stepping 10, GenuineIntel",
+    "python": "3.12.10",
+    "seed": 42
+  },
   "evidence": {
-    "started_at_utc": "2026-10-11T13:39:26.914624+00:00",
-    "seconds": 114.0,
-    "notebook_sha256": "e4d78407c2506353b50f2a2df7bde4d64ce02ada306cd376224e1fced7a263cf",
-    "executed_notebook_sha256": "7c93a3b466a87e0b726b4b7f9a741098291568fcad90d843c0416ffe0ab64ded"
+    "started_at_utc": "2026-10-13T07:16:10.404404+00:00",
+    "seconds": 92.1,
+    "notebook_sha256": "f5af13ab821795d7d0b973ba4c097ba27acebd9872603928ae93f58da5c7cc00",
+    "executed_notebook_sha256": "e6a5483886a5b29d22a38e3153e67e002def234b867b2ac8d6ce6033887e9b6b",
+    "runner_python": "C:\\Users\\sudee\\Downloads\\Generative_AI_2027_Teaching_Pack\\AI2027_Project\\build\\qa_pinned_env\\Scripts\\python.exe",
+    "kernel_name": "qa-pinned-cpu",
+    "run_record": "build/audit_fixes_20261012/full_week12_label.json",
+    "result_export": "build/audit_fixes_20261012/results_week12_label/week_12/results_cpu_core.json",
+    "result_export_sha256": "83bf68b88e5342b38b122169fbb0846ec0c197da8d2c0f4c63d851b7ffd932cc"
   }
 }
